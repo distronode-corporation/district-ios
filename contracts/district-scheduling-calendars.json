@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "data": {
+    "calendars": [
+      {
+        "id": "contract@distronode.test",
+        "name": "Contract Member",
+        "primary": true,
+        "writable": true,
+        "check_conflicts": true,
+        "is_destination": true
+      },
+      {
+        "id": "holidays@group.v.calendar.google.test",
+        "name": "Statutory holidays"
+      }
+    ]
+  }
+}

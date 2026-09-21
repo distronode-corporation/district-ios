@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Export options for `xcodebuild -exportArchive`, used by scripts/archive-imac.sh.
+
+  ⛔ THIS FILE IS AUTHORED, UNLIKE App/Info.plist AND App/DistrictAI.entitlements.
+  Those two are written by `xcodegen generate` from project.yml on every run and
+  a hand edit to either vanishes at the next generate. This one is read by
+  xcodebuild directly, is named by nothing in project.yml, and is the only place
+  the export half of the release is configured.
+
+  ⚠️ IT CONFIGURES THE EXPORT ONLY. The archive half (team, signing style, build
+  number) is passed to `xcodebuild archive` as flags by archive-imac.sh, and the
+  two must agree: a teamID here that differs from DEVELOPMENT_TEAM there fails at
+  export with a provisioning error that names neither file.
+-->
+<plist version="1.0">
+<dict>
+  <!-- App Store Connect distribution. Xcode 15 renamed the old `app-store`
+       value to `app-store-connect`; both are accepted today, and the new name is
+       the one Apple documents. -->
+  <key>method</key>
+  <string>app-store-connect</string>
+
+  <!-- ⛔ `upload` MAKES -exportArchive DO THE UPLOAD ITSELF. With `export` the
+       command would only write a .ipa into -exportPath and nothing would ever
+       reach TestFlight, which fails silently as far as this script is concerned
+       (exit 0, an .ipa on disk, no build in App Store Connect). The
+       authentication flags on the export command are what let it authenticate;
+       see archive-imac.sh. -->
+  <key>destination</key>
+  <string>upload</string>
+
+  <!-- Cloud signing. Automatic signing plus -allowProvisioningUpdates is
+       what MINTS the Distribution certificate and the App Store provisioning
+       profile on first use, so the signing machine needs neither installed
+       beforehand; manual signing would require creating both by hand in the
+       developer portal and installing them into a keychain only that one
+       machine has. -->
+  <key>signingStyle</key>
+  <string>automatic</string>
+
+  <!-- Apple Developer team R935BA6767 (Distronode Corporation).
+       ⚠️ Must equal the DEVELOPMENT_TEAM passed to `xcodebuild archive`. -->
+  <key>teamID</key>
+  <string>R935BA6767</string>
+
+  <!-- Ship the dSYMs with the build. They are what makes an App Store Connect
+       crash report readable, and Sentry symbolicates against the same
+       files. -->
+  <key>uploadSymbols</key>
+  <true/>
+
+  <!-- ⛔ FALSE ON PURPOSE: THE BUILD NUMBER IS OURS, NOT XCODE'S. True lets
+       xcodebuild pick the next build number by asking App Store Connect, which
+       makes the number depend on the server's state rather than on the commit,
+       and makes an uploaded build impossible to map back to a sha. archive-imac.sh
+       passes CURRENT_PROJECT_VERSION from the commit count (`git rev-list`) plus
+       a fixed offset instead, which is monotonic on main and derivable from any
+       checkout.
+       ⚠️ Written without a double hyphen on purpose: XML forbids one INSIDE a
+       comment, so spelling the flag out here would make this file unparseable
+       and xcodebuild would reject it at export, after the archive. -->
+  <key>manageAppVersionAndBuildNumber</key>
+  <false/>
+</dict>
+</plist>

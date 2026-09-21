@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The App Store privacy manifest.
+
+  ⛔ AUTHORED, NOT GENERATED, WHICH MAKES IT THE OPPOSITE OF App/Info.plist. That
+  file is written by `xcodegen generate` from project.yml's `info:` block and is
+  gitignored because of it; this one is a real source file, reached by the
+  `App/PrivacyInfo.xcprivacy` entry under the target's `sources:`. Edit it here.
+
+  ⛔ IT MUST LAND AT THE BUNDLE ROOT, which is why the sources entry carries an
+  explicit `buildPhase: resources`. Apple's tooling reads `PrivacyInfo.xcprivacy`
+  at the root of the app bundle only; a copy nested inside a folder reference is
+  silently not found, and the failure surfaces as a missing-manifest warning on
+  upload rather than as anything at build time.
+
+  ⚠️ IT IS ALSO A CLAIM ABOUT THE PRODUCT, NOT ONLY A BUILD ARTEFACT. What is
+  declared here has to agree with the App Store Connect privacy questionnaire and
+  with what /privacy says on the website. Adding a screen that sends something new
+  means adding it here in the same change.
+-->
+<plist version="1.0">
+<dict>
+	<!--
+	  ⛔ FALSE, AND IT IS THE TRUTHFUL ANSWER RATHER THAN THE CONVENIENT ONE. The
+	  app links no advertising or attribution SDK, never asks for the advertising
+	  identifier, and sends nothing to a data broker. Tracking as Apple defines it
+	  is linking this app's data to data from other companies' apps or websites;
+	  nothing here does that. ⚠️ Setting this true would additionally require an
+	  App Tracking Transparency prompt before any of the collection below.
+	-->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<!--
+	  ⚠️ EMPTY, AND IT MUST STAY EMPTY WHILE NSPrivacyTracking IS FALSE. A domain
+	  listed here is a domain iOS BLOCKS until the ATT prompt is answered, so a
+	  stray entry would silently break every request to it on a device with
+	  tracking not yet allowed.
+	-->
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<!--
+	  What the app sends to distronode.com.
+
+	  ⛔ THIS LIST IS PINNED TO THE PUBLISHED App Store Connect RECORD, AND THAT IS
+	  THE DIRECTION OF TRUTH. A manifest narrower than the questionnaire is the
+	  disagreement that matters, because the questionnaire is the public claim. The
+	  eight below are exactly what is published. If the questionnaire changes, change this in the same
+	  breath, and read the live record rather than any list in the repo.
+
+	  ⚠️ ALL `Tracking` = false, and all but one `Linked` = true. Linked because it
+	  travels on an authenticated session and is therefore associated with an
+	  account by construction. Product Interaction is the exception and is declared
+	  UNLINKED. ⚠️ Two of these are declared on Apple's side and are not evidenced
+	  anywhere in this tree: Product Interaction (no analytics SDK is linked at all,
+	  and Sentry runs with a traces sample rate of zero) and Crash Data as LINKED
+	  (the app never calls `SentrySDK.setUser` and `sendDefaultPii` is off). Both
+	  over-declare rather than under-declare, which is the safe direction, and both
+	  are deliberate, made with that evidence in hand. Do not
+	  "correct" them here without changing App Store Connect first.
+	-->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array>
+		<!--
+		  The opaque installation id (`DeviceIdentity.current()`, a UUID in UserDefaults)
+		  sent as `deviceId` on token exchange, plus the `deviceName` beside it.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeDeviceID</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+		  The account-level identifier the session carries on every authenticated call.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeUserID</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+		  The sign-in identity, and the address security notices are sent to.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeEmailAddress</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+		  The operator's display name, shown on the account and to teammates.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeName</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+		  Calls the operator places and answers. Recording is a workspace setting;
+		  the microphone is used for nothing else.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeAudioData</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+		  Messages, call transcripts and the recaps written from them.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeOtherUserContent</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+		  Sentry. ⚠️ Declared LINKED to match App Store Connect; see the ⚠️ above,
+		  the SDK is configured without a user and without PII.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeCrashData</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+		  ⚠️ Declared to match App Store Connect. Nothing in this tree collects it;
+		  see the ⚠️ above. Unlinked, which is how it is published.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeProductInteraction</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+	</array>
+	<!--
+	  ⛔ EXACTLY THE REQUIRED-REASON CATEGORIES THIS APP ACTUALLY TOUCHES, AND THE
+	  LIST WAS ESTABLISHED BY GREP RATHER THAN BY MEMORY. Apple's four other
+	  categories are file timestamps, system boot time, disk space and active
+	  keyboards; `App/Sources` and `Packages/DistrictCore/Sources` contain no
+	  `FileManager`, no `ProcessInfo.systemUptime`, no `volumeAvailableCapacity`
+	  and no `activeInputModes`, so none of them is declared.
+
+	  ⚠️ DECLARING A CATEGORY THE APP DOES NOT USE IS NOT FREE: App Store Connect
+	  validates the reason codes, and an unused category is a claim to defend. Add
+	  one only alongside the call that needs it.
+	-->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<!--
+		  `UserDefaults` is read and written in exactly two places, both this
+		  app's own data: `DeviceIdentity` (the installation id) and
+		  `WorkspaceSelectionStore` (the selected workspace).
+
+		  ⚠️ `CA92.1` IS THE APP'S-OWN-DATA REASON. The alternatives are for an
+		  app group shared with an extension (`1C8F.1`) and for a managed-app
+		  configuration (`C56D.1`); neither applies, and there is no app group in
+		  this project today. If a notification-service extension ever shares a
+		  suite, this becomes two reasons rather than a swap.
+		-->
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

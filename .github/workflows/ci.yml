@@ -1,0 +1,373 @@
+name: CI
+
+# The app is two halves that break independently. `verify` covers Packages/DistrictCore,
+# the Linux-testable half (model, network, data, auth and call logic), plus format and
+# lint over the whole tree, in the pinned swift:6.2.4 image. `app` builds the SwiftUI app
+# with Xcode and runs its XCTest bundles on an iPhone and an iPad simulator.
+#
+# No job reads a secret, so pull requests from forks run the same checks as `main`.
+# Releases are not built here; see scripts/archive-imac.sh.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_app:
+        description: Run the macOS app job on this dispatch (needed only if the repository is private)
+        type: boolean
+        default: false
+
+# Least privilege at the top level, so a job added later starts read-only.
+permissions:
+  contents: read
+
+# Per ref and per trigger. Only pull requests cancel in flight: a superseded PR run is
+# waste, a superseded main run is history. A manual dispatch gets its own group, because a
+# group holds one pending run at most, and a push arriving behind a pending dispatch would
+# cancel it: the proof run would vanish because someone pushed a docs change.
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: verify (Linux)
+    runs-on: ubuntu-24.04
+    # ⚠️ PINNED BY TAG AND DIGEST, the same reference as ci/Dockerfile. `6.2.4` is
+    # rebuilt when its Ubuntu base gets a security update, so the tag alone moves. The
+    # Linux toolchain is paired with the Xcode the `app` job selects (Swift 6.2): a
+    # Linux compiler ahead of Xcode's compiles code the app target then rejects. Move
+    # both together, or neither.
+    container: swift:6.2.4@sha256:29b983751c605c2d3102d2ab93438c6e0cadf110d9d2aa6e929b6dec9dcb7cbc
+    timeout-minutes: 30
+    env:
+      # Same versions, URLs and SHA-256 sums as ci/Dockerfile. Bump both together.
+      SWIFTLINT_VERSION: 0.65.1
+      SWIFTLINT_SHA256: caeed6f4a679c35539ffaf124f6c4ab4a8416917f7d8796279dc52b74026059d
+      SWIFTFORMAT_VERSION: 0.63.0
+      SWIFTFORMAT_SHA256: b4a3cbb8c852a0baaf9adf853e221ff1dabf921a3d8957a602e0bda3af8470f1
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # python3 is for ci/coverage-gate.sh and the Package.resolved guard. libxml2 is for
+      # the dynamic SwiftLint binary, which otherwise dies at startup on a missing
+      # libxml2.so.2.
+      - name: Install system packages
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates curl unzip git python3 libxml2
+          rm -rf /var/lib/apt/lists/*
+
+      # ⛔ THE DYNAMIC `swiftlint`, NOT THE `swiftlint-static` BESIDE IT IN THE ZIP. The
+      # static build has SourceKit compiled out, skips every rule that needs it with a
+      # warning, and still reports "0 violations". The dynamic build loads sourcekitd
+      # from the Swift toolchain in this image and runs the full rule set.
+      # The checksum is what tells the real archive from a redirect page or a
+      # substituted asset; an unredirected curl can save HTML and exit 0.
+      - name: Install SwiftLint and SwiftFormat
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o swiftlint.zip \
+            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/swiftlint_linux_amd64.zip"
+          echo "${SWIFTLINT_SHA256}  swiftlint.zip" | sha256sum -c -
+          unzip -q swiftlint.zip -d swiftlint-extract
+          install -m 0755 swiftlint-extract/swiftlint /usr/local/bin/swiftlint
+          curl -fsSL -o swiftformat.zip \
+            "https://github.com/nicklockwood/SwiftFormat/releases/download/${SWIFTFORMAT_VERSION}/swiftformat_linux.zip"
+          echo "${SWIFTFORMAT_SHA256}  swiftformat.zip" | sha256sum -c -
+          unzip -q swiftformat.zip -d swiftformat-extract
+          install -m 0755 swiftformat-extract/swiftformat_linux /usr/local/bin/swiftformat
+          rm -rf swiftlint.zip swiftlint-extract swiftformat.zip swiftformat-extract
+
+      # Prove the toolchain before doing work, so a wrong image fails with the reason
+      # rather than with a confusing compiler error later.
+      - name: Toolchain
+        run: |
+          swift --version
+          swiftlint version
+          swiftformat --version
+          python3 --version
+          llvm-cov --version | head -n 1
+
+      # `--lint` writes nothing and exits non-zero on any file that would change.
+      - name: swiftformat --lint
+        run: swiftformat --lint .
+
+      # `--strict` promotes every warning to an error. A warning tier in CI is a tier
+      # nobody reads.
+      - name: swiftlint --strict
+        run: swiftlint --strict
+
+      # ⛔ DistrictCore MUST STAY LINUX-BUILDABLE, AND NOTHING ELSE ENFORCES THIS. Those
+      # frameworks belong in App/ behind protocols declared in the package. It greps the
+      # SOURCES rather than relying on the build: an import inside `#if canImport(...)`
+      # compiles clean on Linux and still means the type exists only on Darwin, where
+      # the Linux tests silently stop covering it.
+      - name: DistrictCore imports no Darwin-only framework
+        run: |
+          banned=$(grep -rnE '^[[:space:]]*(@testable[[:space:]]+)?import[[:space:]]+(UIKit|SwiftUI|Security|AuthenticationServices|CallKit|PushKit|LiveKit)\b' Packages/DistrictCore/Sources Packages/DistrictCore/Tests || true)
+          if [ -n "$banned" ]; then
+            echo "FATAL - DistrictCore imports a Darwin-only framework:"
+            echo "$banned"
+            echo "DistrictCore is the Linux-testable half of the app and must import only"
+            echo "Foundation/FoundationNetworking. Put the Darwin type in App/ behind a"
+            echo "protocol declared in DistrictCore. See Package.swift."
+            exit 1
+          fi
+
+      # ⛔ XCODE WRITES THE APP'S REMOTE PINS INTO THE PACKAGE'S Package.resolved when it
+      # resolves the app's packages, so a local app build dirties it every time. Committed,
+      # it would ask this job to resolve Apple-only binary frameworks it cannot use; this
+      # turns that accident into a one-line red instead of a resolve failure that reads
+      # like a network problem.
+      - name: Package.resolved pins only DistrictCore's own dependencies
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          allowed = {"swift-crypto", "swift-asn1"}
+          pins = {p["identity"] for p in json.load(open("Packages/DistrictCore/Package.resolved"))["pins"]}
+          extra = sorted(pins - allowed)
+          if extra:
+              print("FATAL - Packages/DistrictCore/Package.resolved pins packages DistrictCore does not depend on:")
+              print("  " + ", ".join(extra))
+              print("Xcode wrote the App target's remote pins into the local package's resolved file.")
+              print("Run: git checkout -- Packages/DistrictCore/Package.resolved  (never commit that write).")
+              sys.exit(1)
+          print("Package.resolved pins only " + ", ".join(sorted(pins)))
+          PY
+
+      # Keyed on the toolchain as well as the lockfile: build products from another
+      # compiler are not reusable.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: Packages/DistrictCore/.build
+          key: districtcore-build-swift-6.2.4-${{ hashFiles('Packages/DistrictCore/Package.resolved') }}
+
+      # ⚠️ A RESTORED CACHE CAN CARRY AN EARLIER RUN'S COVERAGE EXPORT, and
+      # ci/coverage-gate.sh falls back to searching .build for one. Deleting it first
+      # means the only export the gate can find is the one this run writes.
+      - name: swift test
+        working-directory: Packages/DistrictCore
+        run: |
+          if [ -d .build ]; then find .build -type d -name codecov -prune -exec rm -rf {} +; fi
+          set -o pipefail
+          swift test --enable-code-coverage 2>&1 | tee swift-test.log
+
+      # ⛔ PROVE THE TESTS ACTUALLY RAN. An XCTest bundle that discovers nothing exits 0,
+      # the same shape as a skipped suite reporting green.
+      - name: Tests were discovered
+        working-directory: Packages/DistrictCore
+        run: |
+          executed=$(sed -n 's/.*Executed \([0-9]*\) test.*/\1/p' swift-test.log | sort -n | tail -1)
+          echo "unit tests executed - ${executed:-0}"
+          if [ -z "$executed" ] || [ "$executed" -eq 0 ]; then
+            echo "FATAL - zero unit tests executed. A bundle that discovers nothing"
+            echo "reports success, so this is a silent loss of coverage, not a pass."
+            exit 1
+          fi
+
+      # ⛔ THE FLOORS ARE ENFORCED HERE AND NOWHERE ELSE. SwiftPM has no coverage
+      # threshold of its own; the script fails on missing coverage data rather than
+      # treating it as nothing to check.
+      - name: Coverage floors
+        run: ci/coverage-gate.sh
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: swift-test-log
+          path: Packages/DistrictCore/swift-test.log
+          if-no-files-found: warn
+          retention-days: 7
+
+  app:
+    name: app (${{ matrix.device }})
+    # Runs on every push and pull request. This guard and the run_app input matter only if
+    # the repository is ever private again: the free plan bills a private repository's
+    # macOS minutes at 10x, so there this job runs only on a manual dispatch with run_app.
+    if: ${{ !github.event.repository.private || (github.event_name == 'workflow_dispatch' && inputs.run_app) }}
+    runs-on: macos-26
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [iPhone, iPad]
+    env:
+      DEVICE: ${{ matrix.device }}
+      # ⚠️ Xcode 26.3, not the image default. It is the Xcode the release is archived
+      # with, and it ships Swift 6.2, which the Linux job's swift:6.2.4 is paired with.
+      XCODE_APP: /Applications/Xcode_26.3.app
+      XCODE_VERSION: "26.3"
+      XCODEGEN_VERSION: 2.46.0
+      XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+      # Recommended by xcbeautify: without it xcodebuild buffers its output when piped.
+      NSUnbufferedIO: "YES"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Asserted rather than trusted: an image rotation that drops this Xcode must fail
+      # here, naming the reason, not later with a compiler error.
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE_APP"
+          # Not `| head -n 1`: under pipefail with unbuffered output, xcodebuild aborts on
+          # the closed pipe (exit 134). Read everything, keep the first line.
+          have_all="$(xcodebuild -version)"
+          have="${have_all%%$'\n'*}"
+          echo "$have"
+          if [ "$have" != "Xcode $XCODE_VERSION" ]; then
+            echo "::error::expected Xcode $XCODE_VERSION at $XCODE_APP, got '$have'"
+            exit 1
+          fi
+
+      # Recorded so a runner image change is attributable from the job log.
+      - name: Toolchain
+        run: |
+          sw_vers
+          uname -m
+          xcodebuild -version
+          swift --version
+          xcbeautify --version
+
+      # The upstream release zip, checked against a pinned SHA-256, rather than a
+      # Homebrew formula whose version floats.
+      - name: Install XcodeGen
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o xcodegen.zip \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip"
+          echo "${XCODEGEN_SHA256}  xcodegen.zip" | shasum -a 256 -c -
+          unzip -q xcodegen.zip
+          sudo ./xcodegen/install.sh
+          xcodegen --version
+
+      # ⛔ THE PROJECT IS GENERATED, NEVER COMMITTED. project.yml is the source of truth.
+      - name: xcodegen generate
+        run: xcodegen generate --spec project.yml
+
+      # Where the LiveKit, WebRTC and Sentry packages land. The app's remote packages are
+      # pinned `exactVersion` in project.yml, hence the key.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: SourcePackages
+          key: sourcepackages-xcode-26.3-${{ hashFiles('project.yml', 'Packages/DistrictCore/Package.resolved') }}
+
+      - name: Resolve packages
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAI \
+            -clonedSourcePackagesDirPath SourcePackages
+
+      - name: Choose a simulator
+        run: ci/sim-udid.sh "$DEVICE"
+
+      # ⛔ `generic/platform=iOS Simulator` BUILDS AGAINST THE SIMULATOR SDK WITHOUT
+      # BOOTING ONE, and `CODE_SIGNING_ALLOWED=NO` is what lets every job here run with no
+      # Apple account: a simulator build needs no certificate, profile or team.
+      # The raw log is kept for the guards below; xcbeautify only formats the console.
+      - name: Build for testing
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAI \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild.log | xcbeautify --renderer github-actions
+          grep -q '\*\* TEST BUILD SUCCEEDED \*\*' xcodebuild.log
+
+      - name: DistrictAITests
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" \
+            -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages \
+            -resultBundlePath DistrictAITests.xcresult \
+            -only-testing:DistrictAITests \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-test.log | xcbeautify --renderer github-actions
+
+      # ⛔ A BUNDLE THAT DISCOVERS NOTHING REPORTS SUCCESS; a scheme edit that drops the
+      # target from the test action would turn this job into a green no-op.
+      - name: DistrictAITests were discovered
+        run: |
+          executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-test.log | sort -n | tail -1)
+          echo "app-target tests executed - ${executed:-0}"
+          if [ -z "$executed" ] || [ "$executed" -eq 0 ]; then
+            echo "FATAL - zero DistrictAITests executed. A bundle that discovers nothing"
+            echo "reports success, so this is a silent loss of the signal, not a pass."
+            exit 1
+          fi
+
+      # ⛔ THE SIGNED-OUT SUBSET ONLY; no session ever reaches CI. These assert the state a
+      # stranger meets. An unsigned build has no keychain entitlement, so the app lands on
+      # its "Try again" state rather than "Sign in", which is why these tests address
+      # elements by accessibility identifier.
+      # ⛔ `-only-testing` IS AN ALLOW-LIST: a new signed-out class runs here only once it
+      # is named here, and the count below moves with it.
+      - name: Signed-out UI tests
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" \
+            -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages \
+            -resultBundlePath DistrictAIUITests.xcresult \
+            -only-testing:DistrictAIUITests/UnauthenticatedTests \
+            -only-testing:DistrictAIUITests/LargerTextTests \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-uitest.log | xcbeautify --renderer github-actions
+
+      # ⛔ COUNTS RATHER THAN CHECKING FOR ZERO. A dropped `-only-testing` line looks
+      # exactly like a pass. The expected number is the sum of the cases in the classes
+      # named above (UnauthenticatedTests 5 + LargerTextTests 2), AT LEAST rather than
+      # exactly, so a case added to an existing class does not red the commit adding it.
+      - name: UI tests were discovered
+        run: |
+          expected=7
+          executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-uitest.log | sort -n | tail -1)
+          echo "ui tests executed - ${executed:-0} (expected at least $expected)"
+          if [ -z "$executed" ] || [ "$executed" -lt "$expected" ]; then
+            echo "FATAL - expected at least $expected UI tests, saw ${executed:-0}."
+            echo "Either a -only-testing class was dropped from the list above, or the"
+            echo "bundle discovered nothing. Both report success, so both are a silent"
+            echo "loss of the signal rather than a pass."
+            exit 1
+          fi
+
+      # The useful line in an xcodebuild failure is often far above the end of the log,
+      # and the console above shows only xcbeautify's summary of it.
+      - name: Tail the logs on failure
+        if: failure()
+        run: |
+          for log in xcodebuild.log xcodebuild-test.log xcodebuild-uitest.log; do
+            echo "=== last 200 lines of $log ==="
+            tail -n 200 "$log" 2>/dev/null || echo "(no log written)"
+          done
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: app-${{ matrix.device }}
+          path: |
+            xcodebuild*.log
+            simulator-udid.txt
+            *.xcresult
+          if-no-files-found: warn
+          retention-days: 7

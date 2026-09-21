@@ -1,0 +1,580 @@
+# XcodeGen spec for the District AI iOS app.
+#
+# ⛔ THIS FILE IS THE PROJECT. There is no `.xcodeproj` in the repo and there must
+# never be one: a hand-repaired `pbxproj` is unreviewable, and the generated
+# bundle is gitignored precisely so there is one source of truth.
+# `xcodegen generate` runs in CI immediately before `xcodebuild`.
+#
+# ⛔ AND IT SHOULD ALMOST NEVER CHANGE. The app target is deliberately thin —
+# every testable line lives in `Packages/DistrictCore`, which `swift test` builds
+# on a cheap Linux runner. A change here compiles only on a Mac, so it costs a
+# full macOS CI round trip to verify.
+#
+# ⚠️ THAT RULE STANDS, AND `DistrictAITests` IS ITS ONE DELIBERATE EXCEPTION.
+# Logic that CAN live in the package still belongs there — the exception buys
+# nothing for anything Linux can already reach, and `DialEntry.assess(_:)` is the
+# worked example: it decides what is dialable, it sits in `DistrictCall`, and
+# `DialNumberTests` covers it for free. What the package cannot reach is the
+# App-target wording above the boundary. `InCallCopy.word(for:endedByOperator:)`
+# is why the bundle exists: it stops the screen telling an operator they hung up
+# a call they did not, and without this target, deleting it would leave every
+# gate green. Add a case here only when it cannot be tested in
+# `Packages/DistrictCore`; the default answer is still the package.
+#
+# ⚠️ NO SIGNING CONFIGURATION AT ALL, ON PURPOSE. CI passes
+# `CODE_SIGNING_ALLOWED=NO` and a simulator build needs nothing else. The team
+# (R935BA6767) is kept out of this file because a `DEVELOPMENT_TEAM` here would
+# make every CI simulator build and every local scratch build a signing decision,
+# and a first `-allowProvisioningUpdates` run CREATES a profile on the company
+# account, which is an outward-facing side effect that belongs to a deliberate
+# archive, not to a compile. Signing arrives as xcodebuild flags plus
+# `ExportOptions.plist` in the release script (`scripts/archive-imac.sh`), never
+# as settings here.
+# ⚠️ AND A SIMULATOR BUILD, SIGNED OR NOT, PROVES NOTHING ABOUT ENTITLEMENTS:
+# simulator signing is ad hoc and does not consume the entitlements file. Push
+# (`aps-environment`) and associated domains are verified on a DEVICE install.
+# ⚠️ THE `entitlements:` BLOCK BELOW IS NOT AN EXCEPTION TO THAT. It declares
+# entitlement keys and sets `CODE_SIGN_ENTITLEMENTS` to a path; it names no team,
+# no identity and no profile, and with signing disabled nothing reads it.
+name: DistrictAI
+
+options:
+  # ⚠️ Only an assertion, and a cheap one: xcodegen refuses to run if it is older
+  # than this. CI installs a pinned, checksummed XcodeGen release and records
+  # `xcodegen --version` in the job log; this floor catches a local install that
+  # is too old.
+  minimumXcodeGenVersion: "2.42"
+  bundleIdPrefix: com.distronode
+  createIntermediateGroups: true
+  # ⚠️ MUST MATCH `platforms: [.iOS(.v17)]` IN Packages/DistrictCore/Package.swift.
+  # A deployment target BELOW the package's floor fails to link with a message
+  # about the package, not about this line.
+  deploymentTarget:
+    iOS: "17.0"
+
+packages:
+  # The local package, by path. Nothing is fetched: the four products below are
+  # built from the working tree, so a change in Packages/ is picked up by the
+  # next `xcodebuild` with no resolution step of its own.
+  #
+  # ⚠️ Its ONE external dependency (swift-crypto, `exact: 5.0.0`) is resolved
+  # transitively by Xcode from `Packages/DistrictCore/Package.resolved`. That
+  # file ships only because of an explicit `.gitignore` negation — see the ⛔ in
+  # Package.swift.
+  DistrictCore:
+    path: Packages/DistrictCore
+  # ⛔ PINNED EXACTLY FOR THE SAME REASON Package.swift PINS swift-crypto WITH
+  # `.exact`: the App target compiles only on a Mac and a dependency bump cannot
+  # be bisected from Linux, so a range would mean the toolchain resolving a
+  # version nobody chose on a machine nobody is watching. Bump it deliberately.
+  # ⚠️ `exactVersion:` IS XCODEGEN'S SPELLING, NOT SwiftPM's `exact:`. The
+  # ProjectSpec accepts `exactVersion` (and `version` as its alias); `exact` is
+  # not a key it knows, and an unknown key under a package is a spec error
+  # rather than a silently ignored line.
+  # ⚠️ 9.29.2 IS THE PRECOMPILED BINARY PATH. sentry-cocoa's own Package.swift
+  # declares the `Sentry` product as a `.binaryTarget` XCFramework downloaded
+  # from the GitHub release, so nothing here compiles the SDK from source. The
+  # source-built product is called `SentrySPM`; `Sentry-Dynamic` and
+  # `SentrySwiftUI` are different distributions again and none of them is wanted.
+  Sentry:
+    url: https://github.com/getsentry/sentry-cocoa
+    exactVersion: 9.29.2
+
+  # ⛔ `exactVersion` IS THE SAME DECISION Package.swift TAKES WITH `.exact` FOR
+  # swift-crypto: a floating range
+  # lets a dependency move under a pipeline whose output eventually reaches
+  # TestFlight, with nothing in the diff to notice. Bumping it is a one-line
+  # reviewed change.
+  # ⛔ AND HERE THE PIN IS THE ONLY THING HOLDING IT. The local package ships a
+  # committed `Package.resolved`; the generated `.xcodeproj` is gitignored, so its
+  # workspace resolution state is not in the repo and there is no second file to
+  # disagree with this line.
+  # ⚠️ LiveKit's own floor is iOS 13 and its manifest is tools-version 6.1, both
+  # below this project's iOS 17 / Swift 6.2 — so it constrains nothing here, and a
+  # deployment-target error after adding it would be about something else.
+  # ⚠️ THE WebRTC VERSION MOVES WITH THIS LINE AND WITH NOTHING ELSE. LiveKit's own
+  # manifest pins `webrtc-xcframework` and `livekit-uniffi-xcframework` with
+  # `exact:` (2.17.0 → 150.7871.02 and 0.1.9), so a WebRTC update is a LiveKit
+  # update, and a call on a real device is the test that matters after one.
+  LiveKit:
+    url: https://github.com/livekit/client-sdk-swift
+    exactVersion: 2.17.0
+
+targets:
+  DistrictAI:
+    type: application
+    platform: iOS
+    sources:
+      - path: App/Sources
+      # ⚠️ COMPILED INTO BOTH THE APP AND `DistrictAIUITests`. A `bundle.ui-testing`
+      # target cannot `@testable import` the app under test, so the identifiers have
+      # to be shared as SOURCE rather than as a module; sharing a directory costs no
+      # Package.swift change and keeps exactly one definition of each string.
+      - path: App/Shared
+      # ⛔ RESOURCES GO UNDER `sources:`, BECAUSE XCODEGEN HAS NO `resources:` KEY
+      # AT ALL. It parses every path listed here and assigns each file to the
+      # build phase its type implies — `.swift` to Sources, `.xcassets` to
+      # Resources — so a `resources:` block would be an unknown key rather than a
+      # second list (ProjectSpec.md, "Target Sources": buildPhase is the only
+      # override, and its values are sources/resources/headers/copyFiles/none).
+      - path: App/Resources
+      # ⛔ THE PRIVACY MANIFEST MUST BE AT THE BUNDLE ROOT, AND IT IS LISTED BY
+      # FILE RATHER THAN SWEPT UP BY A DIRECTORY. Apple's tooling reads
+      # `PrivacyInfo.xcprivacy` from the root of the .app and nowhere else; a
+      # Copy Bundle Resources entry lands there, which is what this is.
+      # ⚠️ `buildPhase` IS STATED RATHER THAN INFERRED. `.xcprivacy` is a recent
+      # extension and an extension XcodeGen does not recognise falls to
+      # `buildPhase: none`, which builds green and ships an app with no manifest
+      # — a warning on upload, weeks later, not a build error.
+      - path: App/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    dependencies:
+      # All five products, listed explicitly. ⚠️ `- package: DistrictCore` alone
+      # would link a product NAMED DistrictCore, which does not exist — the
+      # package publishes five libraries and no umbrella.
+      # ⚠️ `DistrictCall` IS IMPORTED BY `App/Sources/Platform/`.
+      - package: DistrictCore
+        products:
+          - DistrictModel
+          - DistrictAuthCore
+          - DistrictNetwork
+          - DistrictData
+          - DistrictCall
+      # ⚠️ `product:` (SINGULAR) IS STATED RATHER THAN LEFT TO THE DEFAULT. The
+      # default links the product whose name matches the PACKAGE name, which
+      # here happens to be right — and would stop being right the day somebody
+      # renames the package key. The package publishes several products and only
+      # this one is the default static XCFramework; see the ⛔ on the package.
+      - package: Sentry
+        product: Sentry
+      # ⛔ THE ONLY PLACE THE SDK ENTERS THE BUILD, AND IT IS THE APP TARGET ONLY.
+      # CI greps `Packages/DistrictCore` for an `import LiveKit` and
+      # fails the job, so the SDK and its WebRTC natives stay on this side of the
+      # ``CallEngine`` seam — which is what keeps the state machines testable on a
+      # cheap Linux runner.
+      - package: LiveKit
+        product: LiveKit
+    # ⚠️ GENERATED, NOT AUTHORED. xcodegen writes App/Info.plist from the
+    # properties below on every `generate`, filling in CFBundleIdentifier,
+    # CFBundleName and friends itself. The written file is build output: it is not
+    # in the repo and must not be edited by hand, because the next `generate`
+    # overwrites it.
+    #
+    # ⛔ THE TWO VERSION KEYS BELOW MUST BE DECLARED HERE AS `$(...)` REFERENCES.
+    # "CFBundleVersion and friends" are filled in, but WITH WHAT matters: absent
+    # from `properties`, xcodegen writes its own defaults as LITERALS,
+    # `<string>1</string>` and `<string>1.0</string>`. A literal in Info.plist is
+    # never substituted from a build setting, so `CURRENT_PROJECT_VERSION=<n>` on
+    # the xcodebuild command line reaches the build settings and NOT the bundle,
+    # and MARKETING_VERSION is dropped the same way.
+    # ⚠️ Measured on a release archive built without them: CFBundleVersion 1,
+    # CFBundleShortVersionString 1.0. Every archive is then build 1 regardless of
+    # sha, and the commit-count scheme in `scripts/archive-imac.sh` does nothing.
+    # ⛔ Two live consumers read these and both go wrong silently:
+    # `AccountView.swift` shows operators "1.0 (1)", and `DistrictSentry.swift`
+    # builds the release identifier `com.distronode.district@1.0+1` for every
+    # build, so no Sentry release is distinguishable and no crash maps to a sha.
+    # ⚠️ `DistrictSentry.infoString` guards against a value containing `$(`, i.e.
+    # an UNSUBSTITUTED reference.
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: District AI
+        # ⚠️ The values are build-setting references resolved by Xcode at build
+        # time, not by xcodegen at generate time, so the generated Info.plist is
+        # EXPECTED to contain the literal text `$(CURRENT_PROJECT_VERSION)`.
+        # Reading the generated file is therefore not a way to check this works;
+        # read `CFBundleVersion` out of the BUILT app instead.
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        # ⛔ IT IS WHAT MAKES `App/Resources/Localizable.strings` RESOLVE AT ALL.
+        # APNs draws a notification from the `title-loc-key` / `loc-key` the server
+        # sends by looking the keys up in the app bundle's string table for the
+        # user's language, falling back to the
+        # DEVELOPMENT REGION. There is one table and it is English; without this key
+        # the fallback language is unstated, and an unresolved key renders as the
+        # literal `push.message.title` on the lock screen rather than failing
+        # anywhere a build or a test could see.
+        # ⚠️ `en` RATHER THAN `en-CA` OR `en-US`. The client ships no localisations
+        # and this is a fallback, not a claim about spelling; a region-qualified
+        # value here would be the first half of a localisation story nobody has
+        # written.
+        CFBundleDevelopmentRegion: en
+        # ⛔ REQUIRED BY APP STORE CONNECT AND FALSE IS THE TRUTHFUL ANSWER HERE.
+        # Without it every TestFlight upload stops on an export-compliance
+        # question before testers can install. The app uses only HTTPS
+        # through URLSession and the Keychain, which is exactly the exemption
+        # this key claims; it is a claim to re-check the day any bespoke crypto
+        # or a non-exempt algorithm ships.
+        ITSAppUsesNonExemptEncryption: false
+        # An empty dictionary is the modern launch screen: it opts the app into
+        # full-screen layout on every device. ⚠️ Without SOME launch screen key,
+        # iOS runs the app letterboxed at a legacy screen size and every layout
+        # looks subtly wrong for a reason that is not in the layout code.
+        UILaunchScreen: {}
+        # ⚠️ ONE WINDOW ON iPad TOO. Multiple scenes would mean one shell, one
+        # navigation state and one incoming-call cover per window, over a single
+        # live call per process; nothing here is built for that.
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        # iPhone stays portrait-only.
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        # ⛔ ALL FOUR ON iPad, AND THERE IS NO `UIRequiresFullScreen` BESIDE THEM ON
+        # PURPOSE. iPad multitasking (Split View, Slide Over, Stage Manager) requires
+        # every orientation, and App Store Connect rejects an upload that supports
+        # multitasking without them; `UIRequiresFullScreen` is the only other way
+        # past that check, and it opts the app out of multitasking altogether.
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # ⛔ WITHOUT IT A NOTIFICATION CARRYING `content-available` IS NOT
+        # DELIVERED TO A BACKGROUNDED APP AT ALL — iOS drops it silently rather
+        # than reporting anything, so the symptom is "some pushes never arrive"
+        # with nothing in the payload or the server logs to point at it.
+        # ⚠️ ALERT PUSHES STILL WORK WITHOUT IT. This is the background-delivery
+        # half, which is what lets a tap on an inbox alert land on a thread the
+        # app has already refreshed.
+        #
+        # ⛔ `audio` IS WHAT KEEPS A CALL ALIVE WHEN THE SCREEN LOCKS OR THE USER
+        # LEAVES THE APP, and without it iOS suspends the process mid-conversation
+        # — the symptom is a call that goes dead the moment the phone is put to an
+        # ear and the proximity sensor blanks the screen, which reads as a media
+        # fault rather than as a missing plist key.
+        # ⛔ `voip` IS DECLARED BECAUSE PUSHKIT REFUSES TO REGISTER WITHOUT IT.
+        # ⚠️ Apple requires an app that declares `voip` to report an incoming call
+        # to CallKit on every VoIP push, and terminates apps that do not; the
+        # PushKit handler is what meets that obligation.
+        UIBackgroundModes:
+          - remote-notification
+          - audio
+          - voip
+        # ⛔ REQUIRED BEFORE THE FIRST `AVAudioSession` RECORD CATEGORY, NOT MERELY
+        # FOR THE APP STORE. iOS raises the microphone prompt on the first capture
+        # and CRASHES the app outright if the string is absent, so a softphone
+        # without this line dies on its first outgoing call.
+        NSMicrophoneUsageDescription: "District AI uses the microphone for calls you place and answer."
+        # ⚠️ DECLARED THOUGH THE SOFTPHONE NEVER OPENS A CAMERA. The LiveKit binary
+        # references the camera APIs, so App Store review asks for the string on
+        # the whole app; meet rooms are the surface that actually use it.
+        # ⛔ The sentence is the truthful one for both: the softphone
+        # publishes no video, in either direction.
+        NSCameraUsageDescription: "District AI uses the camera only in meeting rooms you join, never on phone calls."
+        # ⛔ THE SENTRY DSN REACHES THE APP THROUGH THIS KEY AND NEVER THROUGH A
+        # SOURCE LITERAL. `$(SENTRY_DSN)` is expanded by the
+        # "Process Info.plist File" build phase, which substitutes build
+        # settings into plist VALUES by default
+        # (`INFOPLIST_EXPAND_BUILD_SETTINGS` is YES and nothing here turns it
+        # off), so the value in the built bundle is whatever xcodebuild was told
+        # on the command line.
+        # ⛔ AND `SENTRY_DSN` IS BLANK IN `settings.base`, WHICH IS THE SAFETY.
+        # An unset build setting expands to the empty string, a blank DSN makes
+        # ``DistrictSentry/startIfConfigured()`` return before it starts
+        # anything, and so every CI simulator build and every local scratch build
+        # ships with the SDK inert. Only `scripts/archive-imac.sh`
+        # supplies a real one, and only at archive time.
+        DistrictSentryDSN: "$(SENTRY_DSN)"
+        # ⚠️ THE CONFIGURATION, NOT A HAND-WRITTEN ENVIRONMENT NAME. `Debug` and
+        # `Release` are the only two configurations this project has, and
+        # lowercasing them in Swift is what separates a scratch build's crashes
+        # from a TestFlight build's in the Sentry UI. A literal here would go
+        # stale the first time a configuration is added.
+        DistrictSentryEnvironment: "$(CONFIGURATION)"
+    # ⛔ GENERATED FROM `properties`, EXACTLY LIKE `info` ABOVE, AND THE COMMITTED
+    # FILE IS THE OUTPUT RATHER THAN THE INPUT. XcodeGen's Plist type writes the
+    # file at `path` and sets `CODE_SIGN_ENTITLEMENTS` to it, so `xcodegen
+    # generate` OVERWRITES `App/DistrictAI.entitlements` on every run. It is
+    # tracked anyway, unlike `App/Info.plist`, because it is the thing a signing
+    # identity is checked against and a reviewer should be able to read it here.
+    # 🔑 SO ENTITLEMENTS ARE EDITED IN THIS BLOCK, NOT IN THE FILE. `aps-environment`
+    # and `com.apple.developer.associated-domains` go in `properties` below; a
+    # key added to the .entitlements file directly survives until the next
+    # `generate` and then vanishes, which on a signing failure reads as a
+    # provisioning-profile problem rather than an erased entitlement.
+    #
+    # ⚠️ `aps-environment` IS SIGNING-CONSUMED ONLY, so the unsigned simulator
+    # build (`CODE_SIGNING_ALLOWED=NO`) ignores it entirely and pushes cannot be
+    # tested there at all. It takes effect on the first SIGNED development
+    # install, which is the only proof that counts.
+    # ⛔ TESTFLIGHT AND THE APP STORE NEED `production`. A build signed with a
+    # distribution profile while this says `development` registers against the
+    # APNs sandbox and every push to it is rejected with `BadDeviceToken` — an
+    # error that surfaces in the FCM response on the SERVER, days later, and reads
+    # as a broken token rather than a mismatched environment.
+    #
+    # ⚠️ `com.apple.developer.associated-domains` is what makes the OS fetch
+    # https://www.distronode.com/.well-known/apple-app-site-association and hand a
+    # `/dashboard/district…` link to this app instead of Safari. Both prefixes are
+    # declared because the served file promises both: an `applinks` block (opening
+    # links) and a `webcredentials` block (offering the password saved for the
+    # domain). Declaring only one leaves the other promise unclaimed.
+    # ⛔ `www.` ONLY, THOUGH THE FILE IS SERVED ON THE APEX TOO. Apple fetches the
+    # association file per DECLARED domain and the apex would verify (the route
+    # answers there without a redirect, which Apple's fetcher does not follow), but
+    # every dashboard link the website hands out is a `www` one (the edge sets
+    # `X-Forwarded-Host: www.distronode.com` unconditionally), so the apex entry
+    # would claim a URL nothing produces. `AppLinkResolver.hosts` accepts the apex
+    # anyway, so widening this is a one-line change with no client half to remember.
+    # ⛔ `distronode.ca` IS DELIBERATELY UNCLAIMED, matching Android and the server's
+    # association route: an unclaimed domain's links open Safari, which is the
+    # intended behaviour for the French Canadian site.
+    # ⚠️ SIGNING-CONSUMED, LIKE `aps-environment` ABOVE. The unsigned simulator build
+    # ignores this entirely, so association can only be proved on a SIGNED device
+    # install against the live file.
+    entitlements:
+      path: App/DistrictAI.entitlements
+      properties:
+        # ⛔ PER CONFIGURATION, NOT A LITERAL. A distribution
+        # profile carries `aps-environment: production`; with `development` written
+        # here `xcodebuild archive` fails at signing before any upload. `Debug`
+        # (a USB install) keeps `development`, `Release` (the archive) gets
+        # `production`; the values live under `settings.configs` below. Xcode
+        # substitutes build settings into the entitlements plist at signing time,
+        # which Linux cannot rehearse: the proof is
+        # `codesign -d --entitlements - <built app>` on the archive.
+        aps-environment: $(APS_ENVIRONMENT)
+        com.apple.developer.associated-domains:
+          - applinks:www.distronode.com
+          - webcredentials:www.distronode.com
+        # ⛔ APP STORE REVIEW GUIDELINE 4.8. The app's other sign-in
+        # door opens the server's login surface, which offers Google and Microsoft
+        # SSO, so Apple requires an equivalent privacy-preserving option — and
+        # `SignInWithAppleButton` renders without this entitlement but FAILS at
+        # authorisation time with `ASAuthorizationError.unknown` (1000), which
+        # reads like a broken button rather than a missing capability.
+        # ⛔ IT GOES HERE, NOT IN `App/DistrictAI.entitlements`. `xcodegen generate`
+        # REWRITES that file from this block, so an entry added there by hand
+        # disappears the next time anyone regenerates — silently, and the symptom
+        # is a device build that stopped being able to sign in with Apple.
+        # ⚠️ `Default` IS THE ONLY VALUE APPLE DEFINES, and it is a plist ARRAY of
+        # one string rather than a bare string; a string here is a signing failure
+        # naming the key and not the type.
+        # ⚠️ SIGNING-CONSUMED, LIKE `aps-environment` AND THE ASSOCIATED DOMAINS
+        # ABOVE. The unsigned simulator build ignores it entirely, so the round
+        # trip can only be proved on a SIGNED device install against the App ID
+        # that carries the capability (`com.distronode.district`, team R935BA6767).
+        com.apple.developer.applesignin:
+          - Default
+    settings:
+      base:
+        # ⛔ NOT THE SAME STRING AS THE ANDROID `applicationId`. Apple refuses to
+        # register `com.distronode.districtai` (the string is held or permanently
+        # burned elsewhere), so the App ID registered on team R935BA6767 is this
+        # one. Android keeps `com.distronode.districtai`. Play and the App
+        # Store share no namespace and nothing ever compares the two, so they are
+        # free to differ — but do not "restore" the match by editing either side.
+        #
+        # ⛔ THIS VALUE IS THE APNs TOPIC. The server's APNs alert topic must equal
+        # it verbatim and the association document's app id is this value behind
+        # the team prefix. Changing it here alone breaks push in production with
+        # nothing failing to compile; a server-side test reads this line and is
+        # what stops that.
+        PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district
+        MARKETING_VERSION: "1.2"
+        # ⚠️ A PLACEHOLDER THAT THE RELEASE SCRIPT OVERRIDES. `scripts/archive-imac.sh`
+        # passes `CURRENT_PROJECT_VERSION` (an offset plus the commit count), because
+        # App Store Connect refuses a build number it has already seen. Nothing
+        # reads this value on the simulator path.
+        CURRENT_PROJECT_VERSION: "1"
+        # ⛔ UNIVERSAL: iPhone AND iPad, ONE BINARY UNDER ONE BUNDLE ID AND ONE
+        # STORE LISTING. iPad gets a dedicated regular-width layout (a sidebar and
+        # split view) rather than a scaled-up phone UI; compact width, which
+        # includes an iPad in narrow Split View or Slide Over, keeps the tab bar.
+        # Both layouts read one navigation state (`ShellPaths`), so a resize that
+        # flips between them keeps every stack, a live call's included.
+        # ⚠️ A ONE-WAY DOOR. Once a version that supports iPad is on the App Store,
+        # a later version may not drop "2", so this line cannot be reverted to take
+        # a problem back out; ship the iPad layout through TestFlight first.
+        TARGETED_DEVICE_FAMILY: "1,2"
+        # ⛔ NAMES THE SET INSIDE `App/Resources/Assets.xcassets`, NOT A FILE. The
+        # catalog holds one `AppIcon.appiconset` in the single-size 1024x1024
+        # form (`"idiom": "universal", "platform": "ios"`), which is what Xcode 14
+        # and later write and what App Store Connect wants; the per-device sizes
+        # are derived at build time. ⛔ THE PNG HAS NO ALPHA CHANNEL, DELIBERATELY
+        # — App Store Connect rejects an icon that carries one — and no rounded
+        # corners, because iOS applies the mask itself.
+        # ⚠️ WITHOUT THIS SETTING THE CATALOG STILL COMPILES AND THE APP STILL
+        # LAUNCHES, with the white placeholder icon. The failure is cosmetic on
+        # device and a hard upload rejection at TestFlight, which is a long way
+        # from the change that caused it.
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # ⚠️ SWIFT 6 LANGUAGE MODE, SO A CONCURRENCY MISTAKE IN App/ IS AN ERROR
+        # RATHER THAN A WARNING IN A JOB LOG NOBODY READS. App/ is the tier the
+        # package tests cannot reach, and the isolation bugs it can hide (a token
+        # store touched off the main actor, a continuation resumed twice) are
+        # exactly the ones that present as a crash on a stranger's phone.
+        # ⚠️ The RETROACTIVE-CONFORMANCE warnings in AppContainer.swift (the empty
+        # extensions that supply NativeAuthClient's generic seams) are not
+        # concurrency diagnostics, so this setting does not govern them.
+        # `@retroactive` would be a misstatement — the conformances are ours to a
+        # protocol of ours on a type of ours — and the honest fix is a module
+        # boundary.
+        #
+        # ⚠️ Packages/DistrictCore pins `.swiftLanguageMode(.v6)` per target in
+        # Package.swift and keeps it whatever this line says; the two agree.
+        SWIFT_VERSION: "6.0"
+        # We supply the plist above; YES here would make Xcode generate a second
+        # one and fail the build on the conflict.
+        GENERATE_INFOPLIST_FILE: "NO"
+        # ⛔ BLANK ON PURPOSE, AND BLANK MEANS SENTRY IS OFF. Read the ⛔ on
+        # `DistrictSentryDSN` above: the value declared here is what every build
+        # that does not override it ships with, and an inert SDK is the correct
+        # default for a simulator run, a unit test and a scratch build. A real
+        # DSN is passed by `scripts/archive-imac.sh` as
+        # `SENTRY_DSN="${SENTRY_DSN:-}"` on the archive command line.
+        # ⛔ NEVER PUT THE REAL DSN HERE. It is not a password, but committing it
+        # would let anyone with the repo post events into the production project,
+        # and it would ship in every Debug build besides.
+        SENTRY_DSN: ""
+      configs:
+        # See the ⛔ on `entitlements.properties.aps-environment`: the two APNs
+        # environments, keyed by the configuration that signs the build.
+        Debug:
+          APS_ENVIRONMENT: development
+        Release:
+          APS_ENVIRONMENT: production
+
+  # ⛔ A UNIT-TEST BUNDLE WITH A HOST APP, NOT A LOGIC-ONLY BUNDLE. `@testable
+  # import DistrictAI` needs the app module built and loadable, and the types
+  # under test are `internal`; a hostless bundle cannot link the app binary at
+  # all. `TEST_HOST` and `BUNDLE_LOADER` are STATED rather than left to
+  # XcodeGen's inference from the `- target: DistrictAI` dependency, because the
+  # inferred form is invisible in this file and a future XcodeGen that changes it
+  # would fail as "symbol not found" at test time rather than as a spec error.
+  #
+  # ⚠️ THIS BUNDLE IS REDUCERS, VIEW-MODEL LOGIC AND PURE COPY. UI tests live in
+  # `DistrictAIUITests` below, inside a boundary the suite must keep:
+  #   - IDENTITY-ADDRESSED. Elements are found by `A11yID`, never by index or
+  #     position, so re-ordering a list cannot turn into a failure somewhere else.
+  #   - REVIEW WORKSPACE ONLY. Authenticated runs use a server-minted session for
+  #     an ordinary review account, never a real operator's.
+  #   - `[test]`-SCOPED. The bundle is not built by `xcodebuild build` and is not
+  #     in the archive, so the compile gate and the release lane do not pay for it.
+  #   - NEVER TAPS A DESTRUCTIVE SURFACE. `UITestApp.ForbiddenSurfaces` holds the
+  #     list and the tap helper refuses them; the simulator and the test device are
+  #     signed into a live production workspace.
+  DistrictAITests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: App/Tests
+    dependencies:
+      - target: DistrictAI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/DistrictAI.app/DistrictAI"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        # ⚠️ THE HOST IS NOT LAUNCHED FOR THESE TESTS, and that is what keeps them
+        # runnable on a CI simulator with no signing: the bundle is injected into
+        # the host binary for symbol resolution only.
+        GENERATE_INFOPLIST_FILE: "YES"
+
+  # ⛔ `bundle.ui-testing`, WHICH IS A DIFFERENT ANIMAL FROM THE UNIT BUNDLE ABOVE.
+  # It runs OUT OF PROCESS driving the app through XCUITest, so it takes
+  # `TEST_TARGET_NAME` rather than `TEST_HOST`/`BUNDLE_LOADER`, and it cannot see the
+  # app's internal types at all — which is why `App/Shared` is compiled into both
+  # rather than imported from one.
+  #
+  # ⚠️ NO `DEVELOPMENT_TEAM` HERE EITHER. The rule at the top of this file stands for
+  # every target: signing is supplied on the xcodebuild command line, by
+  # `scripts/uitest-device-imac.sh` for a device run and not at all for a simulator
+  # one. A team id in the spec is what would make the archive lane depend on it.
+  DistrictAIUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: App/UITests
+      - path: App/Shared
+    dependencies:
+      - target: DistrictAI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.uitests
+        TEST_TARGET_NAME: DistrictAI
+        GENERATE_INFOPLIST_FILE: "YES"
+
+  # ⛔ A SEPARATE BUNDLE FROM `DistrictAIUITests`, NOT A CLASS INSIDE IT, AND THE REASON
+  # IS ISOLATION RATHER THAN TIDINESS. `UITestApp` launches the app ONCE per run and
+  # shares one `XCUIApplication` across every case, because the injected review session
+  # is a single-use refresh token that a second `launch()` would replay and get the
+  # whole family revoked. The smoke suite has the opposite requirement: it signs in
+  # through the real browser handshake with the demo account's own credentials, so it
+  # needs its own launch and must not inherit that shared-app contract. Putting it in
+  # the same bundle would have meant one of the two rules quietly losing.
+  #
+  # ⚠️ `App/Shared` IS COMPILED IN HERE TOO, so the smoke tests see `A11yID`. A
+  # `bundle.ui-testing` target cannot `@testable import` the app, so sharing the SOURCE
+  # is the only way both sides name an element the same thing.
+  #
+  # ⚠️ NO `DEVELOPMENT_TEAM`, same rule as every target above.
+  DistrictSmokeUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: App/SmokeUITests
+      - path: App/Shared
+    dependencies:
+      - target: DistrictAI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.smokeuitests
+        TEST_TARGET_NAME: DistrictAI
+        GENERATE_INFOPLIST_FILE: "YES"
+
+# ⛔ THE SCHEME IS DECLARED RATHER THAN LEFT TO AUTOCREATION. `xcodebuild -scheme
+# DistrictAI` needs a shared scheme in the generated project; Xcode autocreates
+# schemes when a human opens the project, which never happens here, and the
+# failure mode on a runner is "scheme not found in workspace" on a project that
+# is otherwise correct.
+schemes:
+  DistrictAI:
+    build:
+      targets:
+        DistrictAI: all
+        # ⚠️ `[test]` RATHER THAN `all`: the bundle is built when the scheme is
+        # being tested and stays out of an `xcodebuild build` or an archive, so
+        # the compile gate and the release lane do not pay for it.
+        DistrictAITests: [test]
+        # ⚠️ `[test]` FOR THE SAME REASON AS THE UNIT BUNDLE: an `xcodebuild build`
+        # and the archive must not build a UI-test runner. CI's unit lane narrows
+        # further with `-only-testing:DistrictAITests`, so it does not run them.
+        DistrictAIUITests: [test]
+        # ⚠️ `[test]` FOR THE THIRD TIME, AND FOR THE SAME REASON. ⛔ A target listed in
+        # `targets:` but NOT here is generated into the project and then never built by
+        # any lane, which reads as a compile that silently skipped the new code.
+        DistrictSmokeUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - DistrictAITests
+        - DistrictAIUITests
+        # ⚠️ Listed so `xcodebuild test` CAN run it. It does not run by default in CI:
+        # every lane narrows with `-only-testing` to its own bundle, so none picks
+        # this up by accident.
+        - DistrictSmokeUITests
+    archive:
+      config: Release
+  # The App Review screen recording (App/UITests/ReviewRecordingTests.swift), run by hand.
+  #
+  # ⛔ ITS OWN SCHEME, NEVER A `testPlans:` ENTRY ON `DistrictAI`. A scheme that has test
+  # plans runs its DEFAULT PLAN instead of its `targets:` list, and XcodeGen marks the
+  # first plan default. On `DistrictAI` that would make ReviewRecording.xctestplan (which
+  # holds only DistrictAIUITests) the plan every `xcodebuild test -scheme DistrictAI`
+  # runs, so CI's `-only-testing:DistrictAITests` lane would ask for targets outside
+  # the plan. Every lane names `-scheme DistrictAI`, so this one is
+  # reachable only by asking for it.
+  DistrictAIReviewRecording:
+    build:
+      targets:
+        DistrictAI: all
+        DistrictAIUITests: [test]
+    test:
+      config: Debug
+      testPlans:
+        - path: App/UITests/ReviewRecording.xctestplan
+          defaultPlan: true

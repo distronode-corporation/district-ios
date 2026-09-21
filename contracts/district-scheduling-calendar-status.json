@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "data": {
+    "connected": true,
+    "configured": true,
+    "providers": [
+      "google",
+      "microsoft",
+      "caldav"
+    ],
+    "connections": [
+      {
+        "id": "cal-conn-contract-1",
+        "provider": "google",
+        "account_email": "contract@distronode.test",
+        "is_destination": true,
+        "check_conflicts": true
+      },
+      {
+        "id": "cal-conn-contract-2",
+        "provider": "caldav",
+        "account_email": "contract@fastmail.test",
+        "is_destination": false,
+        "check_conflicts": false
+      }
+    ],
+    "unconfigured_providers": [
+      "microsoft"
+    ],
+    "provider": "google"
+  }
+}

@@ -1,0 +1,162 @@
+# SwiftLint configuration for district-ios.
+#
+# Minimal on purpose: the default rule set, no opt-in rules and NO BASELINE.
+# A baseline sits there looking like it enforces something while recording
+# exemptions nobody revisits. Opt-in rules land alongside the code that
+# justifies them.
+#
+# ⛔ NO `analyzer_rules` HERE. Those require `swiftlint analyze --compiler-log-path`,
+# i.e. a full build log, which doubles the verify job's wall time. If one is ever
+# added it needs its own job, not a silent extra 4 minutes on `verify`.
+#
+# CI runs `swiftlint --strict` from the project root, which promotes every warning
+# to an error. That is the whole gate: there is no warning tier that gets
+# ignored, because a warning tier in CI is a tier nobody reads.
+
+included:
+  - Packages
+  # ⛔ THE ONLY THING THAT LINTS App/ AT ALL. SwiftLint and SwiftFormat PARSE
+  # Swift, they do not compile it, so they are the only tools in the Linux
+  # `verify` job that can inspect the Darwin half — it cannot build a file that
+  # imports Security or AuthenticationServices. The macOS `app` job builds and
+  # tests App/ but does not lint it, so without this line the app shell would
+  # get no lint anywhere.
+  # ⚠️ SwiftLint fails outright ("No lintable files found") on an `included` path
+  # that does not exist.
+  - App
+
+excluded:
+  # SwiftPM and Xcode build output, and the app's remote package checkouts
+  # (`-clonedSourcePackagesDirPath SourcePackages` in the workflow). Gitignored,
+  # but the linter would still walk them — and .build and SourcePackages hold
+  # checked-out dependency sources, whose style is not ours to enforce.
+  - Packages/DistrictCore/.build
+  - .build
+  - DerivedData
+  - SourcePackages
+
+# ⚠️ Reported as errors, not warnings, because of --strict above: the two
+# numbers below are the same gate at two severities only when run without it.
+line_length:
+  warning: 120
+  error: 160
+  ignores_comments: false
+  ignores_urls: true
+
+file_length:
+  warning: 500
+  error: 800
+
+type_body_length:
+  warning: 300
+  error: 400
+
+function_body_length:
+  warning: 60
+  error: 100
+
+# ⛔ CASE ARMS ARE NOT COMPLEXITY IN THIS CODEBASE, AND COUNTING THEM PUNISHES A
+# RULE WE ENFORCE EVERYWHERE ELSE. The house style is an EXHAUSTIVE switch with no
+# `default`, so that adding a `Route`, a `SettingsSection` or a state case fails to
+# compile at every site that must handle it. `cyclomatic_complexity` counts each arm,
+# so the better a dispatch table is at being exhaustive the closer it sits to the
+# ceiling, and the only ways under it are the two we least want: collapse unrelated
+# arms together, or add a `default` that swallows the next case silently.
+#
+# ⚠️ Not theoretical: `RouteDestinations.view(for:)` sits past the default ceiling
+# of 10 simply because the app has more than ten screens. Counting arms there
+# measures the thing the file exists to enumerate, and pushes contributors into
+# merging unrelated arms to get back under it.
+#
+# `ignores_case_statements` keeps the rule enforcing what it is actually for: real
+# branching (`if`, `guard`, `for`, `while`, `catch`, `&&`) inside a function. A
+# genuinely convoluted function still fails; a long dispatch table no longer does.
+cyclomatic_complexity:
+  ignores_case_statements: true
+
+# ⚠️ `id`, `to`, `at` are legitimate names in a DTO layer that mirrors a JSON
+# contract; the default 3-character minimum would force them to be renamed away
+# from the wire shape, which is exactly what the contract gate exists to
+# prevent. Type names keep the default floor.
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  excluded:
+    - id
+    - to
+    - at
+    - ok
+
+nesting:
+  type_level:
+    warning: 2
+
+# ⛔ THIS EXISTS BECAUSE THE TWO TOOLS DISAGREE BY DEFAULT AND THE PAIR IS
+# UNSATISFIABLE UNTIL ONE IS TOLD TO YIELD. SwiftFormat's `trailingCommas` rule
+# ADDS a trailing comma to a multi-line collection literal; SwiftLint's
+# `trailing_comma` rule REMOVES it. Left alone, `swiftformat --lint` and
+# `swiftlint --strict` fail on each other's output forever and the only way out
+# looks like disabling a rule. Configuring SwiftLint to agree keeps the rule
+# live (it still catches a trailing comma on a SINGLE-line literal) instead of
+# switching it off.
+# ⚠️ If the SwiftFormat pin (ci/Dockerfile and the workflow) ever changes its
+# comma default, this is the line that has to move with it.
+trailing_comma:
+  mandatory_comma: true
+
+# ⛔ ONE CUSTOM RULE, AND IT EXISTS BECAUSE A SINGLE LINE COST THE ENTIRE BUILD.
+# Passing a bare method reference as a `Binding` setter (`set: retype` instead of
+# `set: { retype($0) }`) partially applies a MainActor-isolated method, and under
+# Swift 6 language mode the compiler ABORTS in IRGen while emitting the
+# reabstraction thunk for it (swiftlang/swift#91702, open, no milestone) rather
+# than reporting a type error. Nothing prints an `error:` line, so the App target
+# simply stops building and no part of the log names the file responsible.
+# ⚠️ MOST CALL SITES ARE ALREADY CLOSURES BY HABIT, WHICH IS THE ARGUMENT FOR A
+# RULE RATHER THAN AGAINST ONE. A single bare reference is enough to make the app
+# unbuildable on every triple including the device, and a habit that holds almost
+# everywhere is an unrecorded assumption, not a convention.
+# ⛔ AND THE CLOSURE FORM IS A HOUSE RULE, NOT A WORKAROUND WITH AN EXPIRY DATE.
+# The upstream bug carries no milestone, so no toolchain bump is known to retire
+# this.
+#
+# ⛔ DO NOT WIDEN THIS TO EVERY BARE METHOD REFERENCE. The trigger is not "a bare
+# method reference", it is "a bare method reference AT A PARAMETER WHOSE TYPE
+# FORCES A REABSTRACTION THUNK TO AN INDIRECT PARAMETER" — which is what
+# `Binding<T>`'s setter produces and almost nothing else here does. Measured, not
+# reasoned: the same shape at `onDismiss:` (`@MainActor` method reference passed
+# as `(() -> Void)?`) compiles CLEAN on a standalone reproducer under the exact
+# flags that abort the `Binding` form, and clean in the real App target
+# (`SettingsChrome.swift` and the settings screens use it throughout).
+# `() -> Void` involves no abstraction change, so no thunk is emitted.
+# Widening the regex to `onDismiss:` would raise false positives on correct
+# code, and a rule people learn to override is a rule that stops catching the one
+# case it exists for.
+#
+# ⚠️ `match_kinds` IS WHAT KEEPS THE PATTERN HONEST, AND IT IS LOAD-BEARING TWICE.
+# Without it the regex also fires inside comments and string literals (measured on
+# a probe file: 6 such hits, all of them removed by the kinds list). The risk is
+# not hypothetical, this tree already carries prose comments containing `set:`
+# (`PKCETests.swift`). `keyword` is REQUIRED for
+# `set: self.retype`, because `self` lexes as a keyword and SwiftLint discards any
+# match whose range contains a kind not listed here: drop it and that case silently
+# stops being caught, which is the exact failure mode this rule exists to prevent.
+# `typeidentifier` is deliberately ABSENT, because with it a declaration such as
+# `func f(set: Bool)` matches. `argument` is inert on SwiftLint 0.65.0 (the label
+# carries no such kind, verified by running with and without it) and is listed so
+# that a future reclassification of argument labels cannot quietly disarm the rule.
+# ⚠️ The leading `\b` is not decoration: without it the pattern matches the tail of
+# `offset:`, and `offset: offset` is live in both App/Sources and DistrictCore.
+custom_rules:
+  binding_setter_method_reference:
+    name: "Binding Setter Method Reference"
+    regex: '\bset:\s*(?!(?:nil|true|false)\b)[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*\s*[,)]'
+    match_kinds:
+      - argument
+      - identifier
+      - keyword
+    message: "Use a closure literal, not a method reference: `set: { thing($0) }`. A bare MainActor-isolated method reference as a Binding setter aborts the compiler in IRGen under Swift 6 (swiftlang/swift#91702), with no error: line to point back at the file."
+    # ⚠️ Stated rather than left to the default, though `--strict` in CI promotes
+    # every warning to an error anyway. A build-stopping construct should not be
+    # a warning in the one place the config is read by a human.
+    severity: error

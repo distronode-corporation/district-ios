@@ -1,0 +1,65 @@
+# gitleaks configuration: the default rules, plus allowlists for the test values in this
+# repository that look like secrets and are not. Each block says what its values are.
+#
+# ⛔ EVERY ALLOWLIST IS SCOPED TO ONE RULE, NAMED FILES AND THE EXACT VALUES, with
+# `condition = "AND"`. A path-only allowlist would also hide a real secret pasted into the
+# same file later, which is exactly the file a reviewer would not think to check again.
+#
+# ⚠️ Paths are matched with `(^|/)` rather than `^` because `gitleaks dir <path>` reports them
+# with the scanned directory in front, while `gitleaks git` reports them repository-relative.
+
+[extend]
+useDefault = true
+
+# LiveKit end-to-end-encryption keys from the server's contract fixtures, and the tests that
+# decode them. Each is base64(HMAC-SHA256("contract-e2ee-master-secret", roomName)), the
+# server contract suite's fixed test secret, so they protect no real room:
+#   cUwBK6...  room `meet_ws-contract-test_weekly-review`
+#   YfxKDU...  room `preview_ws-contract-test_00000000-0000-4000-8000-000000000000`
+[[allowlists]]
+description = "LiveKit E2EE keys in contract fixtures and tests (test data)"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = [
+  '''(^|/)contracts/district-(room-token|room-token-viewer|persona-preview-token)\.json$''',
+  '''(^|/)App/Tests/PersonaPreviewStateTests\.swift$''',
+  '''(^|/)Packages/DistrictCore/Tests/DistrictDataTests/WorkspacePersonaRepositoryTests\.swift$''',
+]
+regexTarget = "secret"
+regexes = [
+  '''^cUwBK6pBSbabCBfQZ8VZW\+bW5dOg2dwb3JG8q7E4Jc4=$''',
+  '''^YfxKDUkaaGp2WrLLGHCHbe2nn5ArCWBd\+x\+k7EzDr/8=$''',
+]
+
+# Placeholders in the native sign-in token-response decoding tests. The JWT is a literal
+# `header.signature` stub, not a signed token; the refresh token is base64 of the string
+# "foobar-refresh-token-32-bytes-of-entropy".
+[[allowlists]]
+description = "Placeholder access and refresh tokens in NativeTokenResponseTests (test data)"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''(^|/)Packages/DistrictCore/Tests/DistrictAuthCoreTests/NativeTokenResponseTests\.swift$''']
+regexTarget = "secret"
+regexes = [
+  '''^eyJhbGciOiJIUzI1NiJ9\.header\.signature$''',
+  '''^Zm9vYmFyLXJlZnJlc2gtdG9rZW4tMzItYnl0ZXMtb2YtZW50cm9weQ$''',
+]
+
+# Fixed `idempotencyKey` UUIDs in the support and desk request tests. An idempotency key only
+# deduplicates a retried POST; it authorises nothing.
+#   6f1c3f2e...  creating a desk ticket (repository tests and the endpoint table)
+#   4f1c8f2e...  filing a support request
+[[allowlists]]
+description = "Test idempotencyKey UUIDs in the desk and support request tests (test data)"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = [
+  '''(^|/)Packages/DistrictCore/Tests/DistrictDataTests/DeskTicketRepositoryTests\.swift$''',
+  '''(^|/)Packages/DistrictCore/Tests/DistrictDataTests/SupportRepositoryTests\.swift$''',
+  '''(^|/)Packages/DistrictCore/Tests/DistrictNetworkTests/EndpointTable\+Desk\.swift$''',
+]
+regexTarget = "secret"
+regexes = [
+  '''^6f1c3f2e-6c4a-4a2f-9b1e-2c9d0f5a7b31$''',
+  '''^4f1c8f2e-0f2a-4a7c-8b1e-2f0a9c3d5e77$''',
+]

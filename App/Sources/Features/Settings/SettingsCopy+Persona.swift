@@ -1,0 +1,229 @@
+import Foundation
+
+/// The persona form's seven vocabulary controls, the persona preview, and the
+/// routing-rule editor.
+///
+/// ⚠️ A THIRD FILE FOR THE SAME NAMESPACE, WHICH IS A LINT CEILING RATHER THAN A
+/// SPLIT WITH MEANING — `swiftlint --strict` promotes `file_length` at 500 lines to an
+/// error, and `SettingsCopy.swift` is already the whole of the rest of this surface.
+/// What is here is the copy for editing the persona and its rules.
+///
+/// ⛔ NO SENTENCE ON THIS SURFACE MAY SAY THE PHONE CANNOT DO THIS. "chosen from lists
+/// this app cannot see", "They cannot be edited in this app" and "Rules cannot be added
+/// in this app" would each be false; a stale refusal is worse than no sentence, because
+/// an operator believes it and goes looking for a browser.
+extension SettingsCopy {
+    // MARK: - The engine panel
+
+    /// ⛔ WHAT THE ENGINE PICKER ACTUALLY DECIDES, SAID IN TEXT AND NEVER BY COLOUR
+    /// ALONE. Each engine's label carries where its audio is processed, which is a
+    /// public claim about residency — it has to survive a screen reader, a monochrome
+    /// display and a copy-paste into an email to a customer's data-protection officer.
+    static let personaEngineNote = "The engine decides which service hears the call and where that "
+        + "happens. Each option says where its audio is processed."
+
+    static let personaEngineLabel = "Voice model engine"
+
+    /// ⛔ WHY AN OPTION IS VISIBLE AND NOT SELECTABLE. The route publishes every engine
+    /// so the label can say what each one would mean; an operator who saw a shorter
+    /// list than a colleague's, with nothing explaining it, would reasonably think the
+    /// app was broken.
+    static let personaEngineOutOfRegion = "Engines that would process this workspace's audio outside "
+        + "its own region are shown but cannot be chosen."
+
+    static let personaVoiceLabel = "Voice"
+
+    /// ⚠️ AN EMPTY VOICE LIST IS A REAL ANSWER, not a failed read: a stored persona can
+    /// name a language its engine does not publish, and existing rows do.
+    static let personaVoiceEmpty = "This engine publishes no voices for the selected language."
+
+    /// ⛔ A STORED VALUE THIS CATALOGUE NO LONGER CARRIES IS KEPT, NOT CORRECTED. It is
+    /// what the workspace is speaking in today; substituting it silently would change
+    /// the agent's voice on the next save, with nothing on screen saying so.
+    static let personaVoiceOffCatalogue = "This workspace is set to a voice the engine no longer "
+        + "publishes. It is kept until somebody picks another."
+
+    static let personaLanguageLabel = "Language"
+
+    /// ⚠️ SAID WHEN AN ENGINE CHANGE DROPPED THE LANGUAGE, because the two lists are not
+    /// subsets of each other: Deepgram carries Dutch and Italian and no Hindi.
+    static let personaLanguageUnset = "This engine does not offer the language that was set. Choose "
+        + "one to see its voices."
+
+    static let personaAnswerLengthLabel = "Answer length"
+
+    /// ⚠️ SAYS IT IS PER ENGINE, because it is the one field on the form whose value
+    /// changes when a different picker moves, and an operator who did not know that
+    /// would read it as the form losing their edit.
+    static let personaAnswerLengthNote = "How long each spoken reply may run. Saved separately for "
+        + "each engine, so switching engines above shows that engine's own setting."
+
+    static let personaTemperatureLabel = "Conversational creativity"
+
+    static let personaTemperatureNote = "Lower is consistent and predictable. Higher is more varied."
+
+    /// ⚠️ THE NUMBER IS SHOWN BESIDE THE SLIDER AND IS ALSO THE SLIDER'S SPOKEN VALUE.
+    /// A slider with no readout is a control an operator cannot describe to support.
+    static func personaTemperatureValue(_ value: Double) -> String {
+        String(format: "%.1f", value)
+    }
+
+    static let personaVoiceStyleLabel = "Accent and style"
+
+    /// ⚠️ ONLY THE REALTIME ENGINE HAS A STAGE TO POSTURE. The chained pipelines would
+    /// accept this, store it and ignore it, so the control is absent rather than inert.
+    static let personaVoiceStyleNote = "Offered by the realtime engine only."
+
+    static let personaPreemptiveLabel = "Start speaking sooner"
+
+    /// ⛔ IT COSTS MONEY AND THE SENTENCE SAYS SO. Speech prepared for a sentence the
+    /// caller then changes is thrown away and still billed.
+    static let personaPreemptiveNote = "Prepares the reply while the caller is still finishing, so it "
+        + "plays sooner. Speech prepared for a sentence that changes is discarded and still charged."
+
+    // MARK: - When the catalogue did not load
+
+    static let personaOptionsFailedEyebrow = "Could not read the lists this form chooses from"
+
+    /// ⛔ THE REFUSAL IS EXPLAINED RATHER THAN PRESENTED AS A PRODUCT DECISION, AND IT
+    /// IS THE ONE THING THAT MUST NOT BE "FIXED" WITH A BUILT-IN LIST. Every value a
+    /// stale Swift catalogue offered would still be accepted and stored, and then
+    /// silently replaced by the agent's own fallback at synthesis time — a 200, a
+    /// persona nobody chose, and nothing anywhere reporting it.
+    static let personaOptionsFailedNote = "The engine, voice, language and style are chosen from lists "
+        + "this workspace's server publishes. Until those load, what is stored is shown as it is and "
+        + "cannot be changed. The name, greeting and personality can still be edited and saved."
+
+    // MARK: - The avatar row
+
+    /// ⛔ A STATUS AND NEVER A CONTROL. Turning video on starts a billable Tavus stream,
+    /// and App Store Review Guideline 3.1.3(b) plus the ⛔ on `AiPersona.videoEnabled`
+    /// both point the same way: nothing in this app writes it.
+    static let personaAvatarLabel = "Avatar"
+
+    static let personaAvatarNote = "The avatar starts a charged video session, so it is shown here and "
+        + "set up elsewhere."
+
+    static let personaSave = "Save persona"
+
+    // MARK: - The preview
+
+    static let previewTitle = "Preview persona"
+
+    /// ⛔ IT IS A REAL, BILLED CALL AND THE OPERATOR IS TOLD BEFORE THEY PRESS. The
+    /// token invites the voice agent into a room on this workspace's own pipeline,
+    /// where it answers with speech recognition, a model and speech synthesis exactly
+    /// as it would on a telephone call. Nothing about it is a dry run.
+    static let previewIntro = "Speak to the persona as it is on screen, before saving it. This places a "
+        + "real call to the agent and is charged like one."
+
+    static let previewStart = "Start preview"
+
+    static let previewEnd = "End preview"
+
+    static let previewConnecting = "Connecting to the agent…"
+
+    static let previewWaiting = "Connected. Waiting for the agent to join…"
+
+    static let previewLive = "The agent is listening. Say something."
+
+    static let previewReconnecting = "The connection dropped and is being re-established."
+
+    static let previewEnded = "Preview ended."
+
+    /// ⚠️ A DISCONNECT NOBODY ASKED FOR IS NOT "ended", and the reason is shown when
+    /// the server gave one.
+    static let previewDropped = "The preview ended without being stopped here."
+
+    static let previewLevelLabel = "Agent audio"
+
+    /// ⚠️ SPOKEN AS A LEVEL RATHER THAN DRAWN AS ONE. A bar with no label is invisible
+    /// to VoiceOver, and "is the agent actually saying anything" is the question this
+    /// screen exists to answer.
+    static func previewLevelValue(_ level: Double) -> String {
+        "\(Int((level * 100).rounded())) percent"
+    }
+
+    /// ⛔ ONE TELEPHONE CALL OR ONE ROOM OWNS THIS DEVICE'S AUDIO, AND A PREVIEW IS
+    /// REFUSED RATHER THAN ARBITRATED. Two owners of one audio session is how a private
+    /// call ends up audible in a meeting.
+    static let previewBusyCall = "There is a call on this device. End it before previewing the persona."
+
+    static let previewBusyRoom = "You are in a room on this device. Leave it before previewing the persona."
+
+    /// ⚠️ A DENIED MICROPHONE IS NOT FATAL TO THE SESSION — the agent still greets and
+    /// can be heard — but it is fatal to the point of it, so it is said plainly.
+    static let previewMicrophoneDenied = "The microphone is not available to this app, so the agent will "
+        + "not hear you. You can still hear it answer."
+
+    /// ⛔ THE BUTTON STAYS DISABLED FOR A MOMENT AFTER A PREVIEW ENDS, AND THE SENTENCE
+    /// SAYS WHY. The route is capped at ten a minute per workspace and each token starts
+    /// a billed session; nothing in this client retries one.
+    static let previewCooldown = "Give the last session a moment to finish before starting another."
+
+    /// ⚠️ A PREVIEW THAT WAS TAKEN AWAY BY A CALL, said rather than left as an absence.
+    static let previewYieldedToCall = "A call arrived on this device, so the preview was ended."
+
+    // MARK: - The routing editor
+
+    static let routingRuleEyebrow = "Rule"
+
+    /// ⛔ THE SAVE REPLACES THE WHOLE LIST. It is the one thing the rows cannot say for
+    /// themselves, and the route answers `{success:true}` either way.
+    static let routingNote = "Each rule changes the agent's voice or model for callers it matches. "
+        + "Saving replaces the whole list, so anything removed here is gone."
+
+    static let routingFieldLabel = "When this caller detail"
+
+    static let routingOperatorLabel = "Is compared by"
+
+    static let routingValueLabel = "To this value"
+
+    static let routingVoiceLabel = "Use this voice"
+
+    static let routingModelLabel = "Use this engine"
+
+    /// ⛔ AN EMPTY `model` IS A REAL, MEANINGFUL VALUE AND IS NOT AN ABSENCE. The route
+    /// reads a falsy model as "no override, use the workspace engine", and the web's own
+    /// picker keeps an empty option for exactly that.
+    static let routingModelInherit = "The workspace's engine"
+
+    static let routingInstructionLabel = "And tell the agent"
+
+    static let routingAdd = "Add a rule"
+
+    static let routingRemove = "Remove"
+
+    static let routingSave = "Save rules"
+
+    /// ⛔ A ROW THIS BUILD CANNOT READ IS SHOWN, KEPT AND NOT OFFERED AN EDITOR. The
+    /// stored column predates every schema on it and holds rows shaped nothing like the
+    /// six fields above; an editor over one would have to invent them, and saving would
+    /// then stamp six keys beside the four it could not read.
+    static let routingUnrecognised = "This rule was written in a shape this app does not recognise. It "
+        + "is shown so it is not a surprise, it is kept exactly as it is when you save, and it cannot "
+        + "be changed here."
+
+    /// ⚠️ FLAGGED, NEVER REFUSED. A rule with nothing to match on is legal, is stored,
+    /// and simply never fires — which is exactly what an operator opened this screen to
+    /// find out.
+    static let routingIncomplete = "This rule has nothing to match on, so it never fires."
+
+    /// ⚠️ THE VOICE LIST IS THE REALTIME ENGINE'S OWN, derived rather than restated, and
+    /// an empty one is honest about a catalogue that carries no such engine.
+    static let routingVoicesEmpty = "No voices are published for rules, so this rule's voice is shown "
+        + "as stored and cannot be changed."
+
+    /// ⛔ SAVING NOTHING DELETES EVERY RULE, AND IT ANSWERS SUCCESS. A confirmation
+    /// rather than a caption, for the same reason the transfer directory has one.
+    static let routingEmptyConfirm = "Save with no rules? Every caller will hear the persona exactly as "
+        + "configured, and the rules are gone. There is no undo."
+
+    static let routingEmptyConfirmAction = "Save with no rules"
+
+    /// ⚠️ THE SERVER'S OWN REFUSAL IS WORTH SHOWING VERBATIM: a workspace that restricts
+    /// voices or models rejects a rule naming one outside its allow-list, BY NAME, and
+    /// this client cannot see either list.
+    static let routingSaveHint = "A workspace can restrict which voices and engines a rule may name. "
+        + "If one is refused, the reason above names it."
+}

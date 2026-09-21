@@ -1,0 +1,26 @@
+{
+  "configurations" : [
+    {
+      "id" : "2E7C1F6A-5D3B-4B8E-9C41-7A1F3D2B9E10",
+      "name" : "Recording",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "preferredScreenCaptureFormat" : "video",
+    "testTimeoutsEnabled" : false,
+    "uiTestingScreenshotsLifetime" : "keepAlways"
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:DistrictAI.xcodeproj",
+        "identifier" : "FA593C0AD2CD597057D2CF3F",
+        "name" : "DistrictAIUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

@@ -1,0 +1,8 @@
+# Normalise line endings to LF in the repository and in every checkout.
+* text=auto eol=lf
+
+*.png binary
+
+# The contract fixtures are compared by content; keep them as text with LF endings
+# on every platform.
+*.json text eol=lf

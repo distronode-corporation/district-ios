@@ -1,0 +1,48 @@
+# SwiftFormat configuration for district-ios.
+#
+# Deliberately minimal: the default rule set, with only the options that pin
+# house style so `swiftformat --lint` in CI is reproducible. Opt-in rules are
+# added alongside the code that justifies them.
+#
+# ⚠️ RUN `swiftformat .` FROM THE PROJECT ROOT (the directory holding this file).
+# The tool discovers this file by walking up from each input path, so running it
+# from anywhere else may not find this config for paths passed absolutely.
+#
+# CI runs `swiftformat --lint .` which formats nothing and exits non-zero on any
+# file that would change.
+
+# Swift version drives which rules are safe to apply (e.g. `any` on existentials,
+# consistent `if let` shorthand).
+# ⚠️ MUST TRACK the swift image in ci/Dockerfile and the workflow. A version
+# stated here that is newer than the toolchain makes the formatter emit code the
+# compiler rejects; older, and it silently skips modernisation rules.
+--swiftversion 6.2
+
+--indent 4
+--maxwidth 120
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--closingparen balanced
+# ⚠️ `collections-only`, NOT the `always` default. `always` also adds a trailing
+# comma to FUNCTION ARGUMENT LISTS, which is Swift 6.1+ syntax — so the
+# formatter would emit code that only the newest parser accepts, and the first
+# place that bites is the macOS tier's Xcode, not this Linux job. Collections
+# have taken a trailing comma since Swift 1.
+--trailing-commas collections-only
+--trimwhitespace always
+--stripunusedargs closure-only
+--self remove
+--importgrouping alpha
+
+# Generated and vendored trees. `.build` is SwiftPM's output; DerivedData is
+# Xcode's; SourcePackages holds the app's remote package checkouts (the workflow
+# passes `-clonedSourcePackagesDirPath SourcePackages`). All are gitignored, but
+# --lint would still walk them and take minutes.
+--exclude .build,**/.build,DerivedData,**/DerivedData,SourcePackages,*.xcodeproj
+
+# ⚠️ `redundantInit` OFF. It rewrites `Foo.init(...)` to `Foo(...)`, which is
+# correct everywhere except when the initialiser is being referenced rather than
+# called (`map(Foo.init)`), and the rule has historically got that wrong inside
+# result-builder bodies. Cheap to re-enable later with a real diff to look at.
+--disable redundantInit

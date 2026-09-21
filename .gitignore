@@ -1,0 +1,43 @@
+# SwiftPM build output. `.build` is not matched by a `build/` rule (git compares the
+# directory NAME), and the package at Packages/DistrictCore has its own, hence both.
+.build/
+**/.build/
+
+# Xcode build output (CI and the scripts pass -derivedDataPath DerivedData).
+DerivedData/
+**/DerivedData/
+
+# Package checkouts from `xcodebuild -clonedSourcePackagesDirPath SourcePackages`.
+SourcePackages/
+
+# The Xcode project is generated from project.yml by XcodeGen and never committed.
+*.xcodeproj/
+*.xcworkspace/
+**/xcuserdata/
+**/.swiftpm/
+
+# Written by `xcodegen generate` from project.yml's `info:` block.
+App/Info.plist
+
+# Output of scripts/smoke-simulator.sh.
+build/
+
+*.log
+
+# App Store Connect API keys. They belong in the operator's environment, never here.
+*.p8
+
+# Signing certificates, provisioning profiles and Firebase client configs are never committed.
+*.p12
+*.mobileprovision
+*.cer
+GoogleService-Info.plist
+
+*.xcresult
+
+# Written by ci/sim-udid.sh.
+simulator-udid.txt
+
+smoke-attachments/
+
+.DS_Store

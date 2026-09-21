@@ -1,0 +1,32 @@
+/*
+  Localizable.strings (District AI)
+
+  ⛔ THE ONLY THING IN HERE IS THE COPY APNs DRAWS A NOTIFICATION FROM, AND IT IS
+  NOT AN INVITATION TO START LOCALISING THE APP. Every other string in this client
+  is an English `Text("…")` literal in its view, by decision; these six exist
+  because the SERVER cannot send the words. The server builds `aps.alert` as
+  `title-loc-key` / `loc-key`, which are KEYS into this table, resolved by the OS on the handset without waking the app.
+
+  ⛔ SO THESE SIX SENTENCES ARE READ OFF A LOCKED PHONE, AND THAT IS THE WHOLE
+  REASON THEY NAME NOBODY. The push payload carries ids and nothing else (no
+  message body, no caller, no number), precisely so a notification cannot disclose
+  who is contacting whom to whoever is holding the device. Copy that said "New
+  message from Jane" would have to come from the server and would undo that on
+  every phone at once. Whatever detail is wanted belongs behind the tap, where the
+  app has a bearer and knows who is asking.
+
+  ⚠️ A KEY REMOVED HERE DOES NOT FAIL, IT SHOWS THE KEY. An unresolved
+  `title-loc-key` renders as the literal string `push.message.title` on the lock
+  screen. So this file and the server's key list move together, and the generic pair is
+  the server's fallback for a push type it has not been taught, and it must exist here
+  even though nothing sends it today.
+*/
+
+"push.message.title" = "New message";
+"push.message.body" = "A new message arrived in your inbox.";
+
+"push.call.title" = "Incoming call";
+"push.call.body" = "Someone is calling your District line.";
+
+"push.generic.title" = "District AI";
+"push.generic.body" = "You have a new notification.";

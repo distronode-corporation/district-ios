@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "data": {
+    "items": [
+      {
+        "user_id": "sched-user-contract",
+        "name": "Contract Member",
+        "email": "contract@distronode.test",
+        "avatar_url": "https://distronode-qa-test-did-book.distronode.com/media/avatars/contract.png",
+        "role": "required",
+        "priority": 0,
+        "archived": false
+      },
+      {
+        "user_id": "sched-user-rotation",
+        "name": "Rotation Host",
+        "email": "rotation@contract.test",
+        "role": "rotation",
+        "priority": 2,
+        "archived": true
+      }
+    ]
+  }
+}
