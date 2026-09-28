@@ -17,6 +17,12 @@ District AI service it talks to is not open source; signing in needs a District 
 account. Without one you can still build the app, run every unit test and run the
 signed-out UI tests.
 
+**Without an account with us.** Today this app needs a District AI account to sign in. We
+want the District AI apps to work without an account with us too. We have not worked out
+what that looks like or whether it can work, and the answer depends on what people would
+use them with, so we are asking before we build anything:
+[tell us what you would connect them to](https://github.com/distronode-corporation/.github/discussions/1).
+
 SwiftUI, Swift 6 language mode, iOS 17 and later, on iPhone and iPad (one universal app).
 
 ## iPad
