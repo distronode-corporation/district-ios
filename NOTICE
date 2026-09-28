@@ -3,5 +3,12 @@ Copyright 2026 Distronode Corporation
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 
-The District AI and Distronode names, logos and app icon are trademarks of
-Distronode Corporation and are not licensed under the Apache License, Version 2.0.
+District AI, Distronode and the District AI and Distronode logos and app icons
+are trademarks of Distronode Corporation. They are not licensed under the Apache
+License 2.0: a build you distribute must use its own name, icon and bundle
+identifier.
+
+This project is not affiliated with or endorsed by Apple, LiveKit or Functional
+Software (Sentry), whose platforms, SDKs and services the app uses.
+
+Third-party dependencies keep their own licences.

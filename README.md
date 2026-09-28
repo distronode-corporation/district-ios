@@ -1,5 +1,13 @@
 # District AI for iOS
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/distronode-corporation/district-ios/badge)](https://scorecard.dev/viewer/?uri=github.com/distronode-corporation/district-ios)
+
+District AI for iOS is [on the App Store](https://apps.apple.com/app/id6809297970).
+
+Links: [project page](https://www.distronode.com/open-source/district-ios) ·
+[GitLab mirror](https://gitlab.com/distronode-corporation/district-ios) (read-only mirror;
+issues and pull requests live on GitHub) · [CHANGELOG](CHANGELOG.md)
+
 The native iPhone and iPad client for [District AI](https://www.distronode.com/district-ai),
 the AI receptionist service by Distronode. It places and answers calls, and covers the
 inbox, contacts, meeting rooms and workspace settings of a District AI workspace.
@@ -49,7 +57,9 @@ ci/coverage-gate.sh        # per-module line-coverage floors
 ```sh
 xcodegen generate --spec project.yml
 
-# Build for the simulator. No signing configuration is needed or committed.
+# Build for the simulator. No signing is needed: the project carries no certificates,
+# provisioning profiles or DEVELOPMENT_TEAM. ExportOptions.plist names the App Store
+# team for the release lane (scripts/archive-imac.sh) only.
 xcodebuild build -project DistrictAI.xcodeproj -scheme DistrictAI \
   -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO
 
@@ -114,6 +124,7 @@ ci/                     The coverage gate and the simulator picker CI runs, and 
                         Dockerfile for the same Linux toolchain
 scripts/                The release lane and local test helpers
 docs/ARCHITECTURE.md    How the pieces fit together
+ExportOptions.plist     Export settings for the App Store release lane only
 project.yml             The XcodeGen spec: this is the project; the .xcodeproj is
                         generated and never committed
 ```
@@ -148,12 +159,15 @@ every pull request, and uses no secrets:
   rule, the `Package.resolved` guard, `swift test` and the coverage floors.
 - **app** (macOS, Xcode 26.3): generates the project, builds once for testing, then runs
   `DistrictAITests` and the signed-out UI tests on an iPhone and an iPad simulator.
+- **gitleaks** (Linux): scans the full git history for secrets, with the rules and
+  allowlists in [`.gitleaks.toml`](.gitleaks.toml).
 
-Both fail if a test bundle runs fewer tests than expected, because a bundle that
-discovers nothing reports success. **app** runs on every push and pull request. Its
-`if:` guard and the `run_app` input matter only if the repository is ever private again:
-the free plan bills a private repository's macOS minutes at ten times the Linux rate,
-so there **app** runs only when started by hand (`workflow_dispatch` with `run_app`).
+**verify** and **app** fail if a test bundle runs fewer tests than expected, because a
+bundle that discovers nothing reports success.
+
+[`codeql.yml`](.github/workflows/codeql.yml) runs CodeQL over the workflows and the
+Swift build, and [`scorecard.yml`](.github/workflows/scorecard.yml) publishes the
+OpenSSF Scorecard result behind the badge above.
 
 ## Releases
 
@@ -174,15 +188,16 @@ when a DSN is supplied at build time, and `project.yml` ships it empty.
   pull requests are reviewed.
 - [SECURITY.md](SECURITY.md): report vulnerabilities privately, not in an issue.
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- [SUPPORT](.github/SUPPORT.md): where questions, bugs and account problems go.
 - [CHANGELOG.md](CHANGELOG.md).
 
 Questions about a District AI account, number or bill go to
 [District AI support](https://www.distronode.com/support).
 
-## Licence and trademarks
+## License and trademarks
 
 Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-The District AI and Distronode names, logos and app icon are trademarks of Distronode
-Corporation and are not licensed under the Apache License 2.0. A build you distribute
-must use your own name, icon and bundle identifier.
+District AI, Distronode and the District AI and Distronode logos and app icons are
+trademarks of Distronode Corporation. They are not licensed under the Apache License 2.0:
+a build you distribute must use its own name, icon and bundle identifier.

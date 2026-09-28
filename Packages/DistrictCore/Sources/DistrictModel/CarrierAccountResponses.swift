@@ -26,9 +26,9 @@ import Foundation
 ///
 /// ⚠️ A TWILIO-SIDE PBX ENDPOINT, NOT THE VOICE AGENT'S TRUNK. ``domain`` is
 /// `<label>.sip.twilio.com` because Twilio requires that suffix; it is a different
-/// thing entirely from `sip.distronode.com`, which is the LiveKit telephony gateway the
-/// AI agent uses. Confusing them would have an operator pointing their PBX at the
-/// agent's bus.
+/// thing entirely from `sip.distronode.com`, which is the District AI platform's own
+/// SIP endpoint. Confusing them would have an operator pointing their PBX at the
+/// wrong host.
 ///
 /// ⛔ ``domainSid`` AND ``ipAclSid`` ARE OPTIONAL BECAUSE OF HOW THE ROW IS STORED, NOT
 /// BECAUSE THE RESOURCES ARE OPTIONAL. The list parses these out of a packed

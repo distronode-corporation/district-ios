@@ -188,11 +188,36 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+  gitleaks:
+    name: gitleaks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # the whole history, not just the tip
+
+      # gitleaks/gitleaks-action needs a paid GITLEAKS_LICENSE for an organization
+      # repository. The CLI itself is free (MIT), so install a pinned version and run it,
+      # the same way district-scheduler does. `go install` of a tagged module is checked
+      # against the Go checksum database. `.gitleaks.toml` is picked up from the root.
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.25"
+          cache: false
+
+      - name: gitleaks git
+        run: |
+          go install github.com/zricethezav/gitleaks/v8@v8.30.1
+          "$(go env GOPATH)/bin/gitleaks" git --no-banner --redact -v .
+
   app:
     name: app (${{ matrix.device }})
     # Runs on every push and pull request. This guard and the run_app input matter only if
     # the repository is ever private again: the free plan bills a private repository's
-    # macOS minutes at 10x, so there this job runs only on a manual dispatch with run_app.
+    # macOS minutes at ten times the Linux rate, so there this job runs only when started
+    # by hand (workflow_dispatch with run_app).
     if: ${{ !github.event.repository.private || (github.event_name == 'workflow_dispatch' && inputs.run_app) }}
     runs-on: macos-26
     timeout-minutes: 60
