@@ -1,0 +1,93 @@
+name: Submit for review
+
+# Submits a version that release.yml has already built and uploaded from a `v*` tag.
+# Runs only with the maintainers' explicit approval in the `approval` input; anything
+# else fails at the first step and submits nothing.
+#
+# Dispatched on main (the `release` environment admits main and `v*` tags only). It
+# checks out the tag, derives the same build number the release run did, and hands it to
+# scripts/release-submit.sh, the same path release.yml's own `submit` job uses.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The release tag to submit, e.g. v1.3
+        type: string
+        required: true
+      approval:
+        description: The maintainers' approval text
+        type: string
+        required: true
+
+permissions: {}
+
+# One submission at a time, never cancelled halfway.
+concurrency:
+  group: submit-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  submit:
+    name: submit for review
+    runs-on: ubuntu-24.04
+    environment: release
+    timeout-minutes: 90
+    permissions:
+      contents: read # check out the scripts and CHANGELOG.md
+      id-token: write # the Google Cloud token for the App Store Connect key
+    steps:
+      # ⛔ FIRST, before any checkout or credential. The input arrives through env, never
+      # interpolated into the script.
+      - name: Approval
+        env:
+          APPROVAL: ${{ inputs.approval }}
+        run: |
+          if [ "$APPROVAL" != "approved for release" ]; then
+            echo "::error::No approval was given. No submission was made."
+            echo "**No submission was made:** the approval input was not the maintainers' approval." >>"$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+      - name: Tag
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+(\.[0-9]+){1,2}$ ]]; then
+            echo "::error::tag '$TAG' is not of the form v<version>. No submission was made."
+            exit 1
+          fi
+
+      # The whole history, for the build number, and main, for the preflight's ancestry
+      # check. `ref` is the validated tag.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: refs/tags/${{ inputs.tag }}
+
+      - name: Preflight
+        id: preflight
+        env:
+          RELEASE_REF_TYPE: tag
+          RELEASE_REF_NAME: ${{ inputs.tag }}
+        run: scripts/release-preflight.sh
+
+      - name: Authenticate to Google Cloud
+        id: gcp
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: projects/409911651910/locations/global/workloadIdentityPools/github-pool/providers/github-actions
+          service_account: gh-ios-release@distronode.iam.gserviceaccount.com
+          token_format: access_token
+          create_credentials_file: false
+
+      - name: Submit for App Review
+        env:
+          GSM_ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          VERSION: ${{ steps.preflight.outputs.version }}
+          BUILD: ${{ steps.preflight.outputs.build }}
+        run: scripts/release-submit.sh

@@ -44,6 +44,14 @@ So a report can say which of these it breaks:
   release script deletes the archive if their strings appear in the release binary.
 - **No crash reporting unless configured.** Sentry starts only when a DSN is supplied at
   build time, and `project.yml` ships it empty.
+- **No signing material in the repository or in GitHub.** Releases are built, signed and
+  uploaded by `.github/workflows/release.yml` from a protected `v*` tag (or a dispatch on
+  `main` for a TestFlight build). Its `release` environment borrows the App Store Connect
+  key and the Sentry settings from Distronode's Google Cloud for the length of one run,
+  through workload identity pinned to this repository, that environment and those refs.
+  No pull request can run it. Submission for App Review runs only with the maintainers'
+  explicit approval. Versions up to 1.2 were built on a maintainer's machine before this
+  workflow existed.
 
 ## Scope
 
@@ -57,8 +65,10 @@ In scope, in rough order of damage:
 - One workspace's data shown under another workspace, or after sign-out.
 - The microphone or camera staying live after the user ended a call or left a room.
 - The UI-test hooks, or any other Debug-only path, reachable in a release build.
-- `scripts/archive-imac.sh` exposing its credentials in a log, a file or a process
-  listing.
+- The release workflows or their scripts (`scripts/archive-imac.sh`,
+  `scripts/gsm-secret.sh`, `scripts/asc_release.py`) exposing a credential in a log, an
+  artifact, a file or a process listing, or being reachable from a ref or event other
+  than the ones described above.
 
 Out of scope for this repository:
 

@@ -96,6 +96,18 @@ layout differs, using test data only.
 Things CI cannot check (a real phone call, push delivery, a physical device) are fine to
 leave untested; say so in the pull request.
 
+## Releases
+
+Contributors do not cut releases. A maintainer pushes a protected `v*` tag matching
+`MARKETING_VERSION` in `project.yml`, and [`release.yml`](.github/workflows/release.yml)
+builds, signs and uploads it to TestFlight; submission for App Review is a separate step
+that runs only with the maintainers' explicit approval. No signing key or store
+credential is stored in this repository or in GitHub. See the README's Releases section.
+
+A change to `scripts/archive-imac.sh`, `scripts/release-preflight.sh` or
+`scripts/asc_release.py` comes with its test in the matching `*.test.sh` or `*_test.py`;
+the **release scripts** job runs them on every pull request.
+
 ## Reporting bugs and asking questions
 
 Use the bug report form for a bug. Questions and ideas go to

@@ -6,7 +6,9 @@ name: CI
 # with Xcode and runs its XCTest bundles on an iPhone and an iPad simulator.
 #
 # No job reads a secret, so pull requests from forks run the same checks as `main`.
-# Releases are not built here; see scripts/archive-imac.sh.
+# Releases are not built here: release.yml builds, signs and uploads them from a protected
+# `v*` tag or a dispatch on main. `release-scripts` below tests that workflow's scripts on
+# every pull request, with stubs and no credentials.
 on:
   push:
     branches: [main]
@@ -187,6 +189,27 @@ jobs:
           path: Packages/DistrictCore/swift-test.log
           if-no-files-found: warn
           retention-days: 7
+
+  release-scripts:
+    name: release scripts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Stub-driven tests of the release lane: the archive script's refusals and exact
+      # xcodebuild argv, the preflight's tag and build-number rules, and the App Store
+      # Connect helper's release notes and ES256 signature. No network, no secret.
+      - name: Release script tests
+        run: |
+          bash scripts/archive-imac.test.sh
+          bash scripts/release-preflight.test.sh
+          python3 scripts/asc_release_test.py
 
   gitleaks:
     name: gitleaks

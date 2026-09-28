@@ -1,0 +1,258 @@
+name: Release
+
+# Builds, signs and uploads District AI to App Store Connect, from which TestFlight's
+# internal group receives every valid build. Submission for App Review is a separate,
+# explicitly approved step.
+#
+#   - A `v*` tag push builds and uploads that version. Nothing is submitted.
+#   - A dispatch on `main` builds and uploads a TestFlight build of main. Nothing is
+#     submitted, whatever the approval input says.
+#   - A dispatch on a `v*` tag with the maintainers' approval input also submits the
+#     build for review once it is valid. submit.yml does the same for a tag that was
+#     already built.
+#
+# ⛔ NO SIGNING MATERIAL LIVES IN THIS REPOSITORY OR IN GITHUB. The `release` environment
+# (branch `main` and tags `v*` only) is the one place a job can obtain a Google Cloud
+# token: the workload identity provider admits only this repository, that environment and
+# those refs, and the service account it maps to can read exactly the release secrets.
+# Everything is fetched for one run and written under the runner's temporary directory,
+# which is wiped with the job.
+#
+# No pull_request trigger of any kind: nothing a pull request contains can reach this
+# workflow's credentials.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      approval:
+        description: Leave empty for an upload only. Submission for review needs the maintainers' approval text and a v* tag.
+        type: string
+        default: ""
+
+# Nothing at the top level; each job asks for exactly what it uses.
+permissions: {}
+
+# One release run per ref at a time, and a running one is never cancelled: an upload cut
+# off halfway leaves App Store Connect holding a build number nobody can reuse.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    # Explicit so every step gets `-eo pipefail`; the implicit default has no pipefail.
+    shell: bash
+
+env:
+  WORKLOAD_IDENTITY_PROVIDER: projects/409911651910/locations/global/workloadIdentityPools/github-pool/providers/github-actions
+  RELEASE_SERVICE_ACCOUNT: gh-ios-release@distronode.iam.gserviceaccount.com
+
+jobs:
+  build:
+    name: build and upload
+    runs-on: macos-26
+    environment: release
+    # The archive alone takes 10 to 20 minutes; the rest is App Store Connect processing.
+    timeout-minutes: 120
+    permissions:
+      contents: read # check out the source
+      id-token: write # the Google Cloud token for the release secrets
+    outputs:
+      version: ${{ steps.preflight.outputs.version }}
+      build: ${{ steps.preflight.outputs.build }}
+      kind: ${{ steps.preflight.outputs.kind }}
+    env:
+      XCODE_APP: /Applications/Xcode_26.3.app
+      XCODE_VERSION: "26.3"
+      XCODEGEN_VERSION: 2.46.0
+      XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+      SENTRY_CLI_VERSION: 3.8.0
+      SENTRY_CLI_SHA256: 2c26914636c47ab9bf9e710484ad7b44d371cbec8bd29cafb36b3cf877bf4285
+      SENTRY_ORG: distronode-corporation-eu
+    steps:
+      # ⛔ THE WHOLE HISTORY. The build number is 4101 plus `git rev-list --count HEAD`,
+      # and a shallow clone answers 1; the preflight refuses one.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      # Refuses a tag that is not v<MARKETING_VERSION>, a tagged commit that is not on
+      # main, and any branch but main, before anything is built or any secret is read.
+      - name: Preflight
+        id: preflight
+        run: scripts/release-preflight.sh
+
+      # The release scripts' own tests, so a broken script fails here rather than halfway
+      # through an upload.
+      - name: Release script tests
+        run: |
+          bash scripts/archive-imac.test.sh
+          bash scripts/release-preflight.test.sh
+          python3 scripts/asc_release_test.py
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE_APP"
+          # Not `| head -n 1`: under pipefail xcodebuild aborts on the closed pipe.
+          have_all="$(xcodebuild -version)"
+          have="${have_all%%$'\n'*}"
+          echo "$have"
+          if [ "$have" != "Xcode $XCODE_VERSION" ]; then
+            echo "::error::expected Xcode $XCODE_VERSION at $XCODE_APP, got '$have'"
+            exit 1
+          fi
+
+      - name: Install XcodeGen
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o xcodegen.zip \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip"
+          echo "${XCODEGEN_SHA256}  xcodegen.zip" | shasum -a 256 -c -
+          unzip -q xcodegen.zip
+          sudo ./xcodegen/install.sh
+          xcodegen --version
+
+      # Pinned by version and SHA-256, for the dSYM upload.
+      - name: Install sentry-cli
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSL -o "$RUNNER_TEMP/bin/sentry-cli" \
+            "https://github.com/getsentry/sentry-cli/releases/download/${SENTRY_CLI_VERSION}/sentry-cli-Darwin-universal"
+          echo "${SENTRY_CLI_SHA256}  $RUNNER_TEMP/bin/sentry-cli" | shasum -a 256 -c -
+          chmod 0755 "$RUNNER_TEMP/bin/sentry-cli"
+          echo "$RUNNER_TEMP/bin" >>"$GITHUB_PATH"
+          "$RUNNER_TEMP/bin/sentry-cli" --version
+
+      - name: Authenticate to Google Cloud
+        id: gcp
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.RELEASE_SERVICE_ACCOUNT }}
+          token_format: access_token
+          create_credentials_file: false
+
+      # ⛔ The .p8 is written once, mode 0600, under the runner's temporary directory,
+      # and removed by the last step whatever happens. Every value is masked before
+      # anything else can print it.
+      - name: Fetch the App Store Connect key
+        env:
+          GSM_ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          key_id="$(scripts/gsm-secret.sh IOS_ASC_KEY_ID)"
+          issuer="$(scripts/gsm-secret.sh IOS_ASC_ISSUER_ID)"
+          echo "::add-mask::$key_id"
+          echo "::add-mask::$issuer"
+          mkdir -p "$RUNNER_TEMP/release"
+          key_path="$RUNNER_TEMP/release/AuthKey_${key_id}.p8"
+          scripts/gsm-secret.sh IOS_ASC_API_KEY_P8 >"$key_path"
+          while IFS= read -r line || [ -n "$line" ]; do
+            [ -n "$line" ] && echo "::add-mask::$line"
+          done <"$key_path"
+          {
+            echo "ASC_KEY_ID=$key_id"
+            echo "ASC_ISSUER_ID=$issuer"
+            echo "ASC_KEY_PATH=$key_path"
+          } >>"$GITHUB_ENV"
+
+      # ⚠️ An `xcodebuild archive` on Xcode 26.3 has been seen to hang for good while
+      # reaping the sentry-cocoa package's manifest helper (0% CPU, a defunct child). The
+      # step timeout turns that into a red run; re-running it has always succeeded.
+      - name: Archive and upload
+        timeout-minutes: 75
+        env:
+          GSM_ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          KIND: ${{ steps.preflight.outputs.kind }}
+          EXPECTED_BUILD: ${{ steps.preflight.outputs.build }}
+        run: |
+          set -euo pipefail
+          SENTRY_DSN="$(scripts/gsm-secret.sh IOS_SENTRY_DSN)"
+          SENTRY_AUTH_TOKEN="$(scripts/gsm-secret.sh SENTRY_EU_AUTH_TOKEN)"
+          echo "::add-mask::$SENTRY_DSN"
+          echo "::add-mask::$SENTRY_AUTH_TOKEN"
+          export SENTRY_DSN SENTRY_AUTH_TOKEN
+          # The Google token is not needed past this point.
+          unset GSM_ACCESS_TOKEN
+          # A tag is a detached HEAD; the preflight has already proved its commit is on
+          # main, which is what the script's branch check exists to establish.
+          if [ "$KIND" = "tag" ]; then export ALLOW_BRANCH=1; fi
+          BUILD_DIR="$RUNNER_TEMP/build" scripts/archive-imac.sh 2>&1 | tee "$RUNNER_TEMP/archive.log"
+          grep -qx "build number: $EXPECTED_BUILD" "$RUNNER_TEMP/archive.log" || {
+            echo "::error::the archive did not report build number $EXPECTED_BUILD"
+            exit 1
+          }
+
+      # Upload returns before App Store Connect has processed the build; this waits for
+      # VALID, which is also when TestFlight's internal group receives it.
+      - name: Wait for App Store Connect processing
+        timeout-minutes: 45
+        env:
+          VERSION: ${{ steps.preflight.outputs.version }}
+          BUILD: ${{ steps.preflight.outputs.build }}
+        run: python3 scripts/asc_release.py wait-valid --version "$VERSION" --build "$BUILD" --timeout 2400
+
+      - name: Summary
+        if: success()
+        env:
+          VERSION: ${{ steps.preflight.outputs.version }}
+          BUILD: ${{ steps.preflight.outputs.build }}
+          KIND: ${{ steps.preflight.outputs.kind }}
+          APPROVAL: ${{ inputs.approval }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          {
+            echo "### District AI $VERSION ($BUILD)"
+            echo
+            echo "Uploaded to App Store Connect and **VALID**. TestFlight internal testers receive it automatically."
+            echo
+            if [ "$EVENT" = "workflow_dispatch" ] && [ "$KIND" = "tag" ] && [ "$APPROVAL" = "approved for release" ]; then
+              echo "Approved: the **submit** job submits it for App Review."
+            elif [ "$KIND" = "tag" ]; then
+              echo "**Not submitted for review.** It is uploaded and waiting for approval; submit it with submit.yml."
+            else
+              echo "**Not submitted for review.** A build of main is a TestFlight build only."
+            fi
+          } >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the key and the build
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/release" "$RUNNER_TEMP/build" "$RUNNER_TEMP/archive.log"
+
+  submit:
+    name: submit for review
+    needs: build
+    # ⛔ Only a dispatch on a tag, and only with the approval input exactly as the
+    # maintainers give it. Anything else skips this job.
+    if: github.event_name == 'workflow_dispatch' && needs.build.outputs.kind == 'tag' && inputs.approval == 'approved for release'
+    runs-on: ubuntu-24.04
+    environment: release
+    timeout-minutes: 90
+    permissions:
+      contents: read # check out the scripts and CHANGELOG.md
+      id-token: write # the Google Cloud token for the App Store Connect key
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Authenticate to Google Cloud
+        id: gcp
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.RELEASE_SERVICE_ACCOUNT }}
+          token_format: access_token
+          create_credentials_file: false
+
+      - name: Submit for App Review
+        env:
+          GSM_ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          VERSION: ${{ needs.build.outputs.version }}
+          BUILD: ${{ needs.build.outputs.build }}
+        run: scripts/release-submit.sh
