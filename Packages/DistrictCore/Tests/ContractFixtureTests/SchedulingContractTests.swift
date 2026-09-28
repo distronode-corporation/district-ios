@@ -49,7 +49,7 @@ final class SchedulingContractTests: XCTestCase {
         let tenant = try XCTUnwrap(response.tenant)
 
         XCTAssertEqual(tenant.status, .provisioning)
-        XCTAssertEqual(tenant.publicHost, "distronode-qa-test-did-book.distronode.com")
+        XCTAssertEqual(tenant.publicHost, "book.example.com")
         XCTAssertEqual(tenant.region, "us")
         XCTAssertFalse(tenant.hasCredentials, "the once-only key has not been stored yet")
         XCTAssertNil(tenant.lastReadyAt, "never yet observed complete")
@@ -73,7 +73,7 @@ final class SchedulingContractTests: XCTestCase {
         XCTAssertNil(tenant.lastError)
         XCTAssertEqual(
             tenant.bookingUrl,
-            "https://distronode-qa-test-did-book.distronode.com/book/phone-consultation"
+            "https://book.example.com/book/phone-consultation"
         )
     }
 
@@ -100,7 +100,7 @@ final class SchedulingContractTests: XCTestCase {
         XCTAssertFalse(response.canManage, "a viewer reads the same facts and gets no button")
 
         XCTAssertEqual(tenant.status, .error)
-        XCTAssertEqual(tenant.publicHost, "distronode-qa-test-did-book.distronode.com")
+        XCTAssertEqual(tenant.publicHost, "book.example.com")
         XCTAssertTrue(tenant.hasCredentials, "the stored key outlives a failed re-provision")
         XCTAssertEqual(tenant.lastReadyAt, "2026-09-06T11:20:00.000Z", "not cleared by the failure")
         XCTAssertEqual(tenant.lastError, "cloudflare refused the dns record (HTTP 403)")
@@ -120,7 +120,7 @@ final class SchedulingContractTests: XCTestCase {
 
         XCTAssertTrue(response.ok)
         XCTAssertEqual(response.status, "ready")
-        XCTAssertEqual(response.publicHost, "distronode-qa-test-did-book.distronode.com")
+        XCTAssertEqual(response.publicHost, "book.example.com")
         XCTAssertNil(response.error)
         XCTAssertEqual(response.tenantStatus, .ready)
     }
