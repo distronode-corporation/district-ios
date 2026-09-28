@@ -23,6 +23,8 @@ body:
           required: true
         - label: This is not a security issue (those go to the private report linked above).
           required: true
+        - label: I've removed every token and every piece of customer or caller data from what I'm pasting.
+          required: true
   - type: textarea
     id: what-happened
     attributes:
