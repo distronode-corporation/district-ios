@@ -41,3 +41,8 @@ simulator-udid.txt
 smoke-attachments/
 
 .DS_Store
+
+# Python bytecode from scripts/asc_release_test.py. Ignored so the release workflow,
+# which runs that test before archiving, does not leave the tree dirty (the archive
+# script refuses a dirty tree).
+__pycache__/

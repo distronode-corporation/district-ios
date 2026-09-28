@@ -17,6 +17,12 @@ District AI service it talks to is not open source; signing in needs a District 
 account. Without one you can still build the app, run every unit test and run the
 signed-out UI tests.
 
+**Without an account with us.** Today this app needs a District AI account to sign in. We
+want the District AI apps to work without an account with us too. We have not worked out
+what that looks like or whether it can work, and the answer depends on what people would
+use them with, so we are asking before we build anything:
+[tell us what you would connect them to](https://github.com/distronode-corporation/.github/discussions/1).
+
 SwiftUI, Swift 6 language mode, iOS 17 and later, on iPhone and iPad (one universal app).
 
 ## iPad
@@ -59,7 +65,7 @@ xcodegen generate --spec project.yml
 
 # Build for the simulator. No signing is needed: the project carries no certificates,
 # provisioning profiles or DEVELOPMENT_TEAM. ExportOptions.plist names the App Store
-# team for the release lane (scripts/archive-imac.sh) only.
+# team for the release workflow only.
 xcodebuild build -project DistrictAI.xcodeproj -scheme DistrictAI \
   -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO
 
@@ -122,9 +128,9 @@ Packages/DistrictCore/  DistrictModel, DistrictAuthCore, DistrictNetwork, Distri
 contracts/              JSON contract fixtures from the District AI service
 ci/                     The coverage gate and the simulator picker CI runs, and a
                         Dockerfile for the same Linux toolchain
-scripts/                The release lane and local test helpers
+scripts/                The release scripts and local test helpers
 docs/ARCHITECTURE.md    How the pieces fit together
-ExportOptions.plist     Export settings for the App Store release lane only
+ExportOptions.plist     Export settings for the App Store release only
 project.yml             The XcodeGen spec: this is the project; the .xcodeproj is
                         generated and never committed
 ```
@@ -161,6 +167,7 @@ every pull request, and uses no secrets:
   `DistrictAITests` and the signed-out UI tests on an iPhone and an iPad simulator.
 - **gitleaks** (Linux): scans the full git history for secrets, with the rules and
   allowlists in [`.gitleaks.toml`](.gitleaks.toml).
+- **release scripts** (Linux): tests the release workflow's scripts against stubs.
 
 **verify** and **app** fail if a test bundle runs fewer tests than expected, because a
 bundle that discovers nothing reports success.
@@ -171,16 +178,33 @@ OpenSSF Scorecard result behind the badge above.
 
 ## Releases
 
-Releases are archived and uploaded to App Store Connect from a Mac with
-`scripts/archive-imac.sh`, not from CI. The App Store Connect API key and the optional
-crash-reporting settings are supplied by the operator's environment; none of them is in
-this repository. The script refuses a dirty tree or a branch other than `main`, derives
-the build number from the commit history, and deletes the archive if the UI-test hooks
-are present in the release binary. `scripts/archive-imac.test.sh` tests it against
-stubs.
+Releases are built, signed and uploaded to App Store Connect by
+[`release.yml`](.github/workflows/release.yml), on a GitHub-hosted macOS runner, from a
+protected `v*` tag whose name matches `MARKETING_VERSION` and whose commit is on `main`.
+A dispatch on `main` builds a TestFlight-only build of `main`. The build number is 4101
+plus the commit count, and the workflow refuses a shallow clone, a mismatched tag and any
+other branch before it reads a credential.
 
-Builds from this repository report no crashes: crash reporting (Sentry) starts only
-when a DSN is supplied at build time, and `project.yml` ships it empty.
+No signing key or store credential is stored in this repository or in GitHub. The
+workflow's `release` environment borrows them from Distronode's Google Cloud for the
+length of one run, through workload identity pinned to this repository, that environment
+and those refs. Signing is Xcode's automatic signing with an App Store Connect API key.
+Every valid build goes to TestFlight's internal testers. Submission for App Review is a
+separate step ([`submit.yml`](.github/workflows/submit.yml), or the `submit` job of a
+dispatch on a tag) and runs only with the maintainers' explicit approval.
+
+The workflow calls `scripts/archive-imac.sh`, which refuses a dirty tree, deletes the
+archive if the UI-test hooks are present in the release binary, and uploads the debug
+symbols to Sentry. `scripts/archive-imac.test.sh`, `scripts/release-preflight.test.sh` and
+`scripts/asc_release_test.py` test the release scripts against stubs on every pull
+request.
+
+Versions up to the current store release (1.2) were built on a maintainer's machine with
+the same script, before this workflow existed.
+
+Builds from a fork report no crashes: crash reporting (Sentry) starts only when a DSN is
+supplied at build time, and `project.yml` ships it empty. Only the release workflow
+supplies one.
 
 ## Contributing, security and conduct
 
