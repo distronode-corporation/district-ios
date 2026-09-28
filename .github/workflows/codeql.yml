@@ -7,56 +7,91 @@ name: CodeQL
 # the database and the job still passes. This workflow generates the project and builds
 # the app itself, which compiles the App target and DistrictCore together.
 #
-# Two languages: `actions` reads the workflow files and needs no build; `swift` is traced
-# through the `xcodebuild build` below.
+# Two jobs: `actions` reads the workflow files, needs no build and runs everywhere;
+# `swift` is traced through the `xcodebuild build` below and runs only where its hours
+# are worth spending (see that job).
 on:
   push:
     branches: [main]
+    # The Swift sources, what builds them, and the workflows the `actions` job reads.
+    # A push that touches none of them has nothing new for either job to analyse.
+    paths:
+      - "App/**"
+      - "Packages/**"
+      - "project.yml"
+      - ".github/workflows/**"
   pull_request:
     branches: [main]
   schedule:
     # Weekly, so new queries in a CodeQL release reach code that has not changed.
     - cron: "17 6 * * 1"
+  workflow_dispatch:
 
-# Nothing at the top level; the one job below asks for exactly what it uses.
+# Nothing at the top level; each job below asks for exactly what it uses.
 permissions: {}
 
-# Same shape as ci.yml: only pull requests cancel in flight. A superseded PR analysis is
-# wasted macOS time; a superseded main analysis is the record for that commit.
-concurrency:
-  group: codeql-${{ github.ref }}-${{ github.event_name }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 jobs:
-  analyze:
-    name: Analyze (${{ matrix.language }})
+  actions:
+    name: Analyze (actions)
     # ⛔ SKIPPED WHILE THE REPOSITORY IS PRIVATE. Code scanning is not available to a
-    # private repository on the free plan, so the upload would fail, and the swift leg
-    # would first spend macOS minutes billed at 10x. `schedule` carries `repository` in
-    # its payload too (since 2022), so the weekly run is guarded the same way.
+    # private repository on the free plan, so the upload would fail. `schedule` carries
+    # `repository` in its payload too (since 2022), so the weekly run is guarded the same way.
     if: ${{ !github.event.repository.private }}
-    runs-on: ${{ matrix.runs-on }}
-    # Unmeasured on this repository: tracing slows the build, and the swift analysis
-    # runs after it. Generous rather than tight.
-    timeout-minutes: 120
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Same shape as ci.yml: only pull requests cancel in flight. A superseded PR analysis is
+    # wasted time; a superseded main analysis is the record for that commit.
+    concurrency:
+      group: codeql-actions-${{ github.ref }}-${{ github.event_name }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     permissions:
       security-events: write # upload the results
       contents: read # check out the code
       actions: read # read this run's workflow details
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - language: actions
-            build-mode: none
-            runs-on: ubuntu-24.04
-          # The same runner and Xcode as ci.yml's `app` job, so the analysed build is the
-          # one CI tests. Xcode 26.3 ships Swift 6.2, inside CodeQL's supported range.
-          - language: swift
-            build-mode: manual
-            runs-on: macos-26
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          languages: actions
+          build-mode: none
+          queries: security-extended
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          category: "/language:actions"
+
+  swift:
+    name: Analyze (swift)
+    # ⛔ NOT ON PULL REQUESTS. The traced build is hours long, and the free plan runs at
+    # most five macOS jobs at once for the whole organisation, so a Swift scan per PR push
+    # held slots that ci.yml's `app` jobs and release.yml were queued behind (2026-09-28:
+    # ~7 runner-hours in one morning, one release run waiting on it). It runs on pushes to
+    # main that change Swift, weekly, and on demand. Same private-repository guard as above.
+    if: ${{ !github.event.repository.private && github.event_name != 'pull_request' }}
+    runs-on: macos-26
+    # ⛔ 300, NOT 120, BECAUSE THE BUILD BELOW IS SERIAL (`-jobs 1`, see that step). The
+    # untraced build takes 4-5 minutes in ci.yml; traced and serial it is expected to take
+    # most of this budget, and a run that has not finished is still worth more than one
+    # killed at 120. GitHub's ceiling for a hosted job is 360. Measure before lowering.
+    timeout-minutes: 300
+    # One scan running and at most one waiting per ref: a newer push replaces the waiting
+    # run rather than stacking hours of them, and the running one is never cancelled (its
+    # result is the record for that commit).
+    concurrency:
+      group: codeql-swift-${{ github.ref }}
+      cancel-in-progress: false
+    permissions:
+      security-events: write # upload the results
+      contents: read # check out the code
+      actions: read # read this run's workflow details
     env:
-      # Same values as ci.yml's `app` job. Bump both together.
+      # Same values as ci.yml's `app` job. Bump both together. Xcode 26.3 ships Swift 6.2,
+      # inside CodeQL's supported range (Swift 5.4-6.3 as of CodeQL 2.27.1).
       XCODE_APP: /Applications/Xcode_26.3.app
       XCODE_VERSION: "26.3"
       XCODEGEN_VERSION: 2.46.0
@@ -71,7 +106,6 @@ jobs:
       # Asserted rather than trusted: an image rotation that drops this Xcode must fail
       # here, naming the reason, not later with a compiler error.
       - name: Select Xcode
-        if: matrix.language == 'swift'
         run: |
           sudo xcode-select -s "$XCODE_APP"
           # Not `| head -n 1`: under pipefail with unbuffered output, xcodebuild aborts on
@@ -87,7 +121,6 @@ jobs:
       # The upstream release zip, checked against a pinned SHA-256, rather than a
       # Homebrew formula whose version floats.
       - name: Install XcodeGen
-        if: matrix.language == 'swift'
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP"
@@ -100,25 +133,42 @@ jobs:
 
       # ⛔ THE PROJECT IS GENERATED, NEVER COMMITTED. project.yml is the source of truth.
       - name: xcodegen generate
-        if: matrix.language == 'swift'
         run: xcodegen generate --spec project.yml
 
       # Every step after this one is traced, so the setup above stays out of it.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
         with:
-          languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
+          languages: swift
+          build-mode: manual
           queries: security-extended
 
       # `xcodebuild build` of the DistrictAI scheme builds the app target and the local
       # DistrictCore package; the test bundles are `[test]` in project.yml, so they stay
-      # out, as they do for the autobuilder. The five `=NO` settings are the ones GitHub's
+      # out, as they do for the autobuilder. The four `=NO` settings are ones GitHub's
       # Swift autobuilder passes. One architecture, as GitHub's build options for Swift
       # recommend: the runner's own. DerivedData, and with it the package checkouts
       # (LiveKit is compiled from source), sits outside the checkout.
+      #
+      # ⛔ `-jobs 1` IS THE FIX FOR "THE HOSTED RUNNER LOST COMMUNICATION WITH THE SERVER".
+      # The tracer runs CodeQL's Swift extractor beside every swift-frontend, and in
+      # parallel those pairs outgrow the runner's 7 GB: every traced run before this change
+      # (five on 2026-09-28 alone) died 64-100 minutes in with that annotation and no log,
+      # because the runner never uploaded one. Read a death with
+      # `gh api repos/{owner}/{repo}/check-runs/<job-id>/annotations`. Serial builds keep
+      # one pair resident; another public iOS repository measured the same failure fall
+      # from ~71% of runs to ~1 in 95 with this flag alone, after pinning an older CodeQL
+      # bundle and lowering the extractor's `ram` both failed
+      # (github.com/OrellBuehler/bissbilanz/issues/570).
+      # ⛔ AND IT ONLY WORKS WITH THE INTEGRATED DRIVER, which is why the autobuilder's fifth
+      # setting, `SWIFT_USE_INTEGRATED_DRIVER=NO`, is gone. Xcode hands every `swiftc` a
+      # hard-coded `-j<CPU count>` (swift-build `SwiftCompiler.swift`, "Set the parallelism
+      # level for the compile", at 2df999a). The legacy driver obeys that and runs its own
+      # parallel frontends inside one build task, where `-jobs` cannot reach them; the
+      # integrated driver hands each frontend back to the build system as a task of its own,
+      # which `-jobs 1` does limit. ci.yml and release.yml build with the integrated driver
+      # too, so the analysed build is now the tested one.
       - name: Build the app
-        if: matrix.language == 'swift'
         run: |
           set -o pipefail
           xcodebuild build \
@@ -126,15 +176,15 @@ jobs:
             -scheme DistrictAI \
             -destination "generic/platform=iOS Simulator" \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            -jobs 1 \
             ARCHS="$(uname -m)" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             COMPILATION_CACHE_ENABLE_CACHING=NO \
-            SWIFT_ENABLE_COMPILE_CACHE=NO \
-            SWIFT_USE_INTEGRATED_DRIVER=NO 2>&1 | tee xcodebuild.log | xcbeautify --renderer github-actions
+            SWIFT_ENABLE_COMPILE_CACHE=NO 2>&1 | tee xcodebuild.log | xcbeautify --renderer github-actions
           grep -q '\*\* BUILD SUCCEEDED \*\*' xcodebuild.log
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
         with:
-          category: "/language:${{ matrix.language }}"
+          category: "/language:swift"
