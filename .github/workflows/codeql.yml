@@ -49,7 +49,7 @@ jobs:
         include:
           - language: actions
             build-mode: none
-            runs-on: ubuntu-latest
+            runs-on: ubuntu-24.04
           # The same runner and Xcode as ci.yml's `app` job, so the analysed build is the
           # one CI tests. Xcode 26.3 ships Swift 6.2, inside CodeQL's supported range.
           - language: swift

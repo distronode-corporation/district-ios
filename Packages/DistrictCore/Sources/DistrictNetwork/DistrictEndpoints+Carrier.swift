@@ -142,9 +142,8 @@ public extension DistrictEndpoints {
     ///
     /// ⚠️ A TWILIO-SIDE PBX ENDPOINT, NOT THE VOICE AGENT'S TRUNK. The provisioned
     /// domain is `<domain>.sip.twilio.com` because Twilio requires that suffix — a
-    /// different thing entirely from `sip.distronode.com`, which is the LiveKit
-    /// telephony gateway the AI agent's own SIP trunks use. Nothing on this route
-    /// touches that.
+    /// different thing entirely from `sip.distronode.com`, which is the District AI
+    /// platform's own SIP endpoint. Nothing on this route touches that.
     ///
     /// ⚠️ THE ROWS ARE PARSED OUT OF A PACKED STRING. `productRef` holds
     /// `name|domain|ips|domainSid|ipAclSid`, which is why ``SipTrunk/domainSid`` and

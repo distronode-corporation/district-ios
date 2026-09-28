@@ -236,8 +236,8 @@ extension DistrictPaths {
     /// ⚠️ THIS IS A TWILIO-SIDE PBX ENDPOINT, NOT THE VOICE AGENT'S TRUNK. Twilio
     /// requires the domain to end in `sip.twilio.com`, so the provisioned name is
     /// `<domain>.sip.twilio.com` — a different thing entirely from
-    /// `sip.distronode.com`, which is the LiveKit telephony gateway the AI agent
-    /// uses. Nothing here touches that.
+    /// `sip.distronode.com`, which is the District AI platform's own SIP endpoint.
+    /// Nothing here touches that.
     ///
     /// ⚠️ THE GET'S ROWS ARE PARSED OUT OF A PACKED `productRef` STRING
     /// (`name|domain|ips|domainSid|ipAclSid`), which is why `domainSid` and `ipAclSid`

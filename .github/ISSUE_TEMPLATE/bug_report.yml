@@ -19,9 +19,9 @@ body:
       options:
         - label: I've searched existing issues and this isn't a duplicate.
           required: true
-        - label: This is a reproducible bug, not an account question or a feature request.
+        - label: I'm on the latest App Store release, or building from the latest `main`.
           required: true
-        - label: I've removed personal data, tokens and anything else private from everything I'm pasting.
+        - label: This is not a security issue (those go to the private report linked above).
           required: true
   - type: textarea
     id: what-happened
@@ -61,7 +61,6 @@ body:
       label: Where did the app come from?
       options:
         - App Store
-        - TestFlight
         - Built from source
     validations:
       required: true
@@ -69,7 +68,7 @@ body:
     id: version
     attributes:
       label: App version, or commit if built from source
-      placeholder: "1.0, or a commit SHA"
+      placeholder: "1.2, or a commit SHA"
     validations:
       required: true
   - type: input

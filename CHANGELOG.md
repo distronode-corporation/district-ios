@@ -5,7 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions
 are the App Store version (`MARKETING_VERSION` in `project.yml`).
 
-## [1.2] - Unreleased
+The public history starts at 1.2. Versions 1.0 (2026-09-23) and 1.1 (2026-09-25) were
+built from history before publication, so they have no tags in this repository.
+
+## [Unreleased]
+
+## [1.2] - 2026-09-26
 
 ### Changed
 
@@ -42,3 +47,6 @@ are the App Store version (`MARKETING_VERSION` in `project.yml`).
 ## [1.0] - 2026-09-23
 
 The first release on the App Store.
+
+[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v1.2...HEAD
+[1.2]: https://github.com/distronode-corporation/district-ios/releases/tag/v1.2

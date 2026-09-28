@@ -1,13 +1,14 @@
 # No blank issues: everything goes through the structured bug report form, or one of
-# the links below. The tracker is for bugs in this app's source.
+# the links below. The tracker is for bugs in this app's source; account and service
+# questions go to District AI support (see .github/SUPPORT.md).
 blank_issues_enabled: false
 contact_links:
-  - name: 🔒 Security vulnerability
-    url: https://github.com/distronode-corporation/district-ios/security/advisories/new
-    about: Do not open a public issue. Report it privately here (see SECURITY.md).
-  - name: 🛟 Help with a District AI account, number, billing or the service
-    url: https://www.distronode.com/support
-    about: The service is not part of this repository. Account and service questions go to District AI support.
-  - name: 📖 README (building, testing and the repository layout)
+  - name: README
     url: https://github.com/distronode-corporation/district-ios#readme
-    about: Most build questions are answered here.
+    about: Requirements, building, testing and the repository layout.
+  - name: Questions and ideas
+    url: https://github.com/distronode-corporation/district-ios/discussions
+    about: Ask a question or suggest an idea in Discussions.
+  - name: Security report
+    url: https://github.com/distronode-corporation/district-ios/security/advisories/new
+    about: Please do not open a public issue for a vulnerability. Report it privately here (see SECURITY.md).

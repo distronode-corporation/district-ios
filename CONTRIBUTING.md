@@ -31,7 +31,8 @@ xcodegen generate --spec project.yml
 ```
 
 CI also greps DistrictCore for Darwin-only imports and checks `Package.resolved`; both
-are described below.
+are described below. It runs `gitleaks git .` (gitleaks 8.30.1) over the full history
+too, with `.gitleaks.toml`; run it locally if you have it.
 
 ## Rules CI enforces
 
@@ -95,12 +96,15 @@ layout differs, using test data only.
 Things CI cannot check (a real phone call, push delivery, a physical device) are fine to
 leave untested; say so in the pull request.
 
-## Reporting bugs
+## Reporting bugs and asking questions
 
-Use the bug report form. For anything security-relevant, do not open an issue; see
+Use the bug report form for a bug. Questions and ideas go to
+[Discussions](https://github.com/distronode-corporation/district-ios/discussions), not
+Issues. For anything security-relevant, do not open an issue; see
 [SECURITY.md](SECURITY.md).
 
-## Licence
+## Licence of contributions
 
 By contributing you agree that your contribution is licensed under the Apache License
-2.0, as section 5 of [the licence](LICENSE) describes.
+2.0, as section 5 of [the licence](LICENSE) provides. There is no CLA and no sign-off
+requirement.

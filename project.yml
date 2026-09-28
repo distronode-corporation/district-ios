@@ -43,7 +43,7 @@ options:
   # than this. CI installs a pinned, checksummed XcodeGen release and records
   # `xcodegen --version` in the job log; this floor catches a local install that
   # is too old.
-  minimumXcodeGenVersion: "2.42"
+  minimumXcodeGenVersion: "2.46"
   bundleIdPrefix: com.distronode
   createIntermediateGroups: true
   # ⚠️ MUST MATCH `platforms: [.iOS(.v17)]` IN Packages/DistrictCore/Package.swift.
@@ -454,7 +454,7 @@ targets:
   #     in the archive, so the compile gate and the release lane do not pay for it.
   #   - NEVER TAPS A DESTRUCTIVE SURFACE. `UITestApp.ForbiddenSurfaces` holds the
   #     list and the tap helper refuses them; the simulator and the test device are
-  #     signed into a live production workspace.
+  #     signed into a real workspace.
   DistrictAITests:
     type: bundle.unit-test
     platform: iOS
