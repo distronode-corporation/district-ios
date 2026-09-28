@@ -1,0 +1,385 @@
+#!/usr/bin/env python3
+"""App Store Connect steps of the release lane: wait for a build, and submit it for review.
+
+    ASC_KEY_ID=... ASC_ISSUER_ID=... ASC_KEY_PATH=/path/AuthKey_<id>.p8 \\
+      python3 scripts/asc_release.py wait-valid --version 1.2 --build 4104
+    ... python3 scripts/asc_release.py submit --version 1.2 --build 4104
+    python3 scripts/asc_release.py whats-new --version 1.2    # no credentials needed
+
+Used by .github/workflows/release.yml (wait-valid after the upload, submit when approved)
+and .github/workflows/submit.yml (submit). Standard library only: the ES256 signature is
+made by the `openssl` binary and every HTTP call goes through `curl`, so the script needs
+no pip install and no pinned dependency.
+
+The .p8 is read by openssl from its path and never by this process; the bearer token
+reaches curl on stdin (`-K -`), never on argv, which is world-readable through `ps`.
+
+`submit` is written to be re-run after a partial failure: every step reads the current
+state first and does only what is missing, and a version that is already waiting for or
+in review is reported and left alone rather than submitted twice.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+API = "https://api.appstoreconnect.apple.com/v1"
+BUNDLE_ID = "com.distronode.district"  # PRODUCT_BUNDLE_IDENTIFIER in project.yml
+PLATFORM = "IOS"
+WHATS_NEW_LIMIT = 4000  # App Store Connect's limit on the whatsNew field
+
+# appStoreVersion states in which the version is with Apple or already out: submitting
+# again is either refused or a double submission, so `submit` stops and says so.
+ALREADY_SUBMITTED = {
+    "WAITING_FOR_REVIEW",
+    "IN_REVIEW",
+    "PENDING_APPLE_RELEASE",
+    "PENDING_DEVELOPER_RELEASE",
+    "PROCESSING_FOR_APP_STORE",
+    "PROCESSING_FOR_DISTRIBUTION",
+    "READY_FOR_DISTRIBUTION",
+    "READY_FOR_SALE",
+    "ACCEPTED",
+}
+# reviewSubmission states that mean a submission is already with Apple.
+SUBMISSION_IN_FLIGHT = {"WAITING_FOR_REVIEW", "IN_REVIEW", "UNRESOLVED_ISSUES"}
+
+
+def die(msg: str) -> None:
+    print(f"FATAL - {msg}", file=sys.stderr)
+    sys.exit(1)
+
+
+# ── CHANGELOG ────────────────────────────────────────────────────────────────
+
+
+def whats_new(changelog: Path, version: str) -> str:
+    """The `## [version]` section of a Keep a Changelog file, as plain text.
+
+    Headings lose their `#`, a bullet wrapped over several lines becomes one line, and
+    the text is refused if it is empty or longer than App Store Connect accepts: a
+    submission with no release notes, or with notes cut off mid-sentence, is worse than
+    none at all.
+    """
+    lines = changelog.read_text(encoding="utf-8").splitlines()
+    heading = re.compile(r"^## \[" + re.escape(version) + r"\](\s|$)")
+    start = next((i for i, line in enumerate(lines) if heading.match(line)), None)
+    if start is None:
+        die(f"{changelog} has no '## [{version}]' section; add the release notes before submitting.")
+    body: list[str] = []
+    for line in lines[start + 1 :]:
+        if line.startswith("## ") or re.match(r"^\[[^\]]+\]: ", line):
+            break
+        body.append(line)
+
+    out: list[str] = []
+    for raw in body:
+        line = raw.rstrip()
+        if not line:
+            if out and out[-1] != "":
+                out.append("")
+            continue
+        if line.startswith("#"):
+            out.append(line.lstrip("#").strip())
+        elif line.startswith("- ") or not out or out[-1] == "":
+            out.append(line.strip())
+        else:
+            # A wrapped continuation of the previous line.
+            out[-1] = out[-1] + " " + line.strip()
+    text = "\n".join(out).strip()
+    if not text:
+        die(f"the '## [{version}]' section of {changelog} is empty; add the release notes before submitting.")
+    if len(text) > WHATS_NEW_LIMIT:
+        die(f"the release notes for {version} are {len(text)} characters; App Store Connect accepts {WHATS_NEW_LIMIT}.")
+    return text
+
+
+# ── Authentication ───────────────────────────────────────────────────────────
+
+
+def _b64url(data: bytes) -> str:
+    return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
+
+
+def _der_to_raw(der: bytes) -> bytes:
+    """An ECDSA DER signature (SEQUENCE { INTEGER r, INTEGER s }) as JOSE's r || s."""
+
+    def read_int(buf: bytes, pos: int) -> tuple[int, int]:
+        if buf[pos] != 0x02:
+            raise ValueError("not a DER INTEGER")
+        length = buf[pos + 1]
+        start = pos + 2
+        return int.from_bytes(buf[start : start + length], "big"), start + length
+
+    if der[0] != 0x30:
+        raise ValueError("not a DER SEQUENCE")
+    pos = 3 if der[1] & 0x80 else 2
+    r, pos = read_int(der, pos)
+    s, _ = read_int(der, pos)
+    return r.to_bytes(32, "big") + s.to_bytes(32, "big")
+
+
+class Client:
+    def __init__(self) -> None:
+        self.key_id = os.environ.get("ASC_KEY_ID", "")
+        self.issuer = os.environ.get("ASC_ISSUER_ID", "")
+        self.key_path = os.environ.get("ASC_KEY_PATH", "")
+        for name, value in (("ASC_KEY_ID", self.key_id), ("ASC_ISSUER_ID", self.issuer), ("ASC_KEY_PATH", self.key_path)):
+            if not value:
+                die(f"{name} is unset. ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_PATH are all required.")
+        if not Path(self.key_path).is_file():
+            die(f"no App Store Connect key at {self.key_path}.")
+        self._token = ""
+        self._minted = 0.0
+
+    def token(self) -> str:
+        # Apple accepts at most 20 minutes; a fresh one every 10 keeps a long wait valid.
+        if self._token and time.time() - self._minted < 600:
+            return self._token
+        now = int(time.time())
+        header = _b64url(json.dumps({"alg": "ES256", "kid": self.key_id, "typ": "JWT"}).encode())
+        claims = {"iss": self.issuer, "iat": now, "exp": now + 1200, "aud": "appstoreconnect-v1"}
+        payload = _b64url(json.dumps(claims).encode())
+        signing_input = f"{header}.{payload}".encode()
+        der = subprocess.run(
+            ["openssl", "dgst", "-sha256", "-sign", self.key_path],
+            input=signing_input,
+            capture_output=True,
+            check=True,
+        ).stdout
+        self._token = f"{header}.{payload}.{_b64url(_der_to_raw(der))}"
+        self._minted = time.time()
+        return self._token
+
+    def call(self, method: str, path: str, body: dict | None = None, ok=(200, 201, 204)) -> tuple[int, dict]:
+        url = path if path.startswith("https://") else API + path
+        config = f'header = "Authorization: Bearer {self.token()}"\n'
+        cmd = ["curl", "-sS", "-g", "-X", method, "-K", "-", "-w", "\n%{http_code}", "--max-time", "120"]
+        body_file = None
+        if body is not None:
+            body_file = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+            json.dump(body, body_file)
+            body_file.close()
+            cmd += ["-H", "Content-Type: application/json", "--data-binary", f"@{body_file.name}"]
+        cmd.append(url)
+        try:
+            result = subprocess.run(cmd, input=config.encode(), capture_output=True, check=False)
+        finally:
+            if body_file is not None:
+                os.unlink(body_file.name)
+        if result.returncode != 0:
+            die(f"{method} {path}: curl exited {result.returncode}: {result.stderr.decode(errors='replace').strip()}")
+        text, _, code_text = result.stdout.decode(errors="replace").rpartition("\n")
+        code = int(code_text)
+        data = json.loads(text) if text.strip() else {}
+        if code not in ok:
+            details = "; ".join(
+                f"{e.get('code')}: {e.get('detail') or e.get('title')}" for e in data.get("errors", [])
+            )
+            die(f"{method} {path} answered {code}: {details or text[:500]}")
+        return code, data
+
+    def get(self, path: str) -> dict:
+        return self.call("GET", path)[1]
+
+
+# ── Lookups ──────────────────────────────────────────────────────────────────
+
+
+def app_id(client: Client) -> str:
+    apps = client.get(f"/apps?filter[bundleId]={BUNDLE_ID}&fields[apps]=bundleId")["data"]
+    match = [a for a in apps if a["attributes"]["bundleId"] == BUNDLE_ID]
+    if len(match) != 1:
+        die(f"expected one App Store Connect app for {BUNDLE_ID}, found {len(match)}.")
+    return match[0]["id"]
+
+
+def find_build(client: Client, app: str, version: str, build: str) -> dict | None:
+    query = (
+        f"/builds?filter[app]={app}&filter[version]={build}"
+        f"&filter[preReleaseVersion.version]={version}&filter[preReleaseVersion.platform]={PLATFORM}"
+        "&fields[builds]=version,processingState,expired,uploadedDate"
+    )
+    data = client.get(query)["data"]
+    return data[0] if data else None
+
+
+def wait_valid(client: Client, app: str, version: str, build: str, timeout: int) -> dict:
+    """Polls until the build exists and is VALID. A build Apple marks INVALID or FAILED
+    fails at once; one that never appears fails at the timeout, naming both numbers."""
+    deadline = time.time() + timeout
+    last = None
+    while True:
+        found = find_build(client, app, version, build)
+        state = found["attributes"]["processingState"] if found else "not visible yet"
+        if state != last:
+            print(f"build {version} ({build}): {state}", flush=True)
+            last = state
+        if state == "VALID":
+            return found
+        if state in ("INVALID", "FAILED"):
+            die(f"App Store Connect marked build {version} ({build}) {state}; Apple emails the reason to the account holder.")
+        if time.time() > deadline:
+            die(f"build {version} ({build}) was not VALID after {timeout}s (last state: {state}).")
+        time.sleep(30)
+
+
+# ── Submission ───────────────────────────────────────────────────────────────
+
+
+def submit(client: Client, version: str, build: str, notes: str, timeout: int) -> None:
+    app = app_id(client)
+    built = wait_valid(client, app, version, build, timeout)
+
+    # 1. The version record: reuse the one for this version string, or create it.
+    versions = client.get(
+        f"/apps/{app}/appStoreVersions?filter[versionString]={version}&filter[platform]={PLATFORM}"
+        "&fields[appStoreVersions]=versionString,appStoreState,appVersionState"
+    )["data"]
+    if versions:
+        record = versions[0]
+        state = record["attributes"].get("appVersionState") or record["attributes"].get("appStoreState")
+        print(f"version {version}: record {record['id']} exists, state {state}")
+        if state in ALREADY_SUBMITTED:
+            print(f"version {version} is already {state}. Nothing was submitted.")
+            return
+    else:
+        _, created = client.call(
+            "POST",
+            "/appStoreVersions",
+            {
+                "data": {
+                    "type": "appStoreVersions",
+                    "attributes": {"platform": PLATFORM, "versionString": version},
+                    "relationships": {"app": {"data": {"type": "apps", "id": app}}},
+                }
+            },
+        )
+        record = created["data"]
+        print(f"version {version}: created record {record['id']}")
+    version_id = record["id"]
+
+    # 2. Release notes on every localization the record has.
+    localizations = client.get(f"/appStoreVersions/{version_id}/appStoreVersionLocalizations")["data"]
+    if not localizations:
+        die(f"version {version} has no localizations to carry the release notes.")
+    for loc in localizations:
+        if loc["attributes"].get("whatsNew") == notes:
+            print(f"whatsNew ({loc['attributes']['locale']}): already set")
+            continue
+        client.call(
+            "PATCH",
+            f"/appStoreVersionLocalizations/{loc['id']}",
+            {"data": {"type": "appStoreVersionLocalizations", "id": loc["id"], "attributes": {"whatsNew": notes}}},
+        )
+        print(f"whatsNew ({loc['attributes']['locale']}): set")
+
+    # 3. The build. A build attaches only to the record whose version string equals its
+    # CFBundleShortVersionString, which the lookup above already guarantees.
+    attached = client.get(f"/appStoreVersions/{version_id}/relationships/build").get("data")
+    if attached and attached["id"] == built["id"]:
+        print(f"build {build}: already attached")
+    else:
+        client.call(
+            "PATCH",
+            f"/appStoreVersions/{version_id}/relationships/build",
+            {"data": {"type": "builds", "id": built["id"]}},
+        )
+        print(f"build {build}: attached")
+
+    # 4. The review submission: refuse to add a second one while one is with Apple, reuse
+    # an open draft, otherwise create one.
+    submissions = client.get(
+        f"/reviewSubmissions?filter[app]={app}&filter[platform]={PLATFORM}"
+        "&filter[state]=READY_FOR_REVIEW,WAITING_FOR_REVIEW,IN_REVIEW,UNRESOLVED_ISSUES&fields[reviewSubmissions]=state"
+    )["data"]
+    for sub in submissions:
+        if sub["attributes"]["state"] in SUBMISSION_IN_FLIGHT:
+            print(f"review submission {sub['id']} is already {sub['attributes']['state']}. Nothing was submitted.")
+            return
+    draft = next((s for s in submissions if s["attributes"]["state"] == "READY_FOR_REVIEW"), None)
+    if draft is None:
+        _, created = client.call(
+            "POST",
+            "/reviewSubmissions",
+            {
+                "data": {
+                    "type": "reviewSubmissions",
+                    "attributes": {"platform": PLATFORM},
+                    "relationships": {"app": {"data": {"type": "apps", "id": app}}},
+                }
+            },
+        )
+        draft = created["data"]
+        print(f"review submission {draft['id']}: created")
+    else:
+        print(f"review submission {draft['id']}: reusing the open draft")
+
+    items = client.get(f"/reviewSubmissions/{draft['id']}/items?include=appStoreVersion")["data"]
+    has_version = any(
+        (i.get("relationships", {}).get("appStoreVersion", {}).get("data") or {}).get("id") == version_id for i in items
+    )
+    if has_version:
+        print(f"version {version}: already an item of the submission")
+    else:
+        client.call(
+            "POST",
+            "/reviewSubmissionItems",
+            {
+                "data": {
+                    "type": "reviewSubmissionItems",
+                    "relationships": {
+                        "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": draft["id"]}},
+                        "appStoreVersion": {"data": {"type": "appStoreVersions", "id": version_id}},
+                    },
+                }
+            },
+        )
+        print(f"version {version}: added to the submission")
+
+    _, done = client.call(
+        "PATCH",
+        f"/reviewSubmissions/{draft['id']}",
+        {"data": {"type": "reviewSubmissions", "id": draft["id"], "attributes": {"submitted": True}}},
+    )
+    print(f"SUBMITTED - {version} ({build}) for App Review; submission {draft['id']} is {done['data']['attributes'].get('state')}.")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest="command", required=True)
+    for name in ("wait-valid", "submit", "whats-new"):
+        p = sub.add_parser(name)
+        p.add_argument("--version", required=True, help="the marketing version, e.g. 1.2")
+        if name != "whats-new":
+            p.add_argument("--build", required=True, help="the build number (CFBundleVersion)")
+            p.add_argument("--timeout", type=int, default=3600, help="seconds to wait for VALID")
+        p.add_argument("--changelog", default=str(Path(__file__).resolve().parent.parent / "CHANGELOG.md"))
+    args = parser.parse_args()
+
+    if args.command == "whats-new":
+        print(whats_new(Path(args.changelog), args.version))
+        return
+    if not re.fullmatch(r"\d+(\.\d+){1,2}", args.version) or not args.build.isdigit():
+        die(f"version '{args.version}' or build '{args.build}' is malformed.")
+    client = Client()
+    if args.command == "wait-valid":
+        found = wait_valid(client, app_id(client), args.version, args.build, args.timeout)
+        print(f"VALID - build {args.version} ({args.build}), id {found['id']}")
+    else:
+        # The notes are read BEFORE anything is changed in App Store Connect, so a missing
+        # CHANGELOG section stops the run with nothing half done.
+        submit(client, args.version, args.build, whats_new(Path(args.changelog), args.version), args.timeout)
+
+
+if __name__ == "__main__":
+    main()

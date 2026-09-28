@@ -67,7 +67,7 @@ assert_nonzero() {
   if [ "$1" != "0" ]; then ok "$2"; else fail "$2 - expected a non-zero exit, got 0"; fi
 }
 
-for _name in ASC_KEY_ID ASC_ISSUER_ID \
+for _name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_PATH \
   ALLOW_DIRTY ALLOW_BRANCH BUILD_DIR BUILD_NUMBER_OFFSET UPLOAD \
   SENTRY_DSN SENTRY_AUTH_TOKEN SENTRY_ORG SENTRY_URL; do
   if [ -n "${!_name:-}" ]; then
@@ -378,6 +378,41 @@ assert_nonzero "$RC" "7b: an unset ASC_ISSUER_ID is fatal"
 assert_contains "$OUT" "ASC_ISSUER_ID is unset" "7b: the message names ASC_ISSUER_ID"
 assert_contains "$OUT" "Both ASC_KEY_ID and ASC_ISSUER_ID are required" "7b: it says both are needed"
 assert_not_contains "$(calls)" "xcodebuild" "7b: nothing is built"
+
+# ── 7c/7d. ASC_KEY_PATH ──────────────────────────────────────────────────────
+# ⛔ THE RELEASE WORKFLOW'S ROUTE. A CI runner writes the key under its own
+# temporary directory, not under ~/private_keys, so the override has to reach
+# BOTH xcodebuild calls, and a missing override file has to be refused by its own
+# path rather than silently falling back to the home-directory default.
+echo "7c. ASC_KEY_PATH moves the key, and both xcodebuild calls are handed it"
+new_case
+rm -f "$KEY_FILE"
+ALT_KEY="$STUB_DIR/runner-temp/AuthKey_$KEY_ID.p8"
+mkdir -p "$(dirname "$ALT_KEY")"
+{
+  echo "-----BEGIN PRIVATE KEY-----" # gitleaks:allow
+  echo "$FAKE_KEY_MARKER"
+  echo "-----END PRIVATE KEY-----"
+} >"$ALT_KEY"
+chmod 600 "$ALT_KEY"
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" ASC_KEY_PATH="$ALT_KEY" \
+  BUILD_DIR="$STUB_DIR/out"
+assert_zero "$RC" "7c: a key at ASC_KEY_PATH is accepted with none at the default path"
+assert_contains "$(line_for 'xcodebuild archive ')" "-authenticationKeyPath $ALT_KEY " \
+  "7c: the archive is handed the ASC_KEY_PATH key"
+assert_contains "$(line_for 'xcodebuild -exportArchive ')" "-authenticationKeyPath $ALT_KEY " \
+  "7c: the export is handed the ASC_KEY_PATH key"
+assert_not_contains "$OUT" "$FAKE_KEY_MARKER" "7c: the key contents never reach stdout or stderr"
+assert_not_contains "$(calls)" "$FAKE_KEY_MARKER" "7c: the key contents are never passed as an argument"
+
+echo "7d. a missing ASC_KEY_PATH is refused by its own path, with no fallback"
+new_case
+# The default-path key IS present here, so a fallback would pass; it must not.
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" \
+  ASC_KEY_PATH="$STUB_DIR/nowhere/AuthKey_$KEY_ID.p8" BUILD_DIR="$STUB_DIR/out"
+assert_nonzero "$RC" "7d: exits non-zero when ASC_KEY_PATH names no file"
+assert_contains "$OUT" "$STUB_DIR/nowhere/AuthKey_$KEY_ID.p8" "7d: the message names the override path"
+assert_not_contains "$(calls)" "xcodebuild" "7d: nothing is built"
 
 # ── 8. The archive command ───────────────────────────────────────────────────
 # ⛔ EXACT, NOT `contains`. Every flag here is load-bearing and a missing one

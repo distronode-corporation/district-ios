@@ -4,46 +4,53 @@
 #
 #   ASC_KEY_ID=<key id> ASC_ISSUER_ID=<issuer id> scripts/archive-imac.sh
 #
-# ── Why this is a script and not a CI job ────────────────────────────────────
-# ⛔ CI BUILDS NO RELEASE, BY DESIGN. The workflow reads no secret and uploads
-# nothing; a release is cut from a signing Mac with this script.
+# ── Where it runs ────────────────────────────────────────────────────────────
+# Releases are built by .github/workflows/release.yml, on a GitHub-hosted macOS
+# runner, which calls this script: a protected `v*` tag (or a dispatch on main
+# for a TestFlight-only build) is the only way in. The workflow borrows the App
+# Store Connect key and the Sentry settings from Distronode's Google Cloud for
+# the length of one run, writes the key to a mode-0600 file under the runner's
+# temporary directory and passes its path as ASC_KEY_PATH. The same script still
+# runs on a maintainer's Mac, which is how versions up to 1.2 were built.
 #
-# ⚠️ If the release ever moves into a macOS CI job, the flags below move with it
-# more or less verbatim; keeping them in a file rather than in somebody's shell
-# history is most of the point of this script.
+# ⚠️ The flags live here rather than in the workflow so that both routes build
+# the same thing, and so that scripts/archive-imac.test.sh can prove them.
 #
 # ── The App Store Connect key ────────────────────────────────────────────────
 # ⛔ THE .p8 NEVER ENTERS THE REPO, A COMMIT, A LOG, A CI VARIABLE OR CHAT. The
-# operator places it at the path below, and nothing here ever reads, prints,
-# rewrites or copies it, or passes its contents as an argument (argv is
-# world-readable through `ps`): xcodebuild is handed the PATH. If the key is
-# ever pasted somewhere, revoke it in App Store Connect and mint a new one; an
-# ASC .p8 downloads exactly ONCE.
+# operator (or the workflow) places it at the path below, and nothing here ever
+# reads, prints, rewrites or copies it, or passes its contents as an argument
+# (argv is world-readable through `ps`): xcodebuild is handed the PATH. If the
+# key is ever pasted somewhere, revoke it in App Store Connect and mint a new
+# one; an ASC .p8 downloads exactly ONCE.
 #
-# ⚠️ THE KEY PATH IS FIXED BY APPLE, NOT CHOSEN HERE. xcodebuild and altool look
-# up an API key by id as AuthKey_<KEY_ID>.p8 in a private_keys directory under
-# the home directory (and a couple of legacy siblings), so the filename carries
-# the key id and the directory is not a preference. -authenticationKeyPath below
-# states it explicitly anyway, because a path that is implied by a lookup rule is
-# a path nobody can debug.
+# ⚠️ THE DEFAULT PATH IS APPLE'S LOOKUP PATH. xcodebuild and altool look up an
+# API key by id as AuthKey_<KEY_ID>.p8 in a private_keys directory under the
+# home directory (and a couple of legacy siblings), which is where a Mac keeps
+# it. -authenticationKeyPath below states the path explicitly, so ASC_KEY_PATH
+# can put it anywhere else (a CI runner's temporary directory, which is wiped
+# with the job); a path that is only implied by a lookup rule is a path nobody
+# can debug.
 #
 # ── Environment ──────────────────────────────────────────────────────────────
 #   ASC_KEY_ID      ASC API key id      (required)
 #   ASC_ISSUER_ID   ASC API issuer id   (required)
-#                   and the key itself at ~/private_keys/AuthKey_<ASC_KEY_ID>.p8
-#                   (required, mode 0600; this script never writes or fetches it)
+#   ASC_KEY_PATH    the .p8 (default: ~/private_keys/AuthKey_<ASC_KEY_ID>.p8;
+#                   required to exist, mode 0600; this script never writes or
+#                   fetches it)
 #   BUILD_DIR       archive + export output (default: DerivedData/release)
 #   BUILD_NUMBER_OFFSET  added to the commit count (default: 4101; see below)
 #   UPLOAD=0        stop after the archive, upload nothing (signed scratch build)
 #   ALLOW_DIRTY=1   proceed with a dirty working tree
-#   ALLOW_BRANCH=1  proceed when HEAD is not on main
+#   ALLOW_BRANCH=1  proceed when HEAD is not on main (the workflow sets it for a
+#                   tag, whose commit it has already proved is on main)
 #   SENTRY_DSN      the app's DSN (optional; when unset the build carries an
 #                   EMPTY value, which DISABLES Sentry entirely — no SDK is
 #                   started, so nothing is reported, symbolicated or otherwise)
 #   SENTRY_AUTH_TOKEN  Sentry org token (optional); when set, dSYMs are uploaded after the archive
 #   SENTRY_ORG      Sentry org slug (EU region); REQUIRED when SENTRY_AUTH_TOKEN is set
 #
-# Every credential comes from the operator's environment and the key file. The
+# Every credential comes from the caller's environment and the key file. The
 # script reads no secret store and has no default for any of them.
 #
 # Proven by scripts/archive-imac.test.sh, which drives it against stub uname,
@@ -107,10 +114,11 @@ ASC_ISSUER_ID="${ASC_ISSUER_ID:-}"
 [ -n "$ASC_ISSUER_ID" ] ||
   die "ASC_ISSUER_ID is unset. Both ASC_KEY_ID and ASC_ISSUER_ID are required (App Store Connect, Users and Access, Integrations)."
 
-# ⛔ THE KEY FILE IS THE OPERATOR'S, AND AN EXISTING ONE IS NEVER REWRITTEN.
+# ⛔ THE KEY FILE IS THE CALLER'S, AND AN EXISTING ONE IS NEVER REWRITTEN.
 # The script only checks that it is there: fetching, decoding or copying it would
-# be a second place its contents could leak from.
-KEY_PATH="$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+# be a second place its contents could leak from. ASC_KEY_PATH moves it; the
+# default is Apple's own lookup path on a Mac.
+KEY_PATH="${ASC_KEY_PATH:-$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8}"
 [ -f "$KEY_PATH" ] ||
   die "no App Store Connect key at $KEY_PATH. Put the .p8 for key $ASC_KEY_ID there, mode 0600 (chmod 600); this script never writes or fetches it."
 echo "Using the App Store Connect key at $KEY_PATH. Its contents are never printed."

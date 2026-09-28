@@ -10,6 +10,14 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Changed
+
+- Releases are built, signed and uploaded by the repository's GitHub Actions release
+  workflow from a protected tag, instead of on a maintainer's machine. No signing key or
+  store credential is stored in the repository or in GitHub, and submission for App
+  Review runs only with the maintainers' explicit approval.
+- The version on `main` is now 1.3.
+
 ## [1.2] - 2026-09-26
 
 ### Changed
