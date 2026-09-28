@@ -230,10 +230,13 @@ jobs:
           go-version: "1.25"
           cache: false
 
+      # `--log-opts="HEAD"`: the history reachable from this checkout only. A full-depth
+      # checkout also fetches every other branch, and without it one open pull request's
+      # finding reds every other pull request's run. A push to main still scans all of main.
       - name: gitleaks git
         run: |
           go install github.com/zricethezav/gitleaks/v8@v8.30.1
-          "$(go env GOPATH)/bin/gitleaks" git --no-banner --redact -v .
+          "$(go env GOPATH)/bin/gitleaks" git --no-banner --redact -v --log-opts="HEAD" .
 
   app:
     name: app (${{ matrix.device }})
