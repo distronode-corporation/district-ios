@@ -3,7 +3,7 @@
   "canManage": true,
   "tenant": {
     "status": "provisioning",
-    "publicHost": "distronode-qa-test-did-book.distronode.com",
+    "publicHost": "book.example.com",
     "region": "us",
     "lastReadyAt": null,
     "lastError": null,
