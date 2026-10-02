@@ -8,8 +8,8 @@ import SwiftUI
 /// ⛔ THREE READS, AND TWO OF THEM CAN BE REFUSED FOR A REASON THAT IS NOT A FAULT. Notes
 /// and transcripts live behind recording storage, which is not enabled in every region;
 /// that refusal arrives as a **424** and means "this region does not store recordings",
-/// not "something broke". ``SchedulingBookingFormat/mediaUnavailableSentence(status:fallback:)``
-/// is what says so, and the generic sentence would send an operator hunting for an outage.
+/// not "something broke". ``SchedulingCopy/mediaUnavailable`` is what says so, and the
+/// generic sentence would send an operator hunting for an outage.
 ///
 /// ⚠️ THE 424 CANNOT BE SEEN FROM `SchedulingAdminError`, WHICH HAS NO STATUS. It arrives
 /// as ``SchedulingAdminFailureCode/unknown``, so the screen cannot distinguish it from a
@@ -281,10 +281,8 @@ struct SchedulingBookingDetailView: View {
 
 /// Notes blocks, rendered as text.
 ///
-/// ⛔ SHARED BY THE BOOKING DETAIL AND THE RECORDINGS SCREEN EVEN THOUGH THEY PARSE WITH
-/// DIFFERENT PARSERS. The block SHAPE is common and the rendering is the same; what
-/// differs is how the markdown became blocks, which is each screen's own decision. Sharing
-/// the renderer is safe precisely because it takes blocks rather than a string.
+/// ⛔ IT TAKES BLOCKS RATHER THAN A STRING, so the parse stays in DistrictCore and the
+/// sink stays `Text`; see the ⛔ on ``SchedulingNotesBlock``.
 struct SchedulingNotesBlocks: View {
     let blocks: [SchedulingNotesBlock]
 

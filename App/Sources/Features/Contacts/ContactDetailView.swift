@@ -213,7 +213,7 @@ private struct ContactDetailContentView: View {
         card("Budget", contact.budget)
         card("Timeline", contact.timeline)
         card("Website", contact.website)
-        card("Added", ContactDates.readable(contact.createdAt))
+        card("Added", WireDate.display(contact.createdAt))
     }
 
     /// ⚠️ Rendered only when the value is present AND not blank. `contacts/update`
@@ -433,41 +433,5 @@ private struct RenameContactSheet: View {
             Spacer(minLength: 0)
         }
         .padding(DistrictSpacing.gutter)
-    }
-}
-
-/// Formatting for the one date this screen shows.
-///
-/// ⛔ THE FORMATTER IS BUILT PER CALL RATHER THAN HELD IN A `static let`.
-/// `ISO8601DateFormatter` is a non-`Sendable` class, so a stored static is a
-/// concurrency error under Swift 6 language mode rather than a micro-optimisation
-/// worth having — and this runs once per contact screen.
-///
-/// ⚠️ TWO PARSES, BECAUSE THE WIRE CARRIES MILLISECONDS. Prisma serialises
-/// `createdAt` as `2026-08-19T09:41:00.000Z`, which the default
-/// `ISO8601DateFormatter` refuses; `.withFractionalSeconds` is required, and the
-/// plain form is kept as a fallback for a row written without them.
-///
-/// ⚠️ FALLS BACK TO THE RAW STRING RATHER THAN TO AN EMPTY CARD. An unparseable
-/// instant is still information; hiding it would look like a contact with no
-/// creation date.
-enum ContactDates {
-    static func readable(_ iso: String) -> String {
-        // ⚠️ WRITTEN OUT RATHER THAN LOOPED OVER AN ARRAY OF OPTION SETS.
-        // `ISO8601DateFormatter.Options` is an `OptionSet`, so it is itself
-        // `ExpressibleByArrayLiteral` — an array of them written as a nested
-        // literal is ambiguous to the type checker in exactly the way that
-        // produces an unreadable error.
-        let fractional = ISO8601DateFormatter()
-        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = fractional.date(from: iso) {
-            return date.formatted(date: .abbreviated, time: .shortened)
-        }
-        let plain = ISO8601DateFormatter()
-        plain.formatOptions = [.withInternetDateTime]
-        if let date = plain.date(from: iso) {
-            return date.formatted(date: .abbreviated, time: .shortened)
-        }
-        return iso
     }
 }

@@ -50,6 +50,10 @@ struct SchedulingBookingRescheduleSheet: View {
                 selection: Binding(get: { model.day }, set: { model.editDay($0) }),
                 displayedComponents: .date
             )
+            // ⛔ THE PICKER SHOWS ITS DAY IN THE PROFILE'S ZONE, THE ZONE `dayKey`
+            // READS IT IN. Left on the device zone, a device ahead of the profile
+            // would list the day before the one shown.
+            .environment(\.timeZone, model.displayTimeZone)
             .disabled(model.busy)
             .accessibilityIdentifier(A11yID.SchedulingWritesB.bookingRescheduleDay)
             // ⛔ THE RELOAD IS DRIVEN BY THE RESOLVED `dayKey`, NOT BY THE `Date`.

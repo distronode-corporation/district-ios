@@ -78,7 +78,7 @@ struct SupportThreadView: View {
                 .font(DistrictType.titleLarge)
                 .foregroundStyle(colors.foreground)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(SupportCopy.opened(ContactDates.readable(detail.createdAt)))
+            Text(SupportCopy.opened(WireDate.display(detail.createdAt)))
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
             HStack(spacing: DistrictSpacing.hairline) {
@@ -139,7 +139,7 @@ struct SupportThreadView: View {
                     .font(DistrictType.labelSmall)
                     .foregroundStyle(tone(for: message).ink(colors))
                 Spacer(minLength: 0)
-                Text(ContactDates.readable(message.createdAt))
+                Text(WireDate.display(message.createdAt))
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
                     .lineLimit(1)

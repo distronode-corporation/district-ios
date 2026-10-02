@@ -81,14 +81,14 @@ final class SchedulingBookingRescheduleModel {
         state.isWorking
     }
 
-    var availableSlots: [SchedulingSlot] {
-        guard case let .ready(rows) = slots else { return [] }
-        return rows
-    }
-
     /// ⚠️ The tz the picker and the labels must both use. A slot rendered in the
     /// device's zone against a list fetched in the profile's zone is two clocks on
     /// one sheet.
+    ///
+    /// ⛔ THE SHEET'S `DatePicker` IS GIVEN THIS ZONE TOO, because ``dayKey`` reads the
+    /// picked `Date` in it. A picker left on the device zone shows the device's day,
+    /// so a device ahead of the profile (Tokyo against Toronto) would fetch the day
+    /// before the one on screen.
     var displayTimeZone: TimeZone {
         TimeZone(identifier: timezone) ?? .current
     }
@@ -167,26 +167,7 @@ final class SchedulingBookingRescheduleModel {
     /// EMPTY LABEL. `start` is the value that gets sent back verbatim, so a tile an
     /// operator cannot read is still better than a tile they cannot tell apart.
     func label(for instant: String) -> String {
-        guard let date = Self.parse(instant) else { return instant }
-        let formatter = DateFormatter()
-        formatter.timeZone = displayTimeZone
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-
-    /// ⚠️ TWO FORMATTERS, BECAUSE RFC3339 FRACTIONAL SECONDS ARE OPTIONAL AND
-    /// `ISO8601DateFormatter` PARSES ONLY WHAT ITS OPTIONS SAY. A fork that starts
-    /// emitting milliseconds would otherwise silently stop producing labels.
-    static func parse(_ instant: String) -> Date? {
-        let plain = ISO8601DateFormatter()
-        plain.formatOptions = [.withInternetDateTime]
-        if let date = plain.date(from: instant) {
-            return date
-        }
-        let fractional = ISO8601DateFormatter()
-        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return fractional.date(from: instant)
+        WireDate.display(instant, in: displayTimeZone)
     }
 
     /// ⛔ `en_US_POSIX`, NOT THE DEVICE LOCALE. `yyyy-MM-dd` under a non-Gregorian

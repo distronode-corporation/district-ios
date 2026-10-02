@@ -58,7 +58,7 @@ final class SchedulingHoursModel {
     /// screen over it would hide a correct week because a caption could not be written.
     private func loadTimezone() async {
         guard let me = try? await repository.me(workspaceId: workspaceId) else { return }
-        timezone = me.timezone.isEmpty ? "UTC" : me.timezone
+        timezone = me.displayTimezone
     }
 
     private func loadRules() async {

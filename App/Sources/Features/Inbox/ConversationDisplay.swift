@@ -22,7 +22,7 @@ import Foundation
 /// little from the instant (see the ⛔ on ``MessageSearchDisplay``). So the row
 /// carries no time, which is also exactly what the Android Inbox row does. A time,
 /// if wanted, belongs on the server (a preformatted label beside the instant, the
-/// way the calls route does) or behind the shared ``ContactDates`` helper.
+/// way the calls route does) or behind the shared ``WireDate`` helper.
 struct ConversationDisplay {
     /// The contact's name when the thread resolved to one, the raw counterpart when
     /// it did not. ``ConversationSummary/displayName`` owns that rule.
@@ -189,7 +189,7 @@ private enum MessagePreview {
 /// workspace's whole history, so WHEN a match was said is half of what makes it
 /// identifiable. The objection recorded on ``ConversationDisplay`` was that the
 /// two Foundation entry points have a silent-nil trap around fractional seconds
-/// that Linux cannot exercise — ``ContactDates`` answers exactly that, with both
+/// that Linux cannot exercise — ``WireDate`` answers exactly that, with both
 /// parses and a raw-string fallback, and is reused here rather than copied.
 struct MessageSearchDisplay {
     /// The contact's name when the hit resolved to one, the raw counterpart when
@@ -221,7 +221,7 @@ extension MessageSearchDisplay {
             // operator scanning results is asking the same question there as here,
             // and a second vocabulary for it would have to be learned twice.
             body: "\(outbound ? "↑" : "↓") \(MessagePreview.line(hit.body))",
-            timestamp: ContactDates.readable(hit.createdAt)
+            timestamp: WireDate.display(hit.createdAt)
         )
     }
 

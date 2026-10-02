@@ -333,9 +333,9 @@ private struct MessageBubble: View {
             // timeline's `timestamp` is a raw ISO-8601 string on both its branches,
             // not a label rendered in the operator's timezone, so printing it verbatim
             // puts `2026-08-15T14:20:00.000Z` under every bubble.
-            // ``ContactDates/readable(_:)`` is reused rather than copied: it already pays
+            // ``WireDate/display(_:in:)`` is reused rather than copied: it already pays
             // for the fractional-seconds parse that silently returns nil without it.
-            Text(ContactDates.readable(event.timestamp))
+            Text(WireDate.display(event.timestamp))
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
             // ⚠️ STATUS ONLY ON OUTBOUND. An inbound message's status is a receipt
@@ -415,7 +415,7 @@ private struct CallEventRow: View {
                 }
             }
             // ⛔ THE SAME MACHINE INSTANT A MESSAGE BUBBLE CARRIES; see ``MessageBubble``.
-            Text(ContactDates.readable(event.timestamp))
+            Text(WireDate.display(event.timestamp))
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
             summary

@@ -114,11 +114,11 @@ final class SchedulingTeamModel {
 
     // MARK: - Writes
 
-    // ⛔ `users.archive` IS THE WRITE THIS SCREEN WANTS AND IT HAS FOUR REFUSALS THAT ARE
-    // NOT FAULTS. ``SchedulingTeamFormat/archiveRefusalSentence(status:fallback:)`` is
-    // already ported and already tested for them: 409 means the person still has upcoming
-    // bookings, 403 that only the owner may archive another administrator, 400 that the
-    // owner has to be transferred first, 404 that the account is already gone. ⚠️ The web
+    // ⛔ `users.archive` HAS FOUR REFUSALS THAT ARE NOT FAULTS: 409 means the person
+    // still has upcoming bookings, 403 that only the owner may archive another
+    // administrator, 400 that the owner has to be transferred first, 404 that the account
+    // is already gone. This client cannot tell them apart (see `SchedulingWritesBFailure`),
+    // so ``SchedulingTeamWriteCopy/archiveRefused`` names all four. ⚠️ The web
     // additionally DISABLES the control until `users.upcomingBookings` has answered zero,
     // which is a read this screen does not yet make.
     //

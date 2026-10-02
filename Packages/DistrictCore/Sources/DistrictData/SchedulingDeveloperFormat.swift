@@ -8,34 +8,12 @@ public enum SchedulingDeveloperFormat {
 
     public static let tabLabels = ["API keys", "Connected apps", "Webhooks"]
 
-    /// ⚠️ THE TEN TOOLS AN ASSISTANT GETS, IN THE WEB'S ORDER. Shown so an operator can
-    /// see what a key they are about to mint actually permits — the list is the closest
-    /// thing this integration has to a permission scope, and the copy beside it says so:
-    /// there are no partial permissions.
-    public static let mcpToolNames = [
-        "list_event_types",
-        "get_event_type",
-        "get_available_slots",
-        "get_booking",
-        "list_bookings",
-        "create_booking",
-        "reschedule_booking",
-        "cancel_booking",
-        "get_meeting_notes",
-        "get_transcript",
-    ]
-
     /// ⛔ THE LITERAL PLACEHOLDER, AND A REAL KEY MUST NEVER BE INTERPOLATED IN ITS
     /// PLACE. The configuration snippet is copyable and a copied snippet ends up in a
     /// file, a chat message and a screenshot; the web holds a minted key in a modal and
     /// drops it when the modal closes, precisely so it never reaches a document. See the
     /// ⛔ on ``SchedulingAdminRepository/createAPIKey(workspaceId:name:)``.
     public static let mcpKeyPlaceholder = "<your API key>"
-
-    /// ⚠️ THE SEVEN EVENTS A WEBHOOK CAN SUBSCRIBE TO, IN THE WEB'S ORDER. Typed as
-    /// ``SchedulingWebhookEvent`` on the way out and as `[String]` on the way back; see
-    /// the ⛔ on ``SchedulingAdminRepository/createWebhook(workspaceId:)``.
-    public static let webhookEvents = SchedulingWebhookEvent.allCases
 
     /// ⛔ THE FOUR FIELDS THAT CARRY THE BOOKER'S OWN DETAILS OUT OF THIS PLATFORM. They
     /// are off by default in the console for that reason, and a screen that lists a
@@ -53,12 +31,6 @@ public enum SchedulingDeveloperFormat {
 
     public static func isPersonalDataField(_ field: String) -> Bool {
         personalDataWebhookFields.contains(field)
-    }
-
-    /// Which tab a `?tab=` value names, falling back to the first.
-    public static func tabId(fromQuery value: String?) -> String {
-        guard let value, tabIds.contains(value) else { return tabIds[0] }
-        return value
     }
 
     /// `https://<host>/mcp`, or empty when the host is not known yet.
@@ -117,7 +89,7 @@ public enum SchedulingDeveloperFormat {
         absent: String = "—"
     ) -> String {
         guard let value, !value.isEmpty else { return absent }
-        guard let date = SchedulingClock.parse(value) else { return "Unknown Date" }
+        guard let date = WireInstant.parse(value) else { return "Unknown Date" }
         let parts = SchedulingClock.parts(of: date, timezone: timezone)
         guard let month = SchedulingClock.monthName(parts.month) else { return "Unknown Date" }
         let suffix = parts.hour < 12 ? "AM" : "PM"

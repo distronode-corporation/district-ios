@@ -155,28 +155,16 @@ final class SchedulingSettingsDeveloperFormatTests: XCTestCase {
         XCTAssertEqual(Developer.tabLabels, ["API keys", "Connected apps", "Webhooks"])
     }
 
-    func testAnUnknownTabFallsBackToTheFirst() {
-        XCTAssertEqual(Developer.tabId(fromQuery: "webhooks"), "webhooks")
-        XCTAssertEqual(Developer.tabId(fromQuery: "nope"), "keys")
-        XCTAssertEqual(Developer.tabId(fromQuery: nil), "keys")
-        XCTAssertEqual(Developer.tabId(fromQuery: ""), "keys")
-    }
-
-    func testTheTenToolNamesAreInTheWebsOrder() {
-        XCTAssertEqual(Developer.mcpToolNames.count, 10)
-        XCTAssertEqual(Developer.mcpToolNames.first, "list_event_types")
-        XCTAssertEqual(Developer.mcpToolNames.last, "get_transcript")
-    }
-
     /// ⛔ THE PLACEHOLDER IS LITERAL AND A REAL KEY MUST NEVER TAKE ITS PLACE. A copied
     /// snippet ends up in a file, a chat message and a screenshot.
     func testTheKeyPlaceholderIsLiteral() {
         XCTAssertEqual(Developer.mcpKeyPlaceholder, "<your API key>")
     }
 
+    /// ⚠️ THE EDITOR LISTS `allCases`, SO THE DECLARATION ORDER IS THE SCREEN'S ORDER.
     func testTheSevenWebhookEventsAreInTheWebsOrder() {
         XCTAssertEqual(
-            Developer.webhookEvents.map(\.rawValue),
+            SchedulingWebhookEvent.allCases.map(\.rawValue),
             [
                 "booking.created", "booking.cancelled", "booking.rescheduled", "booking.reminder",
                 "recording.completed", "transcript.ready", "notes.ready",

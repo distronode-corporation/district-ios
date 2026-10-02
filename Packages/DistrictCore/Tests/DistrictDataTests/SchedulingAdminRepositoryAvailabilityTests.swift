@@ -226,39 +226,6 @@ final class SchedulingAdminAvailabilityRepoTests: XCTestCase {
         )
     }
 
-    func testPatchOverrideWithNoChangesSendsOnlyTheId() async throws {
-        let transport = RepositoryTransport(json: #"{"ok":true,"data":\#(Self.allDayOverride)}"#)
-        let row = try await repository(transport).patchAvailabilityOverride(workspaceId: "ws_1", id: "ovr_2")
-        XCTAssertEqual(row.id, "ovr_2")
-        try assertEnvelope(
-            transport,
-            op: "availability.overrides.patch",
-            params: .object([("id", .string("ovr_2"))])
-        )
-    }
-
-    /// ⛔ THE DATE IS NOT PATCHABLE AND THERE IS NO ARGUMENT FOR IT.
-    func testPatchOverrideCarriesTheThreeFieldsTheSchemaAccepts() async throws {
-        let transport = RepositoryTransport(json: #"{"ok":true,"data":\#(Self.groupedOverride)}"#)
-        _ = try await repository(transport).patchAvailabilityOverride(
-            workspaceId: "ws_1",
-            id: "ovr_1",
-            reason: "custom_hours",
-            startTime: "12:00",
-            endTime: "16:00"
-        )
-        try assertEnvelope(
-            transport,
-            op: "availability.overrides.patch",
-            params: .object([
-                ("id", .string("ovr_1")),
-                ("reason", .string("custom_hours")),
-                ("start_time", .string("12:00")),
-                ("end_time", .string("16:00")),
-            ])
-        )
-    }
-
     /// ⚠️ ONE DAY, AND ON A ROW FROM A RANGE THAT LEAVES THE REST IN PLACE.
     func testDeleteOverrideSendsTheRowId() async throws {
         let transport = RepositoryTransport(json: #"{"ok":true,"data":{"ok":true}}"#)

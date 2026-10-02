@@ -128,17 +128,6 @@ public enum SchedulingBookingFormat {
         )
     }
 
-    /// Whether the operator has narrowed the list, which decides WHICH empty state shows.
-    ///
-    /// ⛔ `workspaceWide` IS DELIBERATELY NOT PART OF IT. Widening the scope is not
-    /// narrowing it, so an admin looking at every host's empty feed should be told "no
-    /// bookings yet" and offered the booking link, not "no bookings match these filters",
-    /// which would send them hunting for a filter they never set.
-    public static func hasNarrowingFilters(_ query: SchedulingBookingQuery) -> Bool {
-        !query.from.isEmpty || !query.to.isEmpty || !query.eventTypeSlug.isEmpty
-            || !query.host.isEmpty || !query.team.isEmpty
-    }
-
     /// Confirmed / Cancelled / Rescheduled, or the raw status.
     ///
     /// ⚠️ AN UNKNOWN STATUS IS ECHOED VERBATIM rather than shown as "Unknown". A status
@@ -164,38 +153,17 @@ public enum SchedulingBookingFormat {
     ///
     /// ⚠️ UNPADDED HOUR, PADDED MINUTE. See the ⛔ on ``SchedulingClock``.
     public static func bookingDateTime(startAt: String, timezone: String) -> String? {
-        guard let start = SchedulingClock.parse(startAt) else { return nil }
+        guard let start = WireInstant.parse(startAt) else { return nil }
         let at = SchedulingClock.parts(of: start, timezone: timezone)
         guard let month = SchedulingClock.monthName(at.month) else { return nil }
         return "\(month) \(at.day), \(at.year), \(SchedulingClock.clock(at))"
     }
 
-    /// `9:30` — the clock alone, for a list of slots on one known day.
-    public static func slotClock(startAt: String, timezone: String) -> String? {
-        guard let start = SchedulingClock.parse(startAt) else { return nil }
-        return SchedulingClock.clock(SchedulingClock.parts(of: start, timezone: timezone))
-    }
-
-    /// `30 min`, or nil when the pair is not a positive span.
-    ///
-    /// ⚠️ nil FOR A ZERO OR NEGATIVE DURATION rather than `0 min`. Both are corrupt rows
-    /// rather than instant meetings, and the caller omits the field instead of asserting
-    /// a length that cannot be true.
-    public static func bookingDuration(startAt: String, endAt: String) -> String? {
-        guard let start = SchedulingClock.parse(startAt),
-              let end = SchedulingClock.parse(endAt),
-              end > start
-        else { return nil }
-        let minutes = (end.timeIntervalSince(start) / 60).rounded()
-        return minutesLabel(Int(minutes))
-    }
-
     /// `30 min`, or `Not set`.
     ///
     /// ⚠️ THE PORT OF `minutesLabel` FROM `event-type-format.ts`, WHICH IS WHERE THE
-    /// EVENT-TYPES TABLE GETS ITS DURATION AND ITS INTERVAL COLUMNS TOO. It lives here
-    /// rather than in a ninth file because both callers are booking-shaped and it is one
-    /// function.
+    /// EVENT-TYPES TABLE GETS ITS DURATION AND ITS INTERVAL COLUMNS. It lives here rather
+    /// than in a ninth file because it is one function.
     public static func minutesLabel(_ minutes: Int?) -> String {
         guard let minutes else { return "Not set" }
         return "\(minutes) min"
@@ -220,15 +188,8 @@ public enum SchedulingBookingFormat {
     /// form.
     public static func isActionable(_ booking: SchedulingBooking, now: Date = Date()) -> Bool {
         guard booking.status == "confirmed" else { return false }
-        guard let end = SchedulingClock.parse(booking.endAt) else { return false }
+        guard let end = WireInstant.parse(booking.endAt) else { return false }
         return end > now
-    }
-
-    /// ⚠️ A 424 ON NOTES OR A TRANSCRIPT IS NOT A FAULT, IT IS AN UNCONFIGURED REGION.
-    /// The generic "that did not work" sentence would send somebody looking for an outage;
-    /// this one names the actual reason, which an operator can act on.
-    public static func mediaUnavailableSentence(status: Int, fallback: String) -> String {
-        status == 424 ? "Recording storage is not enabled for this region." : fallback
     }
 
     static func blankAsNil(_ value: String) -> String? {

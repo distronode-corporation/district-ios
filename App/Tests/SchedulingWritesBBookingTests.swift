@@ -113,7 +113,7 @@ final class SchedulingWritesBBookingTests: XCTestCase {
         ])
         let model = Self.rescheduleModel(transport)
         await model.loadSlots()
-        guard let slot = model.availableSlots.first else {
+        guard case let .ready(rows) = model.slots, let slot = rows.first else {
             return XCTFail("the fixture carries one slot")
         }
         model.select(slot)
@@ -136,14 +136,17 @@ final class SchedulingWritesBBookingTests: XCTestCase {
         ])
         let model = Self.rescheduleModel(transport)
         await model.loadSlots()
-        if let slot = model.availableSlots.first {
+        if case let .ready(rows) = model.slots, let slot = rows.first {
             model.select(slot)
         }
         await model.submit()
 
         XCTAssertEqual(Fixtures.failure(model.state), SchedulingWritesBFailure.slotTakenMessage)
         XCTAssertEqual(Fixtures.op(transport, 2), "eventTypes.slots")
-        XCTAssertTrue(model.availableSlots.isEmpty)
+        guard case let .ready(rows) = model.slots else {
+            return XCTFail("the re-read answers an empty day")
+        }
+        XCTAssertTrue(rows.isEmpty)
     }
 
     func testRescheduleWithNothingChosenSpendsNoRequest() async {
