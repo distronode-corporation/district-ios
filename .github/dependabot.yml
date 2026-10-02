@@ -3,14 +3,16 @@ version: 2
 # Every `uses:` in .github/workflows is pinned to a commit SHA with a `# vX.Y.Z`
 # comment. That is right for supply-chain safety and wrong for noticing a security fix,
 # because a pinned SHA never moves on its own; the `github-actions` entry turns each pin
-# into a pull request and rewrites both the SHA and the comment.
+# into a pull request and rewrites both the SHA and the comment. `/` covers the workflows
+# only, so the composite actions under .github/actions, which pin google-github-actions/auth,
+# are listed too.
 #
 # `cooldown` holds a version update back until the release is a week old, so a
 # compromised publish that is yanked within days never reaches a pull request here. It
 # does not delay security updates.
 updates:
   - package-ecosystem: github-actions
-    directory: /
+    directories: ["/", "/.github/actions/*"]
     schedule:
       interval: weekly
     cooldown:

@@ -55,12 +55,15 @@ final class SchedulingDeveloperModel {
     }
 
     /// ⚠️ THE CONTEXT LOADS ONCE FOR THE SCREEN and the tabs load on demand. The timezone
-    /// captions three of the four tables and the host builds the MCP address.
+    /// captions three of the four tables and the host builds the MCP address; the two
+    /// reads are independent and are sent together, before the tab that renders with them.
     func loadContext() async {
-        if let me = try? await repository.me(workspaceId: workspaceId) {
-            timezone = me.timezone.isEmpty ? "UTC" : me.timezone
+        async let profile = try? repository.me(workspaceId: workspaceId)
+        async let statusRead = scheduling.status(workspaceId: workspaceId)
+        if let me = await profile {
+            timezone = me.displayTimezone
         }
-        if case let .success(status) = await scheduling.status(workspaceId: workspaceId) {
+        if case let .success(status) = await statusRead {
             publicHost = status.tenant?.publicHost
         }
         await loadCurrentTab()
@@ -283,7 +286,7 @@ extension SchedulingDeveloperView {
                     }
                 }
                 if let failure = keyRevoke.failure {
-                    SchedulingWriteFailureLineC(failure: failure, onDismiss: keyRevoke.dismissFailure)
+                    SchedulingWriteFailureLine(failure: failure, onDismiss: keyRevoke.dismissFailure)
                 }
                 if canManage {
                     SchedulingAPIKeyCreateButton(
@@ -361,7 +364,7 @@ extension SchedulingDeveloperView {
                     }
                 }
                 if let failure = appRevoke.failure {
-                    SchedulingWriteFailureLineC(failure: failure, onDismiss: appRevoke.dismissFailure)
+                    SchedulingWriteFailureLine(failure: failure, onDismiss: appRevoke.dismissFailure)
                 }
             }
         }
@@ -404,7 +407,7 @@ extension SchedulingDeveloperView {
                     }
                 }
                 if let failure = webhookDelete.failure {
-                    SchedulingWriteFailureLineC(
+                    SchedulingWriteFailureLine(
                         failure: failure,
                         onDismiss: webhookDelete.dismissFailure
                     )

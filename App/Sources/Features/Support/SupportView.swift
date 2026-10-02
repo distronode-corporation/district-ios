@@ -95,7 +95,7 @@ struct SupportView: View {
     // MARK: - Composing
 
     private var composeCard: some View {
-        SupportCard(eyebrow: SupportCopy.composeTitle) {
+        DistrictCard(eyebrow: SupportCopy.composeTitle) {
             kindPicker
             SettingsField(
                 label: SupportCopy.composeSubject,
@@ -178,7 +178,7 @@ struct SupportView: View {
     /// workspace; this is a statement about us. Rendering the former here would tell a
     /// customer with open tickets that they have none.
     private func listFailure(_ failure: FailureText) -> some View {
-        SupportCard {
+        DistrictCard {
             Text(SupportCopy.listFailedTitle)
                 .font(DistrictType.titleSmall)
                 .foregroundStyle(colors.foreground)
@@ -257,7 +257,7 @@ struct SupportView: View {
     /// same information the badge carries and is worth repeating here: the row is
     /// otherwise identical to a filed one.
     private func subtitle(for request: SupportRequestSummary) -> String {
-        let when = ContactDates.readable(request.createdAt)
+        let when = WireDate.display(request.createdAt)
         guard let key = request.issueKey else { return "\(SupportCopy.unfiledStatus) · \(when)" }
         return "\(key) · \(when)"
     }

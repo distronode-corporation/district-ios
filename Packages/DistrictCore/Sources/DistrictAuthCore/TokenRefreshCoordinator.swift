@@ -54,6 +54,7 @@ public actor TokenRefreshCoordinator {
 
     private let store: any TokenStore
     private let refreshClient: any RefreshClient
+    private let outbox: RevokeOutbox
     private let now: @Sendable () -> Int64
 
     /// The access token, in memory ONLY, deliberately never persisted (see
@@ -73,20 +74,30 @@ public actor TokenRefreshCoordinator {
     /// value instead of starting their own.
     private var inFlight: Task<AccessTokenOutcome, Never>?
 
+    /// Which session a refresh was started for. ``forget()`` bumps it.
+    ///
+    /// ⛔ A REFRESH ON THE WIRE WHEN THE USER SIGNS OUT STILL COMES BACK WITH A
+    /// LIVE SUCCESSOR. Without this fence it was written to the store and its
+    /// access token cached after the sign-out, so the next cold start signed the
+    /// previous user back in with a refresh token nothing would ever revoke. A
+    /// refresh whose generation changed across the network call touches neither
+    /// the store nor the cache, and hands any successor to ``outbox``.
+    private var generation = 0
+
+    /// - Parameter revokeClient: where a successor that lands after ``forget()``
+    ///   is revoked. ⚠️ Nil sends nothing and leaves the token in the
+    ///   store's revoke outbox for ``SignOutCoordinator/drainPendingRevoke()``;
+    ///   the app passes its real client so the token dies straight away.
     public init(
         store: any TokenStore,
         refreshClient: any RefreshClient,
+        revokeClient: (any RevokeClient)? = nil,
         now: @escaping @Sendable () -> Int64 = { Int64(Date().timeIntervalSince1970 * 1000) }
     ) {
         self.store = store
         self.refreshClient = refreshClient
+        outbox = RevokeOutbox(store: store, client: revokeClient ?? OutboxOnlyRevokeClient())
         self.now = now
-    }
-
-    /// True while a rotated pair exists only in memory. Diagnostic; see
-    /// ``unpersistedSession``.
-    public var hasUnpersistedSession: Bool {
-        unpersistedSession != nil
     }
 
     /// A valid access token, refreshing if necessary.
@@ -109,13 +120,18 @@ public actor TokenRefreshCoordinator {
             return await existing.value
         }
 
+        let started = generation
         let task = Task<AccessTokenOutcome, Never> { [self] in
-            let outcome = await acquire()
+            let outcome = await acquire(generation: started)
             // Cleared HERE, inside the task, so it is already nil by the time any
             // awaiting caller resumes. Clearing it after `await task.value` in
             // each caller instead would leave a completed task installed for a
-            // later arrival to latch onto.
-            inFlight = nil
+            // later arrival to latch onto. ⛔ ONLY IF IT IS STILL THIS TASK'S
+            // GATE: after ``forget()`` the slot may hold the next session's
+            // refresh, and releasing that one would let two run at once.
+            if generation == started {
+                inFlight = nil
+            }
             return outcome
         }
         inFlight = task
@@ -160,7 +176,14 @@ public actor TokenRefreshCoordinator {
     /// ⛔ THE IN-MEMORY CREDENTIALS GO FIRST, BEFORE THE SUSPENDING DISK WIPE.
     /// Doing the disk work first would leave a window in which this actor still
     /// hands a live access token to a request racing the sign-out.
+    ///
+    /// ⛔ AND A REFRESH IN FLIGHT IS FENCED OFF, NOT AWAITED. Bumping
+    /// ``generation`` makes its answer land nowhere (see the ⛔ there), and
+    /// dropping ``inFlight`` stops a caller after the sign-out from latching
+    /// onto the old session's outcome.
     public func forget() async {
+        generation += 1
+        inFlight = nil
         cachedAccessToken = nil
         cachedAccessTokenExpiresAt = 0
         unpersistedSession = nil
@@ -174,11 +197,11 @@ public actor TokenRefreshCoordinator {
         return now() + Self.earlyRefreshMarginMilliseconds >= cachedAccessTokenExpiresAt ? nil : token
     }
 
-    private func acquire() async -> AccessTokenOutcome {
+    private func acquire(generation started: Int) async -> AccessTokenOutcome {
         // ⛔ THE RESCUED SESSION WINS OVER THE DISK. See `unpersistedSession`.
         if let rescued = unpersistedSession {
             await repersistRescuedSession(rescued)
-            return await performRefresh(rescued)
+            return await performRefresh(rescued, generation: started)
         }
 
         let stored: PersistedSession?
@@ -226,7 +249,7 @@ public actor TokenRefreshCoordinator {
             return .available(token)
         }
 
-        return await performRefresh(current)
+        return await performRefresh(current, generation: started)
     }
 
     /// Try again to write a successor an earlier rotation could not persist.
@@ -244,7 +267,7 @@ public actor TokenRefreshCoordinator {
         }
     }
 
-    private func performRefresh(_ current: PersistedSession) async -> AccessTokenOutcome {
+    private func performRefresh(_ current: PersistedSession, generation started: Int) async -> AccessTokenOutcome {
         // ⛔ MARKER BEFORE NETWORK, AND A FAILED MARKER ABORTS RATHER THAN FALLS
         // THROUGH. A refresh sent without a durable marker is precisely the
         // crash window the marker exists to close: the successor would be
@@ -257,7 +280,19 @@ public actor TokenRefreshCoordinator {
             return .retryLater(.markerNotDurable)
         }
 
-        switch await refreshClient.refresh(refreshToken: current.refreshToken) {
+        let result = await refreshClient.refresh(refreshToken: current.refreshToken)
+
+        // ⛔ SIGNED OUT WHILE THE REQUEST WAS ON THE WIRE. See ``generation``. No
+        // branch below may run: a success would resurrect the session, and a
+        // rejection's `clear()` could wipe a login that has since replaced it.
+        guard generation == started else {
+            if case let .success(tokens) = result {
+                await outbox.revoke(tokens.refreshToken)
+            }
+            return .reauthRequired(.noSession)
+        }
+
+        switch result {
         case let .success(tokens):
             return await adoptRotated(tokens, deviceId: current.deviceId)
 

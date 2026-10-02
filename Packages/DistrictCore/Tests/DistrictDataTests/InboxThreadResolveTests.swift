@@ -24,8 +24,8 @@ final class InboxThreadResolveTests: XCTestCase {
     /// ⛔ THE SELECTOR PREFERS THE CONTACT ID, AND THE FALLBACK IS THE COUNTERPART
     /// RATHER THAN THE THREAD KEY. `addr:<normalized>` sent whole as the address
     /// parameter matches nothing, so a `mark-read` built from it succeeds against
-    /// ZERO rows and the badge never clears — the same trap
-    /// ``ThreadSelector/forConversation(_:)`` documents from the list's side.
+    /// ZERO rows and the badge never clears — the same trap the App's
+    /// `ThreadTarget` documents from the list's side.
     func testAContactKeyedThreadResolvesToTheContactSelector() async {
         let transport = RepositoryTransport(json: Self.contactKeyed)
 
@@ -95,8 +95,9 @@ final class InboxThreadResolveTests: XCTestCase {
         let second = await InboxRepository(client: .repositoryTest(read))
             .messageThread(workspaceId: "ws_1", messageId: "msg_1")
 
-        XCTAssertEqual(first.successOnly?.isRead, false, "an explicit null readAt is unread")
-        XCTAssertEqual(second.successOnly?.isRead, true)
+        XCTAssertNotNil(first.successOnly, "an explicit null readAt decodes")
+        XCTAssertNil(first.successOnly?.response.message.readAt, "an explicit null readAt is unread")
+        XCTAssertNotNil(second.successOnly?.response.message.readAt)
     }
 
     /// ⚠️ `message.type` IS NULLABLE AND THE CHANNEL DOES NOT COME FROM IT. The column

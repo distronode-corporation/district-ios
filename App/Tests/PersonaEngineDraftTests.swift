@@ -117,7 +117,7 @@ final class PersonaEngineDraftTests: XCTestCase {
         let draft = try Self.draft(persona: "{}")
         XCTAssertEqual(draft.engines.count, 3)
         XCTAssertEqual(
-            draft.options.selectableEngines.map(\.id),
+            draft.options.engines.filter(\.inRegion).map(\.id),
             ["gemini-live-2.5-flash-native-audio", "deepgram-pipeline"]
         )
     }

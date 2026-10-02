@@ -230,23 +230,6 @@ final class SchedulingTeamFormatTests: XCTestCase {
         XCTAssertEqual(Team.strandedNotice([]), "")
     }
 
-    // MARK: - needsBookingResolution
-
-    func testResolutionIsNeededForSomebodyGoneOrArchived() throws {
-        let rows = try rows()
-        let ada = try XCTUnwrap(rows.first { $0.name == "Ada" })
-        XCTAssertFalse(Team.needsBookingResolution(ada))
-
-        let bob = try XCTUnwrap(rows.first { $0.name == "Bob" })
-        XCTAssertTrue(Team.needsBookingResolution(bob))
-    }
-
-    /// ⚠️ SOMEBODY WITH NO SCHEDULER ACCOUNT HAS NOTHING TO RESOLVE.
-    func testAnAbsentAccountNeedsNoResolution() {
-        let rows = Team.joinMembers(district: [member("ada@example.com", role: nil)], scheduler: [])
-        XCTAssertFalse(Team.needsBookingResolution(rows[0]))
-    }
-
     // MARK: - teamMemberCount
 
     /// ⚠️ A SERVER-REPORTED ZERO IS HONOURED rather than falling through to the inlined
@@ -266,20 +249,5 @@ final class SchedulingTeamFormatTests: XCTestCase {
 
         let bare = try SchedulingFixture.team()
         XCTAssertEqual(Team.teamMemberCount(bare), 0)
-    }
-
-    // MARK: - archiveRefusalSentence
-
-    /// ⚠️ CHOSEN FROM THE HTTP STATUS RATHER THAN FROM ANY TEXT THE FORK SENDS, because
-    /// the fork's own wording never travels.
-    func testEachRefusalStatusGetsItsOwnSentence() {
-        XCTAssertTrue(Team.archiveRefusalSentence(status: 409, fallback: "x").hasPrefix("They still have"))
-        XCTAssertTrue(Team.archiveRefusalSentence(status: 403, fallback: "x").hasPrefix("You cannot archive"))
-        XCTAssertTrue(Team.archiveRefusalSentence(status: 400, fallback: "x").hasPrefix("That account cannot"))
-        XCTAssertEqual(
-            Team.archiveRefusalSentence(status: 404, fallback: "x"),
-            "The booking system no longer has that account."
-        )
-        XCTAssertEqual(Team.archiveRefusalSentence(status: 500, fallback: "x"), "x")
     }
 }

@@ -20,7 +20,7 @@ import Observation
 @MainActor
 @Observable
 final class SchedulingNotificationsModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
     private(set) var confirmation: Bool
     private(set) var cancellation: Bool
     private(set) var reschedule: Bool
@@ -110,7 +110,7 @@ final class SchedulingNotificationsModel {
             state = .done(SchedulingSettingsWriteCopy.notificationsDone)
             onSaved(fresh)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 

@@ -31,6 +31,19 @@ final class SchedulingRecordingsModel {
     /// would be a request per row for evidence almost nobody opens; the web does the same.
     private(set) var consents: [String: SchedulingSectionState<[SchedulingRecordingConsent]>] = [:]
 
+    /// The recordings whose playable URL is being minted right now.
+    ///
+    /// ⚠️ PER ID, SO A SECOND PRESS ON THE SAME ROW IS DROPPED rather than minting a
+    /// second presigned URL and stacking a second player, while another row stays
+    /// pressable.
+    private(set) var minting: Set<String> = []
+
+    /// Why the last Play on a row did nothing, keyed by recording id.
+    ///
+    /// ⛔ A FAILED MINT IS SAID ON THE ROW. Storage switched off or a dropped connection
+    /// used to leave the button doing nothing at all, which reads as a broken app.
+    private(set) var playFailures: [String: FailureText] = [:]
+
     private let repository: SchedulingAdminRepository
     private let media: SchedulingAdminMediaRepository
     private let workspaceId: String
@@ -60,17 +73,24 @@ final class SchedulingRecordingsModel {
         )
     }
 
+    /// ⚠️ THE THREE READS ARE INDEPENDENT, SO THEY ARE SENT TOGETHER, and applied in
+    /// this order so the list never draws before the zone and the storage notice it is
+    /// rendered with.
     func load() async {
         state = .loading
         consents = [:]
-        if let me = try? await repository.me(workspaceId: workspaceId) {
-            timezone = me.timezone.isEmpty ? "UTC" : me.timezone
-        }
+        playFailures = [:]
+        async let profile = try? repository.me(workspaceId: workspaceId)
         // ⚠️ THE STORAGE READ IS OPTIONAL. It only decides whether the "no storage" notice
         // is drawn; failing the screen over it would hide recordings that already exist.
-        storage = try? await repository.storageSettings(workspaceId: workspaceId)
+        async let storageAnswer = try? repository.storageSettings(workspaceId: workspaceId)
+        async let listed = repository.recordings(workspaceId: workspaceId)
+        if let me = await profile {
+            timezone = me.displayTimezone
+        }
+        storage = await storageAnswer
         do {
-            state = try await .ready(repository.recordings(workspaceId: workspaceId))
+            state = try await .ready(listed)
         } catch {
             state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
@@ -94,12 +114,38 @@ final class SchedulingRecordingsModel {
     /// lifetime of its own; keeping it on the model would leave a live capability in
     /// memory long after the sheet closed and would make a second press cheap to serve
     /// from a value that may already have expired. Same rule as the hub's hand-off.
+    ///
+    /// ⚠️ nil MEANS "nothing to play": either a press is already minting this id, or the
+    /// mint failed and the reason is in ``playFailures``.
     func downloadURL(for recordingId: String) async -> URL? {
-        guard let raw = try? await media.recordingDownloadURL(
-            workspaceId: workspaceId,
-            recordingId: recordingId
-        ) else { return nil }
-        return URL(string: raw)
+        guard !minting.contains(recordingId) else { return nil }
+        minting.insert(recordingId)
+        defer { minting.remove(recordingId) }
+        playFailures[recordingId] = nil
+        do {
+            let raw = try await media.recordingDownloadURL(
+                workspaceId: workspaceId,
+                recordingId: recordingId
+            )
+            if let url = URL(string: raw) {
+                return url
+            }
+            playFailures[recordingId] = FailureText(message: SchedulingCopy.recordingPlayFailed, action: .none)
+        } catch {
+            playFailures[recordingId] = Self.playFailure(error)
+        }
+        return nil
+    }
+
+    /// The shared scheduling mapping, except where it would say "That did not save".
+    ///
+    /// ⚠️ PLAY IS A READ, SO THE CATCH-ALL SENTENCE IS THE PLAYBACK ONE. Every specific
+    /// refusal (offline, unavailable, forbidden, not ready) keeps its shared sentence and
+    /// offer; only the `unknown` wording, which describes a write, is replaced.
+    static func playFailure(_ error: any Error) -> FailureText {
+        let text = SchedulingFailureCopy.text(forAny: error)
+        guard text.message == SchedulingFailureCopy.unknown else { return text }
+        return FailureText(message: SchedulingCopy.recordingPlayFailed, action: text.action)
     }
 
     /// ⛔ STORAGE OFF IS A PRODUCT STATE, NOT A FAULT, and it changes what the screen can
@@ -265,6 +311,11 @@ struct SchedulingRecordingsView: View {
                         value: row.state.label
                     )
                     actions(row)
+                    if let failure = model.playFailures[row.id] {
+                        Text(failure.message)
+                            .font(DistrictType.bodySmall)
+                            .foregroundStyle(colors.destructive)
+                    }
                     consent(row)
                 }
             }
@@ -277,6 +328,7 @@ struct SchedulingRecordingsView: View {
             if row.canDownload {
                 Button(SchedulingCopy.recordingPlay) { play(row.id) }
                     .buttonStyle(.districtSecondary)
+                    .disabled(model.minting.contains(row.id))
                     .accessibilityIdentifier(A11yID.Scheduling.recordingDownload(row.id))
             }
             Button(SchedulingCopy.recordingConsent) { openConsent(row.id) }

@@ -2,12 +2,10 @@ import DistrictData
 import Foundation
 import XCTest
 
-/// The two notes parsers, and the four ways they differ.
+/// The booking notes parser.
 ///
-/// ⛔ THE DIFFERENCES ARE ASSERTED SIDE BY SIDE, WHICH IS THE POINT OF THIS FILE. Two
-/// functions that both turn markdown into blocks are exactly the shape somebody unifies,
-/// and unifying them would change what one of the two screens renders — silently, and only
-/// for a document that happened to use the feature.
+/// ⚠️ THE WEB'S RECORDINGS PARSER IS NOT PORTED (no screen here uses it); see the ⚠️ on
+/// ``SchedulingMarkdown``. The booking-side halves of the old side-by-side assertions stay.
 final class SchedulingMarkdownTests: XCTestCase {
     private typealias Markdown = SchedulingMarkdown
 
@@ -131,69 +129,26 @@ final class SchedulingMarkdownTests: XCTestCase {
         )
     }
 
-    // MARK: - Recording notes
+    // MARK: - Markers and flush order
 
-    /// ⛔ NO INLINE STRIPPING AT ALL — the asterisks reach the screen. This is the
-    /// source's behaviour and the single sharpest difference between the two parsers.
-    func testTheRecordingParserKeepsInlineMarkupVerbatim() {
-        XCTAssertEqual(
-            Markdown.recordingBlocks("**bold** stays"),
-            [.paragraph("**bold** stays")]
-        )
-    }
-
-    /// ⛔ ORDERED AND UNORDERED ARE NOT DISTINGUISHED: both fold into one list, always
-    /// `ordered: false`.
-    func testTheRecordingParserFoldsBothListKindsIntoOne() {
-        XCTAssertEqual(
-            Markdown.recordingBlocks("- A\n1. B"),
-            [.list(items: ["A", "B"], ordered: false)]
-        )
-    }
-
-    /// ⚠️ `•` IS A MARKER HERE AND NOT IN THE BOOKING PARSER.
-    func testABulletCharacterIsAMarkerOnlyForRecordings() {
-        XCTAssertEqual(
-            Markdown.recordingBlocks("• Item"),
-            [.list(items: ["Item"], ordered: false)]
-        )
+    /// ⚠️ `•` IS NOT A BOOKING MARKER (the web's recordings parser treats it as one).
+    func testABulletCharacterIsNotABookingMarker() {
         XCTAssertEqual(Markdown.bookingBlocks("• Item"), [.paragraph("• Item")])
     }
 
-    /// ⚠️ A BARE MARKER IS TOLERATED: it flushes and adds nothing, because the text group
-    /// is optional.
-    func testABareMarkerIsConsumedWithoutAddingAnything() {
-        XCTAssertTrue(Markdown.recordingBlocks("#").isEmpty)
-        XCTAssertTrue(Markdown.recordingBlocks("-").isEmpty)
-    }
-
-    func testTheRecordingParserReadsAHeadingAndAList() {
+    /// ⚠️ THE FLUSH ORDER IS **NOT** OBSERVABLE: a list item flushes the pending paragraph
+    /// and a paragraph line flushes the pending list, so at most one of the two is ever
+    /// waiting and the order they drain in cannot show.
+    func testAListThenTrailingTextKeepsLineOrder() {
         XCTAssertEqual(
-            Markdown.recordingBlocks("# Notes\n\n- One\n- Two"),
-            [.heading("Notes"), .list(items: ["One", "Two"], ordered: false)]
+            Markdown.bookingBlocks("- Item\nTrailing text\n"),
+            [.list(items: ["Item"], ordered: false), .paragraph("Trailing text")]
         )
     }
 
-    /// ⚠️ THE FLUSH ORDER DIFFERS IN THE SOURCE AND IS **NOT** OBSERVABLE, AND THIS TEST
-    /// WAS WRITTEN TO PROVE THE OPPOSITE BEFORE THE SOURCES WERE TRACED. In each parser a
-    /// list item flushes the pending paragraph and a paragraph line flushes the pending
-    /// list, so at most one of the two is ever waiting and the order they drain in cannot
-    /// show. Kept, asserting the agreement, because "these two produce the same sequence"
-    /// is the fact — and because the ⛔ on ``SchedulingMarkdown`` explains why the port
-    /// still keeps the orders apart.
-    func testTheDifferingFlushOrdersProduceTheSameSequence() {
-        let source = "- Item\nTrailing text\n"
-        let expected: [SchedulingNotesBlock] = [
-            .list(items: ["Item"], ordered: false),
-            .paragraph("Trailing text"),
-        ]
-        XCTAssertEqual(Markdown.bookingBlocks(source), expected)
-        XCTAssertEqual(Markdown.recordingBlocks(source), expected)
-    }
-
     /// ⚠️ THE INVARIANT THAT MAKES THE ORDER INERT, ASSERTED DIRECTLY: a paragraph and a
-    /// list never reach a flush point together, so whichever drains first, the blocks
-    /// alternate in the order the lines arrived.
+    /// list never reach a flush point together, so the blocks alternate in the order the
+    /// lines arrived.
     func testAParagraphAndAListNeverWaitTogether() {
         XCTAssertEqual(
             Markdown.bookingBlocks("Intro line\n- Item\nOutro line"),
@@ -203,31 +158,10 @@ final class SchedulingMarkdownTests: XCTestCase {
                 .paragraph("Outro line"),
             ]
         )
-        XCTAssertEqual(
-            Markdown.recordingBlocks("Intro line\n- Item\nOutro line"),
-            [
-                .paragraph("Intro line"),
-                .list(items: ["Item"], ordered: false),
-                .paragraph("Outro line"),
-            ]
-        )
     }
 
-    func testRecordingInputThatIsOnlyWhitespaceIsEmpty() {
-        XCTAssertTrue(Markdown.recordingBlocks("").isEmpty)
-        XCTAssertTrue(Markdown.recordingBlocks("  \n \n").isEmpty)
-    }
-
-    /// ⚠️ LINES ARE TRIMMED BEFORE MATCHING HERE, so an indented bullet is still a bullet.
-    func testAnIndentedBulletIsStillABulletForRecordings() {
-        XCTAssertEqual(
-            Markdown.recordingBlocks("    - Item"),
-            [.list(items: ["Item"], ordered: false)]
-        )
-    }
-
-    /// ⚠️ THE BOOKING PATTERNS CARRY THEIR OWN LEADING `\s*`, so an indented bullet works
-    /// there too — by a different mechanism, which is why both are asserted.
+    /// ⚠️ THE BOOKING PATTERNS CARRY THEIR OWN LEADING `\s*`, so an indented bullet is
+    /// still a bullet.
     func testAnIndentedBulletIsStillABulletForBookings() {
         XCTAssertEqual(
             Markdown.bookingBlocks("    - Item"),

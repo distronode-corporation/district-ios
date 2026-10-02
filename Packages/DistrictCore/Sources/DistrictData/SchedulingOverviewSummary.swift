@@ -135,7 +135,7 @@ public enum SchedulingOverviewSummary {
         timezone: String,
         now: Date = Date()
     ) -> String? {
-        guard let start = SchedulingClock.parse(startAt) else { return nil }
+        guard let start = WireInstant.parse(startAt) else { return nil }
         let at = SchedulingClock.parts(of: start, timezone: timezone)
         let today = SchedulingClock.parts(of: now, timezone: timezone)
         let clock = SchedulingClock.clock(at)

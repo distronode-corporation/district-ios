@@ -112,16 +112,20 @@ final class SchedulingBookingsModel {
     /// ⚠️ THE PROFILE, THE SCOPE AND THE EVENT TYPES, ALL BEFORE THE FIRST PAGE. Each one
     /// changes how a row RENDERS or what the query asks for, so fetching them alongside
     /// page one would draw a first page with the wrong zone and unresolved slugs, then
-    /// rewrite it under the reader.
+    /// rewrite it under the reader. The three do not depend on each other, so they are
+    /// sent together.
     private func loadContext() async {
-        if case let .success(status) = await scheduling.status(workspaceId: workspaceId) {
+        async let statusRead = scheduling.status(workspaceId: workspaceId)
+        async let profile = try? repository.me(workspaceId: workspaceId)
+        async let types = try? repository.listEventTypes(workspaceId: workspaceId)
+        if case let .success(status) = await statusRead {
             canManage = status.canManage
         }
-        if let me = try? await repository.me(workspaceId: workspaceId) {
-            timezone = me.timezone.isEmpty ? "UTC" : me.timezone
+        if let me = await profile {
+            timezone = me.displayTimezone
             schedulerIsAdmin = me.isAdmin
         }
-        eventTypes = await (try? repository.listEventTypes(workspaceId: workspaceId)) ?? []
+        eventTypes = await types ?? []
     }
 
     /// ⛔ A FRESH PAGER PER QUERY. ``OffsetPager``'s dedupe set is per instance and that is
@@ -347,11 +351,7 @@ struct SchedulingBookingsView: View {
                     }
                 }
             }
-            .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-            .overlay {
-                RoundedRectangle(cornerRadius: DistrictRadius.card)
-                    .strokeBorder(colors.border, lineWidth: 1)
-            }
+            .districtCardSurface()
             more
         }
     }

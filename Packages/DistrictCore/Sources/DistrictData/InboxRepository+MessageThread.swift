@@ -26,10 +26,10 @@ public struct ResolvedThread: Sendable, Equatable {
     /// Which thread to READ or to mark read.
     ///
     /// ⛔ PREFERS THE CONTACT ID AND FALLS BACK TO THE COUNTERPART, NEVER TO
-    /// ``threadKey``, exactly as ``ThreadSelector/forConversation(_:)`` does — and
-    /// for the same reason: `addr:<normalized>` sent whole as the address parameter
+    /// ``threadKey``. `addr:<normalized>` sent whole as the address parameter
     /// matches nothing, so the write would succeed against zero rows and the badge
-    /// would never clear.
+    /// would never clear. (The App's `ThreadTarget` reaches the same selector from a
+    /// list or search row by stripping that prefix.)
     ///
     /// ⚠️ A PRESENT-BUT-BLANK `contactId` IS NOT A CONTACT ID. It would reach the
     /// route as `contactId=`, which is a different instruction from omitting it.
@@ -55,17 +55,6 @@ public struct ResolvedThread: Sendable, Equatable {
     /// on a send. See the ⛔ on ``MessageThreadTarget/counterpart``.
     public var replyTarget: ReplyTarget {
         ReplyTarget(to: response.thread.counterpart, channel: response.thread.channel)
-    }
-
-    /// True when the workspace has already marked this message read.
-    ///
-    /// ⚠️ WHAT LETS A NOTIFICATION SHADE SKIP A "Mark read" THAT WOULD DO NOTHING.
-    /// The inbox is workspace-level, so a colleague can have opened the thread
-    /// between the push being sent and the notification being tapped. ⛔ It is not a
-    /// guard: `mark-read` answers `{success, marked: 0}` for an already-read thread,
-    /// which is a success, so acting on a stale value costs one harmless request.
-    public var isRead: Bool {
-        response.message.readAt != nil
     }
 }
 

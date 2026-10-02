@@ -128,7 +128,7 @@ struct MembersView: View {
         HStack(spacing: DistrictSpacing.tight) {
             Picker(SettingsCopy.membersRoleLabel, selection: roleBinding(member)) {
                 ForEach(model.roleOptions, id: \.rawValue) { option in
-                    Text(Self.roleLabel(option)).tag(option)
+                    Text(option.displayLabel).tag(option)
                 }
             }
             .pickerStyle(.menu)
@@ -163,7 +163,7 @@ struct MembersView: View {
             )
             Picker(SettingsCopy.membersRoleLabel, selection: draftRoleBinding) {
                 ForEach(model.roleOptions, id: \.rawValue) { option in
-                    Text(Self.roleLabel(option)).tag(option)
+                    Text(option.displayLabel).tag(option)
                 }
             }
             .pickerStyle(.segmented)
@@ -273,17 +273,9 @@ struct MembersView: View {
     /// ⚠️ THE RAW WIRE STRING WHEN THE ROLE DOES NOT PARSE, rather than a guess. The
     /// column has no server-side enum and no TypeScript union, so a fourth value is a
     /// schema-level possibility; ``WorkspaceRole/fromWire(_:)`` fails closed to nil and
-    /// showing that as "Read-only" would be a claim about privileges nobody granted.
+    /// showing that as "Viewer" would be a claim about privileges nobody granted.
     private static func roleText(_ member: WorkspaceMember) -> String {
         guard let role = member.parsedRole else { return member.role }
-        return roleLabel(role)
-    }
-
-    private static func roleLabel(_ role: WorkspaceRole) -> String {
-        switch role {
-        case .agency: "Administrator"
-        case .client: "Member"
-        case .viewer: "Read-only"
-        }
+        return role.displayLabel
     }
 }

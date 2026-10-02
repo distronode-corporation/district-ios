@@ -1,5 +1,4 @@
 @testable import DistrictData
-import DistrictModel
 import XCTest
 
 final class PageTests: XCTestCase {
@@ -28,13 +27,5 @@ final class PageTests: XCTestCase {
         let merged = first.appending(Page(items: [], nextCursor: "cur_3"))
         XCTAssertEqual(merged.items, ["a"])
         XCTAssertEqual(merged.nextCursor, "cur_3")
-    }
-
-    func testPageResultCarriesTheNormalisedError() {
-        let failure: PageResult<String> = .failure(.http(status: 401, message: nil))
-        guard case let .failure(error) = failure else {
-            return XCTFail("expected a failure")
-        }
-        XCTAssertTrue(error.isUnauthorized)
     }
 }

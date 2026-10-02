@@ -30,13 +30,6 @@ import Foundation
 /// second `URLSession` with its own configuration. `URLSessionHTTPTransport`
 /// already refuses redirects when asked; see the ⛔ on its delegate.
 struct SchedulingSSOClient: Sendable {
-    /// Where the hand-off lands inside the scheduler.
-    ///
-    /// ⚠️ SENT AS `next`, WHICH THE ROUTE VALIDATES AND MAY DROP. A value it
-    /// refuses costs the operator the deep link and nothing else: the far end
-    /// still signs them in and shows its default page.
-    static let adminPath = "/admin/"
-
     /// ⚠️ SPELLED OUT HERE BECAUSE `DistrictEndpoints` DELIBERATELY DOES NOT
     /// CARRY IT. See the ⛔ at the top of `DistrictEndpoints+Scheduling.swift`.
     private static let ssoPath = "/api/district/scheduling/sso"
@@ -57,15 +50,15 @@ struct SchedulingSSOClient: Sendable {
 
     /// Ask for a hand-off and report where it points, without going there.
     ///
-    /// - Parameter next: where the hand-off lands inside the scheduler. Defaults to
-    ///   ``adminPath``, which is what the tenancy card sends. ⛔ THE CALENDAR OAUTH
-    ///   ROUND TRIP IS THE ONE OTHER CALLER AND IT IS WHY THIS IS A PARAMETER AT
-    ///   ALL: the provider's consent screen is the provider's, not ours, so there is
-    ///   no way to run that round trip through the admin RPC. See
-    ///   `SchedulingCalendarConnectModel`.
+    /// - Parameter next: where the hand-off lands inside the scheduler, which the
+    ///   route validates and may drop. ⛔ THE CALENDAR OAUTH ROUND TRIP IS THE ONLY
+    ///   CALLER: the provider's consent screen is the provider's, not ours, so there
+    ///   is no way to run that round trip through the admin RPC. A console `next`
+    ///   answers 410 now the console is retired, which is why there is no default.
+    ///   See `SchedulingCalendarConnectModel`.
     func handOffURL(
         workspaceId: String,
-        next: String = SchedulingSSOClient.adminPath
+        next: String
     ) async -> Result<URL, ApiError> {
         guard let url = requestURL(workspaceId: workspaceId, next: next) else {
             // Unreachable with a non-empty workspace id, and a guard beats a

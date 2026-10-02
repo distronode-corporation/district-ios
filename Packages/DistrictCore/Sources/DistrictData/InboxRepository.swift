@@ -429,49 +429,6 @@ public enum ThreadSelector: Sendable, Equatable {
     }
 }
 
-public extension ThreadSelector {
-    /// The selector for one Inbox row.
-    ///
-    /// ⛔ PREFER THE CONTACT ID WHENEVER THERE IS ONE. It is exact, it survives an
-    /// address changing, and it is the only thing that matches a message row whose
-    /// counterpart string was never normalizable — the address path is the
-    /// fallback for a thread that resolved to no Contact at all.
-    ///
-    /// ⛔ AND THE FALLBACK IS ``ConversationSummary/counterpart``, NEVER
-    /// ``ConversationSummary/threadKey``. The thread key of an unresolved thread is
-    /// `addr:<normalized>`, and that whole string sent as the address parameter
-    /// matches nothing.
-    static func forConversation(_ conversation: ConversationSummary) -> ThreadSelector {
-        if let contactId = conversation.contactId, !contactId.isEmpty {
-            return .contact(contactId)
-        }
-        return .address(conversation.counterpart)
-    }
-
-    /// The selector for one search hit, so a thread opened from search can be
-    /// marked read the same way a thread opened from the list is.
-    ///
-    /// ⛔ A SEPARATE ENTRY POINT RATHER THAN A CONVERSATION LOOKUP, BECAUSE THE
-    /// LOOKUP OFTEN FAILS AND MUST NOT DECIDE THIS. Search reaches threads outside
-    /// the conversation list's 500-message scan window, so the row is frequently
-    /// not in hand — and the whole point of a hit carrying ``MessageSearchHit/contactId``
-    /// and ``MessageSearchHit/counterpart`` is that `messages/mark-read` accepts
-    /// exactly those two. A reply TARGET genuinely cannot be derived from a hit
-    /// (see the ⛔ on ``MessageSearchHit``); a read receipt can, and conflating the
-    /// two left every thread opened from search permanently unread.
-    ///
-    /// ⛔ AND THE FALLBACK IS THE COUNTERPART, NEVER ``MessageSearchHit/threadKey``,
-    /// for the reason ``forConversation(_:)`` states: `addr:<normalized>` sent whole
-    /// matches nothing, so the write would succeed against zero rows and the badge
-    /// would never clear.
-    static func forSearchHit(_ hit: MessageSearchHit) -> ThreadSelector {
-        if let contactId = hit.contactId, !contactId.isEmpty {
-            return .contact(contactId)
-        }
-        return .address(hit.counterpart)
-    }
-}
-
 /// One position in a thread's expand-only paging.
 ///
 /// ⛔ IT CANNOT HOLD AN ID WITHOUT A TIMESTAMP, AND THAT IS THE WHOLE TYPE.

@@ -124,7 +124,7 @@ final class SchedulingOverviewModel {
     private func loadTimezone() async {
         do {
             let me = try await repository.me(workspaceId: workspaceId)
-            timezone = me.timezone.isEmpty ? "UTC" : me.timezone
+            timezone = me.displayTimezone
         } catch {
             // ⛔ SWALLOWED ON PURPOSE, AND IT IS THE ONLY SWALLOWED READ ON THIS SCREEN.
             // The profile supplies a display zone and nothing else; reporting its failure

@@ -100,12 +100,6 @@ final class DialRefusalTests: XCTestCase {
         XCTAssertEqual(DialRegion.named("Canada and the United States"), assessment.region)
     }
 
-    func testIsE164AgreesWithTheAssessment() {
-        XCTAssertTrue(DialEntry.isE164("+14165550100"))
-        XCTAssertFalse(DialEntry.isE164("14165550100"))
-        XCTAssertFalse(DialEntry.isE164(""))
-    }
-
     func testNonAsciiDigitsAreNotDigits() {
         // ⚠️ `Character.isNumber` is true for Arabic-Indic digits; `\d` in the
         // server's regex is not. Without the ASCII half the two sides would

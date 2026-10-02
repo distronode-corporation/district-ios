@@ -26,8 +26,32 @@ final class SignInCopyTests: XCTestCase {
     /// ⚠️ THE NEIGHBOURS KEEP THEIR TONES, so adding the `info` set moved nothing
     /// that was already classified.
     func testTheExistingReasonsKeepTheirTones() {
-        XCTAssertEqual(SignInStatusTone.forReason("That sign-in could not be verified. Please try again."), .danger)
-        XCTAssertEqual(SignInStatusTone.forReason("That sign-in expired. Please try again."), .warning)
-        XCTAssertEqual(SignInStatusTone.forReason("You are signed out."), .neutral)
+        XCTAssertEqual(SignInStatusTone.forReason(SessionCopy.signInNotVerified), .danger)
+        XCTAssertEqual(SignInStatusTone.forReason(SessionCopy.signInExpired), .warning)
+        XCTAssertEqual(SignInStatusTone.forReason(SessionCopy.signedOut), .neutral)
+    }
+
+    /// ⛔ EVERY SESSION SENTENCE HAS THE TONE ITS WORDING CLAIMS, read through the same
+    /// constants ``SessionModel`` writes, so a rewording cannot demote one to neutral.
+    func testEverySessionSentenceKeepsItsTone() {
+        let expected: [(String, Tone)] = [
+            (SessionCopy.signInNotVerified, .danger),
+            (SessionCopy.refreshRejected, .danger),
+            (SessionCopy.signInExpired, .warning),
+            (SessionCopy.tooManyAttempts, .warning),
+            (SessionCopy.unreachable, .warning),
+            (SessionCopy.refreshThrottled, .warning),
+            (SessionCopy.refreshNotSent, .warning),
+            (SessionCopy.storeUnavailable, .warning),
+            (SessionCopy.markerNotDurable, .warning),
+            (SessionCopy.interruptedRefresh, .warning),
+            (SessionCopy.refreshUnreachable, .warning),
+            (SessionCopy.signedOut, .neutral),
+            (SessionCopy.refreshTokenExpired, .neutral),
+            (SessionCopy.signInNotCompleted("access_denied"), .neutral),
+        ]
+        for (sentence, tone) in expected {
+            XCTAssertEqual(SignInStatusTone.forReason(sentence), tone, sentence)
+        }
     }
 }

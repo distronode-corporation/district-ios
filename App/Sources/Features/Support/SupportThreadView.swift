@@ -61,7 +61,7 @@ struct SupportThreadView: View {
             conversation
             composer(detail)
         case let .failed(failure):
-            SupportCard {
+            DistrictCard {
                 Text(SupportCopy.threadFailed)
                     .font(DistrictType.titleSmall)
                     .foregroundStyle(colors.foreground)
@@ -73,12 +73,12 @@ struct SupportThreadView: View {
     // MARK: - The header
 
     private func headerCard(_ detail: SupportRequestDetail) -> some View {
-        SupportCard(eyebrow: detail.issueKey ?? SupportCopy.unfiledStatus) {
+        DistrictCard(eyebrow: detail.issueKey ?? SupportCopy.unfiledStatus) {
             Text(detail.subject)
                 .font(DistrictType.titleLarge)
                 .foregroundStyle(colors.foreground)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(SupportCopy.opened(ContactDates.readable(detail.createdAt)))
+            Text(SupportCopy.opened(WireDate.display(detail.createdAt)))
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
             HStack(spacing: DistrictSpacing.hairline) {
@@ -133,13 +133,13 @@ struct SupportThreadView: View {
     /// guessing `customer` would draw a message the workspace did not write as though
     /// they had, and guessing `agent` would put words in Distronode's mouth.
     private func messageCard(_ message: SupportMessage) -> some View {
-        SupportCard {
+        DistrictCard {
             HStack(spacing: DistrictSpacing.tight) {
                 Text(message.author)
                     .font(DistrictType.labelSmall)
                     .foregroundStyle(tone(for: message).ink(colors))
                 Spacer(minLength: 0)
-                Text(ContactDates.readable(message.createdAt))
+                Text(WireDate.display(message.createdAt))
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
                     .lineLimit(1)
@@ -171,14 +171,14 @@ struct SupportThreadView: View {
     @ViewBuilder
     private func composer(_ detail: SupportRequestDetail) -> some View {
         if !detail.filed {
-            SupportCard {
+            DistrictCard {
                 Text(SupportCopy.notFiledYet)
                     .font(DistrictType.bodySmall)
                     .foregroundStyle(colors.mutedForeground)
                     .fixedSize(horizontal: false, vertical: true)
             }
         } else if model.canWrite {
-            SupportCard {
+            DistrictCard {
                 SettingsField(
                     label: SupportCopy.replyLabel,
                     text: replyBinding,

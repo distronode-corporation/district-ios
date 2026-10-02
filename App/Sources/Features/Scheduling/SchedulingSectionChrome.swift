@@ -24,16 +24,18 @@ extension SchedulingSectionState {
     }
 }
 
-/// Turning a scheduling admin refusal into a sentence and a recovery.
+/// Turning a scheduling admin refusal into a sentence and a recovery, for every read
+/// and every write on the scheduling surface.
 ///
-/// ⛔ FIVE CODES, FIVE SENTENCES, AND THEY ARE THE BROWSER'S OWN. The web client
-/// performs this exact collapse, and the two clients have to agree: a person
-/// shown two different explanations of one refusal depending on which device they picked
-/// it up on will report a bug against whichever they saw second. The strings below are
-/// copied from the web client rather than written here.
+/// ⛔ ONE MAPPING, AND THE FIVE CODE SENTENCES ARE THE BROWSER'S OWN, copied from its
+/// `SCHEDULING_ERROR_SENTENCES` rather than written here. The web client performs this
+/// exact collapse, and the two clients have to agree: a person shown two different
+/// explanations of one refusal depending on which device or which sheet they picked it
+/// up on will report a bug against whichever they saw second. ⚠️ Changing one of the
+/// five means changing the web's copy in the same breath.
 ///
 /// ⛔ AND THE MODULE DELIBERATELY CARRIES NO COPY. ``SchedulingAdminFailureCode`` is the
-/// DECISION — which of five recoveries applies — and `DistrictCore` is Linux-testable and
+/// DECISION (which of five recoveries applies) and `DistrictCore` is Linux-testable and
 /// locale-free, so the sentence is the App's. This enum is the seam.
 enum SchedulingFailureCopy {
     static let unavailable = "The booking system did not answer. Try again in a minute."
@@ -42,38 +44,73 @@ enum SchedulingFailureCopy {
     static let notReady = "Scheduling is not set up for this workspace yet."
     static let unknown = "That did not save. Try again."
 
+    /// ⚠️ NO WEB ORIGINAL: the browser maps a failed `fetch` to `unavailable`. The app
+    /// already says this for an ``ApiError/transport(_:)`` (``FailureText/from(_:)``),
+    /// and one cause worded two ways inside one app would be worse than diverging here.
+    static let offline = "You appear to be offline. Check your connection and try again."
+    /// ⚠️ NO WEB ORIGINAL EITHER: the browser never decodes `body.data`, so it cannot
+    /// have this problem. A shape this build cannot parse is not "that did not save"
+    /// (the write may well have landed), and the app's `ApiError.decoding` sentence is
+    /// the honest one.
+    static let staleBuild = "This version of the app could not read that response. Please update."
+
     /// The sentence and the recovery for one refusal.
     ///
-    /// ⛔ ONLY `unavailable` OFFERS A RETRY. Pressing again cannot change a role
-    /// (`forbidden`), cannot provision a tenancy (`notReady`), cannot un-take a slot
-    /// (`slotTaken`) and cannot fix a shape this client does not understand (`unknown`) —
-    /// so a "Try again" on any of the other four is a button that produces the identical
-    /// refusal for as long as somebody keeps pressing it. ``FailureView`` draws no action
-    /// at all for `.none`, which is the honest answer.
+    /// ⛔ `transport`, `decoding` AND `invalidParams` ARE LIFTED OUT AHEAD OF THE
+    /// COLLAPSE, and they are the only three arms that are. Everything else answers by
+    /// its ``SchedulingAdminError/uiCode``. `invalidParams` keeps the web's sentence and
+    /// drops only the offer.
+    /// The field names an `invalidParams` carries are never shown: they are zod paths,
+    /// identifiers to look up and not prose.
     ///
     /// ⚠️ THERE IS NO `signIn` ARM. A missing credential arrives as
-    /// ``SchedulingAdminError/forbidden`` alongside a genuine role refusal — the
-    /// repository collapses 401 and 403 together — so this surface cannot tell them apart
+    /// ``SchedulingAdminError/forbidden`` alongside a genuine role refusal (the
+    /// repository collapses 401 and 403 together), so this surface cannot tell them apart
     /// and must not offer a sign-in that may be irrelevant. The session's own 401 handling
     /// runs on the shared ``ApiClient`` regardless.
     static func text(for error: SchedulingAdminError) -> FailureText {
-        switch error.uiCode {
+        switch error {
+        case .transport: FailureText(message: offline, action: .retry)
+        case .decoding: FailureText(message: staleBuild, action: .none)
+        // ⛔ THE WEB'S SENTENCE AND NO OFFER: a 400 against a body this client composed
+        // is refused again when it is re-sent unchanged. The form's own Save is the retry.
+        case .invalidParams: FailureText(message: unknown, action: .none)
+        default: text(for: error.uiCode)
+        }
+    }
+
+    /// One code's sentence and offer.
+    ///
+    /// ⛔ THE OFFER FOLLOWS THE WEB'S SENTENCE. The browser draws no button, so its
+    /// retry policy is what its words tell the person to do: `unavailable` and `unknown`
+    /// both end "Try again", and a ``FailureText/Action/retry`` beside either is the
+    /// same advice made pressable. The other three cannot change on a second attempt:
+    /// pressing again cannot change a role (`forbidden`), provision a tenancy
+    /// (`notReady`) or un-take a slot (`slotTaken`), so ``FailureView`` draws nothing.
+    static func text(for code: SchedulingAdminFailureCode) -> FailureText {
+        switch code {
         case .unavailable: FailureText(message: unavailable, action: .retry)
         case .slotTaken: FailureText(message: slotTaken, action: .none)
         case .forbidden: FailureText(message: forbidden, action: .none)
         case .notReady: FailureText(message: notReady, action: .none)
-        case .unknown: FailureText(message: unknown, action: .none)
+        case .unknown: FailureText(message: unknown, action: .retry)
         }
     }
 
     /// ⚠️ THE SAME MAPPING FOR A THROWN `Error` OF ANY TYPE, so a screen's `catch` has one
-    /// call rather than a cast at every site. Anything that is not a
-    /// ``SchedulingAdminError`` is genuinely unknown to this surface and says so.
+    /// call rather than a cast at every site. `SchedulingAdminRepository.perform` throws
+    /// nothing else, but `throws` erases that; a throw nobody has classified lands on the
+    /// `unknown` code, never on a specific sentence it has not earned.
     static func text(forAny error: any Error) -> FailureText {
-        guard let admin = error as? SchedulingAdminError else {
-            return FailureText(message: unknown, action: .none)
-        }
-        return text(for: admin)
+        text(for: (error as? SchedulingAdminError) ?? .unknown)
+    }
+
+    /// ⚠️ True for the one refusal a reschedule recovers from by RE-READING the slots
+    /// rather than by telling the operator to try again. The web performs the same
+    /// re-fetch; keeping the test here means a sheet does not have to pattern-match an
+    /// error type it otherwise never touches.
+    static func isSlotTaken(_ error: any Error) -> Bool {
+        (error as? SchedulingAdminError)?.uiCode == .slotTaken
     }
 }
 

@@ -235,32 +235,23 @@ struct SettingsField: View {
 /// folding them into one panel with one button would be one tap writing through two
 /// routes with different failure modes, and the destructive one would be the half
 /// nobody was thinking about.
-struct SettingsCard<Content: View>: View {
+///
+/// ⚠️ A ``DistrictCard`` AT ``DistrictSpacing/row``, NOT A SHELL OF ITS OWN. The name
+/// stays because settings and scheduling forms (through ``SchedulingCard``) space their
+/// labelled fields wider than a read-only card, and forty-odd call sites say so by
+/// naming this type rather than repeating the spacing.
+struct SettingsCard<Inner: View>: View {
     let eyebrow: String
-    private let content: Content
+    private let inner: Inner
 
-    @Environment(\.colorScheme) private var colorScheme
-
-    init(eyebrow: String, @ViewBuilder content: () -> Content) {
+    init(eyebrow: String, @ViewBuilder content: () -> Inner) {
         self.eyebrow = eyebrow
-        self.content = content()
-    }
-
-    private var colors: DistrictColors {
-        .resolve(colorScheme)
+        inner = content()
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-            DistrictEyebrow(text: eyebrow)
-            content
-        }
-        .padding(DistrictSpacing.card)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
+        DistrictCard(eyebrow: eyebrow, spacing: DistrictSpacing.row) {
+            inner
         }
     }
 }

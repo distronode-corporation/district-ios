@@ -61,8 +61,13 @@ enum AppContainerSeam {
                 )
             }
         #endif
+        // ⛔ THE LEDGER FIRST, BEFORE `DeviceIdentity.current()` MINTS AN ID: a missing id
+        // is how a fresh install is recognised. The Keychain survives app deletion, so
+        // without the wrapper a reinstall resumed the previous user's session. See
+        // ``FreshInstallTokenStore``.
+        let ledger = UserDefaultsInstallationLedger.begin()
         return Resolved(
-            store: KeychainTokenStore(),
+            store: FreshInstallTokenStore(base: KeychainTokenStore(), ledger: ledger),
             deviceId: DeviceIdentity.current(),
             baseURL: baseURL,
             adopt: { _ in }

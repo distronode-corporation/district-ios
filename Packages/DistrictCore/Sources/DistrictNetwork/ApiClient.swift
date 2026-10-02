@@ -13,11 +13,13 @@ import Foundation
 /// substituted in a test.
 ///
 /// ⛔ THIS CLIENT DOES NOT RETRY. Not on a 401, not on a 5xx, not on a timeout.
-/// The single 401-refresh-and-resend belongs to `TokenRefreshCoordinator`, which
-/// is the only component that knows whether the token it handed
-/// out was the one that got rejected — and even there it is bounded to ONE
-/// attempt. The reason it must not live here is written across the endpoint
-/// surface: `messages/send` bills carrier segments, `messages/draft` bills a
+/// A 401 to a request that carried a bearer is REPORTED, through
+/// ``RejectedTokenHandler``, with the exact token the server refused; the app
+/// hands it to `TokenRefreshCoordinator.invalidateAccessToken(_:)`, so the NEXT
+/// call refreshes instead of presenting the same dead token for the rest of its
+/// TTL. The failed request itself is returned as a 401 and never resent. The
+/// reason a resend must not live here is written across the endpoint surface:
+/// `messages/send` bills carrier segments, `messages/draft` bills a
 /// Vertex generation, `contacts/enrich` buys a model run, `calls/dial` rings a
 /// telephone, `numbers/release` gives up a number for good, and HQ's confirm
 /// executes an irreversible write. A retry helper added here would apply to all
@@ -27,6 +29,13 @@ public struct ApiClient: Sendable {
     /// means "there is no credential", which this client reports as a 401 rather
     /// than sending an unauthenticated request the server would refuse anyway.
     public typealias TokenProvider = @Sendable () async -> String?
+
+    /// Told the bearer a 401 answered, so the issuer can stop handing it out.
+    ///
+    /// ⚠️ THE TOKEN, NOT A FLAG. Two requests can 401 together; the issuer
+    /// compares it against what it currently holds, so a late report about an
+    /// old token cannot discard the fresh one that replaced it.
+    public typealias RejectedTokenHandler = @Sendable (String) async -> Void
 
     /// ⛔ ONE HOST FOR EVERY REGION. Per-region base URLs were considered and
     /// rejected on the Kotlin side: Cloudflare already routes a request to the
@@ -53,8 +62,11 @@ public struct ApiClient: Sendable {
 
     private let transport: any HTTPTransport
     private let accessToken: TokenProvider
+    private let rejectedToken: RejectedTokenHandler
     private let boundary: @Sendable () -> String
 
+    /// - Parameter rejectedToken: called with the bearer of every request the
+    ///   server answered 401. See ``RejectedTokenHandler``.
     /// - Parameter boundary: the multipart boundary generator. ⚠️ Injectable only
     ///   so a test can assert exact bytes; production uses a fresh UUID per
     ///   request.
@@ -62,11 +74,13 @@ public struct ApiClient: Sendable {
         baseURL: URL = ApiClient.productionBaseURL,
         transport: any HTTPTransport,
         accessToken: @escaping TokenProvider,
+        rejectedToken: @escaping RejectedTokenHandler = { _ in },
         boundary: @escaping @Sendable () -> String = { "district-" + UUID().uuidString }
     ) {
         self.baseURL = baseURL
         self.transport = transport
         self.accessToken = accessToken
+        self.rejectedToken = rejectedToken
         self.boundary = boundary
     }
 
@@ -108,19 +122,28 @@ public struct ApiClient: Sendable {
     /// ⚠️ A DECODE FAILURE BECOMES ``ApiError/decoding(_:)`` CARRYING NO BODY
     /// PREVIEW. The bodies that fail to decode here are call transcripts, contact
     /// records and message threads, and ``ApiError/message`` can reach a screen.
+    /// It does carry the KEY PATH that failed (names only, see
+    /// ``ApiErrorNormalizer/decodingReason(statusCode:byteCount:failure:)``), so
+    /// contract drift names the field that moved.
     public func send<T: Decodable & Sendable>(
         _ descriptor: ApiRequestDescriptor,
         as type: T.Type
     ) async -> Result<T, ApiError> {
         let outcome = await perform(descriptor, followRedirects: true)
         return outcome.flatMap { response in
-            let body = response.body ?? Data()
-            guard ApiErrorNormalizer.isSuccess(response.statusCode),
-                  let decoded = try? JSONDecoder().decode(type, from: body)
-            else {
+            guard ApiErrorNormalizer.isSuccess(response.statusCode) else {
                 return .failure(ApiErrorNormalizer.apiError(statusCode: response.statusCode, body: response.body))
             }
-            return .success(decoded)
+            let body = response.body ?? Data()
+            do {
+                return try .success(JSONDecoder().decode(type, from: body))
+            } catch {
+                return .failure(.decoding(ApiErrorNormalizer.decodingReason(
+                    statusCode: response.statusCode,
+                    byteCount: body.count,
+                    failure: error
+                )))
+            }
         }
     }
 
@@ -160,6 +183,30 @@ public struct ApiClient: Sendable {
             return .failure(.transport("The request path could not be built (an id was empty)."))
         }
 
+        let contentType: String?
+        let body: Data?
+        switch descriptor.body {
+        case .none:
+            contentType = nil
+            body = nil
+        case let .json(value):
+            // ⛔ AN UNENCODABLE BODY FAILS HERE, BEFORE ANYTHING IS SENT. The only
+            // way to get here is a non-finite `Double` inside a caller-supplied
+            // ``JSONValue`` (HQ's confirm args, a directory row). Sending it empty
+            // instead spent a round trip on a destructive route and relied on
+            // every route answering 400 to an empty body; throwing out of a send
+            // that has no catch above it would take the process.
+            guard let encoded = try? JSONWire.encode(value) else {
+                return .failure(.transport("The request body could not be encoded (a number was not finite)."))
+            }
+            contentType = "application/json; charset=utf-8"
+            body = encoded
+        case let .multipart(part):
+            let marker = boundary()
+            contentType = "multipart/form-data; boundary=\(marker)"
+            body = MultipartEncoder.encode(part, boundary: marker)
+        }
+
         guard let token = await accessToken() else {
             // ⚠️ NO INVENTED MESSAGE. The UI owns the sentence: a session lapse
             // signs out.
@@ -167,28 +214,18 @@ public struct ApiClient: Sendable {
         }
 
         var headers = ["Authorization": "Bearer \(token)", "Accept": "application/json"]
-        var body: Data?
-        switch descriptor.body {
-        case .none:
-            body = nil
-        case let .json(value):
-            headers["Content-Type"] = "application/json; charset=utf-8"
-            // ⚠️ AN UNENCODABLE BODY BECOMES AN EMPTY ONE RATHER THAN A THROW.
-            // The only way to get here is a non-finite `Double` inside a caller-
-            // supplied ``JSONValue`` (HQ's confirm args, a directory row), and
-            // every route answers a machine-readable 400 for a body it cannot
-            // parse. Throwing out of a
-            // send that has no catch above it would take the process instead.
-            body = (try? JSONWire.encode(value)) ?? Data()
-        case let .multipart(part):
-            let marker = boundary()
-            headers["Content-Type"] = "multipart/form-data; boundary=\(marker)"
-            body = MultipartEncoder.encode(part, boundary: marker)
-        }
+        headers["Content-Type"] = contentType
 
         let request = HTTPRequest(method: descriptor.method, url: url, headers: headers, body: body)
         do {
-            return try await .success(transport.send(request, followRedirects: followRedirects))
+            let response = try await transport.send(request, followRedirects: followRedirects)
+            // ⛔ REPORTED, NOT RETRIED. See the ⛔ on the type: the issuer drops
+            // this exact token so the next call refreshes, and this request is
+            // returned as the 401 it was.
+            if response.statusCode == 401 {
+                await rejectedToken(token)
+            }
+            return .success(response)
         } catch {
             // ⚠️ Carries the cause rather than swallowing it: "offline" and "TLS
             // rejected" need different diagnostics, and this is the only place

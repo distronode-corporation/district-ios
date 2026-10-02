@@ -2,9 +2,9 @@ import DistrictAuthCore
 import Foundation
 import UIKit
 
-/// The two pieces of `AppContainer.init` that are neither container STATE nor part of
-/// wiring it: the access-token closure both credentialed clients take, and the sign-in
-/// door's construction.
+/// The pieces of `AppContainer.init` that are neither container STATE nor part of
+/// wiring it: the access-token closure both credentialed clients take, what `api` does
+/// with a refused one, and the sign-in doors' construction.
 ///
 /// ⛔ ONE DEFINITION, BECAUSE TWO WOULD BE TWO PLACES TO GET THE REFUSAL WRONG.
 /// `accessToken()` returns an outcome, not a token, and only `.available` carries one:
@@ -28,6 +28,19 @@ extension AppContainer {
         { [coordinator] in
             guard case let .available(token) = await coordinator.accessToken() else { return nil }
             return token
+        }
+    }
+
+    /// What `api` does with a bearer the server answered 401: drop THAT token from the
+    /// coordinator's cache, so the next call refreshes instead of presenting it again.
+    ///
+    /// ⛔ INVALIDATE, NEVER RESEND. The failed request is returned to its caller as the
+    /// 401 it was; replaying it could double-bill a send or repeat an irreversible write
+    /// (see the ⛔ on `ApiClient`). The token argument is what keeps two concurrent 401s
+    /// from discarding the fresh token the first one's refresh produced.
+    static func rejected(_ coordinator: TokenRefreshCoordinator) -> @Sendable (String) async -> Void {
+        { [coordinator] token in
+            await coordinator.invalidateAccessToken(token)
         }
     }
 

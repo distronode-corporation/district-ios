@@ -41,7 +41,7 @@ struct RegistrationRow: View {
     }
 
     var body: some View {
-        MarketplacePanel {
+        DistrictCard(spacing: DistrictSpacing.hairline) {
             Text(
                 MarketplaceCopy.registrationTitle(
                     country: registration.isoCountry,

@@ -17,25 +17,18 @@ struct SchedulingEventTypeHostsSheet: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-                Text(SchedulingWriteCopy.hostsTitle)
-                    .font(DistrictType.title)
-                    .foregroundStyle(colors.foreground)
-                routing
-                rows
-                addPicker
-                messages
-                SchedulingWriteButtons(
-                    saveTitle: SchedulingWriteCopy.save,
-                    saving: model.state.isSaving,
-                    saveIdentifier: A11yID.SchedulingWrites.hostsSave,
-                    onCancel: { dismiss() },
-                    onSave: { save() }
-                )
-            }
-            .padding(DistrictSpacing.gutter)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        SchedulingWriteSheet(title: SchedulingWriteCopy.hostsTitle) {
+            routing
+            rows
+            addPicker
+            messages
+            SchedulingWriteButtons(
+                saveTitle: SchedulingWriteCopy.save,
+                saving: model.state.isWorking,
+                saveIdentifier: A11yID.SchedulingWrites.hostsSave,
+                onCancel: { dismiss() },
+                onSave: { save() }
+            )
         }
         .accessibilityIdentifier(A11yID.SchedulingWrites.hostsRoot)
         .task {
@@ -153,19 +146,16 @@ struct SchedulingEventTypeHostsSheet: View {
 
     private var messages: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            SchedulingWriteFailureStrip(message: model.loadState.failure?.message)
-            SchedulingWriteFailureStrip(message: model.validation)
-            SchedulingWriteFailureStrip(message: model.state.failure?.message)
-            SchedulingWriteNotice(message: model.notice) {
-                model.dismissNotice()
-            }
+            SchedulingWriteOutcome(state: model.loadState)
+            SchedulingWriteRejection(message: model.validation)
+            SchedulingWriteOutcome(state: model.state, onDismiss: model.dismissNotice)
         }
     }
 
     private func save() {
         Task {
             await model.save()
-            if case .saved = model.state {
+            if case .done = model.state {
                 dismiss()
             }
         }

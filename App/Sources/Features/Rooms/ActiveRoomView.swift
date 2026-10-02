@@ -70,6 +70,14 @@ struct ActiveRoomView: View {
             if model.flipFailed {
                 RoomNotice(text: RoomsCopy.flipFailed)
             }
+            // ⚠️ THE SAME TONE FOR A REFUSED MICROPHONE OR CAMERA CHANGE, for the same
+            // reason: the meeting is fine, one control did not do what it was asked.
+            if model.microphone.failed {
+                RoomNotice(text: Self.microphoneFailed)
+            }
+            if model.camera.failed {
+                RoomNotice(text: Self.cameraFailed)
+            }
             content
             controls
         }
@@ -219,17 +227,20 @@ struct ActiveRoomView: View {
         if isLive {
             VStack(spacing: DistrictSpacing.tight) {
                 HStack(spacing: DistrictSpacing.tight) {
-                    Button(model.micEnabled ? RoomsCopy.micOn : RoomsCopy.micOff) {
+                    Button(model.microphone.isOn ? RoomsCopy.micOn : RoomsCopy.micOff) {
                         Task { await model.toggleMicrophone() }
                     }
                     .buttonStyle(DistrictButtonStyle(variant: .secondary, size: .small))
-                    .disabled(!model.canPublish || !model.permissions.microphoneGranted)
+                    // ⚠️ AND WHILE A CHANGE IS IN FLIGHT. See ``RoomMediaToggle``.
+                    .disabled(
+                        !model.canPublish || !model.permissions.microphoneGranted || model.microphone.inFlight
+                    )
 
-                    Button(model.cameraEnabled ? RoomsCopy.cameraOn : RoomsCopy.cameraOff) {
+                    Button(model.camera.isOn ? RoomsCopy.cameraOn : RoomsCopy.cameraOff) {
                         Task { await model.toggleCamera() }
                     }
                     .buttonStyle(DistrictButtonStyle(variant: .secondary, size: .small))
-                    .disabled(!model.canPublish || !model.permissions.cameraGranted)
+                    .disabled(!model.canPublish || !model.permissions.cameraGranted || model.camera.inFlight)
 
                     Button(RoomsCopy.flip) {
                         Task { await model.flipCamera() }
@@ -238,7 +249,7 @@ struct ActiveRoomView: View {
                     // ⚠️ Only while the camera is publishing: flipping an off camera
                     // does nothing visible, so an enabled control would report success
                     // for an action with no effect.
-                    .disabled(!model.cameraEnabled)
+                    .disabled(!model.camera.isOn)
 
                     // ⛔ ABSENT WHERE THERE IS NO EARPIECE, as on the call screen. See
                     // ``SpeakerToggleRule``.
@@ -268,6 +279,12 @@ struct ActiveRoomView: View {
             }
         }
     }
+
+    // ⚠️ HERE RATHER THAN IN ``RoomsCopy`` ONLY BECAUSE THAT FILE BELONGS TO ANOTHER
+    // CHANGE SET TODAY; move them beside ``RoomsCopy/flipFailed`` when it is free.
+    // Like that sentence they name no cause, because the SDK's reason is not known here.
+    static let microphoneFailed = "Could not change your microphone. It is as the button shows."
+    static let cameraFailed = "Could not change your camera. It is as the button shows."
 }
 
 extension ActiveRoomModel {

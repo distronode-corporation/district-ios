@@ -147,7 +147,7 @@ final class SchedulingWebhookEditorModel {
             }
             onChanged()
         } catch {
-            failure = FailureText.schedulingWriteC(thrown: error)
+            failure = SchedulingFailureCopy.text(forAny: error)
         }
     }
 
@@ -167,7 +167,7 @@ final class SchedulingWebhookEditorModel {
             savedNotice = SchedulingWriteCopyC.webhookUpdated
             onChanged()
         } catch {
-            failure = FailureText.schedulingWriteC(thrown: error)
+            failure = SchedulingFailureCopy.text(forAny: error)
         }
     }
 
@@ -180,61 +180,5 @@ final class SchedulingWebhookEditorModel {
         let eventsProblem = draft.events.isEmpty ? SchedulingWriteCopyC.webhookEventsMissing : nil
         eventsError = eventsProblem
         return urlProblem == nil && eventsProblem == nil
-    }
-}
-
-/// Delete one webhook, behind a confirmation.
-@MainActor
-@Observable
-final class SchedulingWebhookDeleteModel {
-    private(set) var pending: SchedulingWebhook?
-    private(set) var busy = false
-    private(set) var failure: FailureText?
-
-    private let repository: SchedulingAdminRepository
-    private let workspaceId: String
-    private let onChanged: () -> Void
-
-    init(
-        repository: SchedulingAdminRepository,
-        workspaceId: String,
-        onChanged: @escaping () -> Void
-    ) {
-        self.repository = repository
-        self.workspaceId = workspaceId
-        self.onChanged = onChanged
-    }
-
-    var isAsking: Bool {
-        pending != nil
-    }
-
-    func ask(_ webhook: SchedulingWebhook) {
-        guard !busy else { return }
-        failure = nil
-        pending = webhook
-    }
-
-    func cancel() {
-        pending = nil
-    }
-
-    func confirm() async {
-        guard !busy, let webhook = pending else { return }
-        busy = true
-        pending = nil
-        failure = nil
-        do {
-            _ = try await repository.deleteWebhook(workspaceId: workspaceId, webhookId: webhook.id)
-            busy = false
-            onChanged()
-        } catch {
-            busy = false
-            failure = FailureText.schedulingWriteC(thrown: error)
-        }
-    }
-
-    func dismissFailure() {
-        failure = nil
     }
 }

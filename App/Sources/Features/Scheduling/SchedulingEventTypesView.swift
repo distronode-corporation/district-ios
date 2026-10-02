@@ -47,13 +47,17 @@ final class SchedulingEventTypesModel {
         )
     }
 
+    /// ⚠️ THE STATUS AND THE LIST ARE INDEPENDENT AND ARE SENT TOGETHER; the host is
+    /// applied first so a row never draws without its booking address.
     func load() async {
         state = .loading
-        if case let .success(status) = await scheduling.status(workspaceId: workspaceId) {
+        async let statusRead = scheduling.status(workspaceId: workspaceId)
+        async let listed = repository.listEventTypes(workspaceId: workspaceId)
+        if case let .success(status) = await statusRead {
             publicHost = status.tenant?.publicHost
         }
         do {
-            state = try await .ready(repository.listEventTypes(workspaceId: workspaceId))
+            state = try await .ready(listed)
         } catch {
             state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
@@ -220,11 +224,7 @@ struct SchedulingEventTypesView: View {
                     }
                 }
             }
-            .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-            .overlay {
-                RoundedRectangle(cornerRadius: DistrictRadius.card)
-                    .strokeBorder(colors.border, lineWidth: 1)
-            }
+            .districtCardSurface()
         }
     }
 

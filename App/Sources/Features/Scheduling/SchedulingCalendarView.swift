@@ -43,16 +43,20 @@ final class SchedulingCalendarModel {
         self.init(repository: container.schedulingAdmin, workspaceId: workspaceId)
     }
 
+    /// ⚠️ THE STATUS AND THE ZOOM READ ARE INDEPENDENT AND ARE SENT TOGETHER; only the
+    /// per-connection reads wait, because they are keyed by what the status answers.
     func load() async {
         state = .loading
         calendars = [:]
+        async let answered = repository.calendarStatus(workspaceId: workspaceId)
+        // ⚠️ THE ZOOM READ IS OPTIONAL AND ITS FAILURE IS SILENT. It reports whether a
+        // separate integration is configured; a screen that failed over it would hide
+        // the calendar connections, which are the point.
+        async let zoomAnswer = try? repository.zoomStatus(workspaceId: workspaceId)
         do {
-            let status = try await repository.calendarStatus(workspaceId: workspaceId)
+            let status = try await answered
             state = .ready(status)
-            // ⚠️ THE ZOOM READ IS OPTIONAL AND ITS FAILURE IS SILENT. It reports whether a
-            // separate integration is configured; a screen that failed over it would hide
-            // the calendar connections, which are the point.
-            zoom = try? await repository.zoomStatus(workspaceId: workspaceId)
+            zoom = await zoomAnswer
             await loadCalendars(for: status.connections)
         } catch {
             state = .failed(SchedulingFailureCopy.text(forAny: error))
@@ -218,10 +222,10 @@ struct SchedulingCalendarView: View {
     @ViewBuilder
     private var disconnectMessages: some View {
         if let failure = disconnect.failure {
-            SchedulingWriteFailureLineC(failure: failure, onDismiss: disconnect.dismissFailure)
+            SchedulingWriteFailureLine(failure: failure, onDismiss: disconnect.dismissFailure)
         }
         if disconnect.removedDestination {
-            SchedulingWriteNoticeLineC(message: SchedulingWriteCopyC.disconnectedLastDestination)
+            SchedulingWriteNoticeLine(message: SchedulingWriteCopyC.disconnectedLastDestination)
         }
     }
 

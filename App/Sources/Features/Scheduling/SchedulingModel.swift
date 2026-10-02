@@ -179,13 +179,11 @@ final class SchedulingModel {
     static let pollInterval: Duration = .seconds(10)
 
     private let scheduling: SchedulingRepository
-    private let sso: SchedulingSSOClient
     private let handoff: SchedulingHandoffClient
     private let workspaceId: String
 
     init(container: AppContainer, workspaceId: String) {
         scheduling = container.scheduling
-        sso = container.schedulingSSO
         handoff = container.schedulingHandoff
         self.workspaceId = workspaceId
     }
@@ -241,8 +239,8 @@ final class SchedulingModel {
     /// stale code lands on a page saying the link has expired, which reads as a broken
     /// app rather than as a code that did its job.
     ///
-    /// ⚠️ SAME `opening` FLAG AND SAME `notice` AS ``schedulerHandOff()``, so the two
-    /// routes cannot both be in flight and the screen has one place to read a failure.
+    /// ⚠️ THE ONLY SCHEDULER HAND-OFF. `scheduling/sso` with a console `next` answers
+    /// 410 (the console is retired), so nothing on this screen spends that route.
     func manageScheduling() async -> URL? {
         guard !opening else { return nil }
         opening = true
@@ -252,31 +250,6 @@ final class SchedulingModel {
         switch outcome {
         case let .success(mint):
             return mint.url
-        case let .failure(error):
-            notice = Self.handOffNotice(for: error)
-            return nil
-        }
-    }
-
-    /// Mint a hand-off into the scheduler's own admin, for one press.
-    ///
-    /// ⛔ THE URL IS ANSWERED, NEVER STORED. It carries a 60-second single-use
-    /// token in its query string, so keeping it on this model would leave a live
-    /// credential in memory long after the sheet closed and would make a second
-    /// press cheap to serve from a value that is already spent. The caller
-    /// presents it immediately and drops it when the sheet dismisses.
-    ///
-    /// ⚠️ nil MEANS "nothing to open" AND THE REASON IS IN ``notice``, so the
-    /// caller never has to invent copy for a failure it did not classify.
-    func schedulerHandOff() async -> URL? {
-        guard !opening else { return nil }
-        opening = true
-        notice = nil
-        let outcome = await sso.handOffURL(workspaceId: workspaceId)
-        opening = false
-        switch outcome {
-        case let .success(url):
-            return url
         case let .failure(error):
             notice = Self.handOffNotice(for: error)
             return nil

@@ -4,12 +4,10 @@ import Foundation
 /// The calendar screen's read half, ported from `calendar-format.ts`.
 ///
 /// ⚠️ THE OAuth LEG IS NOT HERE AND IS NOT AN OVERSIGHT. `calendarConnectHref`,
-/// `rememberConnectingProvider` and `takeConnectingProvider` are the browser's
-/// double-encoded hand-off and its `sessionStorage` round trip; the native connect flow
-/// is a later stage and will not use any of the three (an app has no `sessionStorage`,
-/// and the return leg is a redirect this client would have to claim). Porting them now
-/// would be three functions with no caller. ``calendarErrorSentence(reason:provider:)``
-/// IS here, because the screen can already ARRIVE carrying a failed return.
+/// `rememberConnectingProvider`, `takeConnectingProvider` and `calendarErrorSentence`
+/// are the browser's double-encoded hand-off, its `sessionStorage` round trip and the
+/// sentence for a failed return. The app's connect flow is a browser sheet the screen
+/// re-reads after (`SchedulingCalendarConnectModel`), so none of the four has a caller.
 public enum SchedulingCalendarFormat {
     /// ⚠️ THE FOUR THE FORK KNOWS. Anything else falls through to its own raw value,
     /// which is a provider this build has not heard of rather than an error.
@@ -58,24 +56,5 @@ public enum SchedulingCalendarFormat {
             return chosen.name
         }
         return connection.isDestination ? "This account" : "No calendar in this account"
-    }
-
-    /// Why a connection attempt came back unfinished.
-    ///
-    /// ⚠️ THE PROVIDER'S NAME APPEARS IN TWO GRAMMATICAL POSITIONS AND THE FALLBACK
-    /// DIFFERS BETWEEN THEM. Mid-sentence it is "your calendar provider" and leading a
-    /// sentence it is "Your calendar provider"; the source keeps two constants for
-    /// exactly this and getting it wrong produces a sentence that starts lower-case.
-    public static func calendarErrorSentence(reason: String, provider: String?) -> String {
-        if reason == "provider_denied" {
-            let who = provider.map(providerLabel) ?? "your calendar provider"
-            return "You cancelled the connection at \(who)."
-        }
-        if reason == "exchange_failed" {
-            let who = provider.map(providerLabel) ?? "Your calendar provider"
-            return "\(who) refused the connection. Try again, and check that the account "
-                + "allows third-party calendar access."
-        }
-        return "The connection did not complete. Try again."
     }
 }

@@ -15,7 +15,7 @@ struct SchedulingUserArchiveSheet: View {
     @State private var confirming = false
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingTeamWriteCopy.archiveTitle(userName),
             subtitle: SchedulingTeamWriteCopy.archiveBody,
             cancelLabel: SchedulingTeamWriteCopy.archiveKeep,
@@ -55,7 +55,7 @@ struct SchedulingUserArchiveSheet: View {
     @ViewBuilder
     private var blocked: some View {
         if let reason = model.blockedReason {
-            SchedulingWritesBHint(text: reason)
+            SchedulingWriteHint(text: reason)
         }
     }
 

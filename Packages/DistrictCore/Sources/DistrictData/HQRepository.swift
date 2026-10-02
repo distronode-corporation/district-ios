@@ -128,7 +128,11 @@ public struct HQRepository: Sendable {
             DistrictEndpoints.hqConfirm(
                 workspaceId: workspaceId,
                 tool: pendingWrite.tool,
-                args: Self.request(from: pendingWrite.args)
+                // ⛔ LOSSLESS, `.null` INCLUDED: the arguments must reach the server
+                // byte-identical to the ones the summary described, and a null the
+                // model chose is part of that instruction. See
+                // ``JSONValue/carrying(_:)``.
+                args: JSONValue.carrying(pendingWrite.args)
             ),
             as: HqConfirmResponse.self
         )
@@ -168,37 +172,5 @@ public struct HQRepository: Sendable {
             ))
         }
         return .success(HqAnswer(answer: response.answer, pendingWrite: nil))
-    }
-
-    /// Re-express a carried response value as a request value, losslessly.
-    ///
-    /// ⛔ THE TWO JSON TYPES ARE THE RECORDED DEBT AT THE FOOT OF `WireJSON.swift`,
-    /// AND THIS IS THE ONE PLACE THE SEAM IS CROSSED. ``WireJSON`` is the
-    /// response-side carrier and drops nothing; ``JSONValue`` is the request-side
-    /// builder whose `object(_:)` factory drops nils, because an explicit null is a
-    /// different instruction from an absent key on four of this API's routes.
-    ///
-    /// ⛔ SO THE MAPPING IS CASE BY CASE AND `.null` MAPS TO `.null`, NOT TO AN
-    /// OMISSION. The proposal's arguments have to reach the server byte-identical to
-    /// the ones the summary described, and a null the model chose is part of that
-    /// instruction. `JSONValue.object(_:)`'s nil-dropping is not reached here
-    /// because this builds the dictionary case directly.
-    private static func request(from value: WireJSON) -> JSONValue {
-        switch value {
-        case let .string(text):
-            .string(text)
-        case let .integer(number):
-            .integer(number)
-        case let .number(number):
-            .number(number)
-        case let .bool(flag):
-            .bool(flag)
-        case let .array(values):
-            .array(values.map(request(from:)))
-        case let .object(fields):
-            .object(fields.mapValues(request(from:)))
-        case .null:
-            .null
-        }
     }
 }

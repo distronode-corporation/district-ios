@@ -31,7 +31,6 @@ final class SchedulingAvailabilityRulesModel {
     private(set) var stored: [SchedulingAvailabilityRule] = []
     private(set) var loadState: SchedulingWriteState = .idle
     private(set) var state: SchedulingWriteState = .idle
-    private(set) var notice: String?
 
     private let admin: SchedulingAdminRepository
     private let workspaceId: String
@@ -52,7 +51,7 @@ final class SchedulingAvailabilityRulesModel {
     /// operator can already see which window is wrong, so pressing a live button to
     /// be told again buys nothing.
     var canSave: Bool {
-        !state.isSaving && SchedulingWorkingHours.isValid(week)
+        !state.isWorking && SchedulingWorkingHours.isValid(week)
     }
 
     func errors(forRow row: Int) -> [String?] {
@@ -61,14 +60,14 @@ final class SchedulingAvailabilityRulesModel {
     }
 
     func load() async {
-        loadState = .saving
+        loadState = .working
         do {
             let rules = try await admin.availabilityRules(workspaceId: workspaceId)
             stored = rules
             week = SchedulingWorkingHours.week(from: rules)
-            loadState = .saved
+            loadState = .idle
         } catch {
-            loadState = .failed(SchedulingEventTypeEditorModel.failure(error))
+            loadState = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -103,7 +102,6 @@ final class SchedulingAvailabilityRulesModel {
     }
 
     func dismissNotice() {
-        notice = nil
         state = .idle
     }
 
@@ -117,23 +115,20 @@ final class SchedulingAvailabilityRulesModel {
     // MARK: - The save
 
     func save() async {
-        guard !state.isSaving, canSave else { return }
+        guard !state.isWorking, canSave else { return }
         let diff = SchedulingWorkingHours.diff(week: week, stored: stored)
         guard !diff.isEmpty else {
             // ⚠️ NOT A FAILURE AND NOT A REQUEST. A no-op patch still spends a write
             // from the workspace's hourly budget, so the honest answer is a sentence.
-            state = .saved
-            notice = SchedulingWriteCopy.hoursNothingToSave
+            state = .done(SchedulingWriteCopy.hoursNothingToSave)
             return
         }
-        state = .saving
-        notice = nil
+        state = .working
         do {
             try await apply(diff)
-            state = .saved
-            notice = SchedulingWriteCopy.hoursSaved
+            state = .done(SchedulingWriteCopy.hoursSaved)
         } catch {
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
         // ⛔ THE RE-READ RUNS AFTER A FAILURE TOO, AND IT DISCARDS THE DRAFT — which
         // breaks the rule every other sheet here follows ("a failed save keeps the

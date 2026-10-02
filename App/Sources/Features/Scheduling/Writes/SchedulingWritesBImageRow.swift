@@ -19,7 +19,7 @@ import SwiftUI
 struct SchedulingWritesBImageRow: View {
     let label: String
     let publishedUrl: String?
-    let state: SchedulingWritesBState
+    let state: SchedulingWriteState
     let pickIdentifier: String
     let removeIdentifier: String
     let onPicked: (Data, String) -> Void
@@ -36,10 +36,10 @@ struct SchedulingWritesBImageRow: View {
         SettingsCard(eyebrow: label) {
             VStack(alignment: .leading, spacing: DistrictSpacing.tight) {
                 SettingsReadOnlyRow(label: label, value: publishedUrl)
-                SchedulingWritesBHint(text: SchedulingSettingsWriteCopy.imageHint)
-                SchedulingWritesBHint(text: SchedulingSettingsWriteCopy.imageImmediate)
+                SchedulingWriteHint(text: SchedulingSettingsWriteCopy.imageHint)
+                SchedulingWriteHint(text: SchedulingSettingsWriteCopy.imageImmediate)
                 controls
-                SchedulingWritesBNotice(state: state)
+                SchedulingWriteOutcome(state: state)
             }
         }
     }
@@ -80,23 +80,6 @@ struct SchedulingWritesBImageRow: View {
             onUnreadable()
             return
         }
-        onPicked(data, Self.mimeType(of: item))
-    }
-
-    /// ⚠️ THE TYPE COMES FROM THE ITEM, NOT FROM A FILE EXTENSION. A picker item
-    /// often has no name at all, and the route's allowlist is on the MIME type — so
-    /// a guess from a name would refuse legitimate images and could label a
-    /// non-image as one, spending the upload to be refused server-side.
-    ///
-    /// ⚠️ AN ITEM DECLARING NOTHING THE ROUTE ACCEPTS FALLS BACK TO ITS FIRST
-    /// DECLARED TYPE, OR TO A DELIBERATELY UNACCEPTABLE ONE. Either way
-    /// ``SchedulingWritesBImage`` refuses it by name rather than this function
-    /// inventing a type the bytes might not be.
-    static func mimeType(of item: PhotosPickerItem) -> String {
-        let declared = item.supportedContentTypes.compactMap(\.preferredMIMEType)
-        if let allowed = declared.first(where: { SchedulingUploadFile.acceptedMimeTypes.contains($0) }) {
-            return allowed
-        }
-        return declared.first ?? "application/octet-stream"
+        onPicked(data, item.preferredMIMEType(allowed: SchedulingUploadFile.acceptedMimeTypes))
     }
 }

@@ -295,11 +295,7 @@ private struct HQConfirmCard: View {
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
+        .districtCardSurface()
     }
 
     @ViewBuilder

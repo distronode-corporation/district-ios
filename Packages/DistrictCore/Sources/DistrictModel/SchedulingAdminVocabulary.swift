@@ -64,16 +64,6 @@ public enum SchedulingLocationType: String, CaseIterable, Sendable, Equatable {
         }
     }
 
-    /// Whether the catalog will refuse a `location_value` that is not a URL.
-    ///
-    /// ⛔ DERIVED FROM ``valueKind`` RATHER THAN LISTED SEPARATELY. `URL_LOCATION_TYPES`
-    /// is a two-entry subset of `LOCATION_TYPES` on the server and a second literal
-    /// here could disagree with the first — the failure being a client that
-    /// validates a field the server does not, or lets through one it does.
-    public var refusesANonURLValue: Bool {
-        valueKind == .url
-    }
-
     /// ⚠️ nil FOR A STORED VALUE THIS BUILD DOES NOT KNOW, which a caller renders
     /// as the raw string rather than replacing. See the ⚠️ on the type.
     public static func known(_ wire: String?) -> SchedulingLocationType? {

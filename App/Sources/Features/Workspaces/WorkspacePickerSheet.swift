@@ -102,16 +102,8 @@ struct WorkspacePickerSheet: View {
     /// the LIST's membership role, which the overview's effective role may override
     /// upward — so it is a label here and never a gate.
     private static func subtitle(for entry: WorkspaceEntry) -> String {
-        let region = "Region: \(entry.region.uppercased())"
+        let region = "Region: \(RegionCopy.label(entry.region))"
         guard let role = WorkspaceRole.fromWire(entry.role) else { return region }
-        return "\(region) · \(Self.label(for: role))"
-    }
-
-    private static func label(for role: WorkspaceRole) -> String {
-        switch role {
-        case .agency: "Agency"
-        case .client: "Client"
-        case .viewer: "Viewer"
-        }
+        return "\(region) · \(role.displayLabel)"
     }
 }

@@ -29,7 +29,7 @@ struct SchedulingWebhookEditorSheet: View {
     }
 
     var body: some View {
-        SchedulingWriteSheetC(title: title) {
+        SchedulingWriteSheet(title: title) {
             urlSection
             droppedEventsNote
             eventsSection
@@ -47,7 +47,7 @@ struct SchedulingWebhookEditorSheet: View {
     @ViewBuilder
     private var urlSection: some View {
         if let fixed = model.fixedURL {
-            SchedulingWriteFactC(label: SchedulingWriteCopyC.webhookUrlLabel, value: fixed)
+            SchedulingWriteFact(label: SchedulingWriteCopyC.webhookUrlLabel, value: fixed)
             Text(SchedulingWriteCopyC.webhookUrlFixed)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
@@ -92,7 +92,7 @@ struct SchedulingWebhookEditorSheet: View {
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
             ForEach(SchedulingWebhookEvent.allCases, id: \.self) { event in
-                SchedulingWriteToggleRowC(
+                SchedulingWriteToggleRow(
                     label: event.rawValue,
                     isOn: eventBinding(event),
                     enabled: !model.busy
@@ -114,7 +114,7 @@ struct SchedulingWebhookEditorSheet: View {
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
             ForEach(SchedulingWebhookFieldsC.all, id: \.self) { field in
-                SchedulingWriteToggleRowC(
+                SchedulingWriteToggleRow(
                     label: field,
                     isOn: fieldBinding(field),
                     badge: SchedulingDeveloperFormat.isPersonalDataField(field)
@@ -132,14 +132,14 @@ struct SchedulingWebhookEditorSheet: View {
     @ViewBuilder
     private var messages: some View {
         if let failure = model.failure {
-            SchedulingWriteFailureLineC(
+            SchedulingWriteFailureLine(
                 failure: failure,
                 onRetry: submit,
                 onDismiss: model.dismissFailure
             )
         }
         if let notice = model.savedNotice {
-            SchedulingWriteNoticeLineC(message: notice, onDismiss: model.dismissNotice)
+            SchedulingWriteNoticeLine(message: notice, onDismiss: model.dismissNotice)
         }
     }
 
@@ -232,7 +232,7 @@ struct SchedulingWebhookSecretSheet: View {
     }
 
     var body: some View {
-        SchedulingWriteSheetC(title: SchedulingWriteCopyC.webhookSecretTitle) {
+        SchedulingWriteSheet(title: SchedulingWriteCopyC.webhookSecretTitle) {
             Text(SchedulingWriteCopyC.keyRevealWarning)
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.foreground)

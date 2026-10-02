@@ -4,9 +4,9 @@
 #
 #   RELEASE_REF_TYPE=tag RELEASE_REF_NAME=v1.3 scripts/release-preflight.sh
 #
-# Called first by .github/workflows/release.yml and submit.yml. The ref defaults to the
-# run's own (GITHUB_REF_TYPE, GITHUB_REF_NAME); submit.yml runs on main and passes the tag
-# it was asked to submit instead.
+# Called by .github/workflows/release.yml and submit.yml before anything is built. The
+# ref defaults to the run's own (GITHUB_REF_TYPE, GITHUB_REF_NAME); submit.yml passes the
+# tag it was asked to submit instead.
 #
 # Prints, and appends to $GITHUB_OUTPUT when it is set:
 #   version=<MARKETING_VERSION from project.yml>
@@ -19,7 +19,13 @@
 #   - a tag that is not v<MARKETING_VERSION>, because a build attaches only to the
 #     App Store version record whose string equals its CFBundleShortVersionString;
 #   - a tag whose commit is not on main;
-#   - a branch other than main.
+#   - a branch other than main;
+#   - with RELEASE_CHECK_UPLOADED=1, a build number not above the highest App Store
+#     Connect already has for this version (it refuses a number at or below that, so
+#     a tag of a commit a main dispatch already uploaded would spend a whole archive to
+#     be turned away). Needs ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_PATH. release.yml's
+#     build job runs the preflight a second time with it, once the key is fetched;
+#     submit.yml never sets it, because the build it submits is uploaded by design.
 set -euo pipefail
 
 die() {
@@ -65,6 +71,15 @@ case "$REF_TYPE" in
     die "unknown ref type '$REF_TYPE' (expected tag or branch)."
     ;;
 esac
+
+if [ "${RELEASE_CHECK_UPLOADED:-}" = "1" ]; then
+  highest="$(python3 scripts/asc_release.py highest-build --version "$VERSION")" ||
+    die "could not read the builds App Store Connect has for $VERSION."
+  [[ "$highest" =~ ^[0-9]+$ ]] || die "App Store Connect's highest build for $VERSION is '$highest', not a number."
+  [ "$BUILD" -gt "$highest" ] ||
+    die "build $BUILD of $VERSION is not above $highest, the highest App Store Connect already has, so the upload would be refused. Release a newer commit. Nothing was built."
+  echo "highest uploaded build of $VERSION: $highest"
+fi
 
 out="version=$VERSION
 build=$BUILD

@@ -121,13 +121,12 @@ final class DeskSettingsModel {
     ///
     /// ⚠️ THE TYPE AND SIZE ARE REFUSED IN ``DeskRepository`` rather than here, so this
     /// screen shows the same sentence a real 415 or 413 would produce.
-    func uploadLogo(_ bytes: Data, mimeType: String, fileName: String) async {
+    func uploadLogo(_ bytes: Data, mimeType: String) async {
         guard canEditDependents else { return }
         uploading = true
         save = .idle
         switch await desk.uploadLogo(
             workspaceId: workspaceId,
-            fileName: fileName,
             mimeType: mimeType,
             bytes: bytes
         ) {

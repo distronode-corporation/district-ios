@@ -44,7 +44,7 @@ struct SchedulingHubView: View {
     /// ELSE. Its URL carries a 60-second single-use token, so `sheet(item:)` is
     /// what guarantees it is dropped the moment the browser closes — SwiftUI
     /// writes nil back through the binding itself. The model deliberately answers
-    /// the URL rather than storing it; see ``SchedulingModel/schedulerHandOff()``.
+    /// the URL rather than storing it; see ``SchedulingModel/manageScheduling()``.
     @State private var handOff: SchedulingHandOff?
 
     /// ⚠️ DOES NOT TIME OUT, ON PURPOSE. A confirmation that reverts needs a timer
@@ -138,11 +138,7 @@ struct SchedulingHubView: View {
                 }
             }
         }
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
+        .districtCardSurface()
     }
 
     /// ⚠️ ASKS THE SECTION'S OWN `minReadRole` RATHER THAN ANSWERING HERE, so that "who may
@@ -228,11 +224,7 @@ struct SchedulingHubView: View {
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
+        .districtCardSurface()
     }
 
     private func header(_ presentation: SchedulingPresentation) -> some View {
@@ -376,9 +368,8 @@ struct SchedulingHubView: View {
     /// and press again, which is why the model re-mints rather than holding one.
     ///
     /// ⚠️ IT CALLS `manageScheduling()`, WHICH IS THE HAND-OFF MINT AND NOT THE RETIRED
-    /// SSO ROUTE. ``SchedulingModel/schedulerHandOff()`` spends `scheduling/sso`, which
-    /// answers **410**; nothing calls it, and it stays on the model so its own header
-    /// records why the route is dead. ⛔ Do not wire a button back to it.
+    /// SSO ROUTE. The console hand-off on `scheduling/sso` answers **410**. ⛔ Do not
+    /// wire a button back to it.
     private func openInBrowser() {
         Task {
             guard let url = await model.manageScheduling() else { return }
@@ -424,6 +415,6 @@ private struct SchedulingNotice: View {
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
+        .districtCardSurface(bordered: false)
     }
 }

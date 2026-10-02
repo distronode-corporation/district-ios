@@ -17,7 +17,7 @@ struct SchedulingBookingRescheduleSheet: View {
     let onClose: () -> Void
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingBookingWriteCopy.rescheduleTitle,
             subtitle: SchedulingBookingWriteCopy.rescheduleBody,
             cancelLabel: SchedulingBookingWriteCopy.rescheduleCancel,
@@ -29,7 +29,7 @@ struct SchedulingBookingRescheduleSheet: View {
             VStack(alignment: .leading, spacing: DistrictSpacing.row) {
                 day
                 times
-                SchedulingWritesBRejection(message: model.selectionRejected)
+                SchedulingWriteRejection(message: model.selectionRejected)
             }
         } onCancel: {
             onClose()
@@ -50,6 +50,10 @@ struct SchedulingBookingRescheduleSheet: View {
                 selection: Binding(get: { model.day }, set: { model.editDay($0) }),
                 displayedComponents: .date
             )
+            // ⛔ THE PICKER SHOWS ITS DAY IN THE PROFILE'S ZONE, THE ZONE `dayKey`
+            // READS IT IN. Left on the device zone, a device ahead of the profile
+            // would list the day before the one shown.
+            .environment(\.timeZone, model.displayTimeZone)
             .disabled(model.busy)
             .accessibilityIdentifier(A11yID.SchedulingWritesB.bookingRescheduleDay)
             // ⛔ THE RELOAD IS DRIVEN BY THE RESOLVED `dayKey`, NOT BY THE `Date`.
@@ -70,7 +74,7 @@ struct SchedulingBookingRescheduleSheet: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         case let .ready(rows):
             if rows.isEmpty {
-                SchedulingWritesBHint(text: SchedulingBookingWriteCopy.rescheduleNoSlots)
+                SchedulingWriteHint(text: SchedulingBookingWriteCopy.rescheduleNoSlots)
             } else {
                 tiles(rows)
             }

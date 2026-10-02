@@ -24,44 +24,37 @@ struct SchedulingEventTypeActionsSheet: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-                Text(model.eventType.name)
-                    .font(DistrictType.title)
-                    .foregroundStyle(colors.foreground)
-                stateButtons
-                testEmails
-                Button(SchedulingWriteCopy.deleteEventTypeConfirm) {
-                    model.confirmingDelete = true
-                }
-                .buttonStyle(.districtDestructive)
-                .disabled(model.busy)
-                .accessibilityIdentifier(A11yID.SchedulingWrites.actionsDelete)
-                .confirmationDialog(
-                    SchedulingWriteCopy.deleteEventTypeTitle,
-                    isPresented: Binding(
-                        get: { model.confirmingDelete },
-                        set: { model.confirmingDelete = $0 }
-                    ),
-                    titleVisibility: .visible
-                ) {
-                    Button(SchedulingWriteCopy.deleteEventTypeConfirm, role: .destructive) {
-                        delete()
-                    }
-                    Button(SchedulingWriteCopy.cancel, role: .cancel) {
-                        model.confirmingDelete = false
-                    }
-                } message: {
-                    Text(SchedulingWriteCopy.deleteEventTypeBody)
-                }
-                messages
-                Button(SchedulingWriteCopy.cancel) {
-                    dismiss()
-                }
-                .buttonStyle(.districtGhost)
+        SchedulingWriteSheet(title: model.eventType.name) {
+            stateButtons
+            testEmails
+            Button(SchedulingWriteCopy.deleteEventTypeConfirm) {
+                model.confirmingDelete = true
             }
-            .padding(DistrictSpacing.gutter)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .buttonStyle(.districtDestructive)
+            .disabled(model.busy)
+            .accessibilityIdentifier(A11yID.SchedulingWrites.actionsDelete)
+            .confirmationDialog(
+                SchedulingWriteCopy.deleteEventTypeTitle,
+                isPresented: Binding(
+                    get: { model.confirmingDelete },
+                    set: { model.confirmingDelete = $0 }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button(SchedulingWriteCopy.deleteEventTypeConfirm, role: .destructive) {
+                    delete()
+                }
+                Button(SchedulingWriteCopy.cancel, role: .cancel) {
+                    model.confirmingDelete = false
+                }
+            } message: {
+                Text(SchedulingWriteCopy.deleteEventTypeBody)
+            }
+            messages
+            Button(SchedulingWriteCopy.cancel) {
+                dismiss()
+            }
+            .buttonStyle(.districtGhost)
         }
         .accessibilityIdentifier(A11yID.SchedulingWrites.actionsRoot)
     }
@@ -103,10 +96,7 @@ struct SchedulingEventTypeActionsSheet: View {
 
     private var messages: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            SchedulingWriteFailureStrip(message: model.state.failure?.message)
-            SchedulingWriteNotice(message: model.notice) {
-                model.dismissNotice()
-            }
+            SchedulingWriteOutcome(state: model.state, onDismiss: model.dismissNotice)
         }
         .accessibilityIdentifier(A11yID.SchedulingWrites.actionsNotice)
     }
@@ -116,7 +106,7 @@ struct SchedulingEventTypeActionsSheet: View {
     private func delete() {
         Task {
             await model.delete()
-            if case .saved = model.state {
+            if case .done = model.state {
                 dismiss()
             }
         }

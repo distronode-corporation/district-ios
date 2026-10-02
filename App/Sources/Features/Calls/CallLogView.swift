@@ -53,8 +53,8 @@ private struct CallLogScreen: View {
         switch model.state {
         case .loading:
             skeleton
-        case let .content(rows, isEnd, appending, appendFailure):
-            list(rows: rows, isEnd: isEnd, appending: appending, appendFailure: appendFailure)
+        case let .content(rows, _, appending, appendFailure):
+            list(rows: rows, appending: appending, appendFailure: appendFailure)
         case .empty:
             // ⚠️ Reachable only after a SUCCESSFUL first page, which is what makes an
             // empty state honest here rather than a failure wearing the wrong copy.
@@ -85,7 +85,6 @@ private struct CallLogScreen: View {
 
     private func list(
         rows: [CallSummary],
-        isEnd: Bool,
         appending: Bool,
         appendFailure: FailureText?
     ) -> some View {
@@ -105,48 +104,12 @@ private struct CallLogScreen: View {
                 .listRowSeparator(.hidden)
                 .onAppear { reachedEnd(of: rows, at: call) }
             }
-            footer(isEnd: isEnd, appending: appending, appendFailure: appendFailure)
+            PagedFeedFooter(appending: appending, appendFailure: appendFailure, onRetry: loadMore)
                 .listRowInsets(EdgeInsets())
                 .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
         .districtRefreshable { await model.refresh() }
-    }
-
-    /// ⛔ THE FOOTER REPORTS ONLY THE APPEND, so a failed extra page never destroys
-    /// the rows already on screen. Nothing is drawn once the feed has ended.
-    @ViewBuilder
-    private func footer(isEnd: Bool, appending: Bool, appendFailure: FailureText?) -> some View {
-        if appending {
-            // ⚠️ A spinner is correct HERE, unlike the cold-start case: the footer is
-            // a strip below rows the user is already reading, so there is no shape to
-            // stand in for and nothing to stop jumping.
-            HStack {
-                Spacer()
-                ProgressView()
-                Spacer()
-            }
-            .padding(DistrictSpacing.gutter)
-        } else if let appendFailure {
-            appendFooter(appendFailure)
-        }
-    }
-
-    private func appendFooter(_ failure: FailureText) -> some View {
-        VStack(spacing: DistrictSpacing.tight) {
-            Text("Could not load more")
-                .font(DistrictType.bodySmall)
-            Text(failure.message)
-                .font(DistrictType.caption)
-                .multilineTextAlignment(.center)
-            // ⚠️ Offered unconditionally here, unlike ``FailureView``, because the
-            // only thing this footer can do is ask for the same window again. A
-            // failure that cannot be retried still gets its sentence above.
-            Button("Try again") { loadMore() }
-                .buttonStyle(.districtSecondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(DistrictSpacing.gutter)
     }
 
     // MARK: - Actions

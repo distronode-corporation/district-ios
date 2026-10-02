@@ -370,12 +370,8 @@ final class PushRegistrar {
         let repository = container.inbox
         switch await repository.unreadCount(workspaceId: workspaceId) {
         case let .success(response):
-            // ⚠️ THE ENVELOPE IS AFFIRMED HERE BECAUSE THE REPOSITORY DOES NOT AFFIRM
-            // IT. Every sibling read on ``InboxRepository`` runs
-            // `ResponseEnvelope.affirm`; this one returns the decoded body as it
-            // stands, so a `{"success": false}` would otherwise badge whatever `count`
-            // arrived beside it.
-            guard response.success else { return .failed }
+            // ⚠️ ALREADY AFFIRMED: ``InboxRepository/unreadCount(workspaceId:)`` turns a
+            // `{"success": false}` into a failure, so a success here is a real count.
             UnreadBadge.set(response.count)
             return .newData
         case .failure:

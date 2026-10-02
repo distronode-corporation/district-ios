@@ -179,7 +179,7 @@ final class SchedulingHoursFormatTests: XCTestCase {
     // MARK: - todayInZone
 
     func testTodayIsPaddedAndZoned() throws {
-        let instant = try XCTUnwrap(SchedulingClock.parse("2026-09-12T02:30:00Z"))
+        let instant = try XCTUnwrap(WireInstant.parse("2026-09-12T02:30:00Z"))
         XCTAssertEqual(Hours.todayInZone("UTC", now: instant), "2026-09-12")
         XCTAssertEqual(Hours.todayInZone("America/Toronto", now: instant), "2026-09-11")
     }

@@ -22,7 +22,7 @@ struct SchedulingCaldavConnectSheet: View {
     }
 
     var body: some View {
-        SchedulingWriteSheetC(title: SchedulingWriteCopyC.caldavTitle) {
+        SchedulingWriteSheet(title: SchedulingWriteCopyC.caldavTitle) {
             presetPicker
             serverURLField
             usernameField
@@ -121,14 +121,14 @@ struct SchedulingCaldavConnectSheet: View {
     @ViewBuilder
     private var messages: some View {
         if let failure = model.failure {
-            SchedulingWriteFailureLineC(
+            SchedulingWriteFailureLine(
                 failure: failure,
                 onRetry: submit,
                 onDismiss: model.dismissFailure
             )
         }
         if let account = model.connectedAccountEmail {
-            SchedulingWriteNoticeLineC(
+            SchedulingWriteNoticeLine(
                 message: SchedulingWriteCopyC.caldavConnectedTo(account),
                 onDismiss: model.dismissConfirmation
             )

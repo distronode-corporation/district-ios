@@ -30,6 +30,22 @@ public struct OffsetSlice<Item: Sendable>: Sendable {
     public let isEnd: Bool
     /// The raw number of rows the server returned, before deduplication.
     public let receivedCount: Int
+    /// ⛔ THE PAGER WAS RESET WHILE THIS WINDOW WAS IN FLIGHT, SO IT WAS THROWN AWAY.
+    /// A NO-OP, NEVER THE END OF THE FEED: ``isEnd`` is false and ``items`` is empty,
+    /// and a caller must change nothing on screen, because whoever called
+    /// ``OffsetPager/reset()`` now owns the list.
+    public let isDiscarded: Bool
+
+    init(items: [Item], isEnd: Bool, receivedCount: Int, isDiscarded: Bool = false) {
+        self.items = items
+        self.isEnd = isEnd
+        self.receivedCount = receivedCount
+        self.isDiscarded = isDiscarded
+    }
+
+    static var discarded: OffsetSlice {
+        OffsetSlice(items: [], isEnd: false, receivedCount: 0, isDiscarded: true)
+    }
 }
 
 /// Offset-keyed paging over any District list endpoint.
@@ -61,6 +77,12 @@ public struct OffsetSlice<Item: Sendable>: Sendable {
 ///
 /// ⚠️ AN ACTOR because the set and the offset are mutable state that a scroll and
 /// a refresh can reach concurrently, and because `Item` is only `Sendable`.
+///
+/// ⛔ AND AN ACTOR IS NOT ENOUGH ON ITS OWN, BECAUSE IT IS REENTRANT. A
+/// ``loadNext(limit:)`` suspended on its fetch lets a ``reset()`` run, and when the
+/// stale page lands it would advance the RESET pager: scroll to the end, pull to
+/// refresh, and the next scroll asks for offset 100 while rows 50 to 99 are never
+/// shown, with no error anywhere. ``generation`` is what refuses that page.
 public actor OffsetPager<Item: Sendable> {
     public typealias Fetch = @Sendable (_ limit: Int, _ offset: Int) async -> Result<OffsetPage<Item>, ApiError>
 
@@ -74,6 +96,11 @@ public actor OffsetPager<Item: Sendable> {
     private var seenIDs: Set<String> = []
     private var nextOffset = 0
     private var finished = false
+
+    /// Bumped by every ``reset()``. A window whose generation changed across its
+    /// fetch belongs to a feed that no longer exists and comes back
+    /// ``OffsetSlice/isDiscarded``.
+    private var generation = 0
 
     public init(
         identify: @escaping @Sendable (Item) -> String?,
@@ -108,7 +135,13 @@ public actor OffsetPager<Item: Sendable> {
             return .success(OffsetSlice(items: [], isEnd: true, receivedCount: 0))
         }
 
-        switch await fetch(limit, nextOffset) {
+        let started = generation
+        let outcome = await fetch(limit, nextOffset)
+        // ⛔ CHECKED AFTER THE AWAIT, AND FOR A FAILURE TOO. A stale failure would
+        // put a "Could not load more" footer under a feed that never asked.
+        guard started == generation else { return .success(.discarded) }
+
+        switch outcome {
         case let .success(page):
             return .success(absorb(page, requested: limit))
         case let .failure(error):
@@ -130,6 +163,45 @@ public actor OffsetPager<Item: Sendable> {
         seenIDs.removeAll()
         nextOffset = 0
         finished = false
+        generation += 1
+    }
+
+    /// One window that either carries NEW rows, reaches the end, or was discarded.
+    ///
+    /// ⛔ AN EMPTY SLICE WITH `isEnd` FALSE IS NOT THE END, and treating it as one
+    /// truncates the feed silently. A slice is deduplicated, so a window whose every
+    /// row had already been seen comes back empty while more rows remain; a list's
+    /// own trigger is the LAST ROW APPEARING, and an empty slice adds no new last
+    /// row, so nothing would ever ask again. Fetching on through those windows is the
+    /// only way the trigger stays live.
+    ///
+    /// ⚠️ BOUNDED BY `maxEmptyWindows`, because "keep going until something new
+    /// arrives" against a churning feed is an unbounded request loop. Stopping early
+    /// costs a scroll that has to be nudged; not stopping costs the API.
+    ///
+    /// ⛔ A DISCARDED WINDOW STOPS THE LOOP. Going on would fetch from the RESET
+    /// pager's offset and hand its rows to a caller still appending to the old feed.
+    public func loadNonEmptyWindow(limit: Int, maxEmptyWindows: Int) async -> Result<OffsetSlice<Item>, ApiError> {
+        // ⚠️ WHAT THE CEILING ANSWERS: the last empty, unfinished window, so the
+        // caller keeps its footer and the next scroll asks again.
+        var last = OffsetSlice<Item>(items: [], isEnd: false, receivedCount: 0)
+        let started = generation
+        for _ in 0 ..< maxEmptyWindows {
+            let outcome = await loadNext(limit: limit)
+            // ⚠️ THE LOOP'S OWN GENERATION, NOT ONLY EACH WINDOW'S. A reset landing
+            // BETWEEN two windows would otherwise start the next one on the new feed.
+            guard started == generation else { return .success(.discarded) }
+            switch outcome {
+            case let .success(slice):
+                guard slice.items.isEmpty, !slice.isEnd else {
+                    return .success(slice)
+                }
+                last = slice
+            case let .failure(error):
+                return .failure(error)
+            }
+        }
+        return .success(last)
     }
 
     private func absorb(_ page: OffsetPage<Item>, requested: Int) -> OffsetSlice<Item> {

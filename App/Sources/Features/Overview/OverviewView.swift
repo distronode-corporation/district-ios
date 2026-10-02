@@ -179,11 +179,15 @@ struct OverviewView: View {
         let metrics = response.metrics
         return VStack(spacing: DistrictSpacing.row) {
             HStack(spacing: DistrictSpacing.row) {
-                MetricTile(label: "Total Calls Routed", value: "\(metrics.totalCalls)", caption: "Cumulative")
-                MetricTile(label: "Weekly Call Volume", value: "\(metrics.callsThisWeek)", caption: "Last 7 days")
+                DistrictMetricTile(label: "Total Calls Routed", value: "\(metrics.totalCalls)", caption: "Cumulative")
+                DistrictMetricTile(
+                    label: "Weekly Call Volume",
+                    value: "\(metrics.callsThisWeek)",
+                    caption: "Last 7 days"
+                )
             }
             HStack(spacing: DistrictSpacing.row) {
-                MetricTile(label: "Customer Contacts", value: "\(metrics.totalContacts)", caption: "CRM")
+                DistrictMetricTile(label: "Customer Contacts", value: "\(metrics.totalContacts)", caption: "CRM")
                 // ⛔ THE SERVER'S LABEL, NOT A LOCAL FORMAT. Two duration formats
                 // ship in this product and disagree on the same input: this tile
                 // omits a zero minutes component ("45s") while a call row always
@@ -201,7 +205,7 @@ struct OverviewView: View {
                 // SAME NAME, which takes four statuses within the selected window. The
                 // two numbers are both correct and will not match; the captions are
                 // what tell an operator why. Do not make them agree by editing the copy.
-                MetricTile(
+                DistrictMetricTile(
                     label: "Avg Call Duration",
                     value: response.avgDurationLabel,
                     caption: "Completed, all time"
@@ -337,48 +341,6 @@ struct OverviewView: View {
     }
 }
 
-/// One KPI tile.
-///
-/// ⚠️ THE LABEL IS THE MONO EYEBROW, NOT A BOLD SMALL HEADING. Android's tiles used
-/// `labelSmall` at Material's default weight, which read as a heading competing with
-/// the number beneath it; the eyebrow demotes it to an annotation so the value is
-/// unambiguously the subject.
-private struct MetricTile: View {
-    let label: String
-    let value: String
-    let caption: String
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    private var colors: DistrictColors {
-        .resolve(colorScheme)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            DistrictEyebrow(text: label)
-            Text(value)
-                .font(DistrictType.metric)
-                .foregroundStyle(colors.foreground)
-            Text(caption)
-                .font(DistrictType.caption)
-                .foregroundStyle(colors.mutedForeground)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(DistrictSpacing.card)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
-        // ⚠️ THE LABEL AND VALUE ARE ONE ANNOUNCEMENT. Read separately a screen
-        // reader says "Total Calls Routed" then "412" with no stated relationship;
-        // paired, the tile announces itself as a fact.
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(label), \(value)")
-    }
-}
-
 /// One recent-activity row.
 ///
 /// ⚠️ THE DISPLAY RULES ARE DERIVED HERE, ONCE, and they are Android's
@@ -439,10 +401,10 @@ private struct ActivityRow: View {
     /// column is settable only from the web settings page, which this client does not
     /// implement, so `time` is a Toronto wall clock, unlabelled, for every operator who
     /// has not opened the browser app. `createdAt` is the true instant and
-    /// ``ContactDates/readable(_:)`` is the formatter the rest of this app uses.
+    /// ``WireDate/display(_:in:)`` is the formatter the rest of this app uses.
     private var subtitle: String {
         let direction = call.direction == Self.outboundDirection ? "Outbound" : "Inbound"
-        return "\(direction) · \(ContactDates.readable(call.createdAt))"
+        return "\(direction) · \(WireDate.display(call.createdAt))"
     }
 
     /// ⛔ DERIVED FROM THE DISPLAY STATUS, WHICH IS THE WHOLE POINT. The server has

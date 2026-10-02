@@ -50,11 +50,7 @@ struct SdrCampaignCard: View {
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
+        .districtCardSurface()
     }
 
     private var header: some View {
@@ -213,13 +209,10 @@ struct WorkflowRowView: View {
 /// every workflow for as long as it takes its trigger to fire; a blank would read as a
 /// missing value rather than as an answer.
 ///
-/// ⚠️ THE TIMESTAMP GOES THROUGH ``SchedulingTimestamp/display(_:)``, WHICH LIVES UNDER
-/// `Features/Scheduling/` AND IS NOT NAMED FOR THIS SCREEN. Reaching for it rather than
-/// writing a second parser is deliberate: it already pays for the trap that
-/// `ISO8601DateFormatter` rejects fractional seconds unless `withFractionalSeconds` is
-/// set and rejects their ABSENCE when it is, so two formats have to be tried, and it
-/// falls back to the raw string rather than blanking. Promoting it out of that feature is
-/// worth doing, the same call `AnalyticsCard` records about its own card shell.
+/// ⚠️ THE TIMESTAMP GOES THROUGH ``WireDate/display(_:in:)`` RATHER THAN A SECOND
+/// PARSER. It already pays for the trap that an ISO-8601 parser rejects fractional
+/// seconds unless told to expect them and rejects their ABSENCE when it is, so two
+/// formats have to be tried, and it falls back to the raw string rather than blanking.
 struct LatestRunBadge: View {
     let workflow: WorkflowListItem
 
@@ -233,7 +226,7 @@ struct LatestRunBadge: View {
         if let run = workflow.latestRun {
             VStack(alignment: .trailing, spacing: 2) {
                 DistrictBadge(text: run.status, tone: .forRunStatus(run.status))
-                Text(SchedulingTimestamp.display(run.startedAt))
+                Text(WireDate.display(run.startedAt))
                     .font(DistrictType.labelSmall)
                     .foregroundStyle(colors.mutedForeground)
                     .lineLimit(1)
@@ -382,7 +375,7 @@ struct RunCard: View {
         }
         .padding(DistrictSpacing.row)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
+        .districtCardSurface(bordered: false)
     }
 
     /// ⚠️ THREE FACTS ON ONE LINE IS A DEFAULT-SIZE LUXURY. A status badge and two
@@ -395,7 +388,7 @@ struct RunCard: View {
             : AnyLayout(HStackLayout(spacing: DistrictSpacing.tight))
         return layout {
             DistrictBadge(text: run.status, tone: .forRunStatus(run.status))
-            Text(SchedulingTimestamp.display(run.startedAt))
+            Text(WireDate.display(run.startedAt))
                 .font(DistrictType.labelSmall)
                 .foregroundStyle(colors.mutedForeground)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -407,7 +400,7 @@ struct RunCard: View {
 
     private var finishedLine: String {
         guard let finished = run.finishedAt else { return WorkflowsCopy.runUnfinished }
-        return SchedulingTimestamp.display(finished)
+        return WireDate.display(finished)
     }
 
     /// ⛔ THE `reason` IS THE MOST USEFUL LINE ON THE CARD. The engine attaches one when

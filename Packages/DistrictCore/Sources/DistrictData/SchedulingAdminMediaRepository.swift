@@ -181,13 +181,4 @@ public struct SchedulingUploadFile: Equatable, Sendable {
     /// upload costs one request rather than a 5 MiB body pushed at someone else's
     /// service first.
     public static let maxBytes = 5 * 1024 * 1024
-
-    /// Whether this file clears both cheap checks the route makes.
-    ///
-    /// ⚠️ ADVISORY. It answers the same question the route answers, one round trip
-    /// earlier and with a message the app can word itself; a false here means "do
-    /// not send", and a true means only "the two checks a client can make passed".
-    public var isProbablyAcceptable: Bool {
-        Self.acceptedMimeTypes.contains(mimeType) && !bytes.isEmpty && bytes.count <= Self.maxBytes
-    }
 }

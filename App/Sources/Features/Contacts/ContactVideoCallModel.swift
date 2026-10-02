@@ -133,13 +133,6 @@ final class ContactVideoCallModel {
         phase = .idle
     }
 
-    /// Acknowledge a navigation, so returning to this screen does not re-navigate.
-    func acknowledgeNavigation() {
-        if case .sent = phase {
-            phase = .idle
-        }
-    }
-
     // MARK: - Internals
 
     /// Send the invite, then report the room.

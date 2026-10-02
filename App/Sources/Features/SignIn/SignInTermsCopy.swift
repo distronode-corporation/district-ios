@@ -1,3 +1,4 @@
+import DistrictNetwork
 import Foundation
 
 /// The terms line shown under the sign-in controls, and the two pages it opens.
@@ -42,18 +43,13 @@ enum SignInTermsCopy {
         "\(prefix) \(termsName)\(conjunction)\(privacyName)\(terminator)"
     }
 
-    /// ⛔ FULL URLS RATHER THAN PATHS ON THE API BASE, for the reason
+    /// ⛔ THE PRODUCTION HOST RATHER THAN THE CONFIGURED API BASE, for the reason
     /// ``AccountView/accountDeletionURL`` gives: these are legal pages that must
     /// resolve for a reviewer with no session and no app build config, and they are
     /// the URLs declared in the App Store listing's own Privacy Policy and
     /// End User Licence Agreement fields. A build pointed at a staging host still
     /// shows the published terms, which is correct — the terms are the company's,
     /// not the environment's.
-    ///
-    /// ⚠️ SILENT ON A NIL URL RATHER THAN FORCE-UNWRAPPING, matching
-    /// `AccountView.openDeletionPage`. Both literals parse, so the guard at the call
-    /// site is unreachable today; a crash on the sign-in screen because somebody
-    /// edited a string is not a trade worth making.
-    static let termsURL = URL(string: "https://www.distronode.com/terms")
-    static let privacyURL = URL(string: "https://www.distronode.com/privacy")
+    static let termsURL = ApiClient.productionBaseURL.appending(path: "terms")
+    static let privacyURL = ApiClient.productionBaseURL.appending(path: "privacy")
 }

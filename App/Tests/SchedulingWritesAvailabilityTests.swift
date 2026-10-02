@@ -180,7 +180,7 @@ final class SchedulingWritesAvailabilityTests: XCTestCase {
         await model.save()
 
         XCTAssertEqual(SchedulingWritesFixtures.calls(transport).count, 1)
-        XCTAssertEqual(model.notice, "Nothing to save.")
+        XCTAssertEqual(model.state.notice, "Nothing to save.")
     }
 
     /// ⛔ SAVE IS DISABLED WHILE A WINDOW IS INVALID, unlike the event-type

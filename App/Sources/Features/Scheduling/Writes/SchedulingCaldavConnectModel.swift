@@ -267,7 +267,7 @@ final class SchedulingCaldavConnectModel {
     /// username or the password, and telling somebody to check all three would send
     /// them to re-type a credential that was almost certainly correct.
     private static func connectFailure(_ error: any Error) -> FailureText {
-        let mapped = FailureText.schedulingWriteC(thrown: error)
+        let mapped = SchedulingFailureCopy.text(forAny: error)
         let admin = (error as? SchedulingAdminError) ?? .unknown
         if case .decoding = admin {
             return mapped

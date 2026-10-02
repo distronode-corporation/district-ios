@@ -13,7 +13,7 @@ struct SchedulingBookingReassignSheet: View {
     let onClose: () -> Void
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingBookingWriteCopy.reassignTitle,
             subtitle: SchedulingBookingWriteCopy.reassignBody,
             cancelLabel: SchedulingBookingWriteCopy.reassignCancel,
@@ -43,7 +43,7 @@ struct SchedulingBookingReassignSheet: View {
                 // ⚠️ NOT AN ERROR. Every other scheduler user is archived or is
                 // already this booking's host, which is a fact about the tenancy
                 // rather than a failure to look.
-                SchedulingWritesBHint(text: SchedulingBookingWriteCopy.reassignNoHosts)
+                SchedulingWriteHint(text: SchedulingBookingWriteCopy.reassignNoHosts)
             } else {
                 picker(rows)
             }

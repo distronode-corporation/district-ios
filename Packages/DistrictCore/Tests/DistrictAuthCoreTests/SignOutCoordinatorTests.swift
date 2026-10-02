@@ -96,7 +96,9 @@ final class SignOutCoordinatorTests: XCTestCase {
 
         await signOut.signOut()
 
-        await expectEqual([.read, .markRevokePending, .clear]) { await store.operations }
+        // ⚠️ `.readRevoke` IS THE DRAIN-FIRST CHECK: a held entry is chased
+        // before the slot is overwritten (see ``RevokeOutbox``).
+        await expectEqual([.read, .readRevoke, .markRevokePending, .clear]) { await store.operations }
     }
 
     /// ⛔ AND ON THE ACCEPTED PATH THE OUTBOX IS CLEARED BEFORE THE WIPE TOO, so
@@ -111,7 +113,7 @@ final class SignOutCoordinatorTests: XCTestCase {
 
         await signOut.signOut()
 
-        await expectEqual([.read, .markRevokePending, .clearRevokePending, .clear]) {
+        await expectEqual([.read, .readRevoke, .markRevokePending, .clearRevokePending, .clear]) {
             await store.operations
         }
     }

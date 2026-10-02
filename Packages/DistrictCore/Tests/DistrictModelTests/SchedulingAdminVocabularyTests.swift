@@ -37,7 +37,7 @@ final class SchedulingAdminVocabularyTests: XCTestCase {
     /// sent; a client that validated the other five would refuse every phone
     /// consultation in the product.
     func testExactlyTwoTypesRefuseANonURLValue() {
-        let urlKinds = SchedulingLocationType.allCases.filter(\.refusesANonURLValue)
+        let urlKinds = SchedulingLocationType.allCases.filter { $0.valueKind == .url }
         XCTAssertEqual(urlKinds.map(\.rawValue), ["custom_video", "link"])
     }
 

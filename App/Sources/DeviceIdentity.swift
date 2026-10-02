@@ -1,3 +1,4 @@
+import DistrictAuthCore
 import Foundation
 
 /// The installation id sent as `deviceId` on token exchange.
@@ -26,5 +27,47 @@ enum DeviceIdentity {
         let fresh = UUID().uuidString
         defaults.set(fresh, forKey: defaultsKey)
         return fresh
+    }
+}
+
+/// ``InstallationLedger`` over `UserDefaults`, for the reason ``DeviceIdentity`` is
+/// there too: it is erased with the app, and the Keychain is not.
+///
+/// ⛔ "FRESH INSTALL" IS READ OFF THE DEVICE ID'S ABSENCE, SO ``begin(defaults:)`` MUST
+/// RUN BEFORE ``DeviceIdentity/current(defaults:)``, which mints one. A dedicated
+/// "first launch" key would read as absent on every EXISTING installation the first
+/// time a build carrying this code runs, and would sign every current user out on
+/// update. Every signed-in installation has a device id, because the token exchange
+/// sends one, so its absence can only wipe a store that holds no session of this
+/// installation's own.
+///
+/// ⚠️ THE OWED FLAG IS ITS OWN KEY, NOT "THE DEVICE ID IS MISSING" READ AGAIN LATER,
+/// because the id is minted in the same launch: a wipe that failed (a store that
+/// would not answer) must still be owed on the next launch, by which time the id
+/// exists.
+final class UserDefaultsInstallationLedger: InstallationLedger, @unchecked Sendable {
+    static let owedKey = "com.distronode.district.previousInstallWipeOwed"
+
+    private let defaults: UserDefaults
+
+    private init(defaults: UserDefaults) {
+        self.defaults = defaults
+    }
+
+    /// Raise the owed flag if this is the first run of this installation, and
+    /// return the ledger. ⛔ Before ``DeviceIdentity/current(defaults:)``; see the type.
+    static func begin(defaults: UserDefaults = .standard) -> UserDefaultsInstallationLedger {
+        if defaults.string(forKey: DeviceIdentity.defaultsKey) == nil {
+            defaults.set(true, forKey: owedKey)
+        }
+        return UserDefaultsInstallationLedger(defaults: defaults)
+    }
+
+    var owesPreviousInstallWipe: Bool {
+        defaults.bool(forKey: Self.owedKey)
+    }
+
+    func settle() {
+        defaults.removeObject(forKey: Self.owedKey)
     }
 }
