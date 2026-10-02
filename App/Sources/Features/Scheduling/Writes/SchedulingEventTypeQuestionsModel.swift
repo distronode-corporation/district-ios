@@ -67,7 +67,6 @@ final class SchedulingEventTypeQuestionsModel {
     private(set) var loadState: SchedulingWriteState = .idle
     private(set) var state: SchedulingWriteState = .idle
     private(set) var validation: String?
-    private(set) var notice: String?
 
     /// The editor sheet's contents, or nil when it is closed.
     private(set) var editing: SchedulingQuestionForm?
@@ -100,13 +99,13 @@ final class SchedulingEventTypeQuestionsModel {
     }
 
     func load() async {
-        loadState = .saving
+        loadState = .working
         do {
             questions = try await admin.eventTypeQuestions(workspaceId: workspaceId, slug: slug)
                 .sorted { $0.position < $1.position }
-            loadState = .saved
+            loadState = .idle
         } catch {
-            loadState = .failed(SchedulingEventTypeEditorModel.failure(error))
+            loadState = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -170,7 +169,6 @@ final class SchedulingEventTypeQuestionsModel {
     }
 
     func dismissNotice() {
-        notice = nil
         validation = nil
         state = .idle
     }
@@ -178,14 +176,14 @@ final class SchedulingEventTypeQuestionsModel {
     // MARK: - The writes
 
     func submit() async {
-        guard let form = editing, !state.isSaving else { return }
+        guard let form = editing, !state.isWorking else { return }
         if let error = form.error {
             validation = error
             return
         }
         guard let position = SchedulingEventTypeForm.whole(form.position, atLeast: 0) else { return }
         validation = nil
-        state = .saving
+        state = .working
         do {
             if let id = form.id {
                 try await patch(form: form, id: id, position: position)
@@ -195,7 +193,7 @@ final class SchedulingEventTypeQuestionsModel {
             editing = nil
             await reread()
         } catch {
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -208,8 +206,7 @@ final class SchedulingEventTypeQuestionsModel {
         draft.options = form.wireOptions
         draft.position = position
         _ = try await admin.createEventTypeQuestion(workspaceId: workspaceId, slug: slug, draft: draft)
-        state = .saved
-        notice = SchedulingWriteCopy.questionAdded
+        state = .done(SchedulingWriteCopy.questionAdded)
     }
 
     private func patch(form: SchedulingQuestionForm, id: String, position: Int) async throws {
@@ -225,41 +222,19 @@ final class SchedulingEventTypeQuestionsModel {
             id: id,
             changes: changes
         )
-        state = .saved
-        notice = SchedulingWriteCopy.questionSaved
-    }
-
-    /// Move one question, by writing only its own `position`.
-    func reposition(_ question: SchedulingQuestion, to position: Int) async {
-        guard !state.isSaving, position >= 0, position != question.position else { return }
-        state = .saving
-        var changes = SchedulingQuestionChanges()
-        changes.position = position
-        do {
-            _ = try await admin.patchEventTypeQuestion(
-                workspaceId: workspaceId,
-                slug: slug,
-                id: question.id,
-                changes: changes
-            )
-            state = .saved
-            await reread()
-        } catch {
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
-        }
+        state = .done(SchedulingWriteCopy.questionSaved)
     }
 
     func delete() async {
-        guard let question = confirmingDelete, !state.isSaving else { return }
+        guard let question = confirmingDelete, !state.isWorking else { return }
         confirmingDelete = nil
-        state = .saving
+        state = .working
         do {
             try await admin.deleteEventTypeQuestion(workspaceId: workspaceId, slug: slug, id: question.id)
-            state = .saved
-            notice = SchedulingWriteCopy.questionDeleted
+            state = .done(SchedulingWriteCopy.questionDeleted)
             await reread()
         } catch {
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -272,7 +247,7 @@ final class SchedulingEventTypeQuestionsModel {
                 .sorted { $0.position < $1.position }
             onSaved(questions)
         } catch {
-            loadState = .failed(SchedulingEventTypeEditorModel.failure(error))
+            loadState = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 }

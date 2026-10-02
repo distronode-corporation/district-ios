@@ -141,7 +141,7 @@ final class SchedulingWritesCCalendarTests: XCTestCase {
         model.appPassword = Self.password
         await model.connect()
 
-        XCTAssertEqual(model.failure?.message, SchedulingWriteCopyC.forbidden)
+        XCTAssertEqual(model.failure?.message, SchedulingFailureCopy.forbidden)
     }
 
     func test_IOS_SCHW_C46_everyRefusedCaldavFormSpendsNoRequest() async {
@@ -311,7 +311,8 @@ final class SchedulingWritesCCalendarTests: XCTestCase {
         await model.confirm()
 
         XCTAssertTrue(model.removedDestination)
-        model.dismissDestinationWarning()
+        // ⚠️ THE NEXT PROMPT CLEARS IT: the warning is about the row just removed.
+        model.ask(connection)
         XCTAssertFalse(model.removedDestination)
     }
 
@@ -327,7 +328,7 @@ final class SchedulingWritesCCalendarTests: XCTestCase {
         model.ask(connection)
         await model.confirm()
 
-        XCTAssertEqual(model.failure?.message, SchedulingWriteCopyC.unavailable)
+        XCTAssertEqual(model.failure?.message, SchedulingFailureCopy.unavailable)
         XCTAssertFalse(model.removedDestination)
     }
 }

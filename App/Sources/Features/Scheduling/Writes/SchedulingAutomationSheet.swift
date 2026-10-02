@@ -6,7 +6,7 @@ struct SchedulingAutomationSheet: View {
     let onClose: () -> Void
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingSettingsWriteCopy.automationTitle,
             subtitle: nil,
             cancelLabel: SchedulingTeamWriteCopy.close,
@@ -19,7 +19,7 @@ struct SchedulingAutomationSheet: View {
                 recordings
                 notetaker
                 assistant
-                SchedulingWritesBRejection(message: model.rejected)
+                SchedulingWriteRejection(message: model.rejected)
             }
         } onCancel: {
             onClose()
@@ -41,7 +41,7 @@ struct SchedulingAutomationSheet: View {
                 )
                 .disabled(model.busy || !model.canEnableRecordings)
                 .accessibilityIdentifier(A11yID.SchedulingWritesB.automationRecordings)
-                SchedulingWritesBHint(text: model.recordingsHint)
+                SchedulingWriteHint(text: model.recordingsHint)
             }
         }
     }
@@ -55,7 +55,7 @@ struct SchedulingAutomationSheet: View {
                 )
                 .disabled(model.busy)
                 .accessibilityIdentifier(A11yID.SchedulingWritesB.automationNotetaker)
-                SchedulingWritesBHint(text: SchedulingSettingsWriteCopy.notetakerHint)
+                SchedulingWriteHint(text: SchedulingSettingsWriteCopy.notetakerHint)
             }
         }
     }
@@ -73,7 +73,7 @@ struct SchedulingAutomationSheet: View {
                 )
                 .disabled(model.busy)
                 .accessibilityIdentifier(A11yID.SchedulingWritesB.automationAssistant)
-                SchedulingWritesBHint(text: SchedulingSettingsWriteCopy.assistantHint)
+                SchedulingWriteHint(text: SchedulingSettingsWriteCopy.assistantHint)
                 SettingsField(
                     label: SchedulingSettingsWriteCopy.assistantInstructionsLabel,
                     text: Binding(get: { model.instructions }, set: { model.editInstructions($0) }),
@@ -81,7 +81,7 @@ struct SchedulingAutomationSheet: View {
                     multiline: true
                 )
                 .accessibilityIdentifier(A11yID.SchedulingWritesB.automationInstructions)
-                SchedulingWritesBHint(text: SchedulingSettingsWriteCopy.assistantInstructionsHint)
+                SchedulingWriteHint(text: SchedulingSettingsWriteCopy.assistantInstructionsHint)
             }
         }
     }

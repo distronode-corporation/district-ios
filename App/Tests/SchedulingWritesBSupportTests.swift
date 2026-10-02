@@ -126,12 +126,12 @@ enum SchedulingWritesBFixtures {
     /// ⚠️ THE SENTENCE, NOT THE CASE. Every one of these assertions is about what a
     /// person is told, and a test that only checked "it failed" would pass against a
     /// failure explaining the wrong thing.
-    static func done(_ state: SchedulingWritesBState) -> String? {
+    static func done(_ state: SchedulingWriteState) -> String? {
         guard case let .done(message) = state else { return nil }
         return message
     }
 
-    static func failure(_ state: SchedulingWritesBState) -> String? {
+    static func failure(_ state: SchedulingWriteState) -> String? {
         guard case let .failed(text) = state else { return nil }
         return text.message
     }

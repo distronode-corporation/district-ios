@@ -22,7 +22,7 @@ import Observation
 @MainActor
 @Observable
 final class SchedulingBookingNotesModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
 
     private let admin: SchedulingAdminRepository
     private let workspaceId: String
@@ -56,7 +56,7 @@ final class SchedulingBookingNotesModel {
             state = .done(SchedulingBookingWriteCopy.regenerateDone)
             onQueued(answer)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 }

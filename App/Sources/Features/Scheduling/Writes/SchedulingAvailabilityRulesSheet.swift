@@ -23,26 +23,19 @@ struct SchedulingAvailabilityRulesSheet: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-                Text(SchedulingWriteCopy.hoursTitle)
-                    .font(DistrictType.title)
-                    .foregroundStyle(colors.foreground)
-                ForEach(Array(SchedulingWriteCopy.weekDayNames.enumerated()), id: \.offset) { index, name in
-                    dayRow(index, name)
-                }
-                messages
-                SchedulingWriteButtons(
-                    saveTitle: SchedulingWriteCopy.save,
-                    saving: model.state.isSaving,
-                    enabled: model.canSave,
-                    saveIdentifier: A11yID.SchedulingWrites.hoursSave,
-                    onCancel: { dismiss() },
-                    onSave: { Task { await model.save() } }
-                )
+        SchedulingWriteSheet(title: SchedulingWriteCopy.hoursTitle) {
+            ForEach(Array(SchedulingWriteCopy.weekDayNames.enumerated()), id: \.offset) { index, name in
+                dayRow(index, name)
             }
-            .padding(DistrictSpacing.gutter)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            messages
+            SchedulingWriteButtons(
+                saveTitle: SchedulingWriteCopy.save,
+                saving: model.state.isWorking,
+                enabled: model.canSave,
+                saveIdentifier: A11yID.SchedulingWrites.hoursSave,
+                onCancel: { dismiss() },
+                onSave: { Task { await model.save() } }
+            )
         }
         .accessibilityIdentifier(A11yID.SchedulingWrites.hoursRoot)
         .task {
@@ -109,17 +102,14 @@ struct SchedulingAvailabilityRulesSheet: View {
                 }
                 .buttonStyle(.districtGhost)
             }
-            SchedulingWriteFailureStrip(message: error)
+            SchedulingWriteRejection(message: error)
         }
     }
 
     private var messages: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            SchedulingWriteFailureStrip(message: model.loadState.failure?.message)
-            SchedulingWriteFailureStrip(message: model.state.failure?.message)
-            SchedulingWriteNotice(message: model.notice) {
-                model.dismissNotice()
-            }
+            SchedulingWriteOutcome(state: model.loadState)
+            SchedulingWriteOutcome(state: model.state, onDismiss: model.dismissNotice)
         }
     }
 }

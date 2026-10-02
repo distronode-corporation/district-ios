@@ -23,7 +23,6 @@ final class SchedulingAvailabilityOverridesModel {
     private(set) var loadState: SchedulingWriteState = .idle
     private(set) var state: SchedulingWriteState = .idle
     private(set) var validation: String?
-    private(set) var notice: String?
 
     /// The add sheet's contents, or nil when it is closed.
     private(set) var adding: SchedulingOverrideForm?
@@ -52,13 +51,13 @@ final class SchedulingAvailabilityOverridesModel {
     }
 
     func load() async {
-        loadState = .saving
+        loadState = .working
         do {
             overrides = try await admin.availabilityOverrides(workspaceId: workspaceId)
             rows = SchedulingHoursFormat.upcomingOverrides(overrides, today: today)
-            loadState = .saved
+            loadState = .idle
         } catch {
-            loadState = .failed(SchedulingEventTypeEditorModel.failure(error))
+            loadState = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -97,7 +96,6 @@ final class SchedulingAvailabilityOverridesModel {
     }
 
     func dismissNotice() {
-        notice = nil
         validation = nil
         state = .idle
     }
@@ -105,22 +103,21 @@ final class SchedulingAvailabilityOverridesModel {
     // MARK: - The writes
 
     func submit() async {
-        guard let form = adding, !state.isSaving else { return }
+        guard let form = adding, !state.isWorking else { return }
         if let error = form.error {
             validation = error
             return
         }
         guard let draft = form.draft() else { return }
         validation = nil
-        state = .saving
+        state = .working
         do {
             // ⚠️ THE ANSWER IS A UNION AND IS DELIBERATELY DISCARDED. A single date
             // answers the row, a range answers a summary with no `id` in it at all,
             // and neither says where it sits among the others — which is what the
             // table draws. The re-read is the cheaper correct answer.
             _ = try await admin.createAvailabilityOverride(workspaceId: workspaceId, draft: draft)
-            state = .saved
-            notice = SchedulingWriteCopy.overrideAdded
+            state = .done(SchedulingWriteCopy.overrideAdded)
             adding = nil
             await reread()
         } catch {
@@ -131,14 +128,14 @@ final class SchedulingAvailabilityOverridesModel {
             // not `scheduling_not_ready` arrives as `.unknown` and gets the generic
             // sentence. Divergence from the browser, recorded rather than papered
             // over with a guess about which refusal this was.
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
     func delete() async {
-        guard let row = confirmingDelete, !state.isSaving else { return }
+        guard let row = confirmingDelete, !state.isWorking else { return }
         confirmingDelete = nil
-        state = .saving
+        state = .working
         do {
             // ⛔ `target` IS THE ID A DELETE NAMES AND `kind` IS WHICH OP NAMES IT —
             // the row's own id for a single day, the GROUP's for a span. A fortnight
@@ -153,11 +150,10 @@ final class SchedulingAvailabilityOverridesModel {
                     groupId: row.target
                 )
             }
-            state = .saved
-            notice = SchedulingWriteCopy.overrideDeleted
+            state = .done(SchedulingWriteCopy.overrideDeleted)
             await reread()
         } catch {
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -167,7 +163,7 @@ final class SchedulingAvailabilityOverridesModel {
             rows = SchedulingHoursFormat.upcomingOverrides(overrides, today: today)
             onSaved(overrides)
         } catch {
-            loadState = .failed(SchedulingEventTypeEditorModel.failure(error))
+            loadState = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 }

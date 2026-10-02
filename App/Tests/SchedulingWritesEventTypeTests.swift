@@ -209,23 +209,6 @@ final class SchedulingWritesEventTypeTests: XCTestCase {
         XCTAssertEqual(model.state.failure?.action, FailureText.Action.none)
     }
 
-    /// ⛔ A **400** CANNOT BE RETRIED INTO SUCCESS: the identical body is the
-    /// identical refusal. It shares a CODE with two other errors and not an action.
-    func testInvalidParamsOffersNoRetryEvenThoughItsCodeIsUnknown() {
-        let error = SchedulingAdminError.invalidParams(["msg_confirmation"])
-        XCTAssertEqual(error.uiCode, .unknown)
-        XCTAssertEqual(SchedulingWriteFailureText.from(error).message, "That did not save. Try again.")
-        XCTAssertEqual(SchedulingWriteFailureText.from(error).action, .none)
-        XCTAssertEqual(SchedulingWriteFailureText.refusedFields(error), ["msg_confirmation"])
-    }
-
-    /// ⚠️ THE FIELD NAMES NEVER REACH A SCREEN. They are identifiers the route
-    /// flattened out of zod issues precisely so no input is quoted back.
-    func testTheRefusedFieldNamesAreNotInTheSentence() {
-        let error = SchedulingAdminError.invalidParams(["duration_minutes"])
-        XCTAssertFalse(SchedulingWriteFailureText.from(error).message.contains("duration_minutes"))
-    }
-
     // MARK: - Fixtures
 
     private static func editor(

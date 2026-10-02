@@ -25,9 +25,9 @@ import Observation
 @MainActor
 @Observable
 final class SchedulingBrandingModel {
-    private(set) var state: SchedulingWritesBState = .idle
-    private(set) var logoState: SchedulingWritesBState = .idle
-    private(set) var bannerState: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
+    private(set) var logoState: SchedulingWriteState = .idle
+    private(set) var bannerState: SchedulingWriteState = .idle
     private(set) var branding: SchedulingBranding
 
     private(set) var businessName: String
@@ -168,7 +168,7 @@ final class SchedulingBrandingModel {
             try await adopt(admin.updateBranding(workspaceId: workspaceId, update))
             state = .done(SchedulingSettingsWriteCopy.brandingDone)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -190,7 +190,7 @@ final class SchedulingBrandingModel {
             await reread()
             set(.done(SchedulingSettingsWriteCopy.imageUploaded(Self.label(target))), for: target)
         } catch {
-            set(.failed(SchedulingWritesBFailure.text(for: error)), for: target)
+            set(.failed(SchedulingFailureCopy.text(forAny: error)), for: target)
         }
     }
 
@@ -219,7 +219,7 @@ final class SchedulingBrandingModel {
             await reread()
             set(.done(SchedulingSettingsWriteCopy.imageRemoved(Self.label(target))), for: target)
         } catch {
-            set(.failed(SchedulingWritesBFailure.text(for: error)), for: target)
+            set(.failed(SchedulingFailureCopy.text(forAny: error)), for: target)
         }
     }
 
@@ -239,7 +239,7 @@ final class SchedulingBrandingModel {
         onSaved(fresh)
     }
 
-    private func set(_ next: SchedulingWritesBState, for target: SchedulingAdminUploadTarget) {
+    private func set(_ next: SchedulingWriteState, for target: SchedulingAdminUploadTarget) {
         if target == .logo {
             logoState = next
         } else {

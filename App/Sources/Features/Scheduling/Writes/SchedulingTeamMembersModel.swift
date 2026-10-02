@@ -25,7 +25,7 @@ import Observation
 @MainActor
 @Observable
 final class SchedulingTeamMembersModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
     private(set) var team: SchedulingTeam
     private(set) var users: SchedulingReassignHostsState = .loading
     private(set) var pickedUserId: String?
@@ -75,7 +75,7 @@ final class SchedulingTeamMembersModel {
         do {
             users = try await .ready(admin.schedulerUsers(workspaceId: workspaceId))
         } catch {
-            users = .failed(SchedulingWritesBFailure.text(for: error))
+            users = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -138,14 +138,14 @@ final class SchedulingTeamMembersModel {
         do {
             _ = try await admin.removeTeamMember(workspaceId: workspaceId, teamId: team.id, userId: userId)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
             return
         }
         do {
             try await adopt(admin.team(workspaceId: workspaceId, teamId: team.id))
             state = .done(SchedulingTeamWriteCopy.removeDone)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -155,7 +155,7 @@ final class SchedulingTeamMembersModel {
             try await adopt(write())
             state = .done(done)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 

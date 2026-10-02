@@ -38,7 +38,7 @@ struct SchedulingCalendarConnectSection: View {
         VStack(alignment: .leading, spacing: DistrictSpacing.row) {
             content
             if let failure = model.failure {
-                SchedulingWriteFailureLineC(failure: failure, onDismiss: model.dismissFailure)
+                SchedulingWriteFailureLine(failure: failure, onDismiss: model.dismissFailure)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

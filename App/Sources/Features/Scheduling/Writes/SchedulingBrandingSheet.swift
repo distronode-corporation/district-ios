@@ -11,7 +11,7 @@ struct SchedulingBrandingSheet: View {
     let onClose: () -> Void
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingSettingsWriteCopy.brandingTitle,
             subtitle: nil,
             cancelLabel: SchedulingTeamWriteCopy.close,
@@ -39,7 +39,7 @@ struct SchedulingBrandingSheet: View {
                 enabled: !model.busy
             )
             .accessibilityIdentifier(A11yID.SchedulingWritesB.brandingBusinessName)
-            SchedulingWritesBHint(text: SchedulingSettingsWriteCopy.businessNameHint)
+            SchedulingWriteHint(text: SchedulingSettingsWriteCopy.businessNameHint)
             slider(
                 SchedulingSettingsWriteCopy.logoHeightLabel,
                 SchedulingSettingsWriteCopy.logoHeightHint,
@@ -60,7 +60,7 @@ struct SchedulingBrandingSheet: View {
             ) { model.editBannerOpacity($0) }
             legalLinks
             locale
-            SchedulingWritesBRejection(message: model.rejected)
+            SchedulingWriteRejection(message: model.rejected)
         }
     }
 
@@ -85,7 +85,7 @@ struct SchedulingBrandingSheet: View {
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
             .keyboardType(.URL)
-            SchedulingWritesBHint(text: SchedulingSettingsWriteCopy.legalUrlHint)
+            SchedulingWriteHint(text: SchedulingSettingsWriteCopy.legalUrlHint)
         }
     }
 
@@ -95,7 +95,7 @@ struct SchedulingBrandingSheet: View {
     @ViewBuilder
     private var locale: some View {
         if model.localeOptions.isEmpty {
-            SchedulingWritesBHint(text: SchedulingSettingsWriteCopy.fallbackLocaleHint)
+            SchedulingWriteHint(text: SchedulingSettingsWriteCopy.fallbackLocaleHint)
         } else {
             Picker(
                 SchedulingSettingsWriteCopy.fallbackLocaleLabel,
@@ -106,7 +106,7 @@ struct SchedulingBrandingSheet: View {
                 }
             }
             .disabled(model.busy)
-            SchedulingWritesBHint(text: SchedulingSettingsWriteCopy.fallbackLocaleHint)
+            SchedulingWriteHint(text: SchedulingSettingsWriteCopy.fallbackLocaleHint)
         }
     }
 
@@ -130,7 +130,7 @@ struct SchedulingBrandingSheet: View {
             .disabled(model.busy)
             .accessibilityLabel(label)
             .accessibilityValue("\(value)")
-            SchedulingWritesBHint(text: hint)
+            SchedulingWriteHint(text: hint)
         }
     }
 

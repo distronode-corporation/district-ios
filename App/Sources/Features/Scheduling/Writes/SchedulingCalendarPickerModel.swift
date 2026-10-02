@@ -82,7 +82,7 @@ final class SchedulingCalendarPickerModel {
             )
         } catch {
             rows = nil
-            failure = FailureText.schedulingWriteC(thrown: error)
+            failure = SchedulingFailureCopy.text(forAny: error)
         }
         busy = false
     }
@@ -146,7 +146,7 @@ final class SchedulingCalendarPickerModel {
             onChanged()
         } catch {
             busy = false
-            failure = FailureText.schedulingWriteC(thrown: error)
+            failure = SchedulingFailureCopy.text(forAny: error)
         }
     }
 

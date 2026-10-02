@@ -48,7 +48,6 @@ final class SchedulingEventTypeHostsModel {
     private(set) var loadState: SchedulingWriteState = .idle
     private(set) var state: SchedulingWriteState = .idle
     private(set) var validation: String?
-    private(set) var notice: String?
     /// Scheduler users not already hosting, for the add picker.
     ///
     /// ⚠️ EMPTY ALSO MEANS "we could not read the directory", and the two are
@@ -90,7 +89,7 @@ final class SchedulingEventTypeHostsModel {
     }
 
     func load() async {
-        loadState = .saving
+        loadState = .working
         do {
             let hosts = try await admin.eventTypeHosts(workspaceId: workspaceId, slug: slug)
             rows = hosts.map {
@@ -102,9 +101,9 @@ final class SchedulingEventTypeHostsModel {
                     priority: String($0.priority)
                 )
             }
-            loadState = .saved
+            loadState = .idle
         } catch {
-            loadState = .failed(SchedulingEventTypeEditorModel.failure(error))
+            loadState = .failed(SchedulingFailureCopy.text(forAny: error))
             return
         }
         await loadCandidates()
@@ -154,13 +153,12 @@ final class SchedulingEventTypeHostsModel {
     }
 
     func dismissNotice() {
-        notice = nil
         validation = nil
         state = .idle
     }
 
     func save() async {
-        guard !state.isSaving else { return }
+        guard !state.isWorking else { return }
         if rows.isEmpty {
             validation = SchedulingWriteCopy.hostsNeedOne
             return
@@ -176,7 +174,7 @@ final class SchedulingEventTypeHostsModel {
             )
         }
         validation = nil
-        state = .saving
+        state = .working
         await put(assignments)
     }
 
@@ -195,11 +193,10 @@ final class SchedulingEventTypeHostsModel {
             changes.routingMode = routingMode
             changes.rrStrategy = rotationStrategy
             _ = try await admin.patchEventType(workspaceId: workspaceId, slug: slug, changes: changes)
-            state = .saved
-            notice = SchedulingWriteCopy.hostsSaved
+            state = .done(SchedulingWriteCopy.hostsSaved)
             onSaved(hosts)
         } catch {
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 }

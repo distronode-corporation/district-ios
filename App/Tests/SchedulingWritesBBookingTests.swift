@@ -53,7 +53,7 @@ final class SchedulingWritesBBookingTests: XCTestCase {
     }
 
     /// ⚠️ NO REQUEST IS SPENT. The refusal is a validation sentence rather than a
-    /// ``SchedulingWritesBState/failed(_:)``, because nothing failed.
+    /// ``SchedulingWriteState/failed(_:)``, because nothing failed.
     func testCancelRefusesAReasonOverTheCatalogsCeilingWithoutSendingAnything() async {
         let transport = SettingsTransport([])
         let model = SchedulingBookingCancelModel(
@@ -83,7 +83,7 @@ final class SchedulingWritesBBookingTests: XCTestCase {
         )
         await model.submit()
 
-        XCTAssertEqual(Fixtures.failure(model.state), SchedulingWritesBFailure.unavailableMessage)
+        XCTAssertEqual(Fixtures.failure(model.state), SchedulingFailureCopy.unavailable)
         XCTAssertFalse(saved)
     }
 
@@ -141,7 +141,7 @@ final class SchedulingWritesBBookingTests: XCTestCase {
         }
         await model.submit()
 
-        XCTAssertEqual(Fixtures.failure(model.state), SchedulingWritesBFailure.slotTakenMessage)
+        XCTAssertEqual(Fixtures.failure(model.state), SchedulingFailureCopy.slotTaken)
         XCTAssertEqual(Fixtures.op(transport, 2), "eventTypes.slots")
         XCTAssertTrue(model.availableSlots.isEmpty)
     }
@@ -218,7 +218,7 @@ final class SchedulingWritesBBookingTests: XCTestCase {
         model.select("u-2")
         await model.submit()
 
-        XCTAssertEqual(Fixtures.failure(model.state), SchedulingWritesBFailure.forbiddenMessage)
+        XCTAssertEqual(Fixtures.failure(model.state), SchedulingFailureCopy.forbidden)
     }
 
     // MARK: - Notes

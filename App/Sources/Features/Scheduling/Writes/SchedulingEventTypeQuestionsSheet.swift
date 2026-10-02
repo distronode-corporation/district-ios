@@ -121,11 +121,8 @@ struct SchedulingEventTypeQuestionsSheet: View {
 
     private var messages: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            SchedulingWriteFailureStrip(message: model.loadState.failure?.message)
-            SchedulingWriteFailureStrip(message: model.state.failure?.message)
-            SchedulingWriteNotice(message: model.notice) {
-                model.dismissNotice()
-            }
+            SchedulingWriteOutcome(state: model.loadState)
+            SchedulingWriteOutcome(state: model.state, onDismiss: model.dismissNotice)
         }
     }
 
@@ -134,25 +131,18 @@ struct SchedulingEventTypeQuestionsSheet: View {
     @ViewBuilder
     private var editor: some View {
         if let form = model.editing {
-            ScrollView {
-                VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-                    Text(model.editorTitle)
-                        .font(DistrictType.title)
-                        .foregroundStyle(colors.foreground)
-                    editorFields(form)
-                    SchedulingWriteFailureStrip(message: model.validation)
-                    SchedulingWriteButtons(
-                        saveTitle: form.id == nil
-                            ? SchedulingWriteCopy.questionAddTitle
-                            : SchedulingWriteCopy.questionSaveButton,
-                        saving: model.state.isSaving,
-                        saveIdentifier: A11yID.SchedulingWrites.questionsSubmit,
-                        onCancel: { model.cancelEdit() },
-                        onSave: { Task { await model.submit() } }
-                    )
-                }
-                .padding(DistrictSpacing.gutter)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            SchedulingWriteSheet(title: model.editorTitle) {
+                editorFields(form)
+                SchedulingWriteRejection(message: model.validation)
+                SchedulingWriteButtons(
+                    saveTitle: form.id == nil
+                        ? SchedulingWriteCopy.questionAddTitle
+                        : SchedulingWriteCopy.questionSaveButton,
+                    saving: model.state.isWorking,
+                    saveIdentifier: A11yID.SchedulingWrites.questionsSubmit,
+                    onCancel: { model.cancelEdit() },
+                    onSave: { Task { await model.submit() } }
+                )
             }
         }
     }

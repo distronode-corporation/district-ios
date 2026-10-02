@@ -6,7 +6,7 @@ struct SchedulingProfileSheet: View {
     let onClose: () -> Void
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingSettingsWriteCopy.profileTitle,
             subtitle: nil,
             cancelLabel: SchedulingTeamWriteCopy.close,
@@ -46,7 +46,7 @@ struct SchedulingProfileSheet: View {
                 SchedulingSettingsWriteCopy.dateFormats,
                 model.dateFormat
             ) { model.editDateFormat($0) }
-            SchedulingWritesBRejection(message: model.rejected)
+            SchedulingWriteRejection(message: model.rejected)
         }
     }
 
@@ -120,7 +120,7 @@ struct SchedulingNotificationsSheet: View {
     let onClose: () -> Void
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingSettingsWriteCopy.notificationsTitle,
             subtitle: nil,
             cancelLabel: SchedulingTeamWriteCopy.close,

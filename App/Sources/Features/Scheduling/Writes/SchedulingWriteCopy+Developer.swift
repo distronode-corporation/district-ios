@@ -2,38 +2,13 @@ import Foundation
 
 /// Every sentence the DEVELOPER and CALENDAR write sheets can put on screen.
 ///
-/// ⛔ THE FIVE FAILURE SENTENCES ARE THE DESIGN CONTRACT'S AND ARE COPIED FROM
-/// THE WEB'S `SCHEDULING_ERROR_SENTENCES` WORD FOR WORD. The route
-/// answers a CODE and a status and deliberately never the scheduler's own text
-/// (that text is remote and can quote whatever was sent to it), so the mapping
-/// from code to English lives on each client — and the two clients have to agree.
-/// A person shown two different explanations of one refusal depending on the
-/// device they picked it up on will report a bug against whichever they saw
-/// second. ⚠️ Changing one of these five means changing the web's copy in the
-/// same breath.
-///
-/// ⚠️ `unknown` SAYS "That did not save", WHICH IS RIGHT FOR A WRITE AND SLIGHTLY
-/// WRONG FOR A READ — the browser's own note records the same trade. Every caller
-/// in this directory is a write or the read that immediately precedes one, so the
-/// wording is right here in a way it is not on the read screens.
+/// ⚠️ THE FIVE REFUSAL SENTENCES ARE NOT HERE: every scheduling surface reads them
+/// from ``SchedulingFailureCopy``, the one mapping.
 ///
 /// ⛔ A TYPE OF ITS OWN, NOT AN EXTENSION OF `SchedulingCopy`. That enum is the
 /// tenancy card's copy; a second surface appending to it would couple two screens'
 /// wording for no benefit, since nothing here is shared with the tenancy card.
 enum SchedulingWriteCopyC {
-    // MARK: - Refusals
-
-    static let unavailable = "The booking system did not answer. Try again in a minute."
-    static let slotTaken = "That time was just taken. Pick another."
-    static let forbidden = "You can view this but not change it."
-    static let notReady = "Scheduling is not set up for this workspace yet."
-    static let unknown = "That did not save. Try again."
-
-    // MARK: - Shared controls
-
-    static let retry = "Try again"
-    static let dismiss = "Dismiss"
-
     // MARK: - API keys
 
     static let keySheetTitle = "Create key"

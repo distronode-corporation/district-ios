@@ -24,30 +24,23 @@ struct SchedulingEventTypeEditorSheet: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-                Text(model.title)
-                    .font(DistrictType.title)
-                    .foregroundStyle(colors.foreground)
-                nameField
-                if model.isCreating {
-                    durationField(label: SchedulingWriteCopy.durationLabel, text: $model.form.duration)
-                    locationPicker
-                } else {
-                    editFields
-                }
-                messages
-                SchedulingWriteButtons(
-                    saveTitle: SchedulingWriteCopy.save,
-                    saving: model.state.isSaving,
-                    enabled: model.canSave,
-                    saveIdentifier: A11yID.SchedulingWrites.editorSave,
-                    onCancel: { dismiss() },
-                    onSave: { save() }
-                )
+        SchedulingWriteSheet(title: model.title) {
+            nameField
+            if model.isCreating {
+                durationField(label: SchedulingWriteCopy.durationLabel, text: $model.form.duration)
+                locationPicker
+            } else {
+                editFields
             }
-            .padding(DistrictSpacing.gutter)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            messages
+            SchedulingWriteButtons(
+                saveTitle: SchedulingWriteCopy.save,
+                saving: model.state.isWorking,
+                enabled: model.canSave,
+                saveIdentifier: A11yID.SchedulingWrites.editorSave,
+                onCancel: { dismiss() },
+                onSave: { save() }
+            )
         }
         .accessibilityIdentifier(A11yID.SchedulingWrites.editorRoot)
     }
@@ -58,7 +51,7 @@ struct SchedulingEventTypeEditorSheet: View {
         SchedulingWriteField(label: SchedulingWriteCopy.nameLabel) {
             TextField(SchedulingWriteCopy.namePlaceholder, text: $model.form.name)
                 .districtField()
-                .disabled(model.state.isSaving)
+                .disabled(model.state.isWorking)
                 .accessibilityIdentifier(A11yID.SchedulingWrites.editorName)
         }
     }
@@ -72,7 +65,7 @@ struct SchedulingEventTypeEditorSheet: View {
         ) {
             TextField(SchedulingWriteCopy.descriptionLabel, text: $model.form.description, axis: .vertical)
                 .districtField()
-                .disabled(model.state.isSaving)
+                .disabled(model.state.isWorking)
                 .accessibilityIdentifier(A11yID.SchedulingWrites.editorDescription)
         }
         durationField(label: SchedulingWriteCopy.durationLabel, text: $model.form.duration)
@@ -83,7 +76,7 @@ struct SchedulingEventTypeEditorSheet: View {
             TextField(SchedulingWriteCopy.intervalLabel, text: $model.form.interval)
                 .districtField()
                 .keyboardType(.numberPad)
-                .disabled(model.state.isSaving)
+                .disabled(model.state.isWorking)
                 .accessibilityIdentifier(A11yID.SchedulingWrites.editorInterval)
         }
         locationPicker
@@ -108,7 +101,7 @@ struct SchedulingEventTypeEditorSheet: View {
             TextField(label, text: text)
                 .districtField()
                 .keyboardType(.numberPad)
-                .disabled(model.state.isSaving)
+                .disabled(model.state.isWorking)
                 .accessibilityIdentifier(A11yID.SchedulingWrites.editorDuration)
         }
     }
@@ -123,7 +116,7 @@ struct SchedulingEventTypeEditorSheet: View {
                 }
             }
             .pickerStyle(.menu)
-            .disabled(model.state.isSaving)
+            .disabled(model.state.isWorking)
             .accessibilityIdentifier(A11yID.SchedulingWrites.editorLocation)
         }
     }
@@ -137,7 +130,7 @@ struct SchedulingEventTypeEditorSheet: View {
             SchedulingWriteField(label: title) {
                 TextField(title, text: $model.form.locationValue)
                     .districtField()
-                    .disabled(model.state.isSaving)
+                    .disabled(model.state.isWorking)
                     .accessibilityIdentifier(A11yID.SchedulingWrites.editorLocationValue)
             }
         }
@@ -150,7 +143,7 @@ struct SchedulingEventTypeEditorSheet: View {
             Toggle(SchedulingWriteCopy.showTakenToggle, isOn: $model.form.showTakenSlots)
         }
         .font(DistrictType.bodySmall)
-        .disabled(model.state.isSaving)
+        .disabled(model.state.isWorking)
     }
 
     @ViewBuilder
@@ -167,7 +160,7 @@ struct SchedulingEventTypeEditorSheet: View {
             TextField(label, text: text)
                 .districtField()
                 .keyboardType(.numberPad)
-                .disabled(model.state.isSaving)
+                .disabled(model.state.isWorking)
         }
     }
 
@@ -176,8 +169,8 @@ struct SchedulingEventTypeEditorSheet: View {
     /// sent; the other means something was and came back refused.
     private var messages: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            SchedulingWriteFailureStrip(message: model.validation)
-            SchedulingWriteFailureStrip(message: model.state.failure?.message)
+            SchedulingWriteRejection(message: model.validation)
+            SchedulingWriteOutcome(state: model.state)
         }
         .accessibilityIdentifier(A11yID.SchedulingWrites.editorError)
     }
@@ -185,7 +178,7 @@ struct SchedulingEventTypeEditorSheet: View {
     private func save() {
         Task {
             await model.save()
-            if case .saved = model.state {
+            if case .done = model.state {
                 dismiss()
             }
         }

@@ -34,7 +34,7 @@ struct SchedulingRecordingDeleteButton: View {
                 } message: {
                     Text(SchedulingRecordingWriteCopy.deleteBody)
                 }
-            SchedulingWritesBNotice(state: model.state)
+            SchedulingWriteOutcome(state: model.state)
         }
     }
 }
@@ -54,7 +54,7 @@ struct SchedulingRecordingDeleteAllSheet: View {
     let onClose: () -> Void
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingRecordingWriteCopy.deleteAllTitle,
             subtitle: SchedulingRecordingWriteCopy.deleteAllBody,
             cancelLabel: SchedulingRecordingWriteCopy.deleteAllCancel,
@@ -73,7 +73,7 @@ struct SchedulingRecordingDeleteAllSheet: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .accessibilityIdentifier(A11yID.SchedulingWritesB.recordingDeleteAllField)
-                SchedulingWritesBHint(text: SchedulingRecordingWriteCopy.deleteAllFieldHint)
+                SchedulingWriteHint(text: SchedulingRecordingWriteCopy.deleteAllFieldHint)
             }
         } onCancel: {
             onClose()
