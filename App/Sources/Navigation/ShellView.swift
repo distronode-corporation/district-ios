@@ -1,4 +1,5 @@
 import DistrictModel
+import DistrictNetwork
 import Foundation
 import SwiftUI
 
@@ -213,7 +214,14 @@ struct ShellView: View {
             // `districtai://auth` callback would be opened in a browser and sign-in
             // would break. ``AppLinkOutcome/openInBrowser`` is "ours, and the honest
             // answer is the web page". Only the third navigates.
+            //
+            // ⛔ `districtai://handoff` IS TAKEN FIRST AND NEVER REACHES THE RESOLVER (S33):
+            // the scheduling hand-off's flow drops it unless it carries the pending state.
             .onOpenURL { url in
+                if SchedulingHandoffCallback.isCallback(url) {
+                    Task { await container.schedulingHandoffFlow.receive(url) }
+                    return
+                }
                 guard let outcome = AppLinkResolver.resolve(url) else { return }
                 switch outcome {
                 case .openInBrowser:

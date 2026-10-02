@@ -59,12 +59,9 @@ final class SchedulingHandOffTests: XCTestCase {
 
     // MARK: - The statuses the hand-off client can return
 
-    /// ⛔ THIS IS THE REACHABLE HALF OF `SchedulingModel.handOffNotice(for:)`, WHICH IS
-    /// `private static` AND SO CANNOT BE CALLED FROM A TEST EVEN WITH `@testable`
-    /// (that exposes `internal`, not `private`). The method is a 409 branch plus
-    /// `FailureText.from(error).message` for everything else, so pinning `FailureText`
-    /// on the statuses `SchedulingHandoffClient` actually returns covers the same
-    /// mapping without pretending to reach further than it does.
+    /// ⛔ THE `FailureText` HALF OF `SchedulingModel.handOffNotice(for:)`, pinned on the
+    /// statuses `SchedulingHandoffClient` actually returns. The method itself is
+    /// `internal` since S33 and its nonce arms are pinned directly below.
     ///
     /// ⚠️ 401 AND 403 ARE DIFFERENT REMEDIES AND THE ROUTE ANSWERS BOTH: 401 with no
     /// bearer, 403 with one that does not verify. Only the first offers a sign-in.
@@ -89,5 +86,36 @@ final class SchedulingHandOffTests: XCTestCase {
             FailureText.from(ApiErrorNormalizer.apiError(statusCode: 403, body: nil)).action,
             FailureText.Action.none
         )
+    }
+
+    // MARK: - The nonce refusals (S33)
+
+    /// ⛔ `nonce_required` SHOWS THE SERVER'S SENTENCE, and the same words when the body
+    /// carried none. The sentence is the remedy: this build is too old for the server.
+    @MainActor
+    func test_IOS_SCH_25_nonceRequiredShowsItsSentence() {
+        let sentence = "Update the app to open the website from it."
+        XCTAssertEqual(SchedulingModel.handOffNotice(for: .nonceRequired(message: sentence)), sentence)
+        XCTAssertEqual(SchedulingModel.handOffNotice(for: .nonceRequired(message: nil)), sentence)
+        XCTAssertEqual(SchedulingModel.handOffNotice(for: .nonceRequired(message: "Server words")), "Server words")
+    }
+
+    /// ⚠️ `invalid_nonce` IS AN ORDINARY FAILURE, NEVER THE SERVER'S DEBUG SENTENCE.
+    @MainActor
+    func test_IOS_SCH_26_invalidNonceIsAPlainFailure() {
+        let text = SchedulingModel.handOffNotice(for: .invalidNonce)
+        XCTAssertEqual(text, SchedulingCopy.handOffFailed)
+        XCTAssertFalse(text.contains("nonce"))
+    }
+
+    /// The pre-nonce mapping is unchanged: 409 is "not ready", the rest is `FailureText`.
+    @MainActor
+    func test_IOS_SCH_27_otherFailuresKeepTheirMapping() {
+        XCTAssertEqual(
+            SchedulingModel.handOffNotice(for: .api(.http(status: 409, message: "x"))),
+            SchedulingCopy.notReadyYet
+        )
+        let forbidden = ApiError.http(status: 403, message: nil)
+        XCTAssertEqual(SchedulingModel.handOffNotice(for: .api(forbidden)), FailureText.from(forbidden).message)
     }
 }

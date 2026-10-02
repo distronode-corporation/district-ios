@@ -1,5 +1,7 @@
 import DistrictAuthCore
+import DistrictNetwork
 import Foundation
+import OSLog
 import UIKit
 
 /// The pieces of `AppContainer.init` that are neither container STATE nor part of
@@ -96,6 +98,26 @@ extension AppContainer {
             coordinator: coordinator,
             deviceId: deviceId,
             deviceName: UIDevice.current.name
+        )
+    }
+
+    /// The bound scheduling hand-off (S33), the third sign-in door: it signs the
+    /// browser into the website rather than the app.
+    ///
+    /// ⛔ THE LOG LINE NAMES THE PATH AND NOTHING ELSE; the flow never hands it a nonce
+    /// or a state. `.public` is safe for exactly that reason, and it is what makes
+    /// "path=bound" readable in a device's console during the cookie-jar proof. ⚠️
+    /// Sentry's automatic breadcrumbs are off (`DistrictSentry`), so this line reaches
+    /// the unified log only.
+    ///
+    /// ⚠️ `PKCE.newState` IS REUSED FOR THE STATE: 32 random bytes, base64url, which the
+    /// hand-off route accepts (`PKCETests` pins that it does).
+    static func handoffFlow(_ client: SchedulingHandoffClient) -> SchedulingHandoffFlow {
+        let log = Logger(subsystem: "com.distronode.district", category: "SchedulingHandoff")
+        return SchedulingHandoffFlow(
+            client: client,
+            newState: { PKCE.newState() },
+            log: { line in log.info("\(line, privacy: .public)") }
         )
     }
 }

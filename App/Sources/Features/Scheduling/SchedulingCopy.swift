@@ -67,6 +67,13 @@ enum SchedulingCopy {
 
     static let notReadyYet = "Scheduling is not ready yet. Turn it on, or wait for setup to finish."
 
+    /// ⚠️ THE SERVER'S OWN `nonce_required` SENTENCE, used only when that 400 arrives
+    /// without one. The server's words win whenever it sends them.
+    static let updateToOpenWebsite = "Update the app to open the website from it."
+
+    /// `invalid_nonce`: the hand-off was refused and pressing again starts a new one.
+    static let handOffFailed = "The website could not be opened. Try again."
+
     /// ⚠️ USED ONLY WHEN A 202 CARRIED `ok: false` AND NO SENTENCE. The server's
     /// own `error` is the product whenever it sends one.
     static let enableFailedFallback = "Setting up scheduling did not finish, and no reason was recorded."

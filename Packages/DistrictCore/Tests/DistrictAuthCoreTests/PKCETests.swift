@@ -1,4 +1,5 @@
 @testable import DistrictAuthCore
+import DistrictModel
 import Foundation
 import XCTest
 
@@ -63,6 +64,15 @@ final class PKCETests: XCTestCase {
 
     func testStandaloneStateGeneration() {
         XCTAssertNotEqual(PKCE.newState(), PKCE.newState())
+    }
+
+    /// ⛔ THE APP USES `newState` FOR THE SCHEDULING HAND-OFF'S LEG 1 TOO (S33), so it
+    /// must satisfy that route's own rule, or every hand-off would quietly take the
+    /// unbound fallback. Checked on bytes that exercise both base64url specials.
+    func testStateSatisfiesTheHandoffStateRule() {
+        XCTAssertTrue(SchedulingHandoffCallback.isValidState(PKCE.newState()))
+        XCTAssertTrue(SchedulingHandoffCallback.isValidState(PKCE.newState(using: FixedByteSource(byte: 0xFB))))
+        XCTAssertTrue(SchedulingHandoffCallback.isValidState(PKCE.newState(using: FixedByteSource(byte: 0xFF))))
     }
 
     func testEveryAttemptGetsFreshSecrets() {

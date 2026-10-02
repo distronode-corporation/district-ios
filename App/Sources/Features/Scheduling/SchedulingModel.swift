@@ -179,12 +179,12 @@ final class SchedulingModel {
     static let pollInterval: Duration = .seconds(10)
 
     private let scheduling: SchedulingRepository
-    private let handoff: SchedulingHandoffClient
+    private let handoffFlow: SchedulingHandoffFlow
     private let workspaceId: String
 
     init(container: AppContainer, workspaceId: String) {
         scheduling = container.scheduling
-        handoff = container.schedulingHandoff
+        handoffFlow = container.schedulingHandoffFlow
         self.workspaceId = workspaceId
     }
 
@@ -241,19 +241,39 @@ final class SchedulingModel {
     ///
     /// ⚠️ THE ONLY SCHEDULER HAND-OFF. `scheduling/sso` with a console `next` answers
     /// 410 (the console is retired), so nothing on this screen spends that route.
-    func manageScheduling() async -> URL? {
+    ///
+    /// ⛔ BOUND TO THE BROWSER FIRST (S33). `openStart` presents leg 1 in the SAME
+    /// browser sheet the answered URL will open in; ``SchedulingHandoffFlow`` waits for
+    /// the `districtai://handoff` callback and falls back to the unbound mint when none
+    /// comes. ⚠️ `opening` keeps this screen to one hand-off and its label honest; the
+    /// flow's own single-flight gate is the one that also covers the callback.
+    func manageScheduling(openStart: @escaping SchedulingHandoffFlow.Open) async -> URL? {
         guard !opening else { return nil }
         opening = true
         notice = nil
-        let outcome = await handoff.mint(workspaceId: workspaceId)
+        let outcome = await handoffFlow.run(workspaceId: workspaceId, open: openStart)
         opening = false
         switch outcome {
-        case let .success(mint):
+        case let .minted(mint):
             return mint.url
-        case let .failure(error):
-            notice = Self.handOffNotice(for: error)
+        case let .failed(failure):
+            notice = Self.handOffNotice(for: failure)
+            return nil
+        case .alreadyPending, .abandoned:
             return nil
         }
+    }
+
+    /// Leg 1's browser loaded (or failed to load) its first page. See
+    /// ``SafariView/onInitialLoad``: a rendered page means the server did not redirect.
+    func handOffStartLoaded(state: String, rendered: Bool) {
+        guard rendered else { return }
+        Task { await handoffFlow.legOneFailed(state: state) }
+    }
+
+    /// Leg 1's browser went away. A no-op once the hand-off has moved on.
+    func handOffStartClosed(state: String) {
+        Task { await handoffFlow.browserClosed(state: state) }
     }
 
     /// Re-read on a ten-second floor for as long as the tenancy is provisioning.
@@ -314,10 +334,17 @@ final class SchedulingModel {
     /// `ready`, which is the honest state of a workspace mid-provision, and it
     /// says so rather than reporting a failure the user would try to fix.
     /// Everything else, 500 and 503 included, falls to the shared mapping.
-    private static func handOffNotice(for error: ApiError) -> String {
-        switch error {
-        case .http(status: 409, message: _): SchedulingCopy.notReadyYet
-        default: FailureText.from(error).message
+    ///
+    /// ⛔ `nonce_required` SHOWS THE SERVER'S OWN SENTENCE ("Update the app to open the
+    /// website from it."), with the same words as a fallback for a body that carried
+    /// none. `invalid_nonce` is an ordinary failure: nothing the user can do about it
+    /// beyond pressing again, which starts a fresh leg 1.
+    static func handOffNotice(for failure: SchedulingHandoffFailure) -> String {
+        switch failure {
+        case let .nonceRequired(message): message ?? SchedulingCopy.updateToOpenWebsite
+        case .invalidNonce: SchedulingCopy.handOffFailed
+        case .api(.http(status: 409, message: _)): SchedulingCopy.notReadyYet
+        case let .api(error): FailureText.from(error).message
         }
     }
 }

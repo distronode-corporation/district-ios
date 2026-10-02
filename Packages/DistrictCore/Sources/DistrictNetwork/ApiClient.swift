@@ -60,6 +60,16 @@ public struct ApiClient: Sendable {
         baseURL.host?.lowercased()
     }
 
+    /// A web page on the API's own host, for a BROWSER to open.
+    ///
+    /// ⛔ INTERNAL, AND BUILT THROUGH ``ApiURL`` LIKE EVERY REQUEST, so a page address
+    /// gets the same segment and escaping rules as a route and the base URL still never
+    /// leaves this type. The one caller is the hand-off's leg 1, whose cookie has to be
+    /// set on this exact host.
+    func pageURL(_ segments: [String], query: [ApiQueryItem]) -> URL? {
+        ApiURL.build(base: baseURL, segments: segments, query: query)
+    }
+
     private let transport: any HTTPTransport
     private let accessToken: TokenProvider
     private let rejectedToken: RejectedTokenHandler
