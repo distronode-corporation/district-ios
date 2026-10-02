@@ -52,13 +52,13 @@ import Observation
 /// there is no `deinit` (a `@MainActor` class's `deinit` is nonisolated under Swift 6
 /// and could not touch these properties).
 ///
-/// ⛔ ``canPublish`` IS THE ROLE'S ANSWER AND IT FAILS CLOSED. `role != nil && role
-/// != .viewer`, never `role != .viewer` on its own: a nil role is what
-/// `WorkspaceRole.fromWire` returns for a value the route could not parse, and
-/// `nil != .viewer` is TRUE, so the shorter expression would hand an UNKNOWN role
-/// publish rights. ⚠️ It is an affordance rather than an enforcement: a viewer's token
-/// carries `canPublish:false` and the media server refuses either track whatever this
-/// client believes. Disabling the controls avoids offering an action that cannot work.
+/// ⛔ ``canPublish`` IS THE ROLE'S ANSWER AND IT FAILS CLOSED, through
+/// ``WorkspaceRole/allowsMutation(_:)`` like every other write gate. Never
+/// `role != .viewer` on its own: a nil role is what `WorkspaceRole.fromWire` returns
+/// for a value the route could not parse, and `nil != .viewer` is TRUE, so that
+/// expression would hand an UNKNOWN role publish rights. ⚠️ It is an affordance, not
+/// an enforcement: a viewer's token carries `canPublish:false` and the media server
+/// refuses either track whatever this client believes.
 @MainActor
 @Observable
 final class ActiveRoomModel: RoomAudio {
@@ -77,9 +77,10 @@ final class ActiveRoomModel: RoomAudio {
     /// nothing is publishing, which is the state the room is joined in.
     private(set) var localVideo: VideoTrack?
 
-    private(set) var micEnabled = false
+    /// ⚠️ SINGLE-FLIGHT, AND A REFUSAL IS SHOWN. See ``RoomMediaToggle``.
+    private(set) var microphone = RoomMediaToggle()
 
-    private(set) var cameraEnabled = false
+    private(set) var camera = RoomMediaToggle()
 
     /// ⚠️ WHAT WAS ASKED FOR, NOT WHAT THE DEVICE DID: the SDK's preference, which its
     /// automation routes by. Read from the engine at each join, because the SDK's own
@@ -154,7 +155,7 @@ final class ActiveRoomModel: RoomAudio {
         role: WorkspaceRole?,
         webOrigin: URL = ApiClient.productionBaseURL
     ) {
-        canPublish = role != nil && role != .viewer
+        canPublish = WorkspaceRole.allowsMutation(role)
         self.roomName = roomName
         repository = container.rooms
         callStack = container.callStack
@@ -295,7 +296,7 @@ final class ActiveRoomModel: RoomAudio {
         // it, not consent to be on it. Both respect `canPublish`, because a viewer's
         // token would have the server refuse either.
         guard canPublish, permissions.microphoneGranted else { return }
-        micEnabled = await engine.setMicrophone(enabled: true)
+        await toggle(\.microphone, with: RoomEngine.setMicrophone(enabled:))
     }
 
     // MARK: - The controls
@@ -306,16 +307,26 @@ final class ActiveRoomModel: RoomAudio {
     /// microphone to everyone except the people who cannot hear it.
     func toggleMicrophone() async {
         guard canPublish, permissions.microphoneGranted else { return }
-        guard let engine else { return }
-        micEnabled = await engine.setMicrophone(enabled: !micEnabled)
+        await toggle(\.microphone, with: RoomEngine.setMicrophone(enabled:))
     }
 
     /// ⚠️ Same gating as ``toggleMicrophone()``, against the camera permission.
     func toggleCamera() async {
         guard canPublish, permissions.cameraGranted else { return }
-        guard let engine else { return }
-        cameraEnabled = await engine.setCamera(enabled: !cameraEnabled)
+        await toggle(\.camera, with: RoomEngine.setCamera(enabled:))
         refreshRoster()
+    }
+
+    /// ⛔ A DEAD ENGINE'S ANSWER IS DROPPED: a leave or yield during the await has
+    /// already reset the control, and must not be told the media is live again.
+    private func toggle(
+        _ control: ReferenceWritableKeyPath<ActiveRoomModel, RoomMediaToggle>,
+        with set: (RoomEngine) -> (Bool) async -> Bool
+    ) async {
+        guard let engine, let target = self[keyPath: control].begin() else { return }
+        let accepted = await set(engine)(target)
+        guard self.engine === engine else { return }
+        self[keyPath: control].finish(requested: target, accepted: accepted)
     }
 
     /// ⚠️ ONLY WHILE THE CAMERA IS ON. Flipping a camera that is not publishing does
@@ -329,7 +340,7 @@ final class ActiveRoomModel: RoomAudio {
     /// path CLEARS the notice, so a flip that works after one that did not takes the
     /// sentence back off the screen.
     func flipCamera() async {
-        guard cameraEnabled else { return }
+        guard camera.isOn else { return }
         guard let engine else { return }
         let flipped = await engine.flipCamera()
         flipFailed = !flipped
@@ -393,8 +404,8 @@ final class ActiveRoomModel: RoomAudio {
         engine = nil
         callStack.releaseRoom(self)
         localVideo = nil
-        micEnabled = false
-        cameraEnabled = false
+        microphone = RoomMediaToggle()
+        camera = RoomMediaToggle()
         tiles = []
         companionPresent = false
         // ⚠️ CLEARED HERE TOO, BECAUSE THE PUMP IS ALREADY CANCELLED ABOVE and the
@@ -440,9 +451,9 @@ final class ActiveRoomModel: RoomAudio {
             // case exists for.
             break
         case let .microphoneChanged(enabled):
-            micEnabled = enabled
+            microphone.observe(enabled)
         case let .cameraChanged(enabled):
-            cameraEnabled = enabled
+            camera.observe(enabled)
             // ⚠️ A COMPLAINT ABOUT SWAPPING CAMERAS IS STALE THE MOMENT THERE IS NO
             // CAMERA TO SWAP, and this is the SDK's own signal rather than the
             // toggle's, so it covers a deliberate stop and a server-side unpublish

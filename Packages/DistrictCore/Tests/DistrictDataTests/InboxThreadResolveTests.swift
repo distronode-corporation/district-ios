@@ -24,8 +24,8 @@ final class InboxThreadResolveTests: XCTestCase {
     /// ⛔ THE SELECTOR PREFERS THE CONTACT ID, AND THE FALLBACK IS THE COUNTERPART
     /// RATHER THAN THE THREAD KEY. `addr:<normalized>` sent whole as the address
     /// parameter matches nothing, so a `mark-read` built from it succeeds against
-    /// ZERO rows and the badge never clears — the same trap
-    /// ``ThreadSelector/forConversation(_:)`` documents from the list's side.
+    /// ZERO rows and the badge never clears — the same trap the App's
+    /// `ThreadTarget` documents from the list's side.
     func testAContactKeyedThreadResolvesToTheContactSelector() async {
         let transport = RepositoryTransport(json: Self.contactKeyed)
 

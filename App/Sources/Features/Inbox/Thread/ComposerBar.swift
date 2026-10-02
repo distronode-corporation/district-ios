@@ -37,6 +37,7 @@ struct ComposerBar: View {
             channelStrip
             channelNoteStrip
             draftStrip
+            draftNoticeStrip
             failureStrip
             subjectField
             attachmentStrip
@@ -223,6 +224,20 @@ struct ComposerBar: View {
                         .buttonStyle(.districtGhost)
                 }
             }
+        }
+    }
+
+    /// A draft write that did not land. See ``ThreadModel/draftNotice``.
+    ///
+    /// ⚠️ MUTED INK AND NO DISMISS, like ``channelNoteStrip``. Nothing the operator
+    /// typed is lost, and the next write that lands takes the sentence back down.
+    @ViewBuilder
+    private var draftNoticeStrip: some View {
+        if let notice = model.draftNotice {
+            Text(notice)
+                .font(DistrictType.caption)
+                .foregroundStyle(colors.mutedForeground)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -424,25 +439,6 @@ struct ComposerBar: View {
             model.refuseAttachment(ThreadModel.unreadableAttachment)
             return
         }
-        await model.attach(data, mimeType: Self.mimeType(of: item))
+        await model.attach(data, mimeType: item.preferredMIMEType(allowed: MediaUploadLimits.allowedMimeTypes))
     }
-
-    /// ⚠️ THE TYPE COMES FROM THE ITEM, NOT FROM A FILE EXTENSION. A picker item
-    /// often has no name at all, and the server's allowlist is on the MIME type — so
-    /// a guess from a name would refuse legitimate images and could label a non-image
-    /// as one, spending the upload to be refused server-side.
-    ///
-    /// ⚠️ AN ITEM THAT DECLARES NOTHING THE ROUTE ACCEPTS FALLS BACK TO ITS FIRST
-    /// DECLARED TYPE, OR TO A DELIBERATELY UNACCEPTABLE ONE. Either way
-    /// ``MediaUploadLimits`` refuses it by name rather than this function inventing a
-    /// type the bytes might not be.
-    private static func mimeType(of item: PhotosPickerItem) -> String {
-        let declared = item.supportedContentTypes.compactMap(\.preferredMIMEType)
-        if let allowed = declared.first(where: { MediaUploadLimits.allowedMimeTypes.contains($0) }) {
-            return allowed
-        }
-        return declared.first ?? unknownMimeType
-    }
-
-    private static let unknownMimeType = "application/octet-stream"
 }

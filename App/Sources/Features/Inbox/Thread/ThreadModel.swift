@@ -133,7 +133,19 @@ final class ThreadModel {
     /// Set once ``recordRead()`` has fired, so a retry of ``open()`` spends no second write.
     var readRecorded = false
 
-    init(
+    /// A draft WRITE that did not land, said quietly under the composer.
+    ///
+    /// ⛔ NOT SILENT, BECAUSE A SURVIVING DRAFT IS A DOUBLE-SEND HAZARD. A post-send
+    /// delete that fails leaves the old body to be restored on another device and sent
+    /// again, so it is retried once and then named (``sentDraftSurvived``). A failed
+    /// autosave is milder (``draftNotSaved``). ⚠️ The next draft write that lands
+    /// clears either, so a passing blip does not leave a sentence behind.
+    ///
+    /// ⚠️ ITS SETTER IS NOT `private` ONLY BECAUSE THE DRAFT WRITES LIVE IN
+    /// `ThreadDraftWrites.swift`, for the 500-line ceiling; see ``autosaveTask``.
+    var draftNotice: String?
+
+    convenience init(
         container: AppContainer,
         workspaceId: String,
         role: WorkspaceRole?,
@@ -143,7 +155,24 @@ final class ThreadModel {
         // ⚠️ THE CONTAINER'S ONE REPOSITORY, NEVER ONE CONSTRUCTED HERE. A second
         // `InboxRepository` would carry a second `ApiClient` and reach a second
         // `TokenRefreshCoordinator`; see the ⛔ on ``AppContainer``.
-        inbox = container.inbox
+        self.init(
+            inbox: container.inbox,
+            workspaceId: workspaceId,
+            role: role,
+            threadKey: threadKey,
+            replyTargets: replyTargets
+        )
+    }
+
+    /// ⚠️ THE SEAM TESTS USE. Production goes through the container initialiser.
+    init(
+        inbox: InboxRepository,
+        workspaceId: String,
+        role: WorkspaceRole?,
+        threadKey: String,
+        replyTargets: [ReplyTarget]
+    ) {
+        self.inbox = inbox
         target = ThreadTarget(
             workspaceId: workspaceId,
             threadKey: threadKey,
@@ -356,19 +385,6 @@ final class ThreadModel {
         setContent(content)
     }
 
-    /// ⛔ A BLANK BOX SENDS DELETE, NEVER A PUT WITH AN EMPTY BODY. The route answers
-    /// 400 `empty_body` to the latter, deliberately, because a blank draft is the
-    /// ABSENCE of one rather than an empty one — and a stored blank row would make
-    /// the Inbox badge count a thread with nothing to restore. The two writes share
-    /// one rate-limit bucket, so getting this wrong also burns a slot to be refused.
-    ///
-    /// - Returns: true when the blank case was handled and nothing else should write.
-    func deleteDraftIfBlank(_ text: String) async -> Bool {
-        guard Self.isBlank(text) else { return false }
-        _ = await inbox.deleteDraft(workspaceId: target.workspaceId, threadKey: target.threadKey)
-        return true
-    }
-
     // MARK: - Internals
 
     /// ⛔ THE PENDING AUTOSAVE IS CANCELLED FIRST. Without this a debounce armed by
@@ -385,29 +401,12 @@ final class ThreadModel {
         // its own `Re:` from the message that has just been added rather than
         // inheriting the one that went out.
         composerSubject = ""
-        _ = await inbox.deleteDraft(workspaceId: target.workspaceId, threadKey: target.threadKey)
+        // ⛔ RETRIED ONCE, THEN NAMED. See ``draftNotice``.
+        if await !deleteDraft(), await !deleteDraft() {
+            draftNotice = Self.sentDraftSurvived
+        }
         await load()
         seedSubjectIfNeeded()
-    }
-
-    /// The debounce's body.
-    ///
-    /// ⚠️ THE ATTACHMENTS AND THE SUBJECT ARE READ AT FIRE TIME, NOT AT EDIT TIME:
-    /// an image attached, or a subject typed, during the debounce belongs on the
-    /// draft the timer is about to write.
-    ///
-    /// ⚠️ INTERNAL RATHER THAN `private` FOR ``flushDraft()``; see ``autosaveTask``.
-    func persistDraft(_ text: String) async {
-        if await deleteDraftIfBlank(text) {
-            return
-        }
-        _ = await inbox.saveDraft(
-            workspaceId: target.workspaceId,
-            threadKey: target.threadKey,
-            body: text,
-            subject: outgoingSubject,
-            mediaUrls: current?.attachments ?? []
-        )
     }
 
     /// The loaded content, whether or not the thread has any events.

@@ -184,9 +184,14 @@ public struct DeskRepository: Sendable {
     /// rather than assembling a new URL. There is no optimistic preview to be had: a
     /// local file URL shown as "your customers can see this" would be a claim about an
     /// upload that may never have landed.
+    ///
+    /// ⚠️ THE PART'S FILENAME IS A CONSTANT, ``logoFileName``, AND NO CALLER PASSES ONE.
+    /// A filename is what makes the multipart part a file at all (without one the
+    /// route's `file instanceof File` check fails), but the server stores the mime
+    /// type and the byte length and never reads the name, so a stable placeholder is
+    /// honest and a guessed extension would not be.
     public func uploadLogo(
         workspaceId: String,
-        fileName: String,
         mimeType: String,
         bytes: Data
     ) async -> Result<DeskSettings, ApiError> {
@@ -195,7 +200,7 @@ public struct DeskRepository: Sendable {
         }
         let descriptor = DistrictEndpoints.uploadDeskLogo(
             workspaceId: workspaceId,
-            fileName: fileName,
+            fileName: Self.logoFileName,
             mimeType: mimeType,
             bytes: bytes
         )
@@ -204,6 +209,8 @@ public struct DeskRepository: Sendable {
             .flatMap { ResponseEnvelope.affirm("DeskSettingsResponse", $0.success, $0) }
             .map(\.settings)
     }
+
+    static let logoFileName = "logo"
 
     /// Take the logo down, and delete the stored object with it.
     ///

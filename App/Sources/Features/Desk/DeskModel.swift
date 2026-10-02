@@ -87,6 +87,15 @@ final class DeskModel {
 
     private(set) var notice: String?
 
+    /// A create is in flight.
+    ///
+    /// ⛔ THE SINGLE-FLIGHT GUARD FOR ``createTicket(_:)``, ON THE MODEL RATHER THAN THE
+    /// SHEET. Two taps (or a tap and a Cmd-Return) can dispatch two submits before a
+    /// re-render disables the button, and each mints its own idempotency key, so only
+    /// a check here, before the first `await`, stops a second ticket landing in a
+    /// human's queue. The sheet disables its controls on this same flag.
+    private(set) var creating = false
+
     /// ⛔ False for `viewer` and for a role that did not parse. See the ⛔ on the type.
     let canWrite: Bool
 
@@ -98,8 +107,13 @@ final class DeskModel {
     /// container's ONE ``ApiClient``, so it reaches the one `TokenRefreshCoordinator`
     /// and the one credential closure; what must never happen is a `DeskRepository`
     /// built from a freshly constructed `ApiClient`. See the ⛔ on ``AppContainer``.
-    init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
-        desk = container.desk
+    convenience init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
+        self.init(desk: container.desk, workspaceId: workspaceId, role: role)
+    }
+
+    /// ⚠️ THE SEAM TESTS USE. Production goes through the container initialiser above.
+    init(desk: DeskRepository, workspaceId: String, role: WorkspaceRole?) {
+        self.desk = desk
         self.workspaceId = workspaceId
         canWrite = WorkspaceRole.allowsMutation(role)
     }
@@ -186,11 +200,13 @@ final class DeskModel {
     /// screen — losing a typed ticket to a failed request would be two losses for one
     /// fault.
     func createTicket(_ draft: DeskComposerState) async -> Bool {
-        guard canWrite else { return false }
+        guard canWrite, !creating else { return false }
         guard draft.isComplete else {
             notice = DeskCopy.createIncomplete
             return false
         }
+        creating = true
+        defer { creating = false }
         notice = nil
         let result = await desk.createTicket(
             workspaceId: workspaceId,

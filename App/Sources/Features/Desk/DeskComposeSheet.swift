@@ -20,7 +20,6 @@ struct DeskComposeSheet: View {
     let model: DeskModel
 
     @State private var draft = DeskComposerState()
-    @State private var submitting = false
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
@@ -57,12 +56,12 @@ struct DeskComposeSheet: View {
                 // MainActor-isolated method as a `Binding` setter aborts the compiler
                 // in IRGen under Swift 6 with no `error:` line; a lint rule catches it.
                 text: Binding(get: { draft.subject }, set: { draft.subject = $0 }),
-                enabled: !submitting
+                enabled: !model.creating
             )
             SettingsField(
                 label: DeskCopy.messageLabel,
                 text: Binding(get: { draft.message }, set: { draft.message = $0 }),
-                enabled: !submitting,
+                enabled: !model.creating,
                 multiline: true
             )
         }
@@ -73,17 +72,17 @@ struct DeskComposeSheet: View {
             SettingsField(
                 label: DeskCopy.requesterNameLabel,
                 text: Binding(get: { draft.requesterName }, set: { draft.requesterName = $0 }),
-                enabled: !submitting
+                enabled: !model.creating
             )
             SettingsField(
                 label: DeskCopy.requesterEmailLabel,
                 text: Binding(get: { draft.requesterEmail }, set: { draft.requesterEmail = $0 }),
-                enabled: !submitting
+                enabled: !model.creating
             )
             SettingsField(
                 label: DeskCopy.requesterPhoneLabel,
                 text: Binding(get: { draft.requesterPhone }, set: { draft.requesterPhone = $0 }),
-                enabled: !submitting
+                enabled: !model.creating
             )
         }
     }
@@ -92,7 +91,7 @@ struct DeskComposeSheet: View {
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
             Button(DeskCopy.cancel) { dismiss() }
-                .disabled(submitting)
+                .disabled(model.creating)
                 .keyboardShortcut(.cancelAction)
         }
         ToolbarItem(placement: .confirmationAction) {
@@ -100,7 +99,9 @@ struct DeskComposeSheet: View {
                 // ⛔ DISABLED FOR THE WHOLE ROUND TRIP. The idempotency key is minted
                 // per submit and the server's claim is fail-open, so a second tap on a
                 // slow network can genuinely put two tickets in a human's queue.
-                .disabled(submitting || !draft.isComplete)
+                // ⚠️ A DISABLED BUTTON DOES NOT STOP TWO TAPS DISPATCHED BEFORE A
+                // RE-RENDER; ``DeskModel/createTicket(_:)`` refuses the second itself.
+                .disabled(model.creating || !draft.isComplete)
                 .keyboardShortcut(.districtSubmit)
         }
     }
@@ -109,9 +110,7 @@ struct DeskComposeSheet: View {
     /// draft with it, so closing on a failure would discard what was typed at exactly
     /// the moment it still needs to be sent.
     private func submit() async {
-        submitting = true
         let ok = await model.createTicket(draft)
-        submitting = false
         if ok {
             dismiss()
         }

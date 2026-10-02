@@ -232,32 +232,7 @@ struct DeskSettingsView: View {
         }
         await model.uploadLogo(
             data,
-            mimeType: Self.mimeType(of: item),
-            fileName: Self.fileName(for: item)
+            mimeType: item.preferredMIMEType(allowed: DeskLogoLimits.allowedMimeTypes)
         )
-    }
-
-    /// ⚠️ THE TYPE COMES FROM THE ITEM, NOT FROM A FILE EXTENSION. A picker item often
-    /// has no name at all, and the server's allowlist is on the MIME type — so a guess
-    /// from a name would refuse legitimate images and could label a non-image as one.
-    ///
-    /// ⚠️ AN ITEM DECLARING NOTHING THE ROUTE ACCEPTS FALLS BACK TO ITS FIRST DECLARED
-    /// TYPE, so ``DeskLogoLimits`` refuses it BY NAME rather than this function
-    /// inventing a type the bytes might not be.
-    private static func mimeType(of item: PhotosPickerItem) -> String {
-        let declared = item.supportedContentTypes.compactMap(\.preferredMIMEType)
-        if let allowed = declared.first(where: { DeskLogoLimits.allowedMimeTypes.contains($0) }) {
-            return allowed
-        }
-        return declared.first ?? "application/octet-stream"
-    }
-
-    /// ⚠️ A FILENAME IS REQUIRED FOR THE PART TO BE A FILE AT ALL — without one the
-    /// multipart part is a plain field and the route's `file instanceof File` check
-    /// fails. The server stores the mime type and the byte length and never reads this
-    /// name, so a stable placeholder is honest and a guessed extension would not be.
-    private static func fileName(for item: PhotosPickerItem) -> String {
-        _ = item
-        return "logo"
     }
 }

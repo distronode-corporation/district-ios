@@ -204,33 +204,6 @@ final class InboxSearchRepositoryTests: XCTestCase {
         XCTAssertEqual(try Self.hit(body).displayName, "ada@contract.test")
     }
 
-    // MARK: - Marking a thread opened from a hit as read
-
-    /// ⛔ PREFERS THE CONTACT ID, exactly as ``ThreadSelector/forConversation(_:)``
-    /// does: it is exact, and it survives the address changing.
-    func testAResolvedHitMarksReadOnItsContactId() throws {
-        XCTAssertEqual(try ThreadSelector.forSearchHit(Self.hit(Self.resolvedEmailHitBody)), .contact("c_1"))
-    }
-
-    /// ⛔ AND THE FALLBACK IS THE COUNTERPART, NEVER ``MessageSearchHit/threadKey``.
-    /// `addr:14165550134` sent whole as the address parameter matches no message row,
-    /// so the write would succeed against nothing and the badge would never clear —
-    /// a fix that looks exactly like the bug it replaced.
-    func testAnUnresolvedHitMarksReadOnItsCounterpart() throws {
-        let hit = try Self.hit(Self.unresolvedSmsHitBody)
-
-        XCTAssertEqual(ThreadSelector.forSearchHit(hit), .address("+14165550134"))
-        XCTAssertNotEqual(ThreadSelector.forSearchHit(hit), .address(hit.threadKey))
-    }
-
-    /// ⚠️ A PRESENT-BUT-BLANK CONTACT ID IS NOT A CONTACT ID. It reaches the route as
-    /// `contactId=`, which is a different instruction from omitting it.
-    func testABlankContactIdOnAHitFallsBackToTheCounterpart() throws {
-        let body = Self.resolvedEmailHitBody.replacingOccurrences(of: #""contactId":"c_1""#, with: #""contactId":"""#)
-
-        XCTAssertEqual(try ThreadSelector.forSearchHit(Self.hit(body)), .address("ada@contract.test"))
-    }
-
     // MARK: - Helpers
 
     /// One hit on a contact-resolved EMAIL: every nullable column populated.
