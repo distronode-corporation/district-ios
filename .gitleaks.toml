@@ -74,3 +74,14 @@ condition = "AND"
 paths = ['''(^|/)\.github/workflows/release\.yml$''']
 regexTarget = "secret"
 regexes = ['''^2c26914636c47ab9bf9e710484ad7b44d371cbec8bd29cafb36b3cf877bf4285$''']
+
+# The stand-in App Store Connect key in the key-fetch script's tests. Its one body line is the
+# fixed PKCS#8 prefix every P-256 private key starts with (the algorithm and curve
+# identifiers), cut off before any key bytes, so it is not a key and signs nothing.
+[[allowlists]]
+description = "Truncated PKCS#8 P-256 header used as a stand-in .p8 in asc-key.test.sh (test data)"
+targetRules = ["private-key"]
+condition = "AND"
+paths = ['''(^|/)scripts/asc-key\.test\.sh$''']
+regexTarget = "secret"
+regexes = ['''^-----BEGIN PRIVATE KEY-----\s+MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg\s+-----END PRIVATE KEY-----$''']
