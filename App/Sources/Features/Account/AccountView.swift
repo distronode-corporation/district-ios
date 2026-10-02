@@ -1,4 +1,5 @@
 import DistrictModel
+import DistrictNetwork
 import Foundation
 import SwiftUI
 
@@ -361,11 +362,7 @@ struct AccountView: View {
         }
         .padding(.bottom, DistrictSpacing.tight)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
+        .districtCardSurface()
     }
 
     /// ⚠️ A `NavigationLink` WRAPPING THE ROW, WHICH IS WHAT ``DistrictListRow``'s
@@ -414,25 +411,22 @@ struct AccountView: View {
         Task { await session.signOut() }
     }
 
-    /// ⚠️ SILENT ON A NIL URL RATHER THAN FORCE-UNWRAPPING. The literal below parses,
-    /// so the `guard` is unreachable today; a crash on an account screen because
-    /// somebody edited a string is not a trade worth making.
     private func openDeletionPage() {
-        guard let url = Self.accountDeletionURL else { return }
-        openURL(url)
+        openURL(Self.accountDeletionURL)
     }
 
     // ── Constants ────────────────────────────────────────────────────────────
 
     /// The live, public deletion page.
     ///
-    /// ⚠️ A FULL URL RATHER THAN A PATH ON THE API BASE. This is a marketing and
-    /// legal page that must resolve for a reviewer with no session and no app build
-    /// config, and it is the URL declared in each store listing's data-deletion
-    /// field, so the two have to be the same literal. Android holds the identical
-    /// string in `ACCOUNT_DELETION_URL`; changing one without the other is a broken
-    /// link on one platform and a store-listing mismatch on both.
-    static let accountDeletionURL = URL(string: "https://www.distronode.com/privacy/account-deletion")
+    /// ⚠️ THE PRODUCTION HOST, NOT THE API BASE THIS BUILD IS CONFIGURED WITH. This is
+    /// a marketing and legal page that must resolve for a reviewer with no session and
+    /// no app build config, and it is the URL declared in each store listing's
+    /// data-deletion field, so the two have to be the same address. Android holds the
+    /// identical string in `ACCOUNT_DELETION_URL`; changing one without the other is a
+    /// broken link on one platform and a store-listing mismatch on both.
+    /// `ModerationCopyTests` pins the full string.
+    static let accountDeletionURL = ApiClient.productionBaseURL.appending(path: "privacy/account-deletion")
 
     /// ⚠️ READ FROM THE BUNDLE, NEVER HARDCODED. `MARKETING_VERSION` and
     /// `CURRENT_PROJECT_VERSION` live in `project.yml`, and the release script

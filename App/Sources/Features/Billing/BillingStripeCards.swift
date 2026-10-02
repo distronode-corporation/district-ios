@@ -35,7 +35,7 @@ struct BillingSubscriptionsCard: View {
     let detail: StripeBilling
 
     var body: some View {
-        BillingCard(title: BillingCopy.subscriptionsTitle) {
+        DistrictCard(eyebrow: BillingCopy.subscriptionsTitle) {
             if detail.subscriptions.isEmpty {
                 BillingNote(text: BillingCopy.subscriptionsEmpty)
             } else {
@@ -126,7 +126,7 @@ struct BillingSpendCapCard: View {
     let detail: StripeBilling
 
     var body: some View {
-        BillingCard(title: BillingCopy.spendCapTitle) {
+        DistrictCard(eyebrow: BillingCopy.spendCapTitle) {
             BillingNote(text: capText)
             if detail.overageSpendCapExceeded == true {
                 DistrictBadge(text: BillingCopy.spendCapBlocked, tone: .danger)
@@ -157,7 +157,7 @@ struct BillingInvoicesCard: View {
     let detail: StripeBilling
 
     var body: some View {
-        BillingCard(title: BillingCopy.invoicesTitle) {
+        DistrictCard(eyebrow: BillingCopy.invoicesTitle) {
             if detail.invoices.isEmpty {
                 BillingNote(text: BillingCopy.invoicesEmpty)
             } else {
@@ -239,7 +239,7 @@ struct BillingInvoiceRow: View {
 /// outage invites a customer to tap repeatedly at something they cannot fix.
 struct BillingUnavailableCard: View {
     var body: some View {
-        BillingCard(title: BillingCopy.unavailableTitle) {
+        DistrictCard(eyebrow: BillingCopy.unavailableTitle) {
             BillingNote(text: BillingCopy.unavailableBody)
         }
     }
@@ -253,7 +253,7 @@ struct BillingUnavailableCard: View {
 /// exactly that reason.
 struct BillingNoCustomerCard: View {
     var body: some View {
-        BillingCard(title: BillingCopy.noCustomerTitle) {
+        DistrictCard(eyebrow: BillingCopy.noCustomerTitle) {
             BillingNote(text: BillingCopy.noCustomerBody)
         }
     }

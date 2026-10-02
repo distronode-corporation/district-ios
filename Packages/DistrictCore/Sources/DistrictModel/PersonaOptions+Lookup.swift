@@ -15,15 +15,6 @@ public extension PersonaOptionsResponse {
     /// disagree.
     static let languageKeyedEngine = "deepgram-pipeline"
 
-    /// The engines an operator may actually choose.
-    ///
-    /// ⚠️ NOT WHAT THE PICKER SHOWS. The picker shows every engine and DISABLES the
-    /// rest, so the label can say why; this is what a selection is validated
-    /// against. See ``PersonaEngineOption/inRegion``.
-    var selectableEngines: [PersonaEngineOption] {
-        engines.filter(\.inRegion)
-    }
-
     func engine(_ id: String?) -> PersonaEngineOption? {
         guard let id else { return nil }
         return engines.first { $0.id == id }

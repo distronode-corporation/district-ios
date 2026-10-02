@@ -133,6 +133,9 @@ extension SchedulingCopy {
     static let recordingFile = "File"
     static let recordingState = "State"
     static let recordingPlay = "Play"
+    /// ⚠️ NO WEB ORIGINAL: the shared catch-all ("That did not save") describes a write,
+    /// and pressing Play saves nothing.
+    static let recordingPlayFailed = "That recording could not be opened. Try again."
     static let recordingConsent = "Consent"
 
     /// ⛔ "Nobody answered" IS NOT "everybody agreed". These rows are the evidence for a

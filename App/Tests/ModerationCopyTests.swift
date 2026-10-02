@@ -42,11 +42,14 @@ final class ModerationCopyTests: XCTestCase {
 
     /// ⛔ FULL, PUBLIC, PRODUCTION URLS. They must resolve for a reviewer with no
     /// session and no build config; a path on the API base would not.
-    func testTheLegalURLsArePublicAndAbsolute() throws {
-        let terms = try XCTUnwrap(SignInTermsCopy.termsURL)
-        let privacy = try XCTUnwrap(SignInTermsCopy.privacyURL)
-        XCTAssertEqual(terms.absoluteString, "https://www.distronode.com/terms")
-        XCTAssertEqual(privacy.absoluteString, "https://www.distronode.com/privacy")
+    func testTheLegalURLsArePublicAndAbsolute() {
+        XCTAssertEqual(SignInTermsCopy.termsURL.absoluteString, "https://www.distronode.com/terms")
+        XCTAssertEqual(SignInTermsCopy.privacyURL.absoluteString, "https://www.distronode.com/privacy")
+        XCTAssertEqual(
+            AccountView.accountDeletionURL.absoluteString,
+            "https://www.distronode.com/privacy/account-deletion",
+            "the store listings' data-deletion field names this exact address"
+        )
     }
 
     // MARK: - The report

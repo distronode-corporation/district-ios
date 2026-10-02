@@ -224,11 +224,7 @@ struct SchedulingEventTypesView: View {
                     }
                 }
             }
-            .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-            .overlay {
-                RoundedRectangle(cornerRadius: DistrictRadius.card)
-                    .strokeBorder(colors.border, lineWidth: 1)
-            }
+            .districtCardSurface()
         }
     }
 

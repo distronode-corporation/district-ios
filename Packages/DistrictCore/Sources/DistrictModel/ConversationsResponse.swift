@@ -102,11 +102,6 @@ public extension ConversationSummary {
         return contactName
     }
 
-    /// True when this thread has anything the operator has not seen.
-    var hasUnread: Bool {
-        unreadCount > 0
-    }
-
     /// Where a reply to this thread actually goes, and on which channel.
     ///
     /// ⛔ THE RECIPIENT IS AN ADDRESS, NEVER A THREAD IDENTITY, AND THIS WAS A

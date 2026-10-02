@@ -52,8 +52,6 @@ enum RoomsCopy {
 
     static let historyLabel = "Recent meetings"
 
-    static let historyFailed = "Could not load meetings"
-
     static let emptyTitle = "No meetings yet"
 
     static let emptyBody = "Meetings appear here once one has been held, with the minutes the Companion wrote."

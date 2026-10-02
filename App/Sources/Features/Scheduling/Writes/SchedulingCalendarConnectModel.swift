@@ -38,7 +38,7 @@ import Observation
 ///
 /// ⚠️ NOTHING HERE STORES THE MINTED URL. It carries a 60-second single-use token,
 /// so it is answered and presented immediately; the caller drops it when the sheet
-/// dismisses, the same rule `SchedulingModel.schedulerHandOff()` follows.
+/// dismisses, the same rule ``SchedulingModel/manageScheduling()`` follows.
 @MainActor
 @Observable
 final class SchedulingCalendarConnectModel {

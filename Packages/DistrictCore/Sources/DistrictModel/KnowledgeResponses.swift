@@ -152,21 +152,8 @@ public struct KnowledgeModeResponse: Codable, Sendable {
     /// failure on a build that has not learned it yet. Failing a settings read
     /// over a new mode is the wrong direction, and a malformed STORED value is
     /// repaired by the server's own total sanitiser before it is ever sent.
-    /// Branch on ``knownMode``.
+    /// Branch on `KnowledgeMode(rawValue: mode)`; ⚠️ its nil means "a mode this
+    /// build does not know", which is not an error: show ``mode`` as itself and
+    /// leave it alone rather than rewriting it to a value the operator did not choose.
     public let mode: String
-
-    /// ``mode`` parsed into the vocabulary this build knows, or nil for anything
-    /// outside it.
-    ///
-    /// ⚠️ nil MEANS "A MODE THIS BUILD DOES NOT KNOW", WHICH IS NOT AN ERROR. A
-    /// selector should show ``mode`` as itself and leave it alone rather than
-    /// silently rewriting it to a value the operator did not choose.
-    ///
-    /// ⚠️ COMPUTED, SO IT IS NOT ENCODED. Synthesised `Codable` covers stored
-    /// properties only, which is what keeps this from adding a key the server
-    /// never sent and failing the strict gate's key-set walk. Same reason
-    /// ``SchedulingEnableResponse/tenantStatus`` is computed.
-    public var knownMode: KnowledgeMode? {
-        KnowledgeMode(rawValue: mode)
-    }
 }

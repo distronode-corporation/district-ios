@@ -112,7 +112,7 @@ final class KnowledgeContractTests: XCTestCase {
         )
         XCTAssertTrue(read.success)
         XCTAssertEqual(read.mode, "linked")
-        XCTAssertEqual(read.knownMode, .linked, "⛔ questions leave the region in this state")
+        XCTAssertEqual(KnowledgeMode(rawValue: read.mode), .linked, "⛔ questions leave the region in this state")
 
         let patched = try StrictDecodeVerifier.verify(
             fixture: "district-knowledge-mode-patch.json",
@@ -120,7 +120,7 @@ final class KnowledgeContractTests: XCTestCase {
         )
         XCTAssertTrue(patched.success)
         XCTAssertEqual(patched.mode, "internal")
-        XCTAssertEqual(patched.knownMode, .internal)
+        XCTAssertEqual(KnowledgeMode(rawValue: patched.mode), .internal)
     }
 
     /// ⚠️ `mode` IS A TOP-LEVEL KEY, ASSERTED ON THE BYTES. The route spreads the
@@ -149,7 +149,7 @@ final class KnowledgeContractTests: XCTestCase {
         let response = try JSONDecoder().decode(KnowledgeModeResponse.self, from: data)
 
         XCTAssertEqual(response.mode, "federated")
-        XCTAssertNil(response.knownMode, "not a mode this build knows, which is not an error")
+        XCTAssertNil(KnowledgeMode(rawValue: response.mode), "not a mode this build knows, which is not an error")
     }
 
     /// The two wire spellings, pinned as strings and in the server's own order.

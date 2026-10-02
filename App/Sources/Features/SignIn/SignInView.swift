@@ -217,9 +217,8 @@ struct SignInView: View {
     /// which is why the two names are the only words on their line.
     ///
     /// ⚠️ SILENT ON A NIL URL rather than force-unwrapping. See ``SignInTermsCopy``.
-    private func legalLink(_ title: String, _ url: URL?, _ identifier: String) -> some View {
+    private func legalLink(_ title: String, _ url: URL, _ identifier: String) -> some View {
         Button(title) {
-            guard let url else { return }
             openURL(url)
         }
         .buttonStyle(.plain)
@@ -262,18 +261,15 @@ struct SignInView: View {
 /// stopped being a primitive. `DistrictColors`, `Tone` and the button styles
 /// depend on nothing above them and must stay that way.
 ///
-/// ⛔ IT MATCHES THE WHOLE SENTENCE, AND THOSE SENTENCES ARE COPIES OF
-/// ``SessionModel``'s. Android could switch over a `LoginStatus` enum; this client
-/// is handed the rendered string, because the gate passes ``AuthPhase``'s
-/// associated value. Matching the whole
-/// sentence rather than a fragment is what makes the coupling total and greppable:
-/// every string below appears verbatim in `SessionModel.swift`.
+/// ⛔ IT MATCHES THE WHOLE SENTENCE, AND THE SETS HOLD ``SessionCopy``'s CONSTANTS,
+/// the same ones ``SessionModel`` writes into the phase. Android could switch over a
+/// `LoginStatus` enum; this client is handed the rendered string, because the gate
+/// passes ``AuthPhase``'s associated value. Naming each sentence once is what keeps a
+/// rewording from silently demoting a message to neutral.
 ///
-/// ⚠️ SO A REWORDING IN `SessionModel` SILENTLY DEMOTES A MESSAGE TO NEUTRAL, and
-/// nothing on this tier can test that. Neutral is the deliberate fallback because
-/// it is the QUIET one: an unrecognised sentence rendered calmly is a cosmetic
-/// miss, whereas defaulting to danger would paint a routine 60-day sign-out red.
-/// Change a sentence in `SessionModel` and this table in the same commit.
+/// ⚠️ NEUTRAL IS THE FALLBACK because it is the QUIET one: an unrecognised sentence
+/// rendered calmly is a cosmetic miss, whereas defaulting to danger would paint a
+/// routine 60-day sign-out red.
 enum SignInStatusTone {
     static func forReason(_ reason: String) -> Tone {
         if danger.contains(reason) {
@@ -297,8 +293,8 @@ enum SignInStatusTone {
     /// rejected refresh is how a replayed token presents, which the server treats
     /// as theft and answers by revoking the whole token family.
     private static let danger: Set<String> = [
-        "That sign-in could not be verified. Please try again.",
-        "Your session is no longer valid. Please sign in again.",
+        SessionCopy.signInNotVerified,
+        SessionCopy.refreshRejected,
     ]
 
     /// Recoverable by trying again: worth flagging, not worth alarming.
@@ -309,15 +305,15 @@ enum SignInStatusTone {
     /// never be worded as one. Colouring it red would say what the wording refuses
     /// to.
     private static let warning: Set<String> = [
-        "That sign-in expired. Please try again.",
-        "Too many attempts. Please try again shortly.",
-        "We could not reach District AI. Check your connection.",
-        "Too many requests. Please try again shortly.",
-        "You appear to be offline. Your session is still active.",
-        "We could not read your saved session. Please try again.",
-        "We could not safely refresh your session. Please try again.",
-        "Your session ended unexpectedly. Please sign in again.",
-        "We could not confirm your session. Please sign in again.",
+        SessionCopy.signInExpired,
+        SessionCopy.tooManyAttempts,
+        SessionCopy.unreachable,
+        SessionCopy.refreshThrottled,
+        SessionCopy.refreshNotSent,
+        SessionCopy.storeUnavailable,
+        SessionCopy.markerNotDurable,
+        SessionCopy.interruptedRefresh,
+        SessionCopy.refreshUnreachable,
     ]
 
     /// Nothing failed and nothing is worth retrying: the user needs something

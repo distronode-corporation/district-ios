@@ -18,12 +18,12 @@ struct AnalyticsMetricTiles: View {
     var body: some View {
         VStack(spacing: DistrictSpacing.row) {
             HStack(spacing: DistrictSpacing.row) {
-                AnalyticsMetricTile(
+                DistrictMetricTile(
                     label: "Total Calls",
                     value: "\(metrics.totalCalls)",
                     caption: "In this window"
                 )
-                AnalyticsMetricTile(
+                DistrictMetricTile(
                     label: "Avg Call Duration",
                     // ⛔ NOT "Across completed sessions": THAT IS THE NARROW NAME ON THE
                     // BROAD NUMBER. The server divides by
@@ -42,7 +42,7 @@ struct AnalyticsMetricTiles: View {
                 )
             }
             HStack(spacing: DistrictSpacing.row) {
-                AnalyticsMetricTile(
+                DistrictMetricTile(
                     label: "Conversion Rate",
                     // ⚠️ ALREADY A PERCENTAGE, ALREADY ROUNDED. Multiplying by 100 is
                     // the obvious mistake and produces a plausible four-digit number
@@ -50,13 +50,13 @@ struct AnalyticsMetricTiles: View {
                     value: "\(metrics.conversionRate)%",
                     caption: "Of all dials"
                 )
-                AnalyticsMetricTile(
+                DistrictMetricTile(
                     label: "Missed Calls",
                     value: "\(metrics.missedCalls)",
                     caption: "Never connected"
                 )
             }
-            AnalyticsMetricTile(
+            DistrictMetricTile(
                 label: "Abandoned",
                 value: "\(metrics.abandonedCalls)",
                 caption: "Caller hung up"
@@ -87,7 +87,7 @@ struct AnalyticsDeltaCard: View {
     }
 
     var body: some View {
-        AnalyticsCard(title: "Call volume") {
+        DistrictCard(eyebrow: "Call volume") {
             Text("\(delta.current) now, \(delta.prior) in the previous period")
                 .font(DistrictType.metric)
                 .foregroundStyle(colors.foreground)
@@ -109,7 +109,7 @@ struct AnalyticsDeltaCard: View {
     /// ⚠️ NEUTRAL WHENEVER THERE IS NO PERCENTAGE, whatever the direction says. A
     /// green "New" would read as growth that was never measured.
     private var tone: Color {
-        guard delta.pct != nil else { return colors.mutedForeground }
+        guard !delta.isNew else { return colors.mutedForeground }
         switch delta.direction {
         case CallVolumeDirection.up: return colors.success
         case CallVolumeDirection.down: return colors.destructive
@@ -146,7 +146,7 @@ struct AnalyticsTrendCard: View {
     }
 
     var body: some View {
-        AnalyticsCard(title: "Call volume trend") {
+        DistrictCard(eyebrow: "Call volume trend") {
             if let first = points.first, let last = points.last {
                 chart
                 Text("\(first.date) to \(last.date)")
@@ -212,7 +212,7 @@ struct AnalyticsFunnelCard: View {
     }
 
     var body: some View {
-        AnalyticsCard(title: "Conversion funnel") {
+        DistrictCard(eyebrow: "Conversion funnel") {
             Chart {
                 ForEach(stages, id: \.name) { stage in
                     BarMark(
@@ -259,7 +259,7 @@ struct AnalyticsSentimentCard: View {
     }
 
     var body: some View {
-        AnalyticsCard(title: "Sentiment") {
+        DistrictCard(eyebrow: "Sentiment") {
             if hasAnalysis {
                 chart
             }

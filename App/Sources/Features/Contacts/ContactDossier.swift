@@ -191,32 +191,6 @@ private func prettyJSON(_ value: WireJSON) -> String {
 
 // MARK: - Rendering
 
-/// A label over a value, in a card. The contact detail screen's only card shape.
-struct ContactCard: View {
-    let label: String
-    let value: String
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    private var colors: DistrictColors {
-        .resolve(colorScheme)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            Text(label)
-                .font(DistrictType.labelSmall)
-                .foregroundStyle(colors.mutedForeground)
-            Text(value)
-                .font(DistrictType.bodySmall)
-                .foregroundStyle(colors.foreground)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(DistrictSpacing.gutter)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-    }
-}
-
 /// The District Global Intelligence dossier, and the two controls that manage it.
 ///
 /// ⛔ THE STATE MACHINE HERE HAS FOUR OUTCOMES, NOT THREE. `dgiStatus` NULL means
@@ -279,11 +253,11 @@ struct DossierSection: View {
             // ⚠️ THE SERVER'S OWN MESSAGE, VERBATIM. It names what the crawl could
             // not do, and a generic "enrichment failed" would throw away the only
             // diagnostic an operator ever gets for a pipeline that ran elsewhere.
-            ContactCard(label: "Intelligence dossier", value: "Dossier failed: \(error)")
+            DetailFieldCard(label: "Intelligence dossier", value: "Dossier failed: \(error)")
         } else if contact.intelligence == nil {
-            ContactCard(label: "Intelligence dossier", value: "No dossier for this contact.")
+            DetailFieldCard(label: "Intelligence dossier", value: "No dossier for this contact.")
         } else {
-            ContactCard(label: "Intelligence dossier", value: "Dossier available")
+            DetailFieldCard(label: "Intelligence dossier", value: "Dossier available")
         }
     }
 
@@ -396,6 +370,6 @@ struct DossierFieldCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DistrictSpacing.gutter)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
+        .districtCardSurface(bordered: false)
     }
 }

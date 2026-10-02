@@ -123,8 +123,8 @@ public struct KnowledgeRepository: Sendable {
     /// ⚠️ `mode` IS A TOP-LEVEL KEY OF THE ENVELOPE, not a nested config object,
     /// and the string is returned RATHER THAN a ``KnowledgeMode``: a third mode
     /// added server-side must reach the screen as a value to display instead of
-    /// failing a settings read on a build that has not learned it. Call
-    /// ``KnowledgeModeResponse/knownMode`` to branch.
+    /// failing a settings read on a build that has not learned it. Parse it with
+    /// `KnowledgeMode(rawValue:)` to branch.
     ///
     /// ⚠️ READABLE BY `viewer`. It discloses nothing beyond the document list they
     /// can already see.

@@ -98,7 +98,7 @@ struct RoomParticipantTile: View {
             }
         }
         .padding(DistrictSpacing.tight)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
+        .districtCardSurface(bordered: false)
         .accessibilityElement(children: .combine)
         // ⛔ THE MUTE STATE MUST BE IN THE LABEL. The dot beside the name is the only
         // thing marking a muted participant, and an explicit `.accessibilityLabel`

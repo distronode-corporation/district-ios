@@ -38,7 +38,7 @@ final class ConversationsContractTests: XCTestCase {
         XCTAssertEqual(target.to, "14165551234", "the contact's number, not the thread identity")
 
         XCTAssertEqual(folded.displayName, "Contract Test Caller")
-        XCTAssertTrue(folded.hasUnread, "two unread messages")
+        XCTAssertEqual(folded.unreadCount, 2, "two unread messages")
     }
 
     // MARK: - The unresolved thread
@@ -57,7 +57,7 @@ final class ConversationsContractTests: XCTestCase {
         XCTAssertTrue(unresolved.threadKey.hasPrefix("addr:"), "no Contact means an address-keyed thread")
 
         XCTAssertEqual(unresolved.displayName, "+14165558888")
-        XCTAssertFalse(unresolved.hasUnread, "nothing unread on this row")
+        XCTAssertEqual(unresolved.unreadCount, 0, "nothing unread on this row")
 
         let target = try XCTUnwrap(unresolved.replyTarget, "canSms is true, so this thread is replyable")
         XCTAssertEqual(target.to, "+14165558888")
@@ -276,13 +276,6 @@ final class ReplyTargetTests: XCTestCase {
         XCTAssertEqual(try thread(counterpart: "+14165550134", contactName: "Ada").displayName, "Ada")
     }
 
-    /// ``ConversationSummary/hasUnread`` is the badge, and zero is the ordinary
-    /// state of a thread somebody already opened.
-    func testUnreadIsACountAndZeroIsRead() throws {
-        XCTAssertFalse(try thread(unreadCount: 0).hasUnread)
-        XCTAssertTrue(try thread(unreadCount: 1).hasUnread)
-    }
-
     /// ⛔ `Hashable` IS A REQUIREMENT RATHER THAN A NICETY, AND THIS IS WHAT SAYS SO.
     /// `Route.thread` carries the whole ORDERED SET of reply targets so the composer
     /// can OFFER a channel instead of merely naming one, and a `Route` has to be
@@ -345,8 +338,7 @@ private func thread(
     contactEmail: String? = nil,
     canSms: Bool = false,
     canEmail: Bool = false,
-    channels: [String] = [MessageChannel.sms],
-    unreadCount: Int = 0
+    channels: [String] = [MessageChannel.sms]
 ) throws -> ConversationSummary {
     let channelList = channels.map { "\"\($0)\"" }.joined(separator: ",")
     return try decode(
@@ -362,7 +354,7 @@ private func thread(
          "lastMessage":{"body":"Is this the roofing company?","direction":"inbound",
                         "type":"sms","status":"received",
                         "createdAt":"2026-08-15T13:10:00.000Z"},
-         "unreadCount":\#(unreadCount),"totalMessages":1}
+         "unreadCount":0,"totalMessages":1}
         """#
     )
 }

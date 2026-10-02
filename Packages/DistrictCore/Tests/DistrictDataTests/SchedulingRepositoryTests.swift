@@ -111,7 +111,7 @@ final class SchedulingRepositoryTests: XCTestCase {
         let result = await SchedulingRepository(client: .repositoryTest(transport)).enable(workspaceId: "ws_1")
 
         XCTAssertEqual(result.successOnly?.ok, true)
-        XCTAssertEqual(result.successOnly?.tenantStatus, .ready)
+        XCTAssertEqual(result.successOnly?.status, "ready")
         XCTAssertNil(result.failureOnly)
         XCTAssertEqual(transport.requests.first?.method, .post)
         XCTAssertEqual(
@@ -134,7 +134,7 @@ final class SchedulingRepositoryTests: XCTestCase {
         XCTAssertNil(result.failureOnly, "the 202 is a successful response; the refusal is in the body")
         let response = result.successOnly
         XCTAssertEqual(response?.ok, false)
-        XCTAssertEqual(response?.tenantStatus, .error)
+        XCTAssertEqual(response?.status, "error")
         XCTAssertEqual(response?.error, "cloudflare refused the dns record (HTTP 403)")
     }
 

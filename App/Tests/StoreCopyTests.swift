@@ -26,7 +26,7 @@ import XCTest
 ///
 /// ⛔ THREE EXCEPTIONS ARE DELIBERATE AND ARE NOT LOOPHOLES:
 ///   - `Features/Account/AccountView.swift` — the account-deletion row says "Opens in your
-///     browser" and carries the distronode.com URL it opens. Guideline 5.1.1(v) REQUIRES
+///     browser" and opens a distronode.com page. Guideline 5.1.1(v) REQUIRES
 ///     an account-deletion path, the web page is that path, and telling a person the tap
 ///     leaves the app is honesty about what the control does rather than steering toward a
 ///     purchase. Pinned to Android and to both store listings.
@@ -93,7 +93,6 @@ final class StoreCopyTests: XCTestCase {
     private static let allowedLiterals: [String: [String]] = [
         "Features/Account/AccountView.swift": [
             "Request deletion of your account and its data. Opens in your browser.",
-            "https://www.distronode.com/privacy/account-deletion",
         ],
         "Features/Contacts/ContactDetailView.swift": [
             "Website",
@@ -106,18 +105,6 @@ final class StoreCopyTests: XCTestCase {
         ],
         "Features/SignIn/SignInView.swift": [
             "Opens your browser to sign in securely.",
-        ],
-        // ⛔ THE TWO GUIDELINE 1.2 LEGAL URLS, AND THE ALLOWANCE IS A GUIDELINE
-        // CONFLICT RESOLVED RATHER THAN A HOLE. This gate enforces 3.1.1: no string
-        // may tell a customer where to go INSTEAD of buying in the app. Guideline 1.2
-        // requires the terms of use to be presented BEFORE sign-in, and 5.1.1 requires
-        // a privacy policy; Apple's own metadata fields name these same two URLs, and
-        // neither page carries a price, a plan or a sign-up form. Removing them to
-        // satisfy 3.1.1 would breach 1.2. ⚠️ Same standing as the account-deletion row above, which is
-        // 5.1.1(v)'s requirement in the same shape.
-        "Features/SignIn/SignInTermsCopy.swift": [
-            "https://www.distronode.com/terms",
-            "https://www.distronode.com/privacy",
         ],
     ]
 

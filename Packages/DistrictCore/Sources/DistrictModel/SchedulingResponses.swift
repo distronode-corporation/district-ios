@@ -145,7 +145,9 @@ public struct SchedulingEnableResponse: Codable, Sendable {
     /// The enable path cannot reach `"skipped"` today, but a throwing enum here
     /// would turn a future one into a decode failure on a body that is otherwise
     /// perfectly readable, and the sentence in ``error`` is the part that matters.
-    /// Use ``tenantStatus`` to branch.
+    /// Branch on `SchedulingTenantStatus(rawValue: status)`; ⚠️ its nil means "not
+    /// a tenancy state" (today only `"skipped"`), which is not an error: re-read the
+    /// status route, the advice for every outcome of this call anyway.
     public let status: String
     /// The allocated booking host, when there is one. ⚠️ Present on a FAILED
     /// provision too, whenever the host had already been claimed — the host is
@@ -154,19 +156,4 @@ public struct SchedulingEnableResponse: Codable, Sendable {
     /// ⚠️ Null on success. The provisioner's classified message otherwise; never
     /// a credential and never a raw remote body.
     public let error: String?
-
-    /// ``status`` parsed into the tenancy vocabulary, or nil if it is a value
-    /// outside it.
-    ///
-    /// ⚠️ nil MEANS "NOT A TENANCY STATE", WHICH IS NOT AN ERROR. Today the only
-    /// such value the server can produce is `"skipped"`; a caller branching on
-    /// this should fall back to re-reading the status route, which is the advice
-    /// for every outcome of this call anyway.
-    ///
-    /// ⚠️ COMPUTED, SO IT IS NOT ENCODED. Synthesised `Codable` covers stored
-    /// properties only, which is what keeps this from adding a key the server
-    /// never sent and failing the strict gate's key-set walk.
-    public var tenantStatus: SchedulingTenantStatus? {
-        SchedulingTenantStatus(rawValue: status)
-    }
 }

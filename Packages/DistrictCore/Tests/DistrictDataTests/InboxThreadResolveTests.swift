@@ -95,8 +95,9 @@ final class InboxThreadResolveTests: XCTestCase {
         let second = await InboxRepository(client: .repositoryTest(read))
             .messageThread(workspaceId: "ws_1", messageId: "msg_1")
 
-        XCTAssertEqual(first.successOnly?.isRead, false, "an explicit null readAt is unread")
-        XCTAssertEqual(second.successOnly?.isRead, true)
+        XCTAssertNotNil(first.successOnly, "an explicit null readAt decodes")
+        XCTAssertNil(first.successOnly?.response.message.readAt, "an explicit null readAt is unread")
+        XCTAssertNotNil(second.successOnly?.response.message.readAt)
     }
 
     /// ⚠️ `message.type` IS NULLABLE AND THE CHANNEL DOES NOT COME FROM IT. The column

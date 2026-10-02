@@ -31,8 +31,6 @@ enum DeskCopy {
     static let subtitle = "Your customers' tickets, filed by your agent when a call "
         + "cannot be resolved. This is not where you raise something with Distronode."
 
-    static let newTicket = "New ticket"
-
     static let allFilter = "All"
 
     static let loadingQueue = "Loading your tickets…"
@@ -105,9 +103,6 @@ enum DeskCopy {
     // failure string is exactly that re-derivation. ``DeskModel`` uses it directly
     // (`notice = FailureText.from(error).message`, no fallback).
 
-    /// Shown when a ticket row cannot be opened.
-    static let openFailed = "We could not open that ticket."
-
     // MARK: - Author labels
 
     /// ⛔ THE SERVER SENDS NO AUTHOR LABEL AND THE SHARED THREAD RENDERER'S FALLBACK
@@ -150,8 +145,6 @@ enum DeskCopy {
     /// ⛔ THE ROUTE'S OWN RULE, checked locally so an operator is not charged a round
     /// trip to be told: subject and description are both required.
     static let createIncomplete = "A subject and a description are both needed."
-
-    static let createFailed = "We could not open that ticket."
 
     /// ⚠️ THE DEDUPLICATED CREATE, WHICH IS A SUCCESS. The key already produced a
     /// ticket, which is what the key is for; calling it an error would make a retried

@@ -95,7 +95,7 @@ struct SupportView: View {
     // MARK: - Composing
 
     private var composeCard: some View {
-        SupportCard(eyebrow: SupportCopy.composeTitle) {
+        DistrictCard(eyebrow: SupportCopy.composeTitle) {
             kindPicker
             SettingsField(
                 label: SupportCopy.composeSubject,
@@ -178,7 +178,7 @@ struct SupportView: View {
     /// workspace; this is a statement about us. Rendering the former here would tell a
     /// customer with open tickets that they have none.
     private func listFailure(_ failure: FailureText) -> some View {
-        SupportCard {
+        DistrictCard {
             Text(SupportCopy.listFailedTitle)
                 .font(DistrictType.titleSmall)
                 .foregroundStyle(colors.foreground)

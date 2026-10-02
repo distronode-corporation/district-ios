@@ -138,11 +138,7 @@ struct SchedulingHubView: View {
                 }
             }
         }
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
+        .districtCardSurface()
     }
 
     /// ⚠️ ASKS THE SECTION'S OWN `minReadRole` RATHER THAN ANSWERING HERE, so that "who may
@@ -228,11 +224,7 @@ struct SchedulingHubView: View {
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
+        .districtCardSurface()
     }
 
     private func header(_ presentation: SchedulingPresentation) -> some View {
@@ -423,6 +415,6 @@ private struct SchedulingNotice: View {
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
+        .districtCardSurface(bordered: false)
     }
 }

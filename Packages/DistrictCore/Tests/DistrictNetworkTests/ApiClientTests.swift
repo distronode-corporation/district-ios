@@ -269,6 +269,15 @@ final class ApiClientTests: XCTestCase {
         XCTAssertEqual(ApiClient.productionBaseURL.absoluteString, "https://www.distronode.com")
     }
 
+    /// ⛔ THE API HOST IS ONE THE DEEP-LINK PARSER ACCEPTS. The app's legal links are
+    /// built from ``ApiClient/productionBaseURL`` and its universal links are matched
+    /// against ``AppLinkResolver/hosts``; a host change on one side alone would leave
+    /// the app refusing links to its own site.
+    func testTheProductionHostIsADeepLinkHost() throws {
+        let host = try XCTUnwrap(ApiClient.productionBaseURL.host)
+        XCTAssertTrue(AppLinkResolver.hosts.contains(host), "\(host) is not in AppLinkResolver.hosts")
+    }
+
     /// ⚠️ The production boundary is a fresh UUID per request; the injected one
     /// exists only so a body can be asserted byte for byte.
     func testTheDefaultBoundaryIsGeneratedPerRequest() async throws {

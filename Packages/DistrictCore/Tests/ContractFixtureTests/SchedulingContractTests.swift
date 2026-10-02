@@ -122,7 +122,7 @@ final class SchedulingContractTests: XCTestCase {
         XCTAssertEqual(response.status, "ready")
         XCTAssertEqual(response.publicHost, "book.example.com")
         XCTAssertNil(response.error)
-        XCTAssertEqual(response.tenantStatus, .ready)
+        XCTAssertEqual(SchedulingTenantStatus(rawValue: response.status), .ready)
     }
 
     /// ⛔ `ok: false` IS A WELL-FORMED 202 CARRYING A SENTENCE, NOT A FAILURE
@@ -139,7 +139,7 @@ final class SchedulingContractTests: XCTestCase {
         )
 
         XCTAssertFalse(response.ok)
-        XCTAssertEqual(response.tenantStatus, .error)
+        XCTAssertEqual(SchedulingTenantStatus(rawValue: response.status), .error)
         XCTAssertEqual(response.error, "cloudflare refused the dns record (HTTP 403)")
         XCTAssertEqual(response.publicHost, "acme-book.distronode.com", "the host survives a failure")
     }
@@ -160,7 +160,7 @@ final class SchedulingContractTests: XCTestCase {
         )
 
         XCTAssertFalse(response.ok)
-        XCTAssertEqual(response.tenantStatus, .disabled)
+        XCTAssertEqual(SchedulingTenantStatus(rawValue: response.status), .disabled)
     }
 
     /// ⛔ `status` ON THE ENABLE BODY IS A WIDER UNION THAN THE COLUMN'S, WHICH IS
@@ -177,7 +177,7 @@ final class SchedulingContractTests: XCTestCase {
         )
 
         XCTAssertEqual(response.status, "skipped")
-        XCTAssertNil(response.tenantStatus, "not a tenancy state, which is not an error")
+        XCTAssertNil(SchedulingTenantStatus(rawValue: response.status), "not a tenancy state, which is not an error")
     }
 
     // MARK: - The vocabulary itself

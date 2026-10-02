@@ -46,7 +46,7 @@ struct CarrierSection: View {
         case .loading:
             SkeletonBlock(height: 72)
         case let .ready(entries, connected, refused):
-            MarketplacePanel {
+            DistrictCard(spacing: DistrictSpacing.hairline) {
                 DistrictEyebrow(text: MarketplaceCopy.carrierEyebrow)
                 ForEach(connected + refused, id: \.self) { name in
                     if let entry = entries[name] {

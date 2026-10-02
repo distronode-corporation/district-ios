@@ -222,10 +222,10 @@ struct SchedulingCalendarView: View {
     @ViewBuilder
     private var disconnectMessages: some View {
         if let failure = disconnect.failure {
-            SchedulingWriteFailureLineC(failure: failure, onDismiss: disconnect.dismissFailure)
+            SchedulingWriteFailureLine(failure: failure, onDismiss: disconnect.dismissFailure)
         }
         if disconnect.removedDestination {
-            SchedulingWriteNoticeLineC(message: SchedulingWriteCopyC.disconnectedLastDestination)
+            SchedulingWriteNoticeLine(message: SchedulingWriteCopyC.disconnectedLastDestination)
         }
     }
 

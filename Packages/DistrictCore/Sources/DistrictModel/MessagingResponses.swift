@@ -197,9 +197,7 @@ public struct MessagingTestResponse: Codable, Sendable {
     /// pass that said nothing, which is still a pass.
     ///
     /// ⚠️ COMPUTED, SO IT IS NOT ENCODED, and the strict gate's key-set walk
-    /// therefore never sees it. Same reason
-    /// ``SchedulingEnableResponse/tenantStatus`` and
-    /// ``KnowledgeModeResponse/knownMode`` are computed.
+    /// therefore never sees it. Same reason ``DeskTicketSummary/knownStatus`` is computed.
     public var detail: String? {
         details?.friendlyName ?? details?.message
     }

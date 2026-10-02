@@ -56,17 +56,6 @@ public struct ResolvedThread: Sendable, Equatable {
     public var replyTarget: ReplyTarget {
         ReplyTarget(to: response.thread.counterpart, channel: response.thread.channel)
     }
-
-    /// True when the workspace has already marked this message read.
-    ///
-    /// ⚠️ WHAT LETS A NOTIFICATION SHADE SKIP A "Mark read" THAT WOULD DO NOTHING.
-    /// The inbox is workspace-level, so a colleague can have opened the thread
-    /// between the push being sent and the notification being tapped. ⛔ It is not a
-    /// guard: `mark-read` answers `{success, marked: 0}` for an already-read thread,
-    /// which is a success, so acting on a stale value costs one harmless request.
-    public var isRead: Bool {
-        response.message.readAt != nil
-    }
 }
 
 /// The two calls that arrived with the notification surface: resolving a pushed
