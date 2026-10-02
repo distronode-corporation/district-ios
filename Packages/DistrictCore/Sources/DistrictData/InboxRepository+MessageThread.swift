@@ -26,10 +26,10 @@ public struct ResolvedThread: Sendable, Equatable {
     /// Which thread to READ or to mark read.
     ///
     /// ⛔ PREFERS THE CONTACT ID AND FALLS BACK TO THE COUNTERPART, NEVER TO
-    /// ``threadKey``, exactly as ``ThreadSelector/forConversation(_:)`` does — and
-    /// for the same reason: `addr:<normalized>` sent whole as the address parameter
+    /// ``threadKey``. `addr:<normalized>` sent whole as the address parameter
     /// matches nothing, so the write would succeed against zero rows and the badge
-    /// would never clear.
+    /// would never clear. (The App's `ThreadTarget` reaches the same selector from a
+    /// list or search row by stripping that prefix.)
     ///
     /// ⚠️ A PRESENT-BUT-BLANK `contactId` IS NOT A CONTACT ID. It would reach the
     /// route as `contactId=`, which is a different instruction from omitting it.

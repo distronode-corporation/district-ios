@@ -3,27 +3,6 @@ import DistrictModel
 import Foundation
 import Observation
 
-/// What the contact list is showing.
-///
-/// ⛔ `empty` IS REACHABLE ONLY AFTER A SUCCESSFUL FIRST PAGE, exactly as in
-/// ``CallLogState``. "We could not look" and "there is nothing" read to a paying
-/// operator as data loss when confused, and an empty CRM is what a brand new
-/// workspace legitimately has on day one — so the two states must never share a
-/// screen.
-///
-/// ⛔ AN APPEND FAILURE STAYS INSIDE `content`. A failed extra page must never
-/// replace rows the user is already reading.
-enum ContactsState {
-    /// - Parameters:
-    ///   - isEnd: the feed has reported its end, so there is no footer to draw.
-    ///   - appending: a further window is in flight.
-    ///   - appendFailure: the last append failed. Rows above it are still valid.
-    case loading
-    case content(rows: [Contact], isEnd: Bool, appending: Bool, appendFailure: FailureText?)
-    case empty
-    case failed(FailureText)
-}
-
 /// The create-a-contact step, which is a separate state machine from the list.
 ///
 /// ⚠️ SEPARATE BECAUSE A FAILED CREATE MUST NOT TOUCH THE LIST. The rows on
@@ -39,6 +18,9 @@ enum CreateContactState {
 
 /// The paged CRM for ONE workspace, plus creating a contact.
 ///
+/// ⚠️ THE LIST IS THE ONE PAGED-FEED MACHINE, ``PagedFeedModel``, shared with the
+/// call log rather than copied from it.
+///
 /// ⚠️ THE WORKSPACE IS FIXED FOR THE LIFETIME OF THIS MODEL, for the reason
 /// ``CallLogModel`` gives: ``OffsetPager``'s offsets and its dedup set are only
 /// meaningful within one tenant. ``ContactsView`` enforces it with
@@ -51,14 +33,10 @@ enum CreateContactState {
 @MainActor
 @Observable
 final class ContactsModel {
-    /// ⚠️ Under 100, which the server clamps to, and well over its default of 10.
-    /// See ``OffsetPager/loadNext(limit:)``.
-    static let pageSize = 30
+    /// The paged list. ⚠️ Empty only after a successful first page; see
+    /// ``PagedFeedState``.
+    let feed: PagedFeedModel<Contact>
 
-    /// ⚠️ A CEILING ON CONSECUTIVE FULLY-DEDUPLICATED WINDOWS, not a page limit.
-    private static let maxEmptyWindows = 4
-
-    private(set) var state: ContactsState = .loading
     private(set) var createState: CreateContactState = .idle
 
     let workspaceId: String
@@ -72,8 +50,6 @@ final class ContactsModel {
     let canMutate: Bool
 
     private let contacts: ContactsRepository
-    private let pager: OffsetPager<Contact>
-    private var rows: [Contact] = []
 
     /// ⚠️ BUILT FROM THE CONTAINER'S ONE REPOSITORY. A second `ContactsRepository`
     /// would carry a second `ApiClient` and reach a second
@@ -82,48 +58,7 @@ final class ContactsModel {
         self.workspaceId = workspaceId
         canMutate = WorkspaceRole.allowsMutation(role)
         contacts = container.contacts
-        pager = container.contacts.pager(workspaceId: workspaceId)
-    }
-
-    // MARK: - The list
-
-    /// The first page, from a clean pager.
-    ///
-    /// ⚠️ RESETS BEFORE FETCHING so it is idempotent: a retry, or a re-appearance
-    /// of the view, starts from offset 0 with an empty dedup set.
-    func loadFirst() async {
-        state = .loading
-        await restart()
-    }
-
-    /// Pull to refresh.
-    ///
-    /// ⚠️ DOES NOT SET `loading`, so the rows stay on screen while the request
-    /// runs. Replacing a populated list with a spinner throws away what the user
-    /// was reading.
-    func refresh() async {
-        await restart()
-    }
-
-    /// One more window, appended.
-    func loadMore() async {
-        guard case let .content(rows, isEnd, appending, _) = state else { return }
-        guard !isEnd, !appending else { return }
-        state = .content(rows: rows, isEnd: isEnd, appending: true, appendFailure: nil)
-
-        switch await loadWindow() {
-        case let .success(slice):
-            self.rows.append(contentsOf: slice.items)
-            state = .content(rows: self.rows, isEnd: slice.isEnd, appending: false, appendFailure: nil)
-        case let .failure(error):
-            // ⛔ THE ROWS SURVIVE. Only the footer reports this.
-            state = .content(
-                rows: self.rows,
-                isEnd: isEnd,
-                appending: false,
-                appendFailure: FailureText.from(error)
-            )
-        }
+        feed = PagedFeedModel(pager: container.contacts.pager(workspaceId: workspaceId))
     }
 
     // MARK: - Creating
@@ -165,7 +100,7 @@ final class ContactsModel {
         )
         switch outcome {
         case let .success(id):
-            await restart()
+            await feed.refresh()
             createState = .created(id)
         case let .failure(error):
             // ⚠️ A 409 arrives here as the route's own "already exists" sentence
@@ -179,58 +114,4 @@ final class ContactsModel {
     func clearCreateState() {
         createState = .idle
     }
-
-    // MARK: - Internals
-
-    private func restart() async {
-        await pager.reset()
-        switch await loadWindow() {
-        case let .success(slice):
-            rows = slice.items
-            state = rows.isEmpty
-                ? .empty
-                : .content(rows: rows, isEnd: slice.isEnd, appending: false, appendFailure: nil)
-        case let .failure(error):
-            // ⛔ THE ROWS ARE DROPPED ON PURPOSE. The pager has just been reset, so
-            // keeping them would leave the accumulator and the pager's offsets
-            // describing different feeds, and the next append would duplicate.
-            rows = []
-            state = .failed(FailureText.from(error))
-        }
-    }
-
-    /// One window that either carries NEW rows or reaches the end.
-    ///
-    /// ⛔ AN EMPTY SLICE WITH `isEnd` FALSE IS NOT THE END. ``OffsetSlice`` is
-    /// deduplicated, so a window whose every row had already been seen comes back
-    /// empty while more rows remain; the list's trigger is the LAST ROW APPEARING,
-    /// and an empty slice adds no new last row, so nothing would ever ask again.
-    ///
-    /// ⚠️ BOUNDED, because "keep going until something new arrives" against a feed
-    /// that is churning is an unbounded request loop.
-    private func loadWindow() async -> Result<ContactWindow, ApiError> {
-        var isEnd = false
-        for _ in 0 ..< Self.maxEmptyWindows {
-            switch await pager.loadNext(limit: Self.pageSize) {
-            case let .success(slice):
-                isEnd = slice.isEnd
-                guard slice.items.isEmpty, !slice.isEnd else {
-                    return .success(ContactWindow(items: slice.items, isEnd: slice.isEnd))
-                }
-            case let .failure(error):
-                return .failure(error)
-            }
-        }
-        return .success(ContactWindow(items: [], isEnd: isEnd))
-    }
-}
-
-/// What ``ContactsModel/loadWindow()`` resolved to.
-///
-/// ⚠️ ITS OWN TYPE RATHER THAN ``OffsetSlice``, which cannot be built here: that
-/// type declares no explicit initialiser, so its synthesised memberwise one is
-/// internal to `DistrictData`. Same reason as ``CallLogModel``'s.
-private struct ContactWindow {
-    let items: [Contact]
-    let isEnd: Bool
 }

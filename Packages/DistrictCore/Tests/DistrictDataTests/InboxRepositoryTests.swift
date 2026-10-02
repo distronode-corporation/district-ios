@@ -48,34 +48,6 @@ final class InboxRepositoryTests: XCTestCase {
         XCTAssertEqual(result.failureOnly, .decoding("ConversationsResponse did not affirm success=true"))
     }
 
-    // MARK: - Which thread a row selects
-
-    /// ⛔ PREFER THE CONTACT ID WHENEVER THERE IS ONE. It is exact and it survives
-    /// an address changing.
-    func testAContactBackedThreadSelectsOnTheContactId() throws {
-        let row = try conversation(Bodies.conversation(threadKey: "contact:c_1", contactId: "c_1"))
-
-        XCTAssertEqual(ThreadSelector.forConversation(row), .contact("c_1"))
-    }
-
-    /// ⛔ AND THE FALLBACK IS THE COUNTERPART, NEVER THE THREAD KEY. An unresolved
-    /// thread's key is `addr:<normalized>`, and that whole string sent as the
-    /// address parameter matches nothing — an empty thread rendered as "no
-    /// messages" for a customer who has some.
-    func testAnUnresolvedThreadFallsBackToTheCounterpartAddress() throws {
-        let row = try conversation(Bodies.conversation(threadKey: "addr:14165550134", contactId: nil))
-
-        XCTAssertEqual(ThreadSelector.forConversation(row), .address("+14165550134"))
-    }
-
-    /// ⚠️ A PRESENT-BUT-BLANK CONTACT ID IS NOT A CONTACT ID. It reaches the route
-    /// as `contactId=`, which is a different instruction from omitting it.
-    func testABlankContactIdOnAThreadFallsBackToTheAddress() throws {
-        let row = try conversation(Bodies.conversation(threadKey: "addr:14165550134", contactId: ""))
-
-        XCTAssertEqual(ThreadSelector.forConversation(row), .address("+14165550134"))
-    }
-
     // MARK: - One thread's history
 
     /// ⛔ OMITTING BOTH CURSOR ARGUMENTS IS THE NEWEST WINDOW, byte for byte the

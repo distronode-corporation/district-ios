@@ -107,9 +107,17 @@ struct ThreadTarget {
     /// anything outside those two prefixes, so a third form names a thread nothing
     /// could show; guessing an address out of it would read some other conversation.
     ///
-    /// ⚠️ PREFERS THE CONTACT ID, matching ``ThreadSelector/forConversation(_:)``: it
-    /// is exact, it survives an address changing, and it is the only thing that
-    /// matches a message row whose counterpart was never normalizable.
+    /// ⚠️ PREFERS THE CONTACT ID: it is exact, it survives an address changing, and
+    /// it is the only thing that matches a message row whose counterpart was never
+    /// normalizable. The server keys a resolved thread `contact:<id>`, so the prefix
+    /// alone says which one this is.
+    ///
+    /// ⛔ THE ONE IMPLEMENTATION OF THIS RULE FOR A LIST ROW OR A SEARCH HIT. Both open
+    /// a thread through a route that carries only the key, so a helper taking the
+    /// whole conversation or hit could never be reached from here; the package's
+    /// copies were deleted rather than left pinning tests on code no screen ran.
+    /// `ThreadTargetTests` pins it. (A pushed message resolves through
+    /// `ResolvedThread.selector`, which has the whole response in hand.)
     static func selector(threadKey: String) -> ThreadSelector? {
         if threadKey.hasPrefix(contactKeyPrefix) {
             let id = String(threadKey.dropFirst(contactKeyPrefix.count))

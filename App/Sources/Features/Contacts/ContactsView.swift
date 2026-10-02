@@ -69,7 +69,7 @@ private struct ContactsScreen: View {
             }
             .task {
                 // ⚠️ Once per appearance of this view identity, not per redraw.
-                await model.loadFirst()
+                await model.feed.loadFirst()
             }
             // ⛔ ITS OWN `.task`, SO NEITHER READ CAN SKIP THE OTHER. The blocked
             // set is a separate route and a separate failure; the store's read is
@@ -101,11 +101,11 @@ private struct ContactsScreen: View {
 
     @ViewBuilder
     private var content: some View {
-        switch model.state {
+        switch model.feed.state {
         case .loading:
             skeleton
-        case let .content(rows, isEnd, appending, appendFailure):
-            list(rows: rows, isEnd: isEnd, appending: appending, appendFailure: appendFailure)
+        case let .content(rows, _, appending, appendFailure):
+            list(rows: rows, appending: appending, appendFailure: appendFailure)
         case .empty:
             empty
         case let .failed(failure):
@@ -152,7 +152,6 @@ private struct ContactsScreen: View {
 
     private func list(
         rows: [Contact],
-        isEnd: Bool,
         appending: Bool,
         appendFailure: FailureText?
     ) -> some View {
@@ -182,7 +181,7 @@ private struct ContactsScreen: View {
                 .listRowSeparator(.hidden)
                 .onAppear { reachedEnd(of: rows, at: contact) }
             }
-            footer(isEnd: isEnd, appending: appending, appendFailure: appendFailure)
+            PagedFeedFooter(appending: appending, appendFailure: appendFailure, onRetry: loadMore)
                 .listRowInsets(EdgeInsets())
                 .listRowSeparator(.hidden)
         }
@@ -192,7 +191,7 @@ private struct ContactsScreen: View {
         // nearest — so the blocked set has to be re-read here or a pull would leave
         // a stale badge on a freshly-unblocked row.
         .districtRefreshable {
-            await model.refresh()
+            await model.feed.refresh()
             await blocked.refresh(workspaceId: workspaceId)
         }
     }
@@ -296,38 +295,6 @@ private struct ContactsScreen: View {
 
     private static let noIdentifiers = "No phone or email"
 
-    /// ⛔ THE FOOTER REPORTS ONLY THE APPEND, so a failed extra page never
-    /// destroys the rows already on screen.
-    @ViewBuilder
-    private func footer(isEnd: Bool, appending: Bool, appendFailure: FailureText?) -> some View {
-        if appending {
-            HStack {
-                Spacer()
-                ProgressView()
-                Spacer()
-            }
-            .padding(DistrictSpacing.gutter)
-        } else if let appendFailure {
-            appendFooter(appendFailure)
-        }
-    }
-
-    private func appendFooter(_ failure: FailureText) -> some View {
-        VStack(spacing: DistrictSpacing.tight) {
-            Text("Could not load more")
-                .font(DistrictType.bodySmall)
-            Text(failure.message)
-                .font(DistrictType.caption)
-                .multilineTextAlignment(.center)
-            // ⚠️ Offered unconditionally here, unlike ``FailureView``, because the
-            // only thing this footer can do is ask for the same window again.
-            Button("Try again") { loadMore() }
-                .buttonStyle(.districtSecondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(DistrictSpacing.gutter)
-    }
-
     // MARK: - Actions
 
     /// ⚠️ `.onAppear` ON THE LAST ROW IS THE PAGINATION TRIGGER. ``ContactsModel``
@@ -338,10 +305,10 @@ private struct ContactsScreen: View {
     }
 
     private func loadMore() {
-        Task { await model.loadMore() }
+        Task { await model.feed.loadMore() }
     }
 
     private func reload() {
-        Task { await model.loadFirst() }
+        Task { await model.feed.loadFirst() }
     }
 }

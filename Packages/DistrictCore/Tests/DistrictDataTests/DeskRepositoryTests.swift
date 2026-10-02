@@ -156,7 +156,6 @@ final class DeskRepositoryTests: XCTestCase {
 
         let result = await repository(transport).uploadLogo(
             workspaceId: "ws_1",
-            fileName: "logo.png",
             mimeType: "image/png",
             // ⚠️ UTF-8-SAFE STAND-IN BYTES RATHER THAN A REAL PNG HEADER.
             // `RepositoryTransport.bodies` decodes each body as UTF-8 and DROPS one
@@ -176,7 +175,7 @@ final class DeskRepositoryTests: XCTestCase {
         let contentType = transport.requests.first?.headers["Content-Type"] ?? ""
         XCTAssertTrue(contentType.hasPrefix("multipart/form-data;"), "got \(contentType)")
         let body = transport.bodies.first ?? ""
-        XCTAssertTrue(body.contains(#"name="file"; filename="logo.png""#), "got \(body)")
+        XCTAssertTrue(body.contains(#"name="file"; filename="logo""#), "got \(body)")
         XCTAssertFalse(body.contains("workspaceId"), "the workspace must not be a form field")
     }
 
@@ -189,7 +188,6 @@ final class DeskRepositoryTests: XCTestCase {
 
         let result = await repository(transport).uploadLogo(
             workspaceId: "ws_1",
-            fileName: "logo.svg",
             mimeType: "image/svg+xml",
             bytes: Data([0x3C])
         )
@@ -206,7 +204,6 @@ final class DeskRepositoryTests: XCTestCase {
 
         let result = await repository(transport).uploadLogo(
             workspaceId: "ws_1",
-            fileName: "logo.png",
             mimeType: "image/png",
             bytes: Data()
         )
@@ -220,7 +217,6 @@ final class DeskRepositoryTests: XCTestCase {
 
         let result = await repository(transport).uploadLogo(
             workspaceId: "ws_1",
-            fileName: "logo.png",
             mimeType: "image/png",
             bytes: Data(repeating: 0x89, count: DeskLogoLimits.maximumByteCount + 1)
         )
@@ -234,7 +230,6 @@ final class DeskRepositoryTests: XCTestCase {
 
         let result = await repository(transport).uploadLogo(
             workspaceId: "ws_1",
-            fileName: "logo.png",
             mimeType: "image/png",
             bytes: Data([0x89])
         )

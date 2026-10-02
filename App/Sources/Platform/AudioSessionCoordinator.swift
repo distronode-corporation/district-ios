@@ -33,18 +33,6 @@ import Foundation
 /// three. The mutable state is three small values behind one `NSLock`; an actor would
 /// make every one of those calls `await` for no benefit.
 final class AudioSessionCoordinator: @unchecked Sendable {
-    /// The last configuration or override failure, for diagnosis only.
-    ///
-    /// ⛔ NEVER USER-FACING, FOR THE SAME REASON ``PushRegistrar/lastRegistrationFailure``
-    /// is not. A refused category change means the OS had a stronger claim on the
-    /// audio session (another call, a system alert); the person holding the phone
-    /// cannot act on it and the call itself may still be perfectly audible. It is
-    /// stored rather than logged because this app ships no logging surface anyone can
-    /// read.
-    var lastFailure: String? {
-        lock.withLock { storedFailure }
-    }
-
     private let lock = NSLock()
 
     /// What the app ASKED the route to be. See ``CallMediaState/speakerRequested``.
@@ -57,8 +45,6 @@ final class AudioSessionCoordinator: @unchecked Sendable {
     /// at activation rather than being dropped. Dropping it would leave the toggle on
     /// screen saying speaker while the audio came out of the earpiece.
     private var sessionIsActive = false
-
-    private var storedFailure: String?
 
     private var routeHandler: (@Sendable (AudioRoute) -> Void)?
 
@@ -123,7 +109,10 @@ final class AudioSessionCoordinator: @unchecked Sendable {
                 options: [.allowBluetoothHFP, .allowBluetoothA2DP]
             )
         } catch {
-            record(error)
+            // ⚠️ DELIBERATELY UNREPORTED. A refused category change means the OS had a
+            // stronger claim on the session (another call, a system alert); the person
+            // holding the phone cannot act on it and the call may still be audible.
+            // Nothing in this app read a stored copy of it, so none is kept.
         }
     }
 
@@ -175,7 +164,7 @@ final class AudioSessionCoordinator: @unchecked Sendable {
             // separately from what was requested.
             try session.overrideOutputAudioPort(preferred ? .speaker : .none)
         } catch {
-            record(error)
+            // ⚠️ Unreported for the reason given in the category catch above.
         }
     }
 
@@ -190,10 +179,6 @@ final class AudioSessionCoordinator: @unchecked Sendable {
         Task { @MainActor in
             AudioOutputs.shared.record(outputs: outputs)
         }
-    }
-
-    private func record(_ error: Error) {
-        lock.withLock { storedFailure = String(describing: error) }
     }
 
     /// Map the device's own port description onto ``AudioRoute``.
