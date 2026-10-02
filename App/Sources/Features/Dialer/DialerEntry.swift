@@ -36,9 +36,9 @@ extension DialerModel {
     /// rejects anything shorter than 8 characters AFTER normalising, so a client
     /// counting the raw string would enable the button for "(416) 5" — thirteen
     /// characters, five digits — and the operator would meet a 400 that reads as
-    /// a server fault. Counting digits is a LENGTH rather than a transformation,
-    /// which is why it was always safe to duplicate: a disagreement can only make
-    /// the button late, never make the wrong call.
+    /// a server fault. The floor and the digit test are DistrictCore's
+    /// (``DialEntry/minimumDigits``, ``DialEntry/isDigit(_:)``), so the button and
+    /// the refusal sentence count the same characters against the same number.
     ///
     /// ``DialEntry/assess(_:)`` is the addition, and it refuses only what cannot
     /// be E.164 at all — chiefly an entry with no `+`, which names no country and
@@ -52,7 +52,7 @@ extension DialerModel {
     /// moves this is the line that moves with it.
     var canPlaceCall: Bool {
         guard canDial, call == nil, !placing else { return false }
-        guard entry.filter(\.isNumber).count >= Self.minimumDigits else { return false }
+        guard entry.filter(DialEntry.isDigit).count >= DialEntry.minimumDigits else { return false }
         return destination.isDialable
     }
 

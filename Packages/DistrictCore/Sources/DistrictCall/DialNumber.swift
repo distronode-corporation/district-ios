@@ -200,19 +200,6 @@ public enum DialEntry {
         return nil
     }
 
-    /// Whether the server's own normalisation of this entry would be E.164:
-    /// `^\+[0-9]{8,15}$`, the shape the server's phone helpers enforce.
-    ///
-    /// ⛔ THIS IS A PREDICTION ABOUT A LENGTH AND A SHAPE, NOT A TRANSFORMATION
-    /// THAT TRAVELS. The compacted string is used to answer yes or no and is
-    /// then thrown away; the entry is sent exactly as typed. That is the same
-    /// licence the existing digit floor takes and for the same reason — a
-    /// disagreement with the server can only make the button late, never make
-    /// the wrong call.
-    public static func isE164(_ raw: String) -> Bool {
-        assess(raw).isDialable
-    }
-
     /// ⛔ MIRRORS THE SERVER'S `normalizePhoneNumber` EXACTLY: keep ASCII
     /// digits and `+`, drop everything else. It keeps a `+` wherever it appears
     /// rather than only at the front, because the server does, which is what
@@ -238,8 +225,9 @@ public enum DialEntry {
     /// ⚠️ `isASCII` AS WELL AS `isNumber`. `Character.isNumber` is true for
     /// Arabic-Indic digits and for superscripts, none of which `\d` matches in
     /// the server's regex; without the first half the two sides would disagree
-    /// about what counts as a digit.
-    private static func isDigit(_ character: Character) -> Bool {
+    /// about what counts as a digit. Public so the dialer's own digit floor
+    /// counts the same characters this file does.
+    public static func isDigit(_ character: Character) -> Bool {
         character.isASCII && character.isNumber
     }
 

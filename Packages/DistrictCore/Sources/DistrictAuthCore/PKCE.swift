@@ -42,19 +42,6 @@ public enum PKCE {
     /// ever exchanged.
     public static let stateByteCount = 32
 
-    /// The verifier alphabet, RFC 7636 §4.1 (the URI unreserved set).
-    ///
-    /// ⚠️ Held as a `Set<Character>` rather than a regular expression on
-    /// purpose: `NSRegularExpression` and the Swift `Regex` literal both behave
-    /// subtly differently between Darwin Foundation and swift-corelibs-
-    /// foundation, and this check runs on the Linux tier that is the only place
-    /// it is ever tested.
-    private static let verifierAlphabet = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
-
-    /// The challenge alphabet: base64url, which is the verifier's alphabet
-    /// without `.` and `~`.
-    private static let challengeAlphabet = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_")
-
     /// A fresh verifier, its S256 challenge and a `state` value, for one login
     /// attempt.
     public static func newChallenge(using random: any RandomByteSource = CryptoRandomByteSource()) -> PKCEChallenge {
@@ -85,22 +72,6 @@ public enum PKCE {
     /// with the only implementation whose opinion counts.
     public static func deriveChallenge(for verifier: String) -> String {
         Base64URL.encode(Data(SHA256.hash(data: Data(verifier.utf8))))
-    }
-
-    /// The server's `isValidCodeVerifier`, re-implemented so a malformed
-    /// verifier is caught before a round trip rather than as an opaque
-    /// `invalid_grant`.
-    public static func isValidVerifier(_ verifier: String) -> Bool {
-        (43 ... 128).contains(verifier.count) && verifier.allSatisfy(verifierAlphabet.contains)
-    }
-
-    /// The server's `isValidCodeChallenge`: exactly 43 base64url characters.
-    ///
-    /// ⚠️ Checked at AUTHORIZE time server-side, so a 44-character (padded)
-    /// challenge fails before a code is even minted — which presents as "the
-    /// login button does nothing" rather than as a token-exchange error.
-    public static func isValidChallenge(_ challenge: String) -> Bool {
-        challenge.count == 43 && challenge.allSatisfy(challengeAlphabet.contains)
     }
 }
 

@@ -1,4 +1,3 @@
-import DistrictModel
 import Foundation
 
 /// One page of a cursor-paged collection.
@@ -27,7 +26,3 @@ public struct Page<Item: Sendable>: Sendable {
         Page(items: items + next.items, nextCursor: next.nextCursor)
     }
 }
-
-/// The result of a repository read: either a page or the one normalised error
-/// type. Repositories never surface transport-layer types to feature code.
-public typealias PageResult<Item: Sendable> = Result<Page<Item>, ApiError>

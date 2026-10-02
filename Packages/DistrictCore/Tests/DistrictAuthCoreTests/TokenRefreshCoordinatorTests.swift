@@ -248,7 +248,6 @@ final class TokenRefreshCoordinatorTests: XCTestCase {
         await coordinator.forget()
 
         await expectEqual(.reauthRequired(.noSession)) { await coordinator.accessToken() }
-        await expectFalse { await coordinator.hasUnpersistedSession }
         let session = await store.session
         XCTAssertNil(session)
     }

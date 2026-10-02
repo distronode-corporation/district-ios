@@ -331,7 +331,9 @@ final class AppContainer {
         let deviceId = seam.deviceId
         let baseURL = seam.baseURL
         let auth = AppNativeAuthClient(baseURL: baseURL, transport: transport)
-        let coordinator = TokenRefreshCoordinator(store: store, refreshClient: auth)
+        // ⚠️ `auth` AS THE REVOKE CLIENT TOO, so a successor that lands after a sign-out
+        // is revoked at once rather than waiting in the outbox for the next launch.
+        let coordinator = TokenRefreshCoordinator(store: store, refreshClient: auth, revokeClient: auth)
 
         // ⚠️ Locals first, then the stored properties, because the two closures
         // below capture the VALUES rather than `self` — a container that
@@ -368,7 +370,8 @@ final class AppContainer {
         api = ApiClient(
             baseURL: baseURL,
             transport: transport,
-            accessToken: Self.bearer(coordinator)
+            accessToken: Self.bearer(coordinator),
+            rejectedToken: Self.rejected(coordinator)
         )
 
         // ⚠️ EVERY ONE OF THEM SHARES THE ONE `api` ABOVE, which is the point. See

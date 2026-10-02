@@ -74,17 +74,6 @@ public struct AppleNonce: Sendable, Equatable {
         hex(Data(SHA256.hash(data: Data(value.utf8))))
     }
 
-    /// The server's `z.string().min(16).max(256)`, re-implemented so a malformed
-    /// nonce is caught before a round trip rather than as an opaque
-    /// `invalid_grant`.
-    ///
-    /// ⚠️ LENGTH ONLY, BECAUSE THE SCHEMA IS LENGTH ONLY. Asserting a hex
-    /// alphabet here would be this client inventing a rule the server does not
-    /// have, and the first thing it would break is a future nonce format.
-    public static func isValidRaw(_ value: String) -> Bool {
-        (16 ... 256).contains(value.count)
-    }
-
     /// ⛔ A TABLE RATHER THAN `String(format: "%02x")`. The format-string path
     /// goes through `NSString` on Linux and is both the slower and the less
     /// predictable of the two; a nibble table produces the same bytes on every

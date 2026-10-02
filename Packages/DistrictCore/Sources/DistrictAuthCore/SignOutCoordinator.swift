@@ -32,7 +32,7 @@ import Foundation
 public struct SignOutCoordinator: Sendable {
     private let coordinator: TokenRefreshCoordinator
     private let store: any TokenStore
-    private let revokeClient: any RevokeClient
+    private let outbox: RevokeOutbox
 
     /// ⚠️ TAKES THE ONE ``TokenRefreshCoordinator``, NEVER BUILDS ONE. Two
     /// coordinators means two single-flight gates, either of which can present
@@ -44,7 +44,7 @@ public struct SignOutCoordinator: Sendable {
     ) {
         self.coordinator = coordinator
         self.store = store
-        self.revokeClient = revokeClient
+        outbox = RevokeOutbox(store: store, client: revokeClient)
     }
 
     /// End the session: revoke server-side if possible, wipe locally always.
@@ -95,11 +95,7 @@ public struct SignOutCoordinator: Sendable {
     /// retry schedule available, and a counter would only add a way for the
     /// entry to be discarded while the credential is still live.
     public func drainPendingRevoke() async {
-        guard let pending = try? await store.pendingRevokeToken(), !pending.isEmpty else { return }
-
-        if await revokeClient.revoke(refreshToken: pending) == .accepted {
-            try? await store.clearRevokePending()
-        }
+        await outbox.drain()
     }
 
     // ── Internals ────────────────────────────────────────────────────────────
@@ -109,21 +105,9 @@ public struct SignOutCoordinator: Sendable {
         // is the last moment the credential exists on this device.
         guard let session = try? await store.read() else { return }
 
-        // ⛔ DURABLE FIRST, THEN THE NETWORK. See the ⛔ on the type: the window
-        // this closes is a process death between the revoke and the wipe.
-        // ⚠️ A THROWN OUTBOX WRITE STILL SENDS THE REVOKE. This is the opposite
-        // of `performRefresh`'s marker rule, and the asymmetry is the point: a
-        // refresh sent without a durable marker can end in a family revocation,
-        // so it must abort. A revoke sent without a durable outbox entry is
-        // strictly better than not sending one — the worst case is the entry is
-        // lost, which is exactly where the credential would be if we had skipped
-        // the call.
-        try? await store.markRevokePending(session.refreshToken)
-
-        if await revokeClient.revoke(refreshToken: session.refreshToken) == .accepted {
-            try? await store.clearRevokePending()
-        }
-        // ⚠️ ON A DEFERRAL THE OUTBOX IS LEFT SET, WHICH IS THE WHOLE MECHANISM.
-        // No branch is needed to write it: it is already there.
+        // ⛔ DURABLE FIRST, THEN THE NETWORK, AND A HELD ENTRY IS CHASED BEFORE
+        // IT IS REPLACED. See ``RevokeOutbox``: the window the ordering closes is
+        // a process death between the revoke and the wipe.
+        await outbox.revoke(session.refreshToken)
     }
 }
