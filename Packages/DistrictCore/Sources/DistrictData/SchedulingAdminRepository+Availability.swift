@@ -145,33 +145,8 @@ public extension SchedulingAdminRepository {
         )
     }
 
-    /// `availability.overrides.patch` — a sparse update of one dated exception.
-    ///
-    /// ⛔ THE DATE IS NOT PATCHABLE, and neither is the group. Moving an override to
-    /// another day means delete and create; changing one day of a RANGE leaves the
-    /// row's `group_id` in place, so the day is still deleted by
-    /// ``deleteAvailabilityOverrideGroup(workspaceId:groupId:)``.
-    ///
-    /// - Parameter reason: `day_off`, `out_of_office` or `custom_hours`.
-    func patchAvailabilityOverride(
-        workspaceId: String,
-        id: String,
-        reason: String? = nil,
-        startTime: String? = nil,
-        endTime: String? = nil
-    ) async throws -> SchedulingAvailabilityOverride {
-        try await perform(
-            .availabilityOverridesPatch,
-            workspaceId: workspaceId,
-            params: .object([
-                ("id", .string(id)),
-                ("reason", .optional(reason)),
-                ("start_time", .optional(startTime)),
-                ("end_time", .optional(endTime)),
-            ]),
-            as: SchedulingAvailabilityOverride.self
-        )
-    }
+    // ⚠️ `availability.overrides.patch` HAS NO WRAPPER: the app's overrides sheet only
+    // creates, lists and deletes, so moving or editing a day is delete and create.
 
     /// `availability.overrides.delete` — removes ONE day.
     ///

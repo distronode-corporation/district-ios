@@ -74,29 +74,6 @@ final class SchedulingBookingFormatTests: XCTestCase {
         XCTAssertTrue(params.allHosts)
     }
 
-    // MARK: - hasNarrowingFilters
-
-    /// ⛔ `workspaceWide` IS NOT A NARROWING FILTER, so an admin looking at an empty feed
-    /// is told "no bookings yet" rather than sent hunting for a filter they never set.
-    func testWideningTheScopeIsNotNarrowing() {
-        XCTAssertFalse(Booking.hasNarrowingFilters(SchedulingBookingQuery(workspaceWide: true)))
-    }
-
-    func testEachFilterCountsAsNarrowing() {
-        XCTAssertTrue(Booking.hasNarrowingFilters(SchedulingBookingQuery(from: "2026-09-01")))
-        XCTAssertTrue(Booking.hasNarrowingFilters(SchedulingBookingQuery(to: "2026-09-01")))
-        XCTAssertTrue(Booking.hasNarrowingFilters(SchedulingBookingQuery(eventTypeSlug: "a")))
-        XCTAssertTrue(Booking.hasNarrowingFilters(SchedulingBookingQuery(host: "u1")))
-        XCTAssertTrue(Booking.hasNarrowingFilters(SchedulingBookingQuery(team: "t1")))
-        XCTAssertFalse(Booking.hasNarrowingFilters(SchedulingBookingQuery()))
-    }
-
-    /// ⚠️ THE VIEW IS NOT A NARROWING FILTER EITHER. Switching to Cancelled and finding
-    /// nothing means there are no cancelled bookings, not that a filter is hiding them.
-    func testTheViewIsNotANarrowingFilter() {
-        XCTAssertFalse(Booking.hasNarrowingFilters(SchedulingBookingQuery(view: .cancelled)))
-    }
-
     // MARK: - statusLabel
 
     func testTheThreeKnownStatusesGetTheirOwnWording() {
@@ -139,34 +116,9 @@ final class SchedulingBookingFormatTests: XCTestCase {
 
     func testAnUnparseableStampIsNil() {
         XCTAssertNil(Booking.bookingDateTime(startAt: "soon", timezone: "UTC"))
-        XCTAssertNil(Booking.slotClock(startAt: "soon", timezone: "UTC"))
     }
 
-    func testTheSlotClockIsTheTimeAlone() {
-        XCTAssertEqual(Booking.slotClock(startAt: "2026-09-12T09:30:00Z", timezone: "UTC"), "9:30")
-    }
-
-    // MARK: - Duration
-
-    func testTheDurationIsTheMinutesBetweenTheEnds() {
-        XCTAssertEqual(
-            Booking.bookingDuration(startAt: "2026-09-12T10:00:00Z", endAt: "2026-09-12T10:30:00Z"),
-            "30 min"
-        )
-        XCTAssertEqual(
-            Booking.bookingDuration(startAt: "2026-09-12T10:00:00Z", endAt: "2026-09-12T11:30:00Z"),
-            "90 min"
-        )
-    }
-
-    /// ⚠️ nil FOR A ZERO OR NEGATIVE SPAN rather than `0 min`. Both are corrupt rows
-    /// rather than instant meetings.
-    func testAZeroOrBackwardsSpanIsNil() {
-        XCTAssertNil(Booking.bookingDuration(startAt: "2026-09-12T10:00:00Z", endAt: "2026-09-12T10:00:00Z"))
-        XCTAssertNil(Booking.bookingDuration(startAt: "2026-09-12T11:00:00Z", endAt: "2026-09-12T10:00:00Z"))
-        XCTAssertNil(Booking.bookingDuration(startAt: "soon", endAt: "2026-09-12T10:00:00Z"))
-        XCTAssertNil(Booking.bookingDuration(startAt: "2026-09-12T10:00:00Z", endAt: "later"))
-    }
+    // MARK: - minutesLabel
 
     func testMinutesLabelNamesAnAbsentValue() {
         XCTAssertEqual(Booking.minutesLabel(30), "30 min")
@@ -195,7 +147,7 @@ final class SchedulingBookingFormatTests: XCTestCase {
     /// ⛔ JUDGED ON `endAt`, NOT `startAt`: a meeting that started ten minutes ago is
     /// still cancellable and one that ended ten minutes ago is not.
     func testActionabilityIsJudgedOnTheEndAndNotTheStart() throws {
-        let now = try XCTUnwrap(SchedulingClock.parse("2026-09-12T10:10:00Z"))
+        let now = try XCTUnwrap(WireInstant.parse("2026-09-12T10:10:00Z"))
         let running = try SchedulingFixture.booking(
             start: "2026-09-12T10:00:00Z",
             end: "2026-09-12T11:00:00Z"
@@ -210,7 +162,7 @@ final class SchedulingBookingFormatTests: XCTestCase {
     }
 
     func testACancelledBookingIsNeverActionable() throws {
-        let now = try XCTUnwrap(SchedulingClock.parse("2026-09-12T10:00:00Z"))
+        let now = try XCTUnwrap(WireInstant.parse("2026-09-12T10:00:00Z"))
         let cancelled = try SchedulingFixture.booking(
             start: "2026-09-12T14:00:00Z",
             end: "2026-09-12T15:00:00Z",
@@ -220,21 +172,9 @@ final class SchedulingBookingFormatTests: XCTestCase {
     }
 
     func testAnUnparseableEndIsNotActionable() throws {
-        let now = try XCTUnwrap(SchedulingClock.parse("2026-09-12T10:00:00Z"))
+        let now = try XCTUnwrap(WireInstant.parse("2026-09-12T10:00:00Z"))
         let broken = try SchedulingFixture.booking(end: "later")
         XCTAssertFalse(Booking.isActionable(broken, now: now))
-    }
-
-    // MARK: - mediaUnavailableSentence
-
-    /// ⚠️ A 424 IS AN UNCONFIGURED REGION AND NOT A FAULT, so it gets a sentence an
-    /// operator can act on instead of one that sends them looking for an outage.
-    func testA424NamesTheRegionRatherThanReportingAFault() {
-        XCTAssertEqual(
-            Booking.mediaUnavailableSentence(status: 424, fallback: "generic"),
-            "Recording storage is not enabled for this region."
-        )
-        XCTAssertEqual(Booking.mediaUnavailableSentence(status: 500, fallback: "generic"), "generic")
     }
 
     // MARK: - Views

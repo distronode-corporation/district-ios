@@ -53,8 +53,8 @@ enum BillingFormat {
     ///
     /// ⚠️ THE MULTIPLICATION LIVES HERE AND NOWHERE ELSE. See the ⛔ on the type.
     ///
-    /// ⚠️ `formatted(date:time:)` RATHER THAN A `DateFormatter`, which is the same call
-    /// ``ContactDates`` makes: a `DateFormatter` is a non-`Sendable` class, so a stored
+    /// ⚠️ `formatted(date:time:)` RATHER THAN A `DateFormatter`, the same style
+    /// ``WireDate`` uses: a `DateFormatter` is a non-`Sendable` class, so a stored
     /// static of one is a concurrency error under Swift 6 rather than a saving.
     static func date(unixSeconds: Int) -> String {
         let moment = Date(timeIntervalSince1970: TimeInterval(unixSeconds))

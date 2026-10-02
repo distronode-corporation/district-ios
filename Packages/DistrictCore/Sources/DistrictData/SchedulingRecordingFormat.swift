@@ -10,7 +10,7 @@ public enum SchedulingRecordingFormat {
     /// ``SchedulingClock``: making the two agree would put this client out of step with
     /// the browser on a value an operator can compare directly.
     public static func recordedWhen(createdAt: String?, timezone: String) -> String? {
-        guard let createdAt, let at = SchedulingClock.parse(createdAt) else { return nil }
+        guard let createdAt, let at = WireInstant.parse(createdAt) else { return nil }
         let parts = SchedulingClock.parts(of: at, timezone: timezone)
         guard let month = SchedulingClock.monthName(parts.month) else { return nil }
         return "\(month) \(parts.day), \(parts.year), \(SchedulingClock.paddedClock(parts))"

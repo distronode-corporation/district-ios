@@ -1,4 +1,5 @@
 import DistrictData
+import DistrictModel
 import Foundation
 import XCTest
 
@@ -10,27 +11,9 @@ import XCTest
 /// `Date.formatted` would pass on a Toronto laptop and fail in CI, or worse, pass in both
 /// and be wrong for a travelling operator.
 final class SchedulingClockTests: XCTestCase {
-    func testParsesAStampWithFractionalSeconds() {
-        XCTAssertNotNil(SchedulingClock.parse("2026-09-12T14:30:00.123Z"))
-    }
-
-    /// ⚠️ THE PAIR THAT NEEDS TWO FORMATTERS. `ISO8601DateFormatter` rejects fractional
-    /// seconds unless told to expect them and rejects their ABSENCE when it is — so a
-    /// single configuration fails one of these two, and the server sends both shapes.
-    func testParsesAStampWithoutFractionalSeconds() {
-        XCTAssertNotNil(SchedulingClock.parse("2026-09-12T14:30:00Z"))
-    }
-
-    /// ⛔ nil IS "THIS IS NOT A TIME" AND EVERY CALLER RENDERS A WORD FOR IT rather than
-    /// falling back to now, which would put today's date on a corrupt row.
-    func testRefusesSomethingThatIsNotAStamp() {
-        XCTAssertNil(SchedulingClock.parse("not a date"))
-        XCTAssertNil(SchedulingClock.parse(""))
-    }
-
     /// The whole reason this type exists: one instant, two zones, two different days.
     func testTheSameInstantIsADifferentDayInTwoZones() throws {
-        let instant = try XCTUnwrap(SchedulingClock.parse("2026-09-12T02:30:00Z"))
+        let instant = try XCTUnwrap(WireInstant.parse("2026-09-12T02:30:00Z"))
         let toronto = SchedulingClock.parts(of: instant, timezone: "America/Toronto")
         let tokyo = SchedulingClock.parts(of: instant, timezone: "Asia/Tokyo")
         XCTAssertEqual([toronto.day, toronto.hour], [11, 22])
@@ -40,7 +23,7 @@ final class SchedulingClockTests: XCTestCase {
     /// ⚠️ AN UNKNOWN ZONE FALLS BACK TO UTC RATHER THAN REFUSING, so a profile carrying a
     /// zone this platform's database lacks still renders its bookings.
     func testAnUnknownZoneFallsBackToUTC() throws {
-        let instant = try XCTUnwrap(SchedulingClock.parse("2026-09-12T02:30:00Z"))
+        let instant = try XCTUnwrap(WireInstant.parse("2026-09-12T02:30:00Z"))
         let unknown = SchedulingClock.parts(of: instant, timezone: "Mars/Olympus_Mons")
         XCTAssertEqual([unknown.day, unknown.hour], [12, 2])
     }
@@ -48,7 +31,7 @@ final class SchedulingClockTests: XCTestCase {
     /// ⛔ MIDNIGHT IS `0`, NEVER `24` — the property the TypeScript's `% 24` exists to
     /// guarantee and that `Calendar` gives for free.
     func testMidnightIsZeroAndNotTwentyFour() throws {
-        let instant = try XCTUnwrap(SchedulingClock.parse("2026-09-12T00:00:00Z"))
+        let instant = try XCTUnwrap(WireInstant.parse("2026-09-12T00:00:00Z"))
         XCTAssertEqual(SchedulingClock.parts(of: instant, timezone: "UTC").hour, 0)
     }
 
@@ -106,5 +89,15 @@ final class SchedulingClockTests: XCTestCase {
         let absurd = SchedulingZonedParts(year: 300_000_000_000, month: 1, day: 1, hour: 0, minute: 0)
         XCTAssertNil(SchedulingClock.dayDelta(from: absurd, to: normal))
         XCTAssertNil(SchedulingClock.dayDelta(from: normal, to: absurd))
+    }
+
+    // MARK: - displayTimezone
+
+    /// ⚠️ AN EMPTY PROFILE ZONE IS UTC, AND A SET ONE IS PASSED THROUGH UNCHANGED, even
+    /// one this platform cannot resolve, so the label names what the profile says.
+    func testTheDisplayZoneFallsBackToUTCOnlyWhenEmpty() throws {
+        XCTAssertEqual(try SchedulingFixture.me(timezone: "").displayTimezone, "UTC")
+        XCTAssertEqual(try SchedulingFixture.me(timezone: "Asia/Tokyo").displayTimezone, "Asia/Tokyo")
+        XCTAssertEqual(try SchedulingFixture.me(timezone: "Mars/Olympus").displayTimezone, "Mars/Olympus")
     }
 }

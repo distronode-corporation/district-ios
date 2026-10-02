@@ -90,44 +90,4 @@ final class SchedulingCalendarFormatTests: XCTestCase {
             "No calendar in this account"
         )
     }
-
-    // MARK: - calendarErrorSentence
-
-    /// ⚠️ THE PROVIDER NAME APPEARS IN TWO GRAMMATICAL POSITIONS AND THE FALLBACK CHANGES
-    /// CASE WITH IT. Getting this wrong produces a sentence that starts lower-case.
-    func testTheFallbackNameChangesCaseWithItsPosition() {
-        XCTAssertEqual(
-            Calendar.calendarErrorSentence(reason: "provider_denied", provider: nil),
-            "You cancelled the connection at your calendar provider."
-        )
-        XCTAssertTrue(
-            Calendar.calendarErrorSentence(reason: "exchange_failed", provider: nil)
-                .hasPrefix("Your calendar provider refused")
-        )
-    }
-
-    func testANamedProviderIsLabelled() {
-        XCTAssertEqual(
-            Calendar.calendarErrorSentence(reason: "provider_denied", provider: "google"),
-            "You cancelled the connection at Google Calendar."
-        )
-        XCTAssertEqual(
-            Calendar.calendarErrorSentence(reason: "exchange_failed", provider: "microsoft"),
-            "Microsoft 365 refused the connection. Try again, and check that the account "
-                + "allows third-party calendar access."
-        )
-    }
-
-    /// ⚠️ EVERY OTHER REASON, INCLUDING ONES THIS BUILD DOES NOT KNOW, GETS THE GENERIC
-    /// SENTENCE. It is the honest answer: the client cannot say more than "it did not
-    /// finish".
-    func testAnyOtherReasonIsTheGenericSentence() {
-        for reason in ["missing_code", "invalid_state", "who_knows", ""] {
-            XCTAssertEqual(
-                Calendar.calendarErrorSentence(reason: reason, provider: "google"),
-                "The connection did not complete. Try again.",
-                reason
-            )
-        }
-    }
 }

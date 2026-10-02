@@ -89,11 +89,11 @@ struct CallDisplay {
 extension CallDisplay {
     /// Map a wire row to its display rules. The only place these comparisons appear.
     ///
-    /// ⛔ `createdAt` RATHER THAN `time`, AND ``ContactDates/readable(_:)`` RATHER
+    /// ⛔ `createdAt` RATHER THAN `time`, AND ``WireDate/display(_:in:)`` RATHER
     /// THAN A SECOND FORMATTER. That helper already carries the fractional-seconds
-    /// trap the server's `2026-08-19T09:41:00.000Z` walks into (the default
-    /// `ISO8601DateFormatter` returns nil for it, silently), and a private copy here
-    /// would be a second place for that to be got wrong. See ``time``.
+    /// trap the server's `2026-08-19T09:41:00.000Z` walks into (a parser not told to
+    /// expect it returns nil, silently), and a private copy here would be a second
+    /// place for that to be got wrong. See ``time``.
     init(_ call: CallSummary) {
         let seconds = call.durationRaw ?? 0
         self.init(
@@ -104,7 +104,7 @@ extension CallDisplay {
             live: call.status == CallWire.statusInProgress || call.status == CallWire.statusRinging,
             transferred: call.transferStatus == CallWire.transferSuccess,
             transferFailed: call.transferStatus == CallWire.transferFailure,
-            time: ContactDates.readable(call.createdAt),
+            time: WireDate.display(call.createdAt),
             durationLabel: seconds > 0 ? call.duration : nil,
             aiSummary: CallNarrative.summary(call.aiSummary)
         )

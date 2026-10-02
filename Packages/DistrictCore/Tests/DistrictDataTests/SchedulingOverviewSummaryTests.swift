@@ -244,7 +244,7 @@ final class SchedulingOverviewSummaryTests: XCTestCase {
     // MARK: - bookingWhen
 
     private func now() throws -> Date {
-        try XCTUnwrap(SchedulingClock.parse("2026-09-12T12:00:00Z"))
+        try XCTUnwrap(WireInstant.parse("2026-09-12T12:00:00Z"))
     }
 
     func testTodayAndTomorrowAreNamedAndAnythingElseIsDated() throws {

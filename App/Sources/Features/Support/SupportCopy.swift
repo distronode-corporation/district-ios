@@ -132,10 +132,10 @@ enum SupportCopy {
     /// destination and `NavigationStack` draws the back affordance itself.
     static let threadLoading = "Loading the conversation…"
 
-    /// ⚠️ FORMATTED THROUGH ``ContactDates/readable(_:)``, WHICH FALLS BACK TO THE
-    /// RAW ISO STRING. `DistrictModel` owns no date parsing — one decoder strategy
-    /// would have to be right for every timestamp on the surface and they do not all
-    /// agree — so the formatting is the App target's and the fallback keeps an
+    /// ⚠️ FORMATTED THROUGH ``WireDate/display(_:in:)``, WHICH FALLS BACK TO THE
+    /// RAW ISO STRING. The models carry the instant as a `String` rather than through
+    /// a decoder strategy, which would have to be right for every timestamp on the
+    /// surface, so the formatting is the App target's and the fallback keeps an
     /// unparseable instant visible rather than blanking the line.
     static func opened(_ readableDate: String) -> String {
         "Opened \(readableDate)"

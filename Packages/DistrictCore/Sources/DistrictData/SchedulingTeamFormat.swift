@@ -147,12 +147,6 @@ public enum SchedulingTeamFormat {
         return districtRoleLabels[normalized] ?? role
     }
 
-    /// Whether this person's bookings have to be dealt with before their account can go.
-    public static func needsBookingResolution(_ row: SchedulingMemberRow) -> Bool {
-        guard row.schedulerUserId != nil else { return false }
-        return row.districtRole == nil || row.state == .archived
-    }
-
     /// People who have left the workspace and still hold a live scheduler account.
     public static func strandedHosts(_ rows: [SchedulingMemberRow]) -> [SchedulingMemberRow] {
         rows.filter { $0.districtRole == nil && $0.state == .host }
@@ -186,29 +180,6 @@ public enum SchedulingTeamFormat {
     /// replaced by the length of an inlined array that may itself be nil.
     public static func teamMemberCount(_ team: SchedulingTeam) -> Int {
         team.memberCount ?? team.members?.count ?? 0
-    }
-
-    /// ⚠️ NOTHING IN THIS READ STAGE CALLS IT. The archive refusals are the write stage's,
-    /// and they are ported here rather than later because they are chosen from the HTTP
-    /// STATUS rather than from any text the fork sends — that mapping is the knowledge
-    /// worth capturing while the source is open, and it is the kind that is guessed wrong
-    /// when it is rebuilt from a memory of the screen.
-    public static func archiveRefusalSentence(status: Int, fallback: String) -> String {
-        switch status {
-        case 409:
-            "They still have upcoming bookings. Reassign or cancel those first, "
-                + "then archive the account."
-        case 403:
-            "You cannot archive that account. Only the workspace owner can archive "
-                + "another administrator."
-        case 400:
-            "That account cannot be archived. The workspace owner has to be transferred "
-                + "first, and an account that is already archived stays archived."
-        case 404:
-            "The booking system no longer has that account."
-        default:
-            fallback
-        }
     }
 
     static func normalize(_ email: String) -> String {

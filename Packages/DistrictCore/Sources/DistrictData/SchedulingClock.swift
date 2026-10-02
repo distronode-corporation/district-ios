@@ -1,3 +1,4 @@
+import DistrictModel
 import Foundation
 
 /// The wall-clock fields of an instant, in one IANA zone.
@@ -31,7 +32,8 @@ public struct SchedulingZonedParts: Equatable, Sendable {
     }
 }
 
-/// Parsing the scheduler's timestamps, and rendering them the way each surface does.
+/// Rendering the scheduler's timestamps the way each surface does. Parsing them is
+/// ``WireInstant``'s job, shared with the rest of the app.
 ///
 /// ⛔ THE PADDING IS INCONSISTENT ACROSS THE SURFACES **ON PURPOSE** AND MUST NOT BE
 /// TIDIED. Measured against the web rather than assumed: the overview register and the
@@ -52,27 +54,6 @@ public enum SchedulingClock {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ]
-
-    /// Parse one of the scheduler's ISO-8601 instants.
-    ///
-    /// ⚠️ TWO FORMATS ARE TRIED BECAUSE ONE IS NOT ENOUGH, the same pair
-    /// ``SchedulingTimestamp`` in the App target already pays for: a `Date` serialised
-    /// through `JSON.stringify` carries fractional seconds, and `ISO8601DateFormatter`
-    /// REJECTS those unless `withFractionalSeconds` is set while rejecting a string
-    /// without them when it is. Neither option parses both.
-    ///
-    /// ⛔ nil IS "THIS IS NOT A TIME" AND EVERY CALLER MUST SAY SO RATHER THAN GUESS.
-    /// The web renders the word `Unknown` and never `Invalid Date`; a screen that fell
-    /// back to `Date()` would show today's date for a row whose timestamp was corrupt.
-    public static func parse(_ raw: String) -> Date? {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = formatter.date(from: raw) {
-            return date
-        }
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter.date(from: raw)
-    }
 
     /// The wall-clock fields of `date` in `timezone`.
     ///
@@ -155,5 +136,18 @@ public enum SchedulingClock {
             return nil
         }
         return calendar.dateComponents([.day], from: startDate, to: endDate).day
+    }
+}
+
+public extension SchedulingMe {
+    /// The zone every scheduling screen renders this member's times in.
+    ///
+    /// ⚠️ AN EMPTY PROFILE ZONE IS `UTC`, AND THIS IS THE ONE PLACE THAT SAYS SO. Five
+    /// read screens used to spell the fallback themselves, and two screens resolving it
+    /// differently would show one booking at two different hours. A NON-empty zone this
+    /// platform does not know is passed through: ``SchedulingClock/parts(of:timezone:)``
+    /// already falls back to UTC for it, and the label still names what the profile says.
+    var displayTimezone: String {
+        timezone.isEmpty ? "UTC" : timezone
     }
 }

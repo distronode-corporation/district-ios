@@ -83,38 +83,7 @@ enum SchedulingCopy {
     }
 
     static func lastReadyLine(_ stamp: String) -> String {
-        "Last checked \(SchedulingTimestamp.display(stamp))"
-    }
-}
-
-/// Turns the status route's ISO-8601 string into something a person reads.
-///
-/// ⛔ BUILT PER CALL RATHER THAN HELD IN A `static let`. `ISO8601DateFormatter` is
-/// a reference type and is not `Sendable`, so a shared instance is a Swift 6
-/// concurrency error rather than an optimisation, and this runs once per redraw of
-/// one label.
-///
-/// ⚠️ TWO FORMATS ARE TRIED BECAUSE ONE IS NOT ENOUGH. `NextResponse.json`
-/// serialises a `Date` through `JSON.stringify`, which emits fractional seconds —
-/// and `ISO8601DateFormatter` REJECTS those unless `withFractionalSeconds` is set,
-/// while a string without them is rejected when it is. Neither option parses both.
-///
-/// ⚠️ FALLS BACK TO THE RAW STRING. An unparseable stamp is still true, and a
-/// blank line where a date should be reads as missing data.
-enum SchedulingTimestamp {
-    static func display(_ raw: String) -> String {
-        guard let date = parse(raw) else { return raw }
-        return date.formatted(date: .abbreviated, time: .shortened)
-    }
-
-    private static func parse(_ raw: String) -> Date? {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = formatter.date(from: raw) {
-            return date
-        }
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter.date(from: raw)
+        "Last checked \(WireDate.display(stamp))"
     }
 }
 

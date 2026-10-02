@@ -257,7 +257,7 @@ struct SupportView: View {
     /// same information the badge carries and is worth repeating here: the row is
     /// otherwise identical to a filed one.
     private func subtitle(for request: SupportRequestSummary) -> String {
-        let when = ContactDates.readable(request.createdAt)
+        let when = WireDate.display(request.createdAt)
         guard let key = request.issueKey else { return "\(SupportCopy.unfiledStatus) · \(when)" }
         return "\(key) · \(when)"
     }

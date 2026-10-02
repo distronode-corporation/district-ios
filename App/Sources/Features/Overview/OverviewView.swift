@@ -439,10 +439,10 @@ private struct ActivityRow: View {
     /// column is settable only from the web settings page, which this client does not
     /// implement, so `time` is a Toronto wall clock, unlabelled, for every operator who
     /// has not opened the browser app. `createdAt` is the true instant and
-    /// ``ContactDates/readable(_:)`` is the formatter the rest of this app uses.
+    /// ``WireDate/display(_:in:)`` is the formatter the rest of this app uses.
     private var subtitle: String {
         let direction = call.direction == Self.outboundDirection ? "Outbound" : "Inbound"
-        return "\(direction) · \(ContactDates.readable(call.createdAt))"
+        return "\(direction) · \(WireDate.display(call.createdAt))"
     }
 
     /// ⛔ DERIVED FROM THE DISPLAY STATUS, WHICH IS THE WHOLE POINT. The server has
