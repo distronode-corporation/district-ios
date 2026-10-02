@@ -335,6 +335,13 @@ enum DistrictPaths {
     /// goes straight to the browser without being followed here.
     static let schedulingHandoff = scheduling + ["handoff"]
 
+    /// ⛔ A WEB PAGE, NOT AN API ROUTE, AND IT IS NEVER SENT THROUGH ``ApiClient``. It
+    /// is leg 1 of the bound hand-off: the browser opens it, the server sets the nonce
+    /// cookie in THAT browser and redirects to `districtai://handoff`. Fetching it from
+    /// this process would put the cookie in the wrong jar. See
+    /// ``SchedulingHandoffClient/startURL(state:)``.
+    static let schedulingHandoffStart = ["dashboard", "handoff", "start"]
+
     /// ⛔ THE TENANT'S OWN TICKETS **WITH DISTRONODE**, WHICH IS THE OPPOSITE
     /// DIRECTION FROM `district/desk`. Support is the customer writing to us; the
     /// desk is their customers writing to them. The two families are one segment

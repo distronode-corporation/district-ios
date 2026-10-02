@@ -212,6 +212,17 @@ targets:
         # iOS runs the app letterboxed at a legacy screen size and every layout
         # looks subtly wrong for a reason that is not in the layout code.
         UILaunchScreen: {}
+        # ⛔ REGISTERS `districtai://` WITH THE OS, WHICH SIGN-IN NEVER NEEDED AND THE
+        # SCHEDULING HAND-OFF DOES (S33). `ASWebAuthenticationSession` intercepts
+        # `districtai://auth` in-session with no registration at all; the hand-off's leg 1
+        # runs in `SFSafariViewController`, whose redirect to `districtai://handoff` is
+        # routed by the OS and reaches `ShellView.onOpenURL` only through this entry.
+        # ⚠️ ANY APP CAN CLAIM THE SAME SCHEME, which is why the callback is spent only
+        # against the state this app generated (`SchedulingHandoffFlow`).
+        CFBundleURLTypes:
+          - CFBundleURLName: com.distronode.district
+            CFBundleURLSchemes:
+              - districtai
         # ⚠️ ONE WINDOW ON iPad TOO. Multiple scenes would mean one shell, one
         # navigation state and one incoming-call cover per window, over a single
         # live call per process; nothing here is built for that.

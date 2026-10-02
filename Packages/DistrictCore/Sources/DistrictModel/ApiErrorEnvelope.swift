@@ -70,4 +70,11 @@ public enum ApiErrorCode {
     /// the subscription refusal — so `ApiErrorEnvelope` models it exactly and it
     /// needs no type of its own. See `district-dial-dormant.json`.
     public static let workspaceDormant = "workspace_dormant"
+    /// 400 from `POST /api/district/scheduling/handoff` when a `nonce` was sent but
+    /// is not 43 base64url characters. The mint is a failure and is NOT retried with
+    /// the same nonce: it would be refused identically.
+    public static let invalidNonce = "invalid_nonce"
+    /// 400 from the same route when no `nonce` was sent and the server requires one
+    /// (`HANDOFF_REQUIRE_NONCE`). Its `error` is the sentence the user sees.
+    public static let nonceRequired = "nonce_required"
 }

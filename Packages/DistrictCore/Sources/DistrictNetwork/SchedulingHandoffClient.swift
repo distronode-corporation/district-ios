@@ -20,6 +20,24 @@ public struct SchedulingHandoff: Sendable, Equatable {
     }
 }
 
+/// Why a hand-off mint failed.
+///
+/// ⚠️ TWO 400s GET THEIR OWN CASES BECAUSE EACH HAS ITS OWN REMEDY, and an
+/// ``ApiError/http(status:message:)`` cannot carry the `code` that tells them apart.
+public enum SchedulingHandoffFailure: Error, Equatable, Sendable {
+    /// 400 `nonce_required`: the server now refuses unbound mints. The message is the
+    /// sentence to show ("Update the app to open the website from it."), nil when the
+    /// body carried none.
+    case nonceRequired(message: String?)
+
+    /// 400 `invalid_nonce`: the nonce sent was refused. ⛔ A failure, never retried
+    /// with the same nonce; the next tap starts again from leg 1.
+    case invalidNonce
+
+    /// Every other failure, normalised exactly as the client always has.
+    case api(ApiError)
+}
+
 /// Mints the hand-off URL into the tenant's own scheduler.
 ///
 /// ⛔ IT DOES NOT REPLACE `scheduling/sso`; THE TWO COEXIST. Where the scheduler's
@@ -41,12 +59,53 @@ public struct SchedulingHandoffClient: Sendable {
         self.client = client
     }
 
-    public func mint(workspaceId: String, next: String? = nil) async -> Result<SchedulingHandoff, ApiError> {
-        let descriptor = DistrictEndpoints.schedulingHandoff(workspaceId: workspaceId, next: next)
-        let outcome = await client.send(descriptor)
-        return outcome.flatMap { raw in
-            decode(raw.body).flatMap(verified)
+    /// Leg 1 of the bound hand-off: the page the BROWSER opens to receive the nonce
+    /// cookie, on the API's own host.
+    ///
+    /// ⛔ OPENED IN THE SAME BROWSER COMPONENT AS LEG 3, NEVER FETCHED HERE. The cookie
+    /// is host-only and lands in whichever jar made the request; leg 3 redeems only in a
+    /// jar holding it. `SFSafariViewController` and `ASWebAuthenticationSession` do not
+    /// share one, so mixing them is a 410 on every bound redeem.
+    public func startURL(state: String) -> URL? {
+        client.pageURL(DistrictPaths.schedulingHandoffStart, query: [ApiQueryItem("state", state)])
+    }
+
+    /// Leg 2: mint the code, bound to `nonce` when there is one.
+    ///
+    /// ⛔ nil SENDS NO `nonce` KEY AT ALL, which is the unbound flow every installed
+    /// build already uses and the server accepts until `HANDOFF_REQUIRE_NONCE` is on.
+    /// The response body is the same two keys either way.
+    public func mint(
+        workspaceId: String,
+        next: String? = nil,
+        nonce: String? = nil
+    ) async -> Result<SchedulingHandoff, SchedulingHandoffFailure> {
+        let descriptor = DistrictEndpoints.schedulingHandoff(workspaceId: workspaceId, next: next, nonce: nonce)
+        let outcome = await client.sendUnmapped(descriptor)
+        switch outcome {
+        case let .failure(error):
+            return .failure(.api(error))
+        case let .success(raw):
+            guard ApiErrorNormalizer.isSuccess(raw.statusCode) else {
+                return .failure(Self.refusal(raw))
+            }
+            return decode(raw.body).flatMap(verified).mapError(SchedulingHandoffFailure.api)
         }
+    }
+
+    /// ⛔ THE TWO NONCE REFUSALS ARE TOLD APART BY `code`, NEVER BY THE SENTENCE, and
+    /// only on a 400: the same code on any other status is not this contract. Every
+    /// other refusal keeps the shared normalisation, so a 401, 403, 409 or 429 reads
+    /// exactly as it did before the nonce existed.
+    private static func refusal(_ raw: RawResponse) -> SchedulingHandoffFailure {
+        let envelope = ApiErrorEnvelope.lenient(raw.body)
+        if raw.statusCode == 400, envelope?.code == ApiErrorCode.nonceRequired {
+            return .nonceRequired(message: envelope?.message)
+        }
+        if raw.statusCode == 400, envelope?.code == ApiErrorCode.invalidNonce {
+            return .invalidNonce
+        }
+        return .api(ApiErrorNormalizer.apiError(statusCode: raw.statusCode, body: raw.body))
     }
 
     /// ⛔ STRICT: MISSING KEYS AND UNKNOWN KEYS BOTH FAIL. A body that grew a field is

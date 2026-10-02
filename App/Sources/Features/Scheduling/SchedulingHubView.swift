@@ -97,7 +97,7 @@ struct SchedulingHubView: View {
             await model.pollWhileProvisioning()
         }
         .sheet(item: $handOff) { target in
-            SafariView(url: target.url)
+            handOffSheet(target)
         }
     }
 
@@ -370,10 +370,33 @@ struct SchedulingHubView: View {
     /// ⚠️ IT CALLS `manageScheduling()`, WHICH IS THE HAND-OFF MINT AND NOT THE RETIRED
     /// SSO ROUTE. The console hand-off on `scheduling/sso` answers **410**. ⛔ Do not
     /// wire a button back to it.
+    ///
+    /// ⛔ LEG 1 AND LEG 3 ARE THE SAME SHEET, TWO CONTROLLERS (S33). Leg 1 presents
+    /// `/dashboard/handoff/start`; when the hand-off answers, the item is REPLACED by the
+    /// minted URL, and the fresh identity is what makes SwiftUI build a new
+    /// `SFSafariViewController` in the same cookie store. Never route either leg through
+    /// `ASWebAuthenticationSession`: its cookies are Safari's, and the redeem would 410.
     private func openInBrowser() {
         Task {
-            guard let url = await model.manageScheduling() else { return }
+            let url = await model.manageScheduling { url, state in
+                handOff = SchedulingHandOff(url: url, startState: state)
+            }
+            guard let url else { return }
             handOff = SchedulingHandOff(url: url)
+        }
+    }
+
+    /// ⚠️ ONLY LEG 1 REPORTS BACK, and it reports with its own state, so an event from a
+    /// sheet that has already been replaced cannot touch a newer hand-off.
+    @ViewBuilder
+    private func handOffSheet(_ target: SchedulingHandOff) -> some View {
+        if let state = target.startState {
+            SafariView(url: target.url) { rendered in
+                model.handOffStartLoaded(state: state, rendered: rendered)
+            }
+            .onDisappear { model.handOffStartClosed(state: state) }
+        } else {
+            SafariView(url: target.url)
         }
     }
 
@@ -389,9 +412,13 @@ struct SchedulingHubView: View {
 /// press so a second hand-off re-presents rather than being deduplicated against a
 /// token that has already been spent — and a URL used as an identity is a URL
 /// SwiftUI keeps a copy of.
+///
+/// ⚠️ `startState` IS SET ONLY ON LEG 1, and it is the in-memory state that leg's
+/// callback must carry. It is never shown, logged or persisted.
 struct SchedulingHandOff: Identifiable {
     let id = UUID()
     let url: URL
+    var startState: String?
 }
 
 /// A dismissible sentence above the card. Mirrors `DeviceNotice`.

@@ -181,6 +181,15 @@ final class AppContainer {
     /// one answers ordinary JSON and belongs on the ordinary client.
     let schedulingHandoff: SchedulingHandoffClient
 
+    /// The bound hand-off (S33): leg 1 in the browser, the `districtai://handoff`
+    /// callback, then the mint.
+    ///
+    /// ⛔ ONE PER PROCESS, AND THAT IS WHAT MAKES THE CALLBACK FIND ITS HAND-OFF. The
+    /// scene's `onOpenURL` (``ShellView``) delivers the callback and the scheduling hub
+    /// started the hand-off; both reach this one instance through the container, so
+    /// the state check and the single-flight gate see every event.
+    let schedulingHandoffFlow: SchedulingHandoffFlow
+
     /// Placing one outbound call. ⛔ Never retried; see the ⛔ on the type.
     let dial: DialRepository
 
@@ -401,6 +410,7 @@ final class AppContainer {
         }
         schedulingAdminMedia = SchedulingAdminMediaRepository(client: api)
         schedulingHandoff = SchedulingHandoffClient(client: api)
+        schedulingHandoffFlow = Self.handoffFlow(schedulingHandoff)
 
         // ⚠️ THE SAME `transport` AND THE SAME `coordinator` AS `api` ABOVE, and
         // the bearer closure is the same shape for the same reason: acquiring a

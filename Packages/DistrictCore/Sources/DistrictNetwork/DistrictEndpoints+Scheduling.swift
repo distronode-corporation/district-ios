@@ -99,7 +99,16 @@ public extension DistrictEndpoints {
     /// ⚠️ `next` IS OPTIONAL AND DROPPED WHEN nil, not sent as null: `JSONValue.object`
     /// discards a nil pair so the route's own default fires, and an explicit null is a
     /// value zod would not default over. Same decision as `registerPushToken`'s `kind`.
-    static func schedulingHandoff(workspaceId: String, next: String? = nil) -> ApiRequestDescriptor {
+    ///
+    /// ⛔ `nonce` IS DROPPED WHEN nil FOR THE SAME REASON, AND HERE THE ABSENT KEY IS
+    /// THE CONTRACT. The unbound fallback must send no `nonce` key at all: the server
+    /// reads a present-but-empty value as a malformed nonce (400 `invalid_nonce`), not
+    /// as "no nonce".
+    static func schedulingHandoff(
+        workspaceId: String,
+        next: String? = nil,
+        nonce: String? = nil
+    ) -> ApiRequestDescriptor {
         ApiRequestDescriptor(
             .schedulingHandoff,
             .post,
@@ -107,6 +116,7 @@ public extension DistrictEndpoints {
             body: .json(.object([
                 ("workspaceId", .string(workspaceId)),
                 ("next", .optional(next)),
+                ("nonce", .optional(nonce)),
             ]))
         )
     }
