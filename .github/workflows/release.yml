@@ -106,6 +106,7 @@ jobs:
           bash scripts/archive-imac.test.sh
           bash scripts/release-preflight.test.sh
           bash scripts/asc-key.test.sh
+          bash scripts/github-release.test.sh
           python3 scripts/asc_release_test.py
 
       # Xcode 26.3, asserted, and the pinned XcodeGen; archive-imac.sh generates the
@@ -191,15 +192,18 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/release" "$RUNNER_TEMP/build" "$RUNNER_TEMP/archive.log"
 
   # The one submission path, submit.yml, called here rather than copied: it checks the
-  # approval again, checks out the tag and runs scripts/release-submit.sh.
+  # approval again, checks out the tag and runs scripts/release-submit.sh, then its
+  # `github-release` job publishes the tag's GitHub Release if the version is on sale.
   submit:
     name: submit for review
     needs: build
     # ⛔ Only a dispatch on a tag, and only with the approval input exactly as the
     # maintainers give it. Anything else skips this job.
     if: github.event_name == 'workflow_dispatch' && needs.build.outputs.kind == 'tag' && inputs.approval == 'approved for release'
+    # The ceiling for submit.yml's jobs, each of which asks for no more than it uses:
+    # `submit` reads, and only `github-release` writes.
     permissions:
-      contents: read # check out the scripts and CHANGELOG.md
+      contents: write # submit.yml's github-release job publishes the Release
       id-token: write # the Google Cloud token for the App Store Connect key
     uses: ./.github/workflows/submit.yml
     with:
