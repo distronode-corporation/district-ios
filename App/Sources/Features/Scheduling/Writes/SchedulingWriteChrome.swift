@@ -437,12 +437,3 @@ struct SchedulingWriteFact: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
-
-// MARK: - Names the image row still spells
-
-// ⚠️ `SchedulingWritesBImageRow.swift` STILL SPELLS THE PRE-MERGE NAMES and belongs to
-// another change set. These aliases point it at the one implementation above; delete
-// them when that file is renamed.
-typealias SchedulingWritesBState = SchedulingWriteState
-typealias SchedulingWritesBHint = SchedulingWriteHint
-typealias SchedulingWritesBNotice = SchedulingWriteOutcome

@@ -17,6 +17,35 @@ built from history before publication, so they have no tags in this repository.
   store credential is stored in the repository or in GitHub, and submission for App
   Review runs only with the maintainers' explicit approval.
 - The version on `main` is now 1.3.
+- Scheduling sheets show one set of failure sentences, the same as the web, and offer
+  Try again only where trying again can work. Sheet titles, notices and failure lines
+  look the same on every scheduling sheet.
+- Workspace roles and regions have one name each across the app: Administrator,
+  Member and Viewer; Canada, Europe, APAC and US.
+- The reschedule date picker uses the scheduling profile's time zone, so the slots
+  listed are for the day shown.
+- Scheduling screens load their independent data in parallel.
+
+### Fixed
+
+- Signing out while the app was refreshing its session could leave that session
+  stored, so the next launch signed the previous user back in. A refresh that finishes
+  after sign-out is now discarded and its token revoked.
+- A session left in the Keychain by a previous installation is cleared and revoked on
+  the first launch of a new one.
+- A second sign-out in the same launch could drop a token still waiting to be revoked.
+- A token the server refuses is no longer reused until it expires; the next request
+  refreshes it.
+- Pulling to refresh the call log or contacts while more rows were loading could skip
+  rows.
+- Creating a Desk ticket with a double tap could create two tickets.
+- A quick second tap on the meeting microphone or camera button could be lost, and a
+  refused change now says so.
+- Inbox drafts that fail to save, or fail to delete after sending, are now reported
+  instead of failing silently.
+- A recording that cannot be played now says so.
+- A request body that cannot be encoded fails on the device instead of being sent
+  empty.
 
 ## [1.2] - 2026-09-26
 
