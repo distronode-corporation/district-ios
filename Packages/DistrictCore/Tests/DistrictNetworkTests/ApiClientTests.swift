@@ -315,21 +315,47 @@ final class ApiClientTests: XCTestCase {
         XCTAssertEqual(result.failureOnly, .decoding(ApiErrorNormalizer.decodingReason(statusCode: 200, byteCount: 0)))
     }
 
-    /// ⛔ AN UNENCODABLE BODY MUST NOT THROW OUT OF A SEND THAT HAS NO CATCH ABOVE
-    /// IT. The only way to reach this is a non-finite `Double` inside a
-    /// caller-supplied ``JSONValue`` — HQ's confirm args are echoed back verbatim
-    /// from a proposal, so the client does not get to inspect them.
-    func testAnUnencodableBodyBecomesAnEmptyBodyRatherThanACrash() async throws {
+    /// ⛔ AN UNENCODABLE BODY FAILS LOCALLY AND SENDS NOTHING. The only way to
+    /// reach this is a non-finite `Double` inside a caller-supplied ``JSONValue``
+    /// (HQ's confirm args are echoed back verbatim from a proposal, so the client
+    /// does not get to inspect them). It used to go out as an empty POST to a
+    /// destructive route; it must also not throw out of a send that has no catch
+    /// above it.
+    func testAnUnencodableBodyFailsBeforeAnythingIsSent() async throws {
         let transport = TestTransport(json: #"{"success":true}"#)
-        let client = ApiClient.test(transport)
+        let tokens = TokenRequests()
+        let client = try ApiClient(
+            baseURL: XCTUnwrap(URL(string: EndpointTable.host)),
+            transport: transport,
+            accessToken: { await tokens.hand() }
+        )
 
-        _ = await client.send(DistrictEndpoints.hqConfirm(
+        let result = await client.send(DistrictEndpoints.hqConfirm(
             workspaceId: "ws_1",
             tool: "delete_contact",
             args: .object(["weight": .number(.nan)])
         ))
 
-        XCTAssertEqual(try XCTUnwrap(transport.lastRequest?.body), Data())
+        XCTAssertEqual(
+            result.failureOnly,
+            .transport("The request body could not be encoded (a number was not finite).")
+        )
+        XCTAssertTrue(transport.recorded.isEmpty)
+        await expectNoTokenRequested(tokens)
+    }
+
+    private func expectNoTokenRequested(_ tokens: TokenRequests) async {
+        let count = await tokens.count
+        XCTAssertEqual(count, 0, "an unsendable request must not trigger a token refresh")
+    }
+}
+
+private actor TokenRequests {
+    private(set) var count = 0
+
+    func hand() -> String? {
+        count += 1
+        return "session-token"
     }
 }
 

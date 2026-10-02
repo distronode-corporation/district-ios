@@ -2,7 +2,7 @@ import CallKit
 import DistrictCall
 import Foundation
 
-/// Every sentence the dialer says, the two thresholds behind its button, and the
+/// Every sentence the dialer says, the start timeout behind its button, and the
 /// one thing it tells the OS rather than a person.
 ///
 /// ⚠️ ITS OWN FILE RATHER THAN AN EXTENSION AT THE BOTTOM OF `DialerModel.swift`, AND
@@ -15,9 +15,6 @@ import Foundation
 /// message is the only place the 100-day window and the reactivation instruction are
 /// stated at all. These are what a blank message degrades to. See the ⛔ on ``DialOutcome``.
 extension DialerModel {
-    /// See ``canPlaceCall``.
-    static let minimumDigits = 8
-
     /// ⚠️ GENEROUS, BECAUSE THE COST OF FIRING EARLY IS A CALL ABANDONED THAT WAS ABOUT
     /// TO START. A `CXStartCallAction` is normally performed in well under a second.
     static let startTimeoutSeconds = 10

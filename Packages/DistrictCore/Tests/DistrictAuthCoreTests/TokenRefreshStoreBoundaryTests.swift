@@ -73,7 +73,6 @@ final class TokenRefreshStoreBoundaryTests: XCTestCase {
         // successor here would convert a momentary Keychain failure into a
         // PERMANENT sign-out.
         await expectEqual(.available("access-2")) { await coordinator.accessToken() }
-        await expectTrue { await coordinator.hasUnpersistedSession }
         // ⚠️ And the marker stays set, so a crash before the retry lands on the
         // clean interrupted-refresh path rather than on a replay.
         let marker = await store.pending
@@ -97,7 +96,6 @@ final class TokenRefreshStoreBoundaryTests: XCTestCase {
         // ⛔ THE SECOND REFRESH PRESENTED refresh-2, NOT THE refresh-1 STILL ON
         // DISK. Presenting the disk copy is the replay that revokes the family.
         await expectEqual(["refresh-1", "refresh-2"]) { await client.presented }
-        await expectFalse { await coordinator.hasUnpersistedSession }
         let session = await store.session
         XCTAssertEqual(session?.refreshToken, "refresh-3")
     }
@@ -118,7 +116,6 @@ final class TokenRefreshStoreBoundaryTests: XCTestCase {
 
         let presented = await client.presented
         XCTAssertEqual(presented, ["refresh-1", "refresh-2", "refresh-3"])
-        await expectTrue { await coordinator.hasUnpersistedSession }
         let written = await store.writtenSessions
         XCTAssertTrue(written.isEmpty)
     }

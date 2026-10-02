@@ -73,4 +73,40 @@ public enum ApiErrorNormalizer {
         "The server's response did not match the shape this app expects "
             + "(HTTP \(statusCode), \(byteCount) bytes)."
     }
+
+    /// The same sentence, plus the key path the decoder stopped at.
+    ///
+    /// ⛔ KEY NAMES ONLY, NEVER VALUES, for the reason above. A struct's coding
+    /// keys are names this app declared, and an array index is a position; a
+    /// DICTIONARY key is data (a host id, a provider name), so it is written as
+    /// `*`. ⚠️ The tell is the key's TYPE NAME: every DTO's keys are a
+    /// `CodingKeys` enum, synthesized or spelled out, while the decoder makes
+    /// its own key for a map entry or an index. Not "is it an enum": Darwin's
+    /// decoder key (`_CodingKey`) is an enum too, measured on this toolchain.
+    static func decodingReason(statusCode: Int, byteCount: Int, failure: any Error) -> String {
+        let path = keyPath(of: failure)
+        let base = decodingReason(statusCode: statusCode, byteCount: byteCount)
+        return path.isEmpty ? base : base + " Field: " + path + "."
+    }
+
+    static func keyPath(of failure: any Error) -> String {
+        let keys: [any CodingKey] = switch failure as? DecodingError {
+        case let .keyNotFound(key, context)?:
+            context.codingPath + [key]
+        case let .typeMismatch(_, context)?, let .valueNotFound(_, context)?, let .dataCorrupted(context)?:
+            context.codingPath
+        default:
+            // Not a `DecodingError`, or a case added after this was written.
+            []
+        }
+        return keys.reduce(into: "") { path, key in
+            if String(describing: type(of: key)) == "CodingKeys" {
+                path += (path.isEmpty ? "" : ".") + key.stringValue
+            } else if let index = key.intValue {
+                path += "[\(index)]"
+            } else {
+                path += (path.isEmpty ? "" : ".") + "*"
+            }
+        }
+    }
 }

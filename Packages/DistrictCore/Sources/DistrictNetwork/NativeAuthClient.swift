@@ -14,9 +14,9 @@ import Foundation
 /// be: the credential is the code (exchange), Apple's identity token, or the
 /// refresh token itself (refresh, revoke). Giving them an `EndpointID` would
 /// also put them in the untyped/typed/redirect partition that
-/// `EndpointSurfaceTests` asserts over `EndpointID.allCases`, i.e. it would claim they are reachable through the
-/// client that cannot reach them — so that suite's 55/25/1 counts are untouched
-/// by anything in this file.
+/// `EndpointCountTests` asserts over `EndpointID.allCases`, i.e. it would claim
+/// they are reachable through the client that cannot reach them, so nothing in
+/// this file moves that suite's counts.
 enum NativeAuthPaths {
     private static let nativeAuth = ["api", "auth", "native"]
 
