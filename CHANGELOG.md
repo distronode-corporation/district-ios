@@ -10,42 +10,36 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
-### Changed
-
-- Releases are built, signed and uploaded by the repository's GitHub Actions release
-  workflow from a protected tag, instead of on a maintainer's machine. No signing key or
-  store credential is stored in the repository or in GitHub, and submission for App
-  Review runs only with the maintainers' explicit approval.
-- The version on `main` is now 1.3.
-- Scheduling sheets show one set of failure sentences, the same as the web, and offer
-  Try again only where trying again can work. Sheet titles, notices and failure lines
-  look the same on every scheduling sheet.
-- Workspace roles and regions have one name each across the app: Administrator,
-  Member and Viewer; Canada, Europe, APAC and US.
-- The reschedule date picker uses the scheduling profile's time zone, so the slots
-  listed are for the day shown.
-- Scheduling screens load their independent data in parallel.
+## [1.3] - 2026-10-02
 
 ### Fixed
 
-- Signing out while the app was refreshing its session could leave that session
-  stored, so the next launch signed the previous user back in. A refresh that finishes
-  after sign-out is now discarded and its token revoked.
-- A session left in the Keychain by a previous installation is cleared and revoked on
-  the first launch of a new one.
-- A second sign-out in the same launch could drop a token still waiting to be revoked.
-- A token the server refuses is no longer reused until it expires; the next request
-  refreshes it.
+- Signing out while the app was refreshing your session could leave you signed in on
+  the next launch. Signing out now always sticks.
+- Reinstalling the app no longer resumes the account that was signed in before it was
+  deleted.
+- If the service refuses your session, the app now gets a fresh one on the next request
+  instead of failing until it expires.
 - Pulling to refresh the call log or contacts while more rows were loading could skip
   rows.
-- Creating a Desk ticket with a double tap could create two tickets.
-- A quick second tap on the meeting microphone or camera button could be lost, and a
-  refused change now says so.
-- Inbox drafts that fail to save, or fail to delete after sending, are now reported
+- A quick double tap on Create ticket in Desk could create two tickets.
+- A quick second tap on the microphone or camera button in a meeting could be lost, and
+  a change the device refuses now says so.
+- Inbox drafts that fail to save, or fail to clear after sending, are now reported
   instead of failing silently.
 - A recording that cannot be played now says so.
-- A request body that cannot be encoded fails on the device instead of being sent
-  empty.
+
+### Changed
+
+- Scheduling shows the same messages as the website when something goes wrong, and
+  offers Try again only where trying again can work. Its sheets now look alike.
+- Rescheduling a booking lists the slots for the day shown, in your scheduling time
+  zone, even when you are travelling.
+- Scheduling screens open faster.
+- Workspace roles read Administrator, Member and Viewer, and regions read US, Canada,
+  Europe and APAC, everywhere in the app.
+- Releases are built, signed and uploaded by this repository's public GitHub Actions
+  workflow. No signing key or store credential is stored in the repository or in GitHub.
 
 ## [1.2] - 2026-09-26
 
@@ -85,5 +79,6 @@ built from history before publication, so they have no tags in this repository.
 
 The first release on the App Store.
 
-[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v1.2...HEAD
+[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v1.3...HEAD
+[1.3]: https://github.com/distronode-corporation/district-ios/releases/tag/v1.3
 [1.2]: https://github.com/distronode-corporation/district-ios/releases/tag/v1.2
