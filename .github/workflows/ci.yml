@@ -163,16 +163,22 @@ jobs:
           set -o pipefail
           swift test --enable-code-coverage 2>&1 | tee swift-test.log
 
-      # ⛔ PROVE THE TESTS ACTUALLY RAN. An XCTest bundle that discovers nothing exits 0,
-      # the same shape as a skipped suite reporting green.
+      # ⛔ PROVE THE TESTS ACTUALLY RAN, AND NOT FEWER OF THEM THAN LAST TIME. An XCTest
+      # bundle that discovers nothing exits 0, the same shape as a skipped suite reporting
+      # green, and a test target dropped from Package.swift loses hundreds of tests with
+      # no other failure. The floor is a ratchet, set a little below the count (1687 on
+      # 2026-10-01): raise it when tests are added, and lower it only in the commit that
+      # deletes tests on purpose, saying so.
       - name: Tests were discovered
         working-directory: Packages/DistrictCore
         run: |
+          minimum=1650
           executed=$(sed -n 's/.*Executed \([0-9]*\) test.*/\1/p' swift-test.log | sort -n | tail -1)
-          echo "unit tests executed - ${executed:-0}"
-          if [ -z "$executed" ] || [ "$executed" -eq 0 ]; then
-            echo "FATAL - zero unit tests executed. A bundle that discovers nothing"
-            echo "reports success, so this is a silent loss of coverage, not a pass."
+          echo "unit tests executed - ${executed:-0} (at least $minimum expected)"
+          if [ -z "$executed" ] || [ "$executed" -lt "$minimum" ]; then
+            echo "FATAL - expected at least $minimum unit tests, saw ${executed:-0}. A bundle"
+            echo "that discovers nothing, or a test target that is no longer built, reports"
+            echo "success, so this is a silent loss of coverage, not a pass."
             exit 1
           fi
 
@@ -203,12 +209,14 @@ jobs:
           persist-credentials: false
 
       # Stub-driven tests of the release lane: the archive script's refusals and exact
-      # xcodebuild argv, the preflight's tag and build-number rules, and the App Store
-      # Connect helper's release notes and ES256 signature. No network, no secret.
+      # xcodebuild argv, the preflight's tag and build-number rules, the key fetch's
+      # masking, and the App Store Connect helper's release notes, ES256 signature, error
+      # handling and submission decisions. No network, no secret.
       - name: Release script tests
         run: |
           bash scripts/archive-imac.test.sh
           bash scripts/release-preflight.test.sh
+          bash scripts/asc-key.test.sh
           python3 scripts/asc_release_test.py
 
   gitleaks:
@@ -253,12 +261,6 @@ jobs:
         device: [iPhone, iPad]
     env:
       DEVICE: ${{ matrix.device }}
-      # ⚠️ Xcode 26.3, not the image default. It is the Xcode the release is archived
-      # with, and it ships Swift 6.2, which the Linux job's swift:6.2.4 is paired with.
-      XCODE_APP: /Applications/Xcode_26.3.app
-      XCODE_VERSION: "26.3"
-      XCODEGEN_VERSION: 2.46.0
-      XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
       # Recommended by xcbeautify: without it xcodebuild buffers its output when piped.
       NSUnbufferedIO: "YES"
     steps:
@@ -266,20 +268,11 @@ jobs:
         with:
           persist-credentials: false
 
-      # Asserted rather than trusted: an image rotation that drops this Xcode must fail
-      # here, naming the reason, not later with a compiler error.
-      - name: Select Xcode
-        run: |
-          sudo xcode-select -s "$XCODE_APP"
-          # Not `| head -n 1`: under pipefail with unbuffered output, xcodebuild aborts on
-          # the closed pipe (exit 134). Read everything, keep the first line.
-          have_all="$(xcodebuild -version)"
-          have="${have_all%%$'\n'*}"
-          echo "$have"
-          if [ "$have" != "Xcode $XCODE_VERSION" ]; then
-            echo "::error::expected Xcode $XCODE_VERSION at $XCODE_APP, got '$have'"
-            exit 1
-          fi
+      # Xcode 26.3, asserted, plus the pinned XcodeGen and the generated project. The pins
+      # live in the action, shared with codeql.yml and release.yml.
+      - name: Xcode and XcodeGen
+        id: toolchain
+        uses: ./.github/actions/macos-toolchain
 
       # Recorded so a runner image change is attributable from the job log.
       - name: Toolchain
@@ -290,29 +283,12 @@ jobs:
           swift --version
           xcbeautify --version
 
-      # The upstream release zip, checked against a pinned SHA-256, rather than a
-      # Homebrew formula whose version floats.
-      - name: Install XcodeGen
-        run: |
-          set -euo pipefail
-          cd "$RUNNER_TEMP"
-          curl -fsSL -o xcodegen.zip \
-            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip"
-          echo "${XCODEGEN_SHA256}  xcodegen.zip" | shasum -a 256 -c -
-          unzip -q xcodegen.zip
-          sudo ./xcodegen/install.sh
-          xcodegen --version
-
-      # ⛔ THE PROJECT IS GENERATED, NEVER COMMITTED. project.yml is the source of truth.
-      - name: xcodegen generate
-        run: xcodegen generate --spec project.yml
-
       # Where the LiveKit, WebRTC and Sentry packages land. The app's remote packages are
       # pinned `exactVersion` in project.yml, hence the key.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: SourcePackages
-          key: sourcepackages-xcode-26.3-${{ hashFiles('project.yml', 'Packages/DistrictCore/Package.resolved') }}
+          key: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-${{ hashFiles('project.yml', 'Packages/DistrictCore/Package.resolved') }}
 
       - name: Resolve packages
         run: |
@@ -354,14 +330,19 @@ jobs:
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-test.log | xcbeautify --renderer github-actions
 
       # ⛔ A BUNDLE THAT DISCOVERS NOTHING REPORTS SUCCESS; a scheme edit that drops the
-      # target from the test action would turn this job into a green no-op.
+      # target from the test action would turn this job into a green no-op, and files
+      # dropped from the target lose their tests just as quietly. The floor is a ratchet,
+      # set a little below the count (486 on iPhone and iPad on 2026-10-01): raise it when
+      # tests are added, and lower it only in the commit that deletes tests on purpose.
       - name: DistrictAITests were discovered
         run: |
+          minimum=470
           executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-test.log | sort -n | tail -1)
-          echo "app-target tests executed - ${executed:-0}"
-          if [ -z "$executed" ] || [ "$executed" -eq 0 ]; then
-            echo "FATAL - zero DistrictAITests executed. A bundle that discovers nothing"
-            echo "reports success, so this is a silent loss of the signal, not a pass."
+          echo "app-target tests executed - ${executed:-0} (at least $minimum expected)"
+          if [ -z "$executed" ] || [ "$executed" -lt "$minimum" ]; then
+            echo "FATAL - expected at least $minimum DistrictAITests, saw ${executed:-0}. A"
+            echo "bundle that discovers nothing, or loses files, reports success, so this is"
+            echo "a silent loss of the signal, not a pass."
             exit 1
           fi
 

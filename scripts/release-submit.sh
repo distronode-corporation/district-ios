@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 #
-# Submit an uploaded build for App Review. The one submission path, shared by the
-# `submit` job of .github/workflows/release.yml and by .github/workflows/submit.yml.
+# Submit an uploaded build for App Review. The one submission path: the job of
+# .github/workflows/submit.yml, which release.yml's `submit` job also calls.
 #
 #   GSM_ACCESS_TOKEN=<token> VERSION=1.3 BUILD=4110 scripts/release-submit.sh
 #
-# Both workflows run this only after the maintainers' explicit approval; it does not
-# check that itself, because the workflows are where the approval is given.
+# submit.yml runs this only after the maintainers' explicit approval; it does not check
+# that itself, because the workflow is where the approval is given.
 #
-# Fetches the App Store Connect key for this run only (mode 0600, under a temporary
-# directory removed on exit), then runs `asc_release.py submit`, which waits for the
-# build to be VALID, sets the release notes from CHANGELOG.md, attaches the build and
-# submits it, doing only what is not already done.
+# Fetches the App Store Connect key for this run only with scripts/asc-key.sh (mode 0600,
+# masked, under a temporary directory removed on exit), then runs `asc_release.py
+# submit`, which waits for the build to be VALID, sets the release notes from
+# CHANGELOG.md, attaches the build and submits it, doing only what is not already done.
 set -euo pipefail
 
 die() {
@@ -32,15 +32,13 @@ umask 077
 workdir="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/asc.XXXXXX")"
 trap 'rm -rf "$workdir"' EXIT
 
-ASC_KEY_ID="$(scripts/gsm-secret.sh IOS_ASC_KEY_ID)"
-ASC_ISSUER_ID="$(scripts/gsm-secret.sh IOS_ASC_ISSUER_ID)"
-if [ -n "${GITHUB_ACTIONS:-}" ]; then
-  echo "::add-mask::$ASC_KEY_ID"
-  echo "::add-mask::$ASC_ISSUER_ID"
-fi
-ASC_KEY_PATH="$workdir/AuthKey_${ASC_KEY_ID}.p8"
-scripts/gsm-secret.sh IOS_ASC_API_KEY_P8 >"$ASC_KEY_PATH"
+scripts/asc-key.sh "$workdir"
 unset GSM_ACCESS_TOKEN
-export ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_PATH
+while IFS='=' read -r name value; do
+  case "$name" in
+    ASC_KEY_ID | ASC_ISSUER_ID | ASC_KEY_PATH) export "$name=$value" ;;
+    *) die "unexpected line in asc.env." ;;
+  esac
+done <"$workdir/asc.env"
 
 python3 scripts/asc_release.py submit --version "$VERSION" --build "$BUILD"

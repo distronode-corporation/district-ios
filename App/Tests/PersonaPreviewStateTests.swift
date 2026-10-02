@@ -29,12 +29,12 @@ final class PersonaPreviewStateTests: XCTestCase {
         XCTAssertEqual(harness.model.phase, .connecting)
 
         harness.engine.emit(.connected)
-        await harness.settle()
+        await waitUntil { harness.model.phase == .waiting }
         XCTAssertEqual(harness.model.phase, .waiting)
 
         harness.engine.participants = [Harness.agent(level: 0)]
         harness.engine.emit(.rosterChanged)
-        await harness.settle()
+        await waitUntil { harness.model.phase == .live }
         XCTAssertEqual(harness.model.phase, .live)
         XCTAssertTrue(harness.model.agentPresent)
     }
@@ -89,7 +89,7 @@ final class PersonaPreviewStateTests: XCTestCase {
         await harness.model.start()
         harness.engine.participants = [Harness.agent(level: 0.42)]
         harness.engine.emit(.speakersChanged)
-        await harness.settle()
+        await waitUntil { abs(harness.model.level - 0.42) < 0.0001 }
         XCTAssertEqual(harness.model.level, 0.42, accuracy: 0.0001)
     }
 
@@ -138,7 +138,7 @@ final class PersonaPreviewStateTests: XCTestCase {
         let harness = Harness()
         await harness.model.start()
         harness.engine.emit(.disconnected(reason: "token expired"))
-        await harness.settle()
+        await waitUntil { harness.model.phase == .ended(.droppedRemotely(reason: "token expired")) }
         XCTAssertEqual(harness.model.phase, .ended(.droppedRemotely(reason: "token expired")))
         XCTAssertFalse(harness.callStack.hasLiveRoom)
     }
@@ -151,7 +151,7 @@ final class PersonaPreviewStateTests: XCTestCase {
         let harness = Harness()
         await harness.model.start()
         harness.engine.emit(.failed(message: "media server refused"))
-        await harness.settle()
+        await waitUntil { harness.model.phase == .failed }
         XCTAssertEqual(harness.model.phase, .failed)
         await harness.model.end()
         XCTAssertEqual(harness.engine.disconnects, 1)
@@ -193,6 +193,11 @@ final class PersonaPreviewStateTests: XCTestCase {
         XCTAssertEqual(harness.engine.connects.count, 1)
         XCTAssertEqual(harness.transport.paths.count, 1)
     }
+
+    // ⚠️ THE PUMP IS A `Task`, so an emitted event has not been reduced when `emit`
+    // returns, and `Task.yield()` alone is not a guarantee that another task on this actor
+    // ran. Each test therefore waits, bounded, for the state it expects (`waitUntil`, in
+    // WaitUntil.swift) rather than sleeping a fixed time.
 
     // MARK: - Harness
 
@@ -249,13 +254,6 @@ final class PersonaPreviewStateTests: XCTestCase {
                 audioLevel: level,
                 video: nil
             )
-        }
-
-        /// ⚠️ THE PUMP IS A `Task`, so an emitted event has not been reduced when `emit`
-        /// returns — and `Task.yield()` alone is not a guarantee that another task on
-        /// this actor ran. A real suspension is.
-        func settle() async {
-            try? await Task.sleep(for: .milliseconds(20))
         }
     }
 }

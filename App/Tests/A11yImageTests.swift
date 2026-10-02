@@ -30,19 +30,25 @@ final class A11yImageTests: XCTestCase {
     /// enough for a formatter's line wrapping without reaching the next statement.
     private static let window = 8
 
+    /// ⚠️ SPELLED IN PIECES, as ``SourceBanTests`` spells its tokens, so this file never
+    /// contains the constructor outside a comment.
+    private static let constructor = "Image(" + "systemName:"
+
     func testEverySFSymbolCarriesAnAccessibilityDecision() throws {
-        let root = try Self.sourceRoot()
+        let root = try SourceScan.sourceRoot()
         var offenders: [String] = []
 
-        for file in try Self.swiftFiles(under: root) {
-            let lines = try String(contentsOf: file, encoding: .utf8)
+        for file in try SourceScan.swiftFiles(under: root) {
+            // Comments stripped (``SourceScan``), so neither a symbol nor a treatment named in
+            // one counts; line numbers survive the stripping.
+            let lines = try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
                 .components(separatedBy: .newlines)
-            for (index, line) in lines.enumerated() where line.contains("Image(systemName:") {
+            for (index, line) in lines.enumerated() where line.contains(Self.constructor) {
                 let upper = min(index + Self.window, lines.count - 1)
                 let window = lines[index ... upper].joined(separator: "\n")
                 let treated = Self.treatments.contains { window.contains($0) }
                 if !treated {
-                    let path = file.path.components(separatedBy: "App/Sources/").last ?? file.path
+                    let path = SourceScan.relativePath(file)
                     offenders.append("\(path):\(index + 1)  \(line.trimmingCharacters(in: .whitespaces))")
                 }
             }
@@ -62,11 +68,11 @@ final class A11yImageTests: XCTestCase {
     /// ⚠️ AND THE COUNT IS PINNED, so a symbol DELETED along with its treatment does
     /// not quietly shrink the surface this gate covers.
     func testTheNumberOfSymbolsIsWhatWeThinkItIs() throws {
-        let root = try Self.sourceRoot()
+        let root = try SourceScan.sourceRoot()
         var count = 0
-        for file in try Self.swiftFiles(under: root) {
-            count += try String(contentsOf: file, encoding: .utf8)
-                .components(separatedBy: "Image(systemName:").count - 1
+        for file in try SourceScan.swiftFiles(under: root) {
+            count += try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
+                .components(separatedBy: Self.constructor).count - 1
         }
         // ⚠️ ELEVEN. The tenth is the chevron on
         // ``SchedulingHubView``'s section rows and the eleventh is the radio glyph on
@@ -78,40 +84,11 @@ final class A11yImageTests: XCTestCase {
         // ⚠️ `SchedulingEmptyState`'s glyph is NOT among these — `EmptyStateView` takes a
         // symbol NAME and constructs the `Image` itself, so it is counted at that one
         // definition rather than per caller.
-        // ⛔ AND IT COUNTS THE LITERAL IN COMMENTS. A comment that names the
-        // constructor counts as a symbol, and usually as an untreated one. The scan is
-        // deliberately dumb — it reads source, not a view tree (see the ⛔ above) — so
-        // the rule is: do not write the constructor's name in a comment under
-        // `App/Sources`. Say "an SF Symbol" instead. Teaching this to skip
-        // comments would mean parsing Swift, which is the thing it exists to avoid.
+        // Comments do not count: both scans read comment-stripped source.
         XCTAssertEqual(
             count, 11,
             "the app has \(count) SF Symbols, not 11 — update this number in the same "
                 + "commit that adds or removes one, having decided how it is announced"
         )
-    }
-
-    // MARK: - Walking the tree
-
-    /// ⛔ FOUND BY WALKING UP FROM `#filePath`, NOT FROM THE BUNDLE. A test bundle's
-    /// resource path is inside DerivedData and says nothing about where the sources
-    /// are; `#filePath` is the compiler's own record of this file's location.
-    private static func sourceRoot() throws -> URL {
-        var dir = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent() // App/Tests
-            .deletingLastPathComponent() // App
-        dir.appendPathComponent("Sources")
-        try XCTSkipUnless(
-            FileManager.default.fileExists(atPath: dir.path),
-            "sources are not on disk beside this test, so there is nothing to scan"
-        )
-        return dir
-    }
-
-    private static func swiftFiles(under root: URL) throws -> [URL] {
-        guard let walker = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil) else {
-            throw XCTSkip("cannot walk \(root.path)")
-        }
-        return walker.compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
     }
 }

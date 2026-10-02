@@ -10,7 +10,7 @@ set -uo pipefail
 # ⛔ HERMETIC. The script falls back to GITHUB_REF_TYPE / GITHUB_REF_NAME, which are set
 # in every Actions job, so an ambient value would silently become the fixture.
 for _leaked in $(env 2>/dev/null | sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' |
-  grep -E '^(RELEASE_|GITHUB_|BUILD_NUMBER_OFFSET$)'); do
+  grep -E '^(RELEASE_|GITHUB_|ASC_|HIGHEST$|BUILD_NUMBER_OFFSET$)'); do
   unset "$_leaked"
 done
 
@@ -148,6 +148,45 @@ new_repo 1.3
 (cd "$REPO" && printf '        MARKETING_VERSION: "1.4"\n' >>project.yml && git commit -qam two)
 run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main
 assert_nonzero "$RC" "two MARKETING_VERSION lines are refused"
+
+echo "12. RELEASE_CHECK_UPLOADED refuses a build number App Store Connect already has"
+# A stand-in for asc_release.py that answers highest-build from HIGHEST and records its
+# arguments, so no credential or network is involved.
+stub_asc() {
+  cat >"$REPO/scripts/asc_release.py" <<'STUB'
+import os, sys
+with open(os.environ["ASC_ARGS"], "w") as f:
+    f.write(" ".join(sys.argv[1:]))
+if os.environ.get("HIGHEST") == "fail":
+    sys.exit("FATAL - stub refused")
+print(os.environ["HIGHEST"])
+STUB
+}
+new_repo 1.3
+stub_asc
+run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main RELEASE_CHECK_UPLOADED=1 HIGHEST=4103 ASC_ARGS="$TMPROOT/args$N"
+assert_zero "$RC" "4104 above 4103 is accepted"
+assert_contains "$(cat "$TMPROOT/args$N")" "highest-build --version 1.3" "it asks for this version's builds"
+assert_contains "$OUT" "build=4104" "the outputs are still written"
+new_repo 1.3
+stub_asc
+(cd "$REPO" && git tag v1.3)
+run RELEASE_REF_TYPE=tag RELEASE_REF_NAME=v1.3 RELEASE_CHECK_UPLOADED=1 HIGHEST=4104 ASC_ARGS="$TMPROOT/args$N"
+assert_nonzero "$RC" "a tag of the commit main already uploaded as 4104 is refused"
+assert_contains "$OUT" "build 4104 of 1.3 is not above 4104" "the message names both numbers"
+new_repo 1.3
+stub_asc
+run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main RELEASE_CHECK_UPLOADED=1 HIGHEST=fail ASC_ARGS="$TMPROOT/args$N"
+assert_nonzero "$RC" "a failed App Store Connect read is a refusal, not a pass"
+new_repo 1.3
+stub_asc
+run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main RELEASE_CHECK_UPLOADED=1 HIGHEST= ASC_ARGS="$TMPROOT/args$N"
+assert_nonzero "$RC" "an empty answer is a refusal, not a pass"
+new_repo 1.3
+stub_asc
+run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main HIGHEST=9999 ASC_ARGS="$TMPROOT/args$N"
+assert_zero "$RC" "without RELEASE_CHECK_UPLOADED nothing is asked"
+if [ -e "$TMPROOT/args$N" ]; then fail "the stub was called without RELEASE_CHECK_UPLOADED"; else ok "the stub was not called"; fi
 
 echo
 echo "passed $PASS, failed $FAIL"
