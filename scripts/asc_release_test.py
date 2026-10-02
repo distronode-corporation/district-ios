@@ -102,6 +102,34 @@ class WhatsNewTests(unittest.TestCase):
             asc_release.whats_new(self.path, "2.0")
 
 
+class ReleaseBodyTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.dir = tempfile.TemporaryDirectory()
+        self.path = Path(self.dir.name) / "CHANGELOG.md"
+        self.path.write_text(CHANGELOG, encoding="utf-8")
+
+    def tearDown(self) -> None:
+        self.dir.cleanup()
+
+    def test_shape_of_the_v1_2_release(self) -> None:
+        self.assertEqual(
+            asc_release.release_body(self.path, "1.3", "4109"),
+            "District AI for iOS 1.3, the source of the App Store release (build 4109).\n\n"
+            "On the App Store: https://apps.apple.com/app/id6809297970\n\n"
+            "### Added\n\n- A feature whose description is wrapped over two lines.\n- A second one.\n\n"
+            "### Fixed\n\n- A fix.\n",
+        )
+
+    def test_missing_section_is_refused(self) -> None:
+        with self.assertRaises(SystemExit):
+            asc_release.release_body(self.path, "9.9", "4109")
+
+    def test_longer_than_whats_new_allows_is_still_a_body(self) -> None:
+        # The App Store limit is on whatsNew; a GitHub Release has none worth enforcing.
+        self.path.write_text("## [2.0] - 2026-10-01\n\n- " + "x" * 4001 + "\n", encoding="utf-8")
+        self.assertIn("x" * 4001, asc_release.release_body(self.path, "2.0", "4200"))
+
+
 class SignatureTests(unittest.TestCase):
     def test_der_to_raw_pads_both_halves(self) -> None:
         r = (1).to_bytes(32, "big")
@@ -255,6 +283,38 @@ class HighestBuildTests(unittest.TestCase):
 
     def test_no_build_is_zero(self) -> None:
         self.assertEqual(asc_release.highest_build(FakeClient({"/builds?": {"data": []}}), "app1", "1.3"), 0)
+
+
+def _state_gets(attributes: dict | None, build: str | None) -> dict[str, dict]:
+    versions = [{"id": "v13", "attributes": {"versionString": "1.3", **attributes}}] if attributes is not None else []
+    return {
+        "/apps/app1/appStoreVersions?": {"data": versions},
+        "/appStoreVersions/v13/build": {"data": {"id": "b", "attributes": {"version": build}} if build else None},
+    }
+
+
+class StoreStateTests(unittest.TestCase):
+    def state(self, attributes: dict | None, build: str | None = "4109") -> tuple[tuple[str, str, bool], FakeClient]:
+        client = FakeClient(_state_gets(attributes, build))
+        return asc_release.store_state(client, "app1", "1.3"), client
+
+    def test_on_sale(self) -> None:
+        got, client = self.state({"appStoreState": "READY_FOR_SALE", "appVersionState": "READY_FOR_DISTRIBUTION"})
+        self.assertEqual(got, ("READY_FOR_DISTRIBUTION", "4109", True))
+        self.assertEqual(client.writes(), [])
+
+    def test_replaced_by_a_newer_version_was_on_sale(self) -> None:
+        got, _ = self.state({"appStoreState": "REPLACED_WITH_NEW_VERSION"})
+        self.assertEqual(got, ("REPLACED_WITH_NEW_VERSION", "4109", True))
+
+    def test_in_review_and_approved_but_held_are_not_on_sale(self) -> None:
+        for state in ("WAITING_FOR_REVIEW", "IN_REVIEW", "PENDING_DEVELOPER_RELEASE", "REJECTED"):
+            got, _ = self.state({"appStoreState": state, "appVersionState": state})
+            self.assertEqual(got, (state, "4109", False), state)
+
+    def test_no_record_and_no_build(self) -> None:
+        self.assertEqual(self.state(None)[0], ("NONE", "", False))
+        self.assertEqual(self.state({"appVersionState": "PREPARE_FOR_SUBMISSION"}, None)[0], ("PREPARE_FOR_SUBMISSION", "", False))
 
 
 class CallTests(unittest.TestCase):

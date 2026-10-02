@@ -199,11 +199,18 @@ Every valid build goes to TestFlight's internal testers. Submission for App Revi
 separate step ([`submit.yml`](.github/workflows/submit.yml), or the `submit` job of a
 dispatch on a tag) and runs only with the maintainers' explicit approval.
 
+Each version gets its GitHub Release, the source of that App Store release, once App
+Store Connect has it on sale: `submit.yml` checks after each submission and every six
+hours, and `scripts/github-release.sh` publishes it with the version's `CHANGELOG.md`
+section. It never publishes at submission: Releases here are immutable, so the tag could
+never move again, even to fix a version Apple turned down.
+
 The workflow calls `scripts/archive-imac.sh`, which refuses a dirty tree, deletes the
 archive if the UI-test hooks are present in the release binary, and uploads the debug
 symbols to Sentry. `scripts/archive-imac.test.sh`, `scripts/release-preflight.test.sh`,
-`scripts/asc-key.test.sh` and `scripts/asc_release_test.py` test the release scripts
-against stubs on every pull request.
+`scripts/asc-key.test.sh`, `scripts/github-release.test.sh` and
+`scripts/asc_release_test.py` test the release scripts against stubs on every pull
+request.
 
 Versions up to the current store release (1.2) were built on a maintainer's machine with
 the same script, before this workflow existed.

@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """App Store Connect steps of the release lane: check a build number is unused, wait for a
-build, and submit it for review.
+build, submit it for review, and read whether a version is on sale.
 
     ASC_KEY_ID=... ASC_ISSUER_ID=... ASC_KEY_PATH=/path/AuthKey_<id>.p8 \\
       python3 scripts/asc_release.py wait-valid --version 1.2 --build 4104
     ... python3 scripts/asc_release.py submit --version 1.2 --build 4104
     ... python3 scripts/asc_release.py highest-build --version 1.2
+    ... python3 scripts/asc_release.py store-state --version 1.2    # read only
     python3 scripts/asc_release.py whats-new --version 1.2    # no credentials needed
+    python3 scripts/asc_release.py release-body --version 1.2 --build 4102    # nor here
 
 Used by scripts/release-preflight.sh (highest-build, before anything is built),
-.github/workflows/release.yml (wait-valid after the upload) and submit.yml (submit).
+.github/workflows/release.yml (wait-valid after the upload), submit.yml (submit) and
+scripts/github-release.sh (store-state and release-body).
 Standard library only: the ES256 signature is made by the `openssl` binary and every HTTP
 call goes through `curl`, so the script needs no pip install and no pinned dependency.
 
@@ -54,6 +57,12 @@ ALREADY_SUBMITTED = {
 }
 # reviewSubmission states that mean a submission is already with Apple.
 SUBMISSION_IN_FLIGHT = {"WAITING_FOR_REVIEW", "IN_REVIEW", "UNRESOLVED_ISSUES"}
+# A version that is or was on sale. appVersionState reads READY_FOR_DISTRIBUTION from
+# release onwards; the older appStoreState is kept as a second witness.
+ON_SALE_VERSION_STATES = {"READY_FOR_DISTRIBUTION"}
+ON_SALE_STORE_STATES = {"READY_FOR_SALE", "REPLACED_WITH_NEW_VERSION"}
+
+APP_STORE_URL = "https://apps.apple.com/app/id6809297970"
 
 
 def die(msg: str) -> None:
@@ -64,13 +73,12 @@ def die(msg: str) -> None:
 # ── CHANGELOG ────────────────────────────────────────────────────────────────
 
 
-def whats_new(changelog: Path, version: str) -> str:
-    """The `## [version]` section of a Keep a Changelog file, as plain text.
+def changelog_section(changelog: Path, version: str, markdown: bool = False) -> str:
+    """The `## [version]` section of a Keep a Changelog file.
 
-    Headings lose their `#`, a bullet wrapped over several lines becomes one line, and
-    the text is refused if it is empty or longer than App Store Connect accepts: a
-    submission with no release notes, or with notes cut off mid-sentence, is worse than
-    none at all.
+    A bullet wrapped over several lines becomes one line and runs of blank lines become
+    one. As plain text (the default) headings lose their `#`; as Markdown they keep it.
+    An empty or missing section is refused.
     """
     lines = changelog.read_text(encoding="utf-8").splitlines()
     heading = re.compile(r"^## \[" + re.escape(version) + r"\](\s|$)")
@@ -91,7 +99,7 @@ def whats_new(changelog: Path, version: str) -> str:
                 out.append("")
             continue
         if line.startswith("#"):
-            out.append(line.lstrip("#").strip())
+            out.append(line if markdown else line.lstrip("#").strip())
         elif line.startswith("- ") or not out or out[-1] == "":
             out.append(line.strip())
         else:
@@ -100,9 +108,28 @@ def whats_new(changelog: Path, version: str) -> str:
     text = "\n".join(out).strip()
     if not text:
         die(f"the '## [{version}]' section of {changelog} is empty; add the release notes before submitting.")
+    return text
+
+
+def whats_new(changelog: Path, version: str) -> str:
+    """The release notes for App Store Connect: the version's CHANGELOG section as plain
+    text, refused if it is longer than App Store Connect accepts. A submission with no
+    release notes, or with notes cut off mid-sentence, is worse than none at all.
+    """
+    text = changelog_section(changelog, version)
     if len(text) > WHATS_NEW_LIMIT:
         die(f"the release notes for {version} are {len(text)} characters; App Store Connect accepts {WHATS_NEW_LIMIT}.")
     return text
+
+
+def release_body(changelog: Path, version: str, build: str) -> str:
+    """The body of a version's GitHub Release, in the shape of v1.2's: what it is the
+    source of, where it is on the App Store, then its CHANGELOG section as Markdown."""
+    return (
+        f"District AI for iOS {version}, the source of the App Store release (build {build}).\n\n"
+        f"On the App Store: {APP_STORE_URL}\n\n"
+        f"{changelog_section(changelog, version, markdown=True)}\n"
+    )
 
 
 # ── Authentication ───────────────────────────────────────────────────────────
@@ -255,6 +282,25 @@ def wait_valid(client: Client, app: str, version: str, build: str, timeout: int)
         time.sleep(30)
 
 
+def store_state(client: Client, app: str, version: str) -> tuple[str, str, bool]:
+    """Where a version stands on the App Store, read only: its state ("NONE" when App
+    Store Connect has no record for it), the build number attached to it ("" when none
+    is), and whether it is or was on sale."""
+    versions = client.get(
+        f"/apps/{app}/appStoreVersions?filter[versionString]={version}&filter[platform]={PLATFORM}"
+        "&fields[appStoreVersions]=versionString,appStoreState,appVersionState"
+    )["data"]
+    if not versions:
+        return "NONE", "", False
+    record = versions[0]
+    version_state = record["attributes"].get("appVersionState") or ""
+    store = record["attributes"].get("appStoreState") or ""
+    attached = client.get(f"/appStoreVersions/{record['id']}/build?fields[builds]=version").get("data")
+    build = attached["attributes"]["version"] if attached else ""
+    on_sale = version_state in ON_SALE_VERSION_STATES or store in ON_SALE_STORE_STATES
+    return version_state or store, build, on_sale
+
+
 # ── Submission ───────────────────────────────────────────────────────────────
 
 
@@ -402,11 +448,12 @@ def submit(client: Client, version: str, build: str, notes: str, timeout: int) -
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("wait-valid", "submit", "whats-new", "highest-build"):
+    for name in ("wait-valid", "submit", "whats-new", "highest-build", "store-state", "release-body"):
         p = sub.add_parser(name)
         p.add_argument("--version", required=True, help="the marketing version, e.g. 1.2")
-        if name in ("wait-valid", "submit"):
+        if name in ("wait-valid", "submit", "release-body"):
             p.add_argument("--build", required=True, help="the build number (CFBundleVersion)")
+        if name in ("wait-valid", "submit"):
             p.add_argument("--timeout", type=int, default=3600, help="seconds to wait for VALID")
         p.add_argument("--changelog", default=str(Path(__file__).resolve().parent.parent / "CHANGELOG.md"))
     args = parser.parse_args()
@@ -414,14 +461,21 @@ def main() -> None:
     if args.command == "whats-new":
         print(whats_new(Path(args.changelog), args.version))
         return
-    if args.command == "highest-build":
+    if args.command in ("highest-build", "store-state"):
         if not re.fullmatch(r"\d+(\.\d+){1,2}", args.version):
             die(f"version '{args.version}' is malformed.")
         client = Client()
-        print(highest_build(client, app_id(client), args.version))
+        if args.command == "highest-build":
+            print(highest_build(client, app_id(client), args.version))
+        else:
+            state, build, on_sale = store_state(client, app_id(client), args.version)
+            print(f"state={state}\nbuild={build}\non_sale={'yes' if on_sale else 'no'}")
         return
     if not re.fullmatch(r"\d+(\.\d+){1,2}", args.version) or not args.build.isdigit():
         die(f"version '{args.version}' or build '{args.build}' is malformed.")
+    if args.command == "release-body":
+        sys.stdout.write(release_body(Path(args.changelog), args.version, args.build))
+        return
     client = Client()
     if args.command == "wait-valid":
         found = wait_valid(client, app_id(client), args.version, args.build, args.timeout)

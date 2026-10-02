@@ -11,7 +11,15 @@ name: Submit for review
 #
 # ⚠️ The tag's own tree supplies the scripts and .github/actions/release-auth, so a tag
 # cut before that action existed (v1.2) cannot be submitted from here.
+#
+# The `github-release` job publishes a tag's GitHub Release once App Store Connect has the
+# version on sale, never before (scripts/github-release.sh says why): after each
+# submission for its tag, which publishes only if the version is already on sale, and on
+# the schedule for every v* tag that has no Release yet, which is what catches Apple's
+# approval. It runs from main's tree and CHANGELOG.md, whatever the tag's.
 on:
+  schedule:
+    - cron: "23 */6 * * *"
   workflow_dispatch:
     inputs:
       tag:
@@ -35,9 +43,10 @@ on:
 
 permissions: {}
 
-# One submission at a time, never cancelled halfway.
+# One submission at a time, never cancelled halfway. The schedule has its own group, so
+# a scheduled run can never displace a submission waiting in the queue.
 concurrency:
-  group: submit-${{ github.ref }}
+  group: submit-${{ github.event_name == 'schedule' && 'schedule' || github.ref }}
   cancel-in-progress: false
 
 defaults:
@@ -47,6 +56,8 @@ defaults:
 jobs:
   submit:
     name: submit for review
+    # The schedule publishes Releases only; it never submits.
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
     environment: release
     timeout-minutes: 90
@@ -101,3 +112,55 @@ jobs:
           VERSION: ${{ steps.preflight.outputs.version }}
           BUILD: ${{ steps.preflight.outputs.build }}
         run: scripts/release-submit.sh
+
+  github-release:
+    name: GitHub Release
+    needs: submit
+    # After a submission that went through, for its tag; on the schedule (which skips
+    # `submit`), for every tag. A failed or refused submission publishes nothing.
+    if: always() && (needs.submit.result == 'success' || (github.event_name == 'schedule' && needs.submit.result == 'skipped'))
+    runs-on: ubuntu-24.04
+    environment: release
+    timeout-minutes: 15
+    permissions:
+      contents: write # publish the Release
+      id-token: write # the Google Cloud token for the App Store Connect key (read only here)
+    # One at a time; a second for the same tag would find the first's Release and stop.
+    concurrency:
+      group: github-release
+      cancel-in-progress: false
+    steps:
+      # main, whatever ref the run is on: its script and its CHANGELOG.md, which is final
+      # by the time a version is on sale. The whole history and every tag, for the build
+      # number.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: main
+
+      # ⚠️ The workspace-relative form, as everywhere else here: actionlint refuses
+      # zizmor's suggested `$/` form.
+      - name: Authenticate to Google Cloud
+        id: gcp
+        uses: ./.github/actions/release-auth # zizmor: ignore[self-repository]
+
+      - name: Publish the Release of a version on sale
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GSM_ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          EVENT: ${{ github.event_name }}
+          SUBMITTED_TAG: ${{ inputs.tag }}
+        run: |
+          if [ "$EVENT" = "schedule" ]; then
+            tags="$(git tag -l 'v*' --sort=v:refname)"
+          else
+            tags="$SUBMITTED_TAG"
+          fi
+          # Every tag is tried, so one refused tag cannot hold back the others; any
+          # refusal still fails the run.
+          status=0
+          for tag in $tags; do
+            TAG="$tag" scripts/github-release.sh || status=1
+          done
+          exit "$status"
