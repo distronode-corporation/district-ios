@@ -115,7 +115,7 @@ struct RoomsLobbyView: View {
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(cardFill, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
+        .districtCardSurface(bordered: false)
     }
 
     /// ⛔ A `NavigationLink(value:)` CARRYING THE WHOLE MINTED NAME, never a button
@@ -232,10 +232,6 @@ struct RoomsLobbyView: View {
     private var mutedInk: Color {
         DistrictColors.resolve(colorScheme).mutedForeground
     }
-
-    private var cardFill: Color {
-        DistrictColors.resolve(colorScheme).card
-    }
 }
 
 /// One meeting in the history.
@@ -311,6 +307,6 @@ struct MeetingRow: View {
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
+        .districtCardSurface(bordered: false)
     }
 }

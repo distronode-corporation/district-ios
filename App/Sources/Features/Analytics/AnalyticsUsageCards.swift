@@ -23,7 +23,7 @@ struct AnalyticsUsageCard: View {
     }
 
     var body: some View {
-        AnalyticsCard(title: "Usage this month") {
+        DistrictCard(eyebrow: "Usage this month") {
             if let usage {
                 Text("Month \(usage.month)")
                     .font(DistrictType.caption)
@@ -107,7 +107,7 @@ struct AnalyticsHistoryCard: View {
     }
 
     var body: some View {
-        AnalyticsCard(title: "Recent months") {
+        DistrictCard(eyebrow: "Recent months") {
             if months.isEmpty {
                 AnalyticsNote(text: "No usage has been recorded in any recent month yet.")
             } else {

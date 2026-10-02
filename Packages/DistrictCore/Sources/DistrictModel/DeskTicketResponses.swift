@@ -61,7 +61,7 @@ public struct DeskTicketSummary: Codable, Sendable, Equatable {
     ///
     /// ⚠️ nil IS NOT AN ERROR AND MUST NOT RENDER AS ONE. It means a state was added
     /// server-side that this build predates; the right response is to show ``status``
-    /// as itself and offer no opinion, exactly as ``KnowledgeModeResponse/knownMode``
+    /// as itself and offer no opinion, exactly as ``SupportMessage/knownRole``
     /// does. Painting an unknown status as resolved would tell an operator a customer
     /// has been dealt with.
     ///

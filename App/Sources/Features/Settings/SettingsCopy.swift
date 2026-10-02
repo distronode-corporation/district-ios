@@ -231,13 +231,4 @@ enum SettingsCopy {
     /// ⚠️ A CONSEQUENCE RATHER THAN A COUNT, the same call ``directoryEmptyBody`` makes:
     /// what actually happens on the next call is that everybody hears one persona.
     static let routingEmptyBody = "Every caller hears the persona exactly as it is configured above."
-
-    static let routingRuleFallback = "Rule"
-
-    // MARK: - Scheduling
-
-    /// ⚠️ THE HUB'S SCHEDULING ROW OPENS THE EXISTING SCHEDULING DESTINATION rather
-    /// than a settings section of its own, so there is no second copy of that
-    /// screen's rules to drift.
-    static let schedulingRowNote = "Booking pages are managed on their own screen."
 }

@@ -286,7 +286,7 @@ extension SchedulingDeveloperView {
                     }
                 }
                 if let failure = keyRevoke.failure {
-                    SchedulingWriteFailureLineC(failure: failure, onDismiss: keyRevoke.dismissFailure)
+                    SchedulingWriteFailureLine(failure: failure, onDismiss: keyRevoke.dismissFailure)
                 }
                 if canManage {
                     SchedulingAPIKeyCreateButton(
@@ -364,7 +364,7 @@ extension SchedulingDeveloperView {
                     }
                 }
                 if let failure = appRevoke.failure {
-                    SchedulingWriteFailureLineC(failure: failure, onDismiss: appRevoke.dismissFailure)
+                    SchedulingWriteFailureLine(failure: failure, onDismiss: appRevoke.dismissFailure)
                 }
             }
         }
@@ -407,7 +407,7 @@ extension SchedulingDeveloperView {
                     }
                 }
                 if let failure = webhookDelete.failure {
-                    SchedulingWriteFailureLineC(
+                    SchedulingWriteFailureLine(
                         failure: failure,
                         onDismiss: webhookDelete.dismissFailure
                     )

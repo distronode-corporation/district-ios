@@ -100,7 +100,7 @@ struct RegistrationsSection: View {
         case let .noRegulation(country, purchasable):
             // ⛔ NO REGULATION IS AN ANSWER, NOT A FAILURE, AND IT OFFERS NO RETRY. The
             // country publishes nothing for this number type, so there is nothing to file.
-            MarketplacePanel {
+            DistrictCard(spacing: DistrictSpacing.hairline) {
                 DistrictEyebrow(text: MarketplaceCopy.requirementsEyebrow)
                 Text("\(country) · \(MarketplaceCopy.requirementsNoneTitle)")
                     .font(DistrictType.title)
@@ -152,7 +152,7 @@ struct RequirementsCard: View {
     let purchasable: Bool
 
     var body: some View {
-        MarketplacePanel {
+        DistrictCard(spacing: DistrictSpacing.hairline) {
             DistrictEyebrow(text: MarketplaceCopy.requirementsEyebrow)
             Text(regulation.friendlyName)
                 .font(DistrictType.title)
@@ -220,7 +220,7 @@ struct RegistrationsList: View {
     @ViewBuilder
     private var gates: some View {
         if !approved.isEmpty || !platform.isEmpty {
-            MarketplacePanel {
+            DistrictCard(spacing: DistrictSpacing.hairline) {
                 if !platform.isEmpty {
                     SettingsReadOnlyRow(label: "Ready to buy today", value: platform.joined(separator: ", "))
                 }

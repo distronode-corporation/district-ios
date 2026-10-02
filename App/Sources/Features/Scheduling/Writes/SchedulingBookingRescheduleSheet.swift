@@ -17,7 +17,7 @@ struct SchedulingBookingRescheduleSheet: View {
     let onClose: () -> Void
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingBookingWriteCopy.rescheduleTitle,
             subtitle: SchedulingBookingWriteCopy.rescheduleBody,
             cancelLabel: SchedulingBookingWriteCopy.rescheduleCancel,
@@ -29,7 +29,7 @@ struct SchedulingBookingRescheduleSheet: View {
             VStack(alignment: .leading, spacing: DistrictSpacing.row) {
                 day
                 times
-                SchedulingWritesBRejection(message: model.selectionRejected)
+                SchedulingWriteRejection(message: model.selectionRejected)
             }
         } onCancel: {
             onClose()
@@ -74,7 +74,7 @@ struct SchedulingBookingRescheduleSheet: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         case let .ready(rows):
             if rows.isEmpty {
-                SchedulingWritesBHint(text: SchedulingBookingWriteCopy.rescheduleNoSlots)
+                SchedulingWriteHint(text: SchedulingBookingWriteCopy.rescheduleNoSlots)
             } else {
                 tiles(rows)
             }

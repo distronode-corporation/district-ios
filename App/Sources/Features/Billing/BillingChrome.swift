@@ -1,46 +1,5 @@
 import SwiftUI
 
-/// The card shell every billing section sits in: an eyebrow, then its content.
-///
-/// ⚠️ LOCAL TO THIS FEATURE RATHER THAN PROMOTED INTO `DesignSystem/`, and the same call
-/// ``AnalyticsCard`` documents. Several screens have each written this same
-/// `background(colors.card, in: RoundedRectangle(...))` inline; extracting them all into
-/// one component is worth doing as a change of its own, touching every caller at once.
-///
-/// ⛔ THE GENERIC IS `Inner`, NOT `Content`. `View`'s own associated type is `Body`, but
-/// the family of names that become accidental witnesses is wider than that (`Content`,
-/// `Label`, `ID`, `Value`, `Configuration`), and a generic parameter is as capable of
-/// colliding as a nested type. See the ⛔ in `DistrictButton.swift`.
-struct BillingCard<Inner: View>: View {
-    private let title: String
-    private let inner: Inner
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    private var colors: DistrictColors {
-        .resolve(colorScheme)
-    }
-
-    init(title: String, @ViewBuilder content: () -> Inner) {
-        self.title = title
-        inner = content()
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DistrictSpacing.tight) {
-            DistrictEyebrow(text: title)
-            inner
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(DistrictSpacing.card)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
-    }
-}
-
 /// The settled sentence a card shows when it has something to say rather than something
 /// to show.
 ///
@@ -87,7 +46,7 @@ struct BillingCardFailure: View {
     }
 
     var body: some View {
-        BillingCard(title: title) {
+        DistrictCard(eyebrow: title) {
             Text(failure.message)
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.destructive)

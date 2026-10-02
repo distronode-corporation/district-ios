@@ -65,20 +65,6 @@ enum SupportCopy {
     /// region raises.
     static let defaultRegion = "us"
 
-    /// ⛔ AN UNRECOGNISED REGION RENDERS ITS OWN RAW ID, UPPERCASED, AND IS NEVER
-    /// COERCED TO A DEFAULT. A helper that answered "us" for anything it did not
-    /// know would tell a customer their data sits in the United States on the
-    /// strength of a typo.
-    static func regionLabel(_ region: String) -> String {
-        switch region {
-        case "us": "US"
-        case "ca": "Canada"
-        case "eu": "Europe"
-        case "apac": "APAC"
-        default: region.uppercased()
-        }
-    }
-
     // MARK: - Composing one
 
     static let composeTitle = "New support request"

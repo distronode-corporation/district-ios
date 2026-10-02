@@ -36,7 +36,7 @@ struct BillingPlanCard: View {
     }
 
     var body: some View {
-        BillingCard(title: BillingCopy.planTitle) {
+        DistrictCard(eyebrow: BillingCopy.planTitle) {
             HStack(alignment: .firstTextBaseline, spacing: DistrictSpacing.tight) {
                 Text(plan.subscriptionTier ?? BillingCopy.planNone)
                     .font(DistrictType.metric)
@@ -119,7 +119,7 @@ struct BillingOverageCard: View {
     }
 
     var body: some View {
-        BillingCard(title: BillingCopy.overageTitle) {
+        DistrictCard(eyebrow: BillingCopy.overageTitle) {
             Text(hardCap ? BillingCopy.overageHardCap : BillingCopy.overageAutoBill)
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.foreground)
@@ -164,7 +164,7 @@ struct BillingUsageMeterCard: View {
     }
 
     var body: some View {
-        BillingCard(title: BillingCopy.meterTitle) {
+        DistrictCard(eyebrow: BillingCopy.meterTitle) {
             if let used = BillingFormat.billableMinutes(usage) {
                 metered(used)
             } else {

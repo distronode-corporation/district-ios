@@ -9,39 +9,6 @@ import SwiftUI
 /// layout.
 enum SupportChrome {}
 
-/// A titled panel.
-struct SupportCard<Content: View>: View {
-    var eyebrow: String?
-    private let content: Content
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    init(eyebrow: String? = nil, @ViewBuilder content: () -> Content) {
-        self.eyebrow = eyebrow
-        self.content = content()
-    }
-
-    private var colors: DistrictColors {
-        .resolve(colorScheme)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DistrictSpacing.tight) {
-            if let eyebrow {
-                DistrictEyebrow(text: eyebrow)
-            }
-            content
-        }
-        .padding(DistrictSpacing.card)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
-    }
-}
-
 /// The notice a write leaves behind.
 ///
 /// ⛔ ONE COMPONENT FOR SUCCESSES AND FAILURES, BECAUSE ON THIS SURFACE THEY ARE NOT
@@ -105,7 +72,7 @@ struct SupportChips: View {
             DistrictBadge(text: SupportCopy.fromPhoneCall, tone: .info)
         }
         if region != SupportCopy.defaultRegion {
-            DistrictBadge(text: SupportCopy.regionLabel(region), tone: .neutral)
+            DistrictBadge(text: RegionCopy.label(region), tone: .neutral)
         }
     }
 }

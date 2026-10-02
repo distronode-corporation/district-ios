@@ -39,7 +39,7 @@ enum SchedulingRescheduleSlotsState {
 @MainActor
 @Observable
 final class SchedulingBookingRescheduleModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
     private(set) var slots: SchedulingRescheduleSlotsState = .idle
     private(set) var day: Date
     private(set) var selectedStart: String?
@@ -131,7 +131,7 @@ final class SchedulingBookingRescheduleModel {
             )
             slots = .ready(answer.slots)
         } catch {
-            slots = .failed(SchedulingWritesBFailure.text(for: error))
+            slots = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -151,11 +151,11 @@ final class SchedulingBookingRescheduleModel {
             state = .done(SchedulingBookingWriteCopy.rescheduleDone(label(for: booking.startAt)))
             onSaved(booking)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
             // ⛔ THE SLOT LIST IS NOW KNOWN TO BE STALE, so it is re-read rather
             // than left on screen with the taken time still tappable. Only for
             // this one code: every other refusal leaves the list as true as it was.
-            if SchedulingWritesBFailure.isSlotTaken(error) {
+            if SchedulingFailureCopy.isSlotTaken(error) {
                 await loadSlots()
             }
         }

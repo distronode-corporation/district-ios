@@ -33,9 +33,4 @@ enum SchedulingWriteCopy {
     /// form. The web event types table calls the same menu "Actions"; on a phone the
     /// row IS the menu, so the button says what pressing it leads to.
     static let manage = "Manage"
-
-    /// ⚠️ THE VIEWER SENTENCE IS THE SHARED REFUSAL SENTENCE, not a second one.
-    /// The web event type editor renders exactly `SCHEDULING_ERROR_SENTENCES.forbidden`
-    /// in its read-only alert, so the two agree by construction.
-    static let viewerNote = "You can view this but not change it."
 }

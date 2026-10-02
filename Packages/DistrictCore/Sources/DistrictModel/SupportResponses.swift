@@ -94,7 +94,7 @@ public extension SupportMessage {
     ///
     /// ⚠️ COMPUTED, SO IT IS NOT ENCODED. Synthesised `Codable` covers stored
     /// properties only, which is what keeps this from adding a key the server never
-    /// sent. Same reason ``KnowledgeModeResponse/knownMode`` is computed.
+    /// sent.
     var knownRole: SupportMessageRole? {
         SupportMessageRole(rawValue: role)
     }

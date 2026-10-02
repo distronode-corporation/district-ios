@@ -130,11 +130,22 @@ final class SchedulingRecordingsModel {
             if let url = URL(string: raw) {
                 return url
             }
-            playFailures[recordingId] = FailureText(message: SchedulingFailureCopy.unknown, action: .none)
+            playFailures[recordingId] = FailureText(message: SchedulingCopy.recordingPlayFailed, action: .none)
         } catch {
-            playFailures[recordingId] = SchedulingFailureCopy.text(forAny: error)
+            playFailures[recordingId] = Self.playFailure(error)
         }
         return nil
+    }
+
+    /// The shared scheduling mapping, except where it would say "That did not save".
+    ///
+    /// ⚠️ PLAY IS A READ, SO THE CATCH-ALL SENTENCE IS THE PLAYBACK ONE. Every specific
+    /// refusal (offline, unavailable, forbidden, not ready) keeps its shared sentence and
+    /// offer; only the `unknown` wording, which describes a write, is replaced.
+    static func playFailure(_ error: any Error) -> FailureText {
+        let text = SchedulingFailureCopy.text(forAny: error)
+        guard text.message == SchedulingFailureCopy.unknown else { return text }
+        return FailureText(message: SchedulingCopy.recordingPlayFailed, action: text.action)
     }
 
     /// ⛔ STORAGE OFF IS A PRODUCT STATE, NOT A FAULT, and it changes what the screen can

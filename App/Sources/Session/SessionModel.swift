@@ -139,20 +139,20 @@ final class SessionModel {
             // second commonest outcome of tapping sign in.
             break
         case .stateMismatch:
-            phase = .signedOut("That sign-in could not be verified. Please try again.")
+            phase = .signedOut(SessionCopy.signInNotVerified)
         case let .denied(reason):
-            phase = .signedOut("Sign-in was not completed (\(reason)).")
+            phase = .signedOut(SessionCopy.signInNotCompleted(reason))
         case .rejected:
-            phase = .signedOut("That sign-in expired. Please try again.")
+            phase = .signedOut(SessionCopy.signInExpired)
         case .rateLimited:
-            phase = .unavailable("Too many attempts. Please try again shortly.")
+            phase = .unavailable(SessionCopy.tooManyAttempts)
         case .noAccount:
             // ⛔ `signedOut`, SO THE SCREEN KEEPS BOTH DOORS: the invited email
             // signs in through the browser door. The sentence is informational,
             // not a retry prompt; see ``SignInCopy/noAccount``.
             phase = .signedOut(SignInCopy.noAccount)
         case .unreachable:
-            phase = .unavailable("We could not reach District AI. Check your connection.")
+            phase = .unavailable(SessionCopy.unreachable)
         }
     }
 
@@ -180,12 +180,13 @@ final class SessionModel {
         await container.signOut(beforeRevoke: { await push.unregisterForSignOut() })
         push.forget()
         selection.setSelectedWorkspaceId(nil)
-        phase = .signedOut("You are signed out.")
+        phase = .signedOut(SessionCopy.signedOut)
     }
 
     // ── Wording ──────────────────────────────────────────────────────────────
 
-    /// ⚠️ ONE MAPPING, IN ONE PLACE. What must survive any rewrite is that every
+    /// ⚠️ ONE MAPPING, IN ONE PLACE, and the sentences themselves live in
+    /// ``SessionCopy`` so ``SignInStatusTone`` reads the same constants. What must survive any rewrite is that every
     /// reason that IS a reason has a sentence and that none of them accuses the
     /// user of anything.
     ///
@@ -201,30 +202,27 @@ final class SessionModel {
         case .noSession:
             ""
         case .interruptedRefresh:
-            // ⛔ NOT A SECURITY EVENT, AND MUST NEVER BE WORDED AS ONE. It means the
-            // app was killed mid-refresh, so the stored token is presumed spent. The
-            // server accepts that this costs a re-login; the wording should too.
-            "Your session ended unexpectedly. Please sign in again."
+            // ⛔ Not a security event; see ``SessionCopy/interruptedRefresh``.
+            SessionCopy.interruptedRefresh
         case .refreshTokenExpired:
-            "You have been signed out after 60 days. Please sign in again."
+            SessionCopy.refreshTokenExpired
         case .refreshRejected:
-            "Your session is no longer valid. Please sign in again."
+            SessionCopy.refreshRejected
         case .refreshUnreachable:
-            "We could not confirm your session. Please sign in again."
+            SessionCopy.refreshUnreachable
         }
     }
 
     private static func text(for reason: RetryReason) -> String {
         switch reason {
         case .refreshThrottled:
-            "Too many requests. Please try again shortly."
+            SessionCopy.refreshThrottled
         case .refreshNotSent:
-            "You appear to be offline. Your session is still active."
+            SessionCopy.refreshNotSent
         case .storeUnavailable:
-            // The Keychain read failed, typically because the device is locked.
-            "We could not read your saved session. Please try again."
+            SessionCopy.storeUnavailable
         case .markerNotDurable:
-            "We could not safely refresh your session. Please try again."
+            SessionCopy.markerNotDurable
         }
     }
 }

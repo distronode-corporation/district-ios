@@ -50,11 +50,7 @@ struct SdrCampaignCard: View {
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
+        .districtCardSurface()
     }
 
     private var header: some View {
@@ -379,7 +375,7 @@ struct RunCard: View {
         }
         .padding(DistrictSpacing.row)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
+        .districtCardSurface(bordered: false)
     }
 
     /// ⚠️ THREE FACTS ON ONE LINE IS A DEFAULT-SIZE LUXURY. A status badge and two

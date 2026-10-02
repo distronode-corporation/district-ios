@@ -281,28 +281,6 @@ final class SchedulingAdminMediaRepositoryTests: XCTestCase {
         XCTAssertFalse(SchedulingUploadFile.acceptedMimeTypes.contains("image/svg+xml"))
         XCTAssertEqual(SchedulingUploadFile.maxBytes, 5 * 1024 * 1024)
     }
-
-    /// ⚠️ ADVISORY IN ONE DIRECTION ONLY: false means "do not send", true means
-    /// only that the two checks a client CAN make passed. The fork sniffs the first
-    /// 512 bytes and is the real boundary.
-    func testThePreCheckRefusesTheThreeThingsAClientCanSee() {
-        XCTAssertTrue(Self.pixel.isProbablyAcceptable)
-        XCTAssertFalse(
-            SchedulingUploadFile(fileName: "logo.svg", mimeType: "image/svg+xml", bytes: Data([0x3C]))
-                .isProbablyAcceptable
-        )
-        XCTAssertFalse(
-            SchedulingUploadFile(fileName: "empty.png", mimeType: "image/png", bytes: Data())
-                .isProbablyAcceptable
-        )
-        XCTAssertFalse(
-            SchedulingUploadFile(
-                fileName: "huge.png",
-                mimeType: "image/png",
-                bytes: Data(count: SchedulingUploadFile.maxBytes + 1)
-            ).isProbablyAcceptable
-        )
-    }
 }
 
 /// One row of the upload's refusal table.

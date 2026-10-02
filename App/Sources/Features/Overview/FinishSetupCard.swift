@@ -41,11 +41,7 @@ struct FinishSetupCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DistrictSpacing.card)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
+        .districtCardSurface()
         // ⛔ `.contain`, so the button keeps its own identifier and stays operable.
         .accessibilityElement(children: .contain)
     }

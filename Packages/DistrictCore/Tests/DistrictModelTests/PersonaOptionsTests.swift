@@ -90,14 +90,14 @@ final class PersonaOptionsTests: XCTestCase {
     // MARK: - Which engines may be chosen
 
     /// ⛔ THE OUT-OF-REGION ENGINE IS PUBLISHED AND NOT SELECTABLE, which is the
-    /// whole reason both accessors exist. A picker that filtered the list would
+    /// whole reason `inRegion` is a flag rather than an omission. A picker that filtered the list would
     /// leave an operator unable to see why their region offers fewer choices; a
     /// picker that offered it would make a residency decision on a settings screen
     /// with a 200 and no error.
     func testEveryEngineIsPublishedAndOnlyTheInRegionOnesAreSelectable() {
         let options = catalogue()
         XCTAssertEqual(options.engines.count, 3)
-        XCTAssertEqual(options.selectableEngines.map(\.id), [Self.deepgram, Self.gemini])
+        XCTAssertEqual(options.engines.filter(\.inRegion).map(\.id), [Self.deepgram, Self.gemini])
     }
 
     func testAnUnknownEngineIdResolvesToNothingRatherThanToTheFirst() {

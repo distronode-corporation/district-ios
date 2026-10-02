@@ -125,6 +125,22 @@ final class SchedulingReadConcurrencyTests: SchedulingModelTestCase {
         XCTAssertTrue(model.minting.isEmpty)
     }
 
+    /// ⛔ A FAILED PLAY NEVER SAYS "That did not save". The catch-all is reworded for
+    /// playback and keeps its offer; a specific refusal keeps its shared sentence.
+    @MainActor
+    func testAnUnclassifiedPlayFailureSaysTheRecordingCouldNotBeOpened() {
+        let unknown = SchedulingRecordingsModel.playFailure(SchedulingAdminError.unknown)
+        XCTAssertEqual(unknown.message, "That recording could not be opened. Try again.")
+        XCTAssertEqual(unknown.action, .retry)
+
+        let invalid = SchedulingRecordingsModel.playFailure(SchedulingAdminError.invalidParams([]))
+        XCTAssertEqual(invalid.message, SchedulingCopy.recordingPlayFailed)
+        XCTAssertEqual(invalid.action, .none)
+
+        let offline = SchedulingRecordingsModel.playFailure(SchedulingAdminError.transport("offline"))
+        XCTAssertEqual(offline.message, SchedulingFailureCopy.offline)
+    }
+
     /// ⛔ A SECOND PRESS WHILE THE FIRST IS MINTING SPENDS NOTHING. Each press used to
     /// mint its own presigned URL and present its own player.
     @MainActor

@@ -438,26 +438,11 @@ struct SchedulingWriteFact: View {
     }
 }
 
-// MARK: - Names files outside this directory still spell
+// MARK: - Names the image row still spells
 
-// ⚠️ THE RESCHEDULE MODEL AND SHEET, THE IMAGE ROW AND TWO READ SCREENS still spell the
-// pre-merge names, and they belong to other change sets. These aliases point them at
-// the one implementation above; delete each when its last caller is renamed.
+// ⚠️ `SchedulingWritesBImageRow.swift` STILL SPELLS THE PRE-MERGE NAMES and belongs to
+// another change set. These aliases point it at the one implementation above; delete
+// them when that file is renamed.
 typealias SchedulingWritesBState = SchedulingWriteState
-typealias SchedulingWritesBSheet<Content: View> = SchedulingWriteSheet<Content>
-typealias SchedulingWritesBRejection = SchedulingWriteRejection
 typealias SchedulingWritesBHint = SchedulingWriteHint
 typealias SchedulingWritesBNotice = SchedulingWriteOutcome
-typealias SchedulingWriteFailureLineC = SchedulingWriteFailureLine
-typealias SchedulingWriteNoticeLineC = SchedulingWriteNoticeLine
-
-/// ⚠️ THE RESCHEDULE MODEL'S SPELLING OF ``SchedulingFailureCopy``; see the note above.
-enum SchedulingWritesBFailure {
-    static func text(for error: any Error) -> FailureText {
-        SchedulingFailureCopy.text(forAny: error)
-    }
-
-    static func isSlotTaken(_ error: any Error) -> Bool {
-        SchedulingFailureCopy.isSlotTaken(error)
-    }
-}

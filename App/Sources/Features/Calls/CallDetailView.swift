@@ -179,7 +179,7 @@ private struct CallDetailContentView: View {
     @ViewBuilder
     private func card(_ label: String, _ value: String?) -> some View {
         if let value, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            CallDetailCard(label: label, value: value)
+            DetailFieldCard(label: label, value: value)
         }
     }
 
@@ -232,7 +232,7 @@ private struct CallDetailContentView: View {
     @ViewBuilder
     private func listCard(_ label: String, _ values: [String]?) -> some View {
         if let values, !values.isEmpty {
-            CallDetailCard(label: label, value: values.map { "• \($0)" }.joined(separator: "\n"))
+            DetailFieldCard(label: label, value: values.map { "• \($0)" }.joined(separator: "\n"))
         }
     }
 
@@ -252,7 +252,7 @@ private struct CallDetailContentView: View {
         case .loading:
             ProgressView()
         case let .loaded(text):
-            CallDetailCard(label: "Transcript", value: text)
+            DetailFieldCard(label: "Transcript", value: text)
                 .accessibilityIdentifier(A11yID.Calls.transcript)
         case .absent:
             note("No transcript for this call.")
@@ -295,32 +295,6 @@ private struct CallDetailContentView: View {
         Text(failure.message)
             .font(DistrictType.bodySmall)
             .foregroundStyle(colors.destructive)
-    }
-}
-
-/// A labelled card.
-private struct CallDetailCard: View {
-    let label: String
-    let value: String
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    private var colors: DistrictColors {
-        .resolve(colorScheme)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            Text(label)
-                .font(DistrictType.labelSmall)
-                .foregroundStyle(colors.mutedForeground)
-            Text(value)
-                .font(DistrictType.bodySmall)
-                .foregroundStyle(colors.foreground)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(DistrictSpacing.gutter)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
     }
 }
 

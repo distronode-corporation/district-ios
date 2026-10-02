@@ -13,44 +13,6 @@ import SwiftUI
 // rule rejects a doc comment that is attached to no declaration, and a file header is
 // exactly that.
 
-/// The card shell every marketplace row and panel sits in.
-///
-/// ⚠️ LOCAL TO THIS FEATURE RATHER THAN PROMOTED INTO `DesignSystem/`, for the reason
-/// ``AnalyticsCard``'s own ⚠️ gives: several screens have each written this same
-/// background-plus-border inline, and extracting them all into one component is worth
-/// doing as a change of its own rather than in passing.
-///
-/// ⛔ THE GENERIC IS `Inner`, NOT `Content`. `View`'s own associated type is `Body`,
-/// but the family of names that become accidental witnesses is wider than that
-/// (`Content`, `Label`, `ID`, `Value`, `Configuration`). See the ⛔ in
-/// `DistrictButton.swift`.
-struct MarketplacePanel<Inner: View>: View {
-    private let inner: Inner
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    private var colors: DistrictColors {
-        .resolve(colorScheme)
-    }
-
-    init(@ViewBuilder content: () -> Inner) {
-        inner = content()
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            inner
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(DistrictSpacing.card)
-        .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: DistrictRadius.card)
-                .strokeBorder(colors.border, lineWidth: 1)
-        }
-    }
-}
-
 // MARK: - The search form
 
 /// The search filters.
@@ -74,7 +36,7 @@ struct NumberSearchFormCard: View {
     let onSearch: () -> Void
 
     var body: some View {
-        MarketplacePanel {
+        DistrictCard(spacing: DistrictSpacing.hairline) {
             VStack(alignment: .leading, spacing: DistrictSpacing.row) {
                 SettingsField(label: MarketplaceCopy.areaCodeLabel, text: areaCode, enabled: !searching)
                 SettingsField(label: MarketplaceCopy.countryLabel, text: country, enabled: !searching)
@@ -156,7 +118,7 @@ private struct AvailableNumberRow: View {
     }
 
     var body: some View {
-        MarketplacePanel {
+        DistrictCard(spacing: DistrictSpacing.hairline) {
             Text(number.phoneNumber)
                 .font(DistrictType.title)
                 .foregroundStyle(colors.foreground)
@@ -285,7 +247,7 @@ private struct ListedNumberRow: View {
     }
 
     var body: some View {
-        MarketplacePanel {
+        DistrictCard(spacing: DistrictSpacing.hairline) {
             Text(number.phoneNumber)
                 .font(DistrictType.title)
                 .foregroundStyle(colors.foreground)
@@ -379,7 +341,7 @@ struct MarketplaceFailureCard: View {
     }
 
     var body: some View {
-        MarketplacePanel {
+        DistrictCard(spacing: DistrictSpacing.hairline) {
             VStack(alignment: .leading, spacing: DistrictSpacing.tight) {
                 Text(title)
                     .font(DistrictType.titleSmall)

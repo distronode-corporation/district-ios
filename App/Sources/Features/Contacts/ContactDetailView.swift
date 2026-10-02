@@ -222,7 +222,7 @@ private struct ContactDetailContentView: View {
     @ViewBuilder
     private func card(_ label: String, _ value: String?) -> some View {
         if let value, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            ContactCard(label: label, value: value)
+            DetailFieldCard(label: label, value: value)
         }
     }
 
@@ -243,7 +243,7 @@ private struct ContactDetailContentView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(DistrictSpacing.gutter)
-            .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.card))
+            .districtCardSurface(bordered: false)
         }
     }
 
