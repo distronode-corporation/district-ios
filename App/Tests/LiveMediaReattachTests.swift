@@ -62,24 +62,4 @@ final class LiveMediaReattachTests: XCTestCase {
         container.callStack.releaseRoom(model)
         XCTAssertNil(ActiveRoomModel.attached(to: container.callStack, roomName: name), "a released room")
     }
-
-    // MARK: - Support
-
-    /// ⚠️ A BOUNDED POLL, as ``MicrophoneAccessTests`` uses: the model's work runs in tasks
-    /// it owns and exposes no completion to await.
-    private func waitUntil(
-        timeout seconds: Double = 5,
-        file: StaticString = #filePath,
-        line: UInt = #line,
-        _ condition: () -> Bool
-    ) async {
-        let deadline = Date().addingTimeInterval(seconds)
-        while !condition() {
-            guard Date() < deadline else {
-                XCTFail("timed out after \(seconds)s", file: file, line: line)
-                return
-            }
-            try? await Task.sleep(for: .milliseconds(20))
-        }
-    }
 }

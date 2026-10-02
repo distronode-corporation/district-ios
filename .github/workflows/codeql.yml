@@ -90,12 +90,6 @@ jobs:
       contents: read # check out the code
       actions: read # read this run's workflow details
     env:
-      # Same values as ci.yml's `app` job. Bump both together. Xcode 26.3 ships Swift 6.2,
-      # inside CodeQL's supported range (Swift 5.4-6.3 as of CodeQL 2.27.1).
-      XCODE_APP: /Applications/Xcode_26.3.app
-      XCODE_VERSION: "26.3"
-      XCODEGEN_VERSION: 2.46.0
-      XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
       # Recommended by xcbeautify: without it xcodebuild buffers its output when piped.
       NSUnbufferedIO: "YES"
     steps:
@@ -103,37 +97,10 @@ jobs:
         with:
           persist-credentials: false
 
-      # Asserted rather than trusted: an image rotation that drops this Xcode must fail
-      # here, naming the reason, not later with a compiler error.
-      - name: Select Xcode
-        run: |
-          sudo xcode-select -s "$XCODE_APP"
-          # Not `| head -n 1`: under pipefail with unbuffered output, xcodebuild aborts on
-          # the closed pipe (exit 134). Read everything, keep the first line.
-          have_all="$(xcodebuild -version)"
-          have="${have_all%%$'\n'*}"
-          echo "$have"
-          if [ "$have" != "Xcode $XCODE_VERSION" ]; then
-            echo "::error::expected Xcode $XCODE_VERSION at $XCODE_APP, got '$have'"
-            exit 1
-          fi
-
-      # The upstream release zip, checked against a pinned SHA-256, rather than a
-      # Homebrew formula whose version floats.
-      - name: Install XcodeGen
-        run: |
-          set -euo pipefail
-          cd "$RUNNER_TEMP"
-          curl -fsSL -o xcodegen.zip \
-            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip"
-          echo "${XCODEGEN_SHA256}  xcodegen.zip" | shasum -a 256 -c -
-          unzip -q xcodegen.zip
-          sudo ./xcodegen/install.sh
-          xcodegen --version
-
-      # ⛔ THE PROJECT IS GENERATED, NEVER COMMITTED. project.yml is the source of truth.
-      - name: xcodegen generate
-        run: xcodegen generate --spec project.yml
+      # The same Xcode, XcodeGen and generated project as ci.yml's `app` job, from the
+      # action both share.
+      - name: Xcode and XcodeGen
+        uses: ./.github/actions/macos-toolchain
 
       # Every step after this one is traced, so the setup above stays out of it.
       - name: Initialize CodeQL

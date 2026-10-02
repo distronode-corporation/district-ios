@@ -169,8 +169,12 @@ every pull request, and uses no secrets:
   allowlists in [`.gitleaks.toml`](.gitleaks.toml).
 - **release scripts** (Linux): tests the release workflow's scripts against stubs.
 
-**verify** and **app** fail if a test bundle runs fewer tests than expected, because a
-bundle that discovers nothing reports success.
+A bundle that discovers nothing reports success, so CI counts what ran. **verify** fails
+if DistrictCore runs fewer than 1650 tests, and **app** fails if `DistrictAITests` runs
+fewer than 470 or the signed-out UI tests fewer than 7. The first two are ratchets a
+little below the current counts (1687 and 486), so losing a test target or a handful of
+files fails, while deleting one or two tests deliberately does not; the UI count is the
+exact sum of the classes CI names.
 
 [`codeql.yml`](.github/workflows/codeql.yml) runs CodeQL over the workflows and the
 Swift build, and [`scorecard.yml`](.github/workflows/scorecard.yml) publishes the
@@ -183,7 +187,9 @@ Releases are built, signed and uploaded to App Store Connect by
 protected `v*` tag whose name matches `MARKETING_VERSION` and whose commit is on `main`.
 A dispatch on `main` builds a TestFlight-only build of `main`. The build number is 4101
 plus the commit count, and the workflow refuses a shallow clone, a mismatched tag and any
-other branch before it reads a credential.
+other branch before it reads a credential, then a build number App Store Connect already
+has for that version (a tag of a commit a `main` dispatch already uploaded) before it
+builds anything.
 
 No signing key or store credential is stored in this repository or in GitHub. The
 workflow's `release` environment borrows them from Distronode's Google Cloud for the
@@ -195,9 +201,9 @@ dispatch on a tag) and runs only with the maintainers' explicit approval.
 
 The workflow calls `scripts/archive-imac.sh`, which refuses a dirty tree, deletes the
 archive if the UI-test hooks are present in the release binary, and uploads the debug
-symbols to Sentry. `scripts/archive-imac.test.sh`, `scripts/release-preflight.test.sh` and
-`scripts/asc_release_test.py` test the release scripts against stubs on every pull
-request.
+symbols to Sentry. `scripts/archive-imac.test.sh`, `scripts/release-preflight.test.sh`,
+`scripts/asc-key.test.sh` and `scripts/asc_release_test.py` test the release scripts
+against stubs on every pull request.
 
 Versions up to the current store release (1.2) were built on a maintainer's machine with
 the same script, before this workflow existed.

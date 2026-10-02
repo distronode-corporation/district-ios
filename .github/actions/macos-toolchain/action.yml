@@ -1,0 +1,66 @@
+name: macOS toolchain
+description: >-
+  Selects the pinned Xcode and asserts its version, installs the pinned XcodeGen checked
+  against its SHA-256, and optionally generates the project. The one place these pins
+  live, for ci.yml, codeql.yml and release.yml. Needs the repository checked out first.
+
+# ⚠️ Xcode 26.3, not the image default. It is the Xcode the release is archived with, and
+# it ships Swift 6.2, which ci.yml's Linux job (swift:6.2.4) is paired with, and which is
+# inside CodeQL's supported range (Swift 5.4-6.3 as of CodeQL 2.27.1). Move the Linux
+# image with it, or neither.
+inputs:
+  generate:
+    description: Run `xcodegen generate --spec project.yml` after installing XcodeGen.
+    required: false
+    default: "true"
+outputs:
+  xcode-version:
+    description: The Xcode version selected, for cache keys.
+    value: ${{ steps.xcode.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    # Asserted rather than trusted: an image rotation that drops this Xcode must fail
+    # here, naming the reason, not later with a compiler error.
+    - name: Select Xcode
+      id: xcode
+      shell: bash
+      env:
+        XCODE_APP: /Applications/Xcode_26.3.app
+        XCODE_VERSION: "26.3"
+      run: |
+        sudo xcode-select -s "$XCODE_APP"
+        # Not `| head -n 1`: under pipefail with unbuffered output, xcodebuild aborts on
+        # the closed pipe (exit 134). Read everything, keep the first line.
+        have_all="$(xcodebuild -version)"
+        have="${have_all%%$'\n'*}"
+        echo "$have"
+        if [ "$have" != "Xcode $XCODE_VERSION" ]; then
+          echo "::error::expected Xcode $XCODE_VERSION at $XCODE_APP, got '$have'"
+          exit 1
+        fi
+        echo "version=$XCODE_VERSION" >>"$GITHUB_OUTPUT"
+
+    # The upstream release zip, checked against a pinned SHA-256, rather than a Homebrew
+    # formula whose version floats.
+    - name: Install XcodeGen
+      shell: bash
+      env:
+        XCODEGEN_VERSION: 2.46.0
+        XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+      run: |
+        set -euo pipefail
+        cd "$RUNNER_TEMP"
+        curl -fsSL -o xcodegen.zip \
+          "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip"
+        echo "${XCODEGEN_SHA256}  xcodegen.zip" | shasum -a 256 -c -
+        unzip -q xcodegen.zip
+        sudo ./xcodegen/install.sh
+        xcodegen --version
+
+    # ⛔ THE PROJECT IS GENERATED, NEVER COMMITTED. project.yml is the source of truth.
+    - name: xcodegen generate
+      if: inputs.generate == 'true'
+      shell: bash
+      run: xcodegen generate --spec project.yml

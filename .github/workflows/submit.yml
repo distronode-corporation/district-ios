@@ -4,11 +4,25 @@ name: Submit for review
 # Runs only with the maintainers' explicit approval in the `approval` input; anything
 # else fails at the first step and submits nothing.
 #
-# Dispatched on main (the `release` environment admits main and `v*` tags only). It
-# checks out the tag, derives the same build number the release run did, and hands it to
-# scripts/release-submit.sh, the same path release.yml's own `submit` job uses.
+# Dispatched on main (the `release` environment admits main and `v*` tags only), or
+# called by release.yml's `submit` job on the tag it has just built: the one submission
+# path. It checks out the tag, derives the same build number the release run did, and
+# hands it to scripts/release-submit.sh.
+#
+# ⚠️ The tag's own tree supplies the scripts and .github/actions/release-auth, so a tag
+# cut before that action existed (v1.2) cannot be submitted from here.
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: The release tag to submit, e.g. v1.3
+        type: string
+        required: true
+      approval:
+        description: The maintainers' approval text
+        type: string
+        required: true
+  workflow_call:
     inputs:
       tag:
         description: The release tag to submit, e.g. v1.3
@@ -76,14 +90,10 @@ jobs:
           RELEASE_REF_NAME: ${{ inputs.tag }}
         run: scripts/release-preflight.sh
 
+      # The provider and the service account live in the action, shared with release.yml.
       - name: Authenticate to Google Cloud
         id: gcp
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
-        with:
-          workload_identity_provider: projects/409911651910/locations/global/workloadIdentityPools/github-pool/providers/github-actions
-          service_account: gh-ios-release@distronode.iam.gserviceaccount.com
-          token_format: access_token
-          create_credentials_file: false
+        uses: ./.github/actions/release-auth
 
       - name: Submit for App Review
         env:

@@ -72,9 +72,13 @@ merged. If a fixture looks wrong, or the app and the service disagree about a re
 open an issue. A model change that needs a new or different fixture waits for the
 fixture to arrive from the service.
 
-**Test bundles must discover their tests.** CI fails when a bundle runs fewer tests than
-expected. A new signed-out UI test class has to be added to the `-only-testing` list in
-`.github/workflows/ci.yml`, and its cases to the expected count there.
+**Test bundles must discover their tests.** CI counts the tests each bundle ran and fails
+below a floor set in `.github/workflows/ci.yml`: 1650 for DistrictCore, 470 for
+`DistrictAITests` and 7 for the signed-out UI tests. The first two sit a little below
+the current counts and are ratchets: a change that adds many tests may raise its floor,
+and a change that deletes tests on purpose lowers it in the same commit and says why. A
+new signed-out UI test class has to be added to the `-only-testing` list there, and its
+cases to the expected count.
 
 **UI tests find elements by accessibility identifier**, from `App/Shared`, never by
 label: labels change with copy, and an unsigned CI build shows a different screen from a
@@ -104,9 +108,9 @@ builds, signs and uploads it to TestFlight; submission for App Review is a separ
 that runs only with the maintainers' explicit approval. No signing key or store
 credential is stored in this repository or in GitHub. See the README's Releases section.
 
-A change to `scripts/archive-imac.sh`, `scripts/release-preflight.sh` or
-`scripts/asc_release.py` comes with its test in the matching `*.test.sh` or `*_test.py`;
-the **release scripts** job runs them on every pull request.
+A change to `scripts/archive-imac.sh`, `scripts/release-preflight.sh`,
+`scripts/asc-key.sh` or `scripts/asc_release.py` comes with its test in the matching
+`*.test.sh` or `*_test.py`; the **release scripts** job runs them on every pull request.
 
 ## Reporting bugs and asking questions
 

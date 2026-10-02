@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""App Store Connect steps of the release lane: wait for a build, and submit it for review.
+"""App Store Connect steps of the release lane: check a build number is unused, wait for a
+build, and submit it for review.
 
     ASC_KEY_ID=... ASC_ISSUER_ID=... ASC_KEY_PATH=/path/AuthKey_<id>.p8 \\
       python3 scripts/asc_release.py wait-valid --version 1.2 --build 4104
     ... python3 scripts/asc_release.py submit --version 1.2 --build 4104
+    ... python3 scripts/asc_release.py highest-build --version 1.2
     python3 scripts/asc_release.py whats-new --version 1.2    # no credentials needed
 
-Used by .github/workflows/release.yml (wait-valid after the upload, submit when approved)
-and .github/workflows/submit.yml (submit). Standard library only: the ES256 signature is
-made by the `openssl` binary and every HTTP call goes through `curl`, so the script needs
-no pip install and no pinned dependency.
+Used by scripts/release-preflight.sh (highest-build, before anything is built),
+.github/workflows/release.yml (wait-valid after the upload) and submit.yml (submit).
+Standard library only: the ES256 signature is made by the `openssl` binary and every HTTP
+call goes through `curl`, so the script needs no pip install and no pinned dependency.
 
 The .p8 is read by openssl from its path and never by this process; the bearer token
 reaches curl on stdin (`-K -`), never on argv, which is world-readable through `ps`.
@@ -180,13 +182,18 @@ class Client:
             die(f"{method} {path}: curl exited {result.returncode}: {result.stderr.decode(errors='replace').strip()}")
         text, _, code_text = result.stdout.decode(errors="replace").rpartition("\n")
         code = int(code_text)
-        data = json.loads(text) if text.strip() else {}
+        # The status first: an error from a proxy or a load balancer (a 502 or 503 during
+        # a release) is an HTML page, and parsing it would end in a traceback that hides
+        # the code.
         if code not in ok:
-            details = "; ".join(
-                f"{e.get('code')}: {e.get('detail') or e.get('title')}" for e in data.get("errors", [])
-            )
-            die(f"{method} {path} answered {code}: {details or text[:500]}")
-        return code, data
+            try:
+                data = json.loads(text) if text.strip() else {}
+            except ValueError:
+                data = {}
+            errors = data.get("errors", []) if isinstance(data, dict) else []
+            details = "; ".join(f"{e.get('code')}: {e.get('detail') or e.get('title')}" for e in errors)
+            die(f"{method} {path} answered {code}: {details or ' '.join(text.split())[:500]}")
+        return code, json.loads(text) if text.strip() else {}
 
     def get(self, path: str) -> dict:
         return self.call("GET", path)[1]
@@ -213,6 +220,21 @@ def find_build(client: Client, app: str, version: str, build: str) -> dict | Non
     return data[0] if data else None
 
 
+def highest_build(client: Client, app: str, version: str) -> int:
+    """The highest build number already uploaded for this version, or 0 if there is none.
+
+    App Store Connect refuses a build number at or below one it already has, so a run
+    whose number is not above this one would spend its whole archive to be turned away.
+    Expired builds are included: their numbers stay taken.
+    """
+    query = (
+        f"/builds?filter[app]={app}&filter[preReleaseVersion.version]={version}"
+        f"&filter[preReleaseVersion.platform]={PLATFORM}&sort=-uploadedDate&limit=200&fields[builds]=version"
+    )
+    numbers = [int(b["attributes"]["version"]) for b in client.get(query)["data"] if b["attributes"]["version"].isdigit()]
+    return max(numbers, default=0)
+
+
 def wait_valid(client: Client, app: str, version: str, build: str, timeout: int) -> dict:
     """Polls until the build exists and is VALID. A build Apple marks INVALID or FAILED
     fails at once; one that never appears fails at the timeout, naming both numbers."""
@@ -234,6 +256,21 @@ def wait_valid(client: Client, app: str, version: str, build: str, timeout: int)
 
 
 # ── Submission ───────────────────────────────────────────────────────────────
+
+
+def submission_versions(client: Client, submission: str) -> dict[str, str]:
+    """The appStoreVersions a review submission carries, as {id: versionString}. The
+    string is "?" when the included record does not name it."""
+    page = client.get(
+        f"/reviewSubmissions/{submission}/items?include=appStoreVersion&fields[appStoreVersions]=versionString"
+    )
+    names = {
+        inc["id"]: inc.get("attributes", {}).get("versionString", "?")
+        for inc in page.get("included", [])
+        if inc.get("type") == "appStoreVersions"
+    }
+    ids = [(i.get("relationships", {}).get("appStoreVersion", {}).get("data") or {}).get("id") for i in page["data"]]
+    return {vid: names.get(vid, "?") for vid in ids if vid}
 
 
 def submit(client: Client, version: str, build: str, notes: str, timeout: int) -> None:
@@ -303,9 +340,21 @@ def submit(client: Client, version: str, build: str, notes: str, timeout: int) -
         "&filter[state]=READY_FOR_REVIEW,WAITING_FOR_REVIEW,IN_REVIEW,UNRESOLVED_ISSUES&fields[reviewSubmissions]=state"
     )["data"]
     for sub in submissions:
-        if sub["attributes"]["state"] in SUBMISSION_IN_FLIGHT:
-            print(f"review submission {sub['id']} is already {sub['attributes']['state']}. Nothing was submitted.")
+        state = sub["attributes"]["state"]
+        if state not in SUBMISSION_IN_FLIGHT:
+            continue
+        # Apple holds one submission per platform at a time. It is this run's only if it
+        # carries this version; one for another version blocks this one, and reporting
+        # success would leave this version out of review with a green run.
+        carried = submission_versions(client, sub["id"])
+        if version_id in carried:
+            print(f"review submission {sub['id']} is already {state}. Nothing was submitted.")
             return
+        blocking = ", ".join(sorted(carried.values())) or "no version"
+        die(
+            f"review submission {sub['id']} is {state} with {blocking}, not {version}. App Store Connect "
+            "takes one submission at a time; resolve or withdraw that one first. Nothing was submitted."
+        )
     draft = next((s for s in submissions if s["attributes"]["state"] == "READY_FOR_REVIEW"), None)
     if draft is None:
         _, created = client.call(
@@ -324,11 +373,7 @@ def submit(client: Client, version: str, build: str, notes: str, timeout: int) -
     else:
         print(f"review submission {draft['id']}: reusing the open draft")
 
-    items = client.get(f"/reviewSubmissions/{draft['id']}/items?include=appStoreVersion")["data"]
-    has_version = any(
-        (i.get("relationships", {}).get("appStoreVersion", {}).get("data") or {}).get("id") == version_id for i in items
-    )
-    if has_version:
+    if version_id in submission_versions(client, draft["id"]):
         print(f"version {version}: already an item of the submission")
     else:
         client.call(
@@ -357,10 +402,10 @@ def submit(client: Client, version: str, build: str, notes: str, timeout: int) -
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("wait-valid", "submit", "whats-new"):
+    for name in ("wait-valid", "submit", "whats-new", "highest-build"):
         p = sub.add_parser(name)
         p.add_argument("--version", required=True, help="the marketing version, e.g. 1.2")
-        if name != "whats-new":
+        if name in ("wait-valid", "submit"):
             p.add_argument("--build", required=True, help="the build number (CFBundleVersion)")
             p.add_argument("--timeout", type=int, default=3600, help="seconds to wait for VALID")
         p.add_argument("--changelog", default=str(Path(__file__).resolve().parent.parent / "CHANGELOG.md"))
@@ -368,6 +413,12 @@ def main() -> None:
 
     if args.command == "whats-new":
         print(whats_new(Path(args.changelog), args.version))
+        return
+    if args.command == "highest-build":
+        if not re.fullmatch(r"\d+(\.\d+){1,2}", args.version):
+            die(f"version '{args.version}' is malformed.")
+        client = Client()
+        print(highest_build(client, app_id(client), args.version))
         return
     if not re.fullmatch(r"\d+(\.\d+){1,2}", args.version) or not args.build.isdigit():
         die(f"version '{args.version}' or build '{args.build}' is malformed.")
