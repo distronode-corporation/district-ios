@@ -42,7 +42,7 @@ enum SchedulingBookingWriteCopy {
     /// Shown when the day resolved but nothing in it is bookable.
     static let rescheduleNoSlots = "Nothing free that day. Try another."
     /// ⚠️ A VALIDATION SENTENCE, NOT A FAILURE. It never reaches
-    /// ``SchedulingWritesBFailure`` because no request is spent on it.
+    /// ``SchedulingFailureCopy`` because no request is spent on it.
     static let reschedulePickTime = "Pick a time."
     static let rescheduleDone = "Booking moved"
 

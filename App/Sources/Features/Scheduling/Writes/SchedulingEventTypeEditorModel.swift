@@ -116,7 +116,7 @@ final class SchedulingEventTypeEditorModel {
     /// the press. A disabled Save with no explanation is the shape that makes people
     /// hunt for the field they got wrong; the web behaves the same way.
     var canSave: Bool {
-        !state.isSaving
+        !state.isWorking
     }
 
     /// What `location_value` is called here, or nil when the type generates it.
@@ -129,7 +129,7 @@ final class SchedulingEventTypeEditorModel {
     }
 
     func save() async {
-        guard !state.isSaving else { return }
+        guard !state.isWorking else { return }
         switch mode {
         case .create:
             await create()
@@ -153,13 +153,14 @@ final class SchedulingEventTypeEditorModel {
         let slug = SchedulingEventTypeSlug.unique(from: form.trimmedName, taken: takenSlugs)
         guard let draft = form.createDraft(slug: slug) else { return }
         validation = nil
-        state = .saving
+        state = .working
         do {
             let row = try await admin.createEventType(workspaceId: workspaceId, draft: draft)
-            state = .saved
+            // ⚠️ IDLE, NOT A NOTICE: `onSaved` closes the sheet, so there is no one to read one.
+            state = .idle
             onSaved(.saved(row))
         } catch {
-            state = .failed(Self.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -170,26 +171,14 @@ final class SchedulingEventTypeEditorModel {
         }
         guard let changes = form.changes() else { return }
         validation = nil
-        state = .saving
+        state = .working
         do {
             let row = try await admin.patchEventType(workspaceId: workspaceId, slug: slug, changes: changes)
-            state = .saved
+            // ⚠️ IDLE, NOT A NOTICE: `onSaved` closes the sheet, so there is no one to read one.
+            state = .idle
             onSaved(.saved(row))
         } catch {
-            state = .failed(Self.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
-    }
-
-    /// ⚠️ A NON-`SchedulingAdminError` IS IMPOSSIBLE FROM THIS REPOSITORY AND IS
-    /// STILL HANDLED. `perform` throws nothing else; a `catch` that force-cast
-    /// would turn a future third error case into a crash in a save.
-    static func failure(_ error: any Error) -> FailureText {
-        guard let admin = error as? SchedulingAdminError else {
-            return FailureText(
-                message: SchedulingWriteFailureText.sentence(for: .unknown),
-                action: .retry
-            )
-        }
-        return SchedulingWriteFailureText.from(admin)
     }
 }

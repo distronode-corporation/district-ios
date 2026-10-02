@@ -26,11 +26,9 @@ import Observation
 @Observable
 final class SchedulingEventTypeActionsModel {
     private(set) var eventType: SchedulingEventType
+    /// ⚠️ FOUR DIFFERENT WRITES LAND HERE AND EACH SUCCEEDS WITH ITS OWN WORDING,
+    /// which ``SchedulingWriteState/done(_:)`` carries.
     private(set) var state: SchedulingWriteState = .idle
-    /// ⚠️ THE SUCCESS SENTENCE, WHICH IS NOT A FAILURE AND NOT A STATE. Four
-    /// different writes land here and each has its own wording; the state machine
-    /// only knows that something saved.
-    private(set) var notice: String?
     /// ⚠️ True while the confirmation dialog should be up. The view binds it; the
     /// model owns it so a re-render cannot lose a pending destructive prompt.
     var confirmingDelete = false
@@ -68,11 +66,10 @@ final class SchedulingEventTypeActionsModel {
     }
 
     var busy: Bool {
-        state.isSaving
+        state.isWorking
     }
 
     func dismissNotice() {
-        notice = nil
         state = .idle
     }
 
@@ -98,16 +95,15 @@ final class SchedulingEventTypeActionsModel {
     /// CONFIRMATION. The caller sets ``confirmingDelete``; this runs on the
     /// dialog's destructive button.
     func delete() async {
-        guard !state.isSaving else { return }
+        guard !state.isWorking else { return }
         confirmingDelete = false
-        state = .saving
+        state = .working
         do {
             try await admin.deleteEventType(workspaceId: workspaceId, slug: eventType.slug)
-            state = .saved
-            notice = SchedulingWriteCopy.eventTypeDeleted
+            state = .done(SchedulingWriteCopy.eventTypeDeleted)
             onSaved(.deleted(slug: eventType.slug))
         } catch {
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -123,26 +119,27 @@ final class SchedulingEventTypeActionsModel {
     /// the mail did not, and a failure strip offering "try again" would misdescribe
     /// which half is broken.
     func sendTestEmail(type: String) async {
-        guard !state.isSaving else { return }
-        state = .saving
+        guard !state.isWorking else { return }
+        state = .working
         do {
             let result = try await admin.sendEventTypeTestEmail(
                 workspaceId: workspaceId,
                 slug: eventType.slug,
                 type: type
             )
-            state = .saved
-            notice = result.sent
-                ? SchedulingWriteCopy.testEmailSent(to: result.to)
-                : SchedulingWriteCopy.testEmailNotSent
+            state = .done(
+                result.sent
+                    ? SchedulingWriteCopy.testEmailSent(to: result.to)
+                    : SchedulingWriteCopy.testEmailNotSent
+            )
         } catch {
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
     private func patch(_ changes: SchedulingEventTypeChanges, notice message: String) async {
-        guard !state.isSaving else { return }
-        state = .saving
+        guard !state.isWorking else { return }
+        state = .working
         do {
             let row = try await admin.patchEventType(
                 workspaceId: workspaceId,
@@ -150,11 +147,10 @@ final class SchedulingEventTypeActionsModel {
                 changes: changes
             )
             eventType = row
-            state = .saved
-            notice = message
+            state = .done(message)
             onSaved(.saved(row))
         } catch {
-            state = .failed(SchedulingEventTypeEditorModel.failure(error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 }

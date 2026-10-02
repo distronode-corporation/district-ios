@@ -28,7 +28,7 @@ import Observation
 @MainActor
 @Observable
 final class SchedulingAutomationModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
     private(set) var storage: SchedulingStorageSettings
     private(set) var notetaker: SchedulingNotetakerSettings
     private(set) var llm: SchedulingLLMSettings
@@ -150,7 +150,7 @@ final class SchedulingAutomationModel {
             state = .done(SchedulingSettingsWriteCopy.automationDone)
             onSaved()
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 

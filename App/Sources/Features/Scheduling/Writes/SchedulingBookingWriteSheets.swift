@@ -10,7 +10,7 @@ struct SchedulingBookingCancelSheet: View {
     let onClose: () -> Void
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: SchedulingBookingWriteCopy.cancelTitle,
             subtitle: SchedulingBookingWriteCopy.cancelBody,
             cancelLabel: SchedulingBookingWriteCopy.cancelKeep,
@@ -27,8 +27,8 @@ struct SchedulingBookingCancelSheet: View {
                     multiline: true
                 )
                 .accessibilityIdentifier(A11yID.SchedulingWritesB.bookingCancelReason)
-                SchedulingWritesBHint(text: SchedulingBookingWriteCopy.cancelReasonHint)
-                SchedulingWritesBRejection(message: model.reasonRejected)
+                SchedulingWriteHint(text: SchedulingBookingWriteCopy.cancelReasonHint)
+                SchedulingWriteRejection(message: model.reasonRejected)
             }
         } onCancel: {
             onClose()
@@ -56,7 +56,7 @@ struct SchedulingBookingRegenerateNotesButton: View {
             .buttonStyle(.districtSecondary)
             .disabled(model.busy)
             .accessibilityIdentifier(A11yID.SchedulingWritesB.bookingRegenerateNotes)
-            SchedulingWritesBNotice(state: model.state)
+            SchedulingWriteOutcome(state: model.state)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

@@ -25,8 +25,7 @@ enum SchedulingUpcomingBookingsState {
 /// four 4xx answers (409 still hosting, 403 not the owner, 400 owner or already
 /// archived, 404 gone) are all collapsed to ``SchedulingAdminError/unknown`` by
 /// `error(forStatus:code:)` before a screen sees them, so
-/// ``SchedulingTeamWriteCopy/archiveRefused`` enumerates instead of asserting. See
-/// the ⛔ on ``SchedulingWritesBFailure``.
+/// ``SchedulingTeamWriteCopy/archiveRefused`` enumerates instead of asserting.
 ///
 /// ⚠️ SOFT, AND THAT IS WHAT MAKES IT SAFE TO OFFER AT ALL. The row and its links
 /// survive; the member cannot sign in, is skipped in routing and their event types
@@ -34,7 +33,7 @@ enum SchedulingUpcomingBookingsState {
 @MainActor
 @Observable
 final class SchedulingUserArchiveModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
     private(set) var upcoming: SchedulingUpcomingBookingsState = .loading
 
     private let admin: SchedulingAdminRepository
@@ -93,7 +92,7 @@ final class SchedulingUserArchiveModel {
         do {
             upcoming = try await .ready(admin.upcomingBookings(workspaceId: workspaceId, userId: userId))
         } catch {
-            upcoming = .failed(SchedulingWritesBFailure.text(for: error))
+            upcoming = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -126,7 +125,7 @@ final class SchedulingUserArchiveModel {
     /// response would be this client inventing a cause for its own bug.
     static func refusal(_ error: Error) -> FailureText {
         guard let admin = error as? SchedulingAdminError, case .unknown = admin else {
-            return SchedulingWritesBFailure.text(for: error)
+            return SchedulingFailureCopy.text(forAny: error)
         }
         return FailureText(message: SchedulingTeamWriteCopy.archiveRefused, action: .none)
     }

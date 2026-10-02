@@ -29,8 +29,8 @@ import Observation
 @MainActor
 @Observable
 final class SchedulingProfileModel {
-    private(set) var state: SchedulingWritesBState = .idle
-    private(set) var avatarState: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
+    private(set) var avatarState: SchedulingWriteState = .idle
     private(set) var me: SchedulingMe
 
     private(set) var name: String
@@ -170,7 +170,7 @@ final class SchedulingProfileModel {
             try await adopt(admin.updateMe(workspaceId: workspaceId, update))
             state = .done(SchedulingSettingsWriteCopy.profileDone)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -196,7 +196,7 @@ final class SchedulingProfileModel {
             }
             avatarState = .done(SchedulingSettingsWriteCopy.imageUploaded(SchedulingSettingsWriteCopy.avatarLabel))
         } catch {
-            avatarState = .failed(SchedulingWritesBFailure.text(for: error))
+            avatarState = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -220,7 +220,7 @@ final class SchedulingProfileModel {
             await reread()
             avatarState = .done(SchedulingSettingsWriteCopy.imageRemoved(SchedulingSettingsWriteCopy.avatarLabel))
         } catch {
-            avatarState = .failed(SchedulingWritesBFailure.text(for: error))
+            avatarState = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 

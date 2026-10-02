@@ -99,7 +99,7 @@ final class SchedulingAPIKeyCreateModel {
             onChanged()
         } catch {
             busy = false
-            failure = FailureText.schedulingWriteC(thrown: error)
+            failure = SchedulingFailureCopy.text(forAny: error)
         }
     }
 
@@ -115,71 +115,6 @@ final class SchedulingAPIKeyCreateModel {
     /// simulator's shared pasteboard, which is process-wide state a test would leak.
     func markCopied() {
         copied = true
-    }
-
-    func dismissFailure() {
-        failure = nil
-    }
-}
-
-/// Revoke one API key, behind a confirmation.
-///
-/// ⛔ DESTRUCTIVE AND IMMEDIATE: `apiKeys.delete` answers nothing and there is no
-/// undo, so the prompt names the key and says what stops working. ⚠️ The pending
-/// row is held rather than an id, because the prompt has to name it and reading a
-/// name back out of a list that has already been re-read would be a race.
-@MainActor
-@Observable
-final class SchedulingAPIKeyRevokeModel {
-    private(set) var pending: SchedulingAPIKey?
-    private(set) var busy = false
-    private(set) var failure: FailureText?
-
-    private let repository: SchedulingAdminRepository
-    private let workspaceId: String
-    private let onChanged: () -> Void
-
-    init(
-        repository: SchedulingAdminRepository,
-        workspaceId: String,
-        onChanged: @escaping () -> Void
-    ) {
-        self.repository = repository
-        self.workspaceId = workspaceId
-        self.onChanged = onChanged
-    }
-
-    var isAsking: Bool {
-        pending != nil
-    }
-
-    func ask(_ key: SchedulingAPIKey) {
-        guard !busy else { return }
-        failure = nil
-        pending = key
-    }
-
-    func cancel() {
-        pending = nil
-    }
-
-    /// ⚠️ THE PROMPT IS DISMISSED BEFORE THE ANSWER LANDS, matching the browser: a
-    /// confirmation that stays up under a spinner invites a second press on a
-    /// request already in flight. The failure, if there is one, is reported on the
-    /// screen behind it.
-    func confirm() async {
-        guard !busy, let key = pending else { return }
-        busy = true
-        pending = nil
-        failure = nil
-        do {
-            _ = try await repository.deleteAPIKey(workspaceId: workspaceId, keyId: key.id)
-            busy = false
-            onChanged()
-        } catch {
-            busy = false
-            failure = FailureText.schedulingWriteC(thrown: error)
-        }
     }
 
     func dismissFailure() {

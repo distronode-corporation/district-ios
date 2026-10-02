@@ -18,10 +18,10 @@ import Observation
 @MainActor
 @Observable
 final class SchedulingBookingCancelModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
     private(set) var reason = ""
     /// ⚠️ Set only by ``submit()``'s own validation, cleared on the next edit, and
-    /// deliberately NOT a ``SchedulingWritesBState/failed(_:)``: no request was
+    /// deliberately NOT a ``SchedulingWriteState/failed(_:)``: no request was
     /// spent, so offering a retry would be describing a failure that never
     /// happened.
     private(set) var reasonRejected: String?
@@ -77,7 +77,7 @@ final class SchedulingBookingCancelModel {
             state = .done(SchedulingBookingWriteCopy.cancelDone)
             onSaved(booking)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 

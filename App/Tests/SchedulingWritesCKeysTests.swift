@@ -90,7 +90,7 @@ final class SchedulingWritesCKeysTests: XCTestCase {
         await model.create()
 
         XCTAssertNil(model.minted)
-        XCTAssertEqual(model.failure?.message, SchedulingWriteCopyC.unavailable)
+        XCTAssertEqual(model.failure?.message, SchedulingFailureCopy.unavailable)
         XCTAssertEqual(model.failure?.action, .retry)
     }
 
@@ -106,7 +106,7 @@ final class SchedulingWritesCKeysTests: XCTestCase {
         model.name = "Zapier"
         await model.create()
 
-        XCTAssertEqual(model.failure?.message, SchedulingWriteCopyC.forbidden)
+        XCTAssertEqual(model.failure?.message, SchedulingFailureCopy.forbidden)
         XCTAssertEqual(model.failure?.action, FailureText.Action.none)
     }
 
@@ -124,7 +124,7 @@ final class SchedulingWritesCKeysTests: XCTestCase {
         model.name = "Zapier"
         await model.create()
 
-        XCTAssertEqual(model.failure?.message, SchedulingWriteCopyC.notReady)
+        XCTAssertEqual(model.failure?.message, SchedulingFailureCopy.notReady)
         XCTAssertEqual(model.failure?.action, FailureText.Action.none)
     }
 
@@ -181,7 +181,7 @@ final class SchedulingWritesCKeysTests: XCTestCase {
         model.ask(key)
         await model.confirm()
 
-        XCTAssertEqual(model.failure?.message, SchedulingWriteCopyC.unavailable)
+        XCTAssertEqual(model.failure?.message, SchedulingFailureCopy.unavailable)
     }
 
     // MARK: - Connected apps

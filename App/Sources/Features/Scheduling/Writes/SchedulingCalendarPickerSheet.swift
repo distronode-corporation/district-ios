@@ -22,7 +22,7 @@ struct SchedulingCalendarPickerSheet: View {
     }
 
     var body: some View {
-        SchedulingWriteSheetC(title: SchedulingWriteCopyC.calendarsTitle(model.connection.accountEmail)) {
+        SchedulingWriteSheet(title: SchedulingWriteCopyC.calendarsTitle(model.connection.accountEmail)) {
             content
         }
         .task { await model.load() }
@@ -36,7 +36,7 @@ struct SchedulingCalendarPickerSheet: View {
             messages
             buttons
         } else if let failure = model.failure {
-            SchedulingWriteFailureLineC(failure: failure, onRetry: reload)
+            SchedulingWriteFailureLine(failure: failure, onRetry: reload)
         } else {
             LoadingView(message: SchedulingWriteCopyC.calendarsLoading)
         }
@@ -53,7 +53,7 @@ struct SchedulingCalendarPickerSheet: View {
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
             ForEach(rows, id: \.id) { row in
-                SchedulingWriteToggleRowC(
+                SchedulingWriteToggleRow(
                     label: row.name,
                     isOn: conflictBinding(row.id),
                     enabled: !model.busy
@@ -108,14 +108,14 @@ struct SchedulingCalendarPickerSheet: View {
     @ViewBuilder
     private var messages: some View {
         if let failure = model.failure {
-            SchedulingWriteFailureLineC(
+            SchedulingWriteFailureLine(
                 failure: failure,
                 onRetry: save,
                 onDismiss: model.dismissFailure
             )
         }
         if model.saved {
-            SchedulingWriteNoticeLineC(message: SchedulingWriteCopyC.calendarsSaved)
+            SchedulingWriteNoticeLine(message: SchedulingWriteCopyC.calendarsSaved)
         }
     }
 

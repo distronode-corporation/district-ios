@@ -22,7 +22,7 @@ struct SchedulingAPIKeyCreateSheet: View {
     }
 
     var body: some View {
-        SchedulingWriteSheetC(title: SchedulingWriteCopyC.keySheetTitle) {
+        SchedulingWriteSheet(title: SchedulingWriteCopyC.keySheetTitle) {
             Text(SchedulingWriteCopyC.keyNameHint)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
@@ -38,7 +38,7 @@ struct SchedulingAPIKeyCreateSheet: View {
                     .foregroundStyle(colors.destructive)
             }
             if let failure = model.failure {
-                SchedulingWriteFailureLineC(
+                SchedulingWriteFailureLine(
                     failure: failure,
                     onRetry: submit,
                     onDismiss: model.dismissFailure
@@ -103,7 +103,7 @@ struct SchedulingAPIKeyRevealSheet: View {
     }
 
     var body: some View {
-        SchedulingWriteSheetC(title: SchedulingWriteCopyC.keyRevealTitle(minted.name)) {
+        SchedulingWriteSheet(title: SchedulingWriteCopyC.keyRevealTitle(minted.name)) {
             Text(SchedulingWriteCopyC.keyRevealWarning)
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.foreground)

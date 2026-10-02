@@ -18,7 +18,7 @@ final class SchedulingWritesActionsTests: XCTestCase {
         XCTAssertEqual(call?.op, "eventTypes.patch")
         XCTAssertEqual(call?.params["is_active"] as? Bool, false)
         XCTAssertNil(call?.params["archived"])
-        XCTAssertEqual(model.notice, "Event type turned off")
+        XCTAssertEqual(model.state.notice, "Event type turned off")
     }
 
     /// ⚠️ THE LABEL COMES FROM THE ROW THE SERVER ANSWERED WITH, not from what this
@@ -41,7 +41,7 @@ final class SchedulingWritesActionsTests: XCTestCase {
         let call = SchedulingWritesFixtures.lastCall(transport)
         XCTAssertEqual(call?.op, "eventTypes.patch")
         XCTAssertEqual(call?.params["archived"] as? Bool, true)
-        XCTAssertEqual(model.notice, "Event type archived")
+        XCTAssertEqual(model.state.notice, "Event type archived")
         XCTAssertEqual(model.archiveTitle, "Restore")
     }
 
@@ -77,7 +77,7 @@ final class SchedulingWritesActionsTests: XCTestCase {
         XCTAssertEqual(call?.op, "eventTypes.testEmail")
         XCTAssertEqual(call?.params["type"] as? String, "reminder")
         XCTAssertNil(call?.params["to"], "a recipient parameter would make this op a mail relay")
-        XCTAssertEqual(model.notice, "Test email sent to host@example.com")
+        XCTAssertEqual(model.state.notice, "Test email sent to host@example.com")
     }
 
     /// ⛔ `sent: false` IS A SUCCESSFUL RESPONSE REPORTING THAT NOTHING WAS SENT.
@@ -89,7 +89,7 @@ final class SchedulingWritesActionsTests: XCTestCase {
         await model.sendTestEmail(type: "confirmation")
 
         XCTAssertNil(model.state.failure)
-        XCTAssertEqual(model.notice, "The booking system did not send the test email.")
+        XCTAssertEqual(model.state.notice, "The booking system did not send the test email.")
     }
 
     /// ⚠️ THE FOUR TEMPLATES ARE THE CATALOG'S, and the wire values are not derived

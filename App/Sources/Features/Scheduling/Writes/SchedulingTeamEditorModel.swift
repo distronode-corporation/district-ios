@@ -25,7 +25,7 @@ import Observation
 @MainActor
 @Observable
 final class SchedulingTeamEditorModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
     private(set) var name: String
     private(set) var nameRejected: String?
 
@@ -98,7 +98,7 @@ final class SchedulingTeamEditorModel {
             state = .done(isCreating ? SchedulingTeamWriteCopy.createDone : SchedulingTeamWriteCopy.renameDone)
             onSaved(team)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -110,7 +110,7 @@ final class SchedulingTeamEditorModel {
             state = .done(SchedulingTeamWriteCopy.deleteDone)
             onDeleted(teamId)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 

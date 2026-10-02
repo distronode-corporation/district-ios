@@ -283,13 +283,13 @@ final class SchedulingWritesBTeamTests: XCTestCase {
         // `uiCode == .unknown` one.
         XCTAssertEqual(
             SchedulingUserArchiveModel.refusal(SchedulingAdminError.decoding("shape")).message,
-            SchedulingWritesBFailure.staleBuildMessage
+            SchedulingFailureCopy.staleBuild
         )
         // ⚠️ AND EVERY OTHER ARM KEEPS THE SHARED MAPPING, so a 5xx still reads as a
         // 5xx rather than as a statement about this account.
         XCTAssertEqual(
             SchedulingUserArchiveModel.refusal(SchedulingAdminError.unavailable).message,
-            SchedulingWritesBFailure.unavailableMessage
+            SchedulingFailureCopy.unavailable
         )
     }
 

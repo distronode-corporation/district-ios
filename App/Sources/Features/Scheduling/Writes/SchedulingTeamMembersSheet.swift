@@ -12,7 +12,7 @@ struct SchedulingTeamMembersSheet: View {
     @State private var removing: SchedulingTeamMember?
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: model.team.name,
             subtitle: SchedulingTeamWriteCopy.membersHint,
             cancelLabel: SchedulingTeamWriteCopy.close,
@@ -37,7 +37,7 @@ struct SchedulingTeamMembersSheet: View {
     @ViewBuilder
     private var roster: some View {
         if model.members.isEmpty {
-            SchedulingWritesBHint(text: SchedulingTeamWriteCopy.membersEmpty)
+            SchedulingWriteHint(text: SchedulingTeamWriteCopy.membersEmpty)
         } else {
             VStack(alignment: .leading, spacing: DistrictSpacing.row) {
                 ForEach(model.members, id: \.id) { member in
@@ -66,7 +66,7 @@ struct SchedulingTeamMembersSheet: View {
                 .accessibilityIdentifier(
                     A11yID.row(A11yID.SchedulingWritesB.teamMemberPriority, member.id)
                 )
-                SchedulingWritesBRejection(message: model.priorityRejected[member.id])
+                SchedulingWriteRejection(message: model.priorityRejected[member.id])
                 HStack(spacing: DistrictSpacing.tight) {
                     Button(SchedulingTeamWriteCopy.savePriority) {
                         Task { await model.savePriority(for: member.id) }
@@ -105,7 +105,7 @@ struct SchedulingTeamMembersSheet: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         case .ready:
             if model.addable.isEmpty {
-                SchedulingWritesBHint(text: SchedulingTeamWriteCopy.addNone)
+                SchedulingWriteHint(text: SchedulingTeamWriteCopy.addNone)
             } else {
                 candidates
             }

@@ -120,7 +120,7 @@ final class SchedulingWritesBRecordingTests: XCTestCase {
         model.editConfirmation(SchedulingRecordingWriteCopy.deleteAllConfirmation)
         await model.deleteAll()
 
-        XCTAssertEqual(Fixtures.failure(model.state), SchedulingWritesBFailure.unavailableMessage)
+        XCTAssertEqual(Fixtures.failure(model.state), SchedulingFailureCopy.unavailable)
         XCTAssertFalse(reread)
     }
 

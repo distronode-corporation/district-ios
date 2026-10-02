@@ -24,6 +24,8 @@ enum SchedulingWriteCopy {
     static let add = "Add"
     static let remove = "Remove"
     static let edit = "Edit"
+    static let retry = "Try again"
+    static let dismiss = "Dismiss"
 
     /// ⚠️ THE WORD ON THE CONTROL THAT OPENS THE STATE ACTIONS, and it is
     /// deliberately not "Edit": the sheet behind it turns an event type on and

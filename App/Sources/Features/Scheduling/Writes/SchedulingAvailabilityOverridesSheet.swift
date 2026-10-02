@@ -126,11 +126,8 @@ struct SchedulingAvailabilityOverridesSheet: View {
 
     private var messages: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            SchedulingWriteFailureStrip(message: model.loadState.failure?.message)
-            SchedulingWriteFailureStrip(message: model.state.failure?.message)
-            SchedulingWriteNotice(message: model.notice) {
-                model.dismissNotice()
-            }
+            SchedulingWriteOutcome(state: model.loadState)
+            SchedulingWriteOutcome(state: model.state, onDismiss: model.dismissNotice)
         }
     }
 
@@ -139,23 +136,16 @@ struct SchedulingAvailabilityOverridesSheet: View {
     @ViewBuilder
     private var addSheet: some View {
         if let form = model.adding {
-            ScrollView {
-                VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-                    Text(SchedulingWriteCopy.overrideAddTitle)
-                        .font(DistrictType.title)
-                        .foregroundStyle(colors.foreground)
-                    addFields(form)
-                    SchedulingWriteFailureStrip(message: model.validation)
-                    SchedulingWriteButtons(
-                        saveTitle: SchedulingWriteCopy.overrideAddButton,
-                        saving: model.state.isSaving,
-                        saveIdentifier: A11yID.SchedulingWrites.overridesSubmit,
-                        onCancel: { model.cancelAdd() },
-                        onSave: { Task { await model.submit() } }
-                    )
-                }
-                .padding(DistrictSpacing.gutter)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            SchedulingWriteSheet(title: SchedulingWriteCopy.overrideAddTitle) {
+                addFields(form)
+                SchedulingWriteRejection(message: model.validation)
+                SchedulingWriteButtons(
+                    saveTitle: SchedulingWriteCopy.overrideAddButton,
+                    saving: model.state.isWorking,
+                    saveIdentifier: A11yID.SchedulingWrites.overridesSubmit,
+                    onCancel: { model.cancelAdd() },
+                    onSave: { Task { await model.submit() } }
+                )
             }
         }
     }

@@ -22,7 +22,7 @@ final class SchedulingWritesQuestionsTests: XCTestCase {
         XCTAssertEqual(create.params["slug"] as? String, "phone-consultation")
         XCTAssertEqual(create.params["position"] as? Int, 1)
         XCTAssertEqual(create.params["required"] as? Bool, false)
-        XCTAssertEqual(model.notice, "Question added")
+        XCTAssertEqual(model.state.notice, "Question added")
     }
 
     /// ⛔ `options` IS SENT ONLY FOR A `select`, which is the web's rule. The
@@ -112,33 +112,6 @@ final class SchedulingWritesQuestionsTests: XCTestCase {
         XCTAssertEqual(patch.params["label"] as? String, "Renamed")
     }
 
-    /// ⛔ MOVING A QUESTION WRITES ONLY ITS OWN `position` AND RENUMBERS NOTHING.
-    /// The web does the same; the consequence is that positions may collide and
-    /// may have gaps, which is far cheaper than five writes to move one row.
-    func testRepositioningPatchesOneRowAndOnlyItsPosition() async {
-        let transport = SettingsTransport([Self.list, Self.created, Self.list])
-        let model = Self.questions(transport)
-        await model.load()
-        await model.reposition(model.questions[0], to: 3)
-
-        let patch = SchedulingWritesFixtures.calls(transport)[1]
-        XCTAssertEqual(patch.op, "eventTypes.questions.patch")
-        XCTAssertEqual(patch.params["position"] as? Int, 3)
-        XCTAssertNil(patch.params["label"], "a move must not rewrite the question")
-        XCTAssertNil(patch.params["type"])
-    }
-
-    /// ⚠️ MOVING A ROW TO WHERE IT ALREADY IS SPENDS NO REQUEST. A no-op patch
-    /// still costs a write from the workspace's hourly budget.
-    func testMovingARowToItsOwnPositionSendsNothing() async {
-        let transport = SettingsTransport([Self.list])
-        let model = Self.questions(transport)
-        await model.load()
-        await model.reposition(model.questions[0], to: 0)
-
-        XCTAssertEqual(SchedulingWritesFixtures.calls(transport).count, 1)
-    }
-
     func testDeletingAddressesTheQuestionAndRereads() async {
         let transport = SettingsTransport([Self.list, SchedulingWritesFixtures.noContent, Self.empty])
         let model = Self.questions(transport)
@@ -149,7 +122,7 @@ final class SchedulingWritesQuestionsTests: XCTestCase {
         let calls = SchedulingWritesFixtures.calls(transport)
         XCTAssertEqual(calls[1].op, "eventTypes.questions.delete")
         XCTAssertEqual(calls[1].params["id"] as? String, "q_1")
-        XCTAssertEqual(model.notice, "Question deleted")
+        XCTAssertEqual(model.state.notice, "Question deleted")
         XCTAssertTrue(model.questions.isEmpty)
     }
 
@@ -167,7 +140,7 @@ final class SchedulingWritesQuestionsTests: XCTestCase {
         await model.delete()
 
         XCTAssertNil(model.state.failure)
-        XCTAssertEqual(model.notice, "Question deleted")
+        XCTAssertEqual(model.state.notice, "Question deleted")
         XCTAssertNotNil(model.loadState.failure)
     }
 

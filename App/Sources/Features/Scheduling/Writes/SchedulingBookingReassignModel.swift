@@ -30,7 +30,7 @@ enum SchedulingReassignHostsState {
 @MainActor
 @Observable
 final class SchedulingBookingReassignModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
     private(set) var hosts: SchedulingReassignHostsState = .loading
     private(set) var selectedHostId: String?
 
@@ -82,7 +82,7 @@ final class SchedulingBookingReassignModel {
             let rows = try await admin.schedulerUsers(workspaceId: workspaceId)
             hosts = .ready(rows.filter { !$0.archived && $0.id != currentHostId })
         } catch {
-            hosts = .failed(SchedulingWritesBFailure.text(for: error))
+            hosts = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -98,7 +98,7 @@ final class SchedulingBookingReassignModel {
             state = .done(SchedulingBookingWriteCopy.reassignDone)
             onSaved(booking)
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 

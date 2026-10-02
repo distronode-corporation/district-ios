@@ -14,7 +14,7 @@ import Observation
 /// ⛔ A PARTIAL FAILURE IS A **200**. `recordings.deleteAll` deletes per object and
 /// tallies, and nothing about the status changes when some of them do not go — so
 /// ``SchedulingRecordingsDeleted/failed`` is read and reported, and a non-zero one
-/// is a ``SchedulingWritesBState/failed(_:)`` rather than a success. On a surface
+/// is a ``SchedulingWriteState/failed(_:)`` rather than a success. On a surface
 /// whose whole purpose is data removal, "all deleted" over a non-zero `failed` is
 /// the worst available wrong answer.
 ///
@@ -24,7 +24,7 @@ import Observation
 @MainActor
 @Observable
 final class SchedulingRecordingDeleteModel {
-    private(set) var state: SchedulingWritesBState = .idle
+    private(set) var state: SchedulingWriteState = .idle
     private(set) var confirmation = ""
 
     private let admin: SchedulingAdminRepository
@@ -71,7 +71,7 @@ final class SchedulingRecordingDeleteModel {
             state = .done(SchedulingRecordingWriteCopy.deleteDone)
             onDeleted()
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 
@@ -102,7 +102,7 @@ final class SchedulingRecordingDeleteModel {
             }
             onDeleted()
         } catch {
-            state = .failed(SchedulingWritesBFailure.text(for: error))
+            state = .failed(SchedulingFailureCopy.text(forAny: error))
         }
     }
 }

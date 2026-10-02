@@ -16,7 +16,7 @@ struct SchedulingTeamEditorSheet: View {
     @State private var confirmingDelete = false
 
     var body: some View {
-        SchedulingWritesBSheet(
+        SchedulingWriteSheet(
             title: model.isCreating ? SchedulingTeamWriteCopy.createTitle : teamName,
             subtitle: SchedulingTeamWriteCopy.teamsHint,
             cancelLabel: model.isCreating ? SchedulingTeamWriteCopy.cancel : SchedulingTeamWriteCopy.close,
@@ -33,9 +33,9 @@ struct SchedulingTeamEditorSheet: View {
                     enabled: !model.busy
                 )
                 .accessibilityIdentifier(A11yID.SchedulingWritesB.teamNameField)
-                SchedulingWritesBRejection(message: model.nameRejected)
+                SchedulingWriteRejection(message: model.nameRejected)
                 if !model.isCreating {
-                    SchedulingWritesBHint(text: SchedulingTeamWriteCopy.slugReadOnlyHint)
+                    SchedulingWriteHint(text: SchedulingTeamWriteCopy.slugReadOnlyHint)
                     deleteControl
                 }
             }
