@@ -1,9 +1,11 @@
 name: CI
 
-# The app is two halves that break independently. `verify` covers Packages/DistrictCore,
-# the Linux-testable half (model, network, data, auth and call logic), plus format and
-# lint over the whole tree, in the pinned swift:6.2.4 image. `app` builds the SwiftUI app
-# with Xcode and runs its XCTest bundles on an iPhone and an iPad simulator.
+# The Linux-testable half of the app (model, network, data, auth and call logic) is the
+# DistrictCore package, which lives in its own repository, district-core-swift, and is
+# tested there; project.yml pins the release this app builds against. Here, `verify`
+# formats and lints App/ in the pinned swift:6.2.4 image, and `app` builds the SwiftUI
+# app with Xcode, which resolves that pinned release, and runs its XCTest bundles on an
+# iPhone and an iPad simulator.
 #
 # No job reads a secret, so pull requests from forks run the same checks as `main`.
 # Releases are not built here: release.yml builds, signs and uploads them from a protected
@@ -57,14 +59,13 @@ jobs:
         with:
           persist-credentials: false
 
-      # python3 is for ci/coverage-gate.sh and the Package.resolved guard. libxml2 is for
-      # the dynamic SwiftLint binary, which otherwise dies at startup on a missing
-      # libxml2.so.2.
+      # libxml2 is for the dynamic SwiftLint binary, which otherwise dies at startup on a
+      # missing libxml2.so.2.
       - name: Install system packages
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-            ca-certificates curl unzip git python3 libxml2
+            ca-certificates curl unzip git libxml2
           rm -rf /var/lib/apt/lists/*
 
       # ⛔ THE DYNAMIC `swiftlint`, NOT THE `swiftlint-static` BESIDE IT IN THE ZIP. The
@@ -96,8 +97,6 @@ jobs:
           swift --version
           swiftlint version
           swiftformat --version
-          python3 --version
-          llvm-cov --version | head -n 1
 
       # `--lint` writes nothing and exits non-zero on any file that would change.
       - name: swiftformat --lint
@@ -107,94 +106,6 @@ jobs:
       # nobody reads.
       - name: swiftlint --strict
         run: swiftlint --strict
-
-      # ⛔ DistrictCore MUST STAY LINUX-BUILDABLE, AND NOTHING ELSE ENFORCES THIS. Those
-      # frameworks belong in App/ behind protocols declared in the package. It greps the
-      # SOURCES rather than relying on the build: an import inside `#if canImport(...)`
-      # compiles clean on Linux and still means the type exists only on Darwin, where
-      # the Linux tests silently stop covering it.
-      - name: DistrictCore imports no Darwin-only framework
-        run: |
-          banned=$(grep -rnE '^[[:space:]]*(@testable[[:space:]]+)?import[[:space:]]+(UIKit|SwiftUI|Security|AuthenticationServices|CallKit|PushKit|LiveKit)\b' Packages/DistrictCore/Sources Packages/DistrictCore/Tests || true)
-          if [ -n "$banned" ]; then
-            echo "FATAL - DistrictCore imports a Darwin-only framework:"
-            echo "$banned"
-            echo "DistrictCore is the Linux-testable half of the app and must import only"
-            echo "Foundation/FoundationNetworking. Put the Darwin type in App/ behind a"
-            echo "protocol declared in DistrictCore. See Package.swift."
-            exit 1
-          fi
-
-      # ⛔ XCODE WRITES THE APP'S REMOTE PINS INTO THE PACKAGE'S Package.resolved when it
-      # resolves the app's packages, so a local app build dirties it every time. Committed,
-      # it would ask this job to resolve Apple-only binary frameworks it cannot use; this
-      # turns that accident into a one-line red instead of a resolve failure that reads
-      # like a network problem.
-      - name: Package.resolved pins only DistrictCore's own dependencies
-        run: |
-          python3 - <<'PY'
-          import json, sys
-          allowed = {"swift-crypto", "swift-asn1"}
-          pins = {p["identity"] for p in json.load(open("Packages/DistrictCore/Package.resolved"))["pins"]}
-          extra = sorted(pins - allowed)
-          if extra:
-              print("FATAL - Packages/DistrictCore/Package.resolved pins packages DistrictCore does not depend on:")
-              print("  " + ", ".join(extra))
-              print("Xcode wrote the App target's remote pins into the local package's resolved file.")
-              print("Run: git checkout -- Packages/DistrictCore/Package.resolved  (never commit that write).")
-              sys.exit(1)
-          print("Package.resolved pins only " + ", ".join(sorted(pins)))
-          PY
-
-      # Keyed on the toolchain as well as the lockfile: build products from another
-      # compiler are not reusable.
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: Packages/DistrictCore/.build
-          key: districtcore-build-swift-6.2.4-${{ hashFiles('Packages/DistrictCore/Package.resolved') }}
-
-      # ⚠️ A RESTORED CACHE CAN CARRY AN EARLIER RUN'S COVERAGE EXPORT, and
-      # ci/coverage-gate.sh falls back to searching .build for one. Deleting it first
-      # means the only export the gate can find is the one this run writes.
-      - name: swift test
-        working-directory: Packages/DistrictCore
-        run: |
-          if [ -d .build ]; then find .build -type d -name codecov -prune -exec rm -rf {} +; fi
-          set -o pipefail
-          swift test --enable-code-coverage 2>&1 | tee swift-test.log
-
-      # ⛔ PROVE THE TESTS ACTUALLY RAN, AND NOT FEWER OF THEM THAN LAST TIME. An XCTest
-      # bundle that discovers nothing exits 0, the same shape as a skipped suite reporting
-      # green, and a test target dropped from Package.swift loses hundreds of tests with
-      # no other failure. The floor is a ratchet, set a little below the count (1687 on
-      # 2026-10-01): raise it when tests are added, and lower it only in the commit that
-      # deletes tests on purpose, saying so.
-      - name: Tests were discovered
-        working-directory: Packages/DistrictCore
-        run: |
-          minimum=1650
-          executed=$(sed -n 's/.*Executed \([0-9]*\) test.*/\1/p' swift-test.log | sort -n | tail -1)
-          echo "unit tests executed - ${executed:-0} (at least $minimum expected)"
-          if [ -z "$executed" ] || [ "$executed" -lt "$minimum" ]; then
-            echo "FATAL - expected at least $minimum unit tests, saw ${executed:-0}. A bundle"
-            echo "that discovers nothing, or a test target that is no longer built, reports"
-            echo "success, so this is a silent loss of coverage, not a pass."
-            exit 1
-          fi
-
-      # ⛔ THE FLOORS ARE ENFORCED HERE AND NOWHERE ELSE. SwiftPM has no coverage
-      # threshold of its own; the script fails on missing coverage data rather than
-      # treating it as nothing to check.
-      - name: Coverage floors
-        run: ci/coverage-gate.sh
-
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
-        with:
-          name: swift-test-log
-          path: Packages/DistrictCore/swift-test.log
-          if-no-files-found: warn
-          retention-days: 7
 
   release-scripts:
     name: release scripts
@@ -285,12 +196,13 @@ jobs:
           swift --version
           xcbeautify --version
 
-      # Where the LiveKit, WebRTC and Sentry packages land. The app's remote packages are
-      # pinned `exactVersion` in project.yml, hence the key.
+      # Where the DistrictCore, LiveKit, WebRTC and Sentry packages land. Every remote
+      # package, swift-asn1 under DistrictCore included, is pinned `exactVersion` in
+      # project.yml, so project.yml alone is the key.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: SourcePackages
-          key: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-${{ hashFiles('project.yml', 'Packages/DistrictCore/Package.resolved') }}
+          key: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-${{ hashFiles('project.yml') }}
 
       - name: Resolve packages
         run: |
@@ -298,6 +210,32 @@ jobs:
             -project DistrictAI.xcodeproj \
             -scheme DistrictAI \
             -clonedSourcePackagesDirPath SourcePackages
+
+      # ⚠️ PROVES THE GRAPH RESOLVED TO THE PINS, swift-asn1 INCLUDED. DistrictCore pins
+      # swift-crypto exactly, but swift-crypto takes swift-asn1 by range, so only the
+      # `exactVersion` in project.yml holds it; a pin Xcode silently ignored would
+      # resolve whatever is newest and still build. Every remote package declared with
+      # `exactVersion` in project.yml must appear in the resolved file at that version.
+      - name: Resolved versions match project.yml
+        run: |
+          python3 - <<'PY'
+          import json, re, sys
+          spec = open("project.yml").read()
+          wanted = {
+              m.group(1).rstrip("/").removesuffix(".git").rsplit("/", 1)[-1].lower(): m.group(2)
+              for m in re.finditer(r"^\s+url:\s*(\S+)\s*\n\s+exactVersion:\s*\"?([^\s\"]+)\"?", spec, re.M)
+          }
+          path = "DistrictAI.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+          pins = {p["identity"]: p["state"].get("version") for p in json.load(open(path))["pins"]}
+          for identity, version in sorted(pins.items()):
+              print(f"{identity} {version}")
+          bad = [f"{i}: want {v}, resolved {pins.get(i)}" for i, v in sorted(wanted.items()) if pins.get(i) != v]
+          if not wanted or bad:
+              print("FATAL - resolution does not match the exactVersion pins in project.yml:")
+              print("  " + ("\n  ".join(bad) or "no exactVersion pins found in project.yml"))
+              sys.exit(1)
+          print("all " + str(len(wanted)) + " exactVersion pins resolved as declared")
+          PY
 
       - name: Choose a simulator
         run: ci/sim-udid.sh "$DEVICE"

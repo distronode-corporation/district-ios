@@ -1,8 +1,9 @@
 # The Linux toolchain for district-ios: Swift, SwiftLint and SwiftFormat.
 #
-# ⛔ THIS TOOLCHAIN BUILDS AND TESTS Packages/DistrictCore, WHICH IS THE WHOLE
-# LINUX-FIRST ARCHITECTURE. Everything that does not need Xcode runs on Linux;
-# macOS is needed only for the app build, its simulator tests and the release.
+# ⛔ IN THIS REPOSITORY IT ONLY LINTS. DistrictCore, the Linux-testable half of
+# the app, is built and tested in its own repository (district-core-swift),
+# which carries the same toolchain. Here the swift image is still the base
+# because the dynamic SwiftLint loads sourcekitd from it (see below).
 # The `verify` job in .github/workflows/ci.yml runs the same swift image as its
 # container and installs the same two tools itself, so this file is that
 # environment as an image, for running the Linux checks outside CI.
@@ -39,14 +40,9 @@ ARG SWIFTFORMAT_SHA256=b4a3cbb8c852a0baaf9adf853e221ff1dabf921a3d8957a602e0bda3a
 
 RUN set -eux; \
     apt-get update; \
-    # ⚠️ python3 IS A REQUIREMENT, NOT A CONVENIENCE. ci/coverage-gate.sh parses
-    # llvm-cov's JSON export with it and asserts its presence rather than
-    # assuming it — the stock swift image does not guarantee it, and a missing
-    # interpreter otherwise surfaces only as `command not found` when the job
-    # first runs in the image.
     # ⚠️ libxml2 is for SwiftLint, not for anything of ours — see the ⛔ below.
     apt-get install -y --no-install-recommends \
-      ca-certificates curl unzip git python3 libxml2; \
+      ca-certificates curl unzip git libxml2; \
     rm -rf /var/lib/apt/lists/*; \
     \
     cd /tmp; \
@@ -83,14 +79,6 @@ RUN set -eux; \
     # rather than about this build.
     swift --version; \
     swiftlint version; \
-    swiftformat --version; \
-    python3 --version; \
-    llvm-cov --version | head -1
-
-# ⚠️ No SwiftPM cache warming and no `swift build` of anything here. The package
-# has one external dependency, apple/swift-crypto (pinned `exact:`, with
-# swift-asn1 behind it, both recorded in the committed Package.resolved). It is
-# small, the workflow caches `.build` keyed on that file, and baking a .build
-# directory in would be invalidated by the first source change anyway.
+    swiftformat --version
 
 WORKDIR /builds

@@ -12,7 +12,8 @@ The native iPhone and iPad client for [District AI](https://www.distronode.com/d
 the AI receptionist service by Distronode. It places and answers calls, and covers the
 inbox, contacts, meeting rooms and workspace settings of a District AI workspace.
 
-This repository is the client's complete source, under the Apache License 2.0. The
+This repository and [district-core-swift](https://github.com/distronode-corporation/district-core-swift), the Swift package that holds most of
+the app's logic, are the client's complete source, under the Apache License 2.0. The
 District AI service it talks to is not open source; signing in needs a District AI
 account. Without one you can still build the app, run every unit test and run the
 signed-out UI tests.
@@ -41,22 +42,18 @@ type; `App/Tests/SourceBanTests.swift` enforces that.
 - **XcodeGen 2.46** or newer (the Xcode project is generated from `project.yml`)
 - Deployment target **iOS 17.0**
 - For linting: **SwiftFormat 0.63.0** and **SwiftLint 0.65.1**, the versions CI pins
-- `Packages/DistrictCore` also builds and tests on Linux with Swift 6.2
-  (`ci/Dockerfile` defines that toolchain)
+- The lint tools also run on Linux in the Swift 6.2 image `ci/Dockerfile` defines
 
 ## Build and test
 
-### DistrictCore (macOS or Linux)
+### DistrictCore
 
-Most of the app's logic lives in the package, and its tests need no simulator, no
-network and no account:
-
-```sh
-cd Packages/DistrictCore
-swift test --enable-code-coverage
-cd ../..
-ci/coverage-gate.sh        # per-module line-coverage floors
-```
+Most of the app's logic (models, the API client, repositories, auth and the call state
+machines) lives in the DistrictCore package, in its own repository, [district-core-swift](https://github.com/distronode-corporation/district-core-swift).
+Its tests run there, on macOS or Linux, with no simulator, network or account.
+`project.yml` pins the release this app builds against (`exactVersion`), and Xcode
+fetches it when it resolves the app's packages. To work on the core and the app
+together, see "Changing DistrictCore" in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### The app (macOS)
 
@@ -94,9 +91,6 @@ Two things that are expected, not broken:
   signed-out UI tests account for this. Running on a device needs your own signing
   team and bundle identifier; push, associated domains and Sign in with Apple are tied
   to the App Store build's team and will not work under yours.
-- **Xcode rewrites `Packages/DistrictCore/Package.resolved`** when it resolves the app's
-  packages. Restore it with `git checkout -- Packages/DistrictCore/Package.resolved`
-  and never commit that change; CI rejects it.
 
 ### Lint
 
@@ -116,23 +110,19 @@ with each other, which holds for the pinned versions.
 App/                    The SwiftUI app
   Sources/              Features/<Name>/ screens, Navigation/, Platform/ (CallKit,
                         PushKit, LiveKit, audio, notifications), Session/, DesignSystem/
-  Tests/                DistrictAITests: app-level logic the package cannot reach
+  Tests/                DistrictAITests: app-level logic DistrictCore cannot reach
   UITests/              DistrictAIUITests
   SmokeUITests/         An end-to-end smoke suite; needs a demo account from the
                         environment and skips without one
   Shared/               Accessibility identifiers shared by the app and its UI tests
-Packages/DistrictCore/  DistrictModel, DistrictAuthCore, DistrictNetwork, DistrictData
-                        and DistrictCall: models, API client, repositories, auth and
-                        call state machines. Foundation only, no UIKit, SwiftUI or
-                        other Darwin-only framework (CI enforces this)
-contracts/              JSON contract fixtures from the District AI service
-ci/                     The coverage gate and the simulator picker CI runs, and a
-                        Dockerfile for the same Linux toolchain
+ci/                     The simulator picker CI runs, and a Dockerfile for the
+                        Linux lint toolchain
 scripts/                The release scripts and local test helpers
 docs/ARCHITECTURE.md    How the pieces fit together
 ExportOptions.plist     Export settings for the App Store release only
 project.yml             The XcodeGen spec: this is the project; the .xcodeproj is
-                        generated and never committed
+                        generated and never committed. It pins DistrictCore
+project.local-core.yml  The same spec against a local district-core-swift clone
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the module boundaries, navigation
@@ -140,41 +130,29 @@ and the call stack.
 
 ## The contract gate
 
-`contracts/` holds recorded responses from the District AI API. The service's own test
-suite generates them and checks its real responses against them byte for byte; they are
-copied here unchanged and are not edited in this repository.
-
-`ContractFixtureTests` (in `Packages/DistrictCore`) holds the app to them. Every fixture
-that has a Swift model must decode, re-encode to the same keys at every level, and
-contain no `null` outside a reviewed allow-list. So a field the service sends that the
-app does not model fails the suite, and so does a hand-written `Codable` that does not
-round-trip. The suite also asserts the exact number of fixture files and an explicit
-list of fixtures that have no model yet, so a missing directory or a newly added fixture
-is a failure rather than a silent pass. Set `DISTRICT_CONTRACTS_DIR` to read the
-fixtures from somewhere else.
-
-The strictness is in the tests only. The app's decoders ignore unknown fields, so an
-installed app keeps working when the service adds one.
+The recorded District AI API responses, and `ContractFixtureTests`, which holds every
+model to them, live with the models in [district-core-swift](https://github.com/distronode-corporation/district-core-swift). A release of the core
+has passed that gate, so a bump here brings models already checked against the service.
 
 ## Continuous integration
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to `main` and
 every pull request, and uses no secrets:
 
-- **verify** (Linux, `swift:6.2.4`): SwiftFormat, SwiftLint, the DistrictCore import
-  rule, the `Package.resolved` guard, `swift test` and the coverage floors.
-- **app** (macOS, Xcode 26.3): generates the project, builds once for testing, then runs
+- **verify** (Linux, `swift:6.2.4`): SwiftFormat and SwiftLint over `App/`.
+- **app** (macOS, Xcode 26.3): generates the project, resolves its packages and checks
+  every `exactVersion` pin resolved as declared, builds once for testing, then runs
   `DistrictAITests` and the signed-out UI tests on an iPhone and an iPad simulator.
 - **gitleaks** (Linux): scans the full git history for secrets, with the rules and
   allowlists in [`.gitleaks.toml`](.gitleaks.toml).
 - **release scripts** (Linux): tests the release workflow's scripts against stubs.
 
-A bundle that discovers nothing reports success, so CI counts what ran. **verify** fails
-if DistrictCore runs fewer than 1650 tests, and **app** fails if `DistrictAITests` runs
-fewer than 470 or the signed-out UI tests fewer than 7. The first two are ratchets a
-little below the current counts (1687 and 486), so losing a test target or a handful of
-files fails, while deleting one or two tests deliberately does not; the UI count is the
-exact sum of the classes CI names.
+A bundle that discovers nothing reports success, so CI counts what ran. **app** fails if
+`DistrictAITests` runs fewer than 470 or the signed-out UI tests fewer than 7. The first
+is a ratchet a little below the current count (486), so losing a handful of files fails,
+while deleting one or two tests deliberately does not; the UI count is the exact sum of
+the classes CI names. DistrictCore's own test floor and coverage gate run in its
+repository.
 
 [`codeql.yml`](.github/workflows/codeql.yml) runs CodeQL over the workflows and the
 Swift build, and [`scorecard.yml`](.github/workflows/scorecard.yml) publishes the

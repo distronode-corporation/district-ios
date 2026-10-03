@@ -26,18 +26,6 @@ cd "$(dirname "$0")/.."
 MODE="device"
 [ "${1:-}" = "--sim" ] && MODE="sim"
 
-# ⚠️ ALWAYS, EVEN ON A FAILURE PATH. `xcodegen`/`xcodebuild` rewrite
-# Package.resolved, and a dirty tree is what makes the next `archive-imac.sh`
-# refuse to run at all.
-# ⛔ AND THE COMMANDS BELOW ARE NOT `exec`ed, WHICH IS THE ONLY REASON THIS RUNS.
-# `exec` REPLACES the shell process, so an EXIT trap set before it never fires —
-# measured, not assumed: a two-line script with `trap … EXIT` and `exec true`
-# prints nothing, the same script without `exec` prints. An `exec`ed xcodebuild
-# would leave Package.resolved dirty on every run, and a dirty tree is what makes
-# `archive-imac.sh` refuse outright, two scripts away from the cause.
-cleanup() { git checkout -- Packages/DistrictCore/Package.resolved 2>/dev/null || true; }
-trap cleanup EXIT
-
 xcodegen generate --spec project.yml
 
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"

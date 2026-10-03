@@ -21,17 +21,10 @@ updates:
       actions-minor:
         update-types: [minor, patch]
 
-  # DistrictCore's one dependency (apple/swift-crypto, and swift-asn1 through it), pinned
-  # `exact:` in Package.swift with Package.resolved committed. CI's Package.resolved guard
-  # allows exactly those two pins, so a bump that adds a third package fails its PR.
-  #
-  # ⚠️ There is deliberately no `swift` entry for `/`. The repository root holds no
-  # Package.swift: the app's own packages (LiveKit, Sentry) are declared `exactVersion` in
-  # project.yml, which Dependabot cannot read, so an entry there would only report
-  # "dependency file not found" on every run. Those pins are bumped by hand.
-  - package-ecosystem: swift
-    directory: /Packages/DistrictCore
-    schedule:
-      interval: weekly
-    cooldown:
-      default-days: 7
+# ⚠️ THERE IS DELIBERATELY NO `swift` ENTRY. The repository holds no Package.swift and no
+# committed .xcodeproj: every Swift package the app uses (DistrictCore from
+# district-core-swift, swift-asn1 under it, LiveKit, Sentry) is declared `exactVersion`
+# in project.yml, which Dependabot cannot read, so an entry would only report "dependency
+# file not found" on every run. Those pins are bumped by hand. DistrictCore's own
+# dependency (apple/swift-crypto) is watched by Dependabot in district-core-swift, and
+# reaches this app as a new core release and a bump here.

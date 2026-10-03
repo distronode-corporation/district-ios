@@ -14,13 +14,13 @@
 # ignored, because a warning tier in CI is a tier nobody reads.
 
 included:
-  - Packages
   # ⛔ THE ONLY THING THAT LINTS App/ AT ALL. SwiftLint and SwiftFormat PARSE
   # Swift, they do not compile it, so they are the only tools in the Linux
   # `verify` job that can inspect the Darwin half — it cannot build a file that
   # imports Security or AuthenticationServices. The macOS `app` job builds and
   # tests App/ but does not lint it, so without this line the app shell would
-  # get no lint anywhere.
+  # get no lint anywhere. DistrictCore is linted in its own repository,
+  # district-core-swift.
   # ⚠️ SwiftLint fails outright ("No lintable files found") on an `included` path
   # that does not exist.
   - App
@@ -30,7 +30,6 @@ excluded:
   # (`-clonedSourcePackagesDirPath SourcePackages` in the workflow). Gitignored,
   # but the linter would still walk them — and .build and SourcePackages hold
   # checked-out dependency sources, whose style is not ours to enforce.
-  - Packages/DistrictCore/.build
   - .build
   - DerivedData
   - SourcePackages
@@ -146,7 +145,7 @@ trailing_comma:
 # carries no such kind, verified by running with and without it) and is listed so
 # that a future reclassification of argument labels cannot quietly disarm the rule.
 # ⚠️ The leading `\b` is not decoration: without it the pattern matches the tail of
-# `offset:`, and `offset: offset` is live in both App/Sources and DistrictCore.
+# `offset:`, and `offset: offset` is live in App/Sources.
 custom_rules:
   binding_setter_method_reference:
     name: "Binding Setter Method Reference"

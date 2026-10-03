@@ -5,7 +5,7 @@ import XCTest
 /// The App-target half of the dialler's number handling.
 ///
 /// ⚠️ THE VALIDATION HALF IS NOT HERE AND SHOULD NOT BE. `DialEntry.assess(_:)`
-/// decides what is dialable and lives in `Packages/DistrictCore`, where
+/// decides what is dialable and lives in DistrictCore (district-core-swift), where
 /// `DialNumberTests` already covers it on the cheap Linux runner. What only the
 /// App target can reach is the WORDING — the sentence beside the field that lets
 /// an operator notice `+41` is Switzerland before pressing Call.
