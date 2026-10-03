@@ -15,13 +15,11 @@
      CI runs the same gates; see CONTRIBUTING.md for the full list. -->
 
 - [ ] `swiftformat --lint .` (SwiftFormat 0.63.0) and `swiftlint --strict` (SwiftLint 0.65.1)
-- [ ] `swift test --enable-code-coverage` in `Packages/DistrictCore`, then `ci/coverage-gate.sh`
 - [ ] `DistrictAITests` on an iPhone simulator
 - [ ] `DistrictAITests` on an iPad simulator
 - [ ] The signed-out UI tests (`UnauthenticatedTests`, `LargerTextTests`)
-- [ ] `Packages/DistrictCore/Package.resolved` is not part of this change (Xcode rewrites it
-      when it resolves the app's packages; restore it with
-      `git checkout -- Packages/DistrictCore/Package.resolved`)
+- [ ] Built from `project.yml`, not `project.local-core.yml`. A change to DistrictCore
+      itself goes to district-core-swift first; see CONTRIBUTING.md.
 
 ## Screenshots
 

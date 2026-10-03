@@ -1,5 +1,5 @@
 # SwiftPM build output. `.build` is not matched by a `build/` rule (git compares the
-# directory NAME), and the package at Packages/DistrictCore has its own, hence both.
+# directory NAME), and a nested package checkout has its own, hence both.
 .build/
 **/.build/
 

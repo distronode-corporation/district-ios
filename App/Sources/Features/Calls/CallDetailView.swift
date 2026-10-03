@@ -4,9 +4,9 @@ import SwiftUI
 
 /// One call in full.
 ///
-/// ⚠️ `import AVKit` LIVES IN THIS FILE ONLY. The banned-import grep in CI
-/// covers `Packages/DistrictCore/Sources`, where platform frameworks would break the
-/// Linux tier; the app target is the right home for a player.
+/// ⚠️ `import AVKit` LIVES IN THIS FILE ONLY. The banned-import grep in
+/// district-core-swift's CI covers DistrictCore's sources, where platform frameworks
+/// would break the Linux tier; the app target is the right home for a player.
 struct CallDetailView: View {
     let workspaceId: String
     let callId: String

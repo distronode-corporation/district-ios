@@ -190,7 +190,7 @@
 	  ⛔ EXACTLY THE REQUIRED-REASON CATEGORIES THIS APP ACTUALLY TOUCHES, AND THE
 	  LIST WAS ESTABLISHED BY GREP RATHER THAN BY MEMORY. Apple's four other
 	  categories are file timestamps, system boot time, disk space and active
-	  keyboards; `App/Sources` and `Packages/DistrictCore/Sources` contain no
+	  keyboards; `App/Sources` and DistrictCore's `Sources` (district-core-swift) contain no
 	  `FileManager`, no `ProcessInfo.systemUptime`, no `volumeAvailableCapacity`
 	  and no `activeInputModes`, so none of them is declared.
 

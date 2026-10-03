@@ -1,0 +1,34 @@
+# XcodeGen spec for building the app against a LOCAL checkout of DistrictCore.
+#
+#   xcodegen generate --spec project.local-core.yml
+#
+# It is project.yml with one change: the DistrictCore package comes from
+# `../district-core-swift` (a clone of district-core-swift beside this one)
+# instead of the tagged release project.yml pins. Edit the core there, build and
+# test the app here, with no tag and no bump in between. Running plain
+# `xcodegen generate` puts the pinned release back.
+#
+# ⛔ NEVER WHAT CI OR A RELEASE BUILDS. Every workflow generates from project.yml,
+# so a change that works only against a local core is red in CI until the core
+# change is released upstream and project.yml is bumped to it (CONTRIBUTING.md).
+#
+# ⛔ A SEPARATE SPEC, NOT AN ENV-GATED `include:` IN project.yml. XcodeGen merges
+# a spec's includes FIRST and the including spec LAST, so the including spec's
+# keys win: an included file cannot override project.yml's DistrictCore entry, and
+# with both present XcodeGen sees the remote url and the local path side by side.
+# Including project.yml from here reverses that order, and `:REPLACE` makes the
+# entry below replace project.yml's instead of merging into it (checked with
+# `xcodegen dump --type parsed-json` on XcodeGen 2.46.0).
+#
+# ⚠️ THE PATH IS RELATIVE TO THIS FILE. With a different layout, symlink it
+# (`ln -s /path/to/district-core-swift ../district-core-swift`) rather than
+# editing this line, so the file stays the same for everyone.
+#
+# ⚠️ swift-asn1 STAYS PINNED by project.yml's entry. A local core that needs a
+# different swift-asn1 fails to resolve until that pin moves too.
+include:
+  - project.yml
+
+packages:
+  DistrictCore:REPLACE:
+    path: ../district-core-swift

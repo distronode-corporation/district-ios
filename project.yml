@@ -6,20 +6,22 @@
 # `xcodegen generate` runs in CI immediately before `xcodebuild`.
 #
 # ⛔ AND IT SHOULD ALMOST NEVER CHANGE. The app target is deliberately thin —
-# every testable line lives in `Packages/DistrictCore`, which `swift test` builds
-# on a cheap Linux runner. A change here compiles only on a Mac, so it costs a
-# full macOS CI round trip to verify.
+# every testable line lives in DistrictCore, the package in its own repository
+# (district-core-swift), which `swift test` builds on a cheap Linux runner there.
+# A change here compiles only on a Mac, so it costs a full macOS CI round trip to
+# verify.
 #
 # ⚠️ THAT RULE STANDS, AND `DistrictAITests` IS ITS ONE DELIBERATE EXCEPTION.
 # Logic that CAN live in the package still belongs there — the exception buys
 # nothing for anything Linux can already reach, and `DialEntry.assess(_:)` is the
 # worked example: it decides what is dialable, it sits in `DistrictCall`, and
-# `DialNumberTests` covers it for free. What the package cannot reach is the
+# `DialNumberTests` covers it for free, in district-core-swift. What the package
+# cannot reach is the
 # App-target wording above the boundary. `InCallCopy.word(for:endedByOperator:)`
 # is why the bundle exists: it stops the screen telling an operator they hung up
 # a call they did not, and without this target, deleting it would leave every
-# gate green. Add a case here only when it cannot be tested in
-# `Packages/DistrictCore`; the default answer is still the package.
+# gate green. Add a case here only when it cannot be tested in DistrictCore;
+# the default answer is still the package.
 #
 # ⚠️ NO SIGNING CONFIGURATION AT ALL, ON PURPOSE. CI passes
 # `CODE_SIGNING_ALLOWED=NO` and a simulator build needs nothing else. The team
@@ -46,24 +48,43 @@ options:
   minimumXcodeGenVersion: "2.46"
   bundleIdPrefix: com.distronode
   createIntermediateGroups: true
-  # ⚠️ MUST MATCH `platforms: [.iOS(.v17)]` IN Packages/DistrictCore/Package.swift.
+  # ⚠️ MUST MATCH `platforms: [.iOS(.v17)]` IN district-core-swift's Package.swift.
   # A deployment target BELOW the package's floor fails to link with a message
   # about the package, not about this line.
   deploymentTarget:
     iOS: "17.0"
 
 packages:
-  # The local package, by path. Nothing is fetched: the four products below are
-  # built from the working tree, so a change in Packages/ is picked up by the
-  # next `xcodebuild` with no resolution step of its own.
-  #
-  # ⚠️ Its ONE external dependency (swift-crypto, `exact: 5.0.0`) is resolved
-  # transitively by Xcode from `Packages/DistrictCore/Package.resolved`. That
-  # file ships only because of an explicit `.gitignore` negation — see the ⛔ in
-  # Package.swift.
+  # ⛔ THE CORE IS A PUBLIC PACKAGE IN ITS OWN REPOSITORY, PINNED TO ONE RELEASE.
+  # Model, network, data, auth and call logic live in district-core-swift and are
+  # tested there; this app builds the tagged release named here and nothing else.
+  # UPSTREAM FIRST: a core change lands in district-core-swift, is released as a
+  # new tag, and arrives here as a one-line bump of `exactVersion` below. For
+  # working on both at once, `project.local-core.yml` swaps this entry for a local
+  # checkout (see CONTRIBUTING.md); it is never what CI or a release builds.
+  # ⚠️ THE KEY IS NOT THE PACKAGE'S IDENTITY. Xcode names a remote package by the
+  # last path component of its URL (`district-core-swift`); `DistrictCore` is only
+  # XcodeGen's handle for the `dependencies:` below. The products are the
+  # package's five libraries, unchanged by the move.
   DistrictCore:
-    path: Packages/DistrictCore
-  # ⛔ PINNED EXACTLY FOR THE SAME REASON Package.swift PINS swift-crypto WITH
+    url: https://github.com/distronode-corporation/district-core-swift
+    exactVersion: 1.0.0
+  # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
+  # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
+  # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
+  # day the cache misses. A root-level package reference is a constraint on the
+  # whole graph, and XcodeGen writes one for every package listed here whether or
+  # not a target links it (checked in a generated pbxproj with XcodeGen 2.46.0).
+  # 1.7.3 is the version district-core-swift 1.0.0's own Package.resolved records,
+  # so the app and the package's tests run the same code. Bump it with the core.
+  # ⚠️ The `.git` URL matches the spelling swift-crypto's manifest uses, so Xcode
+  # sees one location for the identity rather than two.
+  # The CI step "Resolved versions match project.yml" fails if any `exactVersion`
+  # here is not what Xcode resolved.
+  swift-asn1:
+    url: https://github.com/apple/swift-asn1.git
+    exactVersion: 1.7.3
+  # ⛔ PINNED EXACTLY FOR THE SAME REASON THE CORE'S Package.swift PINS swift-crypto WITH
   # `.exact`: the App target compiles only on a Mac and a dependency bump cannot
   # be bisected from Linux, so a range would mean the toolchain resolving a
   # version nobody chose on a machine nobody is watching. Bump it deliberately.
@@ -80,15 +101,14 @@ packages:
     url: https://github.com/getsentry/sentry-cocoa
     exactVersion: 9.29.2
 
-  # ⛔ `exactVersion` IS THE SAME DECISION Package.swift TAKES WITH `.exact` FOR
+  # ⛔ `exactVersion` IS THE SAME DECISION THE CORE'S Package.swift TAKES WITH `.exact` FOR
   # swift-crypto: a floating range
   # lets a dependency move under a pipeline whose output eventually reaches
   # TestFlight, with nothing in the diff to notice. Bumping it is a one-line
   # reviewed change.
-  # ⛔ AND HERE THE PIN IS THE ONLY THING HOLDING IT. The local package ships a
-  # committed `Package.resolved`; the generated `.xcodeproj` is gitignored, so its
-  # workspace resolution state is not in the repo and there is no second file to
-  # disagree with this line.
+  # ⛔ AND HERE THE PIN IS THE ONLY THING HOLDING IT. The generated `.xcodeproj`
+  # is gitignored, so its workspace resolution state is not in the repo and there
+  # is no second file to disagree with this line.
   # ⚠️ LiveKit's own floor is iOS 13 and its manifest is tools-version 6.1, both
   # below this project's iOS 17 / Swift 6.2 — so it constrains nothing here, and a
   # deployment-target error after adding it would be about something else.
@@ -148,8 +168,8 @@ targets:
       - package: Sentry
         product: Sentry
       # ⛔ THE ONLY PLACE THE SDK ENTERS THE BUILD, AND IT IS THE APP TARGET ONLY.
-      # CI greps `Packages/DistrictCore` for an `import LiveKit` and
-      # fails the job, so the SDK and its WebRTC natives stay on this side of the
+      # district-core-swift's CI greps its sources for an `import LiveKit` and
+      # fails, so the SDK and its WebRTC natives stay on this side of the
       # ``CallEngine`` seam — which is what keeps the state machines testable on a
       # cheap Linux runner.
       - package: LiveKit
@@ -423,7 +443,7 @@ targets:
         # protocol of ours on a type of ours — and the honest fix is a module
         # boundary.
         #
-        # ⚠️ Packages/DistrictCore pins `.swiftLanguageMode(.v6)` per target in
+        # ⚠️ DistrictCore pins `.swiftLanguageMode(.v6)` on every target in its
         # Package.swift and keeps it whatever this line says; the two agree.
         SWIFT_VERSION: "6.0"
         # We supply the plist above; YES here would make Xcode generate a second

@@ -5,6 +5,11 @@
 # `condition = "AND"`. A path-only allowlist would also hide a real secret pasted into the
 # same file later, which is exactly the file a reviewer would not think to check again.
 #
+# ⚠️ THE `Packages/DistrictCore/` AND `contracts/` PATHS NAME FILES THAT NO LONGER EXIST
+# HERE, AND THEY STAY. DistrictCore moved to district-core-swift, but CI runs `gitleaks git`
+# over the whole history, which still holds those files; drop an entry and every scan reds
+# on a commit from before the move.
+#
 # ⚠️ Paths are matched with `(^|/)` rather than `^` because `gitleaks dir <path>` reports them
 # with the scanned directory in front, while `gitleaks git` reports them repository-relative.
 

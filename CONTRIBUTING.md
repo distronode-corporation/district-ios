@@ -6,14 +6,10 @@ This file is the rules a change has to meet.
 
 ## The inner loop
 
-```sh
-cd Packages/DistrictCore
-swift test
-```
-
-No simulator, no network and no account, on macOS or Linux. Most logic belongs in the
-package precisely so that this loop can test it. `swift test --filter <TestClass>` runs
-one class.
+Most of the app's logic lives in the DistrictCore package, in [district-core-swift](https://github.com/distronode-corporation/district-core-swift),
+and its inner loop is `swift test` there: no simulator, no network and no account, on
+macOS or Linux. Most logic belongs in the package precisely so that loop can test it.
+In this repository the loop is the lint below plus `DistrictAITests` on a simulator.
 
 ## The whole local gate
 
@@ -22,17 +18,38 @@ This is what CI runs, in order:
 ```sh
 swiftformat --lint .                          # SwiftFormat 0.63.0
 swiftlint --strict                            # SwiftLint 0.65.1
-(cd Packages/DistrictCore && swift test --enable-code-coverage)
-ci/coverage-gate.sh
 xcodegen generate --spec project.yml
 # then, on an iPhone and on an iPad simulator:
 #   DistrictAITests, and DistrictAIUITests/UnauthenticatedTests + LargerTextTests
 # (the README has the xcodebuild commands)
 ```
 
-CI also greps DistrictCore for Darwin-only imports and checks `Package.resolved`; both
-are described below. It runs `gitleaks git .` (gitleaks 8.30.1) over the full history
-too, with `.gitleaks.toml`; run it locally if you have it.
+CI also checks that every `exactVersion` package in `project.yml` resolved at exactly
+that version. It runs `gitleaks git .` (gitleaks 8.30.1) over the full history too, with
+`.gitleaks.toml`; run it locally if you have it.
+
+## Changing DistrictCore
+
+DistrictCore is not edited here. It lives in {CORE}, and a change to
+it goes **upstream first**: a pull request there, which runs the package's own gates
+(its test floor, 100% line coverage, the Foundation-only import rule and the contract
+fixtures), then a tagged release, then a pull request here that moves `exactVersion` in
+`project.yml` to that tag. The app only ever builds a released core.
+
+To work on both at once, clone district-core-swift beside this repository, so that
+`../district-core-swift` is its root, and generate the project from the local-core spec:
+
+```sh
+git clone https://github.com/distronode-corporation/district-core-swift ../district-core-swift
+xcodegen generate --spec project.local-core.yml   # DistrictCore from ../district-core-swift
+xcodegen generate --spec project.yml              # back to the pinned release
+```
+
+`project.local-core.yml` is `project.yml` with the DistrictCore package swapped for that
+path; with your clones elsewhere, symlink `../district-core-swift` to it. Nothing in CI
+or a release uses it, so a pull request here passes only once the core change it needs
+is released and pinned. It is a separate spec rather than a switch inside `project.yml`
+because XcodeGen lets a spec override what it includes, never the other way round.
 
 ## Rules CI enforces
 
@@ -42,16 +59,14 @@ are configured to agree, and another version can put them back at odds. SwiftLin
 with `--strict`, so a warning is a failure, and there is no baseline file.
 
 **Tests.** A change in behaviour comes with a test that fails without it. Put the logic,
-and its test, in `Packages/DistrictCore` whenever it can live there;
+and its test, in DistrictCore whenever it can live there (see "Changing DistrictCore");
 `App/Tests` (`DistrictAITests`) is for what the package cannot reach, such as wording and
-decisions that depend on app-side types. The package's line coverage is 100%, and
-`ci/coverage-gate.sh` holds every module and the total there: a line a test can reach gets
-a test, and a line nothing can reach is deleted, with a comment at the site saying why.
+decisions that depend on app-side types.
 
-**DistrictCore stays Foundation-only.** No `import` of UIKit, SwiftUI, Security,
-AuthenticationServices, CallKit, PushKit or LiveKit anywhere under `Packages/DistrictCore`,
-including inside `#if canImport(...)`. Declare a protocol in the package and implement
-it in `App/` (see `HTTPTransport`, `TokenStore` and `CallEngine`).
+**DistrictCore stays Foundation-only.** Darwin-only frameworks (UIKit, SwiftUI, Security,
+AuthenticationServices, CallKit, PushKit, LiveKit) are imported in `App/` only. When the
+core needs one, it declares a protocol and the app implements it (see `HTTPTransport`,
+`TokenStore` and `CallEngine`); district-core-swift's CI enforces its side.
 
 **Layout follows width, not the device.** `UIScreen.main` is not used anywhere in
 `App/Sources`, and `userInterfaceIdiom` is used only in
@@ -59,24 +74,15 @@ it in `App/` (see `HTTPTransport`, `TokenStore` and `CallEngine`).
 both. Use size classes and the space the view is given; an iPad in Split View or Stage
 Manager is often compact.
 
-**Never commit Xcode's write to `Packages/DistrictCore/Package.resolved`.** Resolving the
-app's packages adds the app's pins (LiveKit, WebRTC, Sentry and others) to that file.
-Restore it with `git checkout -- Packages/DistrictCore/Package.resolved` after any Xcode
-build. CI fails if it pins anything other than swift-crypto and swift-asn1.
-
-**The project is `project.yml`.** Never commit a `.xcodeproj`; it is generated.
-
-**Contract fixtures are not edited here.** The files in `contracts/` are generated by the
-District AI service and copied in unchanged; a pull request that edits one will not be
-merged. If a fixture looks wrong, or the app and the service disagree about a response,
-open an issue. A model change that needs a new or different fixture waits for the
-fixture to arrive from the service.
+**The project is `project.yml`.** Never commit a `.xcodeproj`; it is generated. Every
+remote package in it is pinned `exactVersion`, including swift-asn1, which nothing links
+and which is listed only so the graph under DistrictCore cannot float.
 
 **Test bundles must discover their tests.** CI counts the tests each bundle ran and fails
-below a floor set in `.github/workflows/ci.yml`: 1650 for DistrictCore, 470 for
-`DistrictAITests` and 7 for the signed-out UI tests. The first two sit a little below
-the current counts and are ratchets: a change that adds many tests may raise its floor,
-and a change that deletes tests on purpose lowers it in the same commit and says why. A
+below a floor set in `.github/workflows/ci.yml`: 470 for `DistrictAITests` and 7 for the
+signed-out UI tests. The first sits a little below the current count and is a ratchet: a
+change that adds many tests may raise it, and a change that deletes tests on purpose
+lowers it in the same commit and says why. A
 new signed-out UI test class has to be added to the `-only-testing` list there, and its
 cases to the expected count.
 

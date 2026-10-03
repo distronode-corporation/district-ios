@@ -10,6 +10,11 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Changed
+
+- DistrictCore now comes from district-core-swift 1.0.0, its own public repository,
+  instead of a copy inside this one. The app's behaviour is unchanged.
+
 ## [1.3] - 2026-10-02
 
 ### Fixed

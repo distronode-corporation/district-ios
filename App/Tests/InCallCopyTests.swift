@@ -3,8 +3,8 @@ import DistrictCall
 import XCTest
 
 /// ⛔ THIS FILE EXISTS BECAUSE WHAT IT PINS IS REACHABLE FROM NO OTHER GATE.
-/// `DialEntry.assess(_:)` lives in `Packages/DistrictCore` and `DialNumberTests`
-/// covers it on the Linux runner. ``InCallCopy/word(for:endedByOperator:)`` lives
+/// `DialEntry.assess(_:)` lives in DistrictCore (district-core-swift) and
+/// `DialNumberTests` covers it on the Linux runner there. ``InCallCopy/word(for:endedByOperator:)`` lives
 /// ABOVE the package boundary, in the App target: without this bundle, deleting the
 /// `endedByOperator ?` would leave every gate green and put "you hung up" in front
 /// of an operator who had not hung up.
