@@ -12,12 +12,14 @@
 # With the first two unset every case in the suite calls `XCTSkip`, the run is green,
 # and this script says so, a skip and a pass are not the same claim.
 #
-# ⛔ `TEST_RUNNER_`-PREFIXED ON THE COMMAND LINE. xcodebuild injects a variable into the
-# UI-test RUNNER process only when the name carries that prefix, and strips it before
-# the test reads it. Passing a bare name sets it on xcodebuild's own environment, where
-# the runner never sees it, and the suite then skips every case while the operator is
-# looking at a shell that clearly has the variable set. `uitest-device-imac.sh` does
-# the same thing for DISTRICT_UITEST_SESSION.
+# ⛔ `TEST_RUNNER_`-PREFIXED, AND IN xcodebuild's ENVIRONMENT, NEVER ON ITS COMMAND LINE.
+# xcodebuild injects a variable into the UI-test RUNNER process only when the name
+# carries that prefix, and strips it before the test reads it. Passing a bare name sets
+# it on xcodebuild's own environment, where the runner never sees it, and the suite then
+# skips every case while the operator is looking at a shell that clearly has the
+# variable set. A `NAME=value` ARGUMENT would also reach the runner, but xcodebuild
+# echoes every command-line setting under "Build settings from command line", which
+# would write the password into the log this script tees, and argv is visible to `ps`.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -60,6 +62,10 @@ else
 fi
 
 set +e
+TEST_RUNNER_DISTRICT_SMOKE_EMAIL="${DISTRICT_SMOKE_EMAIL:-}" \
+TEST_RUNNER_DISTRICT_SMOKE_PASSWORD="${DISTRICT_SMOKE_PASSWORD:-}" \
+TEST_RUNNER_DISTRICT_SMOKE_CONTACT="${DISTRICT_SMOKE_CONTACT:-}" \
+TEST_RUNNER_DISTRICT_SMOKE_PLAN="${DISTRICT_SMOKE_PLAN:-Studio}" \
 xcodebuild test \
   -project DistrictAI.xcodeproj \
   -scheme DistrictAI \
@@ -68,10 +74,6 @@ xcodebuild test \
   -derivedDataPath "$DERIVED" \
   -resultBundlePath "$RESULT" \
   CODE_SIGNING_ALLOWED=NO \
-  TEST_RUNNER_DISTRICT_SMOKE_EMAIL="${DISTRICT_SMOKE_EMAIL:-}" \
-  TEST_RUNNER_DISTRICT_SMOKE_PASSWORD="${DISTRICT_SMOKE_PASSWORD:-}" \
-  TEST_RUNNER_DISTRICT_SMOKE_CONTACT="${DISTRICT_SMOKE_CONTACT:-}" \
-  TEST_RUNNER_DISTRICT_SMOKE_PLAN="${DISTRICT_SMOKE_PLAN:-Studio}" \
   2>&1 | tee "$OUT/xcodebuild-smoke.log"
 STATUS=${PIPESTATUS[0]}
 set -e
