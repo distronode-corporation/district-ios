@@ -220,13 +220,18 @@ targets:
         # value here would be the first half of a localisation story nobody has
         # written.
         CFBundleDevelopmentRegion: en
-        # ⛔ REQUIRED BY APP STORE CONNECT AND FALSE IS THE TRUTHFUL ANSWER HERE.
-        # Without it every TestFlight upload stops on an export-compliance
-        # question before testers can install. The app uses only HTTPS
-        # through URLSession and the Keychain, which is exactly the exemption
-        # this key claims; it is a claim to re-check the day any bespoke crypto
-        # or a non-exempt algorithm ships.
-        ITSAppUsesNonExemptEncryption: false
+        # ⛔ REQUIRED BY APP STORE CONNECT, AND TRUE IS THE MAINTAINERS' DECLARATION.
+        # The app's encryption: HTTPS through URLSession, the Keychain,
+        # swift-crypto (pinned below), and LiveKit's end-to-end media encryption
+        # (AES-GCM), which Rooms turns on
+        # when the server sends a room key (`RoomEngine.options(e2eeKey:)`).
+        # Every algorithm is standard and published; none is proprietary. Rooms'
+        # end-to-end encryption goes beyond the HTTPS-only exemption, so the app
+        # is declared as using non-exempt encryption: a mass-market item,
+        # self-classified 5A992.c under License Exception ENC section
+        # 740.17(b)(1), with the matching declaration in App Store Connect and no
+        # documentation upload. Do not change it without the maintainers.
+        ITSAppUsesNonExemptEncryption: true
         # An empty dictionary is the modern launch screen: it opts the app into
         # full-screen layout on every device. ⚠️ Without SOME launch screen key,
         # iOS runs the app letterboxed at a legacy screen size and every layout
@@ -403,7 +408,7 @@ targets:
         # nothing failing to compile; a server-side test reads this line and is
         # what stops that.
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district
-        MARKETING_VERSION: "2.0.0"
+        MARKETING_VERSION: "2.0"
         # ⚠️ A PLACEHOLDER THAT THE RELEASE SCRIPT OVERRIDES. `scripts/archive-imac.sh`
         # passes `CURRENT_PROJECT_VERSION` (an offset plus the commit count), because
         # App Store Connect refuses a build number it has already seen. Nothing
