@@ -41,7 +41,6 @@ struct VoiceStudioTuningList: View {
         keys.first { $0.key.hasPrefix(Self.interruptionPrefix) }?.key
     }
 
-    @ViewBuilder
     private func control(_ key: VoiceStudioTuningKey) -> some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
             switch key.control {
