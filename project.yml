@@ -68,8 +68,7 @@ packages:
   # package's five libraries, unchanged by the move.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    # ⚠️ A REVISION UNTIL THE CORE PR MERGES: switch back to `exactVersion: 3.1.0` once that commit is tagged.
-    revision: ffeaef7590a3891d9fc09ef6258317bcd04e41af
+    exactVersion: 3.1.0
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
