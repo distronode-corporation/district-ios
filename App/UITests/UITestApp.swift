@@ -49,7 +49,6 @@ class UITestApp: XCTestCase {
         A11yID.Marketplace.release,
         A11yID.Inbox.send,
         A11yID.Dialer.call,
-        // ⛔ Moves the engine every call on the workspace runs on.
         A11yID.VoiceStudio.save,
     ]
 

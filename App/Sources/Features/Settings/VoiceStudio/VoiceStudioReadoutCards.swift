@@ -19,9 +19,15 @@ extension VoiceStudioMeterHeadline {
     /// ⛔ "AT LEAST" WHENEVER A STAGE IS MISSING, NEVER "ABOUT".
     func text(_ labels: VoiceStudioLabels) -> String {
         switch self {
-        case let .server(text): text
-        case let .local(ms, atLeast): atLeast ? VoiceStudioCopy.meterAtLeast(ms) : VoiceStudioCopy.meterAbout(ms)
-        case .none: labels.notMeasured
+        case let .server(text):
+            return text
+        case let .local(ms, atLeast):
+            if atLeast {
+                return VoiceStudioCopy.meterAtLeast(ms)
+            }
+            return VoiceStudioCopy.meterAbout(ms)
+        case .none:
+            return labels.notMeasured
         }
     }
 }
