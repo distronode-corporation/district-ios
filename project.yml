@@ -220,18 +220,22 @@ targets:
         # value here would be the first half of a localisation story nobody has
         # written.
         CFBundleDevelopmentRegion: en
-        # ⛔ REQUIRED BY APP STORE CONNECT, AND TRUE IS THE MAINTAINERS' DECLARATION.
-        # The app's encryption: HTTPS through URLSession, the Keychain,
-        # swift-crypto (pinned below), and LiveKit's end-to-end media encryption
-        # (AES-GCM), which Rooms turns on
-        # when the server sends a room key (`RoomEngine.options(e2eeKey:)`).
-        # Every algorithm is standard and published; none is proprietary. Rooms'
-        # end-to-end encryption goes beyond the HTTPS-only exemption, so the app
-        # is declared as using non-exempt encryption: a mass-market item,
-        # self-classified 5A992.c under License Exception ENC section
-        # 740.17(b)(1), with the matching declaration in App Store Connect and no
-        # documentation upload. Do not change it without the maintainers.
-        ITSAppUsesNonExemptEncryption: true
+        # ⛔ REQUIRED BY APP STORE CONNECT, AND FALSE IS THE MAINTAINERS' ANSWER
+        # WHILE THE APP IS NOT SOLD IN FRANCE. The app's encryption: HTTPS through
+        # URLSession, the Keychain, swift-crypto (pinned below), and LiveKit's
+        # end-to-end media encryption (AES-GCM), which Rooms turns on when the
+        # server sends a room key (`RoomEngine.options(e2eeKey:)`). Every algorithm
+        # is standard and published; none is proprietary. It is a mass-market item,
+        # self-classified 5A992.c under License Exception ENC section 740.17(b)(1)
+        # and covered by the annual self-classification report. Apple asks for
+        # documentation only for proprietary algorithms, or for standard ones
+        # outside the OS when the app is sold in France, and says `false` is the
+        # value for encryption exempt from documentation. France is off the store
+        # until the ANSSI declaration is filed. When France returns, this becomes
+        # `true` with `ITSEncryptionExportComplianceCode` set to the code App Store
+        # Connect issues for the approved declaration: a build with `true` and no
+        # code fails export. Do not change it without the maintainers.
+        ITSAppUsesNonExemptEncryption: false
         # An empty dictionary is the modern launch screen: it opts the app into
         # full-screen layout on every device. ⚠️ Without SOME launch screen key,
         # iOS runs the app letterboxed at a legacy screen size and every layout
