@@ -49,6 +49,7 @@ class UITestApp: XCTestCase {
         A11yID.Marketplace.release,
         A11yID.Inbox.send,
         A11yID.Dialer.call,
+        A11yID.VoiceStudio.save,
     ]
 
     override func setUp() {

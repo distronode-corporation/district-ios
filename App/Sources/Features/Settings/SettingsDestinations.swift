@@ -40,6 +40,10 @@ enum SettingsDestinations {
         case .persona:
             PersonaView(container: container, workspaceId: workspaceId, role: role)
 
+        // ⛔ IT TAKES A ROLE FOR THE SAME REASON: its save moves the engine every call runs on.
+        case .voiceStudio:
+            VoiceStudioView(container: container, workspaceId: workspaceId, role: role)
+
         case .capabilities:
             CapabilitiesView(container: container, workspaceId: workspaceId)
 

@@ -13,9 +13,10 @@ import SwiftUI
 /// ⛔ EVERY ROW IS GATED BY PRESENCE, NOT BY ENABLEMENT, AND THE GATE IS
 /// ``RouteGate`` RATHER THAN A RULE RE-DERIVED HERE. A disabled row that 403s on tap
 /// is worse than no row, and a second copy of "who may open what" is how the two
-/// copies come to disagree. ``RouteGate/gate(for:role:)`` already knows that the four
-/// config-backed sections are hidden from a viewer (their read excludes one, because
-/// the payload carries staff transfer numbers and the operator's own prompt) while
+/// copies come to disagree. ``RouteGate/gate(for:role:)`` already knows that the
+/// config-backed sections and the Voice Studio are hidden from a viewer (their reads
+/// exclude one: the payloads carry staff transfer numbers, the operator's own prompt and
+/// the workspace's engine) while
 /// knowledge, messaging and members are merely `partial` (their reads admit a viewer
 /// and their screens gate their own controls).
 ///
@@ -23,7 +24,7 @@ import SwiftUI
 /// point of the gate above rather than a degenerate case of it: `workspace/knowledge`,
 /// `workspace/knowledge-mode` and `workspace/messaging` all admit a viewer by design,
 /// so hiding the hub in front of them would hide screens a viewer is entitled to. The
-/// four config-backed rows and the members row stay hidden, which
+/// config-backed rows, the Voice Studio row and the members row stay hidden, which
 /// is what Android admits and not one row more. The two screens they DO reach gate
 /// their own controls — the reads admit a viewer and every write on both refuses one —
 /// so "the row was drawn" never means "the button will work".
@@ -140,6 +141,7 @@ struct SettingsHubView: View {
     /// — the compiler will not catch it, but the list is short enough to read.
     private static let entries: [SettingsHubEntry] = [
         SettingsHubEntry(.persona, SettingsCopy.personaTitle, SettingsCopy.personaSubtitle),
+        SettingsHubEntry(.voiceStudio, SettingsCopy.voiceStudioTitle, SettingsCopy.voiceStudioSubtitle),
         SettingsHubEntry(.capabilities, SettingsCopy.capabilitiesTitle, SettingsCopy.capabilitiesSubtitle),
         SettingsHubEntry(.calls, SettingsCopy.callsTitle, SettingsCopy.callsSubtitle),
         SettingsHubEntry(.directory, SettingsCopy.directoryTitle, SettingsCopy.directorySubtitle),

@@ -141,7 +141,7 @@ extension RouteGate {
     /// honest UI is an explanatory line rather than a missing row.
     private static func settingsGate(for section: SettingsSection) -> RouteGate {
         switch section {
-        case .persona, .capabilities, .directory, .routing, .members:
+        case .persona, .voiceStudio, .capabilities, .directory, .routing, .members:
             .hidden
         case .hub, .calls, .knowledge, .messaging, .scheduling:
             .partial

@@ -71,6 +71,9 @@ final class AppContainer {
 
     /// Workspaces this account may operate on, and the roster of one.
     let workspaces: WorkspaceRepository
+    /// The native Voice Studio: one read, and a save through the persona PATCH that is
+    /// always followed by that read.
+    let voiceStudio: VoiceStudioRepository
 
     /// Who answers a call, and whether THIS person can be rung for one.
     ///
@@ -386,6 +389,7 @@ final class AppContainer {
         // the ⚠️ on the stored properties. (Stated without a count on purpose: the
         // number changes with every feature and a count in a comment goes stale.)
         workspaces = WorkspaceRepository(client: api)
+        voiceStudio = VoiceStudioRepository(client: api)
         callHandling = CallHandlingRepository(client: api)
         overview = OverviewRepository(client: api)
         calls = CallsRepository(client: api)

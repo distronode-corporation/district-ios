@@ -188,25 +188,19 @@ enum A11yID {
         static let hubRoot = "district-workspace-settings-root"
     }
 
-    /// The persona form's controls, iOS-first: Android's persona screen is three text
-    /// fields and addresses none of them.
+    /// The persona form's controls.
     ///
     /// ⛔ EVERY PICKER HERE WRITES A VALUE THE SAVE ROUTE COERCES RATHER THAN REFUSES,
     /// so a test that drives the wrong one still passes and the damage is a persona
     /// nobody chose. Naming them individually is what lets a test say which control it
-    /// moved.
+    /// moved. ⚠️ The engine, voice and tuning controls moved to ``VoiceStudio``.
     enum Persona {
         static let root = "district-persona-root"
         static let name = "district-persona-name"
         static let greeting = "district-persona-greeting"
         static let personality = "district-persona-personality"
-        static let engine = "district-persona-engine"
-        static let voice = "district-persona-voice"
         static let language = "district-persona-language"
         static let answerLength = "district-persona-answer-length"
-        static let temperature = "district-persona-temperature"
-        static let voiceStyle = "district-persona-voice-style"
-        static let preemptiveTts = "district-persona-preemptive-tts"
         /// ⚠️ THE RETRY IN THE PANEL SHOWN INSTEAD OF THE PICKERS when the catalogue did
         /// not load. It re-reads the catalogue ALONE, so a test that presses it is not
         /// asserting anything about the three text fields above it.
