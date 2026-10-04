@@ -10,7 +10,9 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
-The version on `main` is now 2.0.0, with Voice Studio as its headline.
+## [2.0] - 2026-10-04
+
+Voice Studio is the headline of 2.0.
 
 ### Added
 
@@ -107,6 +109,7 @@ The version on `main` is now 2.0.0, with Voice Studio as its headline.
 
 The first release on the App Store.
 
-[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v1.3...HEAD
+[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v2.0...HEAD
+[2.0]: https://github.com/distronode-corporation/district-ios/releases/tag/v2.0
 [1.3]: https://github.com/distronode-corporation/district-ios/releases/tag/v1.3
 [1.2]: https://github.com/distronode-corporation/district-ios/releases/tag/v1.2
