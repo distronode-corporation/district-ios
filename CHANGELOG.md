@@ -10,6 +10,23 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+The version on `main` is now 2.0.0, with Voice Studio as its headline.
+
+### Added
+
+- Voice Studio, in workspace settings: the same studio as on the web. Pick a starting
+  point (Stable or Latest), then see the call's signal chain, Ear, Turn-taking, Brain and
+  Voice (or one all-in-one realtime model), with each part's channel, where it is
+  processed and how fast it was measured. Change any part, its voice, and its tuning
+  under Advanced; the time to first word and where the call is processed update as you
+  go, and say "at least" when part of the call has not been measured. Labels follow the
+  language you use on the web.
+
+### Changed
+
+- The agent persona keeps its name, greeting, personality, language and answer length.
+  The engine, the voice and how fast the agent replies moved to Voice Studio.
+
 ### Removed
 
 - Call recordings. No call or meeting is recorded in any region, so the Play recording

@@ -23,7 +23,13 @@ enum SettingsCopy {
     static let hubTitle = "Workspace settings"
 
     static let personaTitle = "Agent persona"
-    static let personaSubtitle = "Name, greeting and personality"
+    static let personaSubtitle = "Name, greeting, personality and language"
+
+    /// ⚠️ THE FEATURE'S NAME, KEPT AS THE WEB AND ANDROID CALL IT. The Studio's own heading
+    /// arrives from the server in the portal language once the read lands; this is the row and
+    /// the title before it does.
+    static let voiceStudioTitle = "Voice Studio"
+    static let voiceStudioSubtitle = "Recipes, the signal chain, voices and tuning, with how fast the agent replies"
 
     static let capabilitiesTitle = "Capabilities"
     static let capabilitiesSubtitle = "What the agent may do on a call"
@@ -113,10 +119,15 @@ enum SettingsCopy {
     /// says the thing the pickers cannot say for themselves: the values come from the
     /// server and are never a list this app made up, which is why a failed read turns the
     /// panel read-only instead of guessing. See ``personaOptionsFailedNote``.
-    static let personaReadOnlyNote = "The engine, voice, language and style come from the lists this "
+    static let personaReadOnlyNote = "The language and answer length come from the lists this "
         + "workspace's own server publishes, so nothing here can offer a value the agent would not honour."
 
-    static let personaEngineEyebrow = "Engine and voice"
+    static let personaLanguageEyebrow = "Language and answers"
+
+    /// ⚠️ SAYS WHERE THE ENGINE WENT. The persona form no longer shows the engine, the voice
+    /// or the tuning, and without this line it reads as a persona with no voice at all.
+    static let personaVoiceStudioNote = "The voice, the engine and how fast the agent replies are set "
+        + "in Voice Studio, in workspace settings."
 
     static let personaUnset = "Not set"
 

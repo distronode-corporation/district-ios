@@ -264,6 +264,11 @@ enum Route: Hashable, Sendable {
 enum SettingsSection: String, Hashable, CaseIterable {
     case hub
     case persona
+    /// ⛔ THE NATIVE VOICE STUDIO, A SIBLING OF THE PERSONA FORM AND NEVER A CHILD OF IT. The
+    /// engine, the voice and the tuning are saved here and nowhere else, so a stale persona form
+    /// can never resend an engine id the Studio changed. ⚠️ Its read excludes a viewer, exactly
+    /// as `persona/options` does, so the row is hidden from one.
+    case voiceStudio
     case capabilities
     /// ⛔ WHO ANSWERS A CALL, AND IT IS THE ONE CONFIG-BACKED SECTION THAT DOES NOT
     /// HYDRATE FROM `workspace/config`. `workspace/call-handling` is its own route with

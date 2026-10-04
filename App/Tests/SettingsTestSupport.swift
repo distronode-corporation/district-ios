@@ -26,6 +26,13 @@ final class SettingsTransport: HTTPTransport, @unchecked Sendable {
         }
     }
 
+    /// ⚠️ A STATUS PER RESPONSE, for a flow whose read succeeds and whose write is refused.
+    init(responses: [(status: Int, body: String)]) {
+        self.responses = responses.map {
+            HTTPResponse(statusCode: $0.status, headers: ["Content-Type": "application/json"], body: Data($0.body.utf8))
+        }
+    }
+
     var bodies: [String] {
         lock.withLock { requests }.compactMap(\.body).compactMap { String(data: $0, encoding: .utf8) }
     }

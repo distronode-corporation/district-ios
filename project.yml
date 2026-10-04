@@ -68,14 +68,15 @@ packages:
   # package's five libraries, unchanged by the move.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    exactVersion: 3.0.0
+    # ⚠️ A REVISION UNTIL THE CORE PR MERGES: switch back to `exactVersion: 3.1.0` once that commit is tagged.
+    revision: a0b8ca60a9f037cc86329fe3cf4676301e950c4c
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
   # day the cache misses. A root-level package reference is a constraint on the
   # whole graph, and XcodeGen writes one for every package listed here whether or
   # not a target links it (checked in a generated pbxproj with XcodeGen 2.46.0).
-  # 1.7.3 is the version district-core-swift 3.0.0's own Package.resolved records,
+  # 1.7.3 is the version district-core-swift 3.1.0's own Package.resolved records,
   # so the app and the package's tests run the same code. Bump it with the core.
   # ⚠️ The `.git` URL matches the spelling swift-crypto's manifest uses, so Xcode
   # sees one location for the identity rather than two.
@@ -403,7 +404,7 @@ targets:
         # nothing failing to compile; a server-side test reads this line and is
         # what stops that.
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district
-        MARKETING_VERSION: "1.3.1"
+        MARKETING_VERSION: "2.0.0"
         # ⚠️ A PLACEHOLDER THAT THE RELEASE SCRIPT OVERRIDES. `scripts/archive-imac.sh`
         # passes `CURRENT_PROJECT_VERSION` (an offset plus the commit count), because
         # App Store Connect refuses a build number it has already seen. Nothing

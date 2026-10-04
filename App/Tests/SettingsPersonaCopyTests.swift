@@ -20,7 +20,7 @@ final class SettingsPersonaCopyTests: XCTestCase {
             SettingsCopy.personaReadOnlyNote,
             SettingsCopy.routingNote,
             SettingsCopy.routingEmptyBody,
-            SettingsCopy.personaEngineNote,
+            SettingsCopy.personaVoiceStudioNote,
         ]
         for sentence in live {
             XCTAssertFalse(sentence.contains("cannot be changed in this app"), sentence)
@@ -48,13 +48,11 @@ final class SettingsPersonaCopyTests: XCTestCase {
         XCTAssertFalse(SettingsCopy.previewCooldown.isEmpty)
     }
 
-    /// ⛔ THE ENGINE NOTE CARRIES THE RESIDENCY CLAIM IN TEXT. Region information on this
-    /// form is never carried by colour or position alone: it has to survive a screen
-    /// reader, a monochrome display and a copy-paste into an email to a customer's
-    /// data-protection officer.
-    func testTheEngineNoteSaysWhereTheAudioGoes() {
-        XCTAssertTrue(SettingsCopy.personaEngineNote.contains("where"))
-        XCTAssertTrue(SettingsCopy.personaEngineOutOfRegion.contains("region"))
+    /// ⛔ THE PERSONA FORM SAYS WHERE THE VOICE WENT. It no longer shows the engine, the
+    /// voice or the tuning, and without the sentence it reads as a persona with no voice.
+    func testThePersonaFormSaysTheVoiceIsInVoiceStudio() {
+        XCTAssertTrue(SettingsCopy.personaVoiceStudioNote.contains("Voice Studio"))
+        XCTAssertTrue(SettingsCopy.personaVoiceStudioNote.contains("workspace settings"))
     }
 
     /// ⛔ BOTH WHOLESALE-REPLACE SAVES SAY SO, AND SO DOES THE CONFIRMATION THAT GUARDS

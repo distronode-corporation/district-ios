@@ -1,7 +1,8 @@
 import Foundation
 
-/// The persona form's seven vocabulary controls, the persona preview, and the
-/// routing-rule editor.
+/// The persona form's language and answer length, the persona preview, and the
+/// routing-rule editor. (The engine, voice and tuning are the Voice Studio's; see
+/// ``VoiceStudioCopy``.)
 ///
 /// ⚠️ A THIRD FILE FOR THE SAME NAMESPACE, WHICH IS A LINT CEILING RATHER THAN A
 /// SPLIT WITH MEANING — `swiftlint --strict` promotes `file_length` at 500 lines to an
@@ -13,73 +14,21 @@ import Foundation
 /// in this app" would each be false; a stale refusal is worse than no sentence, because
 /// an operator believes it and goes looking for a browser.
 extension SettingsCopy {
-    // MARK: - The engine panel
-
-    /// ⛔ WHAT THE ENGINE PICKER ACTUALLY DECIDES, SAID IN TEXT AND NEVER BY COLOUR
-    /// ALONE. Each engine's label carries where its audio is processed, which is a
-    /// public claim about residency — it has to survive a screen reader, a monochrome
-    /// display and a copy-paste into an email to a customer's data-protection officer.
-    static let personaEngineNote = "The engine decides which service hears the call and where that "
-        + "happens. Each option says where its audio is processed."
-
-    static let personaEngineLabel = "Voice model engine"
-
-    /// ⛔ WHY AN OPTION IS VISIBLE AND NOT SELECTABLE. The route publishes every engine
-    /// so the label can say what each one would mean; an operator who saw a shorter
-    /// list than a colleague's, with nothing explaining it, would reasonably think the
-    /// app was broken.
-    static let personaEngineOutOfRegion = "Engines that would process this workspace's audio outside "
-        + "its own region are shown but cannot be chosen."
-
-    static let personaVoiceLabel = "Voice"
-
-    /// ⚠️ AN EMPTY VOICE LIST IS A REAL ANSWER, not a failed read: a stored persona can
-    /// name a language its engine does not publish, and existing rows do.
-    static let personaVoiceEmpty = "This engine publishes no voices for the selected language."
-
-    /// ⛔ A STORED VALUE THIS CATALOGUE NO LONGER CARRIES IS KEPT, NOT CORRECTED. It is
-    /// what the workspace is speaking in today; substituting it silently would change
-    /// the agent's voice on the next save, with nothing on screen saying so.
-    static let personaVoiceOffCatalogue = "This workspace is set to a voice the engine no longer "
-        + "publishes. It is kept until somebody picks another."
+    // MARK: - The language panel
 
     static let personaLanguageLabel = "Language"
 
-    /// ⚠️ SAID WHEN AN ENGINE CHANGE DROPPED THE LANGUAGE, because the two lists are not
-    /// subsets of each other: Deepgram carries Dutch and Italian and no Hindi.
-    static let personaLanguageUnset = "This engine does not offer the language that was set. Choose "
-        + "one to see its voices."
+    /// ⚠️ SAID WHEN NO LANGUAGE IS SET, which happens when one was never chosen, and is
+    /// said rather than left as a blank picker.
+    static let personaLanguageUnset = "No language is set for this persona. Choose one."
 
     static let personaAnswerLengthLabel = "Answer length"
 
-    /// ⚠️ SAYS IT IS PER ENGINE, because it is the one field on the form whose value
-    /// changes when a different picker moves, and an operator who did not know that
-    /// would read it as the form losing their edit.
+    /// ⚠️ SAYS IT IS PER ENGINE, because it is stored per engine: an operator who changes
+    /// the engine in Voice Studio and comes back finds that engine's own setting here, and
+    /// without this sentence would read it as the form losing their edit.
     static let personaAnswerLengthNote = "How long each spoken reply may run. Saved separately for "
-        + "each engine, so switching engines above shows that engine's own setting."
-
-    static let personaTemperatureLabel = "Conversational creativity"
-
-    static let personaTemperatureNote = "Lower is consistent and predictable. Higher is more varied."
-
-    /// ⚠️ THE NUMBER IS SHOWN BESIDE THE SLIDER AND IS ALSO THE SLIDER'S SPOKEN VALUE.
-    /// A slider with no readout is a control an operator cannot describe to support.
-    static func personaTemperatureValue(_ value: Double) -> String {
-        String(format: "%.1f", value)
-    }
-
-    static let personaVoiceStyleLabel = "Accent and style"
-
-    /// ⚠️ ONLY THE REALTIME ENGINE HAS A STAGE TO POSTURE. The chained pipelines would
-    /// accept this, store it and ignore it, so the control is absent rather than inert.
-    static let personaVoiceStyleNote = "Offered by the realtime engine only."
-
-    static let personaPreemptiveLabel = "Start speaking sooner"
-
-    /// ⛔ IT COSTS MONEY AND THE SENTENCE SAYS SO. Speech prepared for a sentence the
-    /// caller then changes is thrown away and still billed.
-    static let personaPreemptiveNote = "Prepares the reply while the caller is still finishing, so it "
-        + "plays sooner. Speech prepared for a sentence that changes is discarded and still charged."
+        + "each engine, so a different engine in Voice Studio keeps its own setting."
 
     // MARK: - When the catalogue did not load
 
@@ -90,7 +39,7 @@ extension SettingsCopy {
     /// stale Swift catalogue offered would still be accepted and stored, and then
     /// silently replaced by the agent's own fallback at synthesis time — a 200, a
     /// persona nobody chose, and nothing anywhere reporting it.
-    static let personaOptionsFailedNote = "The engine, voice, language and style are chosen from lists "
+    static let personaOptionsFailedNote = "The language and answer length are chosen from lists "
         + "this workspace's server publishes. Until those load, what is stored is shown as it is and "
         + "cannot be changed. The name, greeting and personality can still be edited and saved."
 

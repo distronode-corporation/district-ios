@@ -22,18 +22,23 @@ import Observation
 ///
 /// ⛔ AND THERE ARE TWO LOADS, NOT ONE, WITH DIFFERENT CONSEQUENCES FOR FAILING. The
 /// configuration is the baseline every save is built on, so without it there is no
-/// form at all. The VOCABULARIES (`persona/options`) decide only what the seven
-/// non-text controls may offer — so without them the three free-text fields stay
-/// editable and the engine, voice, language and style controls fall back to showing
-/// the stored values and nothing else. ⛔ THEY MUST NEVER FALL BACK TO A BUILT-IN
-/// CATALOGUE: every value a stale Swift list offered would still be accepted, stored
-/// and then silently substituted by the agent, with a 200 and nothing reporting it,
-/// which is the exact failure the options route exists to retire.
+/// form at all. The VOCABULARIES (`persona/options`) decide only what the language and
+/// answer-length controls may offer, so without them the three free-text fields stay
+/// editable and those two fall back to showing the stored values and nothing else.
+/// ⛔ THEY MUST NEVER FALL BACK TO A BUILT-IN CATALOGUE: every value a stale Swift list
+/// offered would still be accepted, stored and then silently substituted by the agent,
+/// with a 200 and nothing reporting it, which is the exact failure the options route
+/// exists to retire.
 ///
-/// ⚠️ AN EMPTY STRING IS SENT FOR THE THREE TEXT FIELDS AND NEVER FOR THE OTHER
-/// SEVEN. Clearing a greeting is a real edit and the server stores `""` verbatim;
-/// clearing a VOICE would store an empty voice and make the agent fall back to one
-/// nobody chose. See the ⛔ on ``PersonaEngineValues``.
+/// ⚠️ AN EMPTY STRING IS SENT FOR THE THREE TEXT FIELDS AND NEVER FOR THE OTHERS.
+/// Clearing a greeting is a real edit and the server stores `""` verbatim; clearing a
+/// LANGUAGE would store an empty one and make the agent fall back to one nobody chose.
+/// See the ⛔ on ``PersonaIdentityValues``.
+///
+/// ⛔ THE ENGINE, VOICE AND TUNING ARE THE VOICE STUDIO'S (``VoiceStudioModel``), a
+/// sibling screen and never a child, so a stale persona form can never resend an engine id
+/// the Studio changed. This form sends the stored engine id only beside an answer length,
+/// where the route needs it as a key.
 ///
 /// ⚠️ THE ENRICHMENT CONSENT FLAG ALSO RIDES THIS ROUTE AND IS NOT EDITED HERE. It
 /// lives on the capabilities screen, matching the web console, where the enrichment
@@ -45,8 +50,8 @@ final class PersonaModel {
     ///
     /// ⚠️ THREE, AND THE SPLIT IS ABOUT WHERE THE VALUE COMES FROM RATHER THAN
     /// ABOUT WHAT MAY BE EDITED. These are free text the route stores verbatim; the
-    /// other seven are drawn from ``PersonaEngineDraft``, which cannot exist without
-    /// the server's own catalogue.
+    /// language and answer length are drawn from ``PersonaIdentityDraft``, which cannot
+    /// exist without the server's own catalogue.
     enum Field: String, CaseIterable {
         case name
         case greeting
@@ -56,10 +61,10 @@ final class PersonaModel {
     private(set) var load: SettingsConfigState = .loading
     private(set) var save: SettingsSaveState = .idle
 
-    /// The seven vocabulary-backed fields, or nil when the catalogue did not load.
+    /// The vocabulary-backed fields, or nil when the catalogue did not load.
     ///
     /// ⛔ NIL IS READ-ONLY, NOT "USE DEFAULTS". See the ⛔ on this type.
-    private(set) var draft: PersonaEngineDraft?
+    private(set) var draft: PersonaIdentityDraft?
 
     /// ⚠️ WHY THE ENGINE CONTROLS ARE NOT OFFERED, SHOWN RATHER THAN SWALLOWED. A
     /// panel that silently turned read-only would read as a product decision.
@@ -130,13 +135,12 @@ final class PersonaModel {
         save = .idle
     }
 
-    /// Move one of the seven vocabulary controls.
+    /// Move the language or the answer length.
     ///
-    /// ⛔ EVERY ONE OF THEM GOES THROUGH ``PersonaEngineDraft``, because four of the
-    /// seven move each other: an engine change carries the answer length, the voice
-    /// and sometimes the language with it. A binding straight to a stored property
-    /// would apply one of those and skip the rest.
-    func editEngine(_ change: (inout PersonaEngineDraft) -> Void) {
+    /// ⛔ BOTH GO THROUGH ``PersonaIdentityDraft``, because the language moves the voice
+    /// with it for the language-keyed engine. A binding straight to a stored property
+    /// would apply the one and skip the other.
+    func editIdentity(_ change: (inout PersonaIdentityDraft) -> Void) {
         guard canWrite, load.config != nil, draft != nil else { return }
         change(&draft!)
         save = .idle
@@ -154,7 +158,7 @@ final class PersonaModel {
     /// read.
     var canSave: Bool {
         guard canWrite, load.config != nil, !save.isSaving else { return false }
-        return !dirtyFields.isEmpty || !(draft?.changes.isEmpty ?? true)
+        return !dirtyFields.isEmpty || draft?.isDirty == true
     }
 
     /// The form as it stands, for one preview session, or nil when there is nothing
@@ -207,7 +211,7 @@ final class PersonaModel {
         switch await gateway.workspaces.personaOptions(workspaceId: gateway.workspaceId) {
         case let .success(options):
             optionsFailure = nil
-            draft = PersonaEngineDraft(persona: config.aiPersona, options: options)
+            draft = PersonaIdentityDraft(persona: config.aiPersona, options: options)
         case let .failure(error):
             // ⛔ THE PREVIOUS DRAFT IS DROPPED RATHER THAN KEPT. It was built from a
             // catalogue this client can no longer vouch for, and the whole reason the
@@ -231,7 +235,7 @@ final class PersonaModel {
     func saveChanges() async {
         guard canSave else { return }
         let dirty = dirtyFields
-        let engine = draft?.write ?? PersonaEngineWrite()
+        let identity = draft?.write ?? PersonaIdentityWrite()
         save = .saving
         // ⛔ THE TERNARY IS THE MECHANISM, NOT A CONVENIENCE. nil drops the key from
         // the body and the server then PRESERVES the stored value; `""` reaches the
@@ -246,13 +250,11 @@ final class PersonaModel {
             // capabilities screen, and sending `false` for a form that did not touch
             // it would be an opt-out nobody chose.
             dgiEnabled: nil,
-            voice: engine.voice,
-            language: engine.language,
-            modelId: engine.modelId,
-            responseLength: engine.responseLength,
-            temperature: engine.temperature,
-            voiceStyle: engine.voiceStyle,
-            preemptiveTts: engine.preemptiveTts
+            // ⛔ THE ENGINE ID ONLY AS THE ANSWER LENGTH'S KEY, AND NOTHING THE STUDIO OWNS.
+            voice: identity.voice,
+            language: identity.language,
+            modelId: identity.modelId,
+            responseLength: identity.responseLength
         )
         await apply(gateway.commit(write))
     }
@@ -293,6 +295,6 @@ final class PersonaModel {
     /// change.
     private func rehydrate(_ config: WorkspaceConfig) {
         guard let options = draft?.options else { return }
-        draft = PersonaEngineDraft(persona: config.aiPersona, options: options)
+        draft = PersonaIdentityDraft(persona: config.aiPersona, options: options)
     }
 }
