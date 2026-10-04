@@ -9,8 +9,7 @@ import SwiftUI
 /// SLUG to ask for slots, the reassign needs the current host so it can be left out
 /// of the candidates — and `bookings.list` is the only op that carries them. The
 /// detail screen addresses a booking by id alone, which is why it offers only the
-/// two writes that need nothing else (see ``SchedulingBookingCancelButton`` and
-/// ``SchedulingBookingRegenerateNotesButton``).
+/// write that needs nothing else (see ``SchedulingBookingCancelButton``).
 ///
 /// ⛔ AND THE GATE IS TWO TESTS, NOT ONE. `client` clears the server's bar; after
 /// that ``SchedulingBookingFormat/isActionable(_:now:)`` decides, on `end_at`, which
@@ -137,37 +136,5 @@ struct SchedulingBookingCancelButton: View {
             bookingId: bookingId,
             onSaved: { _ in onChanged() }
         )
-    }
-}
-
-/// The notes rewrite, on the booking detail.
-///
-/// ⚠️ A HOLDER RATHER THAN A BARE `SchedulingBookingRegenerateNotesButton`, because
-/// that button takes a model and this is the screen that owns one. The model is
-/// built once per appearance: nothing about it changes while the screen is up, and
-/// rebuilding it per redraw would drop the "queued" sentence it is holding.
-struct SchedulingBookingNotesEntry: View {
-    let admin: SchedulingAdminRepository
-    let workspaceId: String
-    let bookingId: String
-    let onQueued: () -> Void
-
-    @State private var model: SchedulingBookingNotesModel?
-
-    var body: some View {
-        Group {
-            if let model {
-                SchedulingBookingRegenerateNotesButton(model: model)
-            }
-        }
-        .onAppear {
-            guard model == nil else { return }
-            model = SchedulingBookingNotesModel(
-                admin: admin,
-                workspaceId: workspaceId,
-                bookingId: bookingId,
-                onQueued: { _ in onQueued() }
-            )
-        }
     }
 }

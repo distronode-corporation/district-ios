@@ -1,4 +1,4 @@
-/// Identifiers for the bookings, team, settings and recordings write surfaces.
+/// Identifiers for the bookings, team and settings write surfaces.
 ///
 /// ⛔ A SEPARATE FILE FROM `A11yID.swift`, AND A SEPARATE NAMESPACE FROM THE OTHER
 /// WRITE SURFACES'. Each adds cases to one enum; an extension per surface is the only
@@ -29,7 +29,6 @@ extension A11yID {
         static let bookingReassignSheet = "district-scheduling-booking-reassign"
         static let bookingReassignHost = "district-scheduling-booking-reassign-host"
         static let bookingReassignConfirm = "district-scheduling-booking-reassign-confirm"
-        static let bookingRegenerateNotes = "district-scheduling-booking-regenerate-notes"
 
         // Teams
         static let teamCreateSheet = "district-scheduling-team-create"
@@ -62,16 +61,8 @@ extension A11yID {
         static let brandingBannerPick = "district-scheduling-branding-banner-pick"
         static let brandingBannerRemove = "district-scheduling-branding-banner-remove"
         static let automationSheet = "district-scheduling-automation"
-        static let automationRecordings = "district-scheduling-automation-recordings"
-        static let automationNotetaker = "district-scheduling-automation-notetaker"
         static let automationAssistant = "district-scheduling-automation-assistant"
         static let automationInstructions = "district-scheduling-automation-instructions"
         static let automationSave = "district-scheduling-automation-save"
-
-        // Recordings
-        static let recordingDeleteConfirm = "district-scheduling-recording-delete-confirm"
-        static let recordingDeleteAllSheet = "district-scheduling-recording-delete-all"
-        static let recordingDeleteAllField = "district-scheduling-recording-delete-all-field"
-        static let recordingDeleteAllConfirm = "district-scheduling-recording-delete-all-confirm"
     }
 }

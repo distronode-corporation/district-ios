@@ -90,12 +90,11 @@ extension RouteGate {
         // ⛔ `.partial` SINCE THE NATIVE SCHEDULING SECTION LANDED, AND IT WAS `.none`
         // BEFORE. That was correct while the destination was one status card whose only
         // control the SERVER gated (`canManage` off the status read), so there was
-        // nothing here for a role to decide. The hub now leads to nine sections, and the
-        // recordings one carries a DOWNLOAD whose bar is `agency`/`client` while the list
-        // beside it admits a viewer — so there is a control to disable and `.partial` is
-        // what says so. ⚠️ Every READ on all nine sections is `viewer`-level
-        // (`SchedulingAdminOp.minRole`), which is why this is `.partial` and not
-        // `.hidden`: a viewer can fill every screen and is refused exactly one affordance.
+        // nothing here for a role to decide. The hub now leads to eight sections whose
+        // WRITE controls are `agency`/`client` while their reads admit a viewer, so there
+        // are controls to disable and `.partial` is what says so. ⚠️ Every READ on all
+        // eight sections is `viewer`-level (`SchedulingAdminOp.minRole`), which is why
+        // this is `.partial` and not `.hidden`: a viewer can fill every screen.
         case .scheduling:
             .partial
         // Everything else admits all three roles: the call log and one call, HQ,
@@ -124,9 +123,9 @@ extension RouteGate {
     ///
     /// ⛔ `scheduling` IS `.partial`, AND THAT WAS READ OFF THE SERVER SURFACE RATHER
     /// THAN ASSUMED: `scheduling/admin`
-    /// classifies all seventy-five operations by minimum role in
+    /// classifies all sixty-four operations by minimum role in
     /// `SchedulingAdminOp+Access.swift`, and **every read is `viewer`** — the rule is
-    /// "reads are viewer, writes are client". So a viewer may fill all nine sections, and
+    /// "reads are viewer, writes are client". So a viewer may fill all eight sections, and
     /// hiding the row would withhold a surface the server would serve them. ⚠️ The
     /// scheduling row is also the one whose destination is not a settings section at all;
     /// see ``SettingsHubView/destination(_:)``.

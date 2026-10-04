@@ -1,12 +1,10 @@
-import AVKit
 import DistrictModel
 import SwiftUI
 
 /// One call in full.
 ///
-/// ⚠️ `import AVKit` LIVES IN THIS FILE ONLY. The banned-import grep in
-/// district-core-swift's CI covers DistrictCore's sources, where platform frameworks
-/// would break the Linux tier; the app target is the right home for a player.
+/// ⚠️ NO RECORDING PLAYER ANY MORE, and with it no `import AVKit`: nothing is recorded
+/// in any region and the server retired the recording route on 2026-10-03.
 struct CallDetailView: View {
     let workspaceId: String
     let callId: String
@@ -21,12 +19,6 @@ struct CallDetailView: View {
     /// ⚠️ THE SHEET'S PRESENTATION LIVES ON THE SCREEN, not in the toolbar item: a
     /// `ToolbarContent` cannot carry a `.sheet`.
     @State private var reporting = false
-
-    /// ⛔ THE RESOLVED URL LIVES HERE AND NOWHERE ELSE, for exactly as long as the
-    /// sheet is up. It is a short-lived presigned object URL; storing it anywhere
-    /// durable makes an expired link present as a corrupt recording. See the ⛔ on
-    /// ``CallDetailModel/resolveRecording()``.
-    @State private var playback: RecordingPlayback?
 
     init(container: AppContainer, workspaceId: String, callId: String) {
         self.workspaceId = workspaceId
@@ -52,7 +44,6 @@ struct CallDetailView: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier(A11yID.Calls.detailRoot)
             .task { await model.load() }
-            .sheet(item: $playback) { RecordingPlayerSheet(url: $0.url) }
             // ⛔ THE GUIDELINE 1.2 FLAG. A transcript is the caller's own words, so
             // the screen that shows one has to offer a way to report it. ⚠️ There is
             // NO block control here: blocking is a property of a CONTACT, and a call
@@ -90,11 +81,7 @@ struct CallDetailView: View {
         case .loading:
             LoadingView(message: "Loading call…")
         case let .content(call):
-            CallDetailContentView(
-                call: call,
-                model: model,
-                onPlay: playRecording
-            )
+            CallDetailContentView(call: call, model: model)
         case let .failed(failure):
             FailureView(failure: failure, onRetry: reload)
         }
@@ -103,20 +90,12 @@ struct CallDetailView: View {
     private func reload() {
         Task { await model.load() }
     }
-
-    private func playRecording() {
-        Task {
-            guard let url = await model.resolveRecording() else { return }
-            playback = RecordingPlayback(url: url)
-        }
-    }
 }
 
 /// The loaded call.
 private struct CallDetailContentView: View {
     let call: CallSummary
     let model: CallDetailModel
-    let onPlay: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -146,7 +125,6 @@ private struct CallDetailContentView: View {
                 followUpCard
                 analysisCards
                 transcriptSection
-                recordingSection
             }
             .padding(DistrictSpacing.gutter)
             .districtReadableWidth()
@@ -187,7 +165,7 @@ private struct CallDetailContentView: View {
     ///
     /// ⛔ IT SAYS WHICH OF THE TWO IT IS. An absent summary and a summariser that
     /// failed read identically if both are rendered as nothing, and this screen is
-    /// where an operator decides whether to go listen to the recording. The wording
+    /// where an operator decides whether to go read the transcript. The wording
     /// lives on ``CallDisplay/aiSummaryNote`` beside the rest of this screen's copy.
     ///
     /// ⚠️ THE MUTED NOTE, NOT ``failureNote(_:)``. A failed summariser is a fact
@@ -261,28 +239,6 @@ private struct CallDetailContentView: View {
         }
     }
 
-    // MARK: - Recording
-
-    @ViewBuilder
-    private var recordingSection: some View {
-        switch model.recording {
-        case .idle:
-            // ⚠️ Offered from the row's `recordingUrl`, which is a hint rather than
-            // the truth: an archived copy lives under a key this shape does not
-            // expose, so the server can still produce a URL when it is absent.
-            if model.mayHaveRecording {
-                Button("Play recording", action: onPlay)
-                    .buttonStyle(.districtPrimary)
-            }
-        case .resolving:
-            ProgressView()
-        case .absent:
-            note("No recording for this call.")
-        case let .failed(failure):
-            failureNote(failure)
-        }
-    }
-
     // MARK: - Small pieces
 
     private func note(_ text: String) -> some View {
@@ -295,48 +251,5 @@ private struct CallDetailContentView: View {
         Text(failure.message)
             .font(DistrictType.bodySmall)
             .foregroundStyle(colors.destructive)
-    }
-}
-
-/// The identity a `sheet(item:)` needs, wrapping one resolved URL.
-///
-/// ⚠️ A FRESH `id` PER RESOLUTION, so presenting the sheet twice for the same call
-/// builds a new player rather than reusing a finished one.
-private struct RecordingPlayback: Identifiable {
-    let id = UUID()
-    let url: URL
-}
-
-/// Playback, for as long as the sheet is up.
-///
-/// ⛔ NO DOWNLOAD, NO SHARE, NO WRITE TO DISK. The URL is a short-lived presigned
-/// object URL for a customer's call recording; the only thing this app does with one
-/// is hand it to a player and forget it.
-private struct RecordingPlayerSheet: View {
-    let url: URL
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var player: AVPlayer
-
-    /// ⚠️ THE PLAYER IS BUILT ONCE, IN `init`. Constructing it in `body` would build a
-    /// new one on every redraw and restart the audio.
-    init(url: URL) {
-        self.url = url
-        _player = State(initialValue: AVPlayer(url: url))
-    }
-
-    var body: some View {
-        VStack(spacing: DistrictSpacing.row) {
-            VideoPlayer(player: player)
-                .frame(height: 220)
-            Button("Done") {
-                player.pause()
-                dismiss()
-            }
-            .buttonStyle(.districtSecondary)
-        }
-        .padding(DistrictSpacing.gutter)
-        .onAppear { player.play() }
-        .onDisappear { player.pause() }
     }
 }

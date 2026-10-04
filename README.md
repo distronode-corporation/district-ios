@@ -148,8 +148,8 @@ every pull request, and uses no secrets:
 - **release scripts** (Linux): tests the release workflow's scripts against stubs.
 
 A bundle that discovers nothing reports success, so CI counts what ran. **app** fails if
-`DistrictAITests` runs fewer than 470 or the signed-out UI tests fewer than 7. The first
-is a ratchet a little below the current count (486), so losing a handful of files fails,
+`DistrictAITests` runs fewer than 460 or the signed-out UI tests fewer than 7. The first
+is a ratchet a little below the current count (about 472), so losing a handful of files fails,
 while deleting one or two tests deliberately does not; the UI count is the exact sum of
 the classes CI names. DistrictCore's own test floor and coverage gate run in its
 repository.

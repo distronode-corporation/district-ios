@@ -52,7 +52,7 @@ enum SchedulingCopy {
     static let refresh = "Refresh"
 
     /// ⛔ "Open in browser" RATHER THAN "Manage scheduling". This button is not how you
-    /// manage scheduling (the nine sections are), it is how you reach what is not native
+    /// manage scheduling (the eight sections are), it is how you reach what is not native
     /// YET. The label says exactly that, and ``sectionsFootnote`` says it in a sentence
     /// underneath.
     static let openInBrowser = "Open in browser"
@@ -156,7 +156,6 @@ extension SchedulingCopy {
         case .booking: "Booking"
         case .calendar: "Calendar"
         case .team: "Team"
-        case .recordings: "Recordings"
         case .settings: "Settings"
         case .developer: "Developer"
         }
@@ -167,9 +166,7 @@ extension SchedulingCopy {
     /// ⛔ EACH ONE SAYS WHAT THE SECTION HOLDS RATHER THAN RESTATING ITS TITLE. A subtitle
     /// that paraphrases the row above it is a line of text that costs a thumb-scroll and
     /// tells nobody anything; these are compressed from the web pages' own subtitles, which
-    /// were written for the same job. ⚠️ `Recordings` deliberately does not say "Your
-    /// recordings": a recording belongs to the workspace, and the web's page header carries
-    /// a comment making the same point.
+    /// were written for the same job.
     static func sectionSubtitle(_ section: SchedulingSection) -> String? {
         switch section {
         case .hub, .eventType, .booking: nil
@@ -179,8 +176,7 @@ extension SchedulingCopy {
         case .bookings: "Every booking in this workspace, upcoming and past"
         case .calendar: "The accounts bookings are written to and checked against"
         case .team: "The hosts who can be booked, and the teams they route through"
-        case .recordings: "Recordings of booked meetings, with their notes and transcripts"
-        case .settings: "Your booking page, your recordings, and how the scheduler treats you"
+        case .settings: "Your booking page, your booking assistant, and how the scheduler treats you"
         case .developer: "API keys, connected apps and webhooks"
         }
     }

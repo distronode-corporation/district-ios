@@ -12,14 +12,12 @@ import SwiftUI
 /// ⛔ AND THERE IS NO PLACEHOLDER ARM, WHICH IS THE RULE ``RouteDestinations`` STATES AND
 /// THIS FILE INHERITS. Every arm below renders a real screen over a real read;
 /// `PlaceholderView`'s own header records that it may not be reachable from a build that
-/// goes to external testers (App Store Review Guideline 2.1), and nine rows on a hub are
-/// nine taps from the Overview.
+/// goes to external testers (App Store Review Guideline 2.1), and eight rows on a hub are
+/// eight taps from the Overview.
 ///
-/// ⚠️ THE ROLE IS CARRIED TO EVERY SECTION AND READ BY EXACTLY ONE. `recordings.list` is
-/// `viewer` while the download beside it is `agency`/`client`, so
-/// ``SchedulingRecordingsView`` gates one affordance on it. The other eight take it and
-/// ignore it, deliberately: a signature that varied per section would have to be
-/// remembered per call site, and the write stage gives all of them something to gate.
+/// ⚠️ THE ROLE IS CARRIED TO EVERY SECTION, whether or not it gates a write there,
+/// deliberately: a signature that varied per section would have to be remembered per
+/// call site.
 enum SchedulingDestinations {
     @MainActor
     @ViewBuilder
@@ -69,10 +67,6 @@ enum SchedulingDestinations {
 
         case .team:
             SchedulingTeamView(container: container, workspaceId: workspaceId, role: role)
-
-        // ⛔ THE ONE SECTION WHOSE ROLE IS LOAD-BEARING. See the ⚠️ on this type.
-        case .recordings:
-            SchedulingRecordingsView(container: container, workspaceId: workspaceId, role: role)
 
         case .settings:
             SchedulingSettingsView(container: container, workspaceId: workspaceId, role: role)

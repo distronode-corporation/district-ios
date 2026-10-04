@@ -68,14 +68,15 @@ packages:
   # package's five libraries, unchanged by the move.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    exactVersion: 2.0.0
+    # ⚠️ A REVISION UNTIL THE CORE PR MERGES: switch back to `exactVersion: 3.0.0` once that commit is tagged.
+    revision: 3d6f0043fa0bbe1cf21d6e94ff585b0db6d27747
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
   # day the cache misses. A root-level package reference is a constraint on the
   # whole graph, and XcodeGen writes one for every package listed here whether or
   # not a target links it (checked in a generated pbxproj with XcodeGen 2.46.0).
-  # 1.7.3 is the version district-core-swift 2.0.0's own Package.resolved records,
+  # 1.7.3 is the version district-core-swift 3.0.0's own Package.resolved records,
   # so the app and the package's tests run the same code. Bump it with the core.
   # ⚠️ The `.git` URL matches the spelling swift-crypto's manifest uses, so Xcode
   # sees one location for the identity rather than two.

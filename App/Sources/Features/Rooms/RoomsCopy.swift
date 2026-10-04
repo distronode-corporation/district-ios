@@ -13,9 +13,8 @@ import Foundation
 ///
 /// ⛔ AND NOTHING HERE PROMISES PLAYBACK. `MeetingResponses.swift` says it outright:
 /// the `Meeting` model has no recording column, neither meetings route has a
-/// recording sibling, and the only recording surface on this API is a telephone
-/// call's. The artefacts are the minutes and the transcript, and the copy offers
-/// exactly those.
+/// recording sibling, and nothing on this API is recorded at all. The artefacts are
+/// the minutes and the transcript, and the copy offers exactly those.
 ///
 /// ⛔ THE COMPANION IS NAMED BEFORE ANYBODY JOINS, NOT AFTER. It is dispatched into
 /// every `meet_` room and transcribes what is said; being told afterwards is being

@@ -64,18 +64,4 @@ enum SchedulingBookingWriteCopy {
     static let reassignDone = "Host changed"
     /// ⚠️ Every other scheduler user is archived or is already the host.
     static let reassignNoHosts = "No other host can take it."
-
-    // MARK: - Notes
-
-    /// ⛔ NO CONFIRMATION, MATCHING THE WEB, AND THAT IS A DELIBERATE OMISSION
-    /// RATHER THAN A GAP IN THE PORT. Regenerating notes destroys nothing: it
-    /// queues a rewrite of a summary the far end can produce again, so a dialog
-    /// would be ceremony in front of a safe button.
-    static let regenerate = "Regenerate notes"
-    /// ⛔ SAYS "ASKED FOR", NOT "WRITTEN". `bookings.notes.regenerate` returns as
-    /// soon as the work is QUEUED — `status` is ordinarily `pending` and `content`
-    /// is still the PREVIOUS text — so a sentence claiming new notes exist would be
-    /// wrong for as long as the job takes. The web renders the response body and
-    /// never renders its `status`; this client says what was actually achieved.
-    static let regenerateDone = "Notes queued. They replace the old ones when they are written."
 }

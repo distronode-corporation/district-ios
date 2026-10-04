@@ -8,7 +8,7 @@ import XCTest
 /// The fixtures and the one assertion every scheduling-write test is built on.
 ///
 /// ⛔ THE ASSERTION IS ABOUT THE `op` AND THE `params`, WHICH IS THE ONLY PLACE
-/// THE ANSWER IS. All 75 scheduling admin ops cross the wire through ONE endpoint
+/// THE ANSWER IS. All 64 scheduling admin ops cross the wire through ONE endpoint
 /// as `{workspaceId, op, params}`, so "did the editor send a create or a patch",
 /// "did the create carry the fourteen fields it must not" and "was the group
 /// delete addressed by `groupId` rather than `group_id`" are questions about the

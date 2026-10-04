@@ -5,16 +5,17 @@ import XCTest
 
 /// The scheduling section vocabulary: its list, its URL segments and its role bars.
 ///
-/// ⛔ THE ROLE ASSERTIONS ARE THE POINT OF THIS FILE. Every read on all nine sections is
+/// ⛔ THE ROLE ASSERTIONS ARE THE POINT OF THIS FILE. Every read on all eight sections is
 /// `viewer`-level today, which makes the gate look like a no-op and makes it the exact
 /// thing a later change breaks silently — a section whose read is narrowed to `client`
 /// would simply stop appearing for a viewer with nothing to say so. These tests pin the
 /// CURRENT answer so that narrowing one becomes a deliberate edit here.
 final class SchedulingSectionTests: XCTestCase {
-    /// ⛔ NINE ROWS ON THE HUB, AND `hub` IS NOT ONE OF THEM. It is the screen the list is
-    /// on; a row leading to itself would be a loop.
-    func test_IOS_SCHSEC_01_theHubListsNineSectionsAndNotItself() {
-        XCTAssertEqual(SchedulingSection.listed.count, 9)
+    /// ⛔ EIGHT ROWS ON THE HUB, AND `hub` IS NOT ONE OF THEM. It is the screen the list is
+    /// on; a row leading to itself would be a loop. (Recordings was the ninth until the
+    /// server retired meeting recording on 2026-10-03.)
+    func test_IOS_SCHSEC_01_theHubListsEightSectionsAndNotItself() {
+        XCTAssertEqual(SchedulingSection.listed.count, 8)
         XCTAssertFalse(SchedulingSection.listed.contains(.hub))
     }
 
@@ -32,7 +33,7 @@ final class SchedulingSectionTests: XCTestCase {
             SchedulingSection.listed.map { $0.pathSegment ?? "" },
             [
                 "overview", "event-types", "hours", "bookings", "calendar",
-                "team", "recordings", "settings", "developer",
+                "team", "settings", "developer",
             ]
         )
     }
@@ -58,6 +59,8 @@ final class SchedulingSectionTests: XCTestCase {
         XCTAssertEqual(SchedulingSection.forPathSegment("nope"), .hub)
         XCTAssertEqual(SchedulingSection.forPathSegment(""), .hub)
         XCTAssertEqual(SchedulingSection.forPathSegment(nil), .hub)
+        // ⚠️ A stale link to the retired recordings page lands on the hub too.
+        XCTAssertEqual(SchedulingSection.forPathSegment("recordings"), .hub)
     }
 
     /// ⛔ EVERY READ ON EVERY SECTION IS `viewer`-LEVEL TODAY. See the ⛔ at the top of this
@@ -70,7 +73,7 @@ final class SchedulingSectionTests: XCTestCase {
     }
 
     /// ⛔ AND THE CLAIM ABOVE IS CHECKED AGAINST THE CATALOG RATHER THAN RESTATED. Every op
-    /// these nine screens actually send is listed here and asserted `viewer` against
+    /// these eight screens actually send is listed here and asserted `viewer` against
     /// ``SchedulingAdminOp/minRole`` — so if the server narrows one, this fails with the
     /// op's name rather than the section quietly vanishing from the hub.
     func test_IOS_SCHSEC_08_everyOpTheSectionsSendIsAViewerRead() {
@@ -78,11 +81,10 @@ final class SchedulingSectionTests: XCTestCase {
             .meGet,
             .eventTypesList, .eventTypesGet, .eventTypesHostsGet, .eventTypesQuestionsList,
             .availabilityRulesList, .availabilityOverridesList,
-            .bookingsList, .bookingsAnswers, .bookingsNotes, .bookingsTranscript,
+            .bookingsList, .bookingsAnswers,
             .calendarStatus, .calendarConnectionsCalendarsGet, .zoomStatus,
             .usersList, .teamsList,
-            .recordingsList, .recordingsConsent,
-            .settingsBrandingGet, .settingsStorageGet, .settingsNotetakerGet, .settingsLlmGet,
+            .settingsBrandingGet, .settingsLlmGet,
             .apiKeysList, .oauthConnectionsList, .webhooksList, .webhooksDeliveries,
         ]
         for op in reads {
@@ -91,21 +93,20 @@ final class SchedulingSectionTests: XCTestCase {
         }
     }
 
-    /// ⛔ THE RECORDING DOWNLOAD IS THE ONE AFFORDANCE NARROWER THAN ITS LIST, which is the
-    /// whole reason the recordings screen reads a role at all. Asserted as a PAIR so the
-    /// asymmetry cannot be tidied away from either side.
-    func test_IOS_SCHSEC_09_theRecordingListAdmitsAViewerAndTheDownloadDoesNot() {
-        XCTAssertEqual(SchedulingAdminOp.recordingsList.minRole, .viewer)
-        // ⚠️ The download is not an `op` at all — it is a 302 on its own route — so the
-        // bar is asserted through the gate the screen actually uses.
+    /// ⛔ THE SECTIONS' WRITE CONTROLS ARE NARROWER THAN THEIR READS: a viewer reads every
+    /// section and is offered none of the writes. Asserted through the gate the screens
+    /// actually use.
+    func test_IOS_SCHSEC_09_aViewerReadsButMayNotWrite() {
+        XCTAssertEqual(SchedulingAdminOp.bookingsList.minRole, .viewer)
+        XCTAssertEqual(SchedulingAdminOp.bookingsCancel.minRole, .client)
         XCTAssertFalse(WorkspaceRole.allowsMutation(.viewer))
         XCTAssertTrue(WorkspaceRole.allowsMutation(.client))
         XCTAssertTrue(WorkspaceRole.allowsMutation(.agency))
     }
 
     /// ⛔ AND IT FAILS CLOSED ON A ROLE THAT DID NOT PARSE, which is the correct direction
-    /// for a control that takes a customer conversation off the platform.
-    func test_IOS_SCHSEC_10_anUnparseableRoleMayNotDownload() {
+    /// for a control that changes a customer's bookings.
+    func test_IOS_SCHSEC_10_anUnparseableRoleMayNotWrite() {
         XCTAssertFalse(WorkspaceRole.allowsMutation(nil))
     }
 }

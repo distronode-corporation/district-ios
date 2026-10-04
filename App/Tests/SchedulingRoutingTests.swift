@@ -21,10 +21,11 @@ final class SchedulingRoutingTests: XCTestCase {
         XCTAssertNil(destination("/dashboard/district/scheduling")?.detailId)
     }
 
-    /// ⛔ ALL NINE SUB-PATHS RESOLVE. The web publishes eight of them and the app draws
-    /// every one, so sending them to the hub would show somebody a screen they did not ask
-    /// for — the exact failure `openInBrowser` was introduced to stop.
-    func test_IOS_SCHLINK_02_allNineSubPathsResolveToTheirSection() {
+    /// ⛔ ALL EIGHT SUB-PATHS RESOLVE. The web publishes seven of them (and `overview` is
+    /// the register at its root) and the app draws every one, so sending them to the
+    /// hub would show somebody a screen they did not ask for — the exact failure
+    /// `openInBrowser` was introduced to stop.
+    func test_IOS_SCHLINK_02_allEightSubPathsResolveToTheirSection() {
         let expected: [(String, SchedulingSection)] = [
             ("overview", .overview),
             ("event-types", .eventTypes),
@@ -32,7 +33,6 @@ final class SchedulingRoutingTests: XCTestCase {
             ("bookings", .bookings),
             ("calendar", .calendar),
             ("team", .team),
-            ("recordings", .recordings),
             ("settings", .settings),
             ("developer", .developer),
         ]
@@ -95,22 +95,22 @@ final class SchedulingRoutingTests: XCTestCase {
     }
 
     func test_IOS_SCHLINK_07_aSubPathBecomesItsSectionsRoute() {
-        let route = route("/dashboard/district/scheduling/recordings", selected: "ws_1", role: .agency)
+        let route = route("/dashboard/district/scheduling/settings", selected: "ws_1", role: .agency)
         guard case let .scheduling(workspaceId, role, section) = route else {
             return XCTFail("expected a scheduling route, got \(String(describing: route))")
         }
         XCTAssertEqual(workspaceId, "ws_1")
         XCTAssertEqual(role, .agency)
-        XCTAssertEqual(section, .recordings)
+        XCTAssertEqual(section, .settings)
     }
 
     /// ⛔ THE ROLE IS DROPPED FOR A CROSS-TENANT LINK, and the section survives. A link
     /// naming another tenant must not carry the SELECTED workspace's role onto it — which
-    /// matters more now than it did, because the recordings screen reads that role to
-    /// decide whether to offer a download.
+    /// matters because the sections read that role to decide whether to offer their
+    /// writes.
     func test_IOS_SCHLINK_08_aCrossTenantLinkDropsTheRoleAndKeepsTheSection() {
         guard case let .destination(value) = outcome(
-            "/dashboard/district/scheduling/recordings",
+            "/dashboard/district/scheduling/settings",
             query: "?workspaceId=ws_2"
         ) else {
             return XCTFail("expected a destination")
@@ -125,7 +125,7 @@ final class SchedulingRoutingTests: XCTestCase {
         }
         XCTAssertEqual(workspaceId, "ws_2")
         XCTAssertNil(role, "a cross-tenant link must not carry the selected workspace's role")
-        XCTAssertEqual(section, .recordings)
+        XCTAssertEqual(section, .settings)
     }
 
     /// ⚠️ SCHEDULING HANGS OFF THE OVERVIEW TAB, which is where ``OverviewEntry`` already
@@ -141,9 +141,9 @@ final class SchedulingRoutingTests: XCTestCase {
     // MARK: - The gate
 
     /// ⛔ `.partial` FOR A VIEWER RATHER THAN `.hidden` OR `.none`, AND ALL THREE ARE
-    /// MEANINGFUL. `.hidden` would withhold nine screens the server would serve; `.none`
+    /// MEANINGFUL. `.hidden` would withhold eight screens the server would serve; `.none`
     /// would claim nothing on the surface is gated, which stopped being true when the
-    /// recordings download arrived.
+    /// write controls arrived.
     func test_IOS_SCHLINK_10_aViewerReachesSchedulingReadOnly() {
         let route = Route.scheduling(workspaceId: "ws_1", role: .viewer, section: .hub)
         guard case .partial = RouteGate.gate(for: route, role: .viewer) else {
@@ -192,7 +192,7 @@ final class SchedulingRoutingTests: XCTestCase {
     }
 
     /// ⛔ AND THE ROW OPENS THE HUB, not a section. A workspace with no booking page has
-    /// nothing in any of the nine, so landing elsewhere would be a screen whose every read
+    /// nothing in any of the eight, so landing elsewhere would be a screen whose every read
     /// answers `scheduling_not_ready`.
     func test_IOS_SCHLINK_15_theOverviewRowOpensTheHub() {
         let entry = OverviewEntry.all(workspaceId: "ws_1", role: .agency)

@@ -272,11 +272,13 @@ jobs:
       # ⛔ A BUNDLE THAT DISCOVERS NOTHING REPORTS SUCCESS; a scheme edit that drops the
       # target from the test action would turn this job into a green no-op, and files
       # dropped from the target lose their tests just as quietly. The floor is a ratchet,
-      # set a little below the count (486 on iPhone and iPad on 2026-10-01): raise it when
-      # tests are added, and lower it only in the commit that deletes tests on purpose.
+      # set a little below the count (486 on iPhone and iPad on 2026-10-01; about 472 after
+      # the recording removal deleted 17 tests with the scheduler recordings, notes and
+      # storage screens and added 3): raise it when tests are added, and lower it only in
+      # the commit that deletes tests on purpose.
       - name: DistrictAITests were discovered
         run: |
-          minimum=470
+          minimum=460
           executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-test.log | sort -n | tail -1)
           echo "app-target tests executed - ${executed:-0} (at least $minimum expected)"
           if [ -z "$executed" ] || [ "$executed" -lt "$minimum" ]; then

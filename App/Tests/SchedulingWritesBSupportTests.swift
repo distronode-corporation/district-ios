@@ -5,7 +5,7 @@ import DistrictNetwork
 import Foundation
 import XCTest
 
-/// The fixtures and the request reader the bookings, team, settings and recordings
+/// The fixtures and the request reader the bookings, team and settings
 /// write tests share.
 ///
 /// ⛔ IT ASSERTS ON THE ENCODED BODY, NOT ON ARGUMENTS, AND THAT IS THE WHOLE POINT
@@ -108,14 +108,6 @@ enum SchedulingWritesBFixtures {
     "banner_url":"","banner_opacity":60,"privacy_url":"https://acme.test/privacy",
     "terms_url":"","fallback_locale":"en","supported_locales":[{"code":"en","name":"English"}]}
     """
-
-    static func storage(enabled: Bool, ready: Bool) -> String {
-        "{\"recordings_enabled\":\(enabled),\"recordings_storage_ready\":\(ready)}"
-    }
-
-    static func notetaker(_ enabled: Bool) -> String {
-        "{\"enabled\":\(enabled)}"
-    }
 
     static func llm(enabled: Bool, instructions: String) -> String {
         "{\"enabled\":\(enabled),\"extra_instructions\":\"\(instructions)\"}"

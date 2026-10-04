@@ -92,17 +92,6 @@ class SchedulingModelTestCase: XCTestCase {
         )
     }
 
-    /// ⚠️ THE ONE MODEL THAT TAKES ``SchedulingAdminMediaRepository``, because a download
-    /// is a 302 rather than an `op` post.
-    @MainActor
-    func recordings(_ transport: SchedulingTestTransport) -> SchedulingRecordingsModel {
-        SchedulingRecordingsModel(
-            repository: admin(transport),
-            media: media(transport),
-            workspaceId: "ws_1"
-        )
-    }
-
     @MainActor
     func settings(_ transport: SchedulingTestTransport) -> SchedulingSettingsModel {
         SchedulingSettingsModel(repository: admin(transport), workspaceId: "ws_1")

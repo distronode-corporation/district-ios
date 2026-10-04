@@ -40,11 +40,6 @@ extension A11yID {
         static let profileEdit = "district-scheduling-entry-profile-edit"
         static let notificationsEdit = "district-scheduling-entry-notifications-edit"
 
-        /// The bulk delete. ⚠️ The per-row delete is addressed through
-        /// ``A11yID/SchedulingWritesB/recordingDeleteConfirm``, because it is a control
-        /// inside the row rather than one that opens a sheet.
-        static let recordingDeleteAll = "district-scheduling-entry-recording-delete-all"
-
         // Developer.
         static let keyCreate = "district-scheduling-entry-key-create"
         static let webhookCreate = "district-scheduling-entry-webhook-create"

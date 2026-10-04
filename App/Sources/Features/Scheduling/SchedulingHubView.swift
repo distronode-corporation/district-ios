@@ -3,10 +3,10 @@ import SwiftUI
 import UIKit
 
 /// The scheduling hub: what state the tenancy is in, the one button that provisions
-/// one, and the way in to the nine sections.
+/// one, and the way in to the eight sections.
 ///
 /// ⛔ THE NATIVE SECTIONS ARE THE PRODUCT AND THE HAND-OFF IS THE FALLBACK.
-/// `POST /api/district/scheduling/admin` is a catalogued allowlist of seventy-five
+/// `POST /api/district/scheduling/admin` is a catalogued allowlist of sixty-four
 /// operations (``SchedulingAdminOp``), with typed DTOs and repository methods for every
 /// one, and the scheduler's own admin console is retired — `scheduling/sso` answers
 /// **410** — so event types, availability, questions and branding are edited here.
@@ -16,16 +16,16 @@ import UIKit
 /// Guideline 3.1.3(b) forbids the purchase, and a "contact sales" link out of a
 /// paid product's own settings is that offer wearing a different hat.
 ///
-/// ⛔ THE SECTION LIST APPEARS ONLY FOR A `live` TENANCY. Every one of the nine reads
+/// ⛔ THE SECTION LIST APPEARS ONLY FOR A `live` TENANCY. Every one of the eight reads
 /// answers **409 `scheduling_not_ready`** without one, so offering the rows earlier would
-/// be nine links to the same refusal — and the refusal's own sentence ("Scheduling is not
+/// be eight links to the same refusal — and the refusal's own sentence ("Scheduling is not
 /// set up for this workspace yet") is already what the card above says, better.
 ///
 /// ⛔ `canManage` STILL COMES FROM THE SERVER AND IS NOT RE-DERIVED FROM THE ROLE. The
 /// status route answers it for exactly this purpose; a second gate built from a role
 /// STRING would fail closed on a role that did not parse and hide Enable from an owner the
-/// server would have admitted. ⚠️ The role IS used, for one thing only: the recordings
-/// section's download affordance, whose bar is narrower than the list beside it.
+/// server would have admitted. ⚠️ The role IS carried on to the sections, which gate
+/// their write controls on it.
 ///
 /// ⚠️ EVERY STATE GETS ITS OWN SENTENCE. A workspace with no tenancy row, a
 /// provision that failed and a read that never landed are three different answers
@@ -103,15 +103,15 @@ struct SchedulingHubView: View {
 
     // MARK: - Sections
 
-    /// The nine native sections, for a tenancy that is live.
+    /// The eight native sections, for a tenancy that is live.
     ///
     /// ⛔ GATED ON THE TENANCY BEING `live`, NOT ON THE READ HAVING SUCCEEDED. A failed
     /// status read leaves ``SchedulingModel/state`` on `.failed` and draws no rows, which
     /// is right: the client does not know whether there is a booking page, so it must not
-    /// offer nine links that may all answer 409.
+    /// offer eight links that may all answer 409.
     ///
     /// ⛔ AND EVERY ROW IS PRESENT FOR EVERY ROLE, WHICH IS A MEASUREMENT RATHER THAN AN
-    /// OVERSIGHT. ``SchedulingSection/minReadRole`` is `viewer` for all nine, because the
+    /// OVERSIGHT. ``SchedulingSection/minReadRole`` is `viewer` for all eight, because the
     /// server's rule is "reads are viewer, writes are client" and every row opens a
     /// read. The row list is still built THROUGH that property rather than unconditionally,
     /// so the day a section's read needs `client` the hub drops it instead of offering a
@@ -327,7 +327,7 @@ struct SchedulingHubView: View {
         .padding(.top, DistrictSpacing.tight)
     }
 
-    /// ⛔ SECONDARY, NOT PRIMARY. The nine section rows below are the product and this is
+    /// ⛔ SECONDARY, NOT PRIMARY. The eight section rows below are the product and this is
     /// the way out for what they do not cover; a primary button here would send people
     /// out of the app to do things the app can do.
     private var browserButton: some View {

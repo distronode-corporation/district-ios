@@ -38,26 +38,3 @@ struct SchedulingBookingCancelSheet: View {
         .accessibilityIdentifier(A11yID.SchedulingWritesB.bookingCancelSheet)
     }
 }
-
-/// Ask for a booking's meeting notes to be written again.
-///
-/// ⛔ A BUTTON, NOT A DIALOG, WHICH IS THE WEB'S SHAPE AND IS CORRECT: nothing is
-/// destroyed. ⚠️ And the sentence it leaves behind says the work was QUEUED rather
-/// than done — the op returns while `status` is still `pending`, so a screen
-/// claiming new notes exist would be wrong for as long as the job takes.
-struct SchedulingBookingRegenerateNotesButton: View {
-    @Bindable var model: SchedulingBookingNotesModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            Button(SchedulingBookingWriteCopy.regenerate) {
-                Task { await model.regenerate() }
-            }
-            .buttonStyle(.districtSecondary)
-            .disabled(model.busy)
-            .accessibilityIdentifier(A11yID.SchedulingWritesB.bookingRegenerateNotes)
-            SchedulingWriteOutcome(state: model.state)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}

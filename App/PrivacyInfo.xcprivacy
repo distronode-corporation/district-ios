@@ -123,8 +123,8 @@
 			</array>
 		</dict>
 		<!--
-		  Calls the operator places and answers. Recording is a workspace setting;
-		  the microphone is used for nothing else.
+		  Calls the operator places and answers. Nothing is recorded; the
+		  microphone is used for nothing else.
 		-->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>

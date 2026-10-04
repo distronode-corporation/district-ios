@@ -13,7 +13,7 @@ import Foundation
 /// ⚠️ THE IDENTITY IS A FRESH `UUID` AND NEVER THE MODEL'S OWN. Two presses of the
 /// same control must present twice, and an identity derived from the edited row
 /// would be deduplicated by SwiftUI on the second press — the same rule
-/// ``SchedulingRecordingPlayback`` and ``SchedulingHandOff`` state for a URL.
+/// ``SchedulingHandOff`` states for a URL.
 struct SchedulingWritePresentation<Model>: Identifiable {
     let id = UUID()
     let model: Model

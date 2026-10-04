@@ -1,9 +1,9 @@
 import Foundation
 
-/// The profile, branding, storage, notetaker and assistant sentences, plus the
-/// two option lists whose ORDER is part of the contract.
+/// The profile, branding and booking assistant sentences, plus the two option lists
+/// whose ORDER is part of the contract.
 ///
-/// ⛔ PORTED FROM THE WEB'S PROFILE, NOTIFICATIONS, BOOKING PAGE AND RECORDINGS
+/// ⛔ PORTED FROM THE WEB'S PROFILE, NOTIFICATIONS, BOOKING PAGE AND BOOKING ASSISTANT
 /// SETTINGS TABS AND THEIR SHARED FORMAT HELPERS. See the namespace note on
 /// ``SchedulingBookingWriteCopy``.
 enum SchedulingSettingsWriteCopy {
@@ -137,24 +137,17 @@ enum SchedulingSettingsWriteCopy {
     /// Remove and then Cancel is the surprise this line exists to prevent.
     static let imageImmediate = "Images save as soon as you choose or remove them."
 
-    // MARK: - Recording storage, notetaker, assistant
+    // MARK: - The booking assistant (settings.llm)
 
-    static let automationTitle = "Recordings and notes"
-    static let automationSave = "Save recordings and notes"
-    static let automationDone = "Recordings and notes saved"
-    static let recordingsToggle = "Record built-in video meetings"
-    static let recordingsReadyHint = "Meetings held on the built-in video are recorded to your workspace's storage."
-    /// ⛔ THE TOGGLE IS DISABLED IN THIS STATE, WHICH IS THE WEB'S BEHAVIOUR AND THE
-    /// ONE THE TRANSPORT WARNS ABOUT: turning recording on does NOT make recording
-    /// work, and `recordings_storage_ready` is the field that says so.
-    static let recordingsNotReadyHint = "Recording storage is not enabled for this region yet, "
-        + "so meetings cannot be recorded."
-    static let notetakerLabel = "Meeting notes"
-    static let notetakerHint = "A written summary of each recorded meeting, from its transcript."
-    static let notetakerToggle = "Write AI meeting notes after recorded meetings"
+    // ⚠️ The recording and notetaker switches that shared this sheet were retired with
+    // meeting recording (2026-10-03), as on the web's "Booking assistant" tab.
+    static let automationTitle = "Booking assistant"
+    static let automationSave = "Save booking assistant"
+    static let automationDone = "Booking assistant saved"
 
     static let assistantLabel = "Booking assistant"
-    static let assistantHint = "The assistant that answers questions on your booking page and writes the notes."
+    /// ⚠️ NO "AND WRITES THE NOTES": meeting notes were retired with recording (2026-10-03).
+    static let assistantHint = "The assistant that answers questions on your booking page."
     static let assistantToggle = "Turn the booking assistant on"
     static let assistantInstructionsLabel = "Extra instructions for the booking assistant"
     static let assistantInstructionsHint = "Extra instructions for the booking assistant. Up to 4000 characters."

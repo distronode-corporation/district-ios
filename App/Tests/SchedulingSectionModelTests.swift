@@ -16,8 +16,8 @@ import XCTest
 /// ⛔ AND EVERY CASE HERE ASSERTS A DEGRADATION RATHER THAN A HAPPY PATH. Each of these
 /// screens is several independent reads, and the decisions worth pinning are the ones
 /// about what a PARTIAL answer is allowed to claim: a missing calendar list is not an
-/// empty one, an unreadable District membership must not accuse every host of having
-/// left, and a recording a viewer can see is not one they may take away.
+/// empty one, and an unreadable District membership must not accuse every host of
+/// having left.
 final class SchedulingSectionModelTests: SchedulingModelTestCase {
     // MARK: - Bookings
 
@@ -76,34 +76,22 @@ final class SchedulingSectionModelTests: SchedulingModelTestCase {
 
     // MARK: - One booking
 
-    /// ⛔ THE MEDIA RE-WORDING TOUCHES `unknown` AND NOTHING ELSE. Notes and transcript get
-    /// the storage sentence for a refusal this surface could not classify, while a refusal
-    /// that IS classified keeps its own — and the answers row, which is not media, keeps
-    /// its own either way.
+    /// ⛔ ONE READ, AND A REFUSAL KEEPS ITS OWN SENTENCE. The notes and transcript reads
+    /// beside it were retired with meeting recording (2026-10-03), so nothing else may be
+    /// asked for.
     @MainActor
-    func test_IOS_SCHSECMODEL_03_onlyTheUnclassifiedMediaRefusalIsReworded() async {
+    func test_IOS_SCHSECMODEL_03_oneBookingReadsOnlyItsAnswers() async {
         let transport = SchedulingTestTransport([
             "bookings.answers": .refused("unavailable"),
-            "bookings.notes": .refused("something_the_client_does_not_know"),
-            // ⛔ A **403**, NOT A `{ok:false,"failure":"forbidden"}` REFUSAL. Only three
-            // of the five codes are reachable from a `failure` STRING; `forbidden` and
-            // `notReady` come from a status alone, because a 200 carrying `{ok:false}`
-            // means our route was satisfied and the SCHEDULER refused, which cannot
-            // decide either. A refusal string here maps to `unknown` and is then
-            // reworded by the media rule, which is the opposite of what this asserts.
-            "bookings.transcript": .http(403, error: "forbidden"),
         ])
         let model = bookingDetail(transport)
         await model.load()
 
-        guard case let .failed(answers) = model.answers,
-              case let .failed(notes) = model.notes,
-              case let .failed(transcript) = model.transcript
-        else { return XCTFail("all three reads were refused and all three must say so") }
+        guard case let .failed(answers) = model.answers else {
+            return XCTFail("the answers read was refused and must say so")
+        }
         XCTAssertEqual(answers.message, SchedulingFailureCopy.unavailable)
-        XCTAssertEqual(notes.message, SchedulingCopy.mediaUnavailable)
-        XCTAssertEqual(notes.action, FailureText.Action.none)
-        XCTAssertEqual(transcript.message, SchedulingFailureCopy.forbidden)
+        XCTAssertEqual(transport.ops, ["bookings.answers"])
     }
 
     // MARK: - Calendar
@@ -178,50 +166,25 @@ final class SchedulingSectionModelTests: SchedulingModelTestCase {
         XCTAssertEqual(model.strandedNotice?.contains("Ada"), true)
     }
 
-    // MARK: - Recordings
-
-    /// ⛔ THREE CONDITIONS, ALL REQUIRED, AND EACH IS ASSERTED BY REMOVING IT. The role
-    /// clears the server's bar, the object has to exist or the download 404s, and storage
-    /// has to be on or it cannot be served at all. The rows are drawn for everybody either
-    /// way — a viewer sees that a recording exists and is not offered a copy.
-    @MainActor
-    func test_IOS_SCHSECMODEL_07_theDownloadNeedsTheRoleTheFileAndStorage() async {
-        let transport = SchedulingTestTransport([
-            "me.get": .me(),
-            "settings.storage.get": .data(#"{"recordings_enabled":true,"recordings_storage_ready":true}"#),
-            "recordings.list": .data("""
-            {"recordings":[{"id":"rec_1","status":"ready","has_file":true},
-                           {"id":"rec_2","status":"ready","has_file":false}]}
-            """),
-        ])
-        let model = recordings(transport)
-        await model.load()
-
-        XCTAssertEqual(model.state.value?.count, 2)
-        XCTAssertFalse(model.storageMissing)
-        XCTAssertEqual(model.rows(mayDownload: true).map(\.canDownload), [true, false])
-        // ⚠️ The role alone removes it from BOTH rows, which is what a viewer sees.
-        XCTAssertEqual(model.rows(mayDownload: false).map(\.canDownload), [false, false])
-    }
-
-    /// ⛔ STORAGE OFF IS A PRODUCT STATE, NOT A FAULT: the rows still list, because they
-    /// exist, and nothing on them can be downloaded.
-    @MainActor
-    func test_IOS_SCHSECMODEL_08_storageOffKeepsTheRowsAndDropsTheDownload() async {
-        let transport = SchedulingTestTransport([
-            "me.get": .me(),
-            "settings.storage.get": .data(#"{"recordings_enabled":false,"recordings_storage_ready":false}"#),
-            "recordings.list": .data(#"{"recordings":[{"id":"rec_1","status":"ready","has_file":true}]}"#),
-        ])
-        let model = recordings(transport)
-        await model.load()
-
-        XCTAssertTrue(model.storageMissing)
-        XCTAssertEqual(model.state.value?.count, 1)
-        XCTAssertEqual(model.rows(mayDownload: true).first?.canDownload, false)
-    }
-
     // MARK: - Settings
+
+    /// ⛔ THE SECOND TAB IS THE BOOKING ASSISTANT AND READS `settings.llm.get` ALONE. It
+    /// was "Recordings and notes" and read storage and the notetaker as well, until both
+    /// were retired with meeting recording (2026-10-03).
+    @MainActor
+    func test_IOS_SCHSECMODEL_07_theAssistantTabReadsOnlyTheAssistant() async {
+        let transport = SchedulingTestTransport([
+            "settings.branding.get": .data(#"{"business_name":"Acme"}"#),
+            "settings.llm.get": .data(#"{"enabled":true,"extra_instructions":"Ask for the location."}"#),
+        ])
+        let model = settings(transport)
+        await model.loadCurrentTab()
+        await model.selectTab("assistant")
+
+        XCTAssertEqual(transport.ops, ["settings.branding.get", "settings.llm.get"])
+        XCTAssertEqual(model.assistant?.value?.enabled, true)
+        XCTAssertEqual(model.assistant?.value?.extraInstructions, "Ask for the location.")
+    }
 
     /// ⛔ THE PROFILE AND NOTIFICATIONS TABS SHARE ONE `me.get`, because they are two views
     /// of one payload. Reading it again on the second tab would spend a request to display
