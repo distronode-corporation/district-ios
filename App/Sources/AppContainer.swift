@@ -131,7 +131,7 @@ final class AppContainer {
     /// provisions one.
     let scheduling: SchedulingRepository
 
-    /// The seventy-five catalogued scheduling admin operations.
+    /// The sixty-four catalogued scheduling admin operations.
     ///
     /// ⛔ A SEPARATE REPOSITORY FROM ``scheduling`` EVEN THOUGH BOTH ARE "SCHEDULING",
     /// AND THE SPLIT IS THE SERVER'S. ``scheduling`` talks to District's own
@@ -148,13 +148,12 @@ final class AppContainer {
     /// the ⛔ on ``SchedulingAdminRepository/init(client:reportUnknownOp:)``.
     let schedulingAdmin: SchedulingAdminRepository
 
-    /// Recording downloads, and the image uploads the write stage will need.
+    /// The image uploads (logo, banner, avatar).
     ///
-    /// ⛔ ITS OWN TYPE BECAUSE ITS TWO CALLS ARE NOT `op` POSTS. A download is a **302**
-    /// whose `Location` is a presigned URL, and an upload is `multipart/form-data`;
-    /// neither fits `perform(_:workspaceId:params:as:)`, which posts JSON and decodes an
-    /// envelope. ⚠️ It shares the one ``ApiClient`` with everything else, so the redirect
-    /// policy and the token refresh are the same ones.
+    /// ⛔ ITS OWN TYPE BECAUSE AN UPLOAD IS NOT AN `op` POST. It is
+    /// `multipart/form-data`, which does not fit `perform(_:workspaceId:params:as:)`,
+    /// which posts JSON and decodes an envelope. ⚠️ It shares the one ``ApiClient`` with
+    /// everything else, so the token refresh is the same one.
     let schedulingAdminMedia: SchedulingAdminMediaRepository
 
     /// The hand-off into the scheduler's own admin.

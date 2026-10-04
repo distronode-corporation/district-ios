@@ -5,8 +5,7 @@ import DistrictNetwork
 import Foundation
 import XCTest
 
-/// The scheduling read screens send their independent reads together, and a recording's
-/// Play says when it fails.
+/// The scheduling read screens send their independent reads together.
 ///
 /// ⛔ CONCURRENCY IS MEASURED, NOT INFERRED FROM ORDER. ``ProbeTransport`` holds each
 /// request until as many as the screen should have in flight have arrived (or a short
@@ -14,25 +13,6 @@ import XCTest
 /// in turn never has more than one in flight, so it reads 1 here and fails.
 final class SchedulingReadConcurrencyTests: SchedulingModelTestCase {
     // MARK: - Independent reads
-
-    @MainActor
-    func testRecordingsSendsTheProfileStorageAndListTogether() async {
-        let probe = ProbeTransport(expected: 3, inner: SchedulingTestTransport([
-            "me.get": .me(timezone: "America/Toronto"),
-            "settings.storage.get": .data(#"{"recordings_enabled":true,"recordings_storage_ready":true}"#),
-            "recordings.list": .data(#"{"recordings":[{"id":"rec_1","status":"ready","has_file":true}]}"#),
-        ]))
-        let model = SchedulingRecordingsModel(
-            repository: SchedulingAdminRepository(client: probeClient(probe), reportUnknownOp: { _ in }),
-            media: SchedulingAdminMediaRepository(client: probeClient(probe)),
-            workspaceId: "ws_1"
-        )
-        await model.load()
-
-        XCTAssertEqual(probe.maxInFlight, 3)
-        XCTAssertEqual(model.timezone, "America/Toronto")
-        XCTAssertEqual(model.state.value?.count, 1)
-    }
 
     @MainActor
     func testBookingsSendsItsThreeContextReadsTogether() async {
@@ -109,73 +89,10 @@ final class SchedulingReadConcurrencyTests: SchedulingModelTestCase {
         XCTAssertNil(model.zoom)
     }
 
-    // MARK: - Play
-
-    /// ⛔ A FAILED MINT IS SAID ON THE ROW. It used to return nil and leave the button
-    /// doing nothing at all.
-    @MainActor
-    func testAFailedPlayIsVisibleOnTheRow() async {
-        // ⚠️ No stub for the download route, so it answers 500.
-        let model = recordings(SchedulingTestTransport([:]))
-
-        let url = await model.downloadURL(for: "rec_1")
-
-        XCTAssertNil(url)
-        XCTAssertEqual(model.playFailures["rec_1"]?.message, SchedulingFailureCopy.unavailable)
-        XCTAssertTrue(model.minting.isEmpty)
-    }
-
-    /// ⛔ A FAILED PLAY NEVER SAYS "That did not save". The catch-all is reworded for
-    /// playback and keeps its offer; a specific refusal keeps its shared sentence.
-    @MainActor
-    func testAnUnclassifiedPlayFailureSaysTheRecordingCouldNotBeOpened() {
-        let unknown = SchedulingRecordingsModel.playFailure(SchedulingAdminError.unknown)
-        XCTAssertEqual(unknown.message, "That recording could not be opened. Try again.")
-        XCTAssertEqual(unknown.action, .retry)
-
-        let invalid = SchedulingRecordingsModel.playFailure(SchedulingAdminError.invalidParams([]))
-        XCTAssertEqual(invalid.message, SchedulingCopy.recordingPlayFailed)
-        XCTAssertEqual(invalid.action, .none)
-
-        let offline = SchedulingRecordingsModel.playFailure(SchedulingAdminError.transport("offline"))
-        XCTAssertEqual(offline.message, SchedulingFailureCopy.offline)
-    }
-
-    /// ⛔ A SECOND PRESS WHILE THE FIRST IS MINTING SPENDS NOTHING. Each press used to
-    /// mint its own presigned URL and present its own player.
-    @MainActor
-    func testASecondPressWhileMintingIsDropped() async throws {
-        let gate = GatedRedirectTransport(location: "https://media.example/rec_1.mp4")
-        let model = SchedulingRecordingsModel(
-            repository: SchedulingAdminRepository(client: gatedClient(gate), reportUnknownOp: { _ in }),
-            media: SchedulingAdminMediaRepository(client: gatedClient(gate)),
-            workspaceId: "ws_1"
-        )
-
-        let first = Task { await model.downloadURL(for: "rec_1") }
-        for _ in 0 ..< 500 where gate.requests == 0 {
-            try await Task.sleep(for: .milliseconds(2))
-        }
-        XCTAssertTrue(model.minting.contains("rec_1"))
-        let second = await model.downloadURL(for: "rec_1")
-        gate.open()
-        let url = await first.value
-
-        XCTAssertNil(second)
-        XCTAssertEqual(url?.absoluteString, "https://media.example/rec_1.mp4")
-        XCTAssertEqual(gate.requests, 1)
-        XCTAssertTrue(model.minting.isEmpty)
-        XCTAssertNil(model.playFailures["rec_1"])
-    }
-
     // MARK: - Support
 
     private func probeClient(_ probe: ProbeTransport) -> ApiClient {
         ApiClient(baseURL: ApiClient.productionBaseURL, transport: probe, accessToken: { "session-token" })
-    }
-
-    private func gatedClient(_ gate: GatedRedirectTransport) -> ApiClient {
-        ApiClient(baseURL: ApiClient.productionBaseURL, transport: gate, accessToken: { "session-token" })
     }
 }
 
@@ -211,50 +128,5 @@ final class ProbeTransport: HTTPTransport, @unchecked Sendable {
         }
         defer { lock.withLock { inFlight -= 1 } }
         return try await inner.send(request, followRedirects: followRedirects)
-    }
-}
-
-/// Answers every request with a 302 to `location`, but only once ``open()`` is called.
-final class GatedRedirectTransport: HTTPTransport, @unchecked Sendable {
-    private let location: String
-    private let lock = NSLock()
-    private var waiting: [CheckedContinuation<Void, Never>] = []
-    private var isOpen = false
-    private var count = 0
-
-    init(location: String) {
-        self.location = location
-    }
-
-    var requests: Int {
-        lock.withLock { count }
-    }
-
-    func send(_ request: HTTPRequest, followRedirects: Bool) async throws -> HTTPResponse {
-        _ = request
-        _ = followRedirects
-        await withCheckedContinuation { continuation in
-            let proceed = lock.withLock { () -> Bool in
-                count += 1
-                if isOpen {
-                    return true
-                }
-                waiting.append(continuation)
-                return false
-            }
-            if proceed {
-                continuation.resume()
-            }
-        }
-        return HTTPResponse(statusCode: 302, headers: ["Location": location], body: nil)
-    }
-
-    func open() {
-        let resumed = lock.withLock { () -> [CheckedContinuation<Void, Never>] in
-            isOpen = true
-            defer { waiting = [] }
-            return waiting
-        }
-        resumed.forEach { $0.resume() }
     }
 }

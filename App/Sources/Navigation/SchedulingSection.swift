@@ -28,7 +28,7 @@ import Foundation
 /// and a booking by ID because `bookings.answers` does; carrying the other half of
 /// either pair would mean deriving the server's key from a display value.
 enum SchedulingSection: Hashable, Sendable {
-    /// The hub itself: the tenancy card, Enable, and the list of the nine below.
+    /// The hub itself: the tenancy card, Enable, and the list of the eight below.
     case hub
 
     /// The register the web serves at the scheduling ROOT: four reads summarised.
@@ -44,14 +44,16 @@ enum SchedulingSection: Hashable, Sendable {
 
     case bookings
 
-    /// One booking, with its answers, notes and transcript.
+    /// One booking, with its answers.
     case booking(id: String)
 
     case calendar
 
     case team
 
-    case recordings
+    // ⚠️ `recordings` WAS A SECTION UNTIL 2026-10-03, when the server retired meeting
+    // recording and the web dropped the page. A stale `/scheduling/recordings` link
+    // lands on the hub through ``forPathSegment(_:)``.
 
     case settings
 
@@ -59,7 +61,7 @@ enum SchedulingSection: Hashable, Sendable {
 }
 
 extension SchedulingSection {
-    /// The nine rows the hub draws, in the web console's own order.
+    /// The eight rows the hub draws, in the web console's own order.
     ///
     /// ⛔ THE ORDER MIRRORS THE WEB SIDEBAR. An operator who has used the dashboard
     /// should find the same thing in the same place; a phone that reordered them by how
@@ -76,7 +78,6 @@ extension SchedulingSection {
         .bookings,
         .calendar,
         .team,
-        .recordings,
         .settings,
         .developer,
     ]
@@ -97,7 +98,6 @@ extension SchedulingSection {
         case .bookings: "bookings"
         case .calendar: "calendar"
         case .team: "team"
-        case .recordings: "recordings"
         case .settings: "settings"
         case .developer: "developer"
         }
@@ -140,16 +140,13 @@ extension SchedulingSection {
     /// surface has one place to disagree with that — and so that the day it does, the hub
     /// drops the row instead of offering a screen whose first request answers 403.
     ///
-    /// ⛔ THE ONE PLACE THE RULE ALREADY BITES IS NOT HERE: `recordings.list` is `viewer`
-    /// while the recording DOWNLOAD beside it is `agency`/`client`. That is an affordance
-    /// inside a section rather than a bar on reaching it, so it is gated on the row's own
-    /// control (see ``SchedulingRecordingsView``) and must not be lifted to this property
-    /// — doing so would hide the consent evidence from the role most likely to be asked
-    /// to check it.
+    /// ⛔ THE WRITE CONTROLS INSIDE A SECTION ARE NOT THIS BAR. They are gated on the
+    /// control itself (`WorkspaceRole.allowsMutation`), and lifting them here would hide
+    /// a whole section from a viewer who can read every row of it.
     var minReadRole: SchedulingAdminRole {
         switch self {
         case .hub, .overview, .eventTypes, .eventType, .hours, .bookings, .booking,
-             .calendar, .team, .recordings, .settings, .developer:
+             .calendar, .team, .settings, .developer:
             .viewer
         }
     }

@@ -23,17 +23,11 @@ enum CallTranscriptState {
     case failed(FailureText)
 }
 
-/// The recording, whose URL is resolved at the moment of playback.
-enum CallRecordingState {
-    case idle
-    case resolving
-    /// ⚠️ Ordinary for a missed call, so it reads as a fact rather than an error.
-    case absent
-    case failed(FailureText)
-}
-
-/// One call in full: the row, its transcript on demand, and a recording URL resolved
-/// only at playback.
+/// One call in full: the row and its transcript on demand.
+///
+/// ⚠️ NO RECORDING. Nothing is recorded in any region, and the server retired
+/// `calls/{id}/recording` on 2026-10-03; `CallSummary.recordingUrl` still decodes and
+/// is always null, and nothing reads it.
 ///
 /// ⚠️ IT FETCHES BY ID RATHER THAN RECEIVING THE ROW, which is what makes the screen
 /// survive process death and be openable from a push notification, where an id is all
@@ -43,7 +37,6 @@ enum CallRecordingState {
 final class CallDetailModel {
     private(set) var state: CallDetailState = .loading
     private(set) var transcript: CallTranscriptState = .idle
-    private(set) var recording: CallRecordingState = .idle
 
     private let calls: CallsRepository
     private let workspaceId: String
@@ -55,20 +48,9 @@ final class CallDetailModel {
         self.callId = callId
     }
 
-    /// ⚠️ Whether a recording is worth OFFERING, from the row we already have, so the
-    /// screen does not show a play button that resolves to a 404. Not authoritative:
-    /// an archived copy lives under a key this shape does not expose, so the server
-    /// can still produce a URL when this is false. Erring toward offering it is the
-    /// friendlier mistake.
-    var mayHaveRecording: Bool {
-        guard case let .content(call) = state else { return false }
-        return call.recordingUrl != nil
-    }
-
     func load() async {
         state = .loading
         transcript = .idle
-        recording = .idle
         switch await calls.detail(workspaceId: workspaceId, callId: callId) {
         case let .success(call):
             state = .content(call)
@@ -100,41 +82,6 @@ final class CallDetailModel {
         }
     }
 
-    /// Resolve a playable URL and hand it back.
-    ///
-    /// ⛔ RESOLVED AT THE MOMENT OF PLAYBACK AND NEVER STORED. The server redirects to
-    /// a short-lived presigned object URL; a cached one expires and then fails inside
-    /// whatever player received it, where the failure looks like a corrupt recording
-    /// rather than a stale link. The returned value goes straight into the player and
-    /// dies with the sheet: nothing here retains it, nothing writes the audio to disk,
-    /// and there is no download or share affordance anywhere on this screen.
-    ///
-    /// ⛔ AND IT IS GUARDED AGAINST A DOUBLE TAP. The other client set `resolving` and
-    /// then never checked it, so two taps resolved twice and opened two players, with
-    /// the server issuing two presigned URLs for one deliberate action.
-    func resolveRecording() async -> URL? {
-        guard case .content = state else { return nil }
-        guard case .idle = recording else { return nil }
-        recording = .resolving
-
-        switch await calls.recordingURL(workspaceId: workspaceId, callId: callId) {
-        case let .success(location):
-            guard let url = URL(string: location) else {
-                // A 302 whose Location this client cannot parse is contract drift, not
-                // an absence, so it must not read as "no recording".
-                recording = .failed(Self.recordingFailure)
-                return nil
-            }
-            recording = .idle
-            return url
-        case let .failure(error):
-            // ⚠️ A 404 IS ORDINARY: a missed call has no recording. Everything else is
-            // a failure and gets the failure sentence.
-            recording = error.httpStatus == 404 ? .absent : .failed(Self.recordingFailure)
-            return nil
-        }
-    }
-
     /// ⛔ A 404 HERE DOES NOT IMPLY A MALFORMED ID. The server reads by id and checks
     /// ownership afterwards, so another tenant's call id is indistinguishable from one
     /// that never existed, and the server's own "Call not found" would be the wrong
@@ -143,9 +90,4 @@ final class CallDetailModel {
         guard error.httpStatus == 404 else { return FailureText.from(error) }
         return FailureText(message: "This call is not available.", action: .none)
     }
-
-    private static let recordingFailure = FailureText(
-        message: "Could not open the recording.",
-        action: .none
-    )
 }

@@ -79,7 +79,7 @@ remote package in it is pinned `exactVersion`, including swift-asn1, which nothi
 and which is listed only so the graph under DistrictCore cannot float.
 
 **Test bundles must discover their tests.** CI counts the tests each bundle ran and fails
-below a floor set in `.github/workflows/ci.yml`: 470 for `DistrictAITests` and 7 for the
+below a floor set in `.github/workflows/ci.yml`: 460 for `DistrictAITests` and 7 for the
 signed-out UI tests. The first sits a little below the current count and is a ratchet: a
 change that adds many tests may raise it, and a change that deletes tests on purpose
 lowers it in the same commit and says why. A

@@ -310,7 +310,6 @@ enum A11yID {
         static let bookingDetailRoot = "district-scheduling-booking-root"
         static let calendarRoot = "district-scheduling-calendar-root"
         static let teamRoot = "district-scheduling-team-root"
-        static let recordingsRoot = "district-scheduling-recordings-root"
         static let settingsRoot = "district-scheduling-settings-root"
         static let developerRoot = "district-scheduling-developer-root"
 
@@ -322,20 +321,6 @@ enum A11yID {
         static let bookingRowBase = "district-scheduling-booking-row"
         static func bookingRow(_ id: String) -> String {
             A11yID.row(bookingRowBase, id)
-        }
-
-        static let recordingRowBase = "district-scheduling-recording-row"
-        static func recordingRow(_ id: String) -> String {
-            A11yID.row(recordingRowBase, id)
-        }
-
-        /// ⛔ HIDDEN FOR A VIEWER RATHER THAN DISABLED, so a test asserting its ABSENCE
-        /// for a read-only seat is asserting the real behaviour. `recordings.list` is
-        /// `viewer` and the download is not; see the ⛔ on
-        /// ``SchedulingAdminMediaRepository/recordingDownloadURL(workspaceId:recordingId:)``.
-        static let recordingDownloadBase = "district-scheduling-recording-download"
-        static func recordingDownload(_ id: String) -> String {
-            A11yID.row(recordingDownloadBase, id)
         }
 
         /// The bookings filter control, and the two tab strips.

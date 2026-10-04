@@ -47,11 +47,9 @@ final class URLSessionHTTPTransport: NSObject, HTTPTransport, URLSessionTaskDele
         }
 
         // ⛔ THE DELEGATE IS THE WHOLE REDIRECT POLICY, AND IT IS ATTACHED PER
-        // TASK RATHER THAN PER SESSION. `calls/{id}/recording` answers 302 with a
-        // `Location` that ``ApiClient/redirectTarget(_:)`` hands to AVPlayer;
-        // following it here would download the entire audio file through this
-        // process, on a metered connection, purely to learn its address — and the
-        // presigned URL is short-lived, so the second fetch has to happen anyway.
+        // TASK RATHER THAN PER SESSION. `scheduling/sso` answers 302 with a
+        // `Location` that is a single-use sign-in credential for the browser;
+        // following it here would spend it on a transport the user never sees.
         // A session-wide delegate would apply that policy to every other call as
         // well, including the ordinary API redirects there is no reason to
         // refuse.
@@ -80,9 +78,8 @@ final class URLSessionHTTPTransport: NSObject, HTTPTransport, URLSessionTaskDele
     ///
     /// ⛔ `completionHandler(nil)` MEANS "HAND ME THE REDIRECT RESPONSE", NOT
     /// "FAIL". `URLSession` then completes the task with the 3xx response and its
-    /// headers, which is exactly the shape ``ApiClient/redirectTarget(_:)`` reads
-    /// — it requires a status in 300...399 and a non-empty `Location`, and treats
-    /// a 3xx WITHOUT one as contract drift.
+    /// headers, which is exactly the shape the scheduling hand-off reads: a status in
+    /// 300...399 and a non-empty `Location`.
     ///
     /// ⚠️ ONLY ATTACHED WHEN `followRedirects` IS FALSE (see `send`), so this
     /// never sees an ordinary call.

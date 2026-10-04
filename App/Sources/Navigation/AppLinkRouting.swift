@@ -147,7 +147,7 @@ enum AppLinkRouting {
             //
             // ⚠️ THE VALUE IS STILL LOAD BEARING ON THE ROUTE ITSELF: ``OverviewEntry``
             // passes it to ``RouteGate`` to decide whether to offer the row at all, and
-            // the recordings screen reads it to decide whether to draw a download.
+            // the scheduling sections read it to decide whether to draw their writes.
             //
             // ⚠️ THE SECOND SEGMENT NAMES A SECTION, AND AN UNRECOGNISED ONE LANDS ON THE
             // HUB RATHER THAN ON A FAILURE. That is the opposite of the top-level rule —
@@ -181,9 +181,9 @@ enum AppLinkRouting {
 /// holding a copy of. A user who dismissed the sheet by accident and tapped the link
 /// again would otherwise get nothing at all.
 ///
-/// ⚠️ THIS TYPE IS WHY THIS FILE IMPORTS `Foundation` EXPLICITLY. The app's two other
-/// hand-off types reach `UUID` and `URL` through UIKit and AVKit, which their files
-/// import for their own reasons; this one imports neither, and a transitive re-export
+/// ⚠️ THIS TYPE IS WHY THIS FILE IMPORTS `Foundation` EXPLICITLY. The app's other
+/// hand-off type reaches `UUID` and `URL` through what its file imports for its own
+/// reasons; this one imports nothing of the kind, and a transitive re-export
 /// from SwiftUI is not a promise worth building on.
 struct AppLinkHandOff: Identifiable {
     let id = UUID()

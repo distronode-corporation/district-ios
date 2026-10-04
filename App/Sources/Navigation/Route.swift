@@ -152,21 +152,21 @@ enum Route: Hashable, Sendable {
     /// transfer numbers and the operator's own prompt.
     case workspaceSettings(workspaceId: String, role: WorkspaceRole?, section: SettingsSection)
 
-    /// The scheduling surface: its hub, its nine sections, and the two drill-downs.
+    /// The scheduling surface: its hub, its eight sections, and the two drill-downs.
     ///
     /// ⛔ ONE CASE FOR THE WHOLE FAMILY, THE SAME SHAPE AS
     /// ``workspaceSettings(workspaceId:role:section:)`` AND FOR THE SAME REASON. The
     /// sections are CHILDREN of the hub rather than siblings of it, so a back press
     /// from a booking lands on the bookings list and a second back press lands on the
-    /// hub. Twelve `Route` cases would be twelve arms in ``RouteDestinations``, which
+    /// hub. Eleven `Route` cases would be eleven arms in ``RouteDestinations``, which
     /// is already at SwiftLint's ceiling.
     ///
     /// ⚠️ THE ROLE IS CARRIED AGAIN AND IT IS NOT THE GATE ON `canManage`. Beyond
-    /// ``OverviewEntry``, it decides whether the recordings screen offers a DOWNLOAD, which is the one affordance on
-    /// this surface whose bar is `agency`/`client` while the list beside it admits a
-    /// viewer. ⛔ It still does not decide Enable: the status route answers `canManage`
-    /// for that, and re-deriving it from a role STRING would hide the button from an
-    /// owner whose role did not parse. See the ⛔ in ``RouteDestinations``.
+    /// ``OverviewEntry``, it decides whether the sections offer their WRITE controls,
+    /// whose bar is `agency`/`client` while the reads beside them admit a viewer.
+    /// ⛔ It still does not decide Enable: the status route answers `canManage` for
+    /// that, and re-deriving it from a role STRING would hide the button from an owner
+    /// whose role did not parse. See the ⛔ in ``RouteDestinations``.
     ///
     /// ⚠️ NO ANDROID COUNTERPART EXISTS YET. `Routes` has no scheduling destination,
     /// so this case is iOS-first rather than ported, and the Android client will need

@@ -1,10 +1,10 @@
 import DistrictData
 import Foundation
 
-/// The wording for the hours, bookings, calendar, team, recordings, settings and
-/// developer sections.
+/// The wording for the hours, bookings, calendar, team, settings and developer
+/// sections.
 ///
-/// ⚠️ ONE FILE FOR SEVEN SECTIONS RATHER THAN SEVEN FILES, because every one of them is a
+/// ⚠️ ONE FILE FOR SIX SECTIONS RATHER THAN SIX FILES, because every one of them is a
 /// short table of labels and SwiftLint's 500-line file limit is comfortably met. The
 /// overview and the event types have their own files because each carries a
 /// derivation as well as a table.
@@ -57,17 +57,6 @@ extension SchedulingCopy {
     // MARK: - Booking detail
 
     static let answersEyebrow = "Answers"
-    static let notesEyebrow = "Notes"
-    static let transcriptEyebrow = "Transcript"
-
-    static let noNotes = "No notes for this booking."
-    static let noTranscript = "No transcript for this booking."
-
-    /// ⛔ A 424 IS AN UNCONFIGURED REGION AND NOT A FAULT. The generic sentence would send
-    /// somebody hunting for an outage; this names a cause an operator can act on. See the
-    /// ⚠️ on ``SchedulingBookingDetailModel`` for why it is also used for the genuinely
-    /// unknown case.
-    static let mediaUnavailable = "Recording storage is not enabled for this region."
 
     // MARK: - Calendar
 
@@ -118,31 +107,6 @@ extension SchedulingCopy {
         count == 1 ? "1 member" : "\(count) members"
     }
 
-    // MARK: - Recordings
-
-    static let loadingRecordings = "Loading recordings…"
-    static let recordingsEmptyTitle = "No recordings"
-    static let recordingsEmptyBody = "A recorded meeting appears here when it ends."
-
-    static let recordingsNoStorage = "Recording storage is not enabled for this region yet. "
-        + "Meetings already recorded are listed below; new ones cannot be stored and none "
-        + "can be played."
-
-    static let recordingWith = "Meeting with"
-    static let recordingDuration = "Duration"
-    static let recordingFile = "File"
-    static let recordingState = "State"
-    static let recordingPlay = "Play"
-    /// ⚠️ NO WEB ORIGINAL: the shared catch-all ("That did not save") describes a write,
-    /// and pressing Play saves nothing.
-    static let recordingPlayFailed = "That recording could not be opened. Try again."
-    static let recordingConsent = "Consent"
-
-    /// ⛔ "Nobody answered" IS NOT "everybody agreed". These rows are the evidence for a
-    /// two-party-consent jurisdiction and an empty set means the prompt resolved for
-    /// nobody, which is a fact rather than a default.
-    static let consentEmpty = "Nobody answered the recording notice for this meeting."
-
     // MARK: - Settings
 
     static let brandingBusinessName = "Business name"
@@ -152,8 +116,6 @@ extension SchedulingCopy {
     static let brandingTerms = "Terms link"
     static let brandingLocale = "Page language"
 
-    static let recordingsEnabled = "Record built-in video meetings"
-    static let notetakerEnabled = "Write AI meeting notes"
     static let assistantEnabled = "Booking assistant"
     static let assistantInstructions = "Extra instructions"
 

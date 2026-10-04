@@ -5,8 +5,8 @@ import SwiftUI
 ///
 /// ⛔ A FAILED READ IS ITS OWN CASE AND IS NEVER RENDERED AS "there is nothing here",
 /// which is the same rule ``SchedulingScreenState`` states for the hub and matters more
-/// on these nine screens: an empty list is an ORDINARY answer on every one of them (a
-/// tenancy with no bookings, no recordings, no webhooks), so a read that did not happen
+/// on these eight screens: an empty list is an ORDINARY answer on every one of them (a
+/// tenancy with no bookings, no teams, no webhooks), so a read that did not happen
 /// and a workspace that has nothing would otherwise be the same picture.
 enum SchedulingSectionState<Value> {
     case loading
@@ -124,9 +124,8 @@ extension SchedulingStatusKind {
     ///
     /// ⚠️ `pending` AND `inProgress` BOTH LAND ON `.info`, WHICH IS A REAL COLLAPSE AND
     /// NOT AN OVERSIGHT. This design system has no distinct "in progress" tone, and the
-    /// two are told apart by their LABELS ("Recording" against "Unknown"), which is where
-    /// the difference is legible anyway. ⛔ Neither may be mapped to `.warning`: a consent
-    /// nobody answered and a recording still running are both ordinary states, and
+    /// two are told apart by their LABELS, which is where the difference is legible
+    /// anyway. ⛔ Neither may be mapped to `.warning`: both are ordinary states, and
     /// painting them as warnings would report a fault that did not happen — the same
     /// argument ``SchedulingPresentation/isFailure`` makes for the hub's card.
     var tone: Tone {
@@ -157,14 +156,14 @@ extension SchedulingStatusLabel {
 /// surfaces ever diverge visually there is one place to change.
 typealias SchedulingCard = SettingsCard
 
-/// A `label: value` line, for the many read-only fields on these nine screens.
+/// A `label: value` line, for the many read-only fields on these eight screens.
 typealias SchedulingReadOnlyRow = SettingsReadOnlyRow
 
 /// The standard scroll container every scheduling section sits in.
 ///
 /// ⛔ ONE CONTAINER FOR ALL NINE, so that the gutter, the section spacing and the
 /// pull-to-refresh behave identically. Nine screens each writing their own `ScrollView`
-/// is nine chances for one of them to forget `refreshable`, and a section that cannot be
+/// is eight chances for one of them to forget `refreshable`, and a section that cannot be
 /// re-read is indistinguishable from one whose data never changes.
 struct SchedulingSectionScroll<Content: View>: View {
     let title: String

@@ -224,29 +224,6 @@ final class SchedulingWritesBBookingTests: XCTestCase {
         XCTAssertEqual(Fixtures.failure(model.state), SchedulingFailureCopy.forbidden)
     }
 
-    // MARK: - Notes
-
-    /// ⛔ THE SENTENCE SAYS "QUEUED", NOT "WRITTEN". The op returns while `status` is
-    /// still `pending` and `content` still holds the PREVIOUS text.
-    func testRegeneratingNotesReportsThatTheWorkWasQueued() async {
-        let transport = SettingsTransport([
-            Fixtures.ok("{\"exists\":true,\"status\":\"pending\",\"content\":\"the old notes\"}"),
-        ])
-        var queued: SchedulingBookingNotesRegenerated?
-        let model = SchedulingBookingNotesModel(
-            admin: Fixtures.repository(transport),
-            workspaceId: Fixtures.workspaceId,
-            bookingId: "bk-1",
-            onQueued: { queued = $0 }
-        )
-        await model.regenerate()
-
-        XCTAssertEqual(Fixtures.op(transport), "bookings.notes.regenerate")
-        XCTAssertEqual(Fixtures.params(transport)["id"] as? String, "bk-1")
-        XCTAssertEqual(Fixtures.done(model.state), SchedulingBookingWriteCopy.regenerateDone)
-        XCTAssertEqual(queued?.status, "pending")
-    }
-
     private static func rescheduleModel(_ transport: SettingsTransport) -> SchedulingBookingRescheduleModel {
         SchedulingBookingRescheduleModel(
             admin: SchedulingWritesBFixtures.repository(transport),

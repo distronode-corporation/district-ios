@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Recording storage, the notetaker and the booking assistant.
+/// The booking assistant: its switch and its extra instructions.
 struct SchedulingAutomationSheet: View {
     @Bindable var model: SchedulingAutomationModel
     let onClose: () -> Void
@@ -16,8 +16,6 @@ struct SchedulingAutomationSheet: View {
             state: model.state
         ) {
             VStack(alignment: .leading, spacing: DistrictSpacing.section) {
-                recordings
-                notetaker
                 assistant
                 SchedulingWriteRejection(message: model.rejected)
             }
@@ -27,37 +25,6 @@ struct SchedulingAutomationSheet: View {
             Task { await model.save() }
         }
         .accessibilityIdentifier(A11yID.SchedulingWritesB.automationSheet)
-    }
-
-    /// ⛔ THE TOGGLE IS DISABLED WHEN THE REGION HAS NO OBJECT STORAGE, and the hint
-    /// below it says which case the workspace is in. Turning it on there would
-    /// succeed and record nothing.
-    private var recordings: some View {
-        SettingsCard(eyebrow: SchedulingSettingsWriteCopy.automationTitle) {
-            VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-                Toggle(
-                    SchedulingSettingsWriteCopy.recordingsToggle,
-                    isOn: Binding(get: { model.recordingsEnabled }, set: { model.editRecordings($0) })
-                )
-                .disabled(model.busy || !model.canEnableRecordings)
-                .accessibilityIdentifier(A11yID.SchedulingWritesB.automationRecordings)
-                SchedulingWriteHint(text: model.recordingsHint)
-            }
-        }
-    }
-
-    private var notetaker: some View {
-        SettingsCard(eyebrow: SchedulingSettingsWriteCopy.notetakerLabel) {
-            VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-                Toggle(
-                    SchedulingSettingsWriteCopy.notetakerToggle,
-                    isOn: Binding(get: { model.notetakerEnabled }, set: { model.editNotetaker($0) })
-                )
-                .disabled(model.busy)
-                .accessibilityIdentifier(A11yID.SchedulingWritesB.automationNotetaker)
-                SchedulingWriteHint(text: SchedulingSettingsWriteCopy.notetakerHint)
-            }
-        }
     }
 
     /// ⛔ NO API-KEY FIELD, AND THERE MUST NEVER BE ONE. The catalog's schema is

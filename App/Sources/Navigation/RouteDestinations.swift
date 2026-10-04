@@ -78,11 +78,11 @@ enum RouteDestinations {
             // nothing to gate and nothing to word. See the ⚠️ on `Route.analytics`.
             AnalyticsView(container: container, workspaceId: workspaceId)
 
-        // ⛔ ONE ARM FOR THE HUB, THE NINE SECTIONS AND THE TWO DRILL-DOWNS, delegated
+        // ⛔ ONE ARM FOR THE HUB, THE EIGHT SECTIONS AND THE TWO DRILL-DOWNS, delegated
         // for the line budget the `helpDestination` comment below records. ⚠️ The role
-        // IS carried in: `canManage` still comes from the status read (see the ⛔ on `SchedulingHubView`), but the
-        // recordings screen needs a role to decide whether to offer a DOWNLOAD, whose
-        // bar is `agency`/`client` while the list beside it admits a viewer.
+        // IS carried in: `canManage` still comes from the status read (see the ⛔ on
+        // `SchedulingHubView`), but each section's write controls are
+        // `agency`/`client` while its reads admit a viewer.
         case let .scheduling(workspaceId, role, section):
             SchedulingDestinations.view(
                 for: section,

@@ -10,6 +10,14 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Removed
+
+- Call recordings. No call or meeting is recorded in any region, so the Play recording
+  control on a call is gone.
+- Scheduling's Recordings section, the recording and meeting notes switches in its
+  settings, and a booking's notes and transcript. Meetings are not recorded, so there was
+  nothing for them to show. The settings tab is now "Booking assistant", as on the web.
+
 ## [1.3] - 2026-10-02
 
 ### Fixed

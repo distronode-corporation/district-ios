@@ -12,14 +12,14 @@ import SwiftUI
 /// something the model fetches for itself.
 ///
 /// ⛔ AND THE ROLE RULE DIFFERS BETWEEN THEM, WHICH IS THE TRAP ON THIS SCREEN.
-/// Branding and the recording settings are `client`-level; `me.patch` and
+/// Branding and the booking assistant are `client`-level; `me.patch` and
 /// `me.avatar.delete` are `viewer`-level, because they touch only the caller's OWN
 /// profile — a viewer who cannot set their own timezone is offered every booking
 /// window in the wrong hours. The gate is therefore applied by the SCREEN, per tab,
 /// and never by this file.
 extension SchedulingWriteCopy {
     static let brandingEdit = "Edit booking page"
-    static let automationEdit = "Edit recording settings"
+    static let automationEdit = "Edit booking assistant"
     static let profileEdit = "Edit profile"
     static let notificationsEdit = "Edit notifications"
 }
@@ -60,15 +60,13 @@ struct SchedulingBrandingEditButton: View {
     }
 }
 
-/// Recording storage, the notetaker and the assistant, in one sheet.
+/// The booking assistant, in one sheet.
 ///
-/// ⚠️ THREE OPS BEHIND ONE FORM, matching the tab that reads them: the model sends
-/// only the ones whose value changed.
+/// ⚠️ ONE OP BEHIND THE FORM, matching the tab that reads it: the model sends nothing
+/// when nothing changed.
 struct SchedulingAutomationEditButton: View {
     let admin: SchedulingAdminRepository
     let workspaceId: String
-    let storage: SchedulingStorageSettings
-    let notetaker: SchedulingNotetakerSettings
     let llm: SchedulingLLMSettings
     let onSaved: () -> Void
 
@@ -89,8 +87,6 @@ struct SchedulingAutomationEditButton: View {
         SchedulingAutomationModel(
             admin: admin,
             workspaceId: workspaceId,
-            storage: storage,
-            notetaker: notetaker,
             llm: llm,
             onSaved: onSaved
         )
