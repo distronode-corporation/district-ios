@@ -203,12 +203,13 @@ struct VoiceStudioRecipesCard: View {
         )
     }
 
-    /// "Based on Fastest, 2 changes", and Reset, once the held engine has moved off its recipe.
+    /// "Based on Fastest, 2 changes.", from the service's templates, and Reset, once the held
+    /// engine has moved off its recipe.
     @ViewBuilder
     private var basedOn: some View {
-        if session.changes > 0, !session.baseName.isEmpty {
+        if let line = session.basedOn {
             HStack(spacing: DistrictSpacing.tight) {
-                Text(VoiceStudioCopy.basedOn(session.baseName, changes: session.changes))
+                Text(line)
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
                     .accessibilityIdentifier(A11yID.VoiceStudio.basedOn)

@@ -3,32 +3,21 @@ import DistrictModel
 import SwiftUI
 
 /// A leg's number, a meter's headline: the words for each, never an estimate.
+///
+/// ⛔ FROM THE SERVICE'S TEMPLATES, IN THE PORTAL LANGUAGE (``VoiceStudioText``): the app types
+/// none of these words (Sean, 2026-10-03: "Follow the portal language").
 extension VoiceStudioLatencyText {
     /// The server's sentence, a measured median the server sent as a bare number, or the
     /// server's "not measured yet".
     func text(_ labels: VoiceStudioLabels) -> String {
-        switch self {
-        case let .server(text): text
-        case let .milliseconds(ms): VoiceStudioCopy.milliseconds(ms)
-        case .none: labels.notMeasured
-        }
+        VoiceStudioText.latency(self, labels: labels)
     }
 }
 
 extension VoiceStudioMeterHeadline {
     /// ⛔ "AT LEAST" WHENEVER A STAGE IS MISSING, NEVER "ABOUT".
     func text(_ labels: VoiceStudioLabels) -> String {
-        switch self {
-        case let .server(text):
-            return text
-        case let .local(ms, atLeast):
-            if atLeast {
-                return VoiceStudioCopy.meterAtLeast(ms)
-            }
-            return VoiceStudioCopy.meterAbout(ms)
-        case .none:
-            return labels.notMeasured
-        }
+        VoiceStudioText.headline(self, labels: labels)
     }
 }
 

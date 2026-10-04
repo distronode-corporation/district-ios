@@ -110,8 +110,20 @@ struct PersonaView: View {
             )
             .accessibilityIdentifier(A11yID.Persona.personality)
             SettingsSaveNotice(state: model.save, onReread: reload, onDismiss: model.dismissNotice)
+            refitLine
             saveButton
             previewButton
+        }
+    }
+
+    /// What fitting the voice chain to a new language did (``PersonaModel/refit``).
+    @ViewBuilder
+    private var refitLine: some View {
+        if let line = model.refit?.line {
+            Text(line)
+                .font(DistrictType.caption)
+                .foregroundStyle(colors.mutedForeground)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

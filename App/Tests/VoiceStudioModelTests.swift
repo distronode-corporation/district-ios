@@ -153,20 +153,48 @@ final class VoiceStudioModelTests: XCTestCase {
 
     // MARK: - Words
 
-    func testAMeterNeverSaysAboutWhenAStageIsMissing() throws {
+    /// ⛔ THE UNSAVED METER IS THE SERVICE'S TEMPLATE, IN THE PORTAL LANGUAGE, and never says
+    /// "about" when a stage is missing.
+    func testTheUnsavedMeterInEnglish() throws {
         let labels = try VoiceStudioTestBody.labels()
-        XCTAssertEqual(VoiceStudioMeterHeadline.local(ms: 850, atLeast: true).text(labels), "At least 850 ms")
-        XCTAssertEqual(VoiceStudioMeterHeadline.local(ms: 970, atLeast: false).text(labels), "About 970 ms")
-        XCTAssertEqual(VoiceStudioMeterHeadline.none.text(labels), labels.notMeasured)
-        XCTAssertEqual(VoiceStudioMeterHeadline.server("Environ 970 ms").text(labels), "Environ 970 ms")
+        typealias Headline = VoiceStudioMeterHeadline
+        XCTAssertEqual(Headline.local(ms: 970, atLeast: false).text(labels), "About 970\u{00A0}ms")
+        XCTAssertEqual(Headline.local(ms: 1234, atLeast: true).text(labels), "At least 1,234\u{00A0}ms")
+        XCTAssertEqual(Headline.local(ms: 12345, atLeast: false).text(labels), "About 12,345\u{00A0}ms")
+        XCTAssertEqual(VoiceStudioMeterHeadline.none.text(labels), "Not measured yet")
+        XCTAssertEqual(VoiceStudioMeterHeadline.server("About 970 ms").text(labels), "About 970 ms")
         XCTAssertEqual(VoiceStudioLatencyText.none.text(labels), labels.notMeasured)
-        XCTAssertEqual(VoiceStudioLatencyText.milliseconds(90).text(labels), "90 ms")
+        XCTAssertEqual(VoiceStudioLatencyText.milliseconds(90).text(labels), "90\u{00A0}ms")
         XCTAssertEqual(VoiceStudioLatencyText.server("Lab: 150 ms").text(labels), "Lab: 150 ms")
     }
 
-    func testTheChangeCountIsSingularForOne() {
-        XCTAssertEqual(VoiceStudioCopy.basedOn("Fastest", changes: 1), "Based on Fastest, 1 change")
-        XCTAssertEqual(VoiceStudioCopy.basedOn("Fastest", changes: 2), "Based on Fastest, 2 changes")
+    func testTheUnsavedMeterInFrench() throws {
+        let labels = try VoiceStudioTestBody.labels(.french)
+        XCTAssertEqual(VoiceStudioMeterHeadline.local(ms: 970, atLeast: false).text(labels), "Environ 970\u{00A0}ms")
+        XCTAssertEqual(
+            VoiceStudioMeterHeadline.local(ms: 1234, atLeast: true).text(labels),
+            "Au moins 1\u{00A0}234\u{00A0}ms"
+        )
+        XCTAssertEqual(
+            VoiceStudioMeterHeadline.local(ms: 12345, atLeast: false).text(labels),
+            "Environ 12\u{00A0}345\u{00A0}ms"
+        )
+        XCTAssertEqual(VoiceStudioMeterHeadline.none.text(labels), "Pas encore mesuré")
+        XCTAssertEqual(VoiceStudioLatencyText.milliseconds(1234).text(labels), "1\u{00A0}234\u{00A0}ms")
+    }
+
+    /// ⛔ "BASED ON" IS THE SERVICE'S TEMPLATE TOO: singular for one, nothing for none.
+    func testBasedOnFollowsThePortalLanguage() throws {
+        let english = try VoiceStudioTestBody.labels()
+        let french = try VoiceStudioTestBody.labels(.french)
+        let line = { (recipe: String, changes: Int, labels: VoiceStudioLabels) in
+            VoiceStudioText.basedOn(recipe: recipe, changes: changes, labels: labels)
+        }
+        XCTAssertEqual(line("Fastest", 1, english), "Based on Fastest, 1 change.")
+        XCTAssertEqual(line("Fastest", 2, english), "Based on Fastest, 2 changes.")
+        XCTAssertNil(line("Fastest", 0, english))
+        XCTAssertEqual(line("Rapide", 1, french), "Basé sur Rapide, 1 modification.")
+        XCTAssertEqual(line("Rapide", 3, french), "Basé sur Rapide, 3 modifications.")
     }
 
     func testAChannelsToneIsDecorationOverItsName() {
@@ -181,7 +209,7 @@ enum VoiceStudioTestBody {
     static func studio(voice: String) -> String {
         #"""
         {"success":true,"region":"us","locale":"en","language":"en-US","previewAllowed":true,
-         "labels":\#(labelsJSON),
+         "labels":\#(labelsJSON()),
          "current":{"modelId":"gemini-live-2.5-flash-native-audio","engineMix":null,"preemptiveTts":false,
           "temperature":0.7,"bilingual":false,"voiceStyle":null,"recipeId":"realtime","tier":"stable",
           "fields":{"modelId":"gemini-live-2.5-flash-native-audio","voice":"\#(voice)","engineMix":null,
@@ -197,12 +225,52 @@ enum VoiceStudioTestBody {
         """#
     }
 
-    static func labels() throws -> VoiceStudioLabels {
-        try JSONDecoder().decode(VoiceStudioLabels.self, from: Data(labelsJSON.utf8))
+    /// The two portal languages' templates, as `voiceStudioI18n.ts` writes them.
+    enum Language {
+        case english
+        case french
+
+        var templates: String {
+            switch self {
+            case .english:
+                #"""
+                "meterAbout":"About {ms}\u00a0ms","meterAtLeast":"At least {ms}\u00a0ms",
+                "meterNone":"Not measured yet",
+                "meterPartial":"Some steps are not measured yet, so the real time is longer.",
+                "numberGrouping":",","basedOnOne":"Based on {recipe}, 1 change.",
+                "basedOnMany":"Based on {recipe}, {n} changes.",
+                """#
+            case .french:
+                #"""
+                "meterAbout":"Environ {ms}\u00a0ms","meterAtLeast":"Au moins {ms}\u00a0ms",
+                "meterNone":"Pas encore mesur\u00e9",
+                "meterPartial":"Certaines \u00e9tapes ne sont pas encore mesur\u00e9es.",
+                "numberGrouping":"\u00a0","basedOnOne":"Bas\u00e9 sur {recipe}, 1 modification.",
+                "basedOnMany":"Bas\u00e9 sur {recipe}, {n} modifications.",
+                """#
+            }
+        }
     }
 
-    private static let labelsJSON = #"""
-    {"heading":"Voice Studio","description":"d","tierLabel":"Models","tierStable":"Stable",
+    /// The same body for a `custom-pipeline` persona holding `engineMix` (JSON, or `null` when
+    /// the service no longer accepts the stored chain).
+    static func custom(engineMix: String) -> String {
+        studio(voice: "Puck").replacingOccurrences(
+            of: #""current":{"modelId":"gemini-live-2.5-flash-native-audio","engineMix":null,"#,
+            with: #""current":{"modelId":"custom-pipeline","engineMix":\#(engineMix),"#
+        )
+    }
+
+    static func labels(_ language: Language = .english) throws -> VoiceStudioLabels {
+        try JSONDecoder().decode(VoiceStudioLabels.self, from: Data(labelsJSON(language).utf8))
+    }
+
+    private static func labelsJSON(_ language: Language = .english) -> String {
+        "{" + language.templates + labelsRest
+    }
+
+    private static let labelsRest = #"""
+    "heading":"Voice Studio","description":"d","tierLabel":"Models","tierStable":"Stable",
      "tierLatest":"Latest","tierDescription":"t","recipesLabel":"Starting point","defaultBadge":"Default",
      "reset":"Reset","chainLabel":"Signal chain","editLeg":"Part to edit","edit":"Edit",
      "meterHeading":"Time to first word","meterDescription":"m","residencyHeading":"r",

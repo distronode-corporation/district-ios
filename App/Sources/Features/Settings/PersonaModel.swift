@@ -40,6 +40,13 @@ import Observation
 /// the Studio changed. This form sends the stored engine id only beside an answer length,
 /// where the route needs it as a key.
 ///
+/// ⛔ A NEW LANGUAGE IS FOLLOWED BY FITTING A CHAIN OF THE MEMBER'S OWN TO IT
+/// (``refit``), as the web form and district-linux do: a `custom-pipeline` chain whose ear
+/// or voice does not speak the new language is one the service no longer accepts. The chain
+/// is read from the Studio BEFORE the save (the config this form holds does not carry it),
+/// and after a save that landed `VoiceStudioRefit` reads the Studio for the new language and,
+/// when it no longer accepts the chain, moves it, saves it and reads it back.
+///
 /// ⚠️ THE ENRICHMENT CONSENT FLAG ALSO RIDES THIS ROUTE AND IS NOT EDITED HERE. It
 /// lives on the capabilities screen, matching the web console, where the enrichment
 /// form sits inside the capabilities tab and posts to `workspace/persona`.
@@ -70,6 +77,10 @@ final class PersonaModel {
     /// panel that silently turned read-only would read as a product decision.
     private(set) var optionsFailure: FailureText?
 
+    /// Fitting the chain to a new language, after the save that changed it; nil when there is
+    /// nothing to fit or nothing to say.
+    private(set) var refit: PersonaRefitState?
+
     /// ⚠️ A VIEWER NEVER REACHES THIS SCREEN — `workspace/config` excludes them, which
     /// is why ``RouteGate`` hides the row — but a control that was not drawn is not a
     /// boundary, so every write and the billable preview are gated here too.
@@ -81,18 +92,30 @@ final class PersonaModel {
     private var edits: [Field: String] = [:]
 
     private let gateway: SettingsConfigGateway
+    private let voiceStudio: VoiceStudioRepository
 
     /// ⚠️ THE REPOSITORY RATHER THAN THE CONTAINER, for the reason ``RoutingModel``'s
     /// own initialiser records: a test that had to build an ``AppContainer`` would touch
     /// the device keychain to ask which fields a save names.
-    init(workspaces: WorkspaceRepository, workspaceId: String, role: WorkspaceRole?) {
+    init(
+        workspaces: WorkspaceRepository,
+        voiceStudio: VoiceStudioRepository,
+        workspaceId: String,
+        role: WorkspaceRole?
+    ) {
         gateway = SettingsConfigGateway(workspaces: workspaces, workspaceId: workspaceId)
+        self.voiceStudio = voiceStudio
         canWrite = WorkspaceRole.allowsMutation(role)
     }
 
     @MainActor
     convenience init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
-        self.init(workspaces: container.workspaces, workspaceId: workspaceId, role: role)
+        self.init(
+            workspaces: container.workspaces,
+            voiceStudio: container.voiceStudio,
+            workspaceId: workspaceId,
+            role: role
+        )
     }
 
     /// The hydrated persona, or nil when nothing has loaded. ⛔ Nil is NOT an empty
@@ -157,7 +180,7 @@ final class PersonaModel {
     /// ⛔ FALSE UNLESS THE CONFIG LOADED. A save is only ever built on a successful
     /// read.
     var canSave: Bool {
-        guard canWrite, load.config != nil, !save.isSaving else { return false }
+        guard canWrite, load.config != nil, !save.isSaving, refit?.isRunning != true else { return false }
         return !dirtyFields.isEmpty || draft?.isDirty == true
     }
 
@@ -237,6 +260,12 @@ final class PersonaModel {
         let dirty = dirtyFields
         let identity = draft?.write ?? PersonaIdentityWrite()
         save = .saving
+        refit = nil
+        // ⛔ READ BEFORE THE SAVE: after it, the Studio no longer holds a chain that does not fit.
+        var stored: Result<EngineMix?, ApiError>?
+        if identity.language != nil, persona?.modelId == VoiceStudioRules.customPipeline {
+            stored = await VoiceStudioRefit.storedChain(workspaceId: gateway.workspaceId, in: voiceStudio)
+        }
         // ⛔ THE TERNARY IS THE MECHANISM, NOT A CONVENIENCE. nil drops the key from
         // the body and the server then PRESERVES the stored value; `""` reaches the
         // wire and CLEARS it. Swapping the two is the difference between clearing a
@@ -256,7 +285,29 @@ final class PersonaModel {
             modelId: identity.modelId,
             responseLength: identity.responseLength
         )
-        await apply(gateway.commit(write))
+        let outcome = await gateway.commit(write)
+        apply(outcome)
+        if case .notSaved = outcome {
+            return
+        }
+        await fitChain(stored)
+    }
+
+    /// After a save that landed: fit the chain read before it to the new language.
+    ///
+    /// ⚠️ A STUDIO THAT COULD NOT BE READ BEFORE THE SAVE IS SAID, not skipped: the language
+    /// landed, and the chain may no longer be one the service accepts.
+    private func fitChain(_ stored: Result<EngineMix?, ApiError>?) async {
+        guard let stored else { return }
+        switch stored {
+        case let .failure(error):
+            refit = .finished(.failed(.failed(error)))
+        case let .success(mix):
+            guard let mix else { return }
+            refit = .running
+            let outcome = await VoiceStudioRefit.run(from: mix, workspaceId: gateway.workspaceId, in: voiceStudio)
+            refit = outcome == .fits ? nil : .finished(outcome)
+        }
     }
 
     /// ⚠️ Lets the screen retire a banner without a re-read.

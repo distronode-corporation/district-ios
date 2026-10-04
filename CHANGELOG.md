@@ -20,7 +20,10 @@ The version on `main` is now 2.0.0, with Voice Studio as its headline.
   processed and how fast it was measured. Change any part, its voice, and its tuning
   under Advanced; the time to first word and where the call is processed update as you
   go, and say "at least" when part of the call has not been measured. Labels follow the
-  language you use on the web.
+  language you use on the web, the time to first word of an unsaved change and the
+  "Based on" line included.
+- Changing the persona's language moves a voice chain of your own to models that speak
+  it, the way the web does, and says what happened.
 
 ### Changed
 

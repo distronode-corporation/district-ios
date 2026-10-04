@@ -5,35 +5,13 @@ import Foundation
 /// ⛔ ONLY CHROME. Every Studio label (headings, recipe names, leg names, channels, residency
 /// and latency sentences, the save and saved lines) arrives from the server in the reader's
 /// PORTAL language and is rendered verbatim (Sean, 2026-10-03: "Follow the portal language").
-/// What is here is the title before the read lands, the change count, the words around a
-/// meter the server has not described yet, and the two refusals' fallbacks, the same set
-/// Android keeps in `strings.xml`.
+/// What is here is the title before the read lands, the tuning chrome and the two refusals'
+/// fallbacks. ⛔ The "Based on" line and an unsaved edit's meter are NOT here: they are filled
+/// from the read's own templates (`VoiceStudioText`), so they follow the portal language too.
 enum VoiceStudioCopy {
     static let title = SettingsCopy.voiceStudioTitle
 
     static let saving = "Saving…"
-
-    /// "Based on Fastest, 2 changes". ⚠️ Nothing when the held engine IS the recipe.
-    static func basedOn(_ name: String, changes: Int) -> String {
-        changes == 1 ? "Based on \(name), 1 change" : "Based on \(name), \(changes) changes"
-    }
-
-    /// ⛔ "ABOUT" ONLY WHEN EVERY STAGE IS MEASURED. The numbers are measured medians the server
-    /// sent; nothing here estimates one.
-    static func meterAbout(_ ms: Double) -> String {
-        "About \(milliseconds(ms))"
-    }
-
-    /// ⛔ "AT LEAST", NEVER "ABOUT", WHEN A STAGE IS UNMEASURED: the missing stage is not
-    /// estimated, so the real time is longer than the sum shown.
-    static func meterAtLeast(_ ms: Double) -> String {
-        "At least \(milliseconds(ms))"
-    }
-
-    /// A whole number of milliseconds, grouped for the device's locale.
-    static func milliseconds(_ ms: Double) -> String {
-        "\(Int(ms.rounded()).formatted()) ms"
-    }
 
     /// A tuning value: two decimals, or none for a whole-number control.
     static func tuningValue(_ value: Double, whole: Bool) -> String {
