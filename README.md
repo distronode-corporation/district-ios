@@ -177,6 +177,15 @@ Every valid build goes to TestFlight's internal testers. Submission for App Revi
 separate step ([`submit.yml`](.github/workflows/submit.yml), or the `submit` job of a
 dispatch on a tag) and runs only with the maintainers' explicit approval.
 
+A dispatch with `build_only` archives and signs on the runner and stops there: nothing is
+uploaded or submitted, and the run's summary shows the signature it verified.
+
+What's New is the version's `CHANGELOG.md` section for English and
+`release-notes/<locale>/<version>.txt` (for example `release-notes/fr-CA/2.1.txt`, plain text
+exactly as the store shows it) for every other language, as on district-android. A
+localization in a language with no notes stops the submission; English is never sent in its
+place.
+
 Each version gets its GitHub Release, the source of that App Store release, once App
 Store Connect has it on sale: `submit.yml` checks after each submission and every six
 hours, and `scripts/github-release.sh` publishes it with the version's `CHANGELOG.md`

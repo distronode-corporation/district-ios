@@ -412,7 +412,7 @@ targets:
         # nothing failing to compile; a server-side test reads this line and is
         # what stops that.
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district
-        MARKETING_VERSION: "2.0"
+        MARKETING_VERSION: "2.1"
         # ⚠️ A PLACEHOLDER THAT THE RELEASE SCRIPT OVERRIDES. `scripts/archive-imac.sh`
         # passes `CURRENT_PROJECT_VERSION` (an offset plus the commit count), because
         # App Store Connect refuses a build number it has already seen. Nothing

@@ -12,19 +12,30 @@ built from history before publication, so they have no tags in this repository.
 
 ### Changed
 
-- Links to District Studio on the web open the matching settings screen: Persona, Voice,
-  call handling, Skills or Knowledge, with workspace settings beneath it, and the Studio's
-  home opens workspace settings. A screen your role cannot open lands on workspace settings
-  instead. Studio pages this app does not have (Integrations, Video) open in the browser.
-- DistrictCore 4.0.0.
-- The Voice screen is titled "Voice" before its settings load, the same word District AI
-  now sends as its heading.
-- Workspace settings groups the receptionist's settings under District Studio, as the web
-  dashboard now does: Persona, Voice, how calls are answered, dynamic persona rules, the
-  transfer directory, Skills and Knowledge, in the order of the web's pages. Messaging,
-  Members and Scheduling follow under Workspace. Four rows take the web's page names:
-  Agent persona is Persona, Voice Studio is Voice, Capabilities is Skills and Knowledge
-  base is Knowledge.
+- DistrictCore 4.0.0, which resolves District Studio links.
+- Release notes per language: What's New for every App Store localization other than English
+  comes from `release-notes/<locale>/<version>.txt`, as on district-android, and a
+  localization with no notes in its language stops the submission rather than showing
+  English.
+- `release.yml` has a `build_only` dispatch input: it archives and signs on the runner and
+  uploads nothing.
+
+## [2.1] - 2026-10-05
+
+Your receptionist's settings now live together under District Studio, as on the web.
+
+### Changed
+
+- In workspace settings, your receptionist's settings are grouped under District Studio, in
+  the same order and with the same names as on the web: Persona, Voice, call handling,
+  Skills and Knowledge. Messaging, Members and Scheduling follow under Workspace.
+- Voice Studio is now called Voice, on its own screen and everywhere the app mentions it.
+
+### Added
+
+- Links to District Studio on distronode.com open the matching screen in the app. A screen
+  your role cannot open shows workspace settings instead, and Studio pages the app does not
+  have open in the browser.
 
 ## [2.0] - 2026-10-04
 

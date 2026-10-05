@@ -356,5 +356,124 @@ class CallTests(unittest.TestCase):
         self.assertEqual(self.result, (200, {"data": []}))
 
 
+class ReleaseNotesTests(unittest.TestCase):
+    """English from the CHANGELOG, every other language from release-notes/<locale>/."""
+
+    def setUp(self) -> None:
+        self.dir = tempfile.TemporaryDirectory()
+        base = Path(self.dir.name)
+        self.changelog = base / "CHANGELOG.md"
+        self.changelog.write_text(CHANGELOG, encoding="utf-8")
+        self.root = base / "release-notes"
+        (self.root / "fr-CA").mkdir(parents=True)
+        (self.root / "fr-CA" / "1.3.txt").write_text("Les notes en fran\u00e7ais.\n\n", encoding="utf-8")
+
+    def tearDown(self) -> None:
+        self.dir.cleanup()
+
+    def notes(self, version: str = "1.3") -> asc_release.ReleaseNotes:
+        return asc_release.ReleaseNotes(self.changelog, version, self.root)
+
+    def refused(self, build) -> str:
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), self.assertRaises(SystemExit):
+            build()
+        return err.getvalue()
+
+    def test_english_locales_take_the_changelog_section(self) -> None:
+        notes = self.notes()
+        for locale in ("en-US", "en-GB", "en-CA"):
+            self.assertEqual(notes.for_locale(locale), asc_release.whats_new(self.changelog, "1.3"))
+
+    def test_french_takes_its_file_trimmed(self) -> None:
+        self.assertEqual(self.notes().for_locale("fr-CA"), "Les notes en fran\u00e7ais.")
+
+    def test_another_french_locale_falls_back_to_french_not_english(self) -> None:
+        self.assertEqual(self.notes().for_locale("fr-FR"), "Les notes en fran\u00e7ais.")
+
+    def test_a_language_with_no_notes_is_refused_not_sent_in_english(self) -> None:
+        notes = self.notes()
+        message = self.refused(lambda: notes.for_locale("de-DE"))
+        self.assertIn("de-DE", message)
+        self.assertIn("English is never sent", message)
+
+    def test_a_missing_file_for_the_version_is_refused_up_front(self) -> None:
+        self.assertIn("1.2.txt is missing", self.refused(lambda: self.notes("1.2")))
+
+    def test_an_empty_file_is_refused(self) -> None:
+        (self.root / "fr-CA" / "1.3.txt").write_text("  \n", encoding="utf-8")
+        self.assertIn("is empty", self.refused(self.notes))
+
+    def test_a_file_longer_than_whats_new_allows_is_refused(self) -> None:
+        (self.root / "fr-CA" / "1.3.txt").write_text("x" * (asc_release.WHATS_NEW_LIMIT + 1), encoding="utf-8")
+        self.assertIn("App Store Connect accepts", self.refused(self.notes))
+
+    def test_no_release_notes_directory_means_english_only(self) -> None:
+        notes = asc_release.ReleaseNotes(self.changelog, "1.3", self.root / "absent")
+        self.assertEqual(notes.translations, {})
+        self.assertIn("English is never sent", self.refused(lambda: notes.for_locale("fr-CA")))
+
+    def test_the_committed_files_are_well_formed(self) -> None:
+        # Every committed language file is non-empty and within the limit, whatever version.
+        root = asc_release.NOTES_ROOT
+        files = sorted(root.glob("*/*.txt")) if root.is_dir() else []
+        for path in files:
+            text = path.read_text(encoding="utf-8").strip()
+            self.assertTrue(text, path)
+            self.assertLessEqual(len(text), asc_release.WHATS_NEW_LIMIT, path)
+            self.assertNotIn("\u2014", text, f"{path}: no em dashes")
+
+
+class SubmitPerLocaleTests(unittest.TestCase):
+    """The submission writes each localization its own language, choosing all of them first."""
+
+    def setUp(self) -> None:
+        self.dir = tempfile.TemporaryDirectory()
+        base = Path(self.dir.name)
+        changelog = base / "CHANGELOG.md"
+        changelog.write_text(CHANGELOG, encoding="utf-8")
+        (base / "release-notes" / "fr-CA").mkdir(parents=True)
+        (base / "release-notes" / "fr-CA" / "1.3.txt").write_text("Notes fr", encoding="utf-8")
+        self.notes = asc_release.ReleaseNotes(changelog, "1.3", base / "release-notes")
+
+    def tearDown(self) -> None:
+        self.dir.cleanup()
+
+    def run_submit(self, localizations: list[dict]) -> tuple[FakeClient, str]:
+        gets = _submit_gets([{"id": "draft1", "attributes": {"state": "READY_FOR_REVIEW"}}], {"draft1": _items()})
+        gets["/appStoreVersions/v13/appStoreVersionLocalizations"] = {"data": localizations}
+        client = FakeClient(gets)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            try:
+                asc_release.submit(client, "1.3", "4110", self.notes, 60)
+            except SystemExit as exit_:
+                out.write(f"\nEXIT {exit_.code}")
+        return client, out.getvalue()
+
+    def test_only_the_localization_whose_text_differs_is_written(self) -> None:
+        english = self.notes.for_locale("en-US")
+        client, out = self.run_submit(
+            [
+                {"id": "loc1", "attributes": {"locale": "en-US", "whatsNew": english}},
+                {"id": "loc2", "attributes": {"locale": "fr-CA", "whatsNew": english}},
+            ]
+        )
+        self.assertNotIn("EXIT", out)
+        self.assertIn("whatsNew (en-US): already set", out)
+        self.assertIn(("PATCH", "/appStoreVersionLocalizations/loc2"), client.writes())
+        self.assertNotIn(("PATCH", "/appStoreVersionLocalizations/loc1"), client.writes())
+
+    def test_a_language_with_no_notes_stops_before_any_localization_is_written(self) -> None:
+        client, out = self.run_submit(
+            [
+                {"id": "loc1", "attributes": {"locale": "en-US", "whatsNew": "old"}},
+                {"id": "loc3", "attributes": {"locale": "de-DE", "whatsNew": "old"}},
+            ]
+        )
+        self.assertIn("EXIT 1", out)
+        self.assertFalse([w for w in client.writes() if w[1].startswith("/appStoreVersionLocalizations/")])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

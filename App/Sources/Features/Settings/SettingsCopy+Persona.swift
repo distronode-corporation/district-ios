@@ -28,7 +28,7 @@ extension SettingsCopy {
     /// the engine in Voice Studio and comes back finds that engine's own setting here, and
     /// without this sentence would read it as the form losing their edit.
     static let personaAnswerLengthNote = "How long each spoken reply may run. Saved separately for "
-        + "each engine, so a different engine in Voice Studio keeps its own setting."
+        + "each engine, so a different engine on the Voice screen keeps its own setting."
 
     // MARK: - When the catalogue did not load
 
