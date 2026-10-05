@@ -138,6 +138,69 @@ final class SchedulingRoutingTests: XCTestCase {
         XCTAssertEqual(action.tab, .overview)
     }
 
+    // MARK: - District Studio links
+
+    /// ⛔ EACH STUDIO AREA THE APP DRAWS OPENS THE HUB'S OWN ROW FOR IT, and no area is the
+    /// hub itself. A mutator, so nothing is gated.
+    func test_IOS_STUDIOLINK_01_eachAreaOpensItsSettingsSection() {
+        let expected: [(String, SettingsSection)] = [
+            ("", .hub),
+            ("/persona", .persona),
+            ("/voice", .voiceStudio),
+            ("/call-handling", .calls),
+            ("/skills", .capabilities),
+            ("/knowledge", .knowledge),
+        ]
+        for (suffix, section) in expected {
+            XCTAssertEqual(
+                route("/dashboard/district/studio" + suffix, selected: "ws_1", role: .agency),
+                .workspaceSettings(workspaceId: "ws_1", role: .agency, section: section),
+                suffix
+            )
+        }
+    }
+
+    /// ⛔ A SCREEN THE GATE HIDES FROM A VIEWER LANDS ON THE HUB; ONE IT ADMITS IS KEPT.
+    func test_IOS_STUDIOLINK_02_aViewerFallsBackToTheHubForAHiddenScreen() {
+        let hub = Route.workspaceSettings(workspaceId: "ws_1", role: .viewer, section: .hub)
+        for suffix in ["/persona", "/voice", "/skills"] {
+            XCTAssertEqual(route("/dashboard/district/studio" + suffix, selected: "ws_1", role: .viewer), hub, suffix)
+        }
+        XCTAssertEqual(
+            route("/dashboard/district/studio/knowledge", selected: "ws_1", role: .viewer),
+            .workspaceSettings(workspaceId: "ws_1", role: .viewer, section: .knowledge)
+        )
+        XCTAssertEqual(
+            route("/dashboard/district/studio/call-handling", selected: "ws_1", role: .viewer),
+            .workspaceSettings(workspaceId: "ws_1", role: .viewer, section: .calls)
+        )
+    }
+
+    /// ⛔ A CROSS-TENANT STUDIO LINK CARRIES NO ROLE, SO A GATED AREA FAILS CLOSED TO THE
+    /// LINKED TENANT'S HUB.
+    func test_IOS_STUDIOLINK_03_aCrossTenantLinkFailsClosedToThatTenantsHub() {
+        guard case let .destination(value) = outcome(
+            "/dashboard/district/studio/persona",
+            query: "?workspaceId=ws_2"
+        ) else {
+            return XCTFail("expected a destination")
+        }
+        let action = AppLinkRouting.action(for: value, selectedWorkspaceId: "ws_1", role: .agency)
+        XCTAssertEqual(action.selectWorkspaceId, "ws_2")
+        XCTAssertEqual(action.route, .workspaceSettings(workspaceId: "ws_2", role: nil, section: .hub))
+    }
+
+    /// ⚠️ THE STUDIO HANGS OFF THE OVERVIEW TAB, where the settings hub's row already is,
+    /// and the pages this app does not draw never become a destination at all.
+    func test_IOS_STUDIOLINK_04_theStudioLandsOnTheOverviewAndUndrawnPagesOpenTheBrowser() {
+        guard let value = destination("/dashboard/district/studio/voice") else {
+            return XCTFail("expected a destination")
+        }
+        XCTAssertEqual(AppLinkRouting.action(for: value, selectedWorkspaceId: "ws_1", role: .client).tab, .overview)
+        XCTAssertEqual(outcome("/dashboard/district/studio/integrations"), .openInBrowser)
+        XCTAssertEqual(outcome("/dashboard/district/studio/video"), .openInBrowser)
+    }
+
     // MARK: - The gate
 
     /// ⛔ `.partial` FOR A VIEWER RATHER THAN `.hidden` OR `.none`, AND ALL THREE ARE
