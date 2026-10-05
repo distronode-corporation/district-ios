@@ -134,4 +134,31 @@ final class ShellLandingTests: ShellPathsTestCase {
         XCTAssertEqual(paths.regularSelection, .scheduling)
         XCTAssertEqual(paths.regularPath(for: .scheduling), [bookings])
     }
+
+    /// ⛔ A STUDIO AREA LINK LANDS ON ITS SETTINGS SCREEN WITH THE HUB BENEATH IT, end to
+    /// end through ``AppLinkRouting``, and the bare Studio link opens the hub alone.
+    func test_IOS_NAV_24_aStudioAreaLinkLandsWithTheSettingsHubBeneathIt() throws {
+        let url = try XCTUnwrap(URL(string: "https://www.distronode.com/dashboard/district/studio/knowledge"))
+        guard case let .destination(destination) = AppLinkResolver.resolve(url) else {
+            return XCTFail("expected a destination")
+        }
+        var paths = seeded()
+        paths.apply(AppLinkRouting.action(for: destination, selectedWorkspaceId: workspaceId, role: role))
+        let hub = Route.workspaceSettings(workspaceId: workspaceId, role: role, section: .hub)
+        let knowledge = Route.workspaceSettings(workspaceId: workspaceId, role: role, section: .knowledge)
+        XCTAssertEqual(paths.compactTab, .overview)
+        XCTAssertEqual(paths.compactPath(for: .overview), [hub, knowledge])
+    }
+
+    func test_IOS_NAV_25_theBareStudioLinkOpensTheSettingsHub() throws {
+        let url = try XCTUnwrap(URL(string: "https://www.distronode.com/dashboard/district/studio"))
+        guard case let .destination(destination) = AppLinkResolver.resolve(url) else {
+            return XCTFail("expected a destination")
+        }
+        var paths = seeded()
+        paths.apply(AppLinkRouting.action(for: destination, selectedWorkspaceId: workspaceId, role: role))
+        let hub = Route.workspaceSettings(workspaceId: workspaceId, role: role, section: .hub)
+        XCTAssertEqual(paths.compactTab, .overview)
+        XCTAssertEqual(paths.compactPath(for: .overview), [hub])
+    }
 }

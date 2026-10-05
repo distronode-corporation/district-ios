@@ -75,8 +75,9 @@ enum AppLinkRouting {
 
     /// The tab that HOSTS a section.
     ///
-    /// ⚠️ ANALYTICS AND SCHEDULING ARE NOT TABS AND HANG OFF THE OVERVIEW, which is
-    /// where ``OverviewEntry`` already offers both. Putting them anywhere else would
+    /// ⚠️ ANALYTICS, SCHEDULING AND THE STUDIO ARE NOT TABS AND HANG OFF THE OVERVIEW,
+    /// which is where ``OverviewEntry`` already offers all three (the Studio is the
+    /// workspace settings hub). Putting them anywhere else would
     /// give the app a second way to reach a screen the overview already owns, and a
     /// back swipe from one of them would land somewhere the user never chose.
     ///
@@ -95,7 +96,7 @@ enum AppLinkRouting {
     /// `trailing_comma` in `.swiftlint.yml` for the same pair disagreeing elsewhere.
     private static func tab(for section: DistrictSection) -> Tab {
         switch section {
-        case .overview, .analytics, .scheduling: .overview
+        case .overview, .analytics, .scheduling, .studio: .overview
         case .inbox: .inbox
         case .calls: .calls
         case .contacts: .contacts
@@ -112,7 +113,7 @@ enum AppLinkRouting {
     ///
     /// ⚠️ THE `workspaceId` GUARDS ARE DEFENSIVE RATHER THAN LIVE. ``ShellView`` holds a
     /// link whose ``AppLinkDestination/requiresWorkspace`` is true until one resolves,
-    /// so nil cannot reach the three arms below today. They return nil rather than
+    /// so nil cannot reach the four arms below today. They return nil rather than
     /// force-unwrapping because "land on the tab root" is a correct answer and a crash
     /// is not, and because a partial function whose impossible arm is wrong is exactly
     /// the shape that becomes a real bug the day the caller changes.
@@ -162,7 +163,38 @@ enum AppLinkRouting {
                 role: role,
                 section: SchedulingSection.forPathSegment(destination.detailId)
             )
+        case .studio:
+            guard let workspaceId else { return nil }
+            return studioRoute(destination.studioArea, workspaceId: workspaceId, role: role)
         }
+    }
+
+    /// The settings screen a District Studio link names.
+    ///
+    /// ⛔ THE WEB'S STUDIO IS THIS APP'S SETTINGS HUB, so no area is the hub and each area
+    /// is the hub's own row for it (see ``SettingsHubView/groups``). The core has already
+    /// sent every area this app cannot draw (`integrations`, `video`) to the browser.
+    ///
+    /// ⛔ A SCREEN ``RouteGate`` HIDES FROM THIS ROLE LANDS ON THE HUB INSTEAD. A viewer
+    /// sharing a persona link would otherwise open a screen whose first read answers 403;
+    /// the hub is the surface the URL named, one level up, with every row this role may
+    /// open. A cross-tenant link carries a nil role, which the gate treats as a viewer, so
+    /// it fails closed the same way.
+    private static func studioRoute(_ area: StudioArea?, workspaceId: String, role: WorkspaceRole?) -> Route {
+        let hub = Route.workspaceSettings(workspaceId: workspaceId, role: role, section: .hub)
+        guard let area else { return hub }
+        let section: SettingsSection = switch area {
+        case .persona: .persona
+        case .voice: .voiceStudio
+        case .callHandling: .calls
+        case .skills: .capabilities
+        case .knowledge: .knowledge
+        }
+        let route = Route.workspaceSettings(workspaceId: workspaceId, role: role, section: section)
+        if case .hidden = RouteGate.gate(for: route, role: role) {
+            return hub
+        }
+        return route
     }
 }
 

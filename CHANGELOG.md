@@ -12,6 +12,11 @@ built from history before publication, so they have no tags in this repository.
 
 ### Changed
 
+- Links to District Studio on the web open the matching settings screen: Persona, Voice,
+  call handling, Skills or Knowledge, with workspace settings beneath it, and the Studio's
+  home opens workspace settings. A screen your role cannot open lands on workspace settings
+  instead. Studio pages this app does not have (Integrations, Video) open in the browser.
+- DistrictCore 4.0.0.
 - The Voice screen is titled "Voice" before its settings load, the same word District AI
   now sends as its heading.
 - Workspace settings groups the receptionist's settings under District Studio, as the web
