@@ -35,8 +35,8 @@ enum SettingsCopy {
     static let personaSubtitle = "Name, greeting, personality and language"
 
     /// ⚠️ THE ROW, NAMED AS THE WEB'S DISTRICT STUDIO PAGE IS ("Voice", Sean's decision of
-    /// 2026-10-04). The screen's own title is ``VoiceStudioCopy/title``, which stays "Voice
-    /// Studio" because that is the heading the server still sends.
+    /// 2026-10-04). It is also the screen's title before the read lands
+    /// (``VoiceStudioCopy/title``), matching the heading the service sends.
     static let voiceStudioTitle = "Voice"
     static let voiceStudioSubtitle = "Recipes, the signal chain, voices and tuning, with how fast the agent replies"
 

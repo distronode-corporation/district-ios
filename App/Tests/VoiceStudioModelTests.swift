@@ -270,7 +270,7 @@ enum VoiceStudioTestBody {
     }
 
     private static let labelsRest = #"""
-    "heading":"Voice Studio","description":"d","tierLabel":"Models","tierStable":"Stable",
+    "heading":"Voice","description":"d","tierLabel":"Models","tierStable":"Stable",
      "tierLatest":"Latest","tierDescription":"t","recipesLabel":"Starting point","defaultBadge":"Default",
      "reset":"Reset","chainLabel":"Signal chain","editLeg":"Part to edit","edit":"Edit",
      "meterHeading":"Time to first word","meterDescription":"m","residencyHeading":"r",

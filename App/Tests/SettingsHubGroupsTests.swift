@@ -40,11 +40,11 @@ final class SettingsHubGroupsTests: XCTestCase {
         XCTAssertEqual(titles[.knowledge], "Knowledge")
     }
 
-    /// ⚠️ THE VOICE SCREEN'S TITLE IS NOT THE ROW'S. The heading the read sends is still
-    /// "Voice Studio", so the title before it lands says the same, or it would change word
+    /// ⚠️ THE VOICE SCREEN'S TITLE IS THE ROW'S AND THE WIRE HEADING'S. The service sends
+    /// "Voice", so the title before the read lands says the same, or it would change word
     /// mid-load.
-    func test_IOS_HUB_04_theVoiceScreenKeepsTheWireHeadingsName() {
-        XCTAssertEqual(VoiceStudioCopy.title, "Voice Studio")
-        XCTAssertNotEqual(VoiceStudioCopy.title, SettingsCopy.voiceStudioTitle)
+    func test_IOS_HUB_04_theVoiceScreenTitleIsTheWireHeadingsName() {
+        XCTAssertEqual(VoiceStudioCopy.title, "Voice")
+        XCTAssertEqual(VoiceStudioCopy.title, SettingsCopy.voiceStudioTitle)
     }
 }
