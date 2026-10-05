@@ -9,7 +9,11 @@ import Foundation
 /// fallbacks. ⛔ The "Based on" line and an unsaved edit's meter are NOT here: they are filled
 /// from the read's own templates (`VoiceStudioText`), so they follow the portal language too.
 enum VoiceStudioCopy {
-    static let title = SettingsCopy.voiceStudioTitle
+    /// ⚠️ NOT THE HUB ROW'S NAME. The row says "Voice", as the web's District Studio page
+    /// does, but the heading the read sends is still "Voice Studio" (the wire key stays until
+    /// the apps read a new one), and a title that changed word the moment the read landed
+    /// would read as a glitch. This moves with the wire heading.
+    static let title = "Voice Studio"
 
     static let saving = "Saving…"
 

@@ -10,6 +10,15 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Changed
+
+- Workspace settings groups the receptionist's settings under District Studio, as the web
+  dashboard now does: Persona, Voice, how calls are answered, dynamic persona rules, the
+  transfer directory, Skills and Knowledge, in the order of the web's pages. Messaging,
+  Members and Scheduling follow under Workspace. Four rows take the web's page names:
+  Agent persona is Persona, Voice Studio is Voice, Capabilities is Skills and Knowledge
+  base is Knowledge.
+
 ## [2.0] - 2026-10-04
 
 Voice Studio is the headline of 2.0.
