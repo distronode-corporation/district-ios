@@ -79,7 +79,7 @@ jobs:
       # The provider and the service account live in the action, shared with submit.yml.
       - name: Authenticate to Google Cloud
         id: gcp
-        uses: ./.github/actions/release-auth
+        uses: ./.github/actions/release-auth # zizmor: ignore[self-repository]
 
       # ⛔ The .p8 is written once, mode 0600, under the runner's temporary directory,
       # every value masked first, and removed by the last step whatever happens. Fetched
@@ -112,7 +112,7 @@ jobs:
       # Xcode 26.3, asserted, and the pinned XcodeGen; archive-imac.sh generates the
       # project itself.
       - name: Xcode and XcodeGen
-        uses: ./.github/actions/macos-toolchain
+        uses: ./.github/actions/macos-toolchain # zizmor: ignore[self-repository]
         with:
           generate: "false"
 
@@ -205,7 +205,7 @@ jobs:
     permissions:
       contents: write # submit.yml's github-release job publishes the Release
       id-token: write # the Google Cloud token for the App Store Connect key
-    uses: ./.github/workflows/submit.yml
+    uses: ./.github/workflows/submit.yml # zizmor: ignore[self-repository]
     with:
       tag: ${{ github.ref_name }}
       approval: ${{ inputs.approval }}
