@@ -104,7 +104,7 @@ jobs:
       # The provider and the service account live in the action, shared with release.yml.
       - name: Authenticate to Google Cloud
         id: gcp
-        uses: ./.github/actions/release-auth
+        uses: ./.github/actions/release-auth # zizmor: ignore[self-repository]
 
       - name: Submit for App Review
         env:

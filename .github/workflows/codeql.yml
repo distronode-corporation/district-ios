@@ -100,7 +100,7 @@ jobs:
       # The same Xcode, XcodeGen and generated project as ci.yml's `app` job, from the
       # action both share.
       - name: Xcode and XcodeGen
-        uses: ./.github/actions/macos-toolchain
+        uses: ./.github/actions/macos-toolchain # zizmor: ignore[self-repository]
 
       # Every step after this one is traced, so the setup above stays out of it.
       - name: Initialize CodeQL
