@@ -50,8 +50,9 @@ final class SettingsPersonaCopyTests: XCTestCase {
 
     /// ⛔ THE PERSONA FORM SAYS WHERE THE VOICE WENT. It no longer shows the engine, the
     /// voice or the tuning, and without the sentence it reads as a persona with no voice.
-    func testThePersonaFormSaysTheVoiceIsInVoiceStudio() {
-        XCTAssertTrue(SettingsCopy.personaVoiceStudioNote.contains("Voice Studio"))
+    func testThePersonaFormSaysTheVoiceIsOnTheVoiceScreen() {
+        XCTAssertTrue(SettingsCopy.personaVoiceStudioNote.contains("Voice screen"))
+        XCTAssertTrue(SettingsCopy.personaVoiceStudioNote.contains("District Studio"))
         XCTAssertTrue(SettingsCopy.personaVoiceStudioNote.contains("workspace settings"))
     }
 

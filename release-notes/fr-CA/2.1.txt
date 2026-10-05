@@ -1,0 +1,10 @@
+Les réglages de votre réceptionniste sont maintenant regroupés sous District Studio, comme sur le Web.
+
+Modifications
+
+- Dans les paramètres de l'espace de travail, les réglages de votre réceptionniste sont regroupés sous District Studio, dans le même ordre et sous les mêmes noms que sur le Web. Messaging, Members et Scheduling suivent, sous Workspace.
+- Voice Studio s'appelle maintenant Voice, sur son écran et partout où l'application le mentionne.
+
+Nouveautés
+
+- Les liens vers District Studio sur distronode.com ouvrent l'écran correspondant dans l'application. Si votre rôle ne permet pas d'ouvrir un écran, les paramètres de l'espace de travail s'affichent à la place, et les pages du studio absentes de l'application s'ouvrent dans le navigateur.

@@ -17,12 +17,13 @@ enum PersonaRefitState: Equatable {
 
     static let runningLine = "Checking that the voice chain speaks the new language."
     static let refittedLine = "The voice chain was moved to models that speak the new language. "
-        + "Voice Studio shows it."
+        + "The Voice screen shows it."
     static let noFitLine = "No model this workspace may use speaks the new language for every part "
-        + "of the voice chain. Choose them in Voice Studio."
-    static let failedLine = "The voice chain could not be moved to the new language. Fit it in Voice Studio."
-    static let notSeenLine = "The voice chain was saved, but Voice Studio does not show it fitting the "
-        + "new language. Check it there."
+        + "of the voice chain. Choose them on the Voice screen."
+    static let failedLine = "The voice chain could not be moved to the new language. "
+        + "Fit it on the Voice screen."
+    static let notSeenLine = "The voice chain was saved, but the Voice screen does not show it fitting "
+        + "the new language. Check it there."
 
     var isRunning: Bool {
         self == .running

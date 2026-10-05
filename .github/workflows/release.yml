@@ -10,6 +10,9 @@ name: Release
 #   - A dispatch on a `v*` tag with the maintainers' approval input also submits the
 #     build for review once it is valid, by calling submit.yml, which also runs on its
 #     own for a tag that was already built.
+#   - A dispatch with `build_only` archives and signs on the runner and stops there: no
+#     upload to App Store Connect, no TestFlight build, no dSYM upload, no submission. It
+#     proves a signed release build of the ref, and needs no approval.
 #
 # ⛔ NO SIGNING MATERIAL LIVES IN THIS REPOSITORY OR IN GITHUB. The `release` environment
 # (branch `main` and tags `v*` only) is the one place a job can obtain a Google Cloud
@@ -29,6 +32,10 @@ on:
         description: Leave empty for an upload only. Submission for review needs the maintainers' approval text and a v* tag.
         type: string
         default: ""
+      build_only:
+        description: Archive and sign only; upload nothing, submit nothing
+        type: boolean
+        default: false
 
 # Nothing at the top level; each job asks for exactly what it uses.
 permissions: {}
@@ -137,13 +144,21 @@ jobs:
           GSM_ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
           KIND: ${{ steps.preflight.outputs.kind }}
           EXPECTED_BUILD: ${{ steps.preflight.outputs.build }}
+          BUILD_ONLY: ${{ inputs.build_only && '1' || '0' }}
         run: |
           set -euo pipefail
           SENTRY_DSN="$(scripts/gsm-secret.sh IOS_SENTRY_DSN)"
-          SENTRY_AUTH_TOKEN="$(scripts/gsm-secret.sh SENTRY_EU_AUTH_TOKEN)"
           echo "::add-mask::$SENTRY_DSN"
-          echo "::add-mask::$SENTRY_AUTH_TOKEN"
-          export SENTRY_DSN SENTRY_AUTH_TOKEN
+          export SENTRY_DSN
+          if [ "$BUILD_ONLY" = "1" ]; then
+            # ⛔ UPLOAD=0 stops archive-imac.sh after the signed archive; with no Sentry
+            # token it uploads no dSYMs either. Nothing leaves the runner.
+            export UPLOAD=0
+          else
+            SENTRY_AUTH_TOKEN="$(scripts/gsm-secret.sh SENTRY_EU_AUTH_TOKEN)"
+            echo "::add-mask::$SENTRY_AUTH_TOKEN"
+            export SENTRY_AUTH_TOKEN
+          fi
           # The Google token is not needed past this point.
           unset GSM_ACCESS_TOKEN
           # A tag is a detached HEAD; the preflight has already proved its commit is on
@@ -155,9 +170,21 @@ jobs:
             exit 1
           }
 
+      # The proof a build-only run exists for: the archived app is validly signed, and by
+      # whom.
+      - name: Verify the signature (build only)
+        if: ${{ inputs.build_only }}
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/build/DistrictAI.xcarchive/Products/Applications/DistrictAI.app"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          codesign -dvv "$APP" 2>&1 | grep -E '^(Identifier|Authority|TeamIdentifier)='
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' -c 'Print :CFBundleVersion' "$APP/Info.plist"
+
       # Upload returns before App Store Connect has processed the build; this waits for
       # VALID, which is also when TestFlight's internal group receives it.
       - name: Wait for App Store Connect processing
+        if: ${{ !inputs.build_only }}
         timeout-minutes: 45
         env:
           VERSION: ${{ steps.preflight.outputs.version }}
@@ -172,10 +199,15 @@ jobs:
           KIND: ${{ steps.preflight.outputs.kind }}
           APPROVAL: ${{ inputs.approval }}
           EVENT: ${{ github.event_name }}
+          BUILD_ONLY: ${{ inputs.build_only }}
         run: |
           {
             echo "### District AI $VERSION ($BUILD)"
             echo
+            if [ "$BUILD_ONLY" = "true" ]; then
+              echo "**Build only.** Archived and signed on the runner; nothing was uploaded or submitted."
+              exit 0
+            fi
             echo "Uploaded to App Store Connect and **VALID**. TestFlight internal testers receive it automatically."
             echo
             if [ "$EVENT" = "workflow_dispatch" ] && [ "$KIND" = "tag" ] && [ "$APPROVAL" = "approved for release" ]; then
@@ -199,7 +231,7 @@ jobs:
     needs: build
     # ⛔ Only a dispatch on a tag, and only with the approval input exactly as the
     # maintainers give it. Anything else skips this job.
-    if: github.event_name == 'workflow_dispatch' && needs.build.outputs.kind == 'tag' && inputs.approval == 'approved for release'
+    if: github.event_name == 'workflow_dispatch' && needs.build.outputs.kind == 'tag' && inputs.approval == 'approved for release' && !inputs.build_only
     # The ceiling for submit.yml's jobs, each of which asks for no more than it uses:
     # `submit` reads, and only `github-release` writes.
     permissions:

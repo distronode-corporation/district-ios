@@ -136,7 +136,7 @@ enum SettingsCopy {
     /// ⚠️ SAYS WHERE THE ENGINE WENT. The persona form no longer shows the engine, the voice
     /// or the tuning, and without this line it reads as a persona with no voice at all.
     static let personaVoiceStudioNote = "The voice, the engine and how fast the agent replies are set "
-        + "in Voice Studio, in workspace settings."
+        + "on the Voice screen, under District Studio in workspace settings."
 
     static let personaUnset = "Not set"
 
