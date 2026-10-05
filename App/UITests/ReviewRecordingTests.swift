@@ -83,9 +83,9 @@ final class ReviewRecordingTests: ReviewRecordingCase {
         }
         back()
 
-        // 9. Workspace settings → Agent persona.
+        // 9. Workspace settings → Persona.
         ShellNavigator.navigate(app, to: .settings); pause(3)
-        rowTitled("Agent persona").tap(); pause(4)
+        rowTitled("Persona").tap(); pause(4)
         back(); back()
     }
 

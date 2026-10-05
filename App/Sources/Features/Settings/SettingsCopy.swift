@@ -22,16 +22,25 @@ enum SettingsCopy {
 
     static let hubTitle = "Workspace settings"
 
-    static let personaTitle = "Agent persona"
+    /// ⚠️ THE WEB'S OWN NAME FOR ITS SECTION, AND THE SAME IN FRENCH. The rows under it
+    /// are the AI-receptionist settings the web moved into District Studio on 2026-10-04;
+    /// the row names below are that section's page names wherever this app has the same
+    /// screen.
+    static let studioGroupTitle = "District Studio"
+
+    /// The heading of the rows that are about the workspace rather than the receptionist.
+    static let workspaceGroupTitle = "Workspace"
+
+    static let personaTitle = "Persona"
     static let personaSubtitle = "Name, greeting, personality and language"
 
-    /// ⚠️ THE FEATURE'S NAME, KEPT AS THE WEB AND ANDROID CALL IT. The Studio's own heading
-    /// arrives from the server in the portal language once the read lands; this is the row and
-    /// the title before it does.
-    static let voiceStudioTitle = "Voice Studio"
+    /// ⚠️ THE ROW, NAMED AS THE WEB'S DISTRICT STUDIO PAGE IS ("Voice", Sean's decision of
+    /// 2026-10-04). The screen's own title is ``VoiceStudioCopy/title``, which stays "Voice
+    /// Studio" because that is the heading the server still sends.
+    static let voiceStudioTitle = "Voice"
     static let voiceStudioSubtitle = "Recipes, the signal chain, voices and tuning, with how fast the agent replies"
 
-    static let capabilitiesTitle = "Capabilities"
+    static let capabilitiesTitle = "Skills"
     static let capabilitiesSubtitle = "What the agent may do on a call"
 
     static let callsTitle = "How calls are answered"
@@ -43,7 +52,7 @@ enum SettingsCopy {
     static let routingTitle = "Dynamic persona rules"
     static let routingSubtitle = "How the agent adapts to who is calling"
 
-    static let knowledgeTitle = "Knowledge base"
+    static let knowledgeTitle = "Knowledge"
     static let knowledgeSubtitle = "What the agent answers from"
 
     static let messagingTitle = "Messaging"
