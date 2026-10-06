@@ -61,8 +61,17 @@ final class CallDetailModel {
         transcript = .idle
         switch await calls.detail(workspaceId: workspaceId, callId: callId) {
         case let .success(call):
-            if live == nil, CallDisplay(call).transcribesLive {
+            let display = CallDisplay(call)
+            if live == nil, display.transcribesLive {
                 live = LiveTranscriptModel(workspaceId: workspaceId, callId: callId, dependencies: liveDependencies())
+            }
+            // ⚠️ EVERY LOAD IS A CALL-STATUS SIGNAL FOR THE LIVE TRANSCRIPT, the only one this
+            // screen gets: a changed status is what may subscribe again after `not_live`, and a
+            // call no longer live has ended.
+            if display.live {
+                live?.callStatusChanged(to: display.status)
+            } else {
+                live?.callEnded()
             }
             state = .content(call)
         case let .failure(error):

@@ -10,6 +10,8 @@ enum LiveTranscriptCopy {
     static let connecting = "Connecting…"
     static let live = "Live"
     static let ended = "Call ended"
+    /// After `agent_error`: the call may be handed to a fresh assistant, so it is not over.
+    static let reconnecting = "Reconnecting…"
     static let waiting = "Nothing has been said yet."
 
     /// ⛔ D3: THE SERVER'S MEMORY DID NOT REACH BACK TO THE CALL'S FIRST LINE (it restarted, or
@@ -39,6 +41,9 @@ enum LiveTranscriptCopy {
     static func status(phase: LiveTranscriptPhase, connection: LiveTranscriptModel.Connection) -> String {
         if case .ended = phase {
             return ended
+        }
+        if phase == .reconnecting {
+            return reconnecting
         }
         return connection == .open && phase == .live ? live : connecting
     }

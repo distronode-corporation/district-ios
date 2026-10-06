@@ -184,10 +184,10 @@ final class LiveTranscriptModelTests: XCTestCase {
         let transcripts = ScriptedTranscripts([.success(""), .success("Ava: Good afternoon.")])
         let model = makeModel(transcripts: transcripts)
         let task = await open(model)
-        task?.deliver(TranscriptWire.snapshot([], lastSeq: 0))
+        task?.deliver(TranscriptWire.snapshot([TranscriptWire.greeting], lastSeq: 1))
         await waitUntil { model.phase == .live }
 
-        task?.deliver(TranscriptWire.ended(seq: 1))
+        task?.deliver(TranscriptWire.ended(seq: 2))
         await waitUntil { model.phase == .ended(.callEnded) }
         XCTAssertEqual(LiveTranscriptCopy.status(phase: model.phase, connection: model.connection), "Call ended")
         XCTAssertEqual(model.finalTranscript, .fetching(attempt: 1))
@@ -273,6 +273,8 @@ final class LiveTranscriptModelTests: XCTestCase {
         XCTAssertEqual(LiveTranscriptCopy.speaker(line(.other("supervisor"), nil)), "Other speaker")
         XCTAssertEqual(LiveTranscriptCopy.status(phase: .subscribing, connection: .connecting), "Connecting…")
         XCTAssertEqual(LiveTranscriptCopy.status(phase: .live, connection: .connecting), "Connecting…")
+        XCTAssertEqual(LiveTranscriptCopy.status(phase: .reconnecting, connection: .open), "Reconnecting…")
+        XCTAssertEqual(LiveTranscriptCopy.status(phase: .reconnecting, connection: .connecting), "Reconnecting…")
     }
 
     /// Only a call in progress is watched live: not a ringing one (nothing said yet) and not
@@ -288,5 +290,97 @@ final class LiveTranscriptModelTests: XCTestCase {
         XCTAssertTrue(try CallDisplay(call("in-progress")).transcribesLive)
         XCTAssertFalse(try CallDisplay(call("ringing")).transcribesLive)
         XCTAssertFalse(try CallDisplay(call("completed")).transcribesLive)
+    }
+
+    // MARK: - The revised contract (§4.12)
+
+    /// ⛔ §4.12 Q7: `agent_error` IS NOT THE END. The screen says "Reconnecting…", fetches
+    /// nothing and keeps its socket; a fresh assistant's first line (a new epoch) makes it
+    /// live again.
+    func test_IOS_LIVE_13_anAgentErrorReconnectsUntilANewEpoch() async {
+        let transcripts = ScriptedTranscripts([.success("never asked")])
+        let model = makeModel(transcripts: transcripts)
+        let task = await open(model)
+        task?.deliver(TranscriptWire.snapshot([TranscriptWire.greeting], lastSeq: 1))
+        await waitUntil { model.phase == .live }
+
+        task?.deliver(TranscriptWire.ended(seq: 2, reason: "agent_error"))
+        await waitUntil { model.phase == .reconnecting }
+        XCTAssertEqual(LiveTranscriptCopy.status(phase: model.phase, connection: model.connection), "Reconnecting…")
+        XCTAssertEqual(model.finalTranscript, .notRequested)
+        XCTAssertFalse(model.fallsBack)
+
+        let fresh = TranscriptWire.epoch + 60000
+        task?.deliver(TranscriptWire.live(
+            TranscriptWire.segment("item_n1", index: 0, seq: 1, epoch: fresh, speaker: "agent", text: "Hello again.")
+        ))
+        await waitUntil { model.phase == .live }
+        XCTAssertEqual(model.lines.map(\.segmentId), ["item_a1", "item_n1"])
+        XCTAssertEqual(transcripts.count, 0, "nothing was fetched")
+        XCTAssertTrue(task?.cancelCodes.isEmpty ?? false, "the socket stayed open")
+        model.deactivate()
+    }
+
+    /// ⛔ §4.12 Q4: `not_live` IS FINAL FOR ITS SUBSCRIBE. No timer subscribes again; only a
+    /// changed call status from a reload of the call row does, on a new socket. The same
+    /// status again does nothing.
+    func test_IOS_LIVE_14_afterNotLiveOnlyAChangedStatusSubscribesAgain() async {
+        let model = makeModel()
+        model.callStatusChanged(to: "in-progress")
+        let first = await open(model)
+        first?.deliver(TranscriptWire.error("not_live"))
+        await waitUntil { model.fallsBack }
+        await waitUntil { first?.cancelCodes.first == .normalClosure }
+
+        for _ in 0 ..< 12 {
+            clock.advance(by: 10000)
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+        model.callStatusChanged(to: "in-progress")
+        try? await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(script.tasks.count, 1, "neither time nor the same status subscribes again")
+
+        model.callStatusChanged(to: "on-hold")
+        await waitUntil { self.script.tasks.count == 2 && self.script.tasks[1].sent.count == 2 }
+        XCTAssertEqual(script.tasks[1].sent, [TranscriptWire.mode, TranscriptWire.subscribe])
+        XCTAssertEqual(model.phase, .subscribing)
+        XCTAssertFalse(model.fallsBack, "the live pane is back while the subscribe is answered")
+        script.tasks[1].deliver(TranscriptWire.snapshot([TranscriptWire.greeting], lastSeq: 1))
+        await waitUntil { model.phase == .live }
+        model.deactivate()
+    }
+
+    /// A changed status while the screen is in the background subscribes once it is back,
+    /// not before: no socket is held for a screen nobody sees.
+    func test_IOS_LIVE_15_aSubscribeAfterNotLiveWaitsForTheScreen() async {
+        let model = makeModel()
+        let first = await open(model)
+        first?.deliver(TranscriptWire.error("not_live"))
+        await waitUntil { model.fallsBack }
+        model.deactivate()
+
+        model.callStatusChanged(to: "on-hold")
+        try? await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(script.tasks.count, 1)
+
+        model.activate()
+        await waitUntil { self.script.tasks.count == 2 && self.script.tasks[1].sent.count == 2 }
+        model.deactivate()
+    }
+
+    /// The call row says the call is over: the transcript ends and the full one is fetched,
+    /// since this socket hears no `call_ended`.
+    func test_IOS_LIVE_16_theCallRowEndingTheCallEndsTheTranscript() async {
+        let transcripts = ScriptedTranscripts([.success("Ava: Good afternoon.")])
+        let model = makeModel(transcripts: transcripts)
+        let task = await open(model)
+        task?.deliver(TranscriptWire.snapshot([TranscriptWire.greeting], lastSeq: 1))
+        await waitUntil { model.phase == .live }
+
+        model.callEnded()
+
+        XCTAssertEqual(model.phase, .ended(.callEnded))
+        await advance(by: 500, upTo: 5000) { model.finalTranscript == .loaded("Ava: Good afternoon.") }
+        await waitUntil { task?.cancelCodes.first == .normalClosure }
     }
 }

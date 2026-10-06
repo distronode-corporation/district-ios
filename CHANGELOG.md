@@ -21,6 +21,11 @@ built from history before publication, so they have no tags in this repository.
   screen goes or the app goes to the background. Lines missed while the server was
   restarting are named ("Earlier lines will appear in the full transcript after the call").
   A call the server has no live transcript for keeps the Show transcript button.
+  ⚠️ When the assistant fails mid-call (`agent_error`) the pane says "Reconnecting…" rather
+  than "Call ended", and goes live again if a fresh assistant takes the call. A call the
+  server answered `not_live` is subscribed again only when a reload of the call row shows
+  a changed status, never on a timer; a reload showing the call over ends the transcript
+  and fetches the full one.
 
 ### Changed
 

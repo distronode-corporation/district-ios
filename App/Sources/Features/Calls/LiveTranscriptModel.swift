@@ -71,6 +71,8 @@ final class LiveTranscriptModel {
     /// Set once the call no longer needs a socket (the full transcript is in, or the live
     /// one is unavailable), so a later activation opens none.
     private var finished = false
+    /// The screen is shown and the app is in front: a socket may be open.
+    private var active = false
 
     private enum Timer: Hashable {
         case resubscribe
@@ -90,11 +92,48 @@ final class LiveTranscriptModel {
     /// The screen is shown and the app is in front: open a socket, unless one is open, or
     /// resume fetching the full transcript if that is where it stood.
     func activate() {
+        active = true
         if case .fetching = finalTranscript {
             schedule(.fetch, after: 0) { [weak self] in await self?.fetchFinal() }
             return
         }
-        guard !finished, runner == nil else { return }
+        openSocket()
+    }
+
+    /// The screen went away or the app went to the background: close the socket and stop
+    /// every wait. What is on screen stays.
+    func deactivate() {
+        active = false
+        closeSocket()
+        cancelTimers()
+        if connection != .failed {
+            connection = .idle
+        }
+    }
+
+    // MARK: - The call row
+
+    /// The call row was loaded again with this status, still in progress.
+    ///
+    /// ⛔ THE ONLY WAY BACK FROM `not_live`, which is final for its subscribe: a status that
+    /// differs from the last one reported subscribes again (`TranscriptReducer`). Never a
+    /// timer. ⚠️ This socket takes no workspace relay (`broadcast: false`), so the call row
+    /// is the only status this screen sees.
+    func callStatusChanged(to status: String) {
+        perform(reducer.callStatusChanged(to: status))
+        publish()
+    }
+
+    /// The call row was loaded again and the call is over.
+    func callEnded() {
+        perform(reducer.callEnded())
+        publish()
+    }
+
+    // MARK: - The socket
+
+    private func openSocket() {
+        guard active, !finished, runner == nil else { return }
         let runner = TelemetryConnectionRunner(
             workspaceId: workspaceId,
             broadcast: false,
@@ -115,18 +154,6 @@ final class LiveTranscriptModel {
             }
         }
     }
-
-    /// The screen went away or the app went to the background: close the socket and stop
-    /// every wait. What is on screen stays.
-    func deactivate() {
-        closeSocket()
-        cancelTimers()
-        if connection != .failed {
-            connection = .idle
-        }
-    }
-
-    // MARK: - The socket
 
     private func handle(_ update: TelemetryUpdate) {
         switch update {
@@ -171,6 +198,11 @@ final class LiveTranscriptModel {
                 // closing it. See ``closeSocket()`` for why no unsubscribe is sent first.
                 finished = true
                 closeSocket()
+            case .subscribe:
+                // A call-status signal after `not_live`: a new socket, whose open sends the
+                // subscribe, once the screen is in front.
+                finished = false
+                openSocket()
             }
         }
     }

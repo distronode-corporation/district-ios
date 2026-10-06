@@ -258,6 +258,7 @@ enum TranscriptWire {
         _ segmentId: String,
         index: Int,
         seq: Int,
+        epoch: Int64 = epoch,
         speaker: String = "caller",
         text: String,
         final: Bool = true,
@@ -274,7 +275,15 @@ enum TranscriptWire {
         envelope("transcript_segment", #"{"v":1,"callId":"call_1","segment":\#(segment)}"#)
     }
 
-    static func snapshot(_ segments: [String], lastSeq: Int, live: Bool = true, complete: Bool = true) -> String {
+    /// ⚠️ NEVER EMPTY WITH `lastSeq: 0`: the server holds a subscribe until the first line
+    /// exists and answers with a snapshot that has it (contract §4.12 Q4).
+    static func snapshot(
+        _ segments: [String],
+        lastSeq: Int,
+        epoch: Int64 = epoch,
+        live: Bool = true,
+        complete: Bool = true
+    ) -> String {
         envelope(
             "transcript_snapshot",
             #"{"v":1,"callId":"call_1","live":\#(live),"complete":\#(complete),"epoch":\#(epoch),"#
@@ -282,12 +291,15 @@ enum TranscriptWire {
         )
     }
 
-    static func ended(seq: Int) -> String {
+    static func ended(seq: Int, epoch: Int64 = epoch, reason: String = "call_ended") -> String {
         envelope(
             "transcript_ended",
-            #"{"v":1,"callId":"call_1","epoch":\#(epoch),"seq":\#(seq),"lastIndex":1,"reason":"call_ended"}"#
+            #"{"v":1,"callId":"call_1","epoch":\#(epoch),"seq":\#(seq),"lastIndex":1,"reason":"\#(reason)"}"#
         )
     }
+
+    /// The §4.11 greeting, which the opening snapshot carries.
+    static let greeting = segment("item_a1", index: 0, seq: 1, speaker: "agent", text: "Good afternoon.")
 
     static func error(_ code: String) -> String {
         envelope(
