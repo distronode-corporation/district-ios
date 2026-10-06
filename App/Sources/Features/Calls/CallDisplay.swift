@@ -111,6 +111,16 @@ extension CallDisplay {
     }
 }
 
+extension CallDisplay {
+    /// Whether the call's transcript can be watched as it happens: the call is in
+    /// progress. ⚠️ NOT WHILE RINGING, which ``live`` includes: nothing has been said yet,
+    /// and the server answers a subscribe for a call with no live transcript with
+    /// `not_live`.
+    var transcribesLive: Bool {
+        status == CallWire.statusInProgress
+    }
+}
+
 // MARK: - Copy
 
 extension CallDisplay {

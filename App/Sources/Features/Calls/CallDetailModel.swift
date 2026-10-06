@@ -38,14 +38,22 @@ final class CallDetailModel {
     private(set) var state: CallDetailState = .loading
     private(set) var transcript: CallTranscriptState = .idle
 
+    /// The live transcript, for a call that was in progress when it loaded; nil otherwise.
+    ///
+    /// ⚠️ MADE ONCE AND KEPT ACROSS A RELOAD of the same call, so a retry does not drop the
+    /// lines already on screen or open a second socket.
+    private(set) var live: LiveTranscriptModel?
+
     private let calls: CallsRepository
     private let workspaceId: String
     private let callId: String
+    private let liveDependencies: @MainActor () -> LiveTranscriptModel.Dependencies
 
     init(container: AppContainer, workspaceId: String, callId: String) {
         calls = container.calls
         self.workspaceId = workspaceId
         self.callId = callId
+        liveDependencies = { .live(container: container, workspaceId: workspaceId, callId: callId) }
     }
 
     func load() async {
@@ -53,6 +61,9 @@ final class CallDetailModel {
         transcript = .idle
         switch await calls.detail(workspaceId: workspaceId, callId: callId) {
         case let .success(call):
+            if live == nil, CallDisplay(call).transcribesLive {
+                live = LiveTranscriptModel(workspaceId: workspaceId, callId: callId, dependencies: liveDependencies())
+            }
             state = .content(call)
         case let .failure(error):
             state = .failed(Self.detailFailure(error))

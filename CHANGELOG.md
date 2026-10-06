@@ -10,11 +10,23 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Added
+
+- A live transcript on a call in progress. A call's screen shows the conversation as it
+  happens, line by line, while the call is in progress and the screen is in front, then the
+  full transcript in the same place once the call ends. It is fed by the telemetry socket
+  (`App/Sources/Platform/Live/`, the `URLSessionWebSocketTask` adapter ported from
+  district-macos with a send added), which the phone opens only for that screen, asks for
+  that call's transcript alone (`socket.mode` with `broadcast: false`), and closes when the
+  screen goes or the app goes to the background. Lines missed while the server was
+  restarting are named ("Earlier lines will appear in the full transcript after the call").
+  A call the server has no live transcript for keeps the Show transcript button.
+
 ### Changed
 
-- DistrictCore 6.0.0: 4.0.0 resolves District Studio links, and 6.0.0 adds
-  `CodeExchangeResult.mfaRequired` and `POST /api/auth/native/mfa`, the authenticator code
-  step after Sign in with Apple. Nothing here uses 5.0.0's live transcript yet.
+- DistrictCore 6.0.0: 4.0.0 resolves District Studio links, 5.0.0 adds the live
+  transcript's models, ops and reducer, and 6.0.0 adds `CodeExchangeResult.mfaRequired` and
+  `POST /api/auth/native/mfa`, the authenticator code step after Sign in with Apple.
 - Release notes per language: What's New for every App Store localization other than English
   comes from `release-notes/<locale>/<version>.txt`, as on district-android, and a
   localization with no notes in its language stops the submission rather than showing

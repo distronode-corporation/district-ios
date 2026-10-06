@@ -98,6 +98,7 @@ private struct CallDetailContentView: View {
     let model: CallDetailModel
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
 
     private var colors: DistrictColors {
         .resolve(colorScheme)
@@ -129,6 +130,23 @@ private struct CallDetailContentView: View {
             .padding(DistrictSpacing.gutter)
             .districtReadableWidth()
         }
+        // ⛔ THE LIVE TRANSCRIPT'S SOCKET RUNS ONLY WHILE THIS SCREEN IS SHOWN AND THE APP IS IN
+        // FRONT: opened on appearing and on becoming active, closed on disappearing and on
+        // going to the background. `.inactive` (a pulled-down notification centre, the app
+        // switcher) keeps it, since the screen is still in view.
+        .onAppear {
+            if scenePhase == .active {
+                model.live?.activate()
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .active: model.live?.activate()
+            case .background: model.live?.deactivate()
+            default: break
+            }
+        }
+        .onDisappear { model.live?.deactivate() }
     }
 
     // MARK: - Header
@@ -216,8 +234,21 @@ private struct CallDetailContentView: View {
 
     // MARK: - Transcript
 
+    /// ⚠️ THE LIVE PANE WHILE IT CAN BE HAD, AND THE ON-DEMAND TRANSCRIPT OTHERWISE: a call
+    /// that was not in progress when the screen loaded, one the server has no live
+    /// transcript for (not answered by the assistant, ended over two minutes ago), or a
+    /// socket that cannot be opened.
     @ViewBuilder
     private var transcriptSection: some View {
+        if let live = model.live, !live.fallsBack {
+            LiveTranscriptSection(model: live)
+        } else {
+            onDemandTranscript
+        }
+    }
+
+    @ViewBuilder
+    private var onDemandTranscript: some View {
         switch model.transcript {
         case .idle:
             Button("Show transcript") {
