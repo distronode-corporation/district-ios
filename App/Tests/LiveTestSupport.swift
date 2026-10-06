@@ -260,11 +260,13 @@ enum TranscriptWire {
         seq: Int,
         epoch: Int64 = epoch,
         speaker: String = "caller",
+        speakerName: String? = "Ava",
         text: String,
         final: Bool = true,
         interrupted: Bool = false
     ) -> String {
-        let name = speaker == "agent" ? #""Ava""# : "null"
+        // The persona's name rides an assistant line only.
+        let name = speaker == "agent" ? speakerName.map { #""\#($0)""# } ?? "null" : "null"
         return #"{"segmentId":"\#(segmentId)","index":\#(index),"epoch":\#(epoch),"seq":\#(seq),"rev":0,"#
             + #""speaker":"\#(speaker)","speakerName":\#(name),"text":"\#(text)","final":\#(final),"#
             + #""interrupted":\#(interrupted),"language":"en","startedAt":"2026-10-06T14:30:03.100Z","#
@@ -303,6 +305,25 @@ enum TranscriptWire {
 
     /// The §4.11 greeting, which the opening snapshot carries.
     static let greeting = segment("item_a1", index: 0, seq: 1, speaker: "agent", text: "Good afternoon.")
+
+    /// `transcript_retracted`: the assistant's (with its epoch and seq) unless `seq` is nil,
+    /// which is the website's (a contact erase), with neither.
+    static func retracted(_ segmentIds: [String], all: Bool = false, seq: Int? = nil) -> String {
+        let counter = seq.map { #""epoch":\#(epoch),"seq":\#($0)"# } ?? #""epoch":null,"seq":null"#
+        let ids = segmentIds.map { #""\#($0)""# }.joined(separator: ",")
+        return envelope(
+            "transcript_retracted",
+            #"{"v":1,"callId":"call_1",\#(counter),"all":\#(all),"segmentIds":[\#(ids)],"reason":"erased"}"#
+        )
+    }
+
+    /// The snapshot after an `all: true` purge emptied the server's memory of the call: no
+    /// epoch, no `lastSeq` and no line (contract §4.12 Q12).
+    static let purgedSnapshot = envelope(
+        "transcript_snapshot",
+        #"{"v":1,"callId":"call_1","live":true,"endedReason":null,"complete":true,"epoch":null,"#
+            + #""lastSeq":null,"segments":[],"part":0,"more":false}"#
+    )
 
     static func error(_ code: String) -> String {
         envelope(
