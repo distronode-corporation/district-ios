@@ -385,8 +385,7 @@ jobs:
   # pins as a snapshot through the dependency submission API, each one as
   # `pkg:swift/github.com/<owner>/<repo>@<version>`, the name the GitHub Advisory Database
   # files Swift advisories under, with the packages project.yml names marked direct.
-  # dependency-review.yml waits for it (`retry-on-snapshot-warnings`) to compare a pull
-  # request against `main`. Push to main and pull requests from this repository only: a
+  # `dependency-review` runs after it, to compare a pull request against `main`. Push to main and pull requests from this repository only: a
   # fork's pull request gets no token that can write a snapshot. The only job with a
   # write permission.
   dependency-graph:
@@ -467,3 +466,28 @@ jobs:
           echo
           # ACCEPTED or SUCCESS; INVALID means the graph kept the previous snapshot.
           jq -e '.result != "INVALID"' "$RUNNER_TEMP/response.json" >/dev/null
+
+  # Pull requests only: fails a pull request that ADDS a dependency (a Swift package from
+  # the snapshot above, or an action) with a known moderate-or-worse vulnerability, or
+  # under a licence this Apache-2.0 project cannot ship. Mostly a guard on Dependabot's own pull
+  # requests. The same action, pin and deny-list as bridgewatch's and district-linux's
+  # `dependency-review` job. It compares the two sides through the dependency graph API,
+  # so it checks nothing out.
+  # ⛔ IT RUNS AFTER `dependency graph`, NOT BESIDE IT. The compare API caches its answer
+  # per query: a review that asks before this pull request's snapshot lands is told "No
+  # snapshots were found for the head SHA" for as long as it asks (measured past 25
+  # minutes after the snapshot landed), so `retry-on-snapshot-warnings` never sees it and
+  # the Swift changes go unreviewed. Asked after the submission, the first answer is the
+  # right one. On a fork's pull request `dependency graph` is skipped and this still runs,
+  # on the actions alone.
+  dependency-review:
+    name: dependency-review
+    needs: dependency-graph
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: moderate
+          deny-licenses: GPL-2.0-only, GPL-2.0-or-later, GPL-3.0-only, GPL-3.0-or-later, AGPL-3.0-only, AGPL-3.0-or-later, LGPL-2.1-only, LGPL-2.1-or-later, LGPL-3.0-only, LGPL-3.0-or-later, SSPL-1.0, BUSL-1.1

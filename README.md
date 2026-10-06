@@ -146,6 +146,12 @@ every pull request, and uses no secrets:
 - **gitleaks** (Linux): scans the full git history for secrets, with the rules and
   allowlists in [`.gitleaks.toml`](.gitleaks.toml).
 - **release scripts** (Linux): tests the release workflow's scripts against stubs.
+- **dependency graph** (Linux): submits the Swift packages **app** resolved to GitHub's dependency graph,
+  which cannot see them on its own; on pushes to `main` and pull requests from this
+  repository.
+- **dependency-review** (Linux, pull requests): fails a pull request that adds a
+  dependency with a known moderate-or-worse vulnerability or a licence this project cannot
+  ship, compared after the snapshot above has landed.
 
 A bundle that discovers nothing reports success, so CI counts what ran. **app** fails if
 `DistrictAITests` runs fewer than 460 or the signed-out UI tests fewer than 7. The first
