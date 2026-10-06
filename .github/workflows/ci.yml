@@ -478,16 +478,31 @@ jobs:
   # snapshots were found for the head SHA" for as long as it asks (measured past 25
   # minutes after the snapshot landed), so `retry-on-snapshot-warnings` never sees it and
   # the Swift changes go unreviewed. Asked after the submission, the first answer is the
-  # right one. On a fork's pull request `dependency graph` is skipped and this still runs,
-  # on the actions alone.
+  # right one (district-android's dependency-submission.yml has the same rule).
+  # ⛔ AND ONLY AFTER A SUBMISSION THAT SUCCEEDED. After a failed or cancelled one this
+  # review would pass without the Swift packages, a gate that looks green without having
+  # looked; it is skipped instead, and the red submission is the signal. On a fork's pull
+  # request no snapshot can come (`dependency graph` is skipped there), so the review runs
+  # on what GitHub reads by itself (the workflows' actions) and does not wait. Skipped
+  # while the repository is private, where dependency review needs GitHub Code Security.
   dependency-review:
     name: dependency-review
     needs: dependency-graph
-    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    if: >-
+      ${{ !cancelled() && github.event_name == 'pull_request' &&
+      !github.event.repository.private &&
+      (needs.dependency-graph.result == 'success' ||
+      (needs.dependency-graph.result == 'skipped' &&
+      github.event.pull_request.head.repo.full_name != github.repository)) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
+      # The retry is a backstop for a snapshot GitHub has not finished storing, not the way
+      # the two jobs are ordered (see above). A run whose log ends in "Retry timeout
+      # exceeded" has NOT reviewed the Swift packages: re-run that job.
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
           fail-on-severity: moderate
+          retry-on-snapshot-warnings: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          retry-on-snapshot-warnings-timeout: 300
           deny-licenses: GPL-2.0-only, GPL-2.0-or-later, GPL-3.0-only, GPL-3.0-or-later, AGPL-3.0-only, AGPL-3.0-or-later, LGPL-2.1-only, LGPL-2.1-or-later, LGPL-3.0-only, LGPL-3.0-or-later, SSPL-1.0, BUSL-1.1
