@@ -113,14 +113,14 @@ final class LiveTranscriptModel {
 
     // MARK: - The call row
 
-    /// The call row was loaded again with this status, still in progress.
+    /// The call row, as this screen already reads it, shows the call in progress.
     ///
-    /// ⛔ THE ONLY WAY BACK FROM `not_live`, which is final for its subscribe: a status that
-    /// differs from the last one reported subscribes again (`TranscriptReducer`). Never a
-    /// timer. ⚠️ This socket takes no workspace relay (`broadcast: false`), so the call row
-    /// is the only status this screen sees.
-    func callStatusChanged(to status: String) {
-        perform(reducer.callStatusChanged(to: status))
+    /// ⛔ THE ONLY WAY BACK FROM `not_live`, which is final for its subscribe: it subscribes
+    /// again at most once per 30 s per call (`TranscriptReducer`, contract §4.12 Q10). Never a
+    /// timer, and no read is added for it. ⚠️ This socket takes no workspace relay
+    /// (`broadcast: false`), so the call row is the only status this screen sees.
+    func callShownInProgress() {
+        perform(reducer.callShownInProgress(atMilliseconds: dependencies.clock.nowMilliseconds()))
         publish()
     }
 

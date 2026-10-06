@@ -66,11 +66,11 @@ final class CallDetailModel {
                 live = LiveTranscriptModel(workspaceId: workspaceId, callId: callId, dependencies: liveDependencies())
             }
             // ⚠️ EVERY LOAD IS A CALL-STATUS SIGNAL FOR THE LIVE TRANSCRIPT, the only one this
-            // screen gets: a changed status is what may subscribe again after `not_live`, and a
-            // call no longer live has ended.
-            if display.live {
-                live?.callStatusChanged(to: display.status)
-            } else {
+            // screen gets (contract §4.12 Q10): in progress, it may subscribe again after
+            // `not_live`; no longer live, the call has ended. Ringing says nothing yet.
+            if display.transcribesLive {
+                live?.callShownInProgress()
+            } else if !display.live {
                 live?.callEnded()
             }
             state = .content(call)

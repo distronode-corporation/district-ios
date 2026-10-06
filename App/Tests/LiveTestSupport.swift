@@ -282,11 +282,14 @@ enum TranscriptWire {
         lastSeq: Int,
         epoch: Int64 = epoch,
         live: Bool = true,
+        endedReason: String? = nil,
         complete: Bool = true
     ) -> String {
-        envelope(
+        let reason = endedReason.map { #""\#($0)""# } ?? "null"
+        return envelope(
             "transcript_snapshot",
-            #"{"v":1,"callId":"call_1","live":\#(live),"complete":\#(complete),"epoch":\#(epoch),"#
+            #"{"v":1,"callId":"call_1","live":\#(live),"endedReason":\#(reason),"complete":\#(complete),"#
+                + #""epoch":\#(epoch),"#
                 + #""lastSeq":\#(lastSeq),"segments":[\#(segments.joined(separator: ","))],"part":0,"more":false}"#
         )
     }
