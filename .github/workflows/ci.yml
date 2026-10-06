@@ -412,7 +412,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RESOLVED: ${{ runner.temp }}/package-resolved/Package.resolved
           MANIFEST: project.yml
-          SOURCE: project.yml
+          # ⛔ THE MANIFEST MUST BE NAMED AFTER A Package.resolved: GitHub takes a submitted
+          # package's ecosystem from the manifest's file name, not from its `pkg:swift` URL.
+          # Under `project.yml` every package was filed as ecosystem "unknown" and matched
+          # no advisory. This is where Xcode writes the file; it is generated, not committed.
+          SOURCE: DistrictAI.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
           CORRELATOR: swiftpm-package-resolved
           # A pull request's snapshot belongs to its head commit, which is what
           # dependency-review compares; GITHUB_SHA there is the test merge commit.
