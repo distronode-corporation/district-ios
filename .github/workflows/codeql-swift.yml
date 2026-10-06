@@ -1,0 +1,200 @@
+name: CodeQL Swift
+
+# The Swift half of code scanning, in ADVANCED setup, because default setup would analyse
+# half the app and report success. Its Swift autobuilder looks for an .xcodeproj, and
+# there is none in the repository (XcodeGen generates it from project.yml), and there is
+# no Package.swift at the root either, so it has nothing of the app's to build: every file
+# under App/ stays out of the database and the job still passes. This workflow generates
+# the project and builds the app itself. The workflow files are analysed by codeql.yml.
+#
+# ⛔ NIGHTLY AND ON DEMAND, NOT PER PUSH OR PULL REQUEST (Sean, 2026-10-06). The traced
+# build holds one of the five macOS jobs the free plan runs at once for the whole
+# organisation, and a scan per push to main (55 to 91 minutes each) was what ci.yml's
+# `app` jobs and release.yml queued behind. One scan a night covers every commit of that
+# day; a new alert arrives up to a day after the push that caused it. Dispatch this
+# workflow to scan a commit sooner.
+#
+# ⛔ THE APP'S OWN CODE ONLY (Sean, 2026-10-06). CodeQL's Swift extractor runs beside
+# every compiler invocation made after `Initialize CodeQL`, and nothing compiled before it
+# is extracted. So the packages are resolved and the whole app is built once BEFORE it,
+# then the app's own sources are touched, and the traced build recompiles them and only
+# them: LiveKit, Sentry and DistrictCore are up to date and stay out of the database
+# (DistrictCore is analysed in its own repository, district-core-swift). The step "Only
+# the app was traced" proves it from the traced build's log.
+on:
+  schedule:
+    # 22:07 UTC, the quietest hour for this organisation's runners; district-macos scans
+    # an hour later so the two never hold two slots at once.
+    - cron: "7 22 * * *"
+  workflow_dispatch:
+
+# Nothing at the top level; the job below asks for exactly what it uses.
+permissions: {}
+
+jobs:
+  swift:
+    name: Analyze (swift)
+    # ⛔ SKIPPED WHILE THE REPOSITORY IS PRIVATE. Code scanning is not available to a
+    # private repository on the free plan, so the upload would fail. `schedule` carries
+    # `repository` in its payload too (since 2022), so the nightly run is guarded the same way.
+    if: ${{ !github.event.repository.private }}
+    runs-on: macos-26
+    # ⛔ 300, NOT 120: the traced build is serial (`-jobs 1`, see that step). Before the
+    # app-only build it took 55 to 91 minutes. GitHub's ceiling for a hosted job is 360.
+    # Measure before lowering.
+    timeout-minutes: 300
+    # One scan running and at most one waiting per ref: a newer run replaces the waiting
+    # one rather than stacking hours of them, and the running one is never cancelled (its
+    # result is the record for that commit).
+    concurrency:
+      group: codeql-swift-${{ github.ref }}
+      cancel-in-progress: false
+    permissions:
+      security-events: write # upload the results
+      contents: read # check out the code
+      actions: read # read this run's workflow details
+    env:
+      # Recommended by xcbeautify: without it xcodebuild buffers its output when piped.
+      NSUnbufferedIO: "YES"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The same Xcode, XcodeGen and generated project as ci.yml's `app` job, from the
+      # action both share.
+      - name: Xcode and XcodeGen
+        id: toolchain
+        uses: ./.github/actions/macos-toolchain # zizmor: ignore[self-repository]
+
+      # The same cache and resolution as ci.yml's `app` job, so a scan reuses its
+      # checkouts. Resolved under the tracer this took 10 minutes (2026-10-04, job
+      # 111644186084); from the cache it takes under a minute.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: SourcePackages
+          key: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-${{ hashFiles('project.yml') }}
+
+      - name: Resolve packages
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAI \
+            -clonedSourcePackagesDirPath SourcePackages
+
+      # ⛔ UNTRACED, AND WITH EXACTLY THE TRACED BUILD'S ARGUMENTS BELOW (all but `-jobs`,
+      # which does not change what a task is). Any other setting would change the
+      # dependencies' build tasks, and the traced build would compile LiveKit again
+      # under the extractor. In parallel, since nothing watches it: about 5 minutes.
+      - name: Build the dependencies, untraced
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAI \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            -clonedSourcePackagesDirPath SourcePackages \
+            ARCHS="$(uname -m)" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILATION_CACHE_ENABLE_CACHING=NO \
+            SWIFT_ENABLE_COMPILE_CACHE=NO 2>&1 | tee xcodebuild-untraced.log | xcbeautify --renderer github-actions
+          grep -q '\*\* BUILD SUCCEEDED \*\*' xcodebuild-untraced.log
+
+      # Every Swift file of the app newer than its object file, so the traced build
+      # recompiles all of the app's own code and nothing else. By path rather than by
+      # target name, so a target added under App/ is covered without an edit here.
+      - name: Mark the app's own sources changed
+        run: find App -name '*.swift' -exec touch {} +
+
+      # Every step after this one is traced, so the setup above stays out of it.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          languages: swift
+          build-mode: manual
+          queries: security-extended
+
+      # `xcodebuild build` of the DistrictAI scheme builds the app target and its
+      # packages; the test bundles are `[test]` in project.yml, so they stay out, as they
+      # do for the autobuilder. The four `=NO` settings are ones GitHub's Swift autobuilder
+      # passes. One architecture, as GitHub's build options for Swift recommend: the
+      # runner's own. DerivedData sits outside the checkout.
+      #
+      # ⛔ `-jobs 1` IS THE FIX FOR "THE HOSTED RUNNER LOST COMMUNICATION WITH THE SERVER".
+      # The tracer runs CodeQL's Swift extractor beside every swift-frontend, and in
+      # parallel those pairs outgrow the runner's 7 GB: every traced run before this change
+      # (five on 2026-09-28 alone) died 64-100 minutes in with that annotation and no log,
+      # because the runner never uploaded one. Read a death with
+      # `gh api repos/{owner}/{repo}/check-runs/<job-id>/annotations`. Serial builds keep
+      # one pair resident; another public iOS repository measured the same failure fall
+      # from ~71% of runs to ~1 in 95 with this flag alone, after pinning an older CodeQL
+      # bundle and lowering the extractor's `ram` both failed
+      # (github.com/OrellBuehler/bissbilanz/issues/570).
+      # ⛔ AND IT ONLY WORKS WITH THE INTEGRATED DRIVER, which is why the autobuilder's fifth
+      # setting, `SWIFT_USE_INTEGRATED_DRIVER=NO`, is gone. Xcode hands every `swiftc` a
+      # hard-coded `-j<CPU count>` (swift-build `SwiftCompiler.swift`, "Set the parallelism
+      # level for the compile", at 2df999a). The legacy driver obeys that and runs its own
+      # parallel frontends inside one build task, where `-jobs` cannot reach them; the
+      # integrated driver hands each frontend back to the build system as a task of its own,
+      # which `-jobs 1` does limit. ci.yml and release.yml build with the integrated driver
+      # too, so the analysed build is now the tested one.
+      - name: Build the app
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAI \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            -clonedSourcePackagesDirPath SourcePackages \
+            -jobs 1 \
+            ARCHS="$(uname -m)" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILATION_CACHE_ENABLE_CACHING=NO \
+            SWIFT_ENABLE_COMPILE_CACHE=NO 2>&1 | tee xcodebuild.log | xcbeautify --renderer github-actions
+          grep -q '\*\* BUILD SUCCEEDED \*\*' xcodebuild.log
+
+      # ⛔ A TRACED BUILD THAT COMPILED NOTHING OF THE APP IS A SCAN OF NOTHING, so that
+      # fails here. Swift compiled for any other project under the tracer means the
+      # untraced build above no longer matches the traced one: the scan is still complete
+      # (a superset), but slow again, so that is a warning. Counted from the raw log's
+      # `SwiftCompile ... (in target 'T' from project 'P')` lines.
+      - name: Only the app was traced
+        env:
+          APP_PROJECT: DistrictAI
+        run: |
+          python3 - <<'PY'
+          import collections, os, re, sys
+          line = re.compile(r"^(?:SwiftCompile|CompileSwift) .*\(in target '([^']+)' from project '([^']+)'\)\s*$")
+          def count(path):
+              seen = collections.Counter()
+              for text in open(path, errors="replace"):
+                  m = line.match(text)
+                  if m:
+                      seen[(m.group(2), m.group(1))] += 1
+              return seen
+          app = os.environ["APP_PROJECT"]
+          for label, path in (("untraced", "xcodebuild-untraced.log"), ("traced", "xcodebuild.log")):
+              seen = count(path)
+              print(f"{label} build, SwiftCompile log lines per project/target:")
+              for (project, target), n in sorted(seen.items()):
+                  print(f"  {n:5d}  {project}/{target}")
+          seen = count("xcodebuild.log")
+          own = sum(n for (project, _), n in seen.items() if project == app)
+          other = sorted({f"{p}/{t}" for (p, t) in seen if p != app})
+          if own == 0:
+              print(f"::error::the traced build compiled no Swift file of project {app}, so the scan would be empty")
+              sys.exit(1)
+          if other:
+              print(f"::warning::dependency code was compiled under the tracer and will be analysed: {', '.join(other)}")
+          else:
+              print(f"traced: {own} SwiftCompile lines, all in project {app}")
+          PY
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          category: "/language:swift"

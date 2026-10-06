@@ -142,7 +142,9 @@ every pull request, and uses no secrets:
 - **verify** (Linux, `swift:6.2.4`): SwiftFormat and SwiftLint over `App/`.
 - **app** (macOS, Xcode 26.3): generates the project, resolves its packages and checks
   every `exactVersion` pin resolved as declared, builds once for testing, then runs
-  `DistrictAITests` and the signed-out UI tests on an iPhone and an iPad simulator.
+  `DistrictAITests` and the signed-out UI tests on an iPhone simulator, and on an iPad
+  simulator too on pushes to `main` (a pull request's `app (iPad)` check is a stand-in
+  that runs nothing).
 - **gitleaks** (Linux): scans the full git history for secrets, with the rules and
   allowlists in [`.gitleaks.toml`](.gitleaks.toml).
 - **release scripts** (Linux): tests the release workflow's scripts against stubs.
@@ -160,8 +162,11 @@ while deleting one or two tests deliberately does not; the UI count is the exact
 the classes CI names. DistrictCore's own test floor and coverage gate run in its
 repository.
 
-[`codeql.yml`](.github/workflows/codeql.yml) runs CodeQL over the workflows and the
-Swift build, and [`scorecard.yml`](.github/workflows/scorecard.yml) publishes the
+[`codeql.yml`](.github/workflows/codeql.yml) runs CodeQL over the workflows on every
+pull request, and [`codeql-swift.yml`](.github/workflows/codeql-swift.yml) over the app's
+own Swift build nightly and on demand (LiveKit, Sentry and DistrictCore are built before
+the trace starts, so they are not analysed here; DistrictCore is analysed in its own
+repository). [`scorecard.yml`](.github/workflows/scorecard.yml) publishes the
 OpenSSF Scorecard result behind the badge above.
 
 ## Releases
