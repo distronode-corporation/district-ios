@@ -1,25 +1,18 @@
 name: CodeQL
 
-# Code scanning in ADVANCED setup, because default setup would analyse half the app and
-# report success. Its Swift autobuilder looks for an .xcodeproj, and there is none in the
-# repository (XcodeGen generates it from project.yml), and there is no Package.swift at
-# the root either, so it has nothing of the app's to build: every file under App/ stays
-# out of the database and the job still passes. This workflow generates the project and
-# builds the app itself, which compiles the App target and its packages together.
-# DistrictCore's own analysis runs in its repository, district-core-swift.
-#
-# Two jobs: `actions` reads the workflow files, needs no build and runs everywhere;
-# `swift` is traced through the `xcodebuild build` below and runs only where its hours
-# are worth spending (see that job).
+# Code scanning of the workflow files (CodeQL's `actions` language), in ADVANCED setup. It
+# needs no build, runs on Linux in about a minute, and so runs on every pull request and
+# on every push to main that changes a workflow or a local action.
+# The Swift analysis is codeql-swift.yml: a traced build of the app on macOS, nightly and
+# on demand (see there why it is a separate workflow).
 on:
   push:
     branches: [main]
-    # The Swift sources, what builds them, and the workflows the `actions` job reads.
-    # A push that touches none of them has nothing new for either job to analyse.
+    # What the `actions` language reads. A push that touches neither has nothing new to
+    # analyse.
     paths:
-      - "App/**"
-      - "project.yml"
       - ".github/workflows/**"
+      - ".github/actions/**"
   pull_request:
     branches: [main]
   schedule:
@@ -27,7 +20,7 @@ on:
     - cron: "17 6 * * 1"
   workflow_dispatch:
 
-# Nothing at the top level; each job below asks for exactly what it uses.
+# Nothing at the top level; the job below asks for exactly what it uses.
 permissions: {}
 
 jobs:
@@ -64,94 +57,3 @@ jobs:
         uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
         with:
           category: "/language:actions"
-
-  swift:
-    name: Analyze (swift)
-    # ⛔ NOT ON PULL REQUESTS. The traced build is hours long, and the free plan runs at
-    # most five macOS jobs at once for the whole organisation, so a Swift scan per PR push
-    # held slots that ci.yml's `app` jobs and release.yml were queued behind (2026-09-28:
-    # ~7 runner-hours in one morning, one release run waiting on it). It runs on pushes to
-    # main that change Swift, weekly, and on demand. Same private-repository guard as above.
-    if: ${{ !github.event.repository.private && github.event_name != 'pull_request' }}
-    runs-on: macos-26
-    # ⛔ 300, NOT 120, BECAUSE THE BUILD BELOW IS SERIAL (`-jobs 1`, see that step). The
-    # untraced build takes 4-5 minutes in ci.yml; traced and serial it is expected to take
-    # most of this budget, and a run that has not finished is still worth more than one
-    # killed at 120. GitHub's ceiling for a hosted job is 360. Measure before lowering.
-    timeout-minutes: 300
-    # One scan running and at most one waiting per ref: a newer push replaces the waiting
-    # run rather than stacking hours of them, and the running one is never cancelled (its
-    # result is the record for that commit).
-    concurrency:
-      group: codeql-swift-${{ github.ref }}
-      cancel-in-progress: false
-    permissions:
-      security-events: write # upload the results
-      contents: read # check out the code
-      actions: read # read this run's workflow details
-    env:
-      # Recommended by xcbeautify: without it xcodebuild buffers its output when piped.
-      NSUnbufferedIO: "YES"
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      # The same Xcode, XcodeGen and generated project as ci.yml's `app` job, from the
-      # action both share.
-      - name: Xcode and XcodeGen
-        uses: ./.github/actions/macos-toolchain # zizmor: ignore[self-repository]
-
-      # Every step after this one is traced, so the setup above stays out of it.
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
-        with:
-          languages: swift
-          build-mode: manual
-          queries: security-extended
-
-      # `xcodebuild build` of the DistrictAI scheme builds the app target and its
-      # packages, DistrictCore among them; the test bundles are `[test]` in project.yml, so they stay
-      # out, as they do for the autobuilder. The four `=NO` settings are ones GitHub's
-      # Swift autobuilder passes. One architecture, as GitHub's build options for Swift
-      # recommend: the runner's own. DerivedData, and with it the package checkouts
-      # (LiveKit is compiled from source), sits outside the checkout.
-      #
-      # ⛔ `-jobs 1` IS THE FIX FOR "THE HOSTED RUNNER LOST COMMUNICATION WITH THE SERVER".
-      # The tracer runs CodeQL's Swift extractor beside every swift-frontend, and in
-      # parallel those pairs outgrow the runner's 7 GB: every traced run before this change
-      # (five on 2026-09-28 alone) died 64-100 minutes in with that annotation and no log,
-      # because the runner never uploaded one. Read a death with
-      # `gh api repos/{owner}/{repo}/check-runs/<job-id>/annotations`. Serial builds keep
-      # one pair resident; another public iOS repository measured the same failure fall
-      # from ~71% of runs to ~1 in 95 with this flag alone, after pinning an older CodeQL
-      # bundle and lowering the extractor's `ram` both failed
-      # (github.com/OrellBuehler/bissbilanz/issues/570).
-      # ⛔ AND IT ONLY WORKS WITH THE INTEGRATED DRIVER, which is why the autobuilder's fifth
-      # setting, `SWIFT_USE_INTEGRATED_DRIVER=NO`, is gone. Xcode hands every `swiftc` a
-      # hard-coded `-j<CPU count>` (swift-build `SwiftCompiler.swift`, "Set the parallelism
-      # level for the compile", at 2df999a). The legacy driver obeys that and runs its own
-      # parallel frontends inside one build task, where `-jobs` cannot reach them; the
-      # integrated driver hands each frontend back to the build system as a task of its own,
-      # which `-jobs 1` does limit. ci.yml and release.yml build with the integrated driver
-      # too, so the analysed build is now the tested one.
-      - name: Build the app
-        run: |
-          set -o pipefail
-          xcodebuild build \
-            -project DistrictAI.xcodeproj \
-            -scheme DistrictAI \
-            -destination "generic/platform=iOS Simulator" \
-            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
-            -jobs 1 \
-            ARCHS="$(uname -m)" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            COMPILATION_CACHE_ENABLE_CACHING=NO \
-            SWIFT_ENABLE_COMPILE_CACHE=NO 2>&1 | tee xcodebuild.log | xcbeautify --renderer github-actions
-          grep -q '\*\* BUILD SUCCEEDED \*\*' xcodebuild.log
-
-      - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
-        with:
-          category: "/language:swift"

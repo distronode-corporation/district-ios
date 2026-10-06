@@ -2,7 +2,7 @@ name: macOS toolchain
 description: >-
   Selects the pinned Xcode and asserts its version, installs the pinned XcodeGen checked
   against its SHA-256, and optionally generates the project. The one place these pins
-  live, for ci.yml, codeql.yml and release.yml. Needs the repository checked out first.
+  live, for ci.yml, codeql-swift.yml and release.yml. Needs the repository checked out first.
 
 # ⚠️ Xcode 26.3, not the image default. It is the Xcode the release is archived with, and
 # it ships Swift 6.2, which ci.yml's Linux job (swift:6.2.4) is paired with, and which is
