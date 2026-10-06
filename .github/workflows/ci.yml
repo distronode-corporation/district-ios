@@ -385,8 +385,7 @@ jobs:
   # pins as a snapshot through the dependency submission API, each one as
   # `pkg:swift/github.com/<owner>/<repo>@<version>`, the name the GitHub Advisory Database
   # files Swift advisories under, with the packages project.yml names marked direct.
-  # dependency-review.yml waits for it (`retry-on-snapshot-warnings`) to compare a pull
-  # request against `main`. Push to main and pull requests from this repository only: a
+  # `dependency-review` runs after it, to compare a pull request against `main`. Push to main and pull requests from this repository only: a
   # fork's pull request gets no token that can write a snapshot. The only job with a
   # write permission.
   dependency-graph:
@@ -412,7 +411,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RESOLVED: ${{ runner.temp }}/package-resolved/Package.resolved
           MANIFEST: project.yml
-          SOURCE: project.yml
+          # ⛔ THE MANIFEST MUST BE NAMED AFTER A Package.resolved: GitHub takes a submitted
+          # package's ecosystem from the manifest's file name, not from its `pkg:swift` URL.
+          # Under `project.yml` every package was filed as ecosystem "unknown" and matched
+          # no advisory. This is where Xcode writes the file; it is generated, not committed.
+          SOURCE: DistrictAI.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
           CORRELATOR: swiftpm-package-resolved
           # A pull request's snapshot belongs to its head commit, which is what
           # dependency-review compares; GITHUB_SHA there is the test merge commit.
@@ -463,3 +466,43 @@ jobs:
           echo
           # ACCEPTED or SUCCESS; INVALID means the graph kept the previous snapshot.
           jq -e '.result != "INVALID"' "$RUNNER_TEMP/response.json" >/dev/null
+
+  # Pull requests only: fails a pull request that ADDS a dependency (a Swift package from
+  # the snapshot above, or an action) with a known moderate-or-worse vulnerability, or
+  # under a licence this Apache-2.0 project cannot ship. Mostly a guard on Dependabot's own pull
+  # requests. The same action, pin and deny-list as bridgewatch's and district-linux's
+  # `dependency-review` job. It compares the two sides through the dependency graph API,
+  # so it checks nothing out.
+  # ⛔ IT RUNS AFTER `dependency graph`, NOT BESIDE IT. The compare API caches its answer
+  # per query: a review that asks before this pull request's snapshot lands is told "No
+  # snapshots were found for the head SHA" for as long as it asks (measured past 25
+  # minutes after the snapshot landed), so `retry-on-snapshot-warnings` never sees it and
+  # the Swift changes go unreviewed. Asked after the submission, the first answer is the
+  # right one (district-android's dependency-submission.yml has the same rule).
+  # ⛔ AND ONLY AFTER A SUBMISSION THAT SUCCEEDED. After a failed or cancelled one this
+  # review would pass without the Swift packages, a gate that looks green without having
+  # looked; it is skipped instead, and the red submission is the signal. On a fork's pull
+  # request no snapshot can come (`dependency graph` is skipped there), so the review runs
+  # on what GitHub reads by itself (the workflows' actions) and does not wait. Skipped
+  # while the repository is private, where dependency review needs GitHub Code Security.
+  dependency-review:
+    name: dependency-review
+    needs: dependency-graph
+    if: >-
+      ${{ !cancelled() && github.event_name == 'pull_request' &&
+      !github.event.repository.private &&
+      (needs.dependency-graph.result == 'success' ||
+      (needs.dependency-graph.result == 'skipped' &&
+      github.event.pull_request.head.repo.full_name != github.repository)) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      # The retry is a backstop for a snapshot GitHub has not finished storing, not the way
+      # the two jobs are ordered (see above). A run whose log ends in "Retry timeout
+      # exceeded" has NOT reviewed the Swift packages: re-run that job.
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: moderate
+          retry-on-snapshot-warnings: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          retry-on-snapshot-warnings-timeout: 300
+          deny-licenses: GPL-2.0-only, GPL-2.0-or-later, GPL-3.0-only, GPL-3.0-or-later, AGPL-3.0-only, AGPL-3.0-or-later, LGPL-2.1-only, LGPL-2.1-or-later, LGPL-3.0-only, LGPL-3.0-or-later, SSPL-1.0, BUSL-1.1
