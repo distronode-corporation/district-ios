@@ -10,6 +10,13 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Added
+
+- Sign in with Apple asks for the authenticator code when the account has one turned on,
+  as the website does. A sheet takes the 6-digit code or a recovery code; a wrong code can
+  be typed again, and a step that has timed out sends you back to the Apple button. Needs
+  the DistrictCore release that adds `CodeExchangeResult.mfaRequired` (the next major).
+
 ### Changed
 
 - DistrictCore 4.0.0, which resolves District Studio links.

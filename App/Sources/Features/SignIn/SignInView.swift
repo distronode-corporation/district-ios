@@ -314,6 +314,8 @@ enum SignInStatusTone {
         SessionCopy.markerNotDurable,
         SessionCopy.interruptedRefresh,
         SessionCopy.refreshUnreachable,
+        // The authenticator step's ticket ran out: recoverable by signing in again.
+        MfaCopy.expired,
     ]
 
     /// Nothing failed and nothing is worth retrying: the user needs something

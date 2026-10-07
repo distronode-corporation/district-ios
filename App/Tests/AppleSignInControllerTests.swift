@@ -294,7 +294,7 @@ final class AppleSignInControllerTests: XCTestCase {
 /// ⚠️ ITS OWN, RATHER THAN `SchedulingTestTransport`. That one routes on a
 /// scheduling `op` name and answers 500 for anything it does not recognise,
 /// which is the wrong shape for a single unauthenticated POST.
-private final class AppleTestTransport: HTTPTransport, @unchecked Sendable {
+final class AppleTestTransport: HTTPTransport, @unchecked Sendable {
     private let lock = NSLock()
     private let response: Result<HTTPResponse, any Error>
     private(set) var recorded: [HTTPRequest] = []
