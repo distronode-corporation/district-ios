@@ -39,25 +39,28 @@ built from history before publication, so they have no tags in this repository.
 - `release.yml` has a `build_only` dispatch input: it archives and signs on the runner and
   uploads nothing.
 
-## [2.1] - 2026-10-05
+## [2.2] - 2026-10-07
 
-Your receptionist's settings now live together under District Studio, as on the web.
+Live call transcripts come to iPhone and iPad, and your receptionist's settings now live
+together under District Studio, as on the web.
 
-### Changed
-
+- See a call's transcript live while the call is in progress, then the full transcript in
+  the same place once it ends.
 - In workspace settings, your receptionist's settings are grouped under District Studio, in
   the same order and with the same names as on the web: Persona, Voice, call handling,
   Skills and Knowledge. Messaging, Members and Scheduling follow under Workspace.
 - Voice Studio is now called Voice, on its own screen and everywhere the app mentions it.
-
-### Added
-
 - Links to District Studio on distronode.com open the matching screen in the app. A screen
   your role cannot open shows workspace settings instead, and Studio pages the app does not
   have open in the browser.
 - If your account has an authenticator app turned on, Sign in with Apple now asks for its
   code, as the website does. Enter the 6-digit code, or one of your recovery codes. A wrong
   code can be typed again, and if the step times out, start again with Sign in with Apple.
+
+## [2.1] - 2026-10-05
+
+Tagged and built for TestFlight (build 4130), never submitted to the App Store. Its changes
+ship in 2.2, whose notes above include them.
 
 ## [2.0] - 2026-10-04
 

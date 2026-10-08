@@ -1,0 +1,7 @@
+La transcription des appels en direct arrive sur iPhone et iPad, et les réglages de votre réceptionniste sont maintenant regroupés sous District Studio, comme sur le Web.
+
+- Suivez la transcription d'un appel en direct pendant qu'il est en cours, puis la transcription complète au même endroit une fois l'appel terminé.
+- Dans les paramètres de l'espace de travail, les réglages de votre réceptionniste sont regroupés sous District Studio, dans le même ordre et sous les mêmes noms que sur le Web : Persona, Voice, gestion des appels, Skills et Knowledge. Messaging, Members et Scheduling suivent, sous Workspace.
+- Voice Studio s'appelle maintenant Voice, sur son écran et partout où l'application le mentionne.
+- Les liens vers District Studio sur distronode.com ouvrent l'écran correspondant dans l'application. Si votre rôle ne permet pas d'ouvrir un écran, les paramètres de l'espace de travail s'affichent à la place, et les pages du studio absentes de l'application s'ouvrent dans le navigateur.
+- Si une application d'authentification est activée sur votre compte, Se connecter avec Apple demande maintenant son code, comme sur le Web. Entrez le code à 6 chiffres ou l'un de vos codes de récupération. Un code erroné peut être saisi de nouveau, et si l'étape expire, recommencez avec Se connecter avec Apple.
