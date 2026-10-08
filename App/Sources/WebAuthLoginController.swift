@@ -225,7 +225,11 @@ final class WebAuthLoginController: NSObject {
             // Passed through rather than folded into `unreachable` so that, if the
             // token route ever answers it, the user reads the true sentence.
             return .noAccount
-        case .transportFailure:
+        case .transportFailure, .mfaRequired:
+            // ⚠️ `mfaRequired` IS UNREACHABLE HERE: `exchangeCode` never produces it,
+            // since the web page asks for the code before a PKCE code exists. Should
+            // it ever arrive, there is no ticket this door could spend, so it is the
+            // ambiguous answer it was before the case existed.
             return .unreachable
         }
     }
@@ -282,6 +286,12 @@ enum LoginOutcome: Sendable, Equatable {
     /// the user cannot fix by retrying, and it is worded calmly rather than as a
     /// failure. See ``SignInCopy/noAccount``.
     case noAccount
+
+    /// ⛔ The Apple door's 401 `mfa_required`: the Apple ID is verified and the account
+    /// has an authenticator enrolled, so nothing is signed in until a code is entered.
+    /// Not a failure, and not worded as one: ``SessionModel`` opens the code step. The
+    /// browser door never produces it (the web page asks for the code itself).
+    case mfaRequired(NativeMfaChallenge)
 
     /// The exchange never got a usable answer.
     case unreachable

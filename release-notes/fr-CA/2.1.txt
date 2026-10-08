@@ -8,3 +8,4 @@ Modifications
 Nouveautés
 
 - Les liens vers District Studio sur distronode.com ouvrent l'écran correspondant dans l'application. Si votre rôle ne permet pas d'ouvrir un écran, les paramètres de l'espace de travail s'affichent à la place, et les pages du studio absentes de l'application s'ouvrent dans le navigateur.
+- Si une application d'authentification est activée sur votre compte, Se connecter avec Apple demande maintenant son code, comme sur le Web. Entrez le code à 6 chiffres ou l'un de vos codes de récupération. Un code erroné peut être saisi de nouveau, et si l'étape expire, recommencez avec Se connecter avec Apple.

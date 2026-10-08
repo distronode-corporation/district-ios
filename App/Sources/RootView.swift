@@ -110,6 +110,19 @@ private struct SessionGate: View {
         Task { await container.callStack.endRoom(.sessionEnded) }
     }
 
+    /// The authenticator step as a sheet item. ⚠️ Writing nil is a dismissal (Cancel or
+    /// a swipe), which drops the ticket; nothing else writes through it.
+    private var pendingMfa: Binding<PendingMfa?> {
+        Binding(
+            get: { session.pendingMfa },
+            set: { item in
+                if item == nil {
+                    session.cancelMfa()
+                }
+            }
+        )
+    }
+
     @ViewBuilder
     private var content: some View {
         switch session.phase {
@@ -161,6 +174,19 @@ private struct SessionGate: View {
                     finish: { result in Task { await session.signInWithApple(result) } }
                 )
             )
+            // ⛔ THE AUTHENTICATOR STEP IS DRAWN OVER THIS SCREEN, NOT INSTEAD OF IT. The
+            // phase stays `signedOut` until the code is accepted, so dismissing the
+            // sheet (Cancel, or a swipe while idle) leaves exactly the sign-in screen,
+            // and an accepted code moves the phase, which removes this branch and the
+            // sheet with it. See ``SessionModel/pendingMfa``.
+            .sheet(item: pendingMfa) { _ in
+                MfaCodeSheet(
+                    message: session.mfaMessage,
+                    isBusy: session.isVerifyingCode,
+                    submit: { code in Task { await session.submitMfaCode(code) } },
+                    cancel: { session.cancelMfa() }
+                )
+            }
 
         case let .unavailable(reason):
             // ⛔ A DISTINCT BRANCH FROM `signedOut`, DELIBERATELY. The session is

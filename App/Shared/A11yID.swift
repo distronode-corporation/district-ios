@@ -67,6 +67,14 @@ enum A11yID {
         /// offers no such button, so this is the one identifier in this enum that
         /// deliberately has no Kotlin twin.
         static let apple = "district-sign-in-apple"
+        /// The authenticator-code step after Sign in with Apple. ⚠️ Apple-only like the
+        /// button above, so these have no Kotlin twin either.
+        static let mfaSheet = "district-sign-in-mfa"
+        static let mfaCode = "district-sign-in-mfa-code"
+        static let mfaVerify = "district-sign-in-mfa-verify"
+        static let mfaKind = "district-sign-in-mfa-kind"
+        static let mfaMessage = "district-sign-in-mfa-message"
+        static let mfaCancel = "district-sign-in-mfa-cancel"
     }
 
     /// ⚠️ NOT Android's `district-workspace-settings-*`, which is the SETTINGS screen.

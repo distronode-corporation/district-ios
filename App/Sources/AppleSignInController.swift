@@ -178,6 +178,50 @@ final class AppleSignInController {
             // again, and no retry can help: this Apple ID has no account, and
             // sign-in never creates one (Guideline 3.1.1).
             return .noAccount
+        case let .mfaRequired(challenge):
+            // ⛔ NOTHING IS SIGNED IN YET. The Apple ID is verified and the account
+            // has an authenticator on, so the server holds the grant until a code is
+            // entered. The ticket goes up to the session gate, which opens the code
+            // step and spends it through ``submitCode(_:for:now:)``.
+            return .mfaRequired(challenge)
+        case .transportFailure:
+            return .unreachable
+        }
+    }
+
+    // ── Leg three: the authenticator code ───────────────────────────────────
+
+    /// Spend the MFA ticket with a code the person typed, already shape-checked by
+    /// `NativeMfaCode`.
+    ///
+    /// ⛔ THE SAME `deviceId` AND PLATFORM AS THE APPLE LEG. The ticket is bound to both,
+    /// and a mismatch is the opaque 400 that sends the person back to the Apple sheet.
+    /// They come from this controller's own fields, which is why the call lives here.
+    ///
+    /// ⚠️ A TICKET THAT HAS CERTAINLY EXPIRED IS NOT SENT. The answer would be the same
+    /// 400, and every request with a code is counted server-side. An expiry this build
+    /// could not read is not "expired"; the server decides.
+    func submitCode(_ code: String, for challenge: NativeMfaChallenge, now: Date = Date()) async -> MfaCodeOutcome {
+        if challenge.isExpired(at: now) {
+            return .expired
+        }
+        let request = NativeMfaRequest(
+            challenge: challenge,
+            code: code,
+            deviceId: deviceId,
+            deviceName: deviceName
+        )
+        switch await auth.submitMfaCode(request) {
+        case let .success(tokens):
+            // ⛔ The same single adopter as both doors; see ``exchange(identityToken:nonce:)``.
+            await coordinator.adopt(tokens, deviceId: deviceId)
+            return .success
+        case .invalidCode:
+            return .wrongCode
+        case .ticketRejected:
+            return .expired
+        case .rateLimited:
+            return .rateLimited
         case .transportFailure:
             return .unreachable
         }

@@ -1,5 +1,6 @@
 import AuthenticationServices
 import DistrictAuthCore
+import DistrictNetwork
 import Foundation
 import Observation
 
@@ -38,6 +39,21 @@ enum AuthPhase: Equatable {
 final class SessionModel {
     private(set) var phase: AuthPhase = .checking
     private(set) var isBusy = false
+
+    /// The authenticator-code step after Sign in with Apple, while it is open.
+    ///
+    /// ⛔ NOT A PHASE. The phase stays `signedOut` until the code is accepted: nothing is
+    /// signed in, the ticket is not a session, and the sheet is drawn over the sign-in
+    /// screen so cancelling it leaves exactly that screen. In memory only, like the
+    /// Apple nonce: process death costs one more Apple prompt, never a stored ticket.
+    private(set) var pendingMfa: PendingMfa?
+
+    /// The sentence under the code field (a wrong code, offline), or nil.
+    private(set) var mfaMessage: String?
+
+    /// A code is on its way to the server. ⛔ Also the single-flight guard: a second
+    /// submit while one is in flight is dropped, since a verified code is spent.
+    private(set) var isVerifyingCode = false
 
     /// Bumped once for every COMPLETED sign-in.
     ///
@@ -125,6 +141,46 @@ final class SessionModel {
         await settle(container.appleLogin.complete(result))
     }
 
+    /// Send the code typed into the authenticator step.
+    ///
+    /// ⚠️ `code` IS ALREADY SHAPE-CHECKED by `NativeMfaCode` in the sheet, which offers
+    /// Verify only for a well-formed value.
+    ///
+    /// ⛔ A SUCCESS SIGNS IN EVEN IF THE SHEET WAS DISMISSED MEANWHILE. By then the
+    /// coordinator has adopted the grant, and leaving the phase `signedOut` over a live
+    /// session would show a sign-in screen to a signed-in person. A refusal that arrives
+    /// after a dismissal is dropped: there is no sheet left to show it on.
+    func submitMfaCode(_ code: String) async {
+        guard let pending = pendingMfa, !isVerifyingCode else { return }
+        isVerifyingCode = true
+        defer { isVerifyingCode = false }
+        mfaMessage = nil
+
+        let outcome = await container.appleLogin.submitCode(code, for: pending.challenge)
+        let stillOpen = pendingMfa?.id == pending.id
+        switch outcome.reaction {
+        case .signedIn:
+            pendingMfa = nil
+            await settle(.success)
+        case let .stayOpen(message):
+            if stillOpen {
+                mfaMessage = message
+            }
+        case let .startOver(message):
+            if stillOpen {
+                pendingMfa = nil
+                phase = .signedOut(message)
+            }
+        }
+    }
+
+    /// Close the code step without signing in. The ticket is dropped; signing in again
+    /// starts from the Apple button.
+    func cancelMfa() {
+        pendingMfa = nil
+        mfaMessage = nil
+    }
+
     /// ⚠️ ONE SWITCH FOR BOTH DOORS. A second copy would be a second place to
     /// get `cancelled` wrong — which is the case that must stay a silent no-op.
     private func settle(_ outcome: LoginOutcome) async {
@@ -151,6 +207,12 @@ final class SessionModel {
             // signs in through the browser door. The sentence is informational,
             // not a retry prompt; see ``SignInCopy/noAccount``.
             phase = .signedOut(SignInCopy.noAccount)
+        case let .mfaRequired(challenge):
+            // ⛔ THE PHASE DOES NOT MOVE. The Apple step is half of a sign-in; the code
+            // sheet opens over the sign-in screen and the session settles only when
+            // the code is accepted (``submitMfaCode(_:)``).
+            mfaMessage = nil
+            pendingMfa = PendingMfa(challenge: challenge)
         case .unreachable:
             phase = .unavailable(SessionCopy.unreachable)
         }
