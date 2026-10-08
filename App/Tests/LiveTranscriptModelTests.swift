@@ -44,15 +44,23 @@ final class LiveTranscriptModelTests: XCTestCase {
     /// Move the manual clock forward in `step`s until `condition` holds, giving the tasks
     /// woken by each step a moment to run. ⚠️ Steps, not one jump: a wait that starts after a
     /// jump would be timed from after it and never come due.
+    ///
+    /// ⛔ `asleep`: HOW MANY SLEEPS MUST BE WAITING BEFORE EACH STEP. A loop the step woke
+    /// (the socket's 30 s ping) sleeps again only when its task next runs, and a step taken
+    /// before that times its next wait from later. Over many steps on a busy simulator the
+    /// pings fell behind until the 90 s silence watchdog closed a healthy socket, which
+    /// reopened on the credential it still held (run 37721222018: one mint, not two).
     private func advance(
         by step: Int64,
         upTo limit: Int64,
+        asleep: Int = 0,
         file: StaticString = #filePath,
         line: UInt = #line,
         until condition: () -> Bool
     ) async {
         var moved: Int64 = 0
         while !condition(), moved < limit {
+            await waitUntilAsleep(clock, count: asleep, file: file, line: line)
             clock.advance(by: step)
             moved += step
             try? await Task.sleep(for: .milliseconds(5))
@@ -82,7 +90,8 @@ final class LiveTranscriptModelTests: XCTestCase {
         let model = makeModel(minter: minter)
         let first = await open(model)
 
-        await advance(by: 10000, upTo: 15 * 60 * 1000) {
+        // The renewal, the silence watchdog and the ping loop.
+        await advance(by: 10000, upTo: 15 * 60 * 1000, asleep: 3) {
             self.script.tasks.count == 2 && self.script.tasks[1].sent.count == 2
         }
 
