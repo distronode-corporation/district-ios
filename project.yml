@@ -149,10 +149,13 @@ targets:
       - path: App/PrivacyInfo.xcprivacy
         buildPhase: resources
     dependencies:
-      # All five products, listed explicitly. ⚠️ `- package: DistrictCore` alone
+      # Six products, listed explicitly. ⚠️ `- package: DistrictCore` alone
       # would link a product NAMED DistrictCore, which does not exist — the
-      # package publishes five libraries and no umbrella.
+      # package publishes six libraries and no umbrella.
       # ⚠️ `DistrictCall` IS IMPORTED BY `App/Sources/Platform/`.
+      # ⚠️ `DistrictLive` IS THE TELEMETRY SOCKET, for the live transcript on a call's
+      # screen (`App/Sources/Platform/Live/`). The Mac's ringing and presence live in the
+      # same module and are not used here.
       - package: DistrictCore
         products:
           - DistrictModel
@@ -160,6 +163,7 @@ targets:
           - DistrictNetwork
           - DistrictData
           - DistrictCall
+          - DistrictLive
       # ⚠️ `product:` (SINGULAR) IS STATED RATHER THAN LEFT TO THE DEFAULT. The
       # default links the product whose name matches the PACKAGE name, which
       # here happens to be right — and would stop being right the day somebody

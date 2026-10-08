@@ -38,14 +38,22 @@ final class CallDetailModel {
     private(set) var state: CallDetailState = .loading
     private(set) var transcript: CallTranscriptState = .idle
 
+    /// The live transcript, for a call that was in progress when it loaded; nil otherwise.
+    ///
+    /// ⚠️ MADE ONCE AND KEPT ACROSS A RELOAD of the same call, so a retry does not drop the
+    /// lines already on screen or open a second socket.
+    private(set) var live: LiveTranscriptModel?
+
     private let calls: CallsRepository
     private let workspaceId: String
     private let callId: String
+    private let liveDependencies: @MainActor () -> LiveTranscriptModel.Dependencies
 
     init(container: AppContainer, workspaceId: String, callId: String) {
         calls = container.calls
         self.workspaceId = workspaceId
         self.callId = callId
+        liveDependencies = { .live(container: container, workspaceId: workspaceId, callId: callId) }
     }
 
     func load() async {
@@ -53,6 +61,18 @@ final class CallDetailModel {
         transcript = .idle
         switch await calls.detail(workspaceId: workspaceId, callId: callId) {
         case let .success(call):
+            let display = CallDisplay(call)
+            if live == nil, display.transcribesLive {
+                live = LiveTranscriptModel(workspaceId: workspaceId, callId: callId, dependencies: liveDependencies())
+            }
+            // ⚠️ EVERY LOAD IS A CALL-STATUS SIGNAL FOR THE LIVE TRANSCRIPT, the only one this
+            // screen gets (contract §4.12 Q10): in progress, it may subscribe again after
+            // `not_live`; no longer live, the call has ended. Ringing says nothing yet.
+            if display.transcribesLive {
+                live?.callShownInProgress()
+            } else if !display.live {
+                live?.callEnded()
+            }
             state = .content(call)
         case let .failure(error):
             state = .failed(Self.detailFailure(error))

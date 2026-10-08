@@ -128,6 +128,10 @@ enum A11yID {
         static let detailRoot = "district-call-detail-root"
         static let transcript = "district-call-detail-transcript"
         static let showTranscript = "district-call-detail-show-transcript"
+        /// The live transcript pane, on a call in progress.
+        static let liveTranscript = "district-call-detail-live-transcript"
+        /// Its "earlier lines will appear after the call" note.
+        static let liveIncomplete = "district-call-detail-live-incomplete"
     }
 
     enum Inbox {
