@@ -17,6 +17,11 @@ built from history before publication, so they have no tags in this repository.
   Windows already offer. It is offered on the same rule as theirs: a role that may write,
   a desk that is on and a queue that loaded (`DeskModel.canStartTicket`). A failed submit
   is now said in the form rather than on the queue behind it.
+- Read a text file into a knowledge document. Knowledge's add form has a Read a text file
+  button that fills the title (when it is empty) and the text from a plain text file
+  (.txt or .md) of up to 1 MB, as the Windows app does. Nothing is added until Add document.
+  The same files are refused for the same reasons as on Windows: too large, empty, no
+  text, or not plain text by its bytes (UTF-8, or UTF-16 with its mark, is read).
 - A live transcript on a call in progress. A call's screen shows the conversation as it
   happens, line by line, while the call is in progress and the screen is in front, then the
   full transcript in the same place once the call ends. It is fed by the telemetry socket

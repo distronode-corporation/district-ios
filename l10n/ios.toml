@@ -9627,6 +9627,58 @@ ctx = "title"
 screen = "settings.sections"
 id = { swift = "SettingsCopy.knowledgeEmptyTitle" }
 
+[settings.knowledge_file_action]
+en = "Read a text file"
+ctx = "button"
+screen = "settings.sections"
+id = { swift = "SettingsCopy.knowledgeFileAction" }
+note = "Opens the Files picker to fill the title and text from a plain text file. Nothing is uploaded until Add document."
+
+[settings.knowledge_file_empty]
+en = "This file is empty."
+ctx = "error"
+screen = "settings.sections"
+tier = "T2"
+id = { swift = "SettingsCopy.knowledgeFileEmpty" }
+
+[settings.knowledge_file_hint]
+en = "A plain text file (.txt or .md) of up to 1 MB fills the title and the text. Nothing is added until you press Add document."
+ctx = "body"
+screen = "settings.sections"
+id = { swift = "SettingsCopy.knowledgeFileHint" }
+note = "\"Add document\" is the button settings.knowledge_add; keep the two the same words."
+
+[settings.knowledge_file_no_text]
+en = "This file has no text to add."
+ctx = "error"
+screen = "settings.sections"
+tier = "T2"
+id = { swift = "SettingsCopy.knowledgeFileNoText" }
+note = "The file holds only spaces and line breaks."
+
+[settings.knowledge_file_not_text]
+en = "Only a plain text file (.txt or .md) can be read in. Copy the text of another kind of document into the box instead."
+ctx = "error"
+screen = "settings.sections"
+tier = "T2"
+id = { swift = "SettingsCopy.knowledgeFileNotText" }
+note = "The file's bytes are not plain text (a PDF, an image, another encoding), whatever its name says."
+
+[settings.knowledge_file_too_large]
+en = "The file must be 1 MB or smaller."
+ctx = "error"
+screen = "settings.sections"
+tier = "T2"
+id = { swift = "SettingsCopy.knowledgeFileTooLarge" }
+
+[settings.knowledge_file_unreadable]
+en = "This file could not be read."
+ctx = "error"
+screen = "settings.sections"
+tier = "T2"
+id = { swift = "SettingsCopy.knowledgeFileUnreadable" }
+note = "The picker or the file system failed to hand the file over."
+
 [settings.knowledge_mode_confirm]
 en = "Switching to the help centre sends this workspace's caller questions to Atlassian to compose an answer. Its own documents will not be used."
 ctx = "button"
