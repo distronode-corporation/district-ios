@@ -133,6 +133,25 @@ final class DeskNewTicketTests: UITestApp {
     }
 }
 
+/// Knowledge's "Read a text file", reached and never used.
+///
+/// ⚠️ IT DOES NOT OPEN THE PICKER. The Files sheet is system UI with no identifiers of
+/// ours, and a pick would put a real file's text in a live workspace's form; what the
+/// file is turned into is ``KnowledgeFileReaderTests``' job. This case proves the button
+/// is drawn, for a role that may add, beside the form it fills.
+final class KnowledgeReadFileTests: UITestApp {
+    func test_IOS_KNOW_01_readATextFileIsOfferedBesideTheAddForm() throws {
+        try requireSession()
+        navigate(to: .settings)
+        tap(A11yID.Settings.row("knowledge"))
+        XCTAssertTrue(element(A11yID.Knowledge.root).waitForExistence(timeout: 15), "Knowledge never opened")
+        let readFile = element(A11yID.Knowledge.readFile)
+        try XCTSkipUnless(readFile.waitForExistence(timeout: 10), "this role is not offered the add form")
+        XCTAssertTrue(readFile.isEnabled, "Read a text file must be usable while nothing is being added")
+        screenshot("IOS-KNOW-01-read-a-text-file")
+    }
+}
+
 /// The regular-width shell, signed in: what a rotation and the sidebar must not lose.
 ///
 /// ⚠️ EACH CASE SKIPS WHEN A TAB BAR IS SHOWING, which is how compact width shows itself. The

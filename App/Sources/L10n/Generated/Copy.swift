@@ -4762,6 +4762,27 @@ extension SettingsCopy {
     /// `settings.knowledge_empty_title`
     internal static var knowledgeEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Nothing uploaded yet" : "Nothing uploaded yet" }
 
+    /// `settings.knowledge_file_action`
+    internal static var knowledgeFileAction: String { AppL10n.copyLocale == .frCA ? "Read a text file" : "Read a text file" }
+
+    /// `settings.knowledge_file_empty`
+    internal static var knowledgeFileEmpty: String { AppL10n.copyLocale == .frCA ? "This file is empty." : "This file is empty." }
+
+    /// `settings.knowledge_file_hint`
+    internal static var knowledgeFileHint: String { AppL10n.copyLocale == .frCA ? "A plain text file (.txt or .md) of up to 1 MB fills the title and the text. Nothing is added until you press Add document." : "A plain text file (.txt or .md) of up to 1 MB fills the title and the text. Nothing is added until you press Add document." }
+
+    /// `settings.knowledge_file_no_text`
+    internal static var knowledgeFileNoText: String { AppL10n.copyLocale == .frCA ? "This file has no text to add." : "This file has no text to add." }
+
+    /// `settings.knowledge_file_not_text`
+    internal static var knowledgeFileNotText: String { AppL10n.copyLocale == .frCA ? "Only a plain text file (.txt or .md) can be read in. Copy the text of another kind of document into the box instead." : "Only a plain text file (.txt or .md) can be read in. Copy the text of another kind of document into the box instead." }
+
+    /// `settings.knowledge_file_too_large`
+    internal static var knowledgeFileTooLarge: String { AppL10n.copyLocale == .frCA ? "The file must be 1 MB or smaller." : "The file must be 1 MB or smaller." }
+
+    /// `settings.knowledge_file_unreadable`
+    internal static var knowledgeFileUnreadable: String { AppL10n.copyLocale == .frCA ? "This file could not be read." : "This file could not be read." }
+
     /// `settings.knowledge_mode_confirm`
     internal static var knowledgeModeConfirm: String { AppL10n.copyLocale == .frCA ? "Switching to the help centre sends this workspace's caller questions to Atlassian to compose an answer. Its own documents will not be used." : "Switching to the help centre sends this workspace's caller questions to Atlassian to compose an answer. Its own documents will not be used." }
 

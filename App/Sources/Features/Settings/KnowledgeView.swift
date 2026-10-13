@@ -1,8 +1,9 @@
 import DistrictModel
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// What the agent answers from, and where the answer is composed. Ported from
-/// Android's `KnowledgeScreen.kt`.
+/// Android's `KnowledgeScreen.kt`; "Read a text file" is Windows' (`KnowledgePage.xaml`).
 ///
 /// ⛔ A VIEWER REACHES THIS SCREEN AND GETS THE LIST AND THE STORED MODE, WITH NO ADD
 /// FORM AND NO SELECTOR. Both reads admit `viewer` server-side and all the writes
@@ -22,6 +23,7 @@ struct KnowledgeView: View {
     @State private var model: KnowledgeModel
     @State private var pendingMode: KnowledgeMode?
     @State private var confirmingMode = false
+    @State private var importingFile = false
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -52,6 +54,9 @@ struct KnowledgeView: View {
             .padding(DistrictSpacing.gutter)
             .districtReadableWidth()
         }
+        // ⛔ `.contain` FIRST, or the identifier is inherited by every control inside.
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(A11yID.Knowledge.root)
         .navigationTitle(SettingsCopy.knowledgeTitle)
         .task {
             await model.load()
@@ -151,12 +156,52 @@ struct KnowledgeView: View {
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.destructive)
             }
+            fileRow
             SettingsSaveNotice(state: model.addSave, onReread: reload, onDismiss: model.dismissNotices)
             Button(model.addSave.isSaving ? SettingsCopy.adding : SettingsCopy.knowledgeAdd, action: submitDocument)
                 .buttonStyle(.districtPrimary)
                 .disabled(!model.canAdd)
         }
     }
+
+    /// "Read a text file": what it takes, why the last file was refused, and the button.
+    ///
+    /// ⛔ THE IMPORTER ONLY HANDS A FILE TO THE MODEL, which decides everything else
+    /// (``KnowledgeModel/readFile(at:)``, ``KnowledgeFileReader``). Nothing is uploaded
+    /// until Add document.
+    @ViewBuilder
+    private var fileRow: some View {
+        Text(SettingsCopy.knowledgeFileHint)
+            .font(DistrictType.caption)
+            .foregroundStyle(colors.mutedForeground)
+        if let refusal = model.fileRefusal {
+            Text(refusal)
+                .font(DistrictType.caption)
+                .foregroundStyle(colors.destructive)
+                .accessibilityIdentifier(A11yID.Knowledge.fileRefusal)
+        }
+        Button(SettingsCopy.knowledgeFileAction, systemImage: "doc.text") { importingFile = true }
+            .buttonStyle(.districtSecondary)
+            .disabled(!model.canReadFile)
+            .accessibilityIdentifier(A11yID.Knowledge.readFile)
+            // ⚠️ THE SINGLE-FILE OVERLOAD, whose result is one URL. Passing
+            // `allowsMultipleSelection` picks the other overload, which hands back `[URL]`.
+            .fileImporter(isPresented: $importingFile, allowedContentTypes: Self.fileTypes) { result in
+                switch result {
+                case let .success(url):
+                    Task { await model.readFile(at: url) }
+                case .failure:
+                    model.fileImportFailed()
+                }
+            }
+    }
+
+    /// ⚠️ PLAIN TEXT ONLY, with Markdown named as well because Files does not always know
+    /// a `.md` file as text. The picker is a convenience; ``KnowledgeFileReader`` decides
+    /// by the bytes whatever type was picked.
+    private static let fileTypes: [UTType] = [.plainText] + [
+        UTType(filenameExtension: "md", conformingTo: .plainText),
+    ].compactMap(\.self)
 
     // MARK: - The list
 

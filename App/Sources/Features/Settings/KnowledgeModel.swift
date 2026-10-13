@@ -74,6 +74,13 @@ final class KnowledgeModel {
 
     private(set) var draftContent = ""
 
+    /// Why the last file picked for "Read a text file" was refused, or nil.
+    ///
+    /// ⚠️ ITS OWN NOTICE, NOT ``addSave``. Nothing has been sent when a file is refused,
+    /// so it is not the outcome of an add, and a keystroke in either box retires it the
+    /// way it retires ``addRejected``.
+    private(set) var fileRefusal: String?
+
     /// ⛔ False for `viewer` and for a role that did not parse. See the ⛔ on the type.
     let canWrite: Bool
 
@@ -102,6 +109,13 @@ final class KnowledgeModel {
         canWrite && !busy && !trimmed(draftTitle).isEmpty && !trimmed(draftContent).isEmpty
     }
 
+    /// Whether "Read a text file" is offered and may fill the form now: the add form is
+    /// drawn (a role that may write) and its boxes can be typed in (no add on its way).
+    /// Windows' `MayPickFile`.
+    var canReadFile: Bool {
+        canWrite && !addSave.isSaving
+    }
+
     /// ⛔ GATED ON A SUCCESSFUL MODE READ AND ON THE ROLE. A viewer sees which mode is
     /// stored (the read admits them) and cannot select another; and nobody changes a
     /// mode this client never read, because that is an edit made against an unknown
@@ -122,11 +136,88 @@ final class KnowledgeModel {
     func editTitle(_ value: String) {
         draftTitle = value
         addRejected = false
+        fileRefusal = nil
     }
 
     func editContent(_ value: String) {
         draftContent = value
         addRejected = false
+        fileRefusal = nil
+    }
+
+    // MARK: - Read a text file
+
+    /// Fill the form from the plain text file at `url`, which the file importer handed
+    /// over, or say why it cannot.
+    ///
+    /// ⛔ NOTHING IS SENT. The file fills the two boxes and the operator still presses Add
+    /// document, which is the billable step and the only one; that is Windows' rule too.
+    ///
+    /// ⚠️ THE READ RUNS OFF THE MAIN ACTOR and stops one byte past
+    /// ``KnowledgeFileReader/maxBytes``, so a larger file is seen to be larger without
+    /// being read whole, and a file still downloading from iCloud does not hold the screen.
+    func readFile(at url: URL) async {
+        guard canReadFile else { return }
+        let picked = await Task.detached(priority: .userInitiated) {
+            Self.load(url)
+        }.value
+        guard let picked else {
+            fileRefusal = SettingsCopy.knowledgeFileUnreadable
+            return
+        }
+        apply(KnowledgeFileReader.read(picked))
+    }
+
+    /// The importer itself failed: there is no file to read.
+    func fileImportFailed() {
+        guard canReadFile else { return }
+        fileRefusal = SettingsCopy.knowledgeFileUnreadable
+    }
+
+    /// Put what a file gave in the form, or its refusal on screen.
+    ///
+    /// ⚠️ THE FILE'S NAME BECOMES THE TITLE ONLY WHEN THE TITLE BOX IS EMPTY, so a title
+    /// already typed is kept; the text replaces the text box, as on Windows. A refused file
+    /// leaves both boxes as they were.
+    func apply(_ read: KnowledgeFileRead) {
+        guard canReadFile else { return }
+        switch read {
+        case let .text(title, content):
+            if trimmed(draftTitle).isEmpty, !title.isEmpty {
+                draftTitle = title
+            }
+            draftContent = content
+            addRejected = false
+            fileRefusal = nil
+        case let .refused(reason):
+            fileRefusal = reason
+        }
+    }
+
+    /// The file's name, its size on disk when the file system says, and its first
+    /// ``KnowledgeFileReader/maxBytes`` + 1 bytes; nil when it cannot be read.
+    ///
+    /// ⚠️ THE SECURITY SCOPE IS ENTERED AND LEFT HERE. A URL from the importer outside the
+    /// app's container can be read only between the two calls.
+    private nonisolated static func load(_ url: URL) -> KnowledgePickedFile? {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer {
+            if scoped {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { try? handle.close() }
+        let bytes: Data
+        do {
+            // ⚠️ NIL AT THE END OF THE FILE, which for an empty file is at once: that is
+            // no bytes, refused as empty, never a failed read.
+            bytes = try handle.read(upToCount: KnowledgeFileReader.maxBytes + 1) ?? Data()
+        } catch {
+            return nil
+        }
+        let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize
+        return KnowledgePickedFile(name: url.lastPathComponent, size: size, bytes: bytes)
     }
 
     /// ⚠️ BOTH READS, CONCURRENTLY. Idempotent GETs, so replaying this is safe.
@@ -160,6 +251,7 @@ final class KnowledgeModel {
             addRejected = true
             return
         }
+        fileRefusal = nil
         addSave = .saving
         let result = await knowledge.addDocument(
             workspaceId: workspaceId,
