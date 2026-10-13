@@ -2700,8 +2700,9 @@ en = "Report: objectionable content"
 ctx = "label"
 screen = "support"
 tier = "T2"
+fixed = true
 id = { swift = "ReportCopy.baseSubject" }
-note = "⛔ 3...200 CHARACTERS, SERVER-VALIDATED, AND THE SUFFIXED FORM MUST ALSO FIT. Both are well inside it; the bound is stated so a future reword checks."
+note = "Sent to the District support desk inside the ticket, never shown on screen: it stays English for staff in every language, as on Windows. ⛔ 3...200 CHARACTERS, SERVER-VALIDATED, AND THE SUFFIXED FORM MUST ALSO FIT. Both are well inside it; the bound is stated so a future reword checks."
 
 [report.cancel]
 en = "Cancel"
@@ -2738,8 +2739,9 @@ en = "No note was added."
 ctx = "body"
 screen = "support"
 tier = "T2"
+fixed = true
 id = { swift = "ReportCopy.noNote" }
-note = "Sent to the support desk inside the report, not shown on screen."
+note = "Sent to the District support desk inside the ticket, never shown on screen: it stays English for staff in every language, as on Windows. Sent to the support desk inside the report, not shown on screen."
 
 [report.note_label]
 en = "What is wrong with it?"
@@ -2767,34 +2769,38 @@ en = "Objectionable content was reported from the District AI iOS app."
 ctx = "body"
 screen = "support"
 tier = "T2"
+fixed = true
 id = { swift = "ReportCopy.preamble" }
-note = "⛔ IT SAYS WHERE THE REPORT CAME FROM, because the same desk receives requests raised from the contact form and from an unresolved phone call (the wire field is `source`), and a moderation report needs telling apart from a support question at a glance."
+note = "Sent to the District support desk inside the ticket, never shown on screen: it stays English for staff in every language, as on Windows. ⛔ IT SAYS WHERE THE REPORT CAME FROM, because the same desk receives requests raised from the contact form and from an unresolved phone call (the wire field is `source`), and a moderation report needs telling apart from a support question at a glance."
 
 [report.recording_suffix]
 en = " (review recording)"
 ctx = "label"
 screen = "support"
 tier = "T2"
+fixed = true
 id = { swift = "ReportCopy.recordingSuffix" }
-note = "⛔ THE MARKER A HUMAN CLOSES ON. A recording's report is about a fictional `+1 555 01xx` caller in the demo workspace, so it is not a moderation case — but it IS a real ticket in a real queue, and an unmarked one would be triaged as if the content existed."
+note = "Sent to the District support desk inside the ticket, never shown on screen: it stays English for staff in every language, as on Windows. ⛔ THE MARKER A HUMAN CLOSES ON. A recording's report is about a fictional `+1 555 01xx` caller in the demo workspace, so it is not a moderation case — but it IS a real ticket in a real queue, and an unmarked one would be triaged as if the content existed."
 
 [report.reference_call]
 en = "Call: {call_id}"
 ctx = "label"
 screen = "support"
 tier = "T2"
+fixed = true
 args = { call_id = "str" }
 id = { swift = "ReportCopy.referenceCall(_:)" }
-note = "Sent to the support desk inside the report. {call_id} is the call's internal id."
+note = "Sent to the District support desk inside the ticket, never shown on screen: it stays English for staff in every language, as on Windows. Sent to the support desk inside the report. {call_id} is the call's internal id."
 
 [report.reference_conversation]
 en = "Conversation: {thread}"
 ctx = "label"
 screen = "support"
 tier = "T2"
+fixed = true
 args = { thread = "str" }
 id = { swift = "ReportCopy.referenceConversation(_:)" }
-note = "Sent to the support desk inside the report. {thread} is the conversation's internal key."
+note = "Sent to the District support desk inside the ticket, never shown on screen: it stays English for staff in every language, as on Windows. Sent to the support desk inside the report. {thread} is the conversation's internal key."
 
 [report.report_call]
 en = "Report call"
