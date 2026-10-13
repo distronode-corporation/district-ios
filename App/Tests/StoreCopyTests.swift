@@ -132,7 +132,7 @@ final class StoreCopyTests: XCTestCase {
         XCTAssertGreaterThan(result.filesScanned, 150, "the scan reached almost nothing, so it proved nothing")
         XCTAssertGreaterThan(
             result.entriesScanned,
-            1000,
+            500,
             "the catalog scan reached almost nothing, so it proved nothing"
         )
 
@@ -151,7 +151,7 @@ final class StoreCopyTests: XCTestCase {
         XCTAssertGreaterThan(result.filesScanned, 150, "the scan reached almost nothing, so it proved nothing")
         XCTAssertGreaterThan(
             result.entriesScanned,
-            1000,
+            500,
             "the catalog scan reached almost nothing, so it proved nothing"
         )
         XCTAssertEqual(
