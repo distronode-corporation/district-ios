@@ -50,6 +50,7 @@ class UITestApp: XCTestCase {
         A11yID.Inbox.send,
         A11yID.Dialer.call,
         A11yID.VoiceStudio.save,
+        A11yID.Desk.composeSubmit,
     ]
 
     override func setUp() {

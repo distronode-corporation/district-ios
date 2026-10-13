@@ -861,6 +861,9 @@ extension DeskCopy {
     /// `desk.message_label`
     internal static var messageLabel: String { AppL10n.copyLocale == .frCA ? "What they need" : "What they need" }
 
+    /// `desk.new_ticket_action`
+    internal static var newTicketAction: String { AppL10n.copyLocale == .frCA ? "New ticket" : "New ticket" }
+
     /// `desk.no_contact_details`
     internal static var noContactDetails: String { AppL10n.copyLocale == .frCA ? "No contact details recorded" : "No contact details recorded" }
 

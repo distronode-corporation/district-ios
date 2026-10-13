@@ -36,12 +36,23 @@ struct DeskComposeSheet: View {
                         .font(DistrictType.bodySmall)
                         .foregroundStyle(colors.mutedForeground)
                         .fixedSize(horizontal: false, vertical: true)
+                    if let failure = model.composeFailure {
+                        // ⚠️ HERE AND NOT ON THE QUEUE, which this sheet covers. See
+                        // ``DeskModel/composeFailure``.
+                        Text(failure)
+                            .font(DistrictType.bodySmall)
+                            .foregroundStyle(colors.destructive)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier(A11yID.Desk.composeFailure)
+                    }
                     fields
                     requester
                 }
                 .padding(DistrictSpacing.gutter)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(A11yID.Desk.composeRoot)
             .navigationTitle(DeskCopy.composeTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
@@ -93,6 +104,7 @@ struct DeskComposeSheet: View {
             Button(DeskCopy.cancel) { dismiss() }
                 .disabled(model.creating)
                 .keyboardShortcut(.cancelAction)
+                .accessibilityIdentifier(A11yID.Desk.composeCancel)
         }
         ToolbarItem(placement: .confirmationAction) {
             Button(DeskCopy.createAction) { Task { await submit() } }
@@ -103,6 +115,7 @@ struct DeskComposeSheet: View {
                 // RE-RENDER; ``DeskModel/createTicket(_:)`` refuses the second itself.
                 .disabled(model.creating || !draft.isComplete)
                 .keyboardShortcut(.districtSubmit)
+                .accessibilityIdentifier(A11yID.Desk.composeSubmit)
         }
     }
 
