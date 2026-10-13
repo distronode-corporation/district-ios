@@ -13,8 +13,8 @@ import Testing
 @MainActor
 @Suite(.serialized)
 struct BillingPlanNameTests {
-    @Test("each of the four tiers reads as the pricing page names it")
-    func fourTiers() {
+    @Test
+    func `each of the four tiers reads as the pricing page names it`() {
         #expect(BillingCopy.planName("VoiceSolo") == "Voice Solo")
         #expect(BillingCopy.planName("VoiceStarter") == "Voice Starter")
         #expect(BillingCopy.planName("VoicePro") == "Voice Pro")
@@ -22,36 +22,36 @@ struct BillingPlanNameTests {
     }
 
     /// ⚠️ EXACTLY THE FOUR. A fifth entry is a name this client invented.
-    @Test("the table holds the server's four tiers and nothing else")
-    func exactlyFour() {
+    @Test
+    func `the table holds the four server tiers and nothing else`() {
         #expect(Set(BillingCopy.planNames.keys) == ["VoiceSolo", "VoiceStarter", "VoicePro", "VoiceStudio"])
     }
 
-    @Test("a tier in another case or with spaces around it still reads as its name")
-    func caseAndSpace() {
+    @Test
+    func `a tier in another case or with spaces around it still reads as its name`() {
         #expect(BillingCopy.planName("voicepro") == "Voice Pro")
         #expect(BillingCopy.planName(" VOICESTUDIO\n") == "Voice Studio")
     }
 
     /// ⚠️ An unknown tier is still the workspace's plan, so it is shown exactly as sent.
-    @Test("an unknown tier is shown exactly as the server sent it")
-    func unknownTier() {
+    @Test
+    func `an unknown tier is shown exactly as the server sent it`() {
         #expect(BillingCopy.planName("VoiceEnterprise") == "VoiceEnterprise")
         #expect(BillingCopy.planName("Free") == "Free")
         #expect(BillingCopy.planName("") == "")
     }
 
     /// ⛔ NULL IS "NO PLAN", NOT "Free". See ``BillingCopy/planNone``.
-    @Test("no tier keeps the no-plan sentence")
-    func noTier() {
+    @Test
+    func `no tier keeps the no-plan sentence`() {
         #expect(BillingCopy.planName(nil) == BillingCopy.planNone)
         #expect(BillingCopy.planName(nil) == "No plan on this workspace")
     }
 
     /// The card itself, drawn and read back as VoiceOver and the smoke suite read it: the
     /// name is on screen and the key is not.
-    @Test("the plan card shows the plan's name, not its key")
-    func cardShowsTheName() async throws {
+    @Test
+    func `the plan card shows the plan name and not its key`() async throws {
         let screen = try HostedAccessibility(BillingPlanCard(plan: Self.billing(tier: "\"VoicePro\"")))
         defer { screen.close() }
 
@@ -64,8 +64,8 @@ struct BillingPlanNameTests {
         #expect(!shown.labels.contains { $0.contains("VoicePro") }, "the wire key is on screen: \(shown)")
     }
 
-    @Test("the plan card with no tier says there is no plan")
-    func cardWithNoTier() async throws {
+    @Test
+    func `the plan card with no tier says there is no plan`() async throws {
         let screen = try HostedAccessibility(BillingPlanCard(plan: Self.billing(tier: "null")))
         defer { screen.close() }
 
