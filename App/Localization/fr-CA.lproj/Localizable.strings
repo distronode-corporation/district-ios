@@ -1,0 +1,13 @@
+/*
+  Localizable.strings (District AI), fr-CA.
+  SPIKE (do not merge): the six push loc-keys the server sends, in Canadian French.
+*/
+
+"push.message.title" = "Nouveau message";
+"push.message.body" = "Un nouveau message est arrivé dans votre boîte de réception.";
+
+"push.call.title" = "Appel entrant";
+"push.call.body" = "Quelqu'un appelle votre ligne District.";
+
+"push.generic.title" = "District AI";
+"push.generic.body" = "Vous avez une nouvelle notification.";

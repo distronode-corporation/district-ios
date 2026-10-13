@@ -1,0 +1,7 @@
+/*
+  InfoPlist.strings (District AI), fr-CA.
+  SPIKE (do not merge): the usage descriptions the OS reads from Info.plist.
+*/
+
+"NSMicrophoneUsageDescription" = "District AI utilise le microphone pour les appels que vous passez et auxquels vous répondez.";
+"NSCameraUsageDescription" = "District AI utilise la caméra seulement dans les salles de réunion où vous entrez, jamais pendant les appels téléphoniques.";

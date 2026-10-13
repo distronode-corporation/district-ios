@@ -1,0 +1,14 @@
+# SPIKE (do not merge): the French resources, merged into project.yml only when
+# DISTRICT_FRENCH is set to a true value (YES, true, 1) in the environment of
+# `xcodegen generate`. Without it, XcodeGen skips this file and the built .app holds
+# no fr-CA.lproj.
+#
+# XcodeGen merges an include additively: this `sources` array is appended to the
+# DistrictAI target's own. App/Localization holds only fr-CA.lproj, so XcodeGen adds
+# fr-CA to knownRegions and each file as a plain reference; the build system takes the
+# region from the parent `.lproj` directory and copies the file into fr-CA.lproj/.
+targets:
+  DistrictAI:
+    sources:
+      - path: App/Localization
+        buildPhase: resources

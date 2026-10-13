@@ -62,45 +62,50 @@ struct DistrictApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(container: container, push: push, incoming: incoming)
-                // ⛔ THE REVOKE OUTBOX IS DRAINED HERE, AND THIS IS THE ONLY HOOK
-                // THAT ALWAYS RUNS. A sign-out whose `POST
-                // /api/auth/native/revoke` could not reach the server leaves the
-                // refresh token in the store's outbox, and something has to come
-                // back for it — but every state-dependent trigger is conditional
-                // on state the signed-out user no longer has. Hanging it off the
-                // login controller fires only if someone signs in again; hanging
-                // it off the first token acquisition fires only when there IS a
-                // session, which is exactly what a signed-out device lacks. The
-                // root view is presented on every cold start either way.
-                //
-                // ⚠️ COSTS ONE KEYCHAIN READ IN THE NORMAL CASE, and makes no
-                // network call unless there is genuinely a token to chase. It
-                // does not gate the UI: `.task` runs after the first render.
-                .task { await container.drainPendingRevoke() }
-                // ⛔ `onAppear` RATHER THAN `.task`, BECAUSE THIS ONE RACES A PUSH.
-                // `.task` runs after the first render; `onAppear` runs with it, and
-                // a VoIP push that beats even that is buffered by ``VoIPPushHandler``.
-                // ⛔ THE ONE PLACE THE DELEGATE LEARNS ABOUT EITHER OBJECT, AND IT
-                // GOES THROUGH THE ADAPTOR'S OWN INSTANCE, never through a cast of
-                // `UIApplication.shared.delegate as? AppDelegate`. ⛔ THAT CAST FAILS:
-                // measured on an iPhone XS Max, iOS 18.7.10, the delegate does not
-                // cast to `AppDelegate`, so a fallback that returned silently on it
-                // would leave a device token going nowhere and a VoIP push with
-                // nothing to ring, in the SHIPPING configuration and not only in a
-                // preview or a test host. A fallback that never succeeds is worse
-                // than none: it is indistinguishable from a feature that does not
-                // exist. `appDelegate` is non-optional — the adaptor guarantees the
-                // instance — so there is no failure branch to be quiet about.
-                //
-                // ⚠️ ABOVE THE SESSION GATE, unlike the notification wiring on
-                // `ShellView`, because a ring must be reported to CallKit on a
-                // handset whose session has not resolved. Reading the adaptor
-                // inside `body` is exactly what SwiftUI promises; `init()` is not.
-                .onAppear {
-                    appDelegate.adopt(registrar: push)
-                    appDelegate.adopt(incoming: incoming)
-                }
+            // SPIKE (do not merge): the French-resolution probe replaces the app.
+            if FrenchSpike.isArmed {
+                FrenchSpikeProbeView()
+            } else {
+                RootView(container: container, push: push, incoming: incoming)
+                    // ⛔ THE REVOKE OUTBOX IS DRAINED HERE, AND THIS IS THE ONLY HOOK
+                    // THAT ALWAYS RUNS. A sign-out whose `POST
+                    // /api/auth/native/revoke` could not reach the server leaves the
+                    // refresh token in the store's outbox, and something has to come
+                    // back for it — but every state-dependent trigger is conditional
+                    // on state the signed-out user no longer has. Hanging it off the
+                    // login controller fires only if someone signs in again; hanging
+                    // it off the first token acquisition fires only when there IS a
+                    // session, which is exactly what a signed-out device lacks. The
+                    // root view is presented on every cold start either way.
+                    //
+                    // ⚠️ COSTS ONE KEYCHAIN READ IN THE NORMAL CASE, and makes no
+                    // network call unless there is genuinely a token to chase. It
+                    // does not gate the UI: `.task` runs after the first render.
+                    .task { await container.drainPendingRevoke() }
+                    // ⛔ `onAppear` RATHER THAN `.task`, BECAUSE THIS ONE RACES A PUSH.
+                    // `.task` runs after the first render; `onAppear` runs with it, and
+                    // a VoIP push that beats even that is buffered by ``VoIPPushHandler``.
+                    // ⛔ THE ONE PLACE THE DELEGATE LEARNS ABOUT EITHER OBJECT, AND IT
+                    // GOES THROUGH THE ADAPTOR'S OWN INSTANCE, never through a cast of
+                    // `UIApplication.shared.delegate as? AppDelegate`. ⛔ THAT CAST FAILS:
+                    // measured on an iPhone XS Max, iOS 18.7.10, the delegate does not
+                    // cast to `AppDelegate`, so a fallback that returned silently on it
+                    // would leave a device token going nowhere and a VoIP push with
+                    // nothing to ring, in the SHIPPING configuration and not only in a
+                    // preview or a test host. A fallback that never succeeds is worse
+                    // than none: it is indistinguishable from a feature that does not
+                    // exist. `appDelegate` is non-optional — the adaptor guarantees the
+                    // instance — so there is no failure branch to be quiet about.
+                    //
+                    // ⚠️ ABOVE THE SESSION GATE, unlike the notification wiring on
+                    // `ShellView`, because a ring must be reported to CallKit on a
+                    // handset whose session has not resolved. Reading the adaptor
+                    // inside `body` is exactly what SwiftUI promises; `init()` is not.
+                    .onAppear {
+                        appDelegate.adopt(registrar: push)
+                        appDelegate.adopt(incoming: incoming)
+                    }
+            }
         }
         // ⚠️ THE HARDWARE KEYBOARD'S MENU. Every command reads what the signed-in shell
         // publishes and is disabled while nothing does; see ``DistrictCommands``.

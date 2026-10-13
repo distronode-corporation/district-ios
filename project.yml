@@ -40,7 +40,16 @@
 # no identity and no profile, and with signing disabled nothing reads it.
 name: DistrictAI
 
+# SPIKE (do not merge): the French resources stay out of the app unless
+# `DISTRICT_FRENCH=YES xcodegen generate`. Unset, `${DISTRICT_FRENCH}` is left
+# unexpanded and reads as false, so the include is skipped. See project.fr.yml.
+include:
+  - path: project.fr.yml
+    enable: ${DISTRICT_FRENCH}
+
 options:
+  # SPIKE: explicit, so knownRegions is `en` + Base (+ fr-CA with the include).
+  developmentLanguage: en
   # ⚠️ Only an assertion, and a cheap one: xcodegen refuses to run if it is older
   # than this. CI installs a pinned, checksummed XcodeGen release and records
   # `xcodegen --version` in the job log; this floor catches a local install that

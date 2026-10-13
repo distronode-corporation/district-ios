@@ -28,8 +28,15 @@ enum DeskCopy {
     /// ⚠️ THE SECOND SENTENCE DENIES RATHER THAN DIRECTS. Pointing at the website would
     /// turn a disambiguation into a signpost, and a signpost is what Guideline 3.1.1
     /// forbids: the distinction it exists to draw survives, the destination does not.
-    static let subtitle = "Your customers' tickets, filed by your agent when a call "
-        + "cannot be resolved. This is not where you raise something with Distronode."
+    /// SPIKE (do not merge): a computed `static var`, chosen at run time, behind the
+    /// unchanged `Text(DeskCopy.subtitle)` call sites.
+    static var subtitle: String {
+        FrenchSpike.isFrench
+            ? "Les billets de vos clients, ouverts par votre agent quand un appel "
+            + "ne peut pas être résolu. Ce n'est pas ici que vous écrivez à Distronode."
+            : "Your customers' tickets, filed by your agent when a call "
+            + "cannot be resolved. This is not where you raise something with Distronode."
+    }
 
     static let allFilter = "All"
 
