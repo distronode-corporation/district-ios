@@ -1,0 +1,1 @@
+Corrige le nom du forfait sur la page Facturation, qui affichait la clé interne du forfait (par exemple « VoicePro ») au lieu de son nom.

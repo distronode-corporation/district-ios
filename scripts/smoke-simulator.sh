@@ -8,7 +8,7 @@
 # Credentials come from the environment and are never written to disk:
 #   DISTRICT_SMOKE_EMAIL / DISTRICT_SMOKE_PASSWORD   the app-store demo account
 #   DISTRICT_SMOKE_CONTACT                           a seeded contact's display name
-#   DISTRICT_SMOKE_PLAN                              expected tier, default Studio
+#   DISTRICT_SMOKE_PLAN                              expected plan name, default Studio
 # With the first two unset every case in the suite calls `XCTSkip`, the run is green,
 # and this script says so, a skip and a pass are not the same claim.
 #

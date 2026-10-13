@@ -43,6 +43,35 @@ enum BillingCopy {
     /// plan name on screen that no database row contains.
     static let planNone = "No plan on this workspace"
 
+    /// The plan names the pricing page shows, keyed by the wire tier.
+    ///
+    /// ⛔ THE SERVER'S `PLAN_TIER_LABELS` (distronode-website,
+    /// `src/lib/payments/plan-urls.ts`), WORD FOR WORD. ``WorkspaceBilling/subscriptionTier``
+    /// is the catalogue KEY (`VoicePro`), never a name, and the card printed it as is
+    /// until 2.2.1. Product marks, so the same in every language.
+    static let planNames: [String: String] = [
+        "VoiceSolo": "Voice Solo",
+        "VoiceStarter": "Voice Starter",
+        "VoicePro": "Voice Pro",
+        "VoiceStudio": "Voice Studio",
+    ]
+
+    /// The plan card's headline: the plan's name for a tier in ``planNames``, any other
+    /// tier exactly as the server sent it, and ``planNone`` for no tier at all.
+    ///
+    /// ⚠️ AN UNKNOWN TIER IS SHOWN, NOT HIDDEN. A tier added server side before this table
+    /// knows it is still the workspace's plan; printing its key is less wrong than
+    /// "no plan", which would be a claim about the account.
+    ///
+    /// ⚠️ MATCHED IGNORING CASE AND SURROUNDING SPACE, as ``BillingFormat/normalisedStatus(_:)``
+    /// matches the status: nothing normalises the column on write, and DistrictCore's
+    /// ``WorkspaceBilling`` calls a case-insensitive comparison the only safe one.
+    static func planName(_ tier: String?) -> String {
+        guard let tier else { return planNone }
+        let key = BillingFormat.normalisedStatus(tier)
+        return planNames.first { $0.key.lowercased() == key }?.value ?? tier
+    }
+
     static let statusActive = "Active"
 
     static let statusPastDue = "Past due"
