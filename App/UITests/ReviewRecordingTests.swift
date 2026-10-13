@@ -85,7 +85,7 @@ final class ReviewRecordingTests: ReviewRecordingCase {
 
         // 9. Workspace settings → Persona.
         ShellNavigator.navigate(app, to: .settings); pause(3)
-        rowTitled("Persona").tap(); pause(4)
+        app.buttons[A11yID.Settings.row("persona")].firstMatch.tap(); pause(4)
         back(); back()
     }
 

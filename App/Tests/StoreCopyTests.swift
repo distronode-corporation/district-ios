@@ -19,8 +19,9 @@ import XCTest
 ///
 /// ⛔ AND THE CATALOG, BECAUSE MOST OF THE SENTENCES LIVE THERE NOW. The `*Copy` enums are
 /// generated from `l10n/ios.toml`, so a walk of the Swift alone would pass every string the
-/// generator writes. Each entry's English is scanned, scoped by its `screen` field the way
-/// the walk is scoped by directory, and allowed by its KEY.
+/// generator writes. Each entry's English AND French are scanned, scoped by its `screen`
+/// field the way the walk is scoped by directory, and allowed by KEY, with the French
+/// allowances listed apart from the English ones.
 /// The three direct assertions at the bottom are a second, independent hold on the
 /// sentences a reviewer is most likely to read first.
 ///
@@ -62,6 +63,19 @@ final class StoreCopyTests: XCTestCase {
         "website",
         "dashboard",
         "browser",
+        "distronode.ca",
+    ]
+
+    /// The same contract in French, matched the same way (lower-cased, as substrings).
+    /// « site Web », « sur le Web », « navigateur » and « tableau de bord » are the
+    /// glossary's store-steering words on Apple; « Aperçu » is Overview here.
+    private static let forbiddenWordsFr = [
+        "site web",
+        "sur le web",
+        "navigateur",
+        "tableau de bord",
+        "distronode.com",
+        "distronode.ca",
     ]
 
     /// ⛔ THE SECOND CONTRACT: NOTHING INVITES A PERSON TO MAKE AN ACCOUNT. Guideline 3.1.1
@@ -90,6 +104,22 @@ final class StoreCopyTests: XCTestCase {
         "start your trial",
     ]
 
+    /// ⚠️ PHRASES, AS IN ENGLISH. « Inscription » alone also names the regulatory filings
+    /// on the Numbers screens, so only wording that can only mean "make an account" is here.
+    private static let registrationPhrasesFr = [
+        "s'inscrire",
+        "inscrivez-vous",
+        "créer un compte",
+        "créez un compte",
+        "créez votre compte",
+        "ouvrir un compte",
+        "ouvrez un compte",
+        "essai gratuit",
+        "période d'essai",
+        "commencer l'essai",
+        "commencez votre essai",
+    ]
+
     /// Directories the gate does not walk, relative to `App/Sources`.
     private static let exemptDirectories = [
         "Features/Scheduling",
@@ -115,6 +145,11 @@ final class StoreCopyTests: XCTestCase {
         "contacts.website": "Website",
         "sign_in.opens_browser_sign_securely": "Opens your browser to sign in securely.",
     ]
+
+    /// French permitted, by key, with the exact French allowed. ⛔ A FRENCH SENTENCE MAY
+    /// NEVER ADD A DESTINATION ITS ENGLISH DOES NOT HAVE, so an English allowance does not
+    /// carry over: each French one is reviewed and listed on its own.
+    private static let allowedEntriesFr: [String: String] = [:]
 
     // MARK: - The gate
 
@@ -162,12 +197,52 @@ final class StoreCopyTests: XCTestCase {
         let result = try scan()
         let declared = Set(Self.allowedLiterals.flatMap { file, literals in
             literals.map { "\(file): \($0)" }
-        }).union(Self.allowedEntries.map { "\($0.key): \($0.value)" })
+        })
+        .union(Self.allowedEntries.map { "\($0.key): \($0.value)" })
+        .union(Self.allowedEntriesFr.map { "\($0.key) (fr): \($0.value)" })
 
         XCTAssertEqual(
             declared.subtracting(result.allowancesUsed).sorted(),
             [],
             "these allowances no longer match any string; delete them in the commit that reworded them"
+        )
+    }
+
+    /// ⛔ THE FRENCH HALF HAS TO BE SEEN TO FIRE. The catalog holds no French until the
+    /// translation wave, so the real scan exercises only English; this runs the same scan
+    /// over a two-entry catalog whose French steers and invites, and whose English does not.
+    func testTheFrenchScanCatchesWhatTheEnglishDoesNotSay() throws {
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("store-copy-\(UUID().uuidString).toml")
+        let catalog = [
+            "[meta]",
+            "catalog = \"probe\"",
+            "",
+            "[probe.steer]",
+            "en = \"Plan changes are not available in this app.\"",
+            "fr = \"Modifiez votre forfait dans le tableau de bord.\"",
+            "screen = \"billing\"",
+            "",
+            "[probe.invite]",
+            "en = \"Ask your administrator for an invitation.\"",
+            "fr = \"Inscrivez-vous pour un essai gratuit.\"",
+            "screen = \"sign_in\"",
+            "",
+        ].joined(separator: "\n")
+        try catalog.write(to: file, atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: file) }
+
+        var result = ScanResult(filesScanned: 0, offences: [], allowancesUsed: [], registrationOffences: [])
+        try scanCatalog(into: &result, file: file)
+
+        XCTAssertEqual(result.entriesScanned, 2)
+        XCTAssertEqual(
+            result.offences,
+            ["probe.steer (fr) names \"tableau de bord\" in \"Modifiez votre forfait dans le tableau de bord.\""]
+        )
+        XCTAssertEqual(
+            result.registrationOffences,
+            ["probe.invite (fr) says \"inscrivez-vous\" in \"Inscrivez-vous pour un essai gratuit.\""]
         )
     }
 
@@ -246,24 +321,35 @@ final class StoreCopyTests: XCTestCase {
     }
 
     /// The catalog half of the walk: every entry's English, checked by the same two rules.
-    private func scanCatalog(into result: inout ScanResult) throws {
-        for entry in try CatalogScan.entries(of: Self.catalogFile) {
+    private func scanCatalog(into result: inout ScanResult, file: URL = StoreCopyTests.catalogFile) throws {
+        for entry in try CatalogScan.entries(of: file) {
             let exempt = Self.exemptScreens.contains { entry.screen == $0 || entry.screen.hasPrefix("\($0).") }
             guard !exempt else { continue }
             result.entriesScanned += 1
             for text in entry.english {
-                let lowered = text.lowercased()
-                if let phrase = Self.registrationPhrases.first(where: { lowered.contains($0) }) {
-                    result.registrationOffences.append("\(entry.key) says \"\(phrase)\" in \"\(text)\"")
-                }
-                guard let word = Self.forbiddenWords.first(where: { lowered.contains($0) }) else { continue }
-                guard Self.allowedEntries[entry.key] != text else {
-                    result.allowancesUsed.insert("\(entry.key): \(text)")
-                    continue
-                }
-                result.offences.append("\(entry.key) names \"\(word)\" in \"\(text)\"")
+                check(text, key: entry.key, label: entry.key, french: false, into: &result)
+            }
+            for text in entry.french {
+                check(text, key: entry.key, label: "\(entry.key) (fr)", french: true, into: &result)
             }
         }
+    }
+
+    /// One catalog string against one language's two rules.
+    private func check(_ text: String, key: String, label: String, french: Bool, into result: inout ScanResult) {
+        let lowered = text.lowercased()
+        let phrases = french ? Self.registrationPhrasesFr : Self.registrationPhrases
+        if let phrase = phrases.first(where: { lowered.contains($0) }) {
+            result.registrationOffences.append("\(label) says \"\(phrase)\" in \"\(text)\"")
+        }
+        let words = french ? Self.forbiddenWordsFr : Self.forbiddenWords
+        guard let word = words.first(where: { lowered.contains($0) }) else { return }
+        let allowed = french ? Self.allowedEntriesFr[key] : Self.allowedEntries[key]
+        guard allowed != text else {
+            result.allowancesUsed.insert("\(label): \(text)")
+            return
+        }
+        result.offences.append("\(label) names \"\(word)\" in \"\(text)\"")
     }
 
     /// `l10n/ios.toml`, two levels above `App/Sources`.

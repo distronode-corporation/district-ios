@@ -45,6 +45,15 @@ built from history before publication, so they have no tags in this repository.
   words. Money stays exactly as English shows it today; in French it goes through the
   core's `L10nFormat`. Copy read from a stored `static let` is computed now, so it follows
   the language.
+- French is ready to switch on and stays off. `project.fr.yml`, included only when
+  `DISTRICT_FRENCH` is set for `xcodegen generate`, adds `App/Localization/fr-CA.lproj`;
+  the push loc-keys (`Localizable.strings`, from `l10n/push.toml`) moved from the bundle
+  root, where they would shadow every `.lproj`, into `en.lproj`, beside an
+  `InfoPlist.strings` for the permission prompts (`l10n/infoplist.toml`, held equal to
+  project.yml). `scripts/archive-imac.sh` deletes an archive that holds `fr-CA.lproj`
+  while French is off, or any `fr.lproj`. The unit tests run pinned to English, the UI
+  tests find the Overview and settings rows, the report's Done and the block
+  confirmations by identifier, and `StoreCopyTests` scans the catalog's French too.
 - DistrictCore 7.0.0-beta.1: the core's sentences come from its catalogs, every request
   sends `Accept-Language` (`en`), and errors are shown through `ApiError.localizedMessage`
   (the same sentence in English).

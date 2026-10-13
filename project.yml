@@ -40,7 +40,18 @@
 # no identity and no profile, and with signing disabled nothing reads it.
 name: DistrictAI
 
+# ⛔ FRENCH STAYS OUT OF THE APP UNLESS `DISTRICT_FRENCH=YES xcodegen generate`. Unset,
+# `${DISTRICT_FRENCH}` is left unexpanded and reads as false, so the include is skipped
+# and the bundle holds en.lproj only. See project.fr.yml; the release workflow refuses an
+# archive that holds fr-CA.lproj while French is off.
+include:
+  - path: project.fr.yml
+    enable: ${DISTRICT_FRENCH}
+
 options:
+  # Stated rather than defaulted, so knownRegions is `en` and Base, plus fr-CA when the
+  # include above is enabled.
+  developmentLanguage: en
   # ⚠️ Only an assertion, and a cheap one: xcodegen refuses to run if it is older
   # than this. CI installs a pinned, checksummed XcodeGen release and records
   # `xcodegen --version` in the job log; this floor catches a local install that
@@ -214,18 +225,19 @@ targets:
         # read `CFBundleVersion` out of the BUILT app instead.
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
-        # ⛔ IT IS WHAT MAKES `App/Resources/Localizable.strings` RESOLVE AT ALL.
+        # ⛔ IT IS WHAT MAKES `App/Resources/en.lproj/Localizable.strings` THE FALLBACK.
         # APNs draws a notification from the `title-loc-key` / `loc-key` the server
         # sends by looking the keys up in the app bundle's string table for the
-        # user's language, falling back to the
-        # DEVELOPMENT REGION. There is one table and it is English; without this key
+        # user's language, falling back to the DEVELOPMENT REGION. Without this key
         # the fallback language is unstated, and an unresolved key renders as the
         # literal `push.message.title` on the lock screen rather than failing
         # anywhere a build or a test could see.
-        # ⚠️ `en` RATHER THAN `en-CA` OR `en-US`. The client ships no localisations
-        # and this is a fallback, not a claim about spelling; a region-qualified
-        # value here would be the first half of a localisation story nobody has
-        # written.
+        # ⛔ THE TABLE IS IN en.lproj, NEVER AT THE BUNDLE ROOT. A root
+        # `Localizable.strings` shadows every `.lproj`, so the French table that
+        # project.fr.yml adds would never be read (measured on the W0 spike: the push
+        # titles stayed English on a French device until the table moved).
+        # ⚠️ `en` RATHER THAN `en-CA` OR `en-US`: a fallback, not a claim about
+        # spelling.
         CFBundleDevelopmentRegion: en
         # ⛔ REQUIRED BY APP STORE CONNECT, AND FALSE IS THE MAINTAINERS' ANSWER
         # WHILE THE APP IS NOT SOLD IN FRANCE. The app's encryption: HTTPS through
@@ -512,6 +524,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.tests
+        # ⛔ PINS ENGLISH FOR EVERY TEST: XCTest creates this class when it loads the
+        # bundle, before the first test. See App/Tests/EnglishTestLocale.swift.
+        INFOPLIST_KEY_NSPrincipalClass: "DistrictAITests.EnglishTestLocale"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/DistrictAI.app/DistrictAI"
         BUNDLE_LOADER: "$(TEST_HOST)"
         # ⚠️ THE HOST IS NOT LAUNCHED FOR THESE TESTS, and that is what keeps them

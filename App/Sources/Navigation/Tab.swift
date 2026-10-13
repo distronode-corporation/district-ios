@@ -21,14 +21,14 @@ enum Tab: String, Hashable, CaseIterable {
 
     var label: String {
         switch self {
-        // ⚠️ FROM `A11yID.NavLabel`, WHICH THE UI-TEST BUNDLE ALSO COMPILES. The tab
-        // bar can only be addressed by label, so a literal here and a literal in the
-        // test would be a suite that passes until somebody renames a tab.
-        case .overview: A11yID.NavLabel.overview
-        case .inbox: A11yID.NavLabel.inbox
-        case .calls: A11yID.NavLabel.calls
-        case .contacts: A11yID.NavLabel.contacts
-        case .account: A11yID.NavLabel.account
+        // ⚠️ FROM THE CATALOG, AND IN ENGLISH EQUAL TO `A11yID.NavLabel`, WHICH THE
+        // UI-TEST BUNDLE COMPILES. The tab bar can only be addressed by label, and the UI
+        // tests run in English; `AppL10nTests` fails if the two ever differ.
+        case .overview: NavigationCopy.tabOverview
+        case .inbox: NavigationCopy.tabInbox
+        case .calls: NavigationCopy.tabCalls
+        case .contacts: NavigationCopy.tabContacts
+        case .account: NavigationCopy.tabAccount
         }
     }
 

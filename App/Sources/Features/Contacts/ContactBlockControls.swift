@@ -98,6 +98,7 @@ struct ContactBlockControl: View {
             Button(blocked ? ContactBlockCopy.confirmUnblock : ContactBlockCopy.confirmBlock) {
                 apply()
             }
+            .accessibilityIdentifier(blocked ? A11yID.Contacts.confirmUnblock : A11yID.Contacts.confirmBlock)
             Button(ContactBlockCopy.cancel, role: .cancel) {}
         }
     }

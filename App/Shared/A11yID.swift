@@ -35,9 +35,10 @@ enum A11yID {
     /// `app.debugDescription` — `district-nav-overview` appeared as a full-screen
     /// `Other`, while the TabBar held `Button, label: 'Overview'`.
     ///
-    /// ⚠️ SO THE LABELS LIVE HERE, compiled into both the app and the UI bundle, and
-    /// ``Tab/label`` reads them. Two copies of "Overview" would be a test that passes
-    /// until somebody renames a tab.
+    /// ⚠️ SO THE ENGLISH LABELS LIVE HERE, for the UI bundle, which runs in English. The
+    /// app's own labels come from the catalog (`NavigationCopy.tab*`), and `AppL10nTests`
+    /// fails if the two ever differ in English: two unchecked copies of "Overview" would
+    /// be a test that passes until somebody renames a tab.
     enum NavLabel {
         static let overview = "Overview"
         static let inbox = "Inbox"
@@ -97,6 +98,12 @@ enum A11yID {
         static let root = "district-overview-root"
         /// The owner mid-setup's "Open setup" button. Present only for that owner.
         static let finishSetup = "district-overview-finish-setup"
+        static let rowBase = "district-overview-row"
+        /// A hub row, by ``OverviewEntry/key`` (`billing`, `hq`, `settings`...), the same
+        /// in every language. ⚠️ On the row's link, so `app.buttons[...]` finds it.
+        static func row(_ key: String) -> String {
+            A11yID.row(rowBase, key)
+        }
     }
 
     enum Contacts {
@@ -198,6 +205,12 @@ enum A11yID {
     /// name the SCREEN rather than assume the word "settings" means one thing.
     enum Settings {
         static let hubRoot = "district-workspace-settings-root"
+        static let rowBase = "district-workspace-settings-row"
+        /// A hub row, by `SettingsSection`'s raw value (`persona`, `voiceStudio`...).
+        /// ⚠️ On the row's link, so `app.buttons[...]` finds it in every language.
+        static func row(_ section: String) -> String {
+            A11yID.row(rowBase, section)
+        }
     }
 
     /// The persona form's controls.

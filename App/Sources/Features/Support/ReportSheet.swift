@@ -117,6 +117,7 @@ struct ReportSheet: View {
                 .accessibilityIdentifier(A11yID.Report.confirmation)
             Button(SupportCopy.done) { dismiss() }
                 .buttonStyle(.districtPrimary)
+                .accessibilityIdentifier(A11yID.Report.done)
         }
     }
 

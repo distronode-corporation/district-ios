@@ -105,6 +105,7 @@ struct SettingsHubView: View {
             DistrictListRow(title: entry.title, subtitle: entry.subtitle, trailing: { chevron })
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(A11yID.Settings.row(entry.section.rawValue))
     }
 
     private var chevron: some View {

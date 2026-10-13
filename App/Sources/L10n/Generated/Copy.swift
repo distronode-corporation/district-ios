@@ -2151,6 +2151,21 @@ extension NavigationCopy {
 
     /// `navigation.subscription_not_active`
     internal static var subscriptionNotActive: String { AppL10n.copyLocale == .frCA ? "Subscription not active" : "Subscription not active" }
+
+    /// `navigation.tab_account`
+    internal static var tabAccount: String { AppL10n.copyLocale == .frCA ? "Account" : "Account" }
+
+    /// `navigation.tab_calls`
+    internal static var tabCalls: String { AppL10n.copyLocale == .frCA ? "Calls" : "Calls" }
+
+    /// `navigation.tab_contacts`
+    internal static var tabContacts: String { AppL10n.copyLocale == .frCA ? "Contacts" : "Contacts" }
+
+    /// `navigation.tab_inbox`
+    internal static var tabInbox: String { AppL10n.copyLocale == .frCA ? "Inbox" : "Inbox" }
+
+    /// `navigation.tab_overview`
+    internal static var tabOverview: String { AppL10n.copyLocale == .frCA ? "Overview" : "Overview" }
 }
 
 extension OverviewCopy {

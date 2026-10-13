@@ -303,9 +303,9 @@ private extension SmokeUITests {
         let button = app.tabBars.buttons[section.tabLabel ?? A11yID.NavLabel.overview]
         XCTAssertTrue(button.waitForExistence(timeout: timeout), "no tab for \(section)")
         button.tap()
-        guard let title = section.overviewRow else { return }
-        let entry = app.buttons[title]
-        XCTAssertTrue(entry.waitForExistence(timeout: 15), "no \(title) row on the console home")
+        guard let rowID = section.overviewRow else { return }
+        let entry = app.buttons[rowID]
+        XCTAssertTrue(entry.waitForExistence(timeout: 15), "no \(rowID) row on the console home")
         entry.tap()
     }
 
@@ -357,7 +357,7 @@ enum SmokeSection {
     /// The Overview row that opens the section on compact width.
     var overviewRow: String? {
         switch self {
-        case .billing: "Billing"
+        case .billing: A11yID.Overview.row("billing")
         case .contacts, .account: nil
         }
     }

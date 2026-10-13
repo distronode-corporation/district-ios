@@ -237,6 +237,41 @@ if [ "$SEAM_HITS" != "0" ]; then
 fi
 echo "IOS-SEC-01 ok - no UI-test seam in the archived binary"
 
+# ── French stays out until it is switched on ─────────────────────────────────
+# ⛔ THE ARCHIVE IS DISCARDED IF IT HOLDS fr-CA.lproj WHILE DISTRICT_FRENCH IS OFF.
+# French enters the app only through project.fr.yml, which `xcodegen generate` above
+# includes when DISTRICT_FRENCH is a true value; with it unset the bundle must hold
+# en.lproj alone. A French table in an English release would turn the push titles
+# and the permission prompts French for every French device, and AppL10n would then
+# turn the whole app French (it answers French when the bundle ships French), with
+# French that has not been reviewed. Same verdict as the seam guard: deleted, not
+# warned about.
+#
+# ⛔ AND NEVER A PLAIN fr.lproj, EVEN WITH FRENCH ON. Beside fr-CA.lproj it would
+# take every fr-FR, fr-BE and fr-CH device, which must read the Canadian French.
+APP_DIR="$ARCHIVE_PATH/Products/Applications/DistrictAI.app"
+case "${DISTRICT_FRENCH:-}" in
+  YES | yes | true | TRUE | 1) FRENCH_ON=1 ;;
+  *) FRENCH_ON=0 ;;
+esac
+FRENCH_REFUSAL=""
+if [ -e "$APP_DIR/fr.lproj" ]; then
+  FRENCH_REFUSAL="the archived app holds fr.lproj, which is never shipped (fr-CA.lproj is the only French)."
+elif [ "$FRENCH_ON" = "0" ] && [ -e "$APP_DIR/fr-CA.lproj" ]; then
+  FRENCH_REFUSAL="the archived app holds fr-CA.lproj, but DISTRICT_FRENCH is not set, so French is off."
+fi
+if [ -n "$FRENCH_REFUSAL" ]; then
+  rm -rf "$ARCHIVE_PATH"
+  echo "FATAL - $FRENCH_REFUSAL" >&2
+  echo "The archive has been DELETED. Nothing was exported or uploaded." >&2
+  exit 1
+fi
+if [ "$FRENCH_ON" = "1" ]; then
+  echo "French ok - DISTRICT_FRENCH is on"
+else
+  echo "French ok - no French localization in the archived app"
+fi
+
 # ── Debug symbols to Sentry ──────────────────────────────────────────────────
 # ⛔ AFTER THE ARCHIVE AND BEFORE THE EXPORT, so a scratch build (UPLOAD=0)
 # uploads its symbols too. A signed scratch build on a device is where the first
