@@ -39,6 +39,10 @@ built from history before publication, so they have no tags in this repository.
 
 ### Changed
 
+- Two CalDAV sentences lose their em dash, the one deliberate change to English in 3.0's
+  catalog work: "The server address must start with https://, because an app password sent
+  over http:// travels in the clear." and "Finish in the browser, then come back: this page
+  re-reads itself." The same change is in district-macos.
 - Every sentence the `*Copy` enums say comes from one catalog, `l10n/ios.toml` (1,281
   entries), with English and room for Canadian French side by side. `scripts/gen-l10n.py`
   writes `App/Sources/L10n/Generated/Copy.swift` from it with the vendored tools in

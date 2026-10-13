@@ -8517,7 +8517,7 @@ screen = "scheduling.writes.calendar"
 id = { swift = "SchedulingWriteCopyC.caldavServerUrlNotAUrl" }
 
 [scheduling_write_c.caldav_server_url_not_https]
-en = "The server address must start with https:// — an app password sent over http:// travels in the clear."
+en = "The server address must start with https://, because an app password sent over http:// travels in the clear."
 ctx = "body"
 screen = "scheduling.writes.calendar"
 id = { swift = "SchedulingWriteCopyC.caldavServerUrlNotHttps" }
@@ -8608,7 +8608,7 @@ screen = "scheduling.writes.developer"
 id = { swift = "SchedulingWriteCopyC.cancel" }
 
 [scheduling_write_c.connect_hand_off_note]
-en = "Finish in the browser, then come back — this page re-reads itself."
+en = "Finish in the browser, then come back: this page re-reads itself."
 ctx = "body"
 screen = "scheduling.writes.calendar"
 id = { swift = "SchedulingWriteCopyC.connectHandOffNote" }

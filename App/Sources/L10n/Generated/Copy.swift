@@ -4211,7 +4211,7 @@ extension SchedulingWriteCopyC {
     internal static var caldavServerUrlNotAUrl: String { AppL10n.copyLocale == .frCA ? "That does not look like a server address. It should start with https://" : "That does not look like a server address. It should start with https://" }
 
     /// `scheduling_write_c.caldav_server_url_not_https`
-    internal static var caldavServerUrlNotHttps: String { AppL10n.copyLocale == .frCA ? "The server address must start with https:// — an app password sent over http:// travels in the clear." : "The server address must start with https:// — an app password sent over http:// travels in the clear." }
+    internal static var caldavServerUrlNotHttps: String { AppL10n.copyLocale == .frCA ? "The server address must start with https://, because an app password sent over http:// travels in the clear." : "The server address must start with https://, because an app password sent over http:// travels in the clear." }
 
     /// `scheduling_write_c.caldav_title`
     internal static var caldavTitle: String { AppL10n.copyLocale == .frCA ? "Connect a CalDAV calendar" : "Connect a CalDAV calendar" }
@@ -4258,7 +4258,7 @@ extension SchedulingWriteCopyC {
     internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
 
     /// `scheduling_write_c.connect_hand_off_note`
-    internal static var connectHandOffNote: String { AppL10n.copyLocale == .frCA ? "Finish in the browser, then come back — this page re-reads itself." : "Finish in the browser, then come back — this page re-reads itself." }
+    internal static var connectHandOffNote: String { AppL10n.copyLocale == .frCA ? "Finish in the browser, then come back: this page re-reads itself." : "Finish in the browser, then come back: this page re-reads itself." }
 
     /// `scheduling_write_c.connect_not_configured`
     internal static var connectNotConfigured: String { AppL10n.copyLocale == .frCA ? "Calendar connections are not set up on this scheduler yet." : "Calendar connections are not set up on this scheduler yet." }
