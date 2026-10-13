@@ -302,9 +302,11 @@ struct OverviewView: View {
             // ``ShellView``, exactly as the activity rows above are.
             NavigationLink(value: route) { entryLabel(entry) }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(A11yID.Overview.row(entry.key))
         case let .tab(tab):
             Button(action: { onSelectTab(tab) }, label: { entryLabel(entry) })
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(A11yID.Overview.row(entry.key))
         }
     }
 

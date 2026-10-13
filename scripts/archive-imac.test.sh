@@ -32,7 +32,7 @@ set -uo pipefail
 # just run a real archive has SENTRY_AUTH_TOKEN exported in that shell, and it
 # would make the "token unset" case take the upload branch and still pass.
 for _leaked in $(env 2>/dev/null | sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' |
-  grep -E '^(ASC_|ALLOW_|SENTRY_|BUILD_DIR$|BUILD_NUMBER_OFFSET$|UPLOAD$|STUB_)'); do
+  grep -E '^(ASC_|ALLOW_|SENTRY_|BUILD_DIR$|BUILD_NUMBER_OFFSET$|UPLOAD$|STUB_|DISTRICT_FRENCH$)'); do
   unset "$_leaked"
 done
 
@@ -219,6 +219,11 @@ if [ "$PHASE" = archive ]; then
   else
     printf 'stub release binary\n' >"$app/DistrictAI"
   fi
+  # The localizations the bundle would hold: STUB_ARCHIVE_LPROJ is a space-separated
+  # list of .lproj names (fr-CA.lproj, fr.lproj) for the French guard.
+  for lproj in ${STUB_ARCHIVE_LPROJ:-}; do
+    mkdir -p "$app/$lproj"
+  done
 fi
 exit 0
 STUB
@@ -525,6 +530,43 @@ assert_nonzero "$RC" "an archive with no app binary fails the script"
 assert_contains "$OUT" "no app binary at" "the message says what is missing"
 assert_not_contains "$OUT" "IOS-SEC-01 ok" "the seam check does not report a clean binary"
 assert_not_contains "$(calls)" "-exportArchive" "nothing is exported without a binary"
+
+# ── 13b. French stays out until it is switched on ────────────────────────────
+# ⛔ SEEN TO FIRE, AND SEEN TO STAND ASIDE. An English release with a French table is
+# refused and deleted; the same bundle with DISTRICT_FRENCH on goes through; fr.lproj
+# is refused either way.
+echo "13b. refuses fr-CA.lproj while French is off, and fr.lproj always"
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj fr-CA.lproj"
+assert_nonzero "$RC" "fr-CA.lproj without DISTRICT_FRENCH fails the script"
+assert_contains "$OUT" "holds fr-CA.lproj, but DISTRICT_FRENCH is not set" "the message names the table and the switch"
+assert_contains "$OUT" "has been DELETED" "the message says the archive is gone"
+if [ -e "$STUB_DIR/out/DistrictAI.xcarchive" ]; then
+  fail "the archive is deleted"
+else
+  ok "the archive is deleted"
+fi
+assert_not_contains "$(calls)" "-exportArchive" "nothing is exported"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj fr-CA.lproj" DISTRICT_FRENCH=YES
+assert_zero "$RC" "fr-CA.lproj with DISTRICT_FRENCH=YES is accepted"
+assert_contains "$OUT" "French ok - DISTRICT_FRENCH is on" "the guard says French is on"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj fr-CA.lproj fr.lproj" DISTRICT_FRENCH=YES
+assert_nonzero "$RC" "fr.lproj fails the script even with French on"
+assert_contains "$OUT" "holds fr.lproj" "the message names fr.lproj"
+assert_not_contains "$(calls)" "-exportArchive" "nothing is exported with fr.lproj"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj"
+assert_zero "$RC" "an English-only bundle is accepted"
+assert_contains "$OUT" "French ok - no French localization" "the guard reports an English-only bundle"
 
 # ── 14. The default build directory ──────────────────────────────────────────
 # ⛔ RUN FROM A COPY OF THE SCRIPT IN A THROWAWAY TREE, because the default is

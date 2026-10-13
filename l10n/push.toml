@@ -1,0 +1,53 @@
+[meta]
+catalog = "push"
+platform = "swift"
+apple = true
+
+[push.call_body]
+en = "Someone is calling your District line."
+ctx = "notification"
+screen = "push"
+tier = "T0"
+id = { apple = "push.call.body" }
+note = "Read off a locked phone, so it names nobody: the push carries ids only. The server sends the KEY (loc-key) and iOS draws the text from Localizable.strings without waking the app."
+
+[push.call_title]
+en = "Incoming call"
+ctx = "notification"
+screen = "push"
+tier = "T0"
+id = { apple = "push.call.title" }
+note = "Lock-screen title (title-loc-key) of an incoming call push. Names nobody."
+
+[push.generic_body]
+en = "You have a new notification."
+ctx = "notification"
+screen = "push"
+tier = "T0"
+id = { apple = "push.generic.body" }
+note = "The server's fallback for a push type the app has not been taught. Nothing sends it today, but a missing key would show the key itself on the lock screen."
+
+[push.generic_title]
+en = "District AI"
+ctx = "notification"
+screen = "push"
+tier = "T0"
+fixed = true
+id = { apple = "push.generic.title" }
+note = "The app's name, as the generic push's title."
+
+[push.message_body]
+en = "A new message arrived in your inbox."
+ctx = "notification"
+screen = "push"
+tier = "T0"
+id = { apple = "push.message.body" }
+note = "Read off a locked phone, so it names nobody: no sender, no body. Detail belongs behind the tap."
+
+[push.message_title]
+en = "New message"
+ctx = "notification"
+screen = "push"
+tier = "T0"
+id = { apple = "push.message.title" }
+note = "Lock-screen title (title-loc-key) of a new message push."

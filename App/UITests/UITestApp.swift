@@ -268,25 +268,27 @@ enum ShellSection: CaseIterable {
         }
     }
 
-    /// The title of the Overview row that opens a hub section on compact width.
+    /// The identifier of the Overview row that opens a hub section on compact width.
     ///
-    /// ⚠️ HQ'S ROW IS A CALL TO ACTION, NOT THE SCREEN'S NAME: the Overview says "Open District
-    /// HQ" where the sidebar says "District HQ".
-    var overviewRowTitle: String? {
-        switch self {
-        case .hq: "Open District HQ"
-        case .analytics: "Analytics"
-        case .marketplace: "Phone numbers"
-        case .billing: "Billing"
-        case .rooms: "Rooms"
-        case .workflows: "Workflows"
-        case .desk: "Desk"
-        case .dialer: "Dial"
-        case .scheduling: "Scheduling"
-        case .support: "Support"
-        case .settings: "Workspace settings"
+    /// ⛔ BY IDENTIFIER, NOT BY TITLE: the titles come from the catalog and are French on a
+    /// French device, and HQ's row title is a call to action ("Open District HQ") rather
+    /// than the screen's name. The keys are ``OverviewEntry/key``'s.
+    var overviewRowID: String? {
+        let key: String? = switch self {
+        case .hq: "hq"
+        case .analytics: "analytics"
+        case .marketplace: "marketplace"
+        case .billing: "billing"
+        case .rooms: "rooms"
+        case .workflows: "workflows"
+        case .desk: "desk"
+        case .dialer: "dialer"
+        case .scheduling: "scheduling"
+        case .support: "support"
+        case .settings: "settings"
         case .overview, .inbox, .calls, .contacts, .account: nil
         }
+        return key.map(A11yID.Overview.row)
     }
 
     /// The identifier on this section's sidebar row, on regular width.
@@ -379,11 +381,11 @@ enum ShellNavigator {
         if let label = section.tabLabel {
             return tapTab(app, label, timeout: timeout)
         }
-        guard let title = section.overviewRowTitle, tapTab(app, A11yID.NavLabel.overview, timeout: timeout) else {
+        guard let rowID = section.overviewRowID, tapTab(app, A11yID.NavLabel.overview, timeout: timeout) else {
             return false
         }
         popToOverview(app)
-        let row = overviewRow(app, title)
+        let row = app.buttons[rowID].firstMatch
         guard row.waitForExistence(timeout: timeout) else { return false }
         bringIntoView(row) { app.swipeUp() }
         row.tap()
@@ -426,14 +428,6 @@ enum ShellNavigator {
             back.tap()
             presses += 1
         }
-    }
-
-    /// ⚠️ THE EXACT TITLE, OR THE TITLE FOLLOWED BY THE ROW'S CAPTION ("Billing, Read-only").
-    /// A bare prefix would also match a recent-activity row whose caller's name happens to
-    /// start with the same word.
-    private static func overviewRow(_ app: XCUIApplication, _ title: String) -> XCUIElement {
-        let titled = NSPredicate(format: "label == %@ OR label BEGINSWITH %@", title, title + ",")
-        return app.buttons.matching(titled).firstMatch
     }
 
     // MARK: - Regular width

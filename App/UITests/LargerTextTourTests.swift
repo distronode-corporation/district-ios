@@ -162,13 +162,13 @@ final class LargerTextTourTests: XCTestCase {
     /// A hub section: an Overview row pushed and popped on compact width, a sidebar row
     /// on regular width.
     private func hub(_ section: ShellSection, as name: String) {
-        guard ShellNavigator.isCompact(app), let title = section.overviewRowTitle else {
+        guard ShellNavigator.isCompact(app), let rowID = section.overviewRowID else {
             show(section)
             capture(name)
             return
         }
         show(.overview)
-        push(label: title, as: name)
+        push(label: rowID, as: name)
     }
 
     /// Push a labelled row from the current list, photograph it, come back.

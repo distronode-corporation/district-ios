@@ -139,6 +139,7 @@ struct ThreadModerationModifier: ViewModifier {
                 titleVisibility: .visible
             ) {
                 Button(ContactBlockCopy.confirmBlock, role: .destructive) { block() }
+                    .accessibilityIdentifier(A11yID.Contacts.confirmBlock)
                 Button(ContactBlockCopy.cancel, role: .cancel) {}
             }
             .sheet(isPresented: $reporting) {

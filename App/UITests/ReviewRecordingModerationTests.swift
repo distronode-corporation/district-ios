@@ -206,7 +206,7 @@ final class ReviewRecordingModerationTests: ReviewRecordingCase {
             "report confirmation"
         )
         pause(5)
-        app.buttons["Done"].tap()
+        any(A11yID.Report.done).tap()
         pause(2)
     }
 
@@ -234,7 +234,7 @@ final class ReviewRecordingModerationTests: ReviewRecordingCase {
         pause(2)
         any(A11yID.Inbox.threadBlock).tap()
         pause(3)
-        app.buttons["Block"].tap()
+        app.buttons[A11yID.Contacts.confirmBlock].firstMatch.tap()
 
         XCTAssertTrue(any(A11yID.Inbox.root).waitForExistence(timeout: 30), "back on the inbox list")
         pause(2)
@@ -291,7 +291,7 @@ final class ReviewRecordingModerationTests: ReviewRecordingCase {
         XCTAssertTrue(block.waitForExistence(timeout: 15), "Block caller")
         block.tap()
         pause(3)
-        app.buttons["Block"].tap()
+        app.buttons[A11yID.Contacts.confirmBlock].firstMatch.tap()
         XCTAssertTrue(any(A11yID.Contacts.blockedBadge).waitForExistence(timeout: 30), "Blocked badge on the detail")
         pause(5)
 
@@ -316,7 +316,7 @@ final class ReviewRecordingModerationTests: ReviewRecordingCase {
         XCTAssertTrue(unblock.waitForExistence(timeout: 15), "Unblock caller")
         unblock.tap()
         pause(3)
-        app.buttons["Unblock"].tap()
+        app.buttons[A11yID.Contacts.confirmUnblock].firstMatch.tap()
         pause(4)
         // ⛔ THE RESTORE IS VERIFIED. A walk that tapped Unblock and did not check
         // would leave the demo workspace showing an empty Inbox to the next reviewer.

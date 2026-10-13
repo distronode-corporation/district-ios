@@ -61,6 +61,11 @@ extension A11yID.Contacts {
     /// expects. One name plus a label assertion would pass on the wrong direction.
     static let block = "district-contact-block"
     static let unblock = "district-contact-unblock"
+    /// The confirmation dialog's own Block and Unblock buttons. ⚠️ Not yet seen on a
+    /// device: if a dialog action drops its identifier, the walk's lookup finds nothing
+    /// and says so, rather than tapping the wrong button.
+    static let confirmBlock = "district-contact-confirm-block"
+    static let confirmUnblock = "district-contact-confirm-unblock"
 }
 
 extension A11yID.Inbox {
@@ -96,5 +101,7 @@ extension A11yID {
         /// being accepted; a submit that dismissed the sheet silently would be
         /// indistinguishable on video from a submit that failed.
         static let confirmation = "district-report-confirmation"
+        /// The Done button under the confirmation.
+        static let done = "district-report-done"
     }
 }

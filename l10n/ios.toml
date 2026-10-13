@@ -4355,6 +4355,41 @@ ctx = "title"
 screen = "navigation"
 id = { swift = "NavigationCopy.subscriptionNotActive" }
 
+[navigation.tab_account]
+en = "Account"
+ctx = "label"
+screen = "navigation"
+id = { swift = "NavigationCopy.tabAccount" }
+note = "A tab bar button. Short: five share the iPhone's width."
+
+[navigation.tab_calls]
+en = "Calls"
+ctx = "label"
+screen = "navigation"
+id = { swift = "NavigationCopy.tabCalls" }
+note = "A tab bar button. Short: five share the iPhone's width."
+
+[navigation.tab_contacts]
+en = "Contacts"
+ctx = "label"
+screen = "navigation"
+id = { swift = "NavigationCopy.tabContacts" }
+note = "A tab bar button. Short: five share the iPhone's width."
+
+[navigation.tab_inbox]
+en = "Inbox"
+ctx = "label"
+screen = "navigation"
+id = { swift = "NavigationCopy.tabInbox" }
+note = "A tab bar button. Short: five share the iPhone's width."
+
+[navigation.tab_overview]
+en = "Overview"
+ctx = "label"
+screen = "navigation"
+id = { swift = "NavigationCopy.tabOverview" }
+note = "A tab bar button. Short: five share the iPhone's width. Never « Tableau de bord » on Apple: Overview is « Aperçu »."
+
 [overview.analytics]
 en = "Analytics"
 ctx = "label"

@@ -318,6 +318,28 @@ jobs:
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild.log | xcbeautify --renderer github-actions
           grep -q '\*\* TEST BUILD SUCCEEDED \*\*' xcodebuild.log
 
+      # ⛔ WHERE THE STRING TABLES LAND IS THE WHOLE POINT OF THEM. iOS reads push titles
+      # and permission prompts from the bundle's .lproj tables; a Localizable.strings at
+      # the bundle ROOT shadows every .lproj (so French pushes would stay English), and a
+      # French table in a build without DISTRICT_FRENCH would ship French nobody switched
+      # on. The release archive refuses the second as well (scripts/archive-imac.sh).
+      - name: The bundle's string tables
+        run: |
+          set -euo pipefail
+          APP=DerivedData/Build/Products/Debug-iphonesimulator/DistrictAI.app
+          for table in Localizable InfoPlist; do
+            test -f "$APP/en.lproj/$table.strings" || { echo "::error::no en.lproj/$table.strings in the app"; exit 1; }
+            if [ -e "$APP/$table.strings" ]; then
+              echo "::error::$table.strings at the bundle root shadows every .lproj"
+              exit 1
+            fi
+          done
+          if compgen -G "$APP/fr*.lproj" >/dev/null; then
+            echo "::error::a French .lproj in a build without DISTRICT_FRENCH"
+            exit 1
+          fi
+          echo "en.lproj holds both tables; no root table and no French"
+
       - name: DistrictAITests
         run: |
           set -o pipefail

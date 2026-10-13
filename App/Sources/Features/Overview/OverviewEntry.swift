@@ -29,6 +29,9 @@ enum OverviewEntryTarget {
 /// promotes the `file_length` WARNING at 500 lines to an error, and that file passes it
 /// with these two types in it. Nothing outside the Overview feature uses them.
 struct OverviewEntry: Identifiable {
+    /// A stable name for the row, the same in every language: its identity and its
+    /// accessibility identifier (``A11yID/Overview/row(_:)``).
+    let key: String
     let title: String
     let target: OverviewEntryTarget
     let gate: RouteGate
@@ -36,7 +39,7 @@ struct OverviewEntry: Identifiable {
     /// ⚠️ Every title below is a distinct compile-time constant, so a separate id
     /// would be a second value that can only drift from this one.
     var id: String {
-        title
+        key
     }
 
     /// ⚠️ THE `.partial` CAPTION, WHICH ANDROID DOES NOT DRAW. It offers a viewer the
@@ -77,15 +80,15 @@ extension OverviewEntry {
     /// the row carries the "Read-only" caption below, which is the honest summary. ⛔ It
     /// is still not `.hidden`: every read on all nine sections is `viewer`-level, so a viewer can fill every screen.
     static func all(workspaceId: String, role: WorkspaceRole?) -> [OverviewEntry] {
-        let targets: [(String, OverviewEntryTarget)] = [
-            (OverviewCopy.callLogs, .tab(.calls)),
-            (OverviewCopy.contacts, .tab(.contacts)),
-            (OverviewCopy.openDistrictHq, .route(.hq(workspaceId: workspaceId, role: role))),
-            (OverviewCopy.analytics, .route(.analytics(workspaceId: workspaceId))),
-            (OverviewCopy.phoneNumbers, .route(.marketplace(workspaceId: workspaceId, role: role))),
-            (OverviewCopy.billing, .route(.billing(workspaceId: workspaceId, role: role))),
-            (OverviewCopy.rooms, .route(.rooms(workspaceId: workspaceId, role: role))),
-            (OverviewCopy.workflows, .route(.workflows(workspaceId: workspaceId, role: role))),
+        let targets: [Row] = [
+            Row("calls", OverviewCopy.callLogs, .tab(.calls)),
+            Row("contacts", OverviewCopy.contacts, .tab(.contacts)),
+            Row("hq", OverviewCopy.openDistrictHq, .route(.hq(workspaceId: workspaceId, role: role))),
+            Row("analytics", OverviewCopy.analytics, .route(.analytics(workspaceId: workspaceId))),
+            Row("marketplace", OverviewCopy.phoneNumbers, .route(.marketplace(workspaceId: workspaceId, role: role))),
+            Row("billing", OverviewCopy.billing, .route(.billing(workspaceId: workspaceId, role: role))),
+            Row("rooms", OverviewCopy.rooms, .route(.rooms(workspaceId: workspaceId, role: role))),
+            Row("workflows", OverviewCopy.workflows, .route(.workflows(workspaceId: workspaceId, role: role))),
             // ⛔ "Desk", NEVER "Tickets" AND NEVER "Inbox". This is the tenant's OWN
             // customers' queue; raising something with Distronode is a different
             // surface, and Operate → Inbox is a third. The web console keeps the same
@@ -98,17 +101,21 @@ extension OverviewEntry {
             // one rather than captioned read-only. That is not the usual call on this
             // list and it is the server's: every route behind the screen excludes
             // `viewer`, the reads included.
-            (OverviewCopy.desk, .route(.desk(workspaceId: workspaceId, role: role))),
+            Row("desk", OverviewCopy.desk, .route(.desk(workspaceId: workspaceId, role: role))),
             // ⛔ THE KEYPAD, AND NOTHING THAT DIALS. `Route.dialer` is one destination
             // for both the keypad and the live call precisely so a restored back stack
             // cannot redial; a shortcut that placed a call from here would hand that
             // property straight back. Same for Rooms above it.
-            (OverviewCopy.dial, .route(.dialer(workspaceId: workspaceId, role: role))),
+            Row("dialer", OverviewCopy.dial, .route(.dialer(workspaceId: workspaceId, role: role))),
             // ⚠️ THE ROW OPENS THE HUB, NOT A SECTION. The hub is where the tenancy card
             // and Enable live, and a workspace with no booking page has nothing to show
             // in any of the nine sections — so landing anywhere else would be a screen
             // whose every read answers `scheduling_not_ready`.
-            (OverviewCopy.scheduling, .route(.scheduling(workspaceId: workspaceId, role: role, section: .hub))),
+            Row(
+                "scheduling",
+                OverviewCopy.scheduling,
+                .route(.scheduling(workspaceId: workspaceId, role: role, section: .hub))
+            ),
             // ⛔ "Support" IS HELP **FROM DISTRONODE** AND MUST NOT BE RENAMED TO
             // ANYTHING THAT COULD ALSO DESCRIBE THE TENANT'S OWN DESK. The web
             // sidebar carries the same instruction beside its two entries: both
@@ -120,18 +127,32 @@ extension OverviewEntry {
             // operating tool. ⛔ Its gate resolves to `.hidden` for a viewer, so this
             // row simply does not appear for one — every route behind it excludes
             // them, the reads included.
-            (OverviewCopy.support, .route(.support(workspaceId: workspaceId, role: role))),
-            (
+            Row("support", OverviewCopy.support, .route(.support(workspaceId: workspaceId, role: role))),
+            Row(
+                "settings",
                 OverviewCopy.workspaceSettings,
                 .route(.workspaceSettings(workspaceId: workspaceId, role: role, section: .hub))
             ),
         ]
-        return targets.compactMap { title, target in
-            let gate = target.gate(role: role)
+        return targets.compactMap { row in
+            let gate = row.target.gate(role: role)
             if case .hidden = gate {
                 return nil
             }
-            return OverviewEntry(title: title, target: target, gate: gate)
+            return OverviewEntry(key: row.key, title: row.title, target: row.target, gate: gate)
+        }
+    }
+
+    /// One row of ``all(workspaceId:role:)``'s list, before its gate is known.
+    private struct Row {
+        let key: String
+        let title: String
+        let target: OverviewEntryTarget
+
+        init(_ key: String, _ title: String, _ target: OverviewEntryTarget) {
+            self.key = key
+            self.title = title
+            self.target = target
         }
     }
 }
