@@ -24,25 +24,7 @@ import Foundation
 /// this client's copy uses commas, periods or parentheses instead, so the dash is a
 /// comma here. Nothing else about the wording differs.
 enum MarketplaceCopy {
-    static let title = "Phone numbers"
-
-    static let tabOwned = "My numbers"
-
-    static let tabSearch = "Search"
-
     // MARK: - The search form
-
-    static let areaCodeLabel = "Area code"
-
-    static let countryLabel = "Country"
-
-    static let typeLocalLabel = "Local"
-
-    static let typeTollFreeLabel = "Toll-free"
-
-    static let typeMobileLabel = "Mobile"
-
-    static let searchAction = "Search available numbers"
 
     /// ⛔ THE THREE VALUES THE ROUTE ACCEPTS. Anything else is silently ignored
     /// server-side, so a fourth chip here would be a control that changes nothing.
@@ -52,26 +34,7 @@ enum MarketplaceCopy {
 
     static let numberTypeMobile = "mobile"
 
-    /// ⚠️ THE SERVER'S OWN DEFAULT, so an untouched form sends exactly what an
-    /// omitted parameter would.
-    static let defaultCountry = "US"
-
     // MARK: - Results
-
-    /// ⚠️ THE CARRIER THAT ACTUALLY ANSWERED, which need not be the one the operator
-    /// expected: the resolved credentials decide, not the request.
-    static func carrier(_ provider: String) -> String {
-        "Carrier: \(provider)"
-    }
-
-    static func numberMeta(provider: String, status: String) -> String {
-        "\(provider) · \(status)"
-    }
-
-    /// ⛔ NOT COSMETIC. `managed` means the line is held on Distronode's carrier
-    /// account rather than the tenant's, so it is theirs to USE and not to
-    /// administer, which is why no release control is offered for it.
-    static let managed = "Managed by Distronode"
 
     /// ⛔ NAMES THE CARRIER SO "the list may be short" IS ACTIONABLE RATHER THAN
     /// OMINOUS. Shown ABOVE the rows, never instead of them.
@@ -83,60 +46,11 @@ enum MarketplaceCopy {
     /// answer than drawing a short list as a complete one.
     static func partialBanner(_ failedProviders: [String]) -> String {
         guard !failedProviders.isEmpty else {
-            return "A carrier did not answer, so this list may be missing numbers."
+            return partialBannerUnnamed
         }
         let named = failedProviders.joined(separator: ", ")
-        return "Could not reach \(named), so this list may be missing numbers."
+        return partialBannerNamed(named)
     }
-
-    /// ⚠️ REACHABLE ONLY ONCE A SEARCH SUCCEEDED, so it genuinely means the carrier
-    /// has nothing matching. Never "we could not look".
-    static let searchEmptyTitle = "No matches"
-
-    static let searchEmptyBody = "The carrier has no numbers matching these filters. "
-        + "Try a different area code or number type."
-
-    static let ownedEmptyTitle = "No numbers yet"
-
-    static let ownedEmptyBody = "This workspace has no active phone numbers."
-
-    // MARK: - Failures
-
-    /// ⛔ AN ACCOUNT STATE, NOT A FAULT, AND IT OFFERS NO RETRY. The workspace has
-    /// not connected a carrier, which no amount of retrying changes. A red failure
-    /// here would tell an operator their app is broken when the truth is that their
-    /// setup is unfinished.
-    static let notConfiguredTitle = "No carrier connected"
-
-    /// ⚠️ WHAT A BLANK SERVER MESSAGE DEGRADES TO. The route's own sentence is shown
-    /// whenever there is one, because it distinguishes "no provider configured for
-    /// this workspace" from "the provider you named is not connected" and this layer
-    /// cannot.
-    static let notConfiguredFallback = "This workspace has no carrier connected yet. "
-        + "A carrier cannot be connected in this app."
-
-    static let searchFailed = "Could not search for numbers."
-
-    static let ownedFailed = "Could not load this workspace's numbers."
-
-    static let retry = "Try again"
-
-    // MARK: - The read-only boundary
-
-    /// ⛔ ONLY THE PURCHASE IS OUT OF REACH. Releasing and reconfiguring are in the app,
-    /// on their own tab, behind confirmations, and ``purchaseElsewhere`` is the line that
-    /// says the purchase is not.
-    ///
-    /// ⛔ WHAT IT STILL DOES IS MAKE A BOUNDARY LEGIBLE WITHOUT LINKING IT OR NAMING ANY
-    /// DESTINATION. App Store Review Guideline 3.1.1 covers steering as well as the purchase,
-    /// and naming the place in prose IS the steering, so this sentence points inward at the
-    /// other tabs — the same call ``BillingCopy/readOnly`` makes for its own guideline.
-    static let readOnly = "Everything else about your numbers is on the other tabs."
-
-    /// ⚠️ A VIEWER CANNOT MAKE THE CHANGE ANYWHERE ELSE EITHER, so a signpost would be
-    /// useless advice on top of being steering. They are told who can.
-    static let readOnlyViewer = "Changing a number needs an agency or client role. Ask someone "
-        + "on this workspace who has one."
 
     // MARK: - Derived values
 

@@ -13,9 +13,9 @@ enum VoiceStudioCopy {
     /// "Voice" (`district-voice-studio.json`), as the web's District Studio page is called, so
     /// the title before the read lands and the one after it agree. If they ever differ again,
     /// the title changes word mid-load.
-    static let title = SettingsCopy.voiceStudioTitle
-
-    static let saving = "Saving…"
+    static var title: String {
+        SettingsCopy.voiceStudioTitle
+    }
 
     /// A tuning value: two decimals, or none for a whole-number control.
     static func tuningValue(_ value: Double, whole: Bool) -> String {
@@ -23,15 +23,4 @@ enum VoiceStudioCopy {
             ? value.formatted(.number.precision(.fractionLength(0)))
             : value.formatted(.number.precision(.fractionLength(2)))
     }
-
-    static let useDefault = "Use the default"
-    static let selected = "Selected"
-    static let advancedShow = "Show"
-    static let advancedHide = "Hide"
-
-    /// ⚠️ THE TWO REFUSALS' FALLBACKS, for a refusal that carried no sentence of its own. The
-    /// server's own sentence is preferred: it is the one the web shows.
-    static let invalidEngineMix = "That voice chain cannot be saved: a model, voice or location in it "
-        + "is not available for this workspace and language."
-    static let modelUnavailableInRegion = "That model is not available for workspaces in this region."
 }

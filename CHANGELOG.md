@@ -29,6 +29,17 @@ built from history before publication, so they have no tags in this repository.
 
 ### Changed
 
+- Every sentence the `*Copy` enums say comes from one catalog, `l10n/ios.toml` (1,281
+  entries), with English and room for Canadian French side by side. `scripts/gen-l10n.py`
+  writes `App/Sources/L10n/Generated/Copy.swift` from it with the vendored tools in
+  `tools/l10n/`, as extensions of the hand-written enums, so every call site reads as
+  before; the enums keep only their logic, which builds its text from catalog entries. CI's
+  `l10n` job fails on a stale generated file or a broken catalog rule, and
+  `StoreCopyTests` scans the catalog as well as the sources. English is unchanged and
+  nothing is French: `AppL10n` keeps the language English until a build ships French.
+- DistrictCore 7.0.0-beta.1: the core's sentences come from its catalogs, every request
+  sends `Accept-Language` (`en`), and errors are shown through `ApiError.localizedMessage`
+  (the same sentence in English).
 - DistrictCore 6.0.0: 4.0.0 resolves District Studio links, 5.0.0 adds the live
   transcript's models, ops and reducer, and 6.0.0 adds `CodeExchangeResult.mfaRequired` and
   `POST /api/auth/native/mfa`, the authenticator code step after Sign in with Apple.

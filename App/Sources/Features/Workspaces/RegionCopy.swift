@@ -9,10 +9,10 @@ enum RegionCopy {
     /// strength of a typo.
     static func label(_ region: String) -> String {
         switch region {
-        case "us": "US"
-        case "ca": "Canada"
-        case "eu": "Europe"
-        case "apac": "APAC"
+        case "us": us
+        case "ca": ca
+        case "eu": eu
+        case "apac": apac
         default: region.uppercased()
         }
     }

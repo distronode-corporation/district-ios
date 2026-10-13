@@ -462,7 +462,7 @@ final class MessagingModel {
     /// yours". ⚠️ Retryable, deliberately: the number stays unclaimed, so trying again
     /// shortly is exactly the right thing to do.
     private static func writeFailure(_ error: ApiError) -> FailureText {
-        guard error.httpStatus == 502, let message = error.message, !message.isEmpty else {
+        guard error.httpStatus == 502, let message = error.localizedMessage, !message.isEmpty else {
             return FailureText.from(error)
         }
         return FailureText(message: message, action: .retry)

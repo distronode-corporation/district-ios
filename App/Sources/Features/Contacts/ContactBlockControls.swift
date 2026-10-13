@@ -15,25 +15,7 @@ import SwiftUI
 /// threads and calls from these screens and stops the conversations route returning
 /// them; it does not stop a phone ringing at a carrier. Wording it as "they can no
 /// longer contact you" would be a promise the service does not keep.
-enum ContactBlockCopy {
-    static let block = "Block caller"
-    static let unblock = "Unblock caller"
-    static let badge = "Blocked"
-
-    static let blockPrompt =
-        "Block this caller? Their conversations and calls stop appearing in this workspace. "
-            + "You can unblock them here at any time."
-
-    static let unblockPrompt =
-        "Unblock this caller? Their conversations and calls start appearing in this workspace again."
-
-    /// ⚠️ THE BUTTON INSIDE THE DIALOG, WHICH IS NOT THE SAME STRING AS THE CONTROL
-    /// THAT OPENED IT. "Block caller" on both would read as a dialog that had not
-    /// registered the first tap.
-    static let confirmBlock = "Block"
-    static let confirmUnblock = "Unblock"
-    static let cancel = "Cancel"
-}
+enum ContactBlockCopy {}
 
 /// The "Blocked" badge.
 ///

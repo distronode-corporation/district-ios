@@ -135,6 +135,30 @@ jobs:
           bash scripts/github-release.test.sh
           python3 scripts/asc_release_test.py
 
+  # ⛔ THE APP'S STRINGS ARE GENERATED, AND THIS IS WHAT KEEPS THE GENERATED FILE HONEST.
+  # Every sentence the `*Copy` enums say lives in l10n/ios.toml; App/Sources/L10n/Generated
+  # is written from it by scripts/gen-l10n.py. Python and seconds, so its own ubuntu job
+  # (the swift image in `verify` has no Python): the vendored tools are the bytes their
+  # SHA256SUMS records, the catalog is canonical and keeps every catalog rule, and the
+  # committed Swift is exactly what the catalog produces.
+  l10n:
+    name: l10n catalog
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: The vendored l10n tools are unmodified
+        run: python3 tools/l10n/l10n.py vendor --check --dest tools/l10n
+
+      - name: The catalog is valid and the generated Swift is current
+        run: python3 scripts/gen-l10n.py --check
+
   gitleaks:
     name: gitleaks
     runs-on: ubuntu-24.04

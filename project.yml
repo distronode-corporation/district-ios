@@ -68,14 +68,14 @@ packages:
   # package's five libraries, unchanged by the move.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    exactVersion: 6.0.0
+    exactVersion: 7.0.0-beta.1
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
   # day the cache misses. A root-level package reference is a constraint on the
   # whole graph, and XcodeGen writes one for every package listed here whether or
   # not a target links it (checked in a generated pbxproj with XcodeGen 2.46.0).
-  # 1.7.3 is the version district-core-swift 6.0.0's own Package.resolved records,
+  # 1.7.3 is the version district-core-swift 7.0.0-beta.1's own Package.resolved records,
   # so the app and the package's tests run the same code. Bump it with the core.
   # ⚠️ The `.git` URL matches the spelling swift-crypto's manifest uses, so Xcode
   # sees one location for the identity rather than two.
@@ -149,9 +149,11 @@ targets:
       - path: App/PrivacyInfo.xcprivacy
         buildPhase: resources
     dependencies:
-      # Six products, listed explicitly. ⚠️ `- package: DistrictCore` alone
-      # would link a product NAMED DistrictCore, which does not exist — the
-      # package publishes six libraries and no umbrella.
+      # Seven products, listed explicitly. ⚠️ `- package: DistrictCore` alone
+      # would link a product NAMED DistrictCore, which does not exist: the
+      # package publishes seven libraries and no umbrella.
+      # ⚠️ `DistrictL10n` IS THE LANGUAGE the core and the app's generated Copy
+      # accessors write in (`App/Sources/L10n/`).
       # ⚠️ `DistrictCall` IS IMPORTED BY `App/Sources/Platform/`.
       # ⚠️ `DistrictLive` IS THE TELEMETRY SOCKET, for the live transcript on a call's
       # screen (`App/Sources/Platform/Live/`). The Mac's ringing and presence live in the
@@ -164,6 +166,7 @@ targets:
           - DistrictData
           - DistrictCall
           - DistrictLive
+          - DistrictL10n
       # ⚠️ `product:` (SINGULAR) IS STATED RATHER THAN LEFT TO THE DEFAULT. The
       # default links the product whose name matches the PACKAGE name, which
       # here happens to be right — and would stop being right the day somebody

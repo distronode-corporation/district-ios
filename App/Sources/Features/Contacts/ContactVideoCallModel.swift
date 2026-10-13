@@ -177,7 +177,7 @@ final class ContactVideoCallModel {
             // customer, and the room still exists, so the operator can join it and share
             // the link another way. Offering "try again" would invite a second charge and a
             // duplicate message.
-            phase = .failed(FailureText(message: error.message ?? ContactVideoCopy.sendFailed, action: .none))
+            phase = .failed(FailureText(message: error.localizedMessage ?? ContactVideoCopy.sendFailed, action: .none))
         }
     }
 
@@ -201,36 +201,4 @@ final class ContactVideoCallModel {
 }
 
 /// Every sentence the video-call action says.
-enum ContactVideoCopy {
-    static let action = "Video call"
-
-    static let starting = "Setting up…"
-
-    /// ⛔ THE MESSAGE SAYS WHAT THE LINK IS AND THAT IT EXPIRES. A bare URL from an unknown
-    /// number reads as spam, and the invite really is time-limited — twelve hours,
-    /// server-minted — so a recipient who opens it tomorrow needs to know why it refused
-    /// them rather than concluding the product is broken.
-    static func invitation(link: String) -> String {
-        "Join me on a video call: \(link) (the link works for the next 12 hours)"
-    }
-
-    /// ⚠️ A REAL SUBJECT, BECAUSE THE SERVER SUBSTITUTES "Message from District" WHEN A
-    /// CLIENT SENDS NONE — and the customer's mail client threads on it, so every reply the
-    /// workspace ever sent would collapse into one conversation. See ``ReplySubject``.
-    static let emailSubject = "Video call invitation"
-
-    /// ⛔ NOT A FAILURE OF ANYTHING. The contact has neither a phone number nor an email
-    /// address, which is legal, so there is nowhere to send an invitation.
-    static let noAddress = "This contact has no phone number or email address, so there is nowhere to "
-        + "send a video call link."
-
-    /// ⛔ THE ROOM EXISTS AND THE INVITATION DOES NOT. `calls/token` withholds the guest
-    /// invite from a read-only seat, so this is what a viewer would see if the gate above
-    /// were ever loosened.
-    static let noInvite = "That room was created without a shareable link, so the contact cannot be "
-        + "invited to it."
-
-    static let couldNotStart = "Could not start a video call for this workspace."
-
-    static let sendFailed = "The room is ready but the invitation could not be sent."
-}
+enum ContactVideoCopy {}

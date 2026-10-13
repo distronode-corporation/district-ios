@@ -54,6 +54,10 @@ struct DistrictApp: App {
         // `Info.plist` read on the simulator and in CI.
         DistrictSentry.startIfConfigured()
 
+        // Before the container, so nothing it builds reads a string in the default
+        // language before the device's is known. English until the build ships French.
+        AppL10n.bootstrap()
+
         let container = AppContainer()
         self.container = container
         push = PushRegistrar(container: container)

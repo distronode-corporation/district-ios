@@ -26,71 +26,15 @@ struct SchedulingBadge {
 /// workspace is not on the allowlist, which is the same fact ``notEligible``
 /// states, and two copies of that sentence is two copies that drift.
 enum SchedulingCopy {
-    static let notEligible = "Scheduling is not enabled for this workspace."
-
-    static let switchedOff = "Scheduling is turned off for this workspace."
-
-    static let legacy = "Scheduling is available for this workspace. "
-        + "Turn it on to give customers a booking page of their own."
-
-    static let provisioning = "Your booking page is being set up. This usually takes under a minute, "
-        + "and it is re-checked automatically every hour if anything stalls."
-
-    static let live = "Your booking page is live."
-
-    static let failedProvision = "Setup did not finish."
-
-    /// ⛔ THE ONE READY-STATE SENTENCE THAT IS NOT A FAILURE AND NOT A LINK. The
-    /// row says `ready` and the server sent no `bookingUrl`, which is contract
-    /// drift rather than an outage, so it says what it can and offers no address.
-    static let liveWithoutLink = "This workspace has a booking page, but the server did not send its address."
-
-    static let enable = "Enable scheduling"
-
-    static let enabling = "Setting up…"
-
-    static let refresh = "Refresh"
-
-    /// ⛔ "Open in browser" RATHER THAN "Manage scheduling". This button is not how you
-    /// manage scheduling (the eight sections are), it is how you reach what is not native
-    /// YET. The label says exactly that, and ``sectionsFootnote`` says it in a sentence
-    /// underneath.
-    static let openInBrowser = "Open in browser"
-
-    static let opening = "Opening…"
-
-    static let copyLink = "Copy link"
-
-    static let copied = "Link copied"
-
-    static let tooManyAttempts = "Too many attempts, try again in an hour."
-
-    static let notReadyYet = "Scheduling is not ready yet. Turn it on, or wait for setup to finish."
-
-    /// ⚠️ THE SERVER'S OWN `nonce_required` SENTENCE, used only when that 400 arrives
-    /// without one. The server's words win whenever it sends them.
-    static let updateToOpenWebsite = "Update the app to open the website from it."
-
-    /// `invalid_nonce`: the hand-off was refused and pressing again starts a new one.
-    static let handOffFailed = "The website could not be opened. Try again."
-
-    /// ⚠️ USED ONLY WHEN A 202 CARRIED `ok: false` AND NO SENTENCE. The server's
-    /// own `error` is the product whenever it sends one.
-    static let enableFailedFallback = "Setting up scheduling did not finish, and no reason was recorded."
-
-    static func hostLine(_ host: String) -> String {
-        "Served from \(host)"
-    }
-
     static func setupFailed(_ reason: String?) -> String {
         guard let reason, !reason.isEmpty else {
-            return "\(failedProvision) No reason was recorded."
+            return setupFailedNoReason
         }
-        return "\(failedProvision) \(reason)"
+        return setupFailedBecause(reason)
     }
 
     static func lastReadyLine(_ stamp: String) -> String {
-        "Last checked \(WireDate.display(stamp))"
+        lastChecked(WireDate.display(stamp))
     }
 }
 
@@ -132,32 +76,21 @@ extension SchedulingPresentation {
 }
 
 extension SchedulingCopy {
-    /// ⚠️ THE EYEBROW OVER THE SECTION LIST. "Manage" rather than "Sections", because the
-    /// list is the point of the screen and its own noun would describe the furniture.
-    static let sectionsEyebrow = "Manage"
-
-    /// ⛔ IT SAYS WHY THERE IS STILL A BUTTON OUT OF THE APP, AND IT MUST NOT NAME THE
-    /// WEBSITE. App Store Review Guideline 3.1.1 covers steering toward an external
-    /// surface as well as the purchase itself, which is also why ``FailureText``'s 402
-    /// sentence names no domain. "In a browser" is a capability, not a destination.
-    static let sectionsFootnote = "These sections are read-only for now. "
-        + "Anything that changes a booking page opens in a browser."
-
     /// One row's title. ⚠️ The web's own section names, so an operator who has used the
     /// dashboard finds the same word here.
     static func sectionTitle(_ section: SchedulingSection) -> String {
         switch section {
-        case .hub: "Scheduling"
-        case .overview: "Overview"
-        case .eventTypes: "Event types"
-        case .eventType: "Event type"
-        case .hours: "Working hours"
-        case .bookings: "Bookings"
-        case .booking: "Booking"
-        case .calendar: "Calendar"
-        case .team: "Team"
-        case .settings: "Settings"
-        case .developer: "Developer"
+        case .hub: sectionTitleHub
+        case .overview: sectionTitleOverview
+        case .eventTypes: sectionTitleEventTypes
+        case .eventType: sectionTitleEventType
+        case .hours: sectionTitleHours
+        case .bookings: sectionTitleBookings
+        case .booking: sectionTitleBooking
+        case .calendar: sectionTitleCalendar
+        case .team: sectionTitleTeam
+        case .settings: sectionTitleSettings
+        case .developer: sectionTitleDeveloper
         }
     }
 
@@ -170,14 +103,14 @@ extension SchedulingCopy {
     static func sectionSubtitle(_ section: SchedulingSection) -> String? {
         switch section {
         case .hub, .eventType, .booking: nil
-        case .overview: "Your booking desk, and what is coming up"
-        case .eventTypes: "The pages a customer can book, and how long each one runs"
-        case .hours: "The weekly hours you are bookable, and the dates you are not"
-        case .bookings: "Every booking in this workspace, upcoming and past"
-        case .calendar: "The accounts bookings are written to and checked against"
-        case .team: "The hosts who can be booked, and the teams they route through"
-        case .settings: "Your booking page, your booking assistant, and how the scheduler treats you"
-        case .developer: "API keys, connected apps and webhooks"
+        case .overview: sectionSubtitleOverview
+        case .eventTypes: sectionSubtitleEventTypes
+        case .hours: sectionSubtitleHours
+        case .bookings: sectionSubtitleBookings
+        case .calendar: sectionSubtitleCalendar
+        case .team: sectionSubtitleTeam
+        case .settings: sectionSubtitleSettings
+        case .developer: sectionSubtitleDeveloper
         }
     }
 }

@@ -11,20 +11,17 @@
 /// Permission granted with a refused registration, and permission denied having
 /// never tried, are indistinguishable from either value alone.
 enum PushStatusCopy {
-    static let title = "Notifications"
-
     static func subtitle(
         authorization: PushAuthorization,
         registration: PushRegistrationStatus
     ) -> String {
         switch authorization {
         case .notAsked:
-            "Not set up on this device yet."
+            notAsked
         case .denied:
-            "Turned off. Allow notifications for District AI in iOS Settings "
-                + "to receive calls and messages."
+            denied
         case .unavailable:
-            "This device could not be asked for permission. Try again, or restart the app."
+            unavailable
         case .authorized:
             authorizedSubtitle(registration)
         }
@@ -36,14 +33,13 @@ enum PushStatusCopy {
     private static func authorizedSubtitle(_ registration: PushRegistrationStatus) -> String {
         switch registration {
         case .notAttempted:
-            "Allowed. Setting up this device."
+            notAttempted
         case .registered:
-            "Allowed. This device is set up to receive calls and messages."
+            registered
         case .apnsRefused:
-            "Allowed, but Apple did not issue a token for this device. "
-                + "Restart the app; if it persists, contact support."
+            apnsRefused
         case .unreachable:
-            "Allowed, but this device could not reach District AI. Check your connection."
+            unreachable
         case let .refused(status):
             refusedSubtitle(status)
         }
@@ -57,12 +53,11 @@ enum PushStatusCopy {
     private static func refusedSubtitle(_ status: Int) -> String {
         switch status {
         case 401, 403:
-            "Allowed, but your session has expired. Sign out and sign in again."
+            sessionExpired
         case 429:
-            "Allowed, but too many attempts were made. This will retry shortly."
+            tooManyAttempts
         default:
-            "Allowed, but District AI refused to set up this device (error \(status)). "
-                + "Contact support if it continues."
+            refused(status)
         }
     }
 }

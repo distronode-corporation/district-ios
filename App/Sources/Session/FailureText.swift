@@ -36,8 +36,10 @@ extension FailureText {
     /// Map a normalised API failure to user-facing copy.
     static func from(_ error: ApiError) -> FailureText {
         switch error {
-        case let .http(status, message):
-            fromHTTP(status: status, serverMessage: message)
+        // ⚠️ `localizedMessage`, NOT `message`: the same server sentence in English, and in
+        // French the error code's sentence, or nil so the fallbacks below speak instead.
+        case let .http(status, _, _):
+            fromHTTP(status: status, serverMessage: error.localizedMessage)
         case .transport:
             // ⚠️ The session is intact. Nothing here should imply otherwise.
             FailureText(message: "You appear to be offline. Check your connection and try again.", action: .retry)

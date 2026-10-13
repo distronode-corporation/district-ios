@@ -34,7 +34,7 @@ extension ThreadModel {
             return
         }
         if let refusal = MediaUploadLimits.refusal(mimeType: mimeType, byteCount: data.count) {
-            refuseAttachment(refusal.message ?? Self.unsupportedAttachment)
+            refuseAttachment(refusal.localizedMessage ?? Self.unsupportedAttachment)
             return
         }
 

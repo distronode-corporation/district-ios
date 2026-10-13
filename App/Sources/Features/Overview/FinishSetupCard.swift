@@ -67,8 +67,4 @@ struct FinishSetupCard: View {
 ///
 /// ⚠️ PINNED BY `FinishSetupTests`, and scanned by `StoreCopyTests` with the rest of
 /// `Features/`: none of them may name a place to go instead of the app.
-enum FinishSetupCopy {
-    static let title = "Finish setting up"
-    static let body = "A few setup steps for this workspace are still open."
-    static let action = "Open setup"
-}
+enum FinishSetupCopy {}

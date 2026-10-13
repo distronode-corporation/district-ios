@@ -324,7 +324,7 @@ final class MembersModel {
     /// body, not to replace wording the server authored.
     private static func conflict(_ error: ApiError, fallback: String) -> FailureText {
         guard error.httpStatus == 409 else { return FailureText.from(error) }
-        let message = error.message?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let message = error.localizedMessage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return FailureText(message: message.isEmpty ? fallback : message, action: .none)
     }
 
