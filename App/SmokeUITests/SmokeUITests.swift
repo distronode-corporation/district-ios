@@ -235,9 +235,10 @@ private extension SmokeUITests {
         let billing = element(A11yID.Billing.root)
         XCTAssertTrue(billing.waitForExistence(timeout: 30), "the billing screen never rendered")
 
-        // ⚠️ THE TIER IS THE RAW WIRE VALUE. `BillingPlanCards.swift:41` prints
-        // `plan.subscriptionTier` untouched and a null tier renders "no plan" rather
-        // than an invented "Free", so this reads the string the row actually holds.
+        // ⚠️ THE CARD SHOWS THE PLAN'S NAME, NOT THE WIRE KEY. `BillingCopy.planName`
+        // turns `VoiceStudio` into "Voice Studio" (an unknown tier is shown as sent) and a
+        // null tier renders "no plan" rather than an invented "Free". The default,
+        // "Studio", is in both spellings; a DISTRICT_SMOKE_PLAN must be the name.
         let plan = element(A11yID.Billing.plan)
         XCTAssertTrue(plan.waitForExistence(timeout: 15), "the plan card is missing")
         XCTAssertTrue(

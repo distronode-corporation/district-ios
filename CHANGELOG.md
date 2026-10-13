@@ -39,6 +39,11 @@ built from history before publication, so they have no tags in this repository.
 - `release.yml` has a `build_only` dispatch input: it archives and signs on the runner and
   uploads nothing.
 
+## [2.2.1] - 2026-10-13
+
+Fixes the plan name on the Billing page, which showed the plan's internal key (for example
+"VoicePro") instead of its name.
+
 ## [2.2] - 2026-10-07
 
 Live call transcripts come to iPhone and iPad, and your receptionist's settings now live
@@ -161,7 +166,10 @@ Voice Studio is the headline of 2.0.
 
 The first release on the App Store.
 
-[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v2.0...HEAD
+[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v2.2.1...HEAD
+[2.2.1]: https://github.com/distronode-corporation/district-ios/releases/tag/v2.2.1
+[2.2]: https://github.com/distronode-corporation/district-ios/releases/tag/v2.2
+[2.1]: https://github.com/distronode-corporation/district-ios/compare/v2.0...v2.1
 [2.0]: https://github.com/distronode-corporation/district-ios/releases/tag/v2.0
 [1.3]: https://github.com/distronode-corporation/district-ios/releases/tag/v1.3
 [1.2]: https://github.com/distronode-corporation/district-ios/releases/tag/v1.2

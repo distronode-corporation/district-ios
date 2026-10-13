@@ -38,7 +38,7 @@ struct BillingPlanCard: View {
     var body: some View {
         DistrictCard(eyebrow: BillingCopy.planTitle) {
             HStack(alignment: .firstTextBaseline, spacing: DistrictSpacing.tight) {
-                Text(plan.subscriptionTier ?? BillingCopy.planNone)
+                Text(BillingCopy.planName(plan.subscriptionTier))
                     .font(DistrictType.metric)
                     .foregroundStyle(colors.foreground)
                     .frame(maxWidth: .infinity, alignment: .leading)
