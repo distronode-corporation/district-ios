@@ -4810,8 +4810,9 @@ en = "Report: objectionable content (review recording)"
 ctx = "label"
 screen = "support"
 tier = "T2"
+fixed = true
 id = { swift = "ReportCopy.subjectRecording" }
-note = "Sent to the support desk as the subject of a report filed during App Review's recording. The rest is report.base_subject."
+note = "Sent to the District support desk inside the ticket, never shown on screen: it stays English for staff in every language, as on Windows. Sent to the support desk as the subject of a report filed during App Review's recording. The rest is report.base_subject."
 
 [report.submit]
 en = "Report"
