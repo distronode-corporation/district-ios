@@ -17,7 +17,4 @@ import Foundation
 /// workspace administrator, so the sentence says exactly that and nothing on this
 /// screen links anywhere else. `StoreCopyTests` fails on registration-inviting
 /// wording anywhere under `Features` and `Navigation`.
-enum SignInCopy {
-    static let noAccount = "No District AI account uses this Apple ID. "
-        + "Ask your organization's administrator to invite you, then sign in with the invited email."
-}
+enum SignInCopy {}

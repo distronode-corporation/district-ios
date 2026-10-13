@@ -324,8 +324,8 @@ final class SchedulingModel {
     /// genuinely resolves by waiting.
     private static func enableFailureNotice(for error: ApiError) -> String {
         switch error {
-        case .http(status: 403, message: _): SchedulingCopy.notEligible
-        case .http(status: 429, message: _): SchedulingCopy.tooManyAttempts
+        case .http(status: 403, message: _, code: _): SchedulingCopy.notEligible
+        case .http(status: 429, message: _, code: _): SchedulingCopy.tooManyAttempts
         default: FailureText.from(error).message
         }
     }
@@ -343,7 +343,7 @@ final class SchedulingModel {
         switch failure {
         case let .nonceRequired(message): message ?? SchedulingCopy.updateToOpenWebsite
         case .invalidNonce: SchedulingCopy.handOffFailed
-        case .api(.http(status: 409, message: _)): SchedulingCopy.notReadyYet
+        case .api(.http(status: 409, message: _, code: _)): SchedulingCopy.notReadyYet
         case let .api(error): FailureText.from(error).message
         }
     }

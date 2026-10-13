@@ -11,9 +11,7 @@ import SwiftUI
 /// they touch only the CALLER's own calendars — somebody who cannot connect their
 /// own calendar cannot be booked at all. Gating them would break the product for
 /// exactly the role the narrow rule exists to protect.
-extension SchedulingWriteCopyC {
-    static let calendarsOpen = "Choose calendars"
-}
+extension SchedulingWriteCopyC {}
 
 /// "Connect a CalDAV calendar".
 ///

@@ -154,32 +154,4 @@ final class AvailabilityModel {
 /// `WorkspaceMember` row holds their role through the owner fallback and CAN be fixed, by
 /// being added to the workspace properly. One generic "you are not available" line would
 /// leave the second person with no idea that anything is wrong or what to ask for.
-enum AvailabilityCopy {
-    static let cardTitle = "Calls to you"
-
-    static let rowTitle = "Available for calls"
-
-    /// ⛔ NAMES THE WORKSPACE, ALWAYS. It is a per-workspace fact about you, and an
-    /// unqualified switch on an account screen reads as an account-wide setting — which
-    /// would be wrong in the one direction that matters, since the same person can be
-    /// available elsewhere.
-    static func rowSubtitle(_ workspaceName: String) -> String {
-        "Ring my phone for calls in \(workspaceName)."
-    }
-
-    /// ⚠️ A VIEWER. Answered with no database read at all, and nothing they can change.
-    static let reasonRole = "You are in this workspace as a viewer, so calls are never rung to you."
-
-    /// ⛔ NOT A PERMISSION PROBLEM AND NOT AN ERROR. The person holds their role through the
-    /// workspace's owner fallback, so there is no membership row to set — and the ring
-    /// fan-out reads exactly that table. The remedy is somebody adding them properly, which
-    /// is what this sentence asks for.
-    static let reasonNoMemberRow = "You are not listed as a member of this workspace, so calls cannot "
-        + "be rung to you. Ask an administrator to add you."
-
-    /// ⚠️ A REASON THIS BUILD HAS NEVER SEEN. It says what is true (no ringing) and does not
-    /// invent a cause.
-    static let reasonUnknown = "Calls are not being rung to you in this workspace."
-
-    static let loadFailed = "Could not read whether calls ring to you."
-}
+enum AvailabilityCopy {}

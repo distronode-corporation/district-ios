@@ -267,9 +267,9 @@ final class MarketplaceModel {
     /// it distinguishes those two cases and this layer cannot. Blank counts as
     /// absent, the same normalisation ``DialerModel/refusalText(_:fallback:)`` makes.
     private static func searchFailure(_ error: ApiError) -> MarketplaceSearchState {
-        guard case let .http(status, message) = error else { return .failed(FailureText.from(error)) }
+        guard case let .http(status, _, _) = error else { return .failed(FailureText.from(error)) }
         guard status == notConfiguredStatus else { return .failed(FailureText.from(error)) }
-        let trimmed = message?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let trimmed = error.localizedMessage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return .notConfigured(trimmed.isEmpty ? MarketplaceCopy.notConfiguredFallback : trimmed)
     }
 

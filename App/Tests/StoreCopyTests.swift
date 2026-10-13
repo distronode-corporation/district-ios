@@ -16,6 +16,11 @@ import XCTest
 /// reaches for "you can do that on the website" by reflex. So this reads the SOURCE of every file under
 /// `App/Sources/Features` and `App/Sources/Navigation`, pulls out the string literals, and
 /// fails on any that names the web, a browser, a dashboard, a console or distronode.com.
+///
+/// ⛔ AND THE CATALOG, BECAUSE MOST OF THE SENTENCES LIVE THERE NOW. The `*Copy` enums are
+/// generated from `l10n/ios.toml`, so a walk of the Swift alone would pass every string the
+/// generator writes. Each entry's English is scanned, scoped by its `screen` field the way
+/// the walk is scoped by directory, and allowed by its KEY.
 /// The three direct assertions at the bottom are a second, independent hold on the
 /// sentences a reviewer is most likely to read first.
 ///
@@ -30,7 +35,8 @@ import XCTest
 ///     an account-deletion path, the web page is that path, and telling a person the tap
 ///     leaves the app is honesty about what the control does rather than steering toward a
 ///     purchase. Pinned to Android and to both store listings.
-///   - `Features/Scheduling/**` — a hand-off into OUR OWN product. Nothing there names a
+///   - `Features/Scheduling/**` and the catalog's `scheduling` screens: a hand-off into OUR OWN product. Nothing there
+/// names a
 ///     place today; the exemption keeps this gate out of that feature's way rather than
 ///     blessing anything.
 ///   - `Features/Dialer/DialerCopy.swift`'s emergency line, which hands the caller to the
@@ -97,15 +103,22 @@ final class StoreCopyTests: XCTestCase {
         "Features/Contacts/ContactDetailView.swift": [
             "Website",
         ],
-        "Features/Desk/DeskCopy.swift": [
-            "so their browser can load it, and anyone with a thread link can see it.",
-        ],
-        "Features/Marketplace/MarketplaceCopy+Numbers.swift": [
-            "Website (optional)",
-        ],
         "Features/SignIn/SignInView.swift": [
             "Opens your browser to sign in securely.",
         ],
+    ]
+
+    /// Catalog screens the gate does not scan: a `screen` equal to one of these or below it.
+    private static let exemptScreens = [
+        "scheduling",
+    ]
+
+    /// Catalog entries permitted, by key, with the exact English allowed.
+    private static let allowedEntries: [String: String] = [
+        "desk.logo_help": "Shown at the top of the thread page your customers open, in place of the name "
+            + "above. PNG, JPEG or WebP, up to 512 KB. It is hosted publicly so their browser can load it, "
+            + "and anyone with a thread link can see it.",
+        "marketplace.a2p_website_label": "Website (optional)",
     ]
 
     // MARK: - The gate
@@ -117,6 +130,11 @@ final class StoreCopyTests: XCTestCase {
         // stops resolving to a real checkout, or a sandbox refuses the read, this is the
         // line that says so instead of a green run that proved nothing.
         XCTAssertGreaterThan(result.filesScanned, 150, "the scan reached almost nothing, so it proved nothing")
+        XCTAssertGreaterThan(
+            result.entriesScanned,
+            1000,
+            "the catalog scan reached almost nothing, so it proved nothing"
+        )
 
         XCTAssertEqual(
             result.offences,
@@ -131,6 +149,11 @@ final class StoreCopyTests: XCTestCase {
         let result = try scan()
 
         XCTAssertGreaterThan(result.filesScanned, 150, "the scan reached almost nothing, so it proved nothing")
+        XCTAssertGreaterThan(
+            result.entriesScanned,
+            1000,
+            "the catalog scan reached almost nothing, so it proved nothing"
+        )
         XCTAssertEqual(
             result.registrationOffences,
             [],
@@ -144,7 +167,7 @@ final class StoreCopyTests: XCTestCase {
         let result = try scan()
         let declared = Set(Self.allowedLiterals.flatMap { file, literals in
             literals.map { "\(file): \($0)" }
-        })
+        }).union(Self.allowedEntries.map { "\($0.key): \($0.value)" })
 
         XCTAssertEqual(
             declared.subtracting(result.allowancesUsed).sorted(),
@@ -185,6 +208,7 @@ final class StoreCopyTests: XCTestCase {
 
     private struct ScanResult {
         var filesScanned: Int
+        var entriesScanned = 0
         var offences: [String]
         var allowancesUsed: Set<String>
         var registrationOffences: [String]
@@ -220,9 +244,37 @@ final class StoreCopyTests: XCTestCase {
             }
         }
 
+        try scanCatalog(into: &result)
         result.offences.sort()
         result.registrationOffences.sort()
         return result
+    }
+
+    /// The catalog half of the walk: every entry's English, checked by the same two rules.
+    private func scanCatalog(into result: inout ScanResult) throws {
+        for entry in try CatalogScan.entries(of: Self.catalogFile) {
+            let exempt = Self.exemptScreens.contains { entry.screen == $0 || entry.screen.hasPrefix("\($0).") }
+            guard !exempt else { continue }
+            result.entriesScanned += 1
+            for text in entry.english {
+                let lowered = text.lowercased()
+                if let phrase = Self.registrationPhrases.first(where: { lowered.contains($0) }) {
+                    result.registrationOffences.append("\(entry.key) says \"\(phrase)\" in \"\(text)\"")
+                }
+                guard let word = Self.forbiddenWords.first(where: { lowered.contains($0) }) else { continue }
+                guard Self.allowedEntries[entry.key] != text else {
+                    result.allowancesUsed.insert("\(entry.key): \(text)")
+                    continue
+                }
+                result.offences.append("\(entry.key) names \"\(word)\" in \"\(text)\"")
+            }
+        }
+    }
+
+    /// `l10n/ios.toml`, two levels above `App/Sources`.
+    private static var catalogFile: URL {
+        sourcesRoot.deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("l10n/ios.toml")
     }
 
     /// ⚠️ `#filePath` RESOLVES ON THE MACHINE THAT COMPILED THIS, which is the checkout the

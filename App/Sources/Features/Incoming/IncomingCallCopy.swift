@@ -34,11 +34,11 @@ enum IncomingCallCopy {
     ///   render a line that opens with the separator.
     static func callerLine(caller: String?, workspaceName: String?) -> String {
         let known = caller?.trimmingCharacters(in: .whitespaces) ?? ""
-        let lead = known.isEmpty ? "Incoming call" : known
+        let lead = known.isEmpty ? incomingCall : known
         guard let workspaceName, !workspaceName.trimmingCharacters(in: .whitespaces).isEmpty else {
             return lead
         }
-        return "\(lead) · \(workspaceName)"
+        return callerLineWithWorkspace(lead, workspaceName)
     }
 
     /// ⛔ THE MESSAGE WINS OVER THE PHASE ON AN ENDED CALL, which is the same call
@@ -53,14 +53,14 @@ enum IncomingCallCopy {
     static func sentence(for state: IncomingCallState, endedByOperator: Bool) -> String {
         switch state.phase {
         case .idle, .ringing:
-            "Ringing…"
+            ringing
         // ⛔ ITS OWN SENTENCE RATHER THAN A SPINNER OVER "Ringing…". The answer
         // round trip plus a room join is a real gap to fill, and the buttons have
         // gone by now; a screen still saying "Ringing…" reads as frozen.
         case .answering:
-            "Answering…"
+            answering
         case .inCall:
-            "Connected · \(InCallCopy.duration(state.media?.elapsedSeconds ?? 0))"
+            connected(InCallCopy.duration(state.media?.elapsedSeconds ?? 0))
         case let .ended(reason):
             InCallCopy.endedSentence(
                 reason: reason,
@@ -74,13 +74,6 @@ enum IncomingCallCopy {
             )
         }
     }
-
-    /// The notice under the Answer button.
-    ///
-    /// ⚠️ SAID BEFORE THE SYSTEM ASKS, like the dialer's, so the microphone prompt has a visible
-    /// reason. The app asks at a foreground Answer (``IncomingCallModel/prepareMicrophoneForAnswer()``),
-    /// and a request with no explanation is the one people deny permanently.
-    static let answerNotice = "Answering turns on your microphone."
 
     /// Why the OS should record this call as having ended.
     ///

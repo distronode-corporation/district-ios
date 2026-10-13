@@ -18,7 +18,7 @@ final class SchedulingHandOffTests: XCTestCase {
 
     func test_IOS_SCH_01_theRetiredConsoleBodyNormalisesToItsOwnSentence() {
         let error = ApiErrorNormalizer.apiError(statusCode: 410, body: Self.retiredBody)
-        guard case let .http(status, message) = error else {
+        guard case let .http(status, message, _) = error else {
             return XCTFail("a 410 must normalise to .http, got \(error)")
         }
         XCTAssertEqual(status, 410)

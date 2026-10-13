@@ -17,12 +17,7 @@ import SwiftUI
 /// profile — a viewer who cannot set their own timezone is offered every booking
 /// window in the wrong hours. The gate is therefore applied by the SCREEN, per tab,
 /// and never by this file.
-extension SchedulingWriteCopy {
-    static let brandingEdit = "Edit booking page"
-    static let automationEdit = "Edit booking assistant"
-    static let profileEdit = "Edit profile"
-    static let notificationsEdit = "Edit notifications"
-}
+extension SchedulingWriteCopy {}
 
 /// The booking page: business name, logo, banner, legal links and fallback locale.
 struct SchedulingBrandingEditButton: View {

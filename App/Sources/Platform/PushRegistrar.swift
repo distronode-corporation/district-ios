@@ -251,7 +251,7 @@ final class PushRegistrar {
             }
         case let .failure(error):
             switch error {
-            case let .http(status, _): .refused(status: status)
+            case let .http(status, _, _): .refused(status: status)
             case .transport: .unreachable
             // ⚠️ CONTRACT DRIFT READS AS A REFUSAL, because from this device's side it
             // is one: the server answered and the answer could not be honoured.

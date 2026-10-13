@@ -10,16 +10,6 @@ import Foundation
 /// (see the ⛔ on ``ReportContentModel``). A literal buried in a view could not be
 /// pinned by a test, and `ReportCopyTests` pins all three.
 enum ReportCopy {
-    /// ⛔ 3...200 CHARACTERS, SERVER-VALIDATED, AND THE SUFFIXED FORM MUST ALSO FIT.
-    /// Both are well inside it; the bound is stated so a future reword checks.
-    static let baseSubject = "Report: objectionable content"
-
-    /// ⛔ THE MARKER A HUMAN CLOSES ON. A recording's report is about a fictional
-    /// `+1 555 01xx` caller in the demo workspace, so it is not a moderation case —
-    /// but it IS a real ticket in a real queue, and an unmarked one would be triaged
-    /// as if the content existed.
-    static let recordingSuffix = " (review recording)"
-
     /// The subject this build sends.
     ///
     /// ⚠️ READ PER CALL RATHER THAN STORED, because the discriminator is a launch
@@ -30,29 +20,6 @@ enum ReportCopy {
     }
 
     // MARK: - The sheet
-
-    /// ⛔ THE CONTROL NAMES THE CONTENT, NOT THE MECHANISM. "Report" alone beside a
-    /// conversation reads as "report on it", and a reviewer looking for a flag has to
-    /// be able to find it without guessing. Two strings because the two screens hold
-    /// two different kinds of content, and both are what Apple's shot list calls them.
-    static let reportConversation = "Report conversation"
-    static let reportCall = "Report call"
-
-    static let title = "Report content"
-    static let submit = "Report"
-    static let cancel = "Cancel"
-    static let notePrompt = "Add a note (optional)"
-    static let noteLabel = "What is wrong with it?"
-
-    /// ⛔ THE CONFIRMATION APP REVIEW ASKS FOR. Apple's ask is
-    /// that the reviewer SEE the flag being accepted; a sheet that dismissed silently
-    /// would be indistinguishable on video from one that failed.
-    static let accepted = "Reported. We'll review it."
-
-    /// ⚠️ THE OTHER TWO SUCCESSFUL OUTCOMES GET THEIR OWN SENTENCE. Both mean "we
-    /// have it", and reporting either as a failure is what invites a second ticket.
-    static let alreadyReported = "You have already reported this. We'll review it."
-    static let pending = "Reported. We have it and it is catching up."
 
     static func confirmation(for filing: SupportRequestFiling) -> String {
         switch filing {
@@ -74,9 +41,9 @@ enum ReportCopy {
             // the voice agent writes for an unidentified caller — so a nil-coalesce
             // to a neutral noun is the only safe fallback. See
             // ``Contact/displayName``.
-            "Report this conversation\(name.map { " with \($0)" } ?? "")?"
+            name.map { headlineConversationWith($0) } ?? headlineConversation
         case .call:
-            "Report this call?"
+            headlineCall
         }
     }
 
@@ -96,15 +63,9 @@ enum ReportCopy {
     /// and the sheet caps it; see ``noteLimit``.
     static func message(for target: ReportTarget, note: String) -> String {
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
-        let tail = trimmed.isEmpty ? "No note was added." : trimmed
+        let tail = trimmed.isEmpty ? noNote : trimmed
         return "\(preamble)\n\(reference(for: target))\n\n\(tail)"
     }
-
-    /// ⛔ IT SAYS WHERE THE REPORT CAME FROM, because the same desk receives requests
-    /// raised from the contact form and from an unresolved phone call (the wire field
-    /// is `source`), and a moderation report needs telling apart from a support
-    /// question at a glance.
-    static let preamble = "Objectionable content was reported from the District AI iOS app."
 
     /// ⚠️ THE KEY AS THE APP HOLDS IT, PREFIX AND ALL. `contact:<id>` and
     /// `addr:<normalized>` are the drafts table's own vocabulary, so an agent can
@@ -113,9 +74,9 @@ enum ReportCopy {
     static func reference(for target: ReportTarget) -> String {
         switch target {
         case let .conversation(threadKey, _):
-            "Conversation: \(threadKey)"
+            referenceConversation(threadKey)
         case let .call(callId):
-            "Call: \(callId)"
+            referenceCall(callId)
         }
     }
 

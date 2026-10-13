@@ -356,7 +356,7 @@ final class NumberProvisioningModel {
     /// drops `failures` and `reasons`, which the route persisted on the row.
     private static func submitFailure(_ error: ApiError) -> FailureText {
         guard error.httpStatus == 422 else { return FailureText.from(error) }
-        let stated = error.message?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let stated = error.localizedMessage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let sentence = stated.isEmpty ? MarketplaceCopy.submitRefusedReread : stated
         return FailureText(message: "\(sentence) \(MarketplaceCopy.submitRefusedReread)", action: .none)
     }

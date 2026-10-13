@@ -38,22 +38,6 @@ extension SchedulingSectionState {
 /// DECISION (which of five recoveries applies) and `DistrictCore` is Linux-testable and
 /// locale-free, so the sentence is the App's. This enum is the seam.
 enum SchedulingFailureCopy {
-    static let unavailable = "The booking system did not answer. Try again in a minute."
-    static let slotTaken = "That time was just taken. Pick another."
-    static let forbidden = "You can view this but not change it."
-    static let notReady = "Scheduling is not set up for this workspace yet."
-    static let unknown = "That did not save. Try again."
-
-    /// ⚠️ NO WEB ORIGINAL: the browser maps a failed `fetch` to `unavailable`. The app
-    /// already says this for an ``ApiError/transport(_:)`` (``FailureText/from(_:)``),
-    /// and one cause worded two ways inside one app would be worse than diverging here.
-    static let offline = "You appear to be offline. Check your connection and try again."
-    /// ⚠️ NO WEB ORIGINAL EITHER: the browser never decodes `body.data`, so it cannot
-    /// have this problem. A shape this build cannot parse is not "that did not save"
-    /// (the write may well have landed), and the app's `ApiError.decoding` sentence is
-    /// the honest one.
-    static let staleBuild = "This version of the app could not read that response. Please update."
-
     /// The sentence and the recovery for one refusal.
     ///
     /// ⛔ `transport`, `decoding` AND `invalidParams` ARE LIFTED OUT AHEAD OF THE

@@ -33,6 +33,9 @@ excluded:
   - .build
   - DerivedData
   - SourcePackages
+  # The Swift `l10n.py gen` writes from l10n/ios.toml: one table of a thousand strings,
+  # checked against the catalog by `l10n.py check` rather than linted.
+  - App/Sources/L10n/Generated
 
 # ⚠️ Reported as errors, not warnings, because of --strict above: the two
 # numbers below are the same gate at two severities only when run without it.

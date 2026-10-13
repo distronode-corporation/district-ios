@@ -173,12 +173,12 @@ enum InCallCopy {
         // ⚠️ ONE SENTENCE FOR BOTH, because the difference between "the request is out"
         // and "the room is being joined" is not a difference an operator can act on.
         case .idle, .dialing, .connecting:
-            "Calling…"
+            calling
         // ⛔ IN THE ROOM, NOBODY ON THE LINE YET. See the ⛔ on ``SoftphonePhase/ringing``.
         case .ringing:
-            "Ringing…"
+            ringing
         case .connected:
-            "Connected · \(duration(state.media.elapsedSeconds))"
+            connected(duration(state.media.elapsedSeconds))
         case let .ended(reason):
             endedSentence(
                 word: word(for: reason, endedByOperator: endedByOperator),
@@ -214,9 +214,9 @@ enum InCallCopy {
     /// THAN GUESSING. "Call ended · 1:02" says everything that is known; the head is
     /// never left dangling on a separator.
     static func endedSentence(word: String?, seconds: Int, answered: Bool) -> String {
-        let head = word.map { "Call ended · \($0)" } ?? "Call ended"
+        let head = word.map { callEndedBecause($0) } ?? callEnded
         guard answered else { return head }
-        return "\(head) · \(duration(seconds))"
+        return endedWithDuration(head, duration(seconds))
     }
 
     /// ⚠️ mm:ss, AND IT KEEPS COUNTING PAST AN HOUR RATHER THAN WRAPPING. A 72-minute
@@ -268,14 +268,14 @@ enum InCallCopy {
     /// it could not attribute.
     private static func word(for reason: CallEndReason) -> String {
         switch reason {
-        case .hungUpLocally: "you hung up"
-        case .remoteHungUp: "they hung up"
-        case let .remoteEnded(text): text ?? "the other end ended it"
-        case let .failed(message): message ?? "the call could not be connected"
-        case .declined: "declined"
-        case .ringTimedOut: "nobody answered"
-        case .callerCancelled: "the caller hung up"
-        case let .answerRefused(message): message ?? "the answer was refused"
+        case .hungUpLocally: wordHungUpLocally
+        case .remoteHungUp: wordRemoteHungUp
+        case let .remoteEnded(text): text ?? wordRemoteEnded
+        case let .failed(message): message ?? wordFailed
+        case .declined: wordDeclined
+        case .ringTimedOut: wordRingTimedOut
+        case .callerCancelled: wordCallerCancelled
+        case let .answerRefused(message): message ?? wordAnswerRefused
         }
     }
 }

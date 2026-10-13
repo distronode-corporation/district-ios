@@ -28,12 +28,6 @@ import Foundation
 /// spacing, so the composed sentence is the literal a test can compare. A layout
 /// container's gap is not in the string.
 enum SignInTermsCopy {
-    static let prefix = "By continuing you agree to the"
-    static let termsName = "Terms of Service"
-    static let conjunction = " and "
-    static let privacyName = "Privacy Policy"
-    static let terminator = "."
-
     /// The whole line, as a reader reads it.
     ///
     /// ⚠️ COMPUTED FROM THE FRAGMENTS, NEVER WRITTEN OUT A SECOND TIME. A literal

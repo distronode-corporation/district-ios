@@ -140,7 +140,7 @@ final class SchedulingCalendarConnectModel {
     /// included, falls to the shared mapping — which shows the server's own sentence
     /// for a 4xx and never invents one.
     private static func handOffFailure(_ error: ApiError) -> FailureText {
-        if case .http(status: 409, message: _) = error {
+        if case .http(status: 409, message: _, code: _) = error {
             return FailureText(message: SchedulingWriteCopyC.connectNotReadyYet, action: .none)
         }
         return FailureText.from(error)

@@ -16,21 +16,4 @@ import Foundation
 /// ⚠️ SEPARATE FROM `SchedulingCopy` (the hub card's copy) ON PURPOSE: keeping
 /// the two surfaces' wording in separate types lets each change without touching
 /// the other.
-enum SchedulingWriteCopy {
-    static let cancel = "Cancel"
-    static let save = "Save"
-    static let saving = "Saving…"
-    static let delete = "Delete"
-    static let add = "Add"
-    static let remove = "Remove"
-    static let edit = "Edit"
-    static let retry = "Try again"
-    static let dismiss = "Dismiss"
-
-    /// ⚠️ THE WORD ON THE CONTROL THAT OPENS THE STATE ACTIONS, and it is
-    /// deliberately not "Edit": the sheet behind it turns an event type on and
-    /// off, archives it, deletes it and sends test emails, none of which is the
-    /// form. The web event types table calls the same menu "Actions"; on a phone the
-    /// row IS the menu, so the button says what pressing it leads to.
-    static let manage = "Manage"
-}
+enum SchedulingWriteCopy {}
