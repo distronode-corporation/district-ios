@@ -416,55 +416,61 @@ jobs:
           key: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-${{ hashFiles('project.yml') }}
           restore-keys: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-
 
-      - name: "Q2: xcodegen generate WITHOUT DISTRICT_FRENCH"
+      - name: Choose a simulator
+        run: ci/sim-udid.sh iPhone
+
+      - name: "Phase 1: WITHOUT DISTRICT_FRENCH (generate, build, list, launch)"
         run: |
           set -euo pipefail
-          echo "SPIKE|q2|no-flag|DISTRICT_FRENCH=${DISTRICT_FRENCH-<unset>}"
+          echo "SPIKE|noflag|DISTRICT_FRENCH=${DISTRICT_FRENCH-<unset>}"
           xcodegen generate --spec project.yml
           pbx=DistrictAI.xcodeproj/project.pbxproj
-          echo "SPIKE|q2|no-flag|developmentRegion: $(grep 'developmentRegion' "$pbx" | tr -s ' \t' ' ')"
-          echo "SPIKE|q2|no-flag|knownRegions: $(sed -n '/knownRegions = (/,/);/p' "$pbx" | tr -s ' \t\n' ' ')"
-          echo "SPIKE|q2|no-flag|lines naming fr-CA in project.pbxproj: $(grep -c 'fr-CA' "$pbx" || true)"
-
-      - name: Resolve packages
-        run: |
-          xcodebuild -resolvePackageDependencies \
-            -project DistrictAI.xcodeproj \
-            -scheme DistrictAI \
-            -clonedSourcePackagesDirPath SourcePackages
-
-      - name: "Q2 and Q4: build the app WITHOUT the flag, list the product"
-        run: |
-          set -o pipefail
-          xcodebuild build \
+          echo "SPIKE|noflag|knownRegions: $(sed -n '/knownRegions = (/,/);/p' "$pbx" | tr -s ' \t\n' ' ')"
+          { grep -E 'lproj|PBXVariantGroup' "$pbx" || echo "(none)"; } | sed 's/^[[:space:]]*/SPIKE|noflag|pbxproj: /'
+          if [ ! -d SourcePackages/checkouts ] || [ ! -f DistrictAI.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved ]; then
+            xcodebuild -resolvePackageDependencies -project DistrictAI.xcodeproj -scheme DistrictAI -clonedSourcePackagesDirPath SourcePackages
+          fi
+          xcodebuild build-for-testing \
             -project DistrictAI.xcodeproj \
             -scheme DistrictAI \
             -destination "generic/platform=iOS Simulator" \
             -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath SourcePackages \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-noflag.log | xcbeautify --renderer github-actions
-          grep -q '\*\* BUILD SUCCEEDED \*\*' xcodebuild-noflag.log
-          echo "SPIKE|q4|no-flag|BUILD SUCCEEDED with DeskCopy.subtitle as a computed static var"
+          grep -q '\*\* TEST BUILD SUCCEEDED \*\*' xcodebuild-noflag.log
+          echo "SPIKE|noflag|q4|TEST BUILD SUCCEEDED with DeskCopy.subtitle as a computed static var"
           app=DerivedData/Build/Products/Debug-iphonesimulator/DistrictAI.app
-          echo "SPIKE|q2|no-flag|ls $app:"
-          ls -1 "$app" | sed 's/^/SPIKE|q2|no-flag|  /'
-          echo "SPIKE|q2|no-flag|.lproj at the app root: [$(find "$app" -maxdepth 1 -name '*.lproj' | sort | tr '\n' ' ')]"
-          echo "SPIKE|q2|no-flag|fr* anywhere in the app: [$(find "$app" -name 'fr*.lproj' | sort | tr '\n' ' ')]"
-          if [ -e "$app/fr-CA.lproj" ]; then
-            echo "SPIKE|q2|no-flag|FAIL fr-CA.lproj is in the app without the flag"
-            exit 1
-          fi
-          echo "SPIKE|q2|no-flag|PASS no fr-CA.lproj in the built app"
+          echo "SPIKE|noflag|.lproj at the app root: [$(find "$app" -maxdepth 1 -name '*.lproj' | sort | tr '\n' ' ')]"
+          echo "SPIKE|noflag|Localizable.strings anywhere in the app: [$(find "$app" -name 'Localizable.strings' | sort | tr '\n' ' ')]"
+          echo "SPIKE|noflag|fr* anywhere in the app: [$(find "$app" -name 'fr*.lproj' | sort | tr '\n' ' ')]"
+          for f in "$app"/*.lproj/*.strings; do
+            echo "SPIKE|noflag|plutil -p $f:"
+            plutil -p "$f" | sed 's/^/SPIKE|noflag|  /'
+          done
+          xcodebuild test-without-building \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" \
+            -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages \
+            -resultBundlePath FrenchSpike-noflag.xcresult \
+            -only-testing:DistrictAIUITests/FrenchSpikeTests/test_2_launches \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-spike-noflag.log | xcbeautify --renderer github-actions
+          grep -o 'SPIKE|launch.*' xcodebuild-spike-noflag.log | awk '!seen[$0]++' | sed 's/^SPIKE|/SPIKE|noflag|/'
 
-      - name: "Q1: xcodegen generate WITH DISTRICT_FRENCH=YES, build for testing"
+      - name: "Phase 2: WITH DISTRICT_FRENCH=YES (generate, build, list, launch)"
         env:
           DISTRICT_FRENCH: "YES"
         run: |
           set -euo pipefail
+          echo "SPIKE|flag|DISTRICT_FRENCH=${DISTRICT_FRENCH-<unset>}"
           xcodegen generate --spec project.yml
           pbx=DistrictAI.xcodeproj/project.pbxproj
-          echo "SPIKE|q1|flag|knownRegions: $(sed -n '/knownRegions = (/,/);/p' "$pbx" | tr -s ' \t\n' ' ')"
-          { grep 'fr-CA' "$pbx" || echo "(no line names fr-CA)"; } | sed 's/^[[:space:]]*/SPIKE|q1|flag|pbxproj: /'
+          echo "SPIKE|flag|knownRegions: $(sed -n '/knownRegions = (/,/);/p' "$pbx" | tr -s ' \t\n' ' ')"
+          { grep -E 'lproj|PBXVariantGroup' "$pbx" || echo "(none)"; } | sed 's/^[[:space:]]*/SPIKE|flag|pbxproj: /'
+          if [ ! -d SourcePackages/checkouts ] || [ ! -f DistrictAI.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved ]; then
+            xcodebuild -resolvePackageDependencies -project DistrictAI.xcodeproj -scheme DistrictAI -clonedSourcePackagesDirPath SourcePackages
+          fi
           xcodebuild build-for-testing \
             -project DistrictAI.xcodeproj \
             -scheme DistrictAI \
@@ -473,47 +479,44 @@ jobs:
             -clonedSourcePackagesDirPath SourcePackages \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-flag.log | xcbeautify --renderer github-actions
           grep -q '\*\* TEST BUILD SUCCEEDED \*\*' xcodebuild-flag.log
+          echo "SPIKE|flag|q4|TEST BUILD SUCCEEDED with DeskCopy.subtitle as a computed static var"
           app=DerivedData/Build/Products/Debug-iphonesimulator/DistrictAI.app
-          echo "SPIKE|q1|flag|.lproj at the app root: [$(find "$app" -maxdepth 1 -name '*.lproj' | sort | tr '\n' ' ')]"
-          ls -la "$app/fr-CA.lproj" | sed 's/^/SPIKE|q1|flag|  /'
-          for f in "$app"/fr-CA.lproj/*.strings "$app/Localizable.strings"; do
-            echo "SPIKE|q1|flag|plutil -p $f:"
-            plutil -p "$f" | sed 's/^/SPIKE|q1|flag|  /'
+          echo "SPIKE|flag|.lproj at the app root: [$(find "$app" -maxdepth 1 -name '*.lproj' | sort | tr '\n' ' ')]"
+          echo "SPIKE|flag|Localizable.strings anywhere in the app: [$(find "$app" -name 'Localizable.strings' | sort | tr '\n' ' ')]"
+          echo "SPIKE|flag|fr* anywhere in the app: [$(find "$app" -name 'fr*.lproj' | sort | tr '\n' ' ')]"
+          for f in "$app"/*.lproj/*.strings; do
+            echo "SPIKE|flag|plutil -p $f:"
+            plutil -p "$f" | sed 's/^/SPIKE|flag|  /'
           done
-
-      - name: Choose a simulator
-        run: ci/sim-udid.sh iPhone
-
-      - name: "Q1, Q3, Q4: FrenchSpikeTests"
-        timeout-minutes: 20
-        run: |
-          set -o pipefail
           xcodebuild test-without-building \
             -project DistrictAI.xcodeproj \
             -scheme DistrictAI \
             -destination "id=$(cat simulator-udid.txt)" \
             -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath SourcePackages \
-            -resultBundlePath FrenchSpike.xcresult \
-            -only-testing:DistrictAIUITests/FrenchSpikeTests \
-            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-spike.log | xcbeautify --renderer github-actions
+            -resultBundlePath FrenchSpike-flag.xcresult \
+            -only-testing:DistrictAIUITests/FrenchSpikeTests/test_2_launches \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-spike-flag.log | xcbeautify --renderer github-actions
+          grep -o 'SPIKE|launch.*' xcodebuild-spike-flag.log | awk '!seen[$0]++' | sed 's/^SPIKE|/SPIKE|flag|/'
 
-      - name: The SPIKE lines
+      - name: Verdicts
         if: always()
         run: |
-          echo "=== printed by the test runner"
-          grep -h 'SPIKE|' xcodebuild-spike.log 2>/dev/null | awk '!seen[$0]++' || echo "(none in the log)"
-          echo "=== attachments in the result bundle"
-          mkdir -p attachments
-          xcrun xcresulttool export attachments --path FrenchSpike.xcresult --output-path attachments || true
-          for f in attachments/*; do
-            case "$f" in *.json) ;; *) echo "== $f"; cat "$f"; echo ;; esac
+          check() {
+            if grep -qF "$2" "$1" 2>/dev/null; then echo "SPIKE|verdict|PASS $3"; else echo "SPIKE|verdict|FAIL $3 (wanted: $2)"; fi
+          }
+          for lang in fr-FR fr-BE fr fr-CA; do
+            check xcodebuild-spike-flag.log "SPIKE|launch|AppleLanguages=($lang)|spike.pushMessageTitle=Nouveau message" "flag ($lang) push title is French"
+          done
+          check xcodebuild-spike-flag.log "SPIKE|launch|AppleLanguages=(en-US)|spike.pushMessageTitle=New message" "flag (en-US) push title is English"
+          for lang in fr-FR fr-CA en-US; do
+            check xcodebuild-spike-noflag.log "SPIKE|launch|AppleLanguages=($lang)|spike.pushMessageTitle=New message" "no flag ($lang) push title is English"
           done
 
       - name: Tail the logs on failure
         if: failure()
         run: |
-          for log in xcodebuild-noflag.log xcodebuild-flag.log xcodebuild-spike.log; do
+          for log in xcodebuild-noflag.log xcodebuild-flag.log xcodebuild-spike-noflag.log xcodebuild-spike-flag.log; do
             echo "=== last 200 lines of $log ==="
             tail -n 200 "$log" 2>/dev/null || echo "(no log written)"
           done
