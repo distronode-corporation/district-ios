@@ -141,7 +141,7 @@ struct BlockFailureNotice: View {
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.destructive)
                     .fixedSize(horizontal: false, vertical: true)
-                Button("Dismiss") { store.clearFailure() }
+                Button(ContactsCopy.dismiss) { store.clearFailure() }
                     .buttonStyle(.districtGhost)
             }
             .frame(maxWidth: .infinity, alignment: .leading)

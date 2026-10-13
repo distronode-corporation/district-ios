@@ -222,10 +222,10 @@ struct RegistrationsList: View {
         if !approved.isEmpty || !platform.isEmpty {
             DistrictCard(spacing: DistrictSpacing.hairline) {
                 if !platform.isEmpty {
-                    SettingsReadOnlyRow(label: "Ready to buy today", value: platform.joined(separator: ", "))
+                    SettingsReadOnlyRow(label: MarketplaceCopy.readyBuyToday, value: platform.joined(separator: ", "))
                 }
                 if !approved.isEmpty {
-                    SettingsReadOnlyRow(label: "Your approvals", value: approved.joined(separator: ", "))
+                    SettingsReadOnlyRow(label: MarketplaceCopy.yourApprovals, value: approved.joined(separator: ", "))
                 }
             }
         }

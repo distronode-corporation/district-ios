@@ -54,23 +54,23 @@ enum MessagingCatalog {
         switch provider {
         case "twilio":
             [
-                MessagingCredentialField(key: "accountSid", label: "Account SID", isSecret: true),
-                MessagingCredentialField(key: "authToken", label: "Auth token", isSecret: true),
+                MessagingCredentialField(key: "accountSid", label: SettingsCopy.accountSid, isSecret: true),
+                MessagingCredentialField(key: "authToken", label: SettingsCopy.authToken, isSecret: true),
             ]
         case "sinch":
             [
-                MessagingCredentialField(key: "projectId", label: "Project id", isSecret: false),
-                MessagingCredentialField(key: "keyId", label: "Key id", isSecret: true),
-                MessagingCredentialField(key: "keySecret", label: "Key secret", isSecret: true),
-                MessagingCredentialField(key: "applicationKey", label: "Application key", isSecret: true),
+                MessagingCredentialField(key: "projectId", label: SettingsCopy.projectId, isSecret: false),
+                MessagingCredentialField(key: "keyId", label: SettingsCopy.keyId, isSecret: true),
+                MessagingCredentialField(key: "keySecret", label: SettingsCopy.keySecret, isSecret: true),
+                MessagingCredentialField(key: "applicationKey", label: SettingsCopy.applicationKey, isSecret: true),
                 MessagingCredentialField(
                     key: "applicationSecret",
-                    label: "Application secret",
+                    label: SettingsCopy.applicationSecret,
                     isSecret: true
                 ),
             ]
         case "telnyx":
-            [MessagingCredentialField(key: "apiKey", label: "API key", isSecret: true)]
+            [MessagingCredentialField(key: "apiKey", label: SettingsCopy.apiKey, isSecret: true)]
         default:
             // ⚠️ EMPTY RATHER THAN A CRASH. A provider added server-side must not break
             // the settings screen on an already-installed build; the form draws no

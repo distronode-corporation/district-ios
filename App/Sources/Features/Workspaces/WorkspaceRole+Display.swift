@@ -14,9 +14,9 @@ import DistrictModel
 extension WorkspaceRole {
     var displayLabel: String {
         switch self {
-        case .agency: "Administrator"
-        case .client: "Member"
-        case .viewer: "Viewer"
+        case .agency: WorkspacesCopy.administrator
+        case .client: WorkspacesCopy.member
+        case .viewer: WorkspacesCopy.viewer
         }
     }
 }

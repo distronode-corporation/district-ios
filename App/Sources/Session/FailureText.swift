@@ -42,12 +42,12 @@ extension FailureText {
             fromHTTP(status: status, serverMessage: error.localizedMessage)
         case .transport:
             // ⚠️ The session is intact. Nothing here should imply otherwise.
-            FailureText(message: "You appear to be offline. Check your connection and try again.", action: .retry)
+            FailureText(message: SessionCopy.appearOfflineCheckConnection, action: .retry)
         case .decoding:
             // ⛔ CONTRACT DRIFT, NOT CONNECTIVITY. "Check your connection" would be
             // both wrong and unactionable, because retrying can never fix a response
             // shape this build cannot parse. Point at the app, offer no retry.
-            FailureText(message: "This version of the app could not read that response. Please update.", action: .none)
+            FailureText(message: SessionCopy.versionAppCouldNot, action: .none)
         }
     }
 
@@ -76,7 +76,7 @@ extension FailureText {
     /// detail, in an alarming register, with nothing they can act on.
     private static func fromHTTP(status: Int, serverMessage: String?) -> FailureText {
         if status == 401 {
-            return FailureText(message: "Your session has ended. Please sign in again.", action: .signIn)
+            return FailureText(message: SessionCopy.sessionHasEndedPlease, action: .signIn)
         }
         if status == 402 {
             // ⛔ NOT RETRYABLE, SO IT MUST NOT FALL THROUGH TO THE `.retry` DEFAULT AT
@@ -98,7 +98,7 @@ extension FailureText {
             // covers STEERING toward an external purchase as well as the purchase
             // itself. Naming where to go and pay is the part
             // that steers; saying the subscription is inactive is not.
-            let fallback = "This workspace's subscription is not active."
+            let fallback = SessionCopy.workspaceSSubscriptionNot
             return FailureText(message: serverMessage ?? fallback, action: .none)
         }
         if status == 410 {
@@ -112,31 +112,30 @@ extension FailureText {
             // ⚠️ THE SERVER'S OWN SENTENCE WINS. It is the only party that knows WHY a
             // thing is gone and where the capability went; a client-side fallback that
             // guessed would go stale the moment the server's answer changed.
-            return FailureText(message: serverMessage ?? "That is no longer available.", action: .none)
+            return FailureText(message: serverMessage ?? SessionCopy.noLongerAvailable, action: .none)
         }
         if status == 403 {
             // ⚠️ NOT RETRYABLE. The role will not change because the user pressed a
             // button again. It can change server-side, but "try again" implies this
             // attempt was unlucky.
-            let fallback = "You do not have permission to do that in this workspace."
+            let fallback = SessionCopy.doNotHavePermission
             return FailureText(message: serverMessage ?? fallback, action: .none)
         }
         if status == 404 {
-            return FailureText(message: serverMessage ?? "That is no longer available.", action: .none)
+            return FailureText(message: serverMessage ?? SessionCopy.noLongerAvailable, action: .none)
         }
         if status >= 500 {
-            return FailureText(message: "Something went wrong on our side. Please try again.", action: .retry)
+            return FailureText(message: SessionCopy.somethingWentWrongOur, action: .retry)
         }
-        return FailureText(message: serverMessage ?? "That request could not be completed.", action: .retry)
+        return FailureText(message: serverMessage ?? SessionCopy.requestCouldNotCompleted, action: .retry)
     }
 
     /// ⚠️ NAMES THE REGIONS WHEN THE SERVER NAMED THEM. "One or more regions" is
     /// true and useless; "the eu region" is what lets an operator decide whether the
     /// number they are looking at is the whole picture.
     private static func degradedMessage(regions: [String]) -> String {
-        let head = "Your account is unchanged, but we could not reach"
-        guard !regions.isEmpty else { return "\(head) every region. Please try again." }
+        guard !regions.isEmpty else { return SessionCopy.degradedEveryRegion }
         let named = regions.map { $0.uppercased() }.joined(separator: ", ")
-        return "\(head) \(named). Some workspaces are missing from this list."
+        return SessionCopy.degradedNamedRegions(named)
     }
 }

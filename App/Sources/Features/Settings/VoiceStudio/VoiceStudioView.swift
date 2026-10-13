@@ -104,9 +104,9 @@ struct VoiceStudioSaveCard: View {
         case .mismatch:
             line(labels.saveFailed, colors.destructive)
         case let .savedButStale(failure):
-            line("\(SettingsCopy.savedButStale) \(failure.message)", colors.mutedForeground)
+            line(SettingsCopy.savedButStaleBecause(failure.message), colors.mutedForeground)
         case let .failed(failure):
-            line("\(labels.saveFailed) \(failure.message)", colors.destructive)
+            line(CommonCopy.sentenceThenReason(labels.saveFailed, failure.message), colors.destructive)
         }
     }
 

@@ -97,7 +97,7 @@ struct OverviewView: View {
     private var content: some View {
         switch model.state {
         case .loading:
-            LoadingView(message: "Loading your overview…")
+            LoadingView(message: OverviewCopy.loadingYourOverview)
         case let .failed(failure):
             FailureView(failure: failure, onRetry: retry, onSignIn: onSignIn)
         case let .content(response, _):
@@ -179,15 +179,23 @@ struct OverviewView: View {
         let metrics = response.metrics
         return VStack(spacing: DistrictSpacing.row) {
             HStack(spacing: DistrictSpacing.row) {
-                DistrictMetricTile(label: "Total Calls Routed", value: "\(metrics.totalCalls)", caption: "Cumulative")
                 DistrictMetricTile(
-                    label: "Weekly Call Volume",
+                    label: OverviewCopy.totalCallsRouted,
+                    value: "\(metrics.totalCalls)",
+                    caption: OverviewCopy.cumulative
+                )
+                DistrictMetricTile(
+                    label: OverviewCopy.weeklyCallVolume,
                     value: "\(metrics.callsThisWeek)",
-                    caption: "Last 7 days"
+                    caption: OverviewCopy.last7Days
                 )
             }
             HStack(spacing: DistrictSpacing.row) {
-                DistrictMetricTile(label: "Customer Contacts", value: "\(metrics.totalContacts)", caption: "CRM")
+                DistrictMetricTile(
+                    label: OverviewCopy.customerContacts,
+                    value: "\(metrics.totalContacts)",
+                    caption: OverviewCopy.crm
+                )
                 // ⛔ THE SERVER'S LABEL, NOT A LOCAL FORMAT. Two duration formats
                 // ship in this product and disagree on the same input: this tile
                 // omits a zero minutes component ("45s") while a call row always
@@ -206,9 +214,9 @@ struct OverviewView: View {
                 // two numbers are both correct and will not match; the captions are
                 // what tell an operator why. Do not make them agree by editing the copy.
                 DistrictMetricTile(
-                    label: "Avg Call Duration",
+                    label: OverviewCopy.avgCallDuration,
                     value: response.avgDurationLabel,
-                    caption: "Completed, all time"
+                    caption: OverviewCopy.completedAllTime
                 )
             }
         }
@@ -219,7 +227,7 @@ struct OverviewView: View {
 
     private func recentActivity(_ response: OverviewResponse) -> some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-            DistrictEyebrow(text: "Recent Activity")
+            DistrictEyebrow(text: OverviewCopy.recentActivity)
                 .padding(.horizontal, DistrictSpacing.gutter)
             calls(response)
         }
@@ -233,8 +241,8 @@ struct OverviewView: View {
         if response.recentCalls.isEmpty {
             EmptyStateView(
                 systemImage: "phone",
-                title: "Nothing here yet",
-                message: "Inbound and outbound calls will appear here as they happen."
+                title: OverviewCopy.nothingHereYet,
+                message: OverviewCopy.inboundOutboundCallsWill
             )
         } else {
             // ⚠️ `response.workspaceId` RATHER THAN THE SESSION'S. It is the
@@ -275,7 +283,7 @@ struct OverviewView: View {
         return VStack(alignment: .leading, spacing: DistrictSpacing.row) {
             // ⚠️ LABELLED, THOUGH ANDROID'S COLUMN IS NOT: its entries are visibly
             // buttons, these are list rows directly under another block of list rows.
-            DistrictEyebrow(text: "Workspace")
+            DistrictEyebrow(text: OverviewCopy.workspace)
                 .padding(.horizontal, DistrictSpacing.gutter)
             VStack(spacing: 0) {
                 ForEach(entries) { entry in
@@ -353,7 +361,7 @@ private struct ActivityRow: View {
 
     var body: some View {
         DistrictListRow(
-            title: displayName ?? "No caller ID",
+            title: displayName ?? OverviewCopy.noCallerId,
             subtitle: subtitle,
             // ⛔ LABELLED SLOTS, or this is `ambiguous use of 'init'` — see the ⛔
             // above the constrained initialisers in `DistrictListRow.swift`.
@@ -374,10 +382,10 @@ private struct ActivityRow: View {
             // that failed is the one thing on this screen a human has to act on, and
             // a neutral chip would make it look like a successful one.
             if isTransferred {
-                DistrictBadge(text: "Transferred", tone: .info)
+                DistrictBadge(text: OverviewCopy.transferred, tone: .info)
             }
             if isTransferFailed {
-                DistrictBadge(text: "Transfer failed", tone: .danger)
+                DistrictBadge(text: OverviewCopy.transferFailed, tone: .danger)
             }
             DistrictBadge(text: statusLabel, tone: statusTone)
         }
@@ -403,7 +411,7 @@ private struct ActivityRow: View {
     /// has not opened the browser app. `createdAt` is the true instant and
     /// ``WireDate/display(_:in:)`` is the formatter the rest of this app uses.
     private var subtitle: String {
-        let direction = call.direction == Self.outboundDirection ? "Outbound" : "Inbound"
+        let direction = call.direction == Self.outboundDirection ? OverviewCopy.outbound : OverviewCopy.inbound
         return "\(direction) · \(WireDate.display(call.createdAt))"
     }
 
@@ -425,7 +433,7 @@ private struct ActivityRow: View {
     }
 
     private var statusLabel: String {
-        isLive ? "Live" : call.status
+        isLive ? OverviewCopy.live : call.status
     }
 
     /// ⚠️ IN PROGRESS IS NOT A VERDICT, so a live call wears the accent rather than

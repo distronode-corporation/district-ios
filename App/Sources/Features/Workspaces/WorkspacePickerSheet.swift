@@ -28,7 +28,7 @@ struct WorkspacePickerSheet: View {
                 colors.background.ignoresSafeArea()
                 rows
             }
-            .navigationTitle("Workspaces")
+            .navigationTitle(WorkspacesCopy.workspaces)
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -102,8 +102,8 @@ struct WorkspacePickerSheet: View {
     /// the LIST's membership role, which the overview's effective role may override
     /// upward — so it is a label here and never a gate.
     private static func subtitle(for entry: WorkspaceEntry) -> String {
-        let region = "Region: \(RegionCopy.label(entry.region))"
+        let region = WorkspacesCopy.regionLine(RegionCopy.label(entry.region))
         guard let role = WorkspaceRole.fromWire(entry.role) else { return region }
-        return "\(region) · \(role.displayLabel)"
+        return WorkspacesCopy.regionAndRole(region, role.displayLabel)
     }
 }

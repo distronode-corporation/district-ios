@@ -101,14 +101,14 @@ enum NotificationCategories {
     static func register(on center: UNUserNotificationCenter = .current()) {
         let reply = UNTextInputNotificationAction(
             identifier: MessageNotificationAction.reply,
-            title: "Reply",
+            title: CommonCopy.reply,
             options: [],
-            textInputButtonTitle: "Send",
-            textInputPlaceholder: "Reply to this message"
+            textInputButtonTitle: CommonCopy.send,
+            textInputPlaceholder: CommonCopy.replyMessage
         )
         let markRead = UNNotificationAction(
             identifier: MessageNotificationAction.markRead,
-            title: "Mark read",
+            title: CommonCopy.markRead,
             options: []
         )
         let message = UNNotificationCategory(
@@ -155,8 +155,8 @@ enum NotificationCategories {
         on center: UNUserNotificationCenter = .current()
     ) {
         let content = UNMutableNotificationContent()
-        content.title = "Reply not sent"
-        content.body = "\(reason)\n\nYour message: \(text)"
+        content.title = CommonCopy.replyNotSent
+        content.body = CommonCopy.replyFailureBody(reason, text)
         // ⚠️ A FRESH IDENTIFIER PER FAILURE, so two failed replies are two notifications
         // rather than the second replacing the first. They are about different messages.
         let request = UNNotificationRequest(

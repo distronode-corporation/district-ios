@@ -86,7 +86,7 @@ struct SchedulingAvailabilityRulesSheet: View {
                     )
                 )
                 .districtField()
-                Text("to")
+                Text(SchedulingWriteCopy.rangeTo)
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
                 TextField(

@@ -19,12 +19,12 @@ struct AnalyticsMetricTiles: View {
         VStack(spacing: DistrictSpacing.row) {
             HStack(spacing: DistrictSpacing.row) {
                 DistrictMetricTile(
-                    label: "Total Calls",
+                    label: AnalyticsCopy.totalCalls,
                     value: "\(metrics.totalCalls)",
-                    caption: "In this window"
+                    caption: AnalyticsCopy.inThisWindow
                 )
                 DistrictMetricTile(
-                    label: "Avg Call Duration",
+                    label: AnalyticsCopy.avgCallDuration,
                     // ⛔ NOT "Across completed sessions": THAT IS THE NARROW NAME ON THE
                     // BROAD NUMBER. The server divides by
                     // `lower(status) IN ('completed','answered','machine','human')`,
@@ -38,28 +38,28 @@ struct AnalyticsMetricTiles: View {
                     // ONLY an exact `completed`.
                     // The two tiles measure different things and are meant to.
                     value: AnalyticsFormat.duration(seconds: metrics.avgDuration),
-                    caption: "Answered calls, this window"
+                    caption: AnalyticsCopy.answeredCallsWindow
                 )
             }
             HStack(spacing: DistrictSpacing.row) {
                 DistrictMetricTile(
-                    label: "Conversion Rate",
+                    label: AnalyticsCopy.conversionRate,
                     // ⚠️ ALREADY A PERCENTAGE, ALREADY ROUNDED. Multiplying by 100 is
                     // the obvious mistake and produces a plausible four-digit number
                     // rather than an obviously broken one.
-                    value: "\(metrics.conversionRate)%",
-                    caption: "Of all dials"
+                    value: AnalyticsCopy.percentValue(metrics.conversionRate),
+                    caption: AnalyticsCopy.ofAllDials
                 )
                 DistrictMetricTile(
-                    label: "Missed Calls",
+                    label: AnalyticsCopy.missedCalls,
                     value: "\(metrics.missedCalls)",
-                    caption: "Never connected"
+                    caption: AnalyticsCopy.neverConnected
                 )
             }
             DistrictMetricTile(
-                label: "Abandoned",
+                label: AnalyticsCopy.abandoned,
                 value: "\(metrics.abandonedCalls)",
-                caption: "Caller hung up"
+                caption: AnalyticsCopy.callerHungUp
             )
         }
     }
@@ -87,8 +87,8 @@ struct AnalyticsDeltaCard: View {
     }
 
     var body: some View {
-        DistrictCard(eyebrow: "Call volume") {
-            Text("\(delta.current) now, \(delta.prior) in the previous period")
+        DistrictCard(eyebrow: AnalyticsCopy.callVolume) {
+            Text(AnalyticsCopy.callVolumeNowAndPrior(delta.current, delta.prior))
                 .font(DistrictType.metric)
                 .foregroundStyle(colors.foreground)
             Text(comparison)
@@ -98,11 +98,11 @@ struct AnalyticsDeltaCard: View {
     }
 
     private var comparison: String {
-        guard let pct = delta.pct else { return "New, no previous period to compare" }
+        guard let pct = delta.pct else { return AnalyticsCopy.newNoPreviousPeriod }
         switch delta.direction {
-        case CallVolumeDirection.up: return "▲ \(abs(pct))% vs the previous period"
-        case CallVolumeDirection.down: return "▼ \(abs(pct))% vs the previous period"
-        default: return "No change vs the previous period"
+        case CallVolumeDirection.up: return AnalyticsCopy.callVolumeUp(abs(pct))
+        case CallVolumeDirection.down: return AnalyticsCopy.callVolumeDown(abs(pct))
+        default: return AnalyticsCopy.noChangeVsPrevious
         }
     }
 
@@ -146,15 +146,15 @@ struct AnalyticsTrendCard: View {
     }
 
     var body: some View {
-        DistrictCard(eyebrow: "Call volume trend") {
+        DistrictCard(eyebrow: AnalyticsCopy.callVolumeTrend) {
             if let first = points.first, let last = points.last {
                 chart
-                Text("\(first.date) to \(last.date)")
+                Text(AnalyticsCopy.dateRange(first.date, last.date))
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
             }
             if isQuietWindow {
-                AnalyticsNote(text: "No calls in this window.")
+                AnalyticsNote(text: AnalyticsCopy.noCallsWindow)
             }
         }
     }
@@ -179,8 +179,8 @@ struct AnalyticsTrendCard: View {
         Chart {
             ForEach(points, id: \.isoDate) { point in
                 BarMark(
-                    x: .value("Bucket", point.date),
-                    y: .value("Calls", point.calls)
+                    x: .value(AnalyticsCopy.bucket, point.date),
+                    y: .value(AnalyticsCopy.calls, point.calls)
                 )
                 .foregroundStyle(colors.district)
                 .accessibilityLabel(point.date)
@@ -212,12 +212,12 @@ struct AnalyticsFunnelCard: View {
     }
 
     var body: some View {
-        DistrictCard(eyebrow: "Conversion funnel") {
+        DistrictCard(eyebrow: AnalyticsCopy.conversionFunnel) {
             Chart {
                 ForEach(stages, id: \.name) { stage in
                     BarMark(
-                        x: .value("Calls", stage.count),
-                        y: .value("Stage", stage.name)
+                        x: .value(AnalyticsCopy.calls, stage.count),
+                        y: .value(AnalyticsCopy.stage, stage.name)
                     )
                     .foregroundStyle(colors.district)
                     .accessibilityLabel(stage.name)
@@ -259,7 +259,7 @@ struct AnalyticsSentimentCard: View {
     }
 
     var body: some View {
-        DistrictCard(eyebrow: "Sentiment") {
+        DistrictCard(eyebrow: AnalyticsCopy.sentiment) {
             if hasAnalysis {
                 chart
             }
@@ -267,7 +267,7 @@ struct AnalyticsSentimentCard: View {
                 legendRow(slice)
             }
             if !hasAnalysis {
-                AnalyticsNote(text: "No calls to analyse yet.")
+                AnalyticsNote(text: AnalyticsCopy.noCallsAnalyseYet)
             }
         }
     }
@@ -282,7 +282,7 @@ struct AnalyticsSentimentCard: View {
         Chart {
             ForEach(slices, id: \.name) { slice in
                 SectorMark(
-                    angle: .value("Calls", slice.value),
+                    angle: .value(AnalyticsCopy.calls, slice.value),
                     innerRadius: .ratio(0.6),
                     angularInset: 1
                 )

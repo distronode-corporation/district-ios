@@ -58,7 +58,7 @@ private struct ContactsScreen: View {
 
     var body: some View {
         content
-            .navigationTitle("Contacts")
+            .navigationTitle(ContactsCopy.contacts)
             // ⛔ `.contain` FIRST, or this identifier is inherited by every row and
             // `A11yID.Contacts.row(id)` stops resolving. See SignInView's note.
             .accessibilityElement(children: .contain)
@@ -92,7 +92,7 @@ private struct ContactsScreen: View {
     private var addContactItem: some ToolbarContent {
         ToolbarItem(placement: .primaryAction) {
             if model.canMutate {
-                Button("Add contact") { creating = true }
+                Button(ContactsCopy.addContact) { creating = true }
             }
         }
     }
@@ -135,17 +135,17 @@ private struct ContactsScreen: View {
         if model.canMutate {
             EmptyStateView(
                 systemImage: "person.2",
-                title: "No contacts yet",
-                message: "Callers are added automatically as they come in."
+                title: ContactsCopy.noContactsYet,
+                message: ContactsCopy.callersAreAddedAutomatically
             ) {
-                Button("Add a contact") { creating = true }
+                Button(ContactsCopy.addAContact) { creating = true }
                     .buttonStyle(.districtPrimary)
             }
         } else {
             EmptyStateView(
                 systemImage: "person.2",
-                title: "No contacts yet",
-                message: "Callers are added automatically as they come in."
+                title: ContactsCopy.noContactsYet,
+                message: ContactsCopy.callersAreAddedAutomatically
             )
         }
     }
@@ -199,7 +199,7 @@ private struct ContactsScreen: View {
     /// ⚠️ STATED UP FRONT RATHER THAN DISCOVERED BY TAPPING SOMETHING THAT 403s.
     /// Every contacts mutation excludes `viewer` server-side.
     private var readOnlyCaption: some View {
-        Text("Read-only access, editing is disabled.")
+        Text(ContactsCopy.readOnlyAccessEditing)
             .font(DistrictType.caption)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, DistrictSpacing.gutter)
@@ -211,7 +211,7 @@ private struct ContactsScreen: View {
         // which the voice agent writes for an unidentified caller. Printing it
         // would read as a name; see ``Contact/displayName``.
         let name = contact.displayName
-        let title = name ?? "Unnamed contact"
+        let title = name ?? ContactsCopy.unnamedContact
         return DistrictListRow(
             title: title,
             subtitle: Self.subtitle(for: contact, title: title),
@@ -234,7 +234,7 @@ private struct ContactsScreen: View {
                 // it to NULL precisely so nothing re-crawls — so rendering null as
                 // pending would promise a job that never finishes.
                 if DgiStatus.isInProgress(contact.dgiStatus) {
-                    DistrictBadge(text: "Building dossier…", tone: .district)
+                    DistrictBadge(text: ContactsCopy.buildingDossier, tone: .district)
                 }
             }
         )
@@ -293,7 +293,9 @@ private struct ContactsScreen: View {
         return left.caseInsensitiveCompare(right) == .orderedSame
     }
 
-    private static let noIdentifiers = "No phone or email"
+    private static var noIdentifiers: String {
+        ContactsCopy.noPhoneEmail
+    }
 
     // MARK: - Actions
 

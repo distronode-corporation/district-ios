@@ -1,3 +1,4 @@
+import DistrictL10n
 import Foundation
 import SwiftUI
 
@@ -30,14 +31,15 @@ enum AnalyticsFormat {
     /// swipes along a chart, and "1 calls" thirty times is the kind of wrongness that
     /// makes a screen reader sound broken rather than merely terse.
     static func callCount(_ calls: Int) -> String {
-        calls == 1 ? "1 call" : "\(calls) calls"
+        AnalyticsCopy.callCount(calls)
     }
 
     static func duration(seconds: Int) -> String {
         let safe = max(seconds, 0)
         let minutes = safe / 60
         let remainder = safe % 60
-        return minutes > 0 ? "\(minutes)m \(remainder)s" : "\(remainder)s"
+        return minutes > 0 ? AnalyticsCopy.durationMinutesSeconds(minutes, remainder) : AnalyticsCopy
+            .durationSeconds(remainder)
     }
 
     /// A metered amount, as a quantity rather than as a raw `Double`.
@@ -75,7 +77,9 @@ enum AnalyticsFormat {
     /// place a fabricated zero gets believed. Android renders an em dash here; this
     /// client spells it out, both because the repo's house style avoids em dashes
     /// and because "—" is read aloud as nothing at all by VoiceOver.
-    static let absent = "Not metered"
+    static var absent: String {
+        AnalyticsCopy.notMetered
+    }
 
     /// Add up several metered amounts, keeping "none of them was metered" distinct
     /// from "they summed to zero".
@@ -126,8 +130,8 @@ enum AnalyticsFormat {
     static func monthLabel(_ month: String) -> String {
         let parts = month.split(separator: "-")
         guard parts.count == 2, parts[0].count == 4, Int(parts[0]) != nil else { return month }
-        guard let ordinal = Int(parts[1]), (1 ... monthNames.count).contains(ordinal) else { return month }
-        return "\(monthNames[ordinal - 1]) \(parts[0])"
+        guard let ordinal = Int(parts[1]), let name = L10nFormat.monthAbbreviation(ordinal) else { return month }
+        return AnalyticsCopy.monthYear(name, String(parts[0]))
     }
 
     /// Parse a server-supplied hex colour, or nil if it cannot be read.
@@ -165,11 +169,4 @@ enum AnalyticsFormat {
         guard let value, value.isFinite else { return 0 }
         return max(value, 0)
     }
-
-    /// ⚠️ HERE RATHER THAN IN ANY COPY TABLE: this is a decoding table keyed by an
-    /// integer the SERVER chose, not user-facing prose with a translation.
-    private static let monthNames = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ]
 }

@@ -219,9 +219,9 @@ struct DossierSection: View {
     /// checker to choose between the `LocalizedStringKey` overload and the
     /// `StringProtocol` one at the call site. A named `String` picks the second
     /// unambiguously.
-    private static let clearPrompt =
-        "Clear this contact's Global Intelligence dossier? The contact, its phone number, "
-            + "email and timeline are kept. Getting the dossier back means running enrichment again."
+    private static var clearPrompt: String {
+        ContactsCopy.clearContactSGlobal
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.row) {
@@ -248,16 +248,16 @@ struct DossierSection: View {
     @ViewBuilder
     private var status: some View {
         if DgiStatus.isInProgress(contact.dgiStatus) {
-            DistrictBadge(text: "Building dossier…", tone: .warning)
+            DistrictBadge(text: ContactsCopy.buildingDossier, tone: .warning)
         } else if let error = contact.dgiError {
             // ⚠️ THE SERVER'S OWN MESSAGE, VERBATIM. It names what the crawl could
             // not do, and a generic "enrichment failed" would throw away the only
             // diagnostic an operator ever gets for a pipeline that ran elsewhere.
-            DetailFieldCard(label: "Intelligence dossier", value: "Dossier failed: \(error)")
+            DetailFieldCard(label: ContactsCopy.intelligenceDossier, value: ContactsCopy.dossierFailed(error))
         } else if contact.intelligence == nil {
-            DetailFieldCard(label: "Intelligence dossier", value: "No dossier for this contact.")
+            DetailFieldCard(label: ContactsCopy.intelligenceDossier, value: ContactsCopy.noDossierContact)
         } else {
-            DetailFieldCard(label: "Intelligence dossier", value: "Dossier available")
+            DetailFieldCard(label: ContactsCopy.intelligenceDossier, value: ContactsCopy.dossierAvailable)
         }
     }
 
@@ -275,16 +275,21 @@ struct DossierSection: View {
     private var company: some View {
         let children = companyChildren
         if !children.isEmpty {
-            DossierFieldCard(field: DossierField(id: "company", label: "Company", value: nil, children: children))
+            DossierFieldCard(field: DossierField(
+                id: "company",
+                label: ContactsCopy.company,
+                value: nil,
+                children: children
+            ))
         }
     }
 
     private var companyChildren: [DossierField] {
         guard let company = contact.company else { return [] }
         let pairs = [
-            ("name", "Name", company.name),
-            ("domain", "Domain", company.domain),
-            ("industry", "Industry", company.industry),
+            ("name", ContactsCopy.name, company.name),
+            ("domain", ContactsCopy.domain, company.domain),
+            ("industry", ContactsCopy.industry, company.industry),
         ]
         return pairs.compactMap { key, label, value in
             guard let value, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
@@ -304,7 +309,7 @@ struct DossierSection: View {
     private var actions: some View {
         if canMutate {
             if isEnrichable {
-                Button("Run Global Intelligence", action: onEnrich)
+                Button(ContactsCopy.runGlobalIntelligence, action: onEnrich)
                     .buttonStyle(.districtSecondary)
                     .disabled(busy)
             }
@@ -312,7 +317,7 @@ struct DossierSection: View {
             // run: clearing is how a failed dossier's error is dismissed and the
             // contact returned to an enrichable state.
             if isClearable {
-                Button("Clear dossier") { confirmingClear = true }
+                Button(ContactsCopy.clearDossier) { confirmingClear = true }
                     .buttonStyle(.districtGhost)
                     .disabled(busy)
                     // ⛔ CONFIRMED, BECAUSE CLEARING IS NOT RECOVERABLE AND IS NOT FREE
@@ -320,8 +325,8 @@ struct DossierSection: View {
                     // and another model run. The prompt says so rather than asking a
                     // bare "are you sure".
                     .confirmationDialog(Self.clearPrompt, isPresented: $confirmingClear, titleVisibility: .visible) {
-                        Button("Clear dossier", role: .destructive, action: onClearIntel)
-                        Button("Cancel", role: .cancel) {}
+                        Button(ContactsCopy.clearDossier, role: .destructive, action: onClearIntel)
+                        Button(ContactsCopy.cancel, role: .cancel) {}
                     }
             }
         }

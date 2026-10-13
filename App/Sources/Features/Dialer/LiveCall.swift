@@ -73,7 +73,9 @@ struct LiveCallDisplay: Equatable {
     /// ⛔ STATED BECAUSE THIS APP NEVER WRITES THE CALL'S OUTCOME, in either
     /// direction. The row's terminal status and its billed duration come from the
     /// carrier's webhooks, so the log is the record and this screen is not.
-    static let logNotice = "This call is in the workspace call log."
+    static var logNotice: String {
+        DialerCopy.callWorkspaceCallLog
+    }
 }
 
 extension LiveCallDisplay {

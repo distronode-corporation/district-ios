@@ -3,6 +3,461 @@ catalog = "ios"
 platform = "swift"
 apple = true
 
+[account.account]
+en = "Account"
+ctx = "label"
+screen = "account"
+id = { swift = "AccountCopy.account" }
+
+[account.delete_account]
+en = "Delete account"
+ctx = "title"
+screen = "account"
+tier = "T0"
+id = { swift = "AccountCopy.deleteAccount" }
+
+[account.devices]
+en = "Devices"
+ctx = "title"
+screen = "account"
+id = { swift = "AccountCopy.devices" }
+
+[account.installation_id]
+en = "Installation id {id}"
+ctx = "label"
+screen = "account"
+args = { id = "str" }
+id = { swift = "AccountCopy.installationId(_:)" }
+note = "{id} is an opaque install identifier the user may copy for support."
+
+[account.opaque_id_install_cleared]
+en = "An opaque id for this install. It is cleared when you delete the app, and it identifies no hardware."
+ctx = "body"
+screen = "account"
+tier = "T0"
+id = { swift = "AccountCopy.opaqueIdInstallCleared" }
+
+[account.request_deletion_account_its]
+en = "Request deletion of your account and its data. Opens in your browser."
+ctx = "title"
+screen = "account"
+tier = "T0"
+id = { swift = "AccountCopy.requestDeletionAccountIts" }
+
+[account.see_where_are_signed]
+en = "See where you are signed in, and sign out a device you no longer have."
+ctx = "title"
+screen = "account"
+id = { swift = "AccountCopy.seeWhereAreSigned" }
+
+[account.sign_out]
+en = "Sign out"
+ctx = "title"
+screen = "account"
+id = { swift = "AccountCopy.signOut" }
+
+[account.sign_out_district_ai]
+en = "Sign out of District AI on this device."
+ctx = "title"
+screen = "account"
+id = { swift = "AccountCopy.signOutDistrictAi" }
+
+[account.this_device]
+en = "This device"
+ctx = "title"
+screen = "account"
+id = { swift = "AccountCopy.thisDevice" }
+
+[account.unknown_version]
+en = "unknown"
+ctx = "label"
+screen = "account"
+id = { swift = "AccountCopy.unknownVersion" }
+note = "Shown in place of the version or build number when the app cannot read it: 'District AI unknown (unknown)'."
+
+[account.version_line]
+en = "District AI {version} ({build})"
+ctx = "label"
+screen = "account"
+args = { version = "str", build = "str" }
+id = { swift = "AccountCopy.versionLine(_:_:)" }
+note = "The app's version and build number, at the foot of Account."
+
+[account.your_account]
+en = "Your account"
+ctx = "title"
+screen = "account"
+id = { swift = "AccountCopy.yourAccount" }
+
+[analytics.abandoned]
+en = "Abandoned"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.abandoned" }
+
+[analytics.analytics]
+en = "Analytics"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.analytics" }
+
+[analytics.answered_calls_window]
+en = "Answered calls, this window"
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.answeredCallsWindow" }
+
+[analytics.avg_call_duration]
+en = "Avg Call Duration"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.avgCallDuration" }
+
+[analytics.bars_compare_metered_call]
+en = "Bars compare metered call minutes across these months. A channel with nothing metered is labelled rather than shown as zero."
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.barsCompareMeteredCall" }
+
+[analytics.bucket]
+en = "Bucket"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.bucket" }
+
+[analytics.call_count]
+en.one = "{calls} call"
+en.other = "{calls} calls"
+ctx = "a11y"
+screen = "analytics"
+args = { calls = "int" }
+id = { swift = "AnalyticsCopy.callCount(_:)" }
+note = "Read by VoiceOver for each bar of a chart."
+
+[analytics.call_volume]
+en = "Call volume"
+ctx = "title"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.callVolume" }
+
+[analytics.call_volume_down]
+en = "▼ {pct}% vs the previous period"
+ctx = "label"
+screen = "analytics"
+args = { pct = "int" }
+id = { swift = "AnalyticsCopy.callVolumeDown(_:)" }
+note = "{pct} is a whole percentage. The triangle shows the direction."
+
+[analytics.call_volume_now_and_prior]
+en = "{current} now, {prior} in the previous period"
+ctx = "label"
+screen = "analytics"
+args = { current = "int", prior = "int" }
+id = { swift = "AnalyticsCopy.callVolumeNowAndPrior(_:_:)" }
+note = "Call counts in this window and the one before it."
+
+[analytics.call_volume_trend]
+en = "Call volume trend"
+ctx = "title"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.callVolumeTrend" }
+
+[analytics.call_volume_up]
+en = "▲ {pct}% vs the previous period"
+ctx = "label"
+screen = "analytics"
+args = { pct = "int" }
+id = { swift = "AnalyticsCopy.callVolumeUp(_:)" }
+note = "{pct} is a whole percentage. The triangle shows the direction."
+
+[analytics.caller_hung_up]
+en = "Caller hung up"
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.callerHungUp" }
+
+[analytics.calls]
+en = "Calls"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.calls" }
+
+[analytics.conversion_funnel]
+en = "Conversion funnel"
+ctx = "title"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.conversionFunnel" }
+
+[analytics.conversion_rate]
+en = "Conversion Rate"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.conversionRate" }
+
+[analytics.could_not_load_analytics]
+en = "Could not load analytics."
+ctx = "title"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.couldNotLoadAnalytics" }
+
+[analytics.could_not_load_usage]
+en = "Could not load usage."
+ctx = "title"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.couldNotLoadUsage" }
+
+[analytics.could_not_load_usage2]
+en = "Could not load usage history."
+ctx = "title"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.couldNotLoadUsage2" }
+
+[analytics.date_range]
+en = "{first} to {last}"
+ctx = "label"
+screen = "analytics"
+args = { first = "date", last = "date" }
+id = { swift = "AnalyticsCopy.dateRange(_:_:)" }
+note = "The first and last dates on the chart, already formatted."
+
+[analytics.duration_minutes_seconds]
+en = "{minutes}m {seconds}s"
+ctx = "format"
+screen = "analytics"
+args = { minutes = "int", seconds = "int" }
+id = { swift = "AnalyticsCopy.durationMinutesSeconds(_:_:)" }
+note = "A call's length, abbreviated."
+
+[analytics.duration_seconds]
+en = "{seconds}s"
+ctx = "format"
+screen = "analytics"
+args = { seconds = "int" }
+id = { swift = "AnalyticsCopy.durationSeconds(_:)" }
+note = "A call's length under a minute, abbreviated."
+
+[analytics.in_this_window]
+en = "In this window"
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.inThisWindow" }
+
+[analytics.inbound_call_minutes]
+en = "Inbound call minutes"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.inboundCallMinutes" }
+
+[analytics.loading_analytics]
+en = "Loading analytics…"
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.loadingAnalytics" }
+
+[analytics.messages]
+en = "Messages"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.messages" }
+
+[analytics.metered_call_minutes]
+en = "Metered call minutes"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.meteredCallMinutes" }
+
+[analytics.missed_calls]
+en = "Missed Calls"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.missedCalls" }
+
+[analytics.mms_sent]
+en = "MMS sent"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.mmsSent" }
+
+[analytics.month_year]
+en = "{month} {year}"
+ctx = "format"
+screen = "analytics"
+args = { month = "str", year = "str" }
+id = { swift = "AnalyticsCopy.monthYear(_:_:)" }
+note = "{month} is the month's abbreviation from the core's calendar words, {year} four digits."
+
+[analytics.n30_days]
+en = "30 days"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.n30Days" }
+
+[analytics.n7_days]
+en = "7 days"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.n7Days" }
+
+[analytics.n90_days]
+en = "90 days"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.n90Days" }
+
+[analytics.never_connected]
+en = "Never connected"
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.neverConnected" }
+
+[analytics.new_no_previous_period]
+en = "New, no previous period to compare"
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.newNoPreviousPeriod" }
+
+[analytics.no_calls_analyse_yet]
+en = "No calls to analyse yet."
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.noCallsAnalyseYet" }
+
+[analytics.no_calls_window]
+en = "No calls in this window."
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.noCallsWindow" }
+
+[analytics.no_change_vs_previous]
+en = "No change vs the previous period"
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.noChangeVsPrevious" }
+
+[analytics.no_usage_has_been]
+en = "No usage has been recorded for this month yet."
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.noUsageHasBeen" }
+
+[analytics.no_usage_has_been2]
+en = "No usage has been recorded in any recent month yet."
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.noUsageHasBeen2" }
+
+[analytics.not_metered]
+en = "Not metered"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.notMetered" }
+
+[analytics.of_all_dials]
+en = "Of all dials"
+ctx = "body"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.ofAllDials" }
+
+[analytics.outbound_call_minutes]
+en = "Outbound call minutes"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.outboundCallMinutes" }
+
+[analytics.percent_value]
+en = "{value}%"
+ctx = "format"
+screen = "analytics"
+args = { value = "int" }
+id = { swift = "AnalyticsCopy.percentValue(_:)" }
+note = "A whole percentage."
+
+[analytics.phone_numbers]
+en = "Phone numbers"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.phoneNumbers" }
+
+[analytics.recent_months]
+en = "Recent months"
+ctx = "title"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.recentMonths" }
+
+[analytics.sentiment]
+en = "Sentiment"
+ctx = "title"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.sentiment" }
+
+[analytics.sms_received]
+en = "SMS received"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.smsReceived" }
+
+[analytics.sms_sent]
+en = "SMS sent"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.smsSent" }
+
+[analytics.stage]
+en = "Stage"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.stage" }
+
+[analytics.total_calls]
+en = "Total Calls"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.totalCalls" }
+
+[analytics.try_again]
+en = "Try again"
+ctx = "button"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.tryAgain" }
+
+[analytics.usage_month]
+en = "Month {month}"
+ctx = "label"
+screen = "analytics"
+args = { month = "date" }
+id = { swift = "AnalyticsCopy.usageMonth(_:)" }
+note = "{month} is the usage month as shown elsewhere on the card."
+
+[analytics.usage_this_month]
+en = "Usage this month"
+ctx = "title"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.usageThisMonth" }
+
+[analytics.video_minutes_tracked]
+en = "Video minutes (tracked)"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.videoMinutesTracked" }
+
+[analytics.whatsapp_received]
+en = "WhatsApp received"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.whatsappReceived" }
+
+[analytics.whatsapp_sent]
+en = "WhatsApp sent"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.whatsappSent" }
+
+[analytics.window]
+en = "Window"
+ctx = "label"
+screen = "analytics"
+id = { swift = "AnalyticsCopy.window" }
+
 [availability.card_title]
 en = "Calls to you"
 ctx = "title"
@@ -436,6 +891,270 @@ tier = "T1"
 id = { swift = "BillingCopy.unavailableTitle" }
 note = "⛔ THE COPY THAT MUST NEVER BE AN EMPTY INVOICE LIST. `billingUnavailable` means we could not reach Stripe; the subscription and the invoices still exist. Rendering this as \"no plan\" tells a paying customer they have none."
 
+[calls.action_items]
+en = "Action items"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.actionItems" }
+
+[calls.ai_summary]
+en = "AI summary"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.aiSummary" }
+
+[calls.call]
+en = "Call"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.call" }
+
+[calls.call_could_not_summarised]
+en = "This call could not be summarised."
+ctx = "body"
+screen = "calls"
+id = { swift = "CallsCopy.callCouldNotSummarised" }
+
+[calls.call_log]
+en = "Call log"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.callLog" }
+
+[calls.call_not_available]
+en = "This call is not available."
+ctx = "body"
+screen = "calls"
+id = { swift = "CallsCopy.callNotAvailable" }
+
+[calls.follow_up_sent]
+en = "Follow-up sent"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.followUpSent" }
+
+[calls.inbound]
+en = "Inbound"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.inbound" }
+
+[calls.inbound_outbound_calls_will]
+en = "Inbound and outbound calls will appear here as they happen."
+ctx = "body"
+screen = "calls"
+id = { swift = "CallsCopy.inboundOutboundCallsWill" }
+
+[calls.key_points]
+en = "Key points"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.keyPoints" }
+
+[calls.live]
+en = "Live"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.live" }
+
+[calls.loading_call]
+en = "Loading call…"
+ctx = "body"
+screen = "calls"
+id = { swift = "CallsCopy.loadingCall" }
+
+[calls.manage]
+en = "Manage"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.manage" }
+
+[calls.no_ai_summary_call]
+en = "No AI summary for this call."
+ctx = "body"
+screen = "calls"
+id = { swift = "CallsCopy.noAiSummaryCall" }
+
+[calls.no_caller_id]
+en = "No caller ID"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.noCallerId" }
+
+[calls.no_transcript_call]
+en = "No transcript for this call."
+ctx = "body"
+screen = "calls"
+id = { swift = "CallsCopy.noTranscriptCall" }
+
+[calls.nothing_here_yet]
+en = "Nothing here yet"
+ctx = "title"
+screen = "calls"
+id = { swift = "CallsCopy.nothingHereYet" }
+
+[calls.objections]
+en = "Objections"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.objections" }
+
+[calls.outbound]
+en = "Outbound"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.outbound" }
+
+[calls.outcome]
+en = "Outcome"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.outcome" }
+
+[calls.sentiment]
+en = "Sentiment"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.sentiment" }
+
+[calls.show_transcript]
+en = "Show transcript"
+ctx = "button"
+screen = "calls"
+id = { swift = "CallsCopy.showTranscript" }
+
+[calls.topics]
+en = "Topics"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.topics" }
+
+[calls.transcript]
+en = "Transcript"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.transcript" }
+
+[calls.transfer]
+en = "Transfer"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.transfer" }
+
+[calls.transfer_failed]
+en = "Transfer failed"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.transferFailed" }
+
+[calls.transferred]
+en = "Transferred"
+ctx = "label"
+screen = "calls"
+id = { swift = "CallsCopy.transferred" }
+
+[common.checking_your_session]
+en = "Checking your session…"
+ctx = "body"
+screen = "root_view.swift"
+id = { swift = "CommonCopy.checkingYourSession" }
+
+[common.copy_address]
+en = "Copy Address"
+ctx = "title"
+screen = "design_system"
+id = { swift = "CommonCopy.copyAddress" }
+
+[common.copy_email]
+en = "Copy Email"
+ctx = "title"
+screen = "design_system"
+id = { swift = "CommonCopy.copyEmail" }
+
+[common.copy_number]
+en = "Copy Number"
+ctx = "title"
+screen = "design_system"
+id = { swift = "CommonCopy.copyNumber" }
+
+[common.could_not_load_more]
+en = "Could not load more"
+ctx = "label"
+screen = "platform"
+id = { swift = "CommonCopy.couldNotLoadMore" }
+
+[common.label_value]
+en = "{label}: {value}"
+ctx = "format"
+screen = "common"
+args = { label = "str", value = "str" }
+id = { swift = "CommonCopy.labelValue(_:_:)" }
+note = "A field's name and its value. French puts a no-break space before the colon."
+
+[common.mark_read]
+en = "Mark read"
+ctx = "notification"
+screen = "platform"
+tier = "T0"
+id = { swift = "CommonCopy.markRead" }
+
+[common.reply]
+en = "Reply"
+ctx = "notification"
+screen = "platform"
+tier = "T0"
+id = { swift = "CommonCopy.reply" }
+
+[common.reply_failure_body]
+en = "{reason}\n\nYour message: {text}"
+ctx = "notification"
+screen = "platform"
+tier = "T0"
+args = { reason = "str", text = "str" }
+id = { swift = "CommonCopy.replyFailureBody(_:_:)" }
+note = "A local notification after a reply from the lock screen failed. {reason} says why; {text} is the reply the user typed."
+
+[common.reply_message]
+en = "Reply to this message"
+ctx = "notification"
+screen = "platform"
+tier = "T0"
+id = { swift = "CommonCopy.replyMessage" }
+
+[common.reply_not_sent]
+en = "Reply not sent"
+ctx = "notification"
+screen = "platform"
+tier = "T0"
+id = { swift = "CommonCopy.replyNotSent" }
+
+[common.send]
+en = "Send"
+ctx = "notification"
+screen = "platform"
+tier = "T0"
+id = { swift = "CommonCopy.send" }
+
+[common.sentence_then_reason]
+en = "{sentence} {reason}"
+ctx = "format"
+screen = "common"
+args = { sentence = "str", reason = "str" }
+id = { swift = "CommonCopy.sentenceThenReason(_:_:)" }
+note = "A sentence the server wrote, then the failure's own sentence."
+
+[common.sign_in]
+en = "Sign in"
+ctx = "label"
+screen = "root_view.swift"
+id = { swift = "CommonCopy.signIn" }
+
+[common.try_again]
+en = "Try again"
+ctx = "label"
+screen = "root_view.swift"
+id = { swift = "CommonCopy.tryAgain" }
+
 [contact_block.badge]
 en = "Blocked"
 ctx = "label"
@@ -547,6 +1266,258 @@ ctx = "label"
 screen = "contacts"
 id = { swift = "ContactVideoCopy.starting" }
 
+[contacts.add]
+en = "Add"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.add" }
+
+[contacts.add_a_contact]
+en = "Add a contact"
+ctx = "button"
+screen = "contacts"
+id = { swift = "ContactsCopy.addAContact" }
+
+[contacts.add_contact]
+en = "Add contact"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.addContact" }
+
+[contacts.added]
+en = "Added"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.added" }
+
+[contacts.adding]
+en = "Adding…"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.adding" }
+
+[contacts.budget]
+en = "Budget"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.budget" }
+
+[contacts.building_dossier]
+en = "Building dossier…"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.buildingDossier" }
+
+[contacts.callers_are_added_automatically]
+en = "Callers are added automatically as they come in."
+ctx = "body"
+screen = "contacts"
+id = { swift = "ContactsCopy.callersAreAddedAutomatically" }
+
+[contacts.cancel]
+en = "Cancel"
+ctx = "button"
+screen = "contacts"
+id = { swift = "ContactsCopy.cancel" }
+
+[contacts.clear_contact_s_global]
+en = "Clear this contact's Global Intelligence dossier? The contact, its phone number, email and timeline are kept. Getting the dossier back means running enrichment again."
+ctx = "body"
+screen = "contacts"
+id = { swift = "ContactsCopy.clearContactSGlobal" }
+
+[contacts.clear_dossier]
+en = "Clear dossier"
+ctx = "button"
+screen = "contacts"
+id = { swift = "ContactsCopy.clearDossier" }
+
+[contacts.company]
+en = "Company"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.company" }
+
+[contacts.contact]
+en = "Contact"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.contact" }
+
+[contacts.contact_name]
+en = "Contact name"
+ctx = "placeholder"
+screen = "contacts"
+id = { swift = "ContactsCopy.contactName" }
+
+[contacts.contact_not_available]
+en = "This contact is not available."
+ctx = "body"
+screen = "contacts"
+id = { swift = "ContactsCopy.contactNotAvailable" }
+
+[contacts.contacts]
+en = "Contacts"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.contacts" }
+
+[contacts.delete]
+en = "Delete"
+ctx = "button"
+screen = "contacts"
+tier = "T2"
+id = { swift = "ContactsCopy.delete" }
+
+[contacts.delete_contact]
+en = "Delete contact"
+ctx = "button"
+screen = "contacts"
+tier = "T2"
+id = { swift = "ContactsCopy.deleteContact" }
+
+[contacts.delete_contact_cannot_undone]
+en = "Delete this contact? This cannot be undone."
+ctx = "title"
+screen = "contacts"
+tier = "T2"
+id = { swift = "ContactsCopy.deleteContactCannotUndone" }
+
+[contacts.dismiss]
+en = "Dismiss"
+ctx = "button"
+screen = "contacts"
+id = { swift = "ContactsCopy.dismiss" }
+
+[contacts.domain]
+en = "Domain"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.domain" }
+
+[contacts.dossier_available]
+en = "Dossier available"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.dossierAvailable" }
+
+[contacts.dossier_failed]
+en = "Dossier failed: {error}"
+ctx = "error"
+screen = "contacts"
+tier = "T2"
+args = { error = "str" }
+id = { swift = "ContactsCopy.dossierFailed(_:)" }
+note = "{error} is the enrichment pipeline's own diagnostic, as the server stored it."
+
+[contacts.email]
+en = "Email"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.email" }
+
+[contacts.enter_phone_number_email]
+en = "Enter a phone number or an email address."
+ctx = "body"
+screen = "contacts"
+id = { swift = "ContactsCopy.enterPhoneNumberEmail" }
+
+[contacts.industry]
+en = "Industry"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.industry" }
+
+[contacts.intelligence_dossier]
+en = "Intelligence dossier"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.intelligenceDossier" }
+
+[contacts.latest_context]
+en = "Latest context"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.latestContext" }
+
+[contacts.loading_contact]
+en = "Loading contact…"
+ctx = "body"
+screen = "contacts"
+id = { swift = "ContactsCopy.loadingContact" }
+
+[contacts.name]
+en = "Name"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.name" }
+
+[contacts.no_contacts_yet]
+en = "No contacts yet"
+ctx = "title"
+screen = "contacts"
+id = { swift = "ContactsCopy.noContactsYet" }
+
+[contacts.no_dossier_contact]
+en = "No dossier for this contact."
+ctx = "body"
+screen = "contacts"
+id = { swift = "ContactsCopy.noDossierContact" }
+
+[contacts.no_phone_email]
+en = "No phone or email"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.noPhoneEmail" }
+
+[contacts.phone_number]
+en = "Phone number"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.phoneNumber" }
+
+[contacts.read_only_access_editing]
+en = "Read-only access, editing is disabled."
+ctx = "body"
+screen = "contacts"
+id = { swift = "ContactsCopy.readOnlyAccessEditing" }
+
+[contacts.rename]
+en = "Rename"
+ctx = "button"
+screen = "contacts"
+id = { swift = "ContactsCopy.rename" }
+
+[contacts.run_global_intelligence]
+en = "Run Global Intelligence"
+ctx = "button"
+screen = "contacts"
+id = { swift = "ContactsCopy.runGlobalIntelligence" }
+
+[contacts.save]
+en = "Save"
+ctx = "button"
+screen = "contacts"
+id = { swift = "ContactsCopy.save" }
+
+[contacts.timeline]
+en = "Timeline"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.timeline" }
+
+[contacts.unnamed_contact]
+en = "Unnamed contact"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.unnamedContact" }
+
+[contacts.website]
+en = "Website"
+ctx = "label"
+screen = "contacts"
+id = { swift = "ContactsCopy.website" }
+
 [desk.all_filter]
 en = "All"
 ctx = "label"
@@ -636,6 +1607,12 @@ en = "Ticket opened."
 ctx = "body"
 screen = "desk"
 id = { swift = "DeskCopy.createSucceeded" }
+
+[desk.done]
+en = "Done"
+ctx = "button"
+screen = "desk"
+id = { swift = "DeskCopy.done" }
 
 [desk.empty_message]
 en = "When a call your agent cannot resolve ends, it files the ticket here with the call's own summary. You can also open one yourself."
@@ -782,6 +1759,12 @@ screen = "desk"
 id = { swift = "DeskCopy.offTitle" }
 note = "⛔ OFF IS NOT EMPTY, AND THIS IS THE SENTENCE THAT KEEPS THEM APART. An empty queue here would be a lie: it reads as \"no customer has ever contacted you\" when the truth is that nothing is being recorded at all."
 
+[desk.open]
+en = "Open"
+ctx = "label"
+screen = "desk"
+id = { swift = "DeskCopy.open" }
+
 [desk.remove_logo]
 en = "Remove logo"
 ctx = "label"
@@ -824,6 +1807,12 @@ en = "Phone"
 ctx = "label"
 screen = "desk"
 id = { swift = "DeskCopy.requesterPhoneLabel" }
+
+[desk.resolved]
+en = "Resolved"
+ctx = "label"
+screen = "desk"
+id = { swift = "DeskCopy.resolved" }
 
 [desk.send_reply]
 en = "Send reply"
@@ -919,6 +1908,134 @@ ctx = "body"
 screen = "desk"
 id = { swift = "DeskCopy.viewerNote" }
 
+[desk.waiting_on_customer]
+en = "Waiting on customer"
+ctx = "label"
+screen = "desk"
+id = { swift = "DeskCopy.waitingOnCustomer" }
+
+[devices.cancel]
+en = "Cancel"
+ctx = "button"
+screen = "devices"
+id = { swift = "DevicesCopy.cancel" }
+
+[devices.could_not_list_devices]
+en = "Could not list your devices"
+ctx = "label"
+screen = "devices"
+id = { swift = "DevicesCopy.couldNotListDevices" }
+
+[devices.device_are_using_signing]
+en = "This is the device you are using. Signing it out will return you to the sign-in screen."
+ctx = "body"
+screen = "devices"
+id = { swift = "DevicesCopy.deviceAreUsingSigning" }
+
+[devices.device_was_already_signed]
+en = "That device was already signed out. The list has been refreshed."
+ctx = "body"
+screen = "devices"
+id = { swift = "DevicesCopy.deviceWasAlreadySigned" }
+
+[devices.devices]
+en = "Devices"
+ctx = "label"
+screen = "devices"
+id = { swift = "DevicesCopy.devices" }
+
+[devices.dismiss]
+en = "Dismiss"
+ctx = "button"
+screen = "devices"
+id = { swift = "DevicesCopy.dismiss" }
+
+[devices.last_active]
+en = "Last active {stamp}"
+ctx = "label"
+screen = "devices"
+args = { stamp = "date" }
+id = { swift = "DevicesCopy.lastActive(_:)" }
+note = "{stamp} is a date and time already formatted."
+
+[devices.no_other_devices]
+en = "No other devices"
+ctx = "title"
+screen = "devices"
+id = { swift = "DevicesCopy.noOtherDevices" }
+
+[devices.nothing_else_signed_account]
+en = "Nothing else is signed in to this account right now. A device that just signed in can take a few minutes to appear."
+ctx = "body"
+screen = "devices"
+id = { swift = "DevicesCopy.nothingElseSignedAccount" }
+
+[devices.sign_device_out_will]
+en = "Sign this device out? It will need to sign in again to use District AI."
+ctx = "body"
+screen = "devices"
+id = { swift = "DevicesCopy.signDeviceOutWill" }
+
+[devices.sign_out]
+en = "Sign out"
+ctx = "button"
+screen = "devices"
+id = { swift = "DevicesCopy.signOut" }
+
+[devices.sign_out_device]
+en = "Sign out this device"
+ctx = "button"
+screen = "devices"
+id = { swift = "DevicesCopy.signOutDevice" }
+
+[devices.sign_out_district_ai]
+en = "Sign out of District AI on every device, including this one?"
+ctx = "body"
+screen = "devices"
+id = { swift = "DevicesCopy.signOutDistrictAi" }
+
+[devices.sign_out_everywhere]
+en = "Sign out everywhere"
+ctx = "button"
+screen = "devices"
+id = { swift = "DevicesCopy.signOutEverywhere" }
+
+[devices.signed_in_recently]
+en = "Signed in recently"
+ctx = "label"
+screen = "devices"
+id = { swift = "DevicesCopy.signedInRecently" }
+
+[devices.this_device]
+en = "This device"
+ctx = "label"
+screen = "devices"
+id = { swift = "DevicesCopy.thisDevice" }
+
+[devices.unknown_platform]
+en = "Unknown platform"
+ctx = "label"
+screen = "devices"
+id = { swift = "DevicesCopy.unknownPlatform" }
+
+[devices.unnamed_device]
+en = "Unnamed device"
+ctx = "label"
+screen = "devices"
+id = { swift = "DevicesCopy.unnamedDevice" }
+
+[dialer.call]
+en = "Call"
+ctx = "label"
+screen = "dialer"
+id = { swift = "DialerCopy.call" }
+
+[dialer.call_workspace_call_log]
+en = "This call is in the workspace call log."
+ctx = "body"
+screen = "dialer"
+id = { swift = "DialerCopy.callWorkspaceCallLog" }
+
 [dialer.callback_hint]
 en = "Fills the number into the keypad. You still press Call to dial."
 ctx = "a11y"
@@ -960,11 +2077,29 @@ screen = "dialer"
 id = { swift = "DialerModel.callbacksTitle" }
 note = "⛔ \"Call back\", NEVER \"Redial\", AND THE WORD IS THE WHOLE POINT OF THE HEADING. The call log records the workspace's OWN number on an outbound row, so only inbound calls carry a number worth dialling. See the ⛔ on ``CallsRepository/recentCallbacks(workspaceId:limit:)``, which is where the filter lives. A heading that said redial would promise to repeat outbound calls this list cannot repeat."
 
+[dialer.calling]
+en = "Calling…"
+ctx = "label"
+screen = "dialer"
+id = { swift = "DialerCopy.calling" }
+
+[dialer.dial]
+en = "Dial"
+ctx = "label"
+screen = "dialer"
+id = { swift = "DialerCopy.dial" }
+
 [dialer.do_not_call_fallback]
 en = "That number has opted out of calls from this workspace."
 ctx = "body"
 screen = "dialer"
 id = { swift = "DialerModel.doNotCallFallback" }
+
+[dialer.done]
+en = "Done"
+ctx = "button"
+screen = "dialer"
+id = { swift = "DialerCopy.done" }
 
 [dialer.dormant_fallback]
 en = "This workspace is paused for inactivity, so calls are on hold. Ask us to reactivate it."
@@ -979,11 +2114,47 @@ ctx = "a11y"
 screen = "dialer"
 id = { swift = "DialerModel.entryHint" }
 
+[dialer.hang_up]
+en = "Hang up"
+ctx = "button"
+screen = "dialer"
+id = { swift = "DialerCopy.hangUp" }
+
 [dialer.microphone_notice]
 en = "Placing a call turns on your microphone."
 ctx = "body"
 screen = "dialer"
 id = { swift = "DialerModel.microphoneNotice" }
+
+[dialer.mute]
+en = "Mute"
+ctx = "label"
+screen = "dialer"
+id = { swift = "DialerCopy.mute" }
+
+[dialer.number]
+en = "Number"
+ctx = "placeholder"
+screen = "dialer"
+id = { swift = "DialerCopy.number" }
+
+[dialer.reconnecting]
+en = "Reconnecting…"
+ctx = "label"
+screen = "dialer"
+id = { swift = "DialerCopy.reconnecting" }
+
+[dialer.speaker_off]
+en = "Speaker off"
+ctx = "label"
+screen = "dialer"
+id = { swift = "DialerCopy.speakerOff" }
+
+[dialer.speaker_on]
+en = "Speaker on"
+ctx = "label"
+screen = "dialer"
+id = { swift = "DialerCopy.speakerOn" }
 
 [dialer.subscription_fallback]
 en = "This workspace's subscription is not active, so calls are paused."
@@ -991,6 +2162,12 @@ ctx = "body"
 screen = "dialer"
 id = { swift = "DialerModel.subscriptionFallback" }
 note = "⛔ STATES THE FACT AND STOPS, AND NAMES NO WEBSITE. App Store Review Guideline 3.1.3(b) keeps subscription purchase and management out of the app entirely, so a \"Fix billing\" control that deep-linked to Stripe would be rejected — and 3.1.1 makes naming the place the same rejection with no button on it. A reactivation is a billing action, so there is no remedy that can honestly be given here; the sentence says why calls stopped and leaves it there."
+
+[dialer.unmute]
+en = "Unmute"
+ctx = "label"
+screen = "dialer"
+id = { swift = "DialerCopy.unmute" }
 
 [dialer.viewer_notice]
 en = "You are in this workspace as a viewer, so you cannot place calls."
@@ -1313,6 +2490,415 @@ screen = "dialer"
 id = { swift = "InCallCopy.wordRingTimedOut" }
 note = "Follows 'Call ended · '."
 
+[inbox.attach_image]
+en = "Attach image"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.attachImage" }
+
+[inbox.attaching]
+en = "Attaching…"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.attaching" }
+
+[inbox.attachment_count]
+en.one = "{count} attachment"
+en.other = "{count} attachments"
+ctx = "label"
+screen = "inbox.thread"
+args = { count = "int" }
+id = { swift = "InboxCopy.attachmentCount(_:)" }
+
+[inbox.attachments_dropped]
+en.one = "image was removed: email replies cannot carry attachments. Switch back to SMS to send them."
+en.other = "{count} images were removed: email replies cannot carry attachments. Switch back to SMS to send them."
+ctx = "body"
+screen = "inbox.thread"
+args = { count = "int" }
+id = { swift = "InboxCopy.attachmentsDropped(_:)" }
+note = "Shown when switching a reply to email drops its images. The English one form names no number and starts lower case, as shipped; count is never 0."
+
+[inbox.call]
+en = "Call"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.call" }
+
+[inbox.can_attach_up5]
+en = "You can attach up to 5 images to one message."
+ctx = "body"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.canAttachUp5" }
+
+[inbox.cancel]
+en = "Cancel"
+ctx = "button"
+screen = "inbox"
+id = { swift = "InboxCopy.cancel" }
+
+[inbox.change]
+en = "Change"
+ctx = "button"
+screen = "inbox"
+id = { swift = "InboxCopy.change" }
+
+[inbox.contact_has_no_phone]
+en = "This contact has no phone number or email address on file."
+ctx = "body"
+screen = "inbox"
+id = { swift = "InboxCopy.contactHasNoPhone" }
+
+[inbox.conversation]
+en = "Conversation"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.conversation" }
+
+[inbox.conversation_could_not_opened]
+en = "This conversation could not be opened."
+ctx = "body"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.conversationCouldNotOpened" }
+
+[inbox.dismiss]
+en = "Dismiss"
+ctx = "button"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.dismiss" }
+
+[inbox.draft]
+en = "Draft"
+ctx = "label"
+screen = "inbox"
+id = { swift = "InboxCopy.draft" }
+
+[inbox.draft_not_saved_will]
+en = "Draft not saved. It will be saved again as you type."
+ctx = "body"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.draftNotSavedWill" }
+
+[inbox.draft_reply]
+en = "Draft reply"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.draftReply" }
+
+[inbox.draft_unread]
+en = "{message} A reply saved on this thread could not be loaded, so the box below may not be showing it, and anything you type will replace it."
+ctx = "error"
+screen = "inbox.thread"
+tier = "T2"
+args = { message = "str" }
+id = { swift = "InboxCopy.draftUnread(_:)" }
+note = "{message} is the failure's own sentence."
+
+[inbox.drafting]
+en = "Drafting…"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.drafting" }
+
+[inbox.duration_minutes_seconds]
+en = "{minutes}m {seconds}s"
+ctx = "format"
+screen = "inbox.thread"
+args = { minutes = "int", seconds = "int" }
+id = { swift = "InboxCopy.durationMinutesSeconds(_:_:)" }
+note = "A call's length, abbreviated."
+
+[inbox.duration_seconds]
+en = "{seconds}s"
+ctx = "format"
+screen = "inbox.thread"
+args = { seconds = "int" }
+id = { swift = "InboxCopy.durationSeconds(_:)" }
+note = "A call's length under a minute, abbreviated."
+
+[inbox.email]
+en = "Email"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.email" }
+
+[inbox.image_could_not_read]
+en = "That image could not be read. Try picking it again."
+ctx = "body"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.imageCouldNotRead" }
+
+[inbox.image_unavailable]
+en = "Image unavailable"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.imageUnavailable" }
+
+[inbox.inbox]
+en = "Inbox"
+ctx = "label"
+screen = "inbox"
+id = { swift = "InboxCopy.inbox" }
+
+[inbox.keep_typing]
+en = "Keep typing"
+ctx = "title"
+screen = "inbox"
+id = { swift = "InboxCopy.keepTyping" }
+
+[inbox.loading_image]
+en = "Loading image"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.loadingImage" }
+
+[inbox.loading_older]
+en = "Loading older…"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.loadingOlder" }
+
+[inbox.manage]
+en = "Manage"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.manage" }
+
+[inbox.mark_all_read]
+en = "Mark all read"
+ctx = "button"
+screen = "inbox"
+id = { swift = "InboxCopy.markAllRead" }
+
+[inbox.message2]
+en = "Message"
+ctx = "label"
+screen = "inbox"
+id = { swift = "InboxCopy.message2" }
+
+[inbox.message_address]
+en = "Message {address}"
+ctx = "button"
+screen = "inbox"
+args = { address = "str" }
+id = { swift = "InboxCopy.messageAddress(_:)" }
+note = "{address} is the phone number or email address being typed."
+
+[inbox.messages_calls_contact_will]
+en = "Messages and calls with this contact will appear here."
+ctx = "body"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.messagesCallsContactWill" }
+
+[inbox.missed_call]
+en = "Missed call"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.missedCall" }
+
+[inbox.new]
+en = "New"
+ctx = "button"
+screen = "inbox"
+id = { swift = "InboxCopy.new" }
+
+[inbox.new_message]
+en = "New message"
+ctx = "a11y"
+screen = "inbox"
+id = { swift = "InboxCopy.newMessage" }
+
+[inbox.no_conversations_yet]
+en = "No conversations yet"
+ctx = "title"
+screen = "inbox"
+id = { swift = "InboxCopy.noConversationsYet" }
+
+[inbox.no_matches]
+en = "No matches"
+ctx = "title"
+screen = "inbox"
+id = { swift = "InboxCopy.noMatches" }
+
+[inbox.no_message_body]
+en = "No message body"
+ctx = "label"
+screen = "inbox"
+id = { swift = "InboxCopy.noMessageBody" }
+
+[inbox.no_message_workspace_contains]
+en = "No message in this workspace contains that."
+ctx = "body"
+screen = "inbox"
+id = { swift = "InboxCopy.noMessageWorkspaceContains" }
+
+[inbox.nothing_thread]
+en = "Nothing in this thread"
+ctx = "title"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.nothingThread" }
+
+[inbox.older_messages]
+en = "Older messages"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.olderMessages" }
+
+[inbox.only_jpeg_png_gif]
+en = "Only JPEG, PNG, GIF or WebP images can be attached."
+ctx = "body"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.onlyJpegPngGif" }
+
+[inbox.part_conversation_could_not]
+en = "Part of this conversation could not be read, so some entries are missing."
+ctx = "body"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.partConversationCouldNot" }
+
+[inbox.remove]
+en = "Remove"
+ctx = "button"
+screen = "inbox.thread"
+tier = "T2"
+id = { swift = "InboxCopy.remove" }
+
+[inbox.remove_attachment]
+en = "Remove attachment"
+ctx = "a11y"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.removeAttachment" }
+
+[inbox.reply]
+en = "Reply"
+ctx = "placeholder"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.reply" }
+
+[inbox.search_messages]
+en = "Search messages"
+ctx = "placeholder"
+screen = "inbox"
+id = { swift = "InboxCopy.searchMessages" }
+
+[inbox.search_too_short]
+en = "Search needs at least {minimum} characters."
+ctx = "body"
+screen = "inbox"
+args = { minimum = "int" }
+id = { swift = "InboxCopy.searchTooShort(_:)" }
+note = "{minimum} is always more than one."
+
+[inbox.send]
+en = "Send"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.send" }
+
+[inbox.send_on]
+en = "Send on"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.sendOn" }
+
+[inbox.sending]
+en = "Sending…"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.sending" }
+
+[inbox.sent_saved_draft_could]
+en = "Sent. The saved draft could not be cleared, so check it before replying elsewhere."
+ctx = "body"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.sentSavedDraftCould" }
+
+[inbox.showing_most_recent_contacts]
+en = "Showing your most recent contacts. For anyone else, type their number or email."
+ctx = "body"
+screen = "inbox"
+id = { swift = "InboxCopy.showingMostRecentContacts" }
+
+[inbox.showing_most_recent_matches]
+en = "Showing the most recent matches. Narrow the search to see older ones."
+ctx = "body"
+screen = "inbox"
+id = { swift = "InboxCopy.showingMostRecentMatches" }
+
+[inbox.showing_recent_conversations_older]
+en = "Showing recent conversations. Older, quieter threads are not listed."
+ctx = "body"
+screen = "inbox"
+id = { swift = "InboxCopy.showingRecentConversationsOlder" }
+
+[inbox.sms]
+en = "SMS"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.sms" }
+note = "The text-message channel's name on the channel picker."
+
+[inbox.subject]
+en = "Subject"
+ctx = "placeholder"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.subject" }
+
+[inbox.suggestions_failed]
+en = "{message} You can still enter a number or an email address above."
+ctx = "error"
+screen = "inbox"
+tier = "T2"
+args = { message = "str" }
+id = { swift = "InboxCopy.suggestionsFailed(_:)" }
+note = "{message} is the failure's own sentence."
+
+[inbox.texts_emails_customers_will]
+en = "Texts and emails from your customers will appear here."
+ctx = "body"
+screen = "inbox"
+id = { swift = "InboxCopy.textsEmailsCustomersWill" }
+
+[inbox.to]
+en = "To"
+ctx = "label"
+screen = "inbox"
+id = { swift = "InboxCopy.to" }
+
+[inbox.transcript]
+en = "Transcript"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.transcript" }
+
+[inbox.try_again]
+en = "Try again"
+ctx = "button"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.tryAgain" }
+
+[inbox.unread_count]
+en.one = "{count} unread"
+en.other = "{count} unread"
+ctx = "a11y"
+screen = "inbox"
+args = { count = "int" }
+id = { swift = "InboxCopy.unreadCount(_:)" }
+note = "Read by VoiceOver on a conversation's unread badge."
+
+[inbox.whatsapp]
+en = "WhatsApp"
+ctx = "label"
+screen = "inbox.thread"
+id = { swift = "InboxCopy.whatsapp" }
+
+[incoming_call.answer]
+en = "Answer"
+ctx = "button"
+screen = "incoming"
+tier = "T0"
+id = { swift = "IncomingCallCopy.answer" }
+
 [incoming_call.answer_notice]
 en = "Answering turns on your microphone."
 ctx = "body"
@@ -1345,6 +2931,20 @@ tier = "T0"
 args = { duration = "duration" }
 id = { swift = "IncomingCallCopy.connected(_:)" }
 note = "{duration} is the elapsed time as m:ss."
+
+[incoming_call.decline]
+en = "Decline"
+ctx = "button"
+screen = "incoming"
+tier = "T0"
+id = { swift = "IncomingCallCopy.decline" }
+
+[incoming_call.done]
+en = "Done"
+ctx = "button"
+screen = "incoming"
+tier = "T0"
+id = { swift = "IncomingCallCopy.done" }
 
 [incoming_call.incoming_call]
 en = "Incoming call"
@@ -1875,6 +3475,13 @@ tier = "T1"
 id = { swift = "MarketplaceCopy.readOnlyViewer" }
 note = "⚠️ A VIEWER CANNOT MAKE THE CHANGE ANYWHERE ELSE EITHER, so a signpost would be useless advice on top of being steering. They are told who can."
 
+[marketplace.ready_buy_today]
+en = "Ready to buy today"
+ctx = "label"
+screen = "marketplace"
+tier = "T1"
+id = { swift = "MarketplaceCopy.readyBuyToday" }
+
 [marketplace.registration_country_label]
 en = "Country (two letters)"
 ctx = "label"
@@ -2279,6 +3886,15 @@ screen = "marketplace.numbers"
 tier = "T1"
 id = { swift = "MarketplaceCopy.submitFiled" }
 
+[marketplace.submit_refused_because]
+en = "{reason} The carrier refused it. Reload the list to see what it objected to."
+ctx = "error"
+screen = "marketplace.numbers"
+tier = "T1"
+args = { reason = "str" }
+id = { swift = "MarketplaceCopy.submitRefusedBecause(_:)" }
+note = "{reason} is the carrier's own sentence. The rest is marketplace.submit_refused_reread."
+
 [marketplace.submit_refused_reread]
 en = "The carrier refused it. Reload the list to see what it objected to."
 ctx = "body"
@@ -2387,12 +4003,44 @@ screen = "marketplace.numbers"
 tier = "T1"
 id = { swift = "MarketplaceCopy.tfvTitle" }
 
+[marketplace.tfv_use_case_customer_support]
+en = "Customer Support"
+ctx = "label"
+screen = "marketplace.numbers"
+tier = "T1"
+id = { swift = "MarketplaceCopy.tfvUseCaseCustomerSupport" }
+note = "A toll-free verification use case. The wire value stays English; this is only its label."
+
 [marketplace.tfv_use_case_label]
 en = "Use case"
 ctx = "label"
 screen = "marketplace.numbers"
 tier = "T1"
 id = { swift = "MarketplaceCopy.tfvUseCaseLabel" }
+
+[marketplace.tfv_use_case_marketing]
+en = "Marketing"
+ctx = "label"
+screen = "marketplace.numbers"
+tier = "T1"
+id = { swift = "MarketplaceCopy.tfvUseCaseMarketing" }
+note = "A toll-free verification use case."
+
+[marketplace.tfv_use_case_notifications]
+en = "Notifications"
+ctx = "label"
+screen = "marketplace.numbers"
+tier = "T1"
+id = { swift = "MarketplaceCopy.tfvUseCaseNotifications" }
+note = "A toll-free verification use case."
+
+[marketplace.tfv_use_case_otp]
+en = "2FA / OTP"
+ctx = "label"
+screen = "marketplace.numbers"
+tier = "T1"
+id = { swift = "MarketplaceCopy.tfvUseCaseOtp" }
+note = "A toll-free verification use case: two-factor and one-time codes."
 
 [marketplace.title]
 en = "Phone numbers"
@@ -2495,6 +4143,13 @@ tier = "T1"
 id = { swift = "MarketplaceCopy.writeUnrepeatable" }
 note = "⛔ WHY A CONTROL IS GONE, AND IT IS NOT OPTIONAL COPY. A dead button under a failure sentence reads as a broken screen; this says the write may already have happened, which is the honest reason it cannot be offered again."
 
+[marketplace.your_approvals]
+en = "Your approvals"
+ctx = "label"
+screen = "marketplace"
+tier = "T1"
+id = { swift = "MarketplaceCopy.yourApprovals" }
+
 [mfa.authenticator_placeholder]
 en = "6-digit code"
 ctx = "placeholder"
@@ -2571,6 +4226,339 @@ ctx = "body"
 screen = "sign_in"
 tier = "T2"
 id = { swift = "MfaCopy.wrongCode" }
+
+[navigation.account_does_not_belong]
+en = "This account does not belong to a workspace. Ask whoever invited you to add you to one."
+ctx = "body"
+screen = "navigation"
+id = { swift = "NavigationCopy.accountDoesNotBelong" }
+
+[navigation.analytics]
+en = "Analytics"
+ctx = "label"
+screen = "navigation.display"
+id = { swift = "NavigationCopy.analytics" }
+
+[navigation.conversation_could_not_opened]
+en = "This conversation could not be opened, so the reply was not sent. Open the Inbox to send it."
+ctx = "body"
+screen = "navigation.routing"
+id = { swift = "NavigationCopy.conversationCouldNotOpened" }
+
+[navigation.dial]
+en = "Dial"
+ctx = "label"
+screen = "navigation.display"
+id = { swift = "NavigationCopy.dial" }
+
+[navigation.go]
+en = "Go"
+ctx = "label"
+screen = "navigation"
+id = { swift = "NavigationCopy.go" }
+
+[navigation.lapsed_many]
+en = "Your workspaces are paused because the subscription is not active."
+ctx = "body"
+screen = "navigation"
+tier = "T1"
+id = { swift = "NavigationCopy.lapsedMany" }
+
+[navigation.lapsed_one]
+en = "Your workspace is paused because the subscription is not active."
+ctx = "body"
+screen = "navigation"
+tier = "T1"
+id = { swift = "NavigationCopy.lapsedOne" }
+
+[navigation.loading_your_workspace]
+en = "Loading your workspace…"
+ctx = "body"
+screen = "navigation"
+id = { swift = "NavigationCopy.loadingYourWorkspace" }
+
+[navigation.loading_your_workspaces]
+en = "Loading your workspaces…"
+ctx = "body"
+screen = "navigation"
+id = { swift = "NavigationCopy.loadingYourWorkspaces" }
+
+[navigation.new_message]
+en = "New Message"
+ctx = "button"
+screen = "navigation"
+id = { swift = "NavigationCopy.newMessage" }
+
+[navigation.no_workspaces_yet]
+en = "No workspaces yet"
+ctx = "title"
+screen = "navigation"
+id = { swift = "NavigationCopy.noWorkspacesYet" }
+
+[navigation.read_only]
+en = "Read-only"
+ctx = "label"
+screen = "navigation"
+id = { swift = "NavigationCopy.readOnly" }
+
+[navigation.refresh]
+en = "Refresh"
+ctx = "button"
+screen = "navigation"
+id = { swift = "NavigationCopy.refresh" }
+
+[navigation.scheduling]
+en = "Scheduling"
+ctx = "label"
+screen = "navigation.display"
+id = { swift = "NavigationCopy.scheduling" }
+
+[navigation.search_messages]
+en = "Search Messages"
+ctx = "button"
+screen = "navigation"
+id = { swift = "NavigationCopy.searchMessages" }
+
+[navigation.select_a_call]
+en = "Select a call"
+ctx = "label"
+screen = "navigation.display"
+id = { swift = "NavigationCopy.selectACall" }
+
+[navigation.select_a_contact]
+en = "Select a contact"
+ctx = "label"
+screen = "navigation.display"
+id = { swift = "NavigationCopy.selectAContact" }
+
+[navigation.select_a_conversation]
+en = "Select a conversation"
+ctx = "label"
+screen = "navigation.display"
+id = { swift = "NavigationCopy.selectAConversation" }
+
+[navigation.select_a_request]
+en = "Select a request"
+ctx = "label"
+screen = "navigation.display"
+id = { swift = "NavigationCopy.selectARequest" }
+
+[navigation.select_a_ticket]
+en = "Select a ticket"
+ctx = "label"
+screen = "navigation.display"
+id = { swift = "NavigationCopy.selectATicket" }
+
+[navigation.subscription_not_active]
+en = "Subscription not active"
+ctx = "title"
+screen = "navigation"
+id = { swift = "NavigationCopy.subscriptionNotActive" }
+
+[overview.analytics]
+en = "Analytics"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.analytics" }
+
+[overview.avg_call_duration]
+en = "Avg Call Duration"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.avgCallDuration" }
+
+[overview.billing]
+en = "Billing"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.billing" }
+
+[overview.call_logs]
+en = "Call Logs"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.callLogs" }
+
+[overview.completed_all_time]
+en = "Completed, all time"
+ctx = "body"
+screen = "overview"
+id = { swift = "OverviewCopy.completedAllTime" }
+
+[overview.contacts]
+en = "Contacts"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.contacts" }
+
+[overview.crm]
+en = "CRM"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.crm" }
+note = "Caption under the customer contacts count: where the number comes from."
+
+[overview.cumulative]
+en = "Cumulative"
+ctx = "body"
+screen = "overview"
+id = { swift = "OverviewCopy.cumulative" }
+
+[overview.customer_contacts]
+en = "Customer Contacts"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.customerContacts" }
+
+[overview.desk]
+en = "Desk"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.desk" }
+
+[overview.dial]
+en = "Dial"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.dial" }
+
+[overview.inbound]
+en = "Inbound"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.inbound" }
+
+[overview.inbound_outbound_calls_will]
+en = "Inbound and outbound calls will appear here as they happen."
+ctx = "body"
+screen = "overview"
+id = { swift = "OverviewCopy.inboundOutboundCallsWill" }
+
+[overview.last7_days]
+en = "Last 7 days"
+ctx = "body"
+screen = "overview"
+id = { swift = "OverviewCopy.last7Days" }
+
+[overview.live]
+en = "Live"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.live" }
+
+[overview.loading_your_overview]
+en = "Loading your overview…"
+ctx = "body"
+screen = "overview"
+id = { swift = "OverviewCopy.loadingYourOverview" }
+
+[overview.no_caller_id]
+en = "No caller ID"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.noCallerId" }
+
+[overview.nothing_here_yet]
+en = "Nothing here yet"
+ctx = "title"
+screen = "overview"
+id = { swift = "OverviewCopy.nothingHereYet" }
+
+[overview.open_district_hq]
+en = "Open District HQ"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.openDistrictHq" }
+
+[overview.outbound]
+en = "Outbound"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.outbound" }
+
+[overview.phone_numbers]
+en = "Phone numbers"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.phoneNumbers" }
+
+[overview.read_only]
+en = "Read-only"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.readOnly" }
+
+[overview.recent_activity]
+en = "Recent Activity"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.recentActivity" }
+
+[overview.rooms]
+en = "Rooms"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.rooms" }
+
+[overview.scheduling]
+en = "Scheduling"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.scheduling" }
+
+[overview.support]
+en = "Support"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.support" }
+
+[overview.total_calls_routed]
+en = "Total Calls Routed"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.totalCallsRouted" }
+
+[overview.transfer_failed]
+en = "Transfer failed"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.transferFailed" }
+
+[overview.transferred]
+en = "Transferred"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.transferred" }
+
+[overview.weekly_call_volume]
+en = "Weekly Call Volume"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.weeklyCallVolume" }
+
+[overview.workflows]
+en = "Workflows"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.workflows" }
+
+[overview.workspace]
+en = "Workspace"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.workspace" }
+
+[overview.workspace_selected_no_longer]
+en = "The workspace you selected is no longer the one we can report on. Please try again."
+ctx = "body"
+screen = "overview"
+id = { swift = "OverviewCopy.workspaceSelectedNoLonger" }
+
+[overview.workspace_settings]
+en = "Workspace settings"
+ctx = "label"
+screen = "overview"
+id = { swift = "OverviewCopy.workspaceSettings" }
 
 [push_status.apns_refused]
 en = "Allowed, but Apple did not issue a token for this device. Restart the app; if it persists, contact support."
@@ -2817,6 +4805,14 @@ tier = "T2"
 id = { swift = "ReportCopy.reportConversation" }
 note = "⛔ THE CONTROL NAMES THE CONTENT, NOT THE MECHANISM. \"Report\" alone beside a conversation reads as \"report on it\", and a reviewer looking for a flag has to be able to find it without guessing. Two strings because the two screens hold two different kinds of content, and both are what Apple's shot list calls them."
 
+[report.subject_recording]
+en = "Report: objectionable content (review recording)"
+ctx = "label"
+screen = "support"
+tier = "T2"
+id = { swift = "ReportCopy.subjectRecording" }
+note = "Sent to the support desk as the subject of a report filed during App Review's recording. The rest is report.base_subject."
+
 [report.submit]
 en = "Report"
 ctx = "button"
@@ -2881,6 +4877,18 @@ en = "The Companion joins every room and writes up the minutes."
 ctx = "body"
 screen = "rooms"
 id = { swift = "RoomsCopy.companionNotice" }
+
+[rooms.could_not_change_camera]
+en = "Could not change your camera. It is as the button shows."
+ctx = "body"
+screen = "rooms"
+id = { swift = "RoomsCopy.couldNotChangeCamera" }
+
+[rooms.could_not_change_microphone]
+en = "Could not change your microphone. It is as the button shows."
+ctx = "body"
+screen = "rooms"
+id = { swift = "RoomsCopy.couldNotChangeMicrophone" }
 
 [rooms.empty_body]
 en = "Meetings appear here once one has been held, with the minutes the Companion wrote."
@@ -2951,6 +4959,12 @@ ctx = "label"
 screen = "rooms"
 id = { swift = "RoomsCopy.micOn" }
 
+[rooms.most_recent_records_workspace]
+en = "The most recent records for this workspace are not meetings this app shows. There may be meetings further back that this app does not show."
+ctx = "body"
+screen = "rooms"
+id = { swift = "RoomsCopy.mostRecentRecordsWorkspace" }
+
 [rooms.muted_participant]
 en = "{name}, muted"
 ctx = "label"
@@ -2984,6 +4998,12 @@ en = "Camera access is off, so you are here without video."
 ctx = "body"
 screen = "rooms"
 id = { swift = "RoomsCopy.noCamera" }
+
+[rooms.no_meetings_page]
+en = "No meetings on this page"
+ctx = "title"
+screen = "rooms"
+id = { swift = "RoomsCopy.noMeetingsPage" }
 
 [rooms.no_microphone]
 en = "Microphone access is off, so others cannot hear you. You can still listen."
@@ -3083,6 +5103,12 @@ ctx = "label"
 screen = "rooms"
 id = { swift = "RoomsCopy.shareInvite" }
 note = "⚠️ \"Guest\" IS LOAD-BEARING: the link admits somebody who is NOT in this workspace, and it works for twelve hours for whoever holds it."
+
+[rooms.showing_most_recent_meetings]
+en = "Showing the most recent meetings. The full history is not available in this app."
+ctx = "body"
+screen = "rooms"
+id = { swift = "RoomsCopy.showingMostRecentMeetings" }
 
 [rooms.speaker_off]
 en = "Speaker off"
@@ -3195,6 +5221,12 @@ ctx = "body"
 screen = "rooms"
 id = { swift = "RoomsCopy.viewerNotice" }
 
+[scheduling.active]
+en = "Active"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.active" }
+
 [scheduling.answers_eyebrow]
 en = "Answers"
 ctx = "label"
@@ -3219,6 +5251,12 @@ ctx = "title"
 screen = "scheduling.sections"
 id = { swift = "SchedulingCopy.appsSubtitle" }
 
+[scheduling.archived]
+en = "Archived"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.archived" }
+
 [scheduling.assistant_enabled]
 en = "Booking assistant"
 ctx = "label"
@@ -3230,6 +5268,12 @@ en = "Extra instructions"
 ctx = "label"
 screen = "scheduling.sections"
 id = { swift = "SchedulingCopy.assistantInstructions" }
+
+[scheduling.booking_page]
+en = "Booking page"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.bookingPage" }
 
 [scheduling.booking_subtitle]
 en = "{who} · {event_type} · {host}"
@@ -3472,6 +5516,12 @@ ctx = "body"
 screen = "scheduling.overview"
 id = { swift = "SchedulingCopy.deskNoHours" }
 
+[scheduling.dismiss]
+en = "Dismiss"
+ctx = "button"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.dismiss" }
+
 [scheduling.enable]
 en = "Enable scheduling"
 ctx = "label"
@@ -3639,6 +5689,12 @@ args = { start = "time", end = "time" }
 id = { swift = "SchedulingCopy.hoursRange(_:_:)" }
 note = "One range of working hours; several are joined with a comma."
 
+[scheduling.inactive]
+en = "Inactive"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.inactive" }
+
 [scheduling.key_value]
 en = "Created {created} · Last used {last_used}"
 ctx = "label"
@@ -3684,6 +5740,12 @@ ctx = "body"
 screen = "scheduling"
 id = { swift = "SchedulingCopy.live" }
 
+[scheduling.live2]
+en = "Live"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.live2" }
+
 [scheduling.live_without_link]
 en = "This workspace has a booking page, but the server did not send its address."
 ctx = "body"
@@ -3720,6 +5782,12 @@ en = "Loading…"
 ctx = "label"
 screen = "scheduling.sections"
 id = { swift = "SchedulingCopy.loadingMore" }
+
+[scheduling.loading_scheduling]
+en = "Loading scheduling…"
+ctx = "body"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.loadingScheduling" }
 
 [scheduling.location_built_in_video]
 en = "Built-in video"
@@ -3835,6 +5903,12 @@ en = "Members"
 ctx = "label"
 screen = "scheduling.sections"
 id = { swift = "SchedulingCopy.membersEyebrow" }
+
+[scheduling.needs_attention]
+en = "Needs attention"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.needsAttention" }
 
 [scheduling.never]
 en = "Never"
@@ -3973,6 +6047,12 @@ ctx = "button"
 screen = "scheduling"
 id = { swift = "SchedulingCopy.refresh" }
 
+[scheduling.scheduling]
+en = "Scheduling"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.scheduling" }
+
 [scheduling.section_subtitle_bookings]
 en = "Every booking in this workspace, upcoming and past"
 ctx = "body"
@@ -4108,6 +6188,12 @@ screen = "scheduling.sections"
 id = { swift = "SchedulingCopy.set" }
 note = "⚠️ \"Set\"/\"Not set\" FOR AN IMAGE RATHER THAN ITS URL. A logo's address is a long opaque string that tells an operator nothing they can act on, and the image itself is not what this read-only row is for."
 
+[scheduling.setting_up]
+en = "Setting up"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.settingUp" }
+
 [scheduling.setup_failed_because]
 en = "Setup did not finish. {reason}"
 ctx = "error"
@@ -4125,6 +6211,12 @@ tier = "T2"
 id = { swift = "SchedulingCopy.setupFailedNoReason" }
 note = "The first sentence is scheduling.failed_provision and must say the same."
 
+[scheduling.share]
+en = "Share"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.share" }
+
 [scheduling.stranded_eyebrow]
 en = "Someone who has left still has bookings"
 ctx = "label"
@@ -4136,6 +6228,12 @@ en = "Scheduling is turned off for this workspace."
 ctx = "body"
 screen = "scheduling"
 id = { swift = "SchedulingCopy.switchedOff" }
+
+[scheduling.switched_off2]
+en = "Switched off"
+ctx = "label"
+screen = "scheduling"
+id = { swift = "SchedulingCopy.switchedOff2" }
 
 [scheduling.teams_empty]
 en = "No teams yet."
@@ -5237,6 +7335,12 @@ ctx = "button"
 screen = "scheduling.writes"
 id = { swift = "SchedulingWriteCopy.add" }
 
+[scheduling_write.address]
+en = "Address"
+ctx = "label"
+screen = "scheduling.writes"
+id = { swift = "SchedulingWriteCopy.address" }
+
 [scheduling_write.archive]
 en = "Archive"
 ctx = "label"
@@ -5309,6 +7413,12 @@ ctx = "label"
 screen = "scheduling.writes.event_types"
 id = { swift = "SchedulingWriteCopy.bufferBeforeLabel" }
 
+[scheduling_write.built_in_video]
+en = "Built-in video"
+ctx = "label"
+screen = "scheduling.writes"
+id = { swift = "SchedulingWriteCopy.builtInVideo" }
+
 [scheduling_write.cancel]
 en = "Cancel"
 ctx = "button"
@@ -5334,6 +7444,14 @@ en = "Event type created"
 ctx = "label"
 screen = "scheduling.writes.event_types"
 id = { swift = "SchedulingWriteCopy.created" }
+
+[scheduling_write.date_range]
+en = "{start} to {end}"
+ctx = "label"
+screen = "scheduling.writes"
+args = { start = "date", end = "date" }
+id = { swift = "SchedulingWriteCopy.dateRange(_:_:)" }
+note = "A range of dates an override covers."
 
 [scheduling_write.delete]
 en = "Delete"
@@ -5542,6 +7660,12 @@ ctx = "title"
 screen = "scheduling.writes.availability"
 id = { swift = "SchedulingWriteCopy.hoursTitle" }
 
+[scheduling_write.in_person]
+en = "In person"
+ctx = "label"
+screen = "scheduling.writes"
+id = { swift = "SchedulingWriteCopy.inPerson" }
+
 [scheduling_write.interval_hint]
 en = "How often a booking may start. Independent of the duration."
 ctx = "a11y"
@@ -5553,6 +7677,12 @@ en = "Starts every"
 ctx = "label"
 screen = "scheduling.writes.event_types"
 id = { swift = "SchedulingWriteCopy.intervalLabel" }
+
+[scheduling_write.link]
+en = "Link"
+ctx = "label"
+screen = "scheduling.writes"
+id = { swift = "SchedulingWriteCopy.link" }
 
 [scheduling_write.listed_toggle]
 en = "Listed on your booking page"
@@ -5584,6 +7714,12 @@ en = "Bookable ahead"
 ctx = "label"
 screen = "scheduling.writes.event_types"
 id = { swift = "SchedulingWriteCopy.maxFutureLabel" }
+
+[scheduling_write.meeting_link]
+en = "Meeting link"
+ctx = "label"
+screen = "scheduling.writes"
+id = { swift = "SchedulingWriteCopy.meetingLink" }
 
 [scheduling_write.min_notice_hint]
 en = "Minutes. How soon from now a customer may book."
@@ -5758,6 +7894,18 @@ en = "Date overrides"
 ctx = "title"
 screen = "scheduling.writes.availability"
 id = { swift = "SchedulingWriteCopy.overridesTitle" }
+
+[scheduling_write.phone]
+en = "Phone"
+ctx = "label"
+screen = "scheduling.writes"
+id = { swift = "SchedulingWriteCopy.phone" }
+
+[scheduling_write.phone_number]
+en = "Phone number"
+ctx = "label"
+screen = "scheduling.writes"
+id = { swift = "SchedulingWriteCopy.phoneNumber" }
 
 [scheduling_write.priority_label]
 en = "Priority"
@@ -5939,6 +8087,13 @@ en = "Questions"
 ctx = "title"
 screen = "scheduling.writes.event_types"
 id = { swift = "SchedulingWriteCopy.questionsTitle" }
+
+[scheduling_write.range_to]
+en = "to"
+ctx = "label"
+screen = "scheduling.writes"
+id = { swift = "SchedulingWriteCopy.rangeTo" }
+note = "Between a start and an end time field, as in '9:00 to 17:00'."
 
 [scheduling_write.remove]
 en = "Remove"
@@ -6729,6 +8884,36 @@ ctx = "body"
 screen = "scheduling.writes.developer"
 id = { swift = "SchedulingWriteCopyC.webhookUrlPrivate" }
 
+[session.appear_offline_check_connection]
+en = "You appear to be offline. Check your connection and try again."
+ctx = "body"
+screen = "session"
+tier = "T2"
+id = { swift = "SessionCopy.appearOfflineCheckConnection" }
+
+[session.degraded_every_region]
+en = "Your account is unchanged, but we could not reach every region. Please try again."
+ctx = "error"
+screen = "session"
+tier = "T2"
+id = { swift = "SessionCopy.degradedEveryRegion" }
+
+[session.degraded_named_regions]
+en = "Your account is unchanged, but we could not reach {regions}. Some workspaces are missing from this list."
+ctx = "error"
+screen = "session"
+tier = "T2"
+args = { regions = "str" }
+id = { swift = "SessionCopy.degradedNamedRegions(_:)" }
+note = "{regions} is one or more region codes joined with commas."
+
+[session.do_not_have_permission]
+en = "You do not have permission to do that in this workspace."
+ctx = "body"
+screen = "session"
+tier = "T2"
+id = { swift = "SessionCopy.doNotHavePermission" }
+
 [session.interrupted_refresh]
 en = "Your session ended unexpectedly. Please sign in again."
 ctx = "body"
@@ -6743,6 +8928,13 @@ ctx = "body"
 screen = "session"
 tier = "T2"
 id = { swift = "SessionCopy.markerNotDurable" }
+
+[session.no_longer_available]
+en = "That is no longer available."
+ctx = "body"
+screen = "session"
+tier = "T2"
+id = { swift = "SessionCopy.noLongerAvailable" }
 
 [session.refresh_not_sent]
 en = "You appear to be offline. Your session is still active."
@@ -6779,6 +8971,20 @@ screen = "session"
 tier = "T2"
 id = { swift = "SessionCopy.refreshUnreachable" }
 
+[session.request_could_not_completed]
+en = "That request could not be completed."
+ctx = "body"
+screen = "session"
+tier = "T2"
+id = { swift = "SessionCopy.requestCouldNotCompleted" }
+
+[session.session_has_ended_please]
+en = "Your session has ended. Please sign in again."
+ctx = "body"
+screen = "session"
+tier = "T2"
+id = { swift = "SessionCopy.sessionHasEndedPlease" }
+
 [session.sign_in_expired]
 en = "That sign-in expired. Please try again."
 ctx = "body"
@@ -6809,6 +9015,13 @@ screen = "session"
 tier = "T2"
 id = { swift = "SessionCopy.signedOut" }
 
+[session.something_went_wrong_our]
+en = "Something went wrong on our side. Please try again."
+ctx = "body"
+screen = "session"
+tier = "T2"
+id = { swift = "SessionCopy.somethingWentWrongOur" }
+
 [session.store_unavailable]
 en = "We could not read your saved session. Please try again."
 ctx = "error"
@@ -6830,6 +9043,92 @@ ctx = "body"
 screen = "session"
 tier = "T2"
 id = { swift = "SessionCopy.unreachable" }
+
+[session.version_app_could_not]
+en = "This version of the app could not read that response. Please update."
+ctx = "body"
+screen = "session"
+tier = "T2"
+id = { swift = "SessionCopy.versionAppCouldNot" }
+
+[session.workspace_s_subscription_not]
+en = "This workspace's subscription is not active."
+ctx = "body"
+screen = "session"
+tier = "T2"
+id = { swift = "SessionCopy.workspaceSSubscriptionNot" }
+
+[settings.account_sid]
+en = "Account SID"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.accountSid" }
+
+[settings.add_carrier_account]
+en = "Add carrier account"
+ctx = "button"
+screen = "settings"
+id = { swift = "SettingsCopy.addCarrierAccount" }
+
+[settings.adding]
+en = "Adding…"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.adding" }
+
+[settings.answer_knowledge_base]
+en = "Answer from the knowledge base"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.answerKnowledgeBase" }
+
+[settings.api_key]
+en = "API key"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.apiKey" }
+
+[settings.application_key]
+en = "Application key"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.applicationKey" }
+
+[settings.application_secret]
+en = "Application secret"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.applicationSecret" }
+
+[settings.asking_the_carrier]
+en = "Asking the carrier…"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.askingTheCarrier" }
+
+[settings.auth_token]
+en = "Auth token"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.authToken" }
+
+[settings.book_an_appointment]
+en = "Book an appointment"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.bookAnAppointment" }
+
+[settings.calendar]
+en = "Calendar"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.calendar" }
+
+[settings.calendar_id]
+en = "Calendar id"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.calendarId" }
 
 [settings.calls_load_failed_eyebrow]
 en = "Could not load how calls are answered"
@@ -6928,6 +9227,12 @@ screen = "settings.sections"
 id = { swift = "SettingsCopy.callsViewerNote" }
 note = "⛔ THE READ ADMITS A VIEWER AND THE WRITE DOES NOT, so this screen is offered read-only rather than hidden — the opposite call from persona and capabilities, whose reads refuse a viewer outright. The wording follows the pattern the knowledge and messaging sections already use."
 
+[settings.cancel]
+en = "Cancel"
+ctx = "button"
+screen = "settings"
+id = { swift = "SettingsCopy.cancel" }
+
 [settings.capabilities_eyebrow]
 en = "What the agent may do"
 ctx = "label"
@@ -6971,6 +9276,65 @@ en = "Stored by this workspace and not recognised by this version of the app. It
 ctx = "body"
 screen = "settings"
 id = { swift = "SettingsCopy.capabilitiesUnknownRow" }
+
+[settings.carrier]
+en = "Carrier"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.carrier" }
+
+[settings.carrier_refused_those_credentials]
+en = "The carrier refused those credentials."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.carrierRefusedThoseCredentials" }
+
+[settings.check_the_calendar]
+en = "Check the calendar"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.checkTheCalendar" }
+
+[settings.checking_voice_chain_speaks]
+en = "Checking that the voice chain speaks the new language."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.checkingVoiceChainSpeaks" }
+
+[settings.close]
+en = "Close"
+ctx = "button"
+screen = "settings"
+id = { swift = "SettingsCopy.close" }
+
+[settings.connected_accounts]
+en = "Connected accounts"
+ctx = "title"
+screen = "settings"
+id = { swift = "SettingsCopy.connectedAccounts" }
+
+[settings.credentials]
+en = "Credentials"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.credentials" }
+
+[settings.credentials_refused]
+en = "Those credentials were refused: {message}"
+ctx = "error"
+screen = "settings"
+tier = "T2"
+args = { message = "str" }
+id = { swift = "SettingsCopy.credentialsRefused(_:)" }
+note = "{message} is the carrier's own reason."
+
+[settings.credentials_work_detail]
+en = "Those credentials work: {detail}"
+ctx = "body"
+screen = "settings"
+args = { detail = "str" }
+id = { swift = "SettingsCopy.credentialsWorkDetail(_:)" }
+note = "{detail} is what the carrier reported, such as the account name."
 
 [settings.directory_add]
 en = "Add someone"
@@ -7087,6 +9451,24 @@ screen = "settings"
 id = { swift = "SettingsCopy.dismiss" }
 note = "⛔ THE ONLY WAY A BANNER LEAVES THE SCREEN WITHOUT ANOTHER WRITE. Every model on this surface has a `dismissNotices()`, and without a control wired to it a red refusal sits beside a fresh \"Saved.\" with nothing to press. ⚠️ A successful RELOAD retires them too; this is for the operator who has read the message and does not want to re-read anything."
 
+[settings.edit]
+en = "Edit"
+ctx = "button"
+screen = "settings"
+id = { swift = "SettingsCopy.edit" }
+
+[settings.edit_carrier_account]
+en = "Edit carrier account"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.editCarrierAccount" }
+
+[settings.email_sender]
+en = "Email sender"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.emailSender" }
+
 [settings.enrichment_body]
 en = "Look up public information about an unknown caller from an outside provider. Off unless someone in this workspace turns it on."
 ctx = "body"
@@ -7112,11 +9494,29 @@ ctx = "label"
 screen = "settings"
 id = { swift = "SettingsCopy.enrichmentToggle" }
 
+[settings.every_field_required_because]
+en = "Every field is required, because this account has no stored credentials to keep."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.everyFieldRequiredBecause" }
+
 [settings.hub_title]
 en = "Workspace settings"
 ctx = "title"
 screen = "settings"
 id = { swift = "SettingsCopy.hubTitle" }
+
+[settings.key_id]
+en = "Key id"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.keyId" }
+
+[settings.key_secret]
+en = "Key secret"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.keySecret" }
 
 [settings.knowledge_add]
 en = "Add document"
@@ -7155,6 +9555,15 @@ en = "Text"
 ctx = "label"
 screen = "settings.sections"
 id = { swift = "SettingsCopy.knowledgeContentLabel" }
+
+[settings.knowledge_document_meta]
+en.one = "{source} · {status} · {count} chunks"
+en.other = "{source} · {status} · {count} chunks"
+ctx = "label"
+screen = "settings"
+args = { source = "str", status = "str", count = "int" }
+id = { swift = "SettingsCopy.knowledgeDocumentMeta(_:_:_:)" }
+note = "{source} and {status} are the document's type and processing state as the server names them; {count} the number of indexed chunks. The English shipped 'chunks' for one as well."
 
 [settings.knowledge_documents_eyebrow]
 en = "Documents"
@@ -7245,11 +9654,29 @@ ctx = "body"
 screen = "settings.sections"
 id = { swift = "SettingsCopy.knowledgeViewerNote" }
 
+[settings.label]
+en = "Label"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.label" }
+
 [settings.load_failed_eyebrow]
 en = "Could not load this workspace's configuration"
 ctx = "label"
 screen = "settings"
 id = { swift = "SettingsCopy.loadFailedEyebrow" }
+
+[settings.make_default_sender]
+en = "Make this the default sender"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.makeDefaultSender" }
+
+[settings.managed_by_distronode]
+en = "Managed by Distronode"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.managedByDistronode" }
 
 [settings.members_add]
 en = "Add member"
@@ -7380,11 +9807,33 @@ ctx = "body"
 screen = "settings.sections"
 id = { swift = "SettingsCopy.membersViewerNote" }
 
+[settings.messaging_account_fallback]
+en = "Account"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.messagingAccountFallback" }
+note = "A carrier account with neither a label nor a carrier name."
+
+[settings.messaging_account_subtitle]
+en = "{carrier} · {source} · {numbers}"
+ctx = "format"
+screen = "settings"
+args = { carrier = "str", source = "str", numbers = "str" }
+id = { swift = "SettingsCopy.messagingAccountSubtitle(_:_:_:)" }
+note = "{carrier} is the carrier's name, {source} who bills it, {numbers} its phone numbers joined with commas."
+
 [settings.messaging_accounts_eyebrow]
 en = "Carrier accounts"
 ctx = "label"
 screen = "settings.sections"
 id = { swift = "SettingsCopy.messagingAccountsEyebrow" }
+
+[settings.messaging_billed_through_distronode]
+en = "billed through Distronode"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.messagingBilledThroughDistronode" }
+note = "A fragment in a carrier account's subtitle, between two middle dots."
 
 [settings.messaging_channels_eyebrow]
 en = "Per-channel senders"
@@ -7483,6 +9932,20 @@ screen = "settings.sections"
 id = { swift = "SettingsCopy.messagingNoDefault" }
 note = "⚠️ A FRESH WORKSPACE OMITS `defaultAccountId` AND NULLS `managedAccount`. That is a state, not an error, and this is the sentence for it."
 
+[settings.messaging_no_numbers_yet]
+en = "no numbers yet"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.messagingNoNumbersYet" }
+note = "A fragment at the end of a carrier account's subtitle."
+
+[settings.messaging_own_carrier_account]
+en = "own carrier account"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.messagingOwnCarrierAccount" }
+note = "A fragment in a carrier account's subtitle, between two middle dots."
+
 [settings.messaging_set_default]
 en = "Make default"
 ctx = "label"
@@ -7514,6 +9977,12 @@ screen = "settings"
 id = { swift = "SettingsCopy.moreOnWeb" }
 note = "⚠️ SAYS WHY THE LIST STOPS WHERE IT DOES. Campaign settings and the avatar form have no native screen and are not planned to get one.\n⚠️ THE IDENTIFIER NAMES THE WEB AND THE SENTENCE DOES NOT. The sentence names nowhere, because Guideline 3.1.1 forbids steering; renaming the identifier would be a call-site change with no copy in it."
 
+[settings.no_model_workspace_may]
+en = "No model this workspace may use speaks the new language for every part of the voice chain. Choose them on the Voice screen."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.noModelWorkspaceMay" }
+
 [settings.not_editable_body]
 en = "This value was written before the settings routes validated it, so showing it here could not be done without misrepresenting part of it. It cannot be read or changed in this app."
 ctx = "body"
@@ -7526,6 +9995,18 @@ ctx = "label"
 screen = "settings"
 id = { swift = "SettingsCopy.notEditableEyebrow" }
 note = "⛔ THE READ SUCCEEDED AND THE VALUE STILL CANNOT BE EDITED, WHICH IS A THIRD STATE RATHER THAN A FAILURE. `callDirectory` and `routingRules` are `Json` columns that can hold rows written before their save routes validated anything, so a stored array whose rows are not objects genuinely exists. ⚠️ No retry: nothing about the request failed, and repeating it returns the same value."
+
+[settings.off]
+en = "Off"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.off" }
+
+[settings.on]
+en = "On"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.on" }
 
 [settings.persona_answer_length_label]
 en = "Answer length"
@@ -7641,6 +10122,12 @@ screen = "settings"
 id = { swift = "SettingsCopy.personaVoiceStudioNote" }
 note = "⚠️ SAYS WHERE THE ENGINE WENT. The persona form no longer shows the engine, the voice or the tuning, and without this line it reads as a persona with no voice at all."
 
+[settings.phone_numbers_one_per]
+en = "Phone numbers, one per line"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.phoneNumbersOnePer" }
+
 [settings.preview_busy_call]
 en = "There is a call on this device. End it before previewing the persona."
 ctx = "body"
@@ -7673,6 +10160,14 @@ ctx = "body"
 screen = "settings.persona"
 id = { swift = "SettingsCopy.previewDropped" }
 note = "⚠️ A DISCONNECT NOBODY ASKED FOR IS NOT \"ended\", and the reason is shown when the server gave one."
+
+[settings.preview_dropped_because]
+en = "The preview ended without being stopped here. {reason}"
+ctx = "body"
+screen = "settings.persona"
+args = { reason = "str" }
+id = { swift = "SettingsCopy.previewDroppedBecause(_:)" }
+note = "{reason} is the server's own reason. The first sentence is settings.preview_dropped."
 
 [settings.preview_end]
 en = "End preview"
@@ -7751,6 +10246,30 @@ ctx = "body"
 screen = "settings.persona"
 id = { swift = "SettingsCopy.previewYieldedToCall" }
 note = "⚠️ A PREVIEW THAT WAS TAKEN AWAY BY A CALL, said rather than left as an absence."
+
+[settings.probe_unreachable]
+en = "We could not ask the carrier, so this says nothing about the credentials. {reason}"
+ctx = "error"
+screen = "settings"
+tier = "T2"
+args = { reason = "str" }
+id = { swift = "SettingsCopy.probeUnreachable(_:)" }
+note = "{reason} is the failure's own sentence. The first sentence is settings.we_could_not_ask."
+
+[settings.project_id]
+en = "Project id"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.projectId" }
+
+[settings.refit_failed_because]
+en = "The voice chain could not be moved to the new language. Fit it on the Voice screen. {reason}"
+ctx = "error"
+screen = "settings"
+tier = "T2"
+args = { reason = "str" }
+id = { swift = "SettingsCopy.refitFailedBecause(_:)" }
+note = "{reason} is the failure's own sentence. The rest is settings.voice_chain_could_not."
 
 [settings.reread]
 en = "Reload"
@@ -7905,11 +10424,29 @@ screen = "settings.persona"
 id = { swift = "SettingsCopy.routingVoicesEmpty" }
 note = "⚠️ THE VOICE LIST IS THE REALTIME ENGINE'S OWN, derived rather than restated, and an empty one is honest about a catalogue that carries no such engine."
 
+[settings.save]
+en = "Save"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.save" }
+
+[settings.save_caller_s_details]
+en = "Save a caller's details"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.saveCallerSDetails" }
+
 [settings.saved]
 en = "Saved."
 ctx = "toast"
 screen = "settings"
 id = { swift = "SettingsCopy.saved" }
+
+[settings.saved_as]
+en = "Saved as"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.savedAs" }
 
 [settings.saved_but_stale]
 en = "Saved. We could not read the configuration back, so what is on screen may be out of date."
@@ -7917,6 +10454,20 @@ ctx = "body"
 screen = "settings"
 id = { swift = "SettingsCopy.savedButStale" }
 note = "⛔ THE SAVE LANDED AND ONLY THE READ BACK FAILED, AND THIS IS NOT AN ERROR. Telling an operator the save failed is the dangerous direction: they would change the form back and save again, through a route that replaces its stored array wholesale, from state this client can no longer vouch for. It offers a re-read, never a re-save."
+
+[settings.saved_but_stale_because]
+en = "Saved. We could not read the configuration back, so what is on screen may be out of date. {reason}"
+ctx = "body"
+screen = "settings"
+args = { reason = "str" }
+id = { swift = "SettingsCopy.savedButStaleBecause(_:)" }
+note = "{reason} is the failure's own sentence. The rest is settings.saved_but_stale."
+
+[settings.saving]
+en = "Saving…"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.saving" }
 
 [settings.scheduling_subtitle]
 en = "The workspace's booking pages"
@@ -7930,6 +10481,18 @@ ctx = "title"
 screen = "settings"
 id = { swift = "SettingsCopy.schedulingTitle" }
 
+[settings.send_an_email]
+en = "Send an email"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.sendAnEmail" }
+
+[settings.shown_stored_they_are]
+en = "Shown as stored. They are only sent if you change them."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.shownStoredTheyAre" }
+
 [settings.studio_group_title]
 en = "District Studio"
 ctx = "title"
@@ -7938,12 +10501,78 @@ fixed = true
 id = { swift = "SettingsCopy.studioGroupTitle" }
 note = "⚠️ THE WEB'S OWN NAME FOR ITS SECTION, AND THE SAME IN FRENCH. The rows under it are the AI-receptionist settings the web moved into District Studio on 2026-10-04; the row names below are that section's page names wherever this app has the same screen."
 
+[settings.support_number]
+en = "Support number"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.supportNumber" }
+
+[settings.take_a_message]
+en = "Take a message"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.takeAMessage" }
+
+[settings.test]
+en = "Test"
+ctx = "button"
+screen = "settings"
+id = { swift = "SettingsCopy.test" }
+
+[settings.text_the_caller]
+en = "Text the caller"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.textTheCaller" }
+
+[settings.these_numbers_will_replace]
+en = "These numbers will replace the account's current list when you save."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.theseNumbersWillReplace" }
+
+[settings.those_credentials_work]
+en = "Those credentials work."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.thoseCredentialsWork" }
+
+[settings.transfer_person]
+en = "Transfer to a person"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.transferPerson" }
+
+[settings.transfer_to_support]
+en = "Transfer to support"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.transferToSupport" }
+
 [settings.viewer_note]
 en = "You are in this workspace as a viewer, so the sections that change how the agent behaves are not available to you."
 ctx = "body"
 screen = "settings"
 id = { swift = "SettingsCopy.viewerNote" }
 note = "⛔ A DIFFERENT SENTENCE FOR A VIEWER, AND \"edit it on the web\" WOULD BE FALSE. A viewer cannot edit these there either, so the note says what is true: the sections that are missing are missing because the reads behind them refuse this role."
+
+[settings.voice_chain_could_not]
+en = "The voice chain could not be moved to the new language. Fit it on the Voice screen."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.voiceChainCouldNot" }
+
+[settings.voice_chain_was_moved]
+en = "The voice chain was moved to models that speak the new language. The Voice screen shows it."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.voiceChainWasMoved" }
+
+[settings.voice_chain_was_saved]
+en = "The voice chain was saved, but the Voice screen does not show it fitting the new language. Check it there."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.voiceChainWasSaved" }
 
 [settings.voice_studio_subtitle]
 en = "Recipes, the signal chain, voices and tuning, with how fast the agent replies"
@@ -7958,6 +10587,12 @@ screen = "settings"
 id = { swift = "SettingsCopy.voiceStudioTitle" }
 note = "⚠️ THE ROW, NAMED AS THE WEB'S DISTRICT STUDIO PAGE IS (\"Voice\", Sean's decision of 2026-10-04). It is also the screen's title before the read lands (``VoiceStudioCopy/title``), matching the heading the service sends."
 
+[settings.we_could_not_ask]
+en = "We could not ask the carrier, so this says nothing about the credentials."
+ctx = "body"
+screen = "settings"
+id = { swift = "SettingsCopy.weCouldNotAsk" }
+
 [settings.workspace_group_title]
 en = "Workspace"
 ctx = "title"
@@ -7965,11 +10600,51 @@ screen = "settings"
 id = { swift = "SettingsCopy.workspaceGroupTitle" }
 note = "The heading of the rows that are about the workspace rather than the receptionist."
 
+[settings.workspace_s_own]
+en = "This workspace's own"
+ctx = "label"
+screen = "settings"
+id = { swift = "SettingsCopy.workspaceSOwn" }
+
+[sign_in.district_ai]
+en = "District AI"
+ctx = "label"
+screen = "sign_in"
+fixed = true
+id = { swift = "SignInCopy.districtAi" }
+
 [sign_in.no_account]
 en = "No District AI account uses this Apple ID. Ask your organization's administrator to invite you, then sign in with the invited email."
 ctx = "body"
 screen = "sign_in"
 id = { swift = "SignInCopy.noAccount" }
+
+[sign_in.opens_browser_sign_securely]
+en = "Opens your browser to sign in securely."
+ctx = "body"
+screen = "sign_in"
+id = { swift = "SignInCopy.opensBrowserSignSecurely" }
+
+[sign_in.sign_apple]
+en = "Sign in with Apple"
+ctx = "a11y"
+screen = "sign_in"
+id = { swift = "SignInCopy.signApple" }
+
+[sign_in.sign_workspace]
+en = "Sign in to your workspace."
+ctx = "body"
+screen = "sign_in"
+id = { swift = "SignInCopy.signWorkspace" }
+
+[sign_in_terms.agreement]
+en = "By continuing you agree to the {terms} and {privacy}."
+ctx = "legal"
+screen = "sign_in"
+tier = "T0"
+args = { terms = "str", privacy = "str" }
+id = { swift = "SignInTermsCopy.agreement(_:_:)" }
+note = "{terms} is sign_in_terms.terms_name and {privacy} sign_in_terms.privacy_name, each a link. The screen lays it out from sign_in_terms.prefix, .conjunction and .terminator, which must say the same."
 
 [sign_in_terms.conjunction]
 en = " and "
@@ -8095,6 +10770,12 @@ ctx = "button"
 screen = "support"
 id = { swift = "SupportCopy.dismiss" }
 
+[support.done]
+en = "Done"
+ctx = "button"
+screen = "support"
+id = { swift = "SupportCopy.done" }
+
 [support.empty_body]
 en = "Anything broken, unclear or missing, open a request and it goes straight to our team."
 ctx = "body"
@@ -8211,6 +10892,12 @@ ctx = "label"
 screen = "support"
 id = { swift = "SupportCopy.replySending" }
 
+[support.reporting]
+en = "Reporting…"
+ctx = "label"
+screen = "support"
+id = { swift = "SupportCopy.reporting" }
+
 [support.sla]
 en = "We reply within one business day."
 ctx = "body"
@@ -8308,6 +10995,30 @@ en = "Use the default"
 ctx = "label"
 screen = "settings.voice_studio"
 id = { swift = "VoiceStudioCopy.useDefault" }
+
+[workflows.added_do_not_call]
+en = "Added to do-not-call"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.addedDoNotCall" }
+
+[workflows.after_answered_call]
+en = "After an answered call"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.afterAnsweredCall" }
+
+[workflows.after_any_call_ends]
+en = "After any call ends"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.afterAnyCallEnds" }
+
+[workflows.after_missed_call]
+en = "After a missed call"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.afterMissedCall" }
 
 [workflows.batch_line]
 en = "{size} contacts per batch"
@@ -8426,6 +11137,12 @@ screen = "workflows"
 id = { swift = "WorkflowsCopy.emptyTitle" }
 note = "⚠️ \"None yet\", NEVER \"none\". An empty list here is a workspace that has not built any automation, not one whose automation vanished."
 
+[workflows.intent_detected]
+en = "Intent detected"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.intentDetected" }
+
 [workflows.list_failed]
 en = "Could not load workflows"
 ctx = "error"
@@ -8433,11 +11150,41 @@ screen = "workflows"
 tier = "T2"
 id = { swift = "WorkflowsCopy.listFailed" }
 
+[workflows.message_received]
+en = "Message received"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.messageReceived" }
+
+[workflows.negative_sentiment]
+en = "Negative sentiment"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.negativeSentiment" }
+
+[workflows.neutral_sentiment]
+en = "Neutral sentiment"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.neutralSentiment" }
+
 [workflows.never_run]
 en = "Never run"
 ctx = "label"
 screen = "workflows"
 id = { swift = "WorkflowsCopy.neverRun" }
+
+[workflows.new_contact]
+en = "New contact"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.newContact" }
+
+[workflows.positive_sentiment]
+en = "Positive sentiment"
+ctx = "label"
+screen = "workflows"
+id = { swift = "WorkflowsCopy.positiveSentiment" }
 
 [workflows.retry]
 en = "Try again"
@@ -8481,3 +11228,69 @@ en = "Workflows"
 ctx = "title"
 screen = "workflows"
 id = { swift = "WorkflowsCopy.title" }
+
+[workspaces.administrator]
+en = "Administrator"
+ctx = "label"
+screen = "workspaces.display"
+id = { swift = "WorkspacesCopy.administrator" }
+
+[workspaces.member]
+en = "Member"
+ctx = "label"
+screen = "workspaces.display"
+id = { swift = "WorkspacesCopy.member" }
+
+[workspaces.missing_regions]
+en = "Some workspaces are missing: we could not reach {regions}."
+ctx = "error"
+screen = "workspaces"
+tier = "T2"
+args = { regions = "str" }
+id = { swift = "WorkspacesCopy.missingRegions(_:)" }
+note = "{regions} is one or more region codes joined with commas."
+
+[workspaces.read_only_access]
+en = "Read-only access"
+ctx = "label"
+screen = "workspaces"
+id = { swift = "WorkspacesCopy.readOnlyAccess" }
+
+[workspaces.region_and_role]
+en = "{region} · {role}"
+ctx = "format"
+screen = "workspaces"
+args = { region = "str", role = "str" }
+id = { swift = "WorkspacesCopy.regionAndRole(_:_:)" }
+
+[workspaces.region_line]
+en = "Region: {region}"
+ctx = "label"
+screen = "workspaces"
+args = { region = "str" }
+id = { swift = "WorkspacesCopy.regionLine(_:)" }
+note = "{region} is a region's name from region.*."
+
+[workspaces.switch_workspace]
+en = "Switch workspace"
+ctx = "button"
+screen = "workspaces"
+id = { swift = "WorkspacesCopy.switchWorkspace" }
+
+[workspaces.viewer]
+en = "Viewer"
+ctx = "label"
+screen = "workspaces.display"
+id = { swift = "WorkspacesCopy.viewer" }
+
+[workspaces.workspace]
+en = "Workspace"
+ctx = "label"
+screen = "workspaces"
+id = { swift = "WorkspacesCopy.workspace" }
+
+[workspaces.workspaces]
+en = "Workspaces"
+ctx = "label"
+screen = "workspaces"
+id = { swift = "WorkspacesCopy.workspaces" }

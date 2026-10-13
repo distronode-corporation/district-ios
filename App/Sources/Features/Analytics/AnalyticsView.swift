@@ -39,7 +39,7 @@ struct AnalyticsView: View {
         // can be pulled to retry rather than only through its button.
         .districtRefreshable { await model.load(refreshing: true) }
         .task { await model.load() }
-        .navigationTitle("Analytics")
+        .navigationTitle(AnalyticsCopy.analytics)
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -49,7 +49,7 @@ struct AnalyticsView: View {
     private var content: some View {
         switch model.state {
         case .loading:
-            LoadingView(message: "Loading analytics…")
+            LoadingView(message: AnalyticsCopy.loadingAnalytics)
         case let .failed(failure):
             // ⛔ REACHED ONLY WHEN ALL THREE READS FAILED. Anything partial keeps its
             // figures and confines the failure to a card.
@@ -83,7 +83,7 @@ struct AnalyticsView: View {
     /// the platform control for exactly this, and it brings the selected-segment
     /// semantics and the accessibility traits with it.
     private func rangePicker(_ range: AnalyticsRange) -> some View {
-        Picker("Window", selection: selection(range)) {
+        Picker(AnalyticsCopy.window, selection: selection(range)) {
             ForEach(AnalyticsRange.allCases, id: \.self) { option in
                 Text(Self.label(for: option)).tag(option)
             }
@@ -109,9 +109,9 @@ struct AnalyticsView: View {
     /// as 7d with a 200.
     private static func label(for range: AnalyticsRange) -> String {
         switch range {
-        case .sevenDays: "7 days"
-        case .thirtyDays: "30 days"
-        case .ninetyDays: "90 days"
+        case .sevenDays: AnalyticsCopy.n7Days
+        case .thirtyDays: AnalyticsCopy.n30Days
+        case .ninetyDays: AnalyticsCopy.n90Days
         }
     }
 
@@ -141,7 +141,7 @@ struct AnalyticsView: View {
             AnalyticsFunnelCard(stages: report.funnelData)
             AnalyticsSentimentCard(slices: report.sentimentDistribution)
         case let .failed(failure):
-            AnalyticsCardFailure(title: "Could not load analytics.", failure: failure, onRetry: retry)
+            AnalyticsCardFailure(title: AnalyticsCopy.couldNotLoadAnalytics, failure: failure, onRetry: retry)
         }
     }
 
@@ -153,7 +153,7 @@ struct AnalyticsView: View {
         case let .failed(failure):
             // ⛔ FAIL-SOFT, INSIDE ITS OWN CARD. The analytics figures beside it came
             // from a different read and are still correct.
-            AnalyticsCardFailure(title: "Could not load usage.", failure: failure, onRetry: retry)
+            AnalyticsCardFailure(title: AnalyticsCopy.couldNotLoadUsage, failure: failure, onRetry: retry)
         }
     }
 
@@ -167,7 +167,7 @@ struct AnalyticsView: View {
             // requests against the same route (`history=true` is the only
             // difference), so a failed history must not take this month's figures off
             // the screen.
-            AnalyticsCardFailure(title: "Could not load usage history.", failure: failure, onRetry: retry)
+            AnalyticsCardFailure(title: AnalyticsCopy.couldNotLoadUsage2, failure: failure, onRetry: retry)
         }
     }
 

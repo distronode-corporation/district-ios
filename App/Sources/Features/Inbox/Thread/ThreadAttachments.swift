@@ -89,7 +89,15 @@ extension ThreadModel {
     /// picker hands over bytes without one, so this constant is the whole of it.
     static let attachmentFileName = "attachment"
 
-    static let tooManyAttachments = "You can attach up to 5 images to one message."
-    static let unsupportedAttachment = "Only JPEG, PNG, GIF or WebP images can be attached."
-    static let unreadableAttachment = "That image could not be read. Try picking it again."
+    static var tooManyAttachments: String {
+        InboxCopy.canAttachUp5
+    }
+
+    static var unsupportedAttachment: String {
+        InboxCopy.onlyJpegPngGif
+    }
+
+    static var unreadableAttachment: String {
+        InboxCopy.imageCouldNotRead
+    }
 }

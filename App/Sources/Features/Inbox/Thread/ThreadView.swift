@@ -71,7 +71,7 @@ struct ThreadView: View {
             // destination built before a name was known; the fallback is a neutral
             // noun rather than "Unknown", which would assert the customer has no
             // name when the truth is that this screen was not told it.
-            .navigationTitle(title ?? "Conversation")
+            .navigationTitle(title ?? InboxCopy.conversation)
             .navigationBarTitleDisplayMode(.inline)
             // ⛔ `.contain` FIRST, or every bubble and the composer inherit this
             // identifier. Same trap `SignInView`'s root documents.
@@ -178,8 +178,8 @@ private struct ThreadContentView: View {
                 Spacer(minLength: 0)
                 EmptyStateView(
                     systemImage: "bubble.left.and.bubble.right",
-                    title: "Nothing in this thread",
-                    message: "Messages and calls with this contact will appear here."
+                    title: InboxCopy.nothingThread,
+                    message: InboxCopy.messagesCallsContactWill
                 )
                 Spacer(minLength: 0)
             }
@@ -231,7 +231,7 @@ private struct ThreadContentView: View {
                 // ⚠️ THE LABEL CARRIES THE PROGRESS STATE, matching Sending… and
                 // Drafting… below: the control is disabled while the page is in
                 // flight, so the changed word is what explains it.
-                Button(content.loadingOlder ? "Loading older…" : "Older messages") {
+                Button(content.loadingOlder ? InboxCopy.loadingOlder : InboxCopy.olderMessages) {
                     Task { await model.loadOlder() }
                 }
                 .buttonStyle(.districtGhost)
@@ -249,7 +249,7 @@ private struct ThreadContentView: View {
     @ViewBuilder
     private var incompleteCaption: some View {
         if content.incompleteCount > 0 {
-            Text("Part of this conversation could not be read, so some entries are missing.")
+            Text(InboxCopy.partConversationCouldNot)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
                 .multilineTextAlignment(.center)
@@ -368,8 +368,7 @@ private struct MessageBubble: View {
     /// ⚠️ SINGULAR AND PLURAL SPELLED OUT. "1 attachments" is the kind of detail
     /// that makes a product look unfinished.
     private var attachmentLabel: String {
-        let count = event.mediaUrls.count
-        return count == 1 ? "1 attachment" : "\(count) attachments"
+        InboxCopy.attachmentCount(event.mediaUrls.count)
     }
 
     private var fill: Color {
@@ -403,7 +402,10 @@ private struct CallEventRow: View {
     var body: some View {
         VStack(spacing: DistrictSpacing.hairline) {
             HStack(spacing: DistrictSpacing.hairline) {
-                DistrictBadge(text: isMissed ? "Missed call" : "Call", tone: isMissed ? .danger : .neutral)
+                DistrictBadge(
+                    text: isMissed ? InboxCopy.missedCall : InboxCopy.call,
+                    tone: isMissed ? .danger : .neutral
+                )
                 if let duration {
                     DistrictBadge(text: duration, tone: .neutral)
                 }
@@ -411,7 +413,7 @@ private struct CallEventRow: View {
                 // this payload, because transcripts would dominate the response on every
                 // thread open. The call detail screen fetches it on demand.
                 if event.hasTranscript {
-                    DistrictBadge(text: "Transcript", tone: .info)
+                    DistrictBadge(text: InboxCopy.transcript, tone: .info)
                 }
             }
             // ⛔ THE SAME MACHINE INSTANT A MESSAGE BUBBLE CARRIES; see ``MessageBubble``.
@@ -441,7 +443,7 @@ private struct CallEventRow: View {
     /// reads as a measurement rather than the absence of one.
     private var duration: String? {
         guard let seconds = event.durationSeconds, seconds > 0 else { return nil }
-        guard seconds >= 60 else { return "\(seconds)s" }
-        return "\(seconds / 60)m \(seconds % 60)s"
+        guard seconds >= 60 else { return InboxCopy.durationSeconds(seconds) }
+        return InboxCopy.durationMinutesSeconds(seconds / 60, seconds % 60)
     }
 }

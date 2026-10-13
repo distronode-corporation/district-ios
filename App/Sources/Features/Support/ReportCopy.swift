@@ -16,7 +16,7 @@ enum ReportCopy {
     /// argument and a `static let` would be resolved once at first use — which on a
     /// relaunched app is whichever launch happened to touch it first.
     static var subject: String {
-        ReviewRecordingMode.isArmed() ? baseSubject + recordingSuffix : baseSubject
+        ReviewRecordingMode.isArmed() ? subjectRecording : baseSubject
     }
 
     // MARK: - The sheet

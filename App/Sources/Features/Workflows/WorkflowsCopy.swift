@@ -31,18 +31,20 @@ enum WorkflowTrigger {
         labels[trigger] ?? trigger
     }
 
-    private static let labels: [String: String] = [
-        "call_ended": "After any call ends",
-        "call_ended_answered": "After an answered call",
-        "call_ended_unanswered": "After a missed call",
-        "negative_sentiment": "Negative sentiment",
-        "positive_sentiment": "Positive sentiment",
-        "neutral_sentiment": "Neutral sentiment",
-        "intent_detected": "Intent detected",
-        "sms_received": "Message received",
-        "contact_created": "New contact",
-        "dnc_registered": "Added to do-not-call",
-    ]
+    private static var labels: [String: String] {
+        [
+            "call_ended": WorkflowsCopy.afterAnyCallEnds,
+            "call_ended_answered": WorkflowsCopy.afterAnsweredCall,
+            "call_ended_unanswered": WorkflowsCopy.afterMissedCall,
+            "negative_sentiment": WorkflowsCopy.negativeSentiment,
+            "positive_sentiment": WorkflowsCopy.positiveSentiment,
+            "neutral_sentiment": WorkflowsCopy.neutralSentiment,
+            "intent_detected": WorkflowsCopy.intentDetected,
+            "sms_received": WorkflowsCopy.messageReceived,
+            "contact_created": WorkflowsCopy.newContact,
+            "dnc_registered": WorkflowsCopy.addedDoNotCall,
+        ]
+    }
 }
 
 extension Tone {

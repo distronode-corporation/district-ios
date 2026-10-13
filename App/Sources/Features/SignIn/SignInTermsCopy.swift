@@ -34,7 +34,7 @@ enum SignInTermsCopy {
     /// here would be a copy that could drift from the controls it describes, which is
     /// the one thing a sentence split across three views is at risk of.
     static var sentence: String {
-        "\(prefix) \(termsName)\(conjunction)\(privacyName)\(terminator)"
+        agreement(termsName, privacyName)
     }
 
     /// ⛔ THE PRODUCTION HOST RATHER THAN THE CONFIGURED API BASE, for the reason

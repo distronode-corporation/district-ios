@@ -67,10 +67,10 @@ extension SchedulingPresentation {
     var badge: SchedulingBadge? {
         switch self {
         case .notEligible, .legacy: nil
-        case .provisioning: SchedulingBadge(label: "Setting up", tone: .info)
-        case .live: SchedulingBadge(label: "Live", tone: .success)
-        case .failedProvision: SchedulingBadge(label: "Needs attention", tone: .danger)
-        case .switchedOff: SchedulingBadge(label: "Switched off", tone: .neutral)
+        case .provisioning: SchedulingBadge(label: SchedulingCopy.settingUp, tone: .info)
+        case .live: SchedulingBadge(label: SchedulingCopy.live2, tone: .success)
+        case .failedProvision: SchedulingBadge(label: SchedulingCopy.needsAttention, tone: .danger)
+        case .switchedOff: SchedulingBadge(label: SchedulingCopy.switchedOff2, tone: .neutral)
         }
     }
 }

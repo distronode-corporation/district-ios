@@ -43,15 +43,15 @@ enum CapabilityCatalog {
     /// unrecognised. ⚠️ Nil is a row that still renders, by id, and still saves.
     static func label(for id: String) -> String? {
         switch id {
-        case "transfer_to_person": "Transfer to a person"
-        case "transfer_to_agent": "Transfer to support"
-        case "dispatch_email": "Send an email"
-        case "check_availability": "Check the calendar"
-        case "book_appointment": "Book an appointment"
-        case "create_or_update_contact": "Save a caller's details"
-        case "leave_message": "Take a message"
-        case "search_knowledge_base": "Answer from the knowledge base"
-        case "send_sms": "Text the caller"
+        case "transfer_to_person": SettingsCopy.transferPerson
+        case "transfer_to_agent": SettingsCopy.transferToSupport
+        case "dispatch_email": SettingsCopy.sendAnEmail
+        case "check_availability": SettingsCopy.checkTheCalendar
+        case "book_appointment": SettingsCopy.bookAnAppointment
+        case "create_or_update_contact": SettingsCopy.saveCallerSDetails
+        case "leave_message": SettingsCopy.takeAMessage
+        case "search_knowledge_base": SettingsCopy.answerKnowledgeBase
+        case "send_sms": SettingsCopy.textTheCaller
         default: nil
         }
     }

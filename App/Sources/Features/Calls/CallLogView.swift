@@ -41,7 +41,7 @@ private struct CallLogScreen: View {
 
     var body: some View {
         content
-            .navigationTitle("Call log")
+            .navigationTitle(CallsCopy.callLog)
             .task {
                 // ⚠️ Once per appearance of this view identity, not per redraw.
                 await model.loadFirst()
@@ -60,8 +60,8 @@ private struct CallLogScreen: View {
             // empty state honest here rather than a failure wearing the wrong copy.
             EmptyStateView(
                 systemImage: "phone",
-                title: "Nothing here yet",
-                message: "Inbound and outbound calls will appear here as they happen."
+                title: CallsCopy.nothingHereYet,
+                message: CallsCopy.inboundOutboundCallsWill
             )
         case let .failed(failure):
             FailureView(failure: failure, onRetry: reload)

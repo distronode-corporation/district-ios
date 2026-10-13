@@ -37,6 +37,14 @@ built from history before publication, so they have no tags in this repository.
   `l10n` job fails on a stale generated file or a broken catalog rule, and
   `StoreCopyTests` scans the catalog as well as the sources. English is unchanged and
   nothing is French: `AppL10n` keeps the language English until a build ships French.
+- The rest of the app's own words joined the catalog: the inline `Text`, `Button`, `Label`,
+  alert and empty-state literals of the views (new `*Copy` namespaces in
+  `App/Sources/L10n/CopyNamespaces.swift` for the screens that had none), sentences that
+  were joined from two pieces as whole entries with placeholders, the English plural
+  ternaries as catalog plurals, and the month abbreviations from the core's calendar
+  words. Money stays exactly as English shows it today; in French it goes through the
+  core's `L10nFormat`. Copy read from a stored `static let` is computed now, so it follows
+  the language.
 - DistrictCore 7.0.0-beta.1: the core's sentences come from its catalogs, every request
   sends `Accept-Language` (`en`), and errors are shown through `ApiError.localizedMessage`
   (the same sentence in English).

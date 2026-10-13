@@ -186,7 +186,7 @@ struct CallHandlingView: View {
                 // ⚠️ NO `onReread`: this write adopts the server's echo, so it can never
                 // be `savedButStale`. See the ⚠️ on this view.
                 SettingsSaveNotice(state: model.save, onDismiss: model.dismissNotices)
-                Button(model.save.isSaving ? "Saving…" : SettingsCopy.callsSave, action: submit)
+                Button(model.save.isSaving ? SettingsCopy.saving : SettingsCopy.callsSave, action: submit)
                     .buttonStyle(.districtPrimary)
                     .disabled(!model.canSave)
             }

@@ -104,7 +104,7 @@ struct IncomingCallView: View {
         case .answering:
             EmptyView()
         case .ended:
-            Button("Done") { model.dismissEndedCall() }
+            Button(IncomingCallCopy.done) { model.dismissEndedCall() }
                 .buttonStyle(.districtPrimary)
         // ⚠️ UNREACHABLE: `inCall` always carries media, which the branch above
         // hands to ``InCallView`` before this is evaluated.
@@ -119,12 +119,12 @@ struct IncomingCallView: View {
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
                 .multilineTextAlignment(.center)
-            Button("Answer") { model.answerPressed() }
+            Button(IncomingCallCopy.answer) { model.answerPressed() }
                 .buttonStyle(.districtPrimary)
             // ⛔ DECLINING SENDS NOTHING TO THE SERVER. See the ⛔ on
             // ``IncomingCallController``: a deliberate refusal and a phone in a
             // pocket must be indistinguishable from outside.
-            Button("Decline") { model.declinePressed() }
+            Button(IncomingCallCopy.decline) { model.declinePressed() }
                 .buttonStyle(.districtDestructive)
         }
     }

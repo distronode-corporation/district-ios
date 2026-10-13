@@ -92,7 +92,7 @@ final class OverviewModel {
     /// the allocation it costs.
     private static var mismatch: FailureText {
         FailureText(
-            message: "The workspace you selected is no longer the one we can report on. Please try again.",
+            message: OverviewCopy.workspaceSelectedNoLonger,
             action: .retry
         )
     }

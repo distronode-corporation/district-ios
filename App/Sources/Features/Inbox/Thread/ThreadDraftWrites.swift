@@ -60,7 +60,11 @@ extension ThreadModel {
         }
     }
 
-    static let draftNotSaved = "Draft not saved. It will be saved again as you type."
+    static var draftNotSaved: String {
+        InboxCopy.draftNotSavedWill
+    }
 
-    static let sentDraftSurvived = "Sent. The saved draft could not be cleared, so check it before replying elsewhere."
+    static var sentDraftSurvived: String {
+        InboxCopy.sentSavedDraftCould
+    }
 }

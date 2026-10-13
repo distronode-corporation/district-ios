@@ -129,7 +129,7 @@ struct MessagingView: View {
     }
 
     private var addButton: some View {
-        Button("Add carrier account") { model.startEditing(accountId: nil) }
+        Button(SettingsCopy.addCarrierAccount) { model.startEditing(accountId: nil) }
             .buttonStyle(.districtSecondary)
             .disabled(!model.canEditNow)
     }
@@ -139,7 +139,8 @@ struct MessagingView: View {
             if isDefault {
                 DistrictEyebrow(text: SettingsCopy.messagingDefaultBadge)
             }
-            Text(account.label ?? MessagingCatalog.providerLabel(account.provider ?? "Account"))
+            Text(account.label ?? account.provider.map(MessagingCatalog.providerLabel) ?? SettingsCopy
+                .messagingAccountFallback)
                 .font(DistrictType.titleSmall)
                 .foregroundStyle(colors.foreground)
             Text(subtitle(account))
@@ -154,7 +155,7 @@ struct MessagingView: View {
 
     private func accountControls(_ account: MessagingAccount, isDefault: Bool) -> some View {
         HStack(spacing: DistrictSpacing.tight) {
-            Button("Edit") { model.startEditing(accountId: account.id) }
+            Button(SettingsCopy.edit) { model.startEditing(accountId: account.id) }
                 .buttonStyle(.districtGhost)
                 .disabled(!model.canEditNow)
             Button(SettingsCopy.messagingSetDefault) { setDefault(account) }
@@ -173,7 +174,7 @@ struct MessagingView: View {
                     titleVisibility: .visible
                 ) {
                     Button(SettingsCopy.messagingDelete, role: .destructive, action: confirmDelete)
-                    Button("Cancel", role: .cancel) { pendingDelete = nil }
+                    Button(SettingsCopy.cancel, role: .cancel) { pendingDelete = nil }
                 }
         }
         .padding(.top, DistrictSpacing.hairline)
@@ -183,9 +184,13 @@ struct MessagingView: View {
     /// bills on their own carrier account and a `managed` one bills through us.
     private func subtitle(_ account: MessagingAccount) -> String {
         let carrier = MessagingCatalog.providerLabel(account.provider ?? "unknown")
-        let source = account.credentialSource == "managed" ? "billed through Distronode" : "own carrier account"
-        let numbers = account.phoneNumbers.isEmpty ? "no numbers yet" : account.phoneNumbers.joined(separator: ", ")
-        return "\(carrier) · \(source) · \(numbers)"
+        let source = account.credentialSource == "managed"
+            ? SettingsCopy.messagingBilledThroughDistronode
+            : SettingsCopy.messagingOwnCarrierAccount
+        let numbers = account.phoneNumbers.isEmpty
+            ? SettingsCopy.messagingNoNumbersYet
+            : account.phoneNumbers.joined(separator: ", ")
+        return SettingsCopy.messagingAccountSubtitle(carrier, source, numbers)
     }
 
     // MARK: - The platform's own numbers

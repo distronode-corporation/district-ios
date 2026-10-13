@@ -54,14 +54,14 @@ struct FailureView: View {
         switch failure.action {
         case .retry:
             if let onRetry {
-                Button("Try again", action: onRetry)
+                Button(CommonCopy.tryAgain, action: onRetry)
                     .buttonStyle(.districtSecondary)
             }
         case .signIn:
             // ⛔ A DISTINCT OFFER FROM "try again", DELIBERATELY. Retrying re-sends a
             // credential that is gone; the only way forward is a new session.
             if let onSignIn {
-                Button("Sign in", action: onSignIn)
+                Button(CommonCopy.signIn, action: onSignIn)
                     .buttonStyle(.districtPrimary)
             }
         case .none:

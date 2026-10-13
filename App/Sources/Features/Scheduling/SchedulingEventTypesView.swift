@@ -96,12 +96,12 @@ final class SchedulingEventTypesModel {
     /// why, and it is the archive somebody has to undo.
     static func stateLabel(_ item: SchedulingEventType) -> SchedulingStatusLabel {
         if item.archived == true {
-            return SchedulingStatusLabel(label: "Archived", kind: .info)
+            return SchedulingStatusLabel(label: SchedulingCopy.archived, kind: .info)
         }
         if item.isActive == false {
-            return SchedulingStatusLabel(label: "Inactive", kind: .stopped)
+            return SchedulingStatusLabel(label: SchedulingCopy.inactive, kind: .stopped)
         }
-        return SchedulingStatusLabel(label: "Active", kind: .success)
+        return SchedulingStatusLabel(label: SchedulingCopy.active, kind: .success)
     }
 
     /// ⛔ "Not public" WHENEVER THE HOST IS UNKNOWN OR THE ROW IS NOT LIVE, AND NEVER A

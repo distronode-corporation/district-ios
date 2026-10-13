@@ -261,7 +261,7 @@ struct RoutingView: View {
                     .accessibilityIdentifier(A11yID.Routing.add)
                 SettingsSaveNotice(state: model.save, onReread: reload, onDismiss: model.dismissNotices)
                 note(SettingsCopy.routingSaveHint, colors.mutedForeground)
-                Button(model.save.isSaving ? "Saving…" : SettingsCopy.routingSave, action: submit)
+                Button(model.save.isSaving ? SettingsCopy.saving : SettingsCopy.routingSave, action: submit)
                     .buttonStyle(.districtPrimary)
                     .disabled(!model.canSave)
                     .accessibilityIdentifier(A11yID.Routing.save)
@@ -275,7 +275,7 @@ struct RoutingView: View {
                         titleVisibility: .visible
                     ) {
                         Button(SettingsCopy.routingEmptyConfirmAction, role: .destructive, action: commit)
-                        Button("Cancel", role: .cancel) {}
+                        Button(SettingsCopy.cancel, role: .cancel) {}
                     }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -468,7 +468,9 @@ final class MessagingModel {
         return FailureText(message: message, action: .retry)
     }
 
-    private static let probeRefusedFallback = "The carrier refused those credentials."
+    private static var probeRefusedFallback: String {
+        SettingsCopy.carrierRefusedThoseCredentials
+    }
 }
 
 /// ⚠️ `private` SO IT IS FILE-SCOPED. A helper this small on a stdlib type is exactly

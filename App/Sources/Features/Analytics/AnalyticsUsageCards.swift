@@ -23,16 +23,16 @@ struct AnalyticsUsageCard: View {
     }
 
     var body: some View {
-        DistrictCard(eyebrow: "Usage this month") {
+        DistrictCard(eyebrow: AnalyticsCopy.usageThisMonth) {
             if let usage {
-                Text("Month \(usage.month)")
+                Text(AnalyticsCopy.usageMonth(usage.month))
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
                 ForEach(Self.rows(usage), id: \.label) { row in
                     AnalyticsAmountRow(label: row.label, amount: row.amount)
                 }
             } else {
-                AnalyticsNote(text: "No usage has been recorded for this month yet.")
+                AnalyticsNote(text: AnalyticsCopy.noUsageHasBeen)
             }
         }
     }
@@ -48,15 +48,15 @@ struct AnalyticsUsageCard: View {
     /// billable metrics would imply a charge that is not made.
     static func rows(_ usage: UsageMonth) -> [AnalyticsUsageRow] {
         let candidates: [(String, Double?)] = [
-            ("SMS sent", usage.smsOutbound),
-            ("SMS received", usage.smsInbound),
-            ("MMS sent", usage.mmsOutbound),
-            ("WhatsApp sent", usage.whatsappOutbound),
-            ("WhatsApp received", usage.whatsappInbound),
-            ("Outbound call minutes", usage.callMinutesOutbound),
-            ("Inbound call minutes", usage.callMinutesInbound),
-            ("Phone numbers", usage.numberCount),
-            ("Video minutes (tracked)", usage.videoMinutes),
+            (AnalyticsCopy.smsSent, usage.smsOutbound),
+            (AnalyticsCopy.smsReceived, usage.smsInbound),
+            (AnalyticsCopy.mmsSent, usage.mmsOutbound),
+            (AnalyticsCopy.whatsappSent, usage.whatsappOutbound),
+            (AnalyticsCopy.whatsappReceived, usage.whatsappInbound),
+            (AnalyticsCopy.outboundCallMinutes, usage.callMinutesOutbound),
+            (AnalyticsCopy.inboundCallMinutes, usage.callMinutesInbound),
+            (AnalyticsCopy.phoneNumbers, usage.numberCount),
+            (AnalyticsCopy.videoMinutesTracked, usage.videoMinutes),
         ]
         return candidates.compactMap { label, amount in
             amount.map { AnalyticsUsageRow(label: label, amount: $0) }
@@ -107,9 +107,9 @@ struct AnalyticsHistoryCard: View {
     }
 
     var body: some View {
-        DistrictCard(eyebrow: "Recent months") {
+        DistrictCard(eyebrow: AnalyticsCopy.recentMonths) {
             if months.isEmpty {
-                AnalyticsNote(text: "No usage has been recorded in any recent month yet.")
+                AnalyticsNote(text: AnalyticsCopy.noUsageHasBeen2)
             } else {
                 populated
             }
@@ -130,8 +130,7 @@ struct AnalyticsHistoryCard: View {
                 row(months[index], minutes: minutes[index], width: widths[index])
             }
             Text(
-                "Bars compare metered call minutes across these months. "
-                    + "A channel with nothing metered is labelled rather than shown as zero."
+                AnalyticsCopy.barsCompareMeteredCall
             )
             .font(DistrictType.caption)
             .foregroundStyle(colors.mutedForeground)
@@ -147,12 +146,12 @@ struct AnalyticsHistoryCard: View {
             Text(AnalyticsFormat.monthLabel(month.month))
                 .font(DistrictType.titleSmall)
                 .foregroundStyle(colors.foreground)
-            AnalyticsAmountRow(label: "Metered call minutes", amount: minutes)
+            AnalyticsAmountRow(label: AnalyticsCopy.meteredCallMinutes, amount: minutes)
             bar(width: width)
             // ⚠️ EVERY MESSAGING CHANNEL, summed the way the minutes are: a month with
             // SMS metered and WhatsApp absent totals the SMS, and a month with none of
             // them metered totals to nil rather than to zero.
-            AnalyticsAmountRow(label: "Messages", amount: messages(month))
+            AnalyticsAmountRow(label: AnalyticsCopy.messages, amount: messages(month))
         }
     }
 

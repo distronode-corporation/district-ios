@@ -94,21 +94,21 @@ struct DistrictCommands: Commands {
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
-            Button("New Message") { shell?.newMessage() }
+            Button(NavigationCopy.newMessage) { shell?.newMessage() }
                 .keyboardShortcut("n")
                 .disabled(!availability.canCompose)
         }
         CommandGroup(after: .textEditing) {
-            Button("Search Messages") { shell?.search() }
+            Button(NavigationCopy.searchMessages) { shell?.search() }
                 .keyboardShortcut("f")
                 .disabled(!availability.canSearch)
         }
         CommandGroup(after: .toolbar) {
-            Button("Refresh") { shell?.refresh() }
+            Button(NavigationCopy.refresh) { shell?.refresh() }
                 .keyboardShortcut("r")
                 .disabled(!availability.canRefresh)
         }
-        CommandMenu("Go") {
+        CommandMenu(NavigationCopy.go) {
             ForEach(Tab.allCases, id: \.self) { tab in
                 Button(tab.label) { shell?.select(tab) }
                     .keyboardShortcut(KeyEquivalent(ShellCommandAvailability.digit(for: tab)))

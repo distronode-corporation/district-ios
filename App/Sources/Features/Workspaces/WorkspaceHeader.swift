@@ -34,7 +34,7 @@ struct WorkspaceHeader: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.tight) {
-            DistrictEyebrow(text: "Workspace")
+            DistrictEyebrow(text: WorkspacesCopy.workspace)
             Text(name)
                 .font(DistrictType.headline)
                 // ⚠️ SCALED, for the same reason as the eyebrow's: tracking is
@@ -53,11 +53,11 @@ struct WorkspaceHeader: View {
                     // ⚠️ STATED UP FRONT rather than discovered by tapping
                     // something that 403s. The server excludes viewers from every
                     // mutating route.
-                    DistrictBadge(text: "Read-only access", tone: .neutral)
+                    DistrictBadge(text: WorkspacesCopy.readOnlyAccess, tone: .neutral)
                 }
                 Spacer(minLength: 0)
                 if canSwitch {
-                    Button("Switch workspace", action: onSwitch)
+                    Button(WorkspacesCopy.switchWorkspace, action: onSwitch)
                         .buttonStyle(.districtGhost)
                 }
             }
@@ -84,7 +84,7 @@ struct PartialWorkspacesCaption: View {
     }
 
     var body: some View {
-        Text("Some workspaces are missing: we could not reach \(named).")
+        Text(WorkspacesCopy.missingRegions(named))
             .font(DistrictType.caption)
             .foregroundStyle(Tone.warning.ink(colors))
             .multilineTextAlignment(.center)

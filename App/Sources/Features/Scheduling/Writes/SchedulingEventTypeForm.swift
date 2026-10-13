@@ -48,12 +48,14 @@ struct SchedulingEventTypeForm: Equatable {
     static let defaultLocation = "livekit"
 
     /// The four the web offers, in its order.
-    static let offeredLocations: [(value: String, label: String)] = [
-        ("livekit", "Built-in video"),
-        ("phone", "Phone"),
-        ("in_person", "In person"),
-        ("link", "Link"),
-    ]
+    static var offeredLocations: [(value: String, label: String)] {
+        [
+            ("livekit", SchedulingWriteCopy.builtInVideo),
+            ("phone", SchedulingWriteCopy.phone),
+            ("in_person", SchedulingWriteCopy.inPerson),
+            ("link", SchedulingWriteCopy.link),
+        ]
+    }
 
     /// What the `location_value` field is called, or nil when the type has none.
     ///
@@ -66,9 +68,9 @@ struct SchedulingEventTypeForm: Equatable {
         guard let known = SchedulingLocationType.known(wire) else { return nil }
         return switch known.valueKind {
         case .generated: nil
-        case .url: "Meeting link"
-        case .phone: "Phone number"
-        case .address: "Address"
+        case .url: SchedulingWriteCopy.meetingLink
+        case .phone: SchedulingWriteCopy.phoneNumber
+        case .address: SchedulingWriteCopy.address
         }
     }
 

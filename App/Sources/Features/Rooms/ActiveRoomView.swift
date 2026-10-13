@@ -280,11 +280,16 @@ struct ActiveRoomView: View {
         }
     }
 
-    // ⚠️ HERE RATHER THAN IN ``RoomsCopy`` ONLY BECAUSE THAT FILE BELONGS TO ANOTHER
-    // CHANGE SET TODAY; move them beside ``RoomsCopy/flipFailed`` when it is free.
-    // Like that sentence they name no cause, because the SDK's reason is not known here.
-    static let microphoneFailed = "Could not change your microphone. It is as the button shows."
-    static let cameraFailed = "Could not change your camera. It is as the button shows."
+    /// ⚠️ HERE RATHER THAN IN ``RoomsCopy`` ONLY BECAUSE THAT FILE BELONGS TO ANOTHER
+    /// CHANGE SET TODAY; move them beside ``RoomsCopy/flipFailed`` when it is free.
+    /// Like that sentence they name no cause, because the SDK's reason is not known here.
+    static var microphoneFailed: String {
+        RoomsCopy.couldNotChangeMicrophone
+    }
+
+    static var cameraFailed: String {
+        RoomsCopy.couldNotChangeCamera
+    }
 }
 
 extension ActiveRoomModel {

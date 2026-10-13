@@ -304,7 +304,7 @@ private struct SidebarRow: View {
 
     private var caption: String? {
         switch entry.gate {
-        case .partial: "Read-only"
+        case .partial: NavigationCopy.readOnly
         case .hidden, .none: nil
         }
     }

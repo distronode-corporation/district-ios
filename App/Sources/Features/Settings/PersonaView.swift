@@ -131,7 +131,7 @@ struct PersonaView: View {
     /// as you type the last character back is harder to understand than one that
     /// greys out, and this screen has nowhere else to put the affordance.
     private var saveButton: some View {
-        Button(model.save.isSaving ? "Saving…" : SettingsCopy.personaSave, action: submit)
+        Button(model.save.isSaving ? SettingsCopy.saving : SettingsCopy.personaSave, action: submit)
             .buttonStyle(.districtPrimary)
             .disabled(!model.canSave)
             .accessibilityIdentifier(A11yID.Persona.save)
@@ -189,7 +189,7 @@ struct PersonaView: View {
     /// difference is worth a word.
     private var avatarState: String? {
         guard let enabled = model.persona?.videoEnabled else { return nil }
-        return enabled ? "On" : "Off"
+        return enabled ? SettingsCopy.on : SettingsCopy.off
     }
 
     // MARK: - Wiring
