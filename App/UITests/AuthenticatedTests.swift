@@ -102,6 +102,37 @@ final class DialerRefusalTests: UITestApp {
     }
 }
 
+/// District Desk's "New ticket": the button opens the form and Cancel closes it.
+///
+/// ⛔ THE FORM IS NEVER SUBMITTED. `A11yID.Desk.composeSubmit` is in the forbidden set: a
+/// submit is a real ticket in a live workspace's queue. The case asserts that Open ticket
+/// is disabled for an empty draft and leaves by Cancel.
+/// ⚠️ IT SKIPS WHERE THE BUTTON IS RIGHTLY ABSENT: a desk that is off, or a settings read
+/// that failed, offers no "New ticket" on any client (`DeskModel.canStartTicket`).
+final class DeskNewTicketTests: UITestApp {
+    func test_IOS_DESK_01_newTicketOpensTheFormAndCancelClosesIt() throws {
+        try requireSession()
+        navigate(to: .desk)
+        XCTAssertTrue(element(A11yID.Desk.root).waitForExistence(timeout: 15), "the desk never opened")
+        try XCTSkipUnless(
+            element(A11yID.Desk.newTicket).waitForExistence(timeout: 15),
+            "this workspace's desk is off or unreadable, so no New ticket is offered"
+        )
+        tap(A11yID.Desk.newTicket)
+        XCTAssertTrue(element(A11yID.Desk.composeRoot).waitForExistence(timeout: 10), "the form never opened")
+        XCTAssertFalse(element(A11yID.Desk.composeSubmit).isEnabled, "an empty draft must not be submittable")
+        screenshot("IOS-DESK-01-new-ticket")
+        tap(A11yID.Desk.composeCancel)
+        // ⚠️ A PREDICATE WAIT, because `waitForNonExistence` is not on every toolchain this
+        // bundle meets (see `ReviewRecordingCase.waitForAbsence`).
+        let gone = expectation(
+            for: NSPredicate(format: "exists == false"),
+            evaluatedWith: element(A11yID.Desk.composeRoot)
+        )
+        wait(for: [gone], timeout: 10)
+    }
+}
+
 /// The regular-width shell, signed in: what a rotation and the sidebar must not lose.
 ///
 /// ⚠️ EACH CASE SKIPS WHEN A TAB BAR IS SHOWING, which is how compact width shows itself. The

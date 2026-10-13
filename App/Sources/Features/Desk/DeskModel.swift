@@ -96,6 +96,14 @@ final class DeskModel {
     /// human's queue. The sheet disables its controls on this same flag.
     private(set) var creating = false
 
+    /// Why the last submit from the new-ticket form did not go through, or nil.
+    ///
+    /// ⚠️ SEPARATE FROM ``notice`` BECAUSE THE FORM COVERS THE QUEUE. A failure written
+    /// to the screen's notice would be drawn under the sheet the operator is looking
+    /// at, so they would see the button come back and nothing else. The form shows
+    /// this one; the queue keeps ``notice`` for the outcome once the form has closed.
+    private(set) var composeFailure: String?
+
     /// ⛔ False for `viewer` and for a role that did not parse. See the ⛔ on the type.
     let canWrite: Bool
 
@@ -141,6 +149,34 @@ final class DeskModel {
         // standard-library surface, and the older spelling compiles on every toolchain
         // this target might meet.
         return allTickets.filter { $0.status == status.rawValue }.count
+    }
+
+    /// Whether "New ticket" is offered.
+    ///
+    /// ⛔ THE SAME RULE AS THE OTHER CLIENTS: a role that may write, a desk that is
+    /// demonstrably ON and a queue that answered (Windows' `can_start`, Android's compose
+    /// button on its loaded state). Not while the desk is off, where the screen's one
+    /// action is turning it on; not while the settings read failed, where whether
+    /// tickets are being taken at all is the open question; and not while a create is
+    /// still in flight.
+    ///
+    /// ⚠️ ON THE MODEL RATHER THAN IN THE VIEW so the Mac, which shares this model's
+    /// shape, gets the same rule by porting one property.
+    var canStartTicket: Bool {
+        guard canWrite, !creating else { return false }
+        guard case .on = availability, case .ready = queue else { return false }
+        return true
+    }
+
+    /// Open the new-ticket form: true when it may open, and the view presents it then.
+    ///
+    /// ⚠️ IT CLEARS THE LAST FORM'S FAILURE, so a reopened form starts clean the way its
+    /// draft does, and re-checks ``canStartTicket`` because a control that was drawn a
+    /// moment ago is not proof the rule still holds.
+    func startTicket() -> Bool {
+        guard canStartTicket else { return false }
+        composeFailure = nil
+        return true
     }
 
     func select(_ status: DeskTicketStatus?) {
@@ -202,12 +238,12 @@ final class DeskModel {
     func createTicket(_ draft: DeskComposerState) async -> Bool {
         guard canWrite, !creating else { return false }
         guard draft.isComplete else {
-            notice = DeskCopy.createIncomplete
+            composeFailure = DeskCopy.createIncomplete
             return false
         }
         creating = true
         defer { creating = false }
-        notice = nil
+        composeFailure = nil
         let result = await desk.createTicket(
             workspaceId: workspaceId,
             // ⚠️ THE THREE REQUESTER BOXES GO OVER AS TYPED. The repository trims each
@@ -236,7 +272,7 @@ final class DeskModel {
             await reloadQueue()
             return true
         case let .failure(error):
-            notice = FailureText.from(error).message
+            composeFailure = FailureText.from(error).message
             return false
         }
     }

@@ -65,6 +65,9 @@ struct DeskView: View {
             content
         }
         .stackedList()
+        // ⛔ `.contain` FIRST, or the identifier is inherited by every row. See ContactsView.
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(A11yID.Desk.root)
         .navigationTitle(DeskCopy.title)
         .toolbar { toolbar }
         .task { await model.load() }
@@ -86,8 +89,20 @@ struct DeskView: View {
         }
     }
 
+    /// ⚠️ "NEW TICKET" IS DRAWN ONLY WHEN ``DeskModel/canStartTicket`` SAYS SO, the way the
+    /// other clients hide theirs: off, could-not-ask and still-loading each have their own
+    /// card, and a create button over any of them would be an action on a queue the screen
+    /// is not showing.
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
+        if model.canStartTicket {
+            ToolbarItem(placement: .primaryAction) {
+                Button(DeskCopy.newTicketAction, systemImage: "square.and.pencil") {
+                    composing = model.startTicket()
+                }
+                .accessibilityIdentifier(A11yID.Desk.newTicket)
+            }
+        }
         ToolbarItem(placement: .topBarTrailing) {
             Button(DeskCopy.offAction) { settingsOpen = true }
                 .disabled(!model.canWrite)

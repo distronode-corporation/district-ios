@@ -35,6 +35,7 @@ final class LargerTextTourTests: XCTestCase {
         A11yID.Marketplace.release,
         A11yID.Inbox.send,
         A11yID.Dialer.call,
+        A11yID.Desk.composeSubmit,
     ]
 
     private var app: XCUIApplication!

@@ -1709,6 +1709,13 @@ ctx = "label"
 screen = "desk"
 id = { swift = "DeskCopy.messageLabel" }
 
+[desk.new_ticket_action]
+en = "New ticket"
+ctx = "button"
+screen = "desk"
+id = { swift = "DeskCopy.newTicketAction" }
+note = "The toolbar button that opens the new-ticket form, for a customer who got in touch another way (a walk-in, an email). Same words as the form's title, but a button."
+
 [desk.no_contact_details]
 en = "No contact details recorded"
 ctx = "label"

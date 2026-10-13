@@ -12,6 +12,11 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
+- New ticket on District Desk. A New ticket button in the Desk toolbar opens the form that
+  raises a ticket on a customer's behalf (a walk-in, an email), as Android, Linux and
+  Windows already offer. It is offered on the same rule as theirs: a role that may write,
+  a desk that is on and a queue that loaded (`DeskModel.canStartTicket`). A failed submit
+  is now said in the form rather than on the queue behind it.
 - A live transcript on a call in progress. A call's screen shows the conversation as it
   happens, line by line, while the call is in progress and the screen is in front, then the
   full transcript in the same place once the call ends. It is fed by the telemetry socket
