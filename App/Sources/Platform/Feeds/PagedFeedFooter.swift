@@ -24,7 +24,7 @@ struct PagedFeedFooter: View {
             .padding(DistrictSpacing.gutter)
         } else if let appendFailure {
             VStack(spacing: DistrictSpacing.tight) {
-                Text("Could not load more")
+                Text(CommonCopy.couldNotLoadMore)
                     .font(DistrictType.bodySmall)
                 Text(appendFailure.message)
                     .font(DistrictType.caption)
@@ -32,7 +32,7 @@ struct PagedFeedFooter: View {
                 // ⚠️ Offered unconditionally here, unlike ``FailureView``, because the
                 // only thing this footer can do is ask for the same window again. A
                 // failure that cannot be retried still gets its sentence above.
-                Button("Try again", action: onRetry)
+                Button(CommonCopy.tryAgain, action: onRetry)
                     .buttonStyle(.districtSecondary)
             }
             .frame(maxWidth: .infinity)

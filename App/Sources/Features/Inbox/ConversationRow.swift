@@ -70,7 +70,7 @@ struct ConversationRow: View {
     @ViewBuilder
     private var draftBadge: some View {
         if hasDraft {
-            DistrictBadge(text: "Draft", tone: .info)
+            DistrictBadge(text: InboxCopy.draft, tone: .info)
         }
         // Nothing when there is no draft. An empty chip would read as a failed load.
     }
@@ -85,7 +85,7 @@ struct ConversationRow: View {
     private var unreadBadge: some View {
         if unreadCount > 0 {
             DistrictBadge(text: "\(unreadCount)", tone: .district)
-                .accessibilityLabel("\(unreadCount) unread")
+                .accessibilityLabel(InboxCopy.unreadCount(unreadCount))
         }
     }
 }

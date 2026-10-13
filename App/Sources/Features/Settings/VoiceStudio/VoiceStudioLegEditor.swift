@@ -25,7 +25,7 @@ struct VoiceStudioLegEditor: View {
     }
 
     var body: some View {
-        SettingsCard(eyebrow: "\(labels.editLeg): \(legTitle)") {
+        SettingsCard(eyebrow: CommonCopy.labelValue(labels.editLeg, legTitle)) {
             ForEach(pickers, id: \.handle) { picker in
                 VoiceStudioPickerRow(picker: picker, enabled: model.canEdit)
             }

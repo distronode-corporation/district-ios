@@ -67,7 +67,7 @@ struct ThreadModerationMenu: ToolbarContent {
             // comments too, so a comment naming it reads as one more symbol with
             // no accessibility treatment — even a comment explaining why a word is
             // used instead.
-            Text("Manage")
+            Text(InboxCopy.manage)
         }
         .accessibilityIdentifier(A11yID.Inbox.threadMenu)
     }

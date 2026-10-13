@@ -28,11 +28,11 @@ struct ThreadMediaThumbnail: View {
                     .resizable()
                     .scaledToFill()
             case .failure:
-                caption("Image unavailable")
+                caption(InboxCopy.imageUnavailable)
             case .empty:
-                caption("Loading image")
+                caption(InboxCopy.loadingImage)
             @unknown default:
-                caption("Image unavailable")
+                caption(InboxCopy.imageUnavailable)
             }
         }
         // ⛔ `minHeight`, BECAUSE THIS BOX HOLDS TEXT IN TWO OF ITS FOUR STATES.

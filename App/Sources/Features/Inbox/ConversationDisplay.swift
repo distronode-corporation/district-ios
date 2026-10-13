@@ -165,7 +165,9 @@ private enum MessagePreview {
 
     /// ⚠️ Copy, not a wire value. A thread whose latest message is an MMS with no text
     /// genuinely has no body, and a blank subtitle reads as a rendering failure.
-    private static let missingBody = "No message body"
+    private static var missingBody: String {
+        InboxCopy.noMessageBody
+    }
 
     /// Roughly two lines at the subtitle's 14pt on the narrowest supported device.
     private static let previewLimit = 140

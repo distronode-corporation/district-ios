@@ -62,11 +62,11 @@ struct SignInView: View {
 
     var body: some View {
         VStack(spacing: DistrictSpacing.row) {
-            DistrictEyebrow(text: "District AI")
-            Text("District AI")
+            DistrictEyebrow(text: SignInCopy.districtAi)
+            Text(SignInCopy.districtAi)
                 .font(DistrictType.headlineLarge)
                 .foregroundStyle(colors.foreground)
-            Text("Sign in to your workspace.")
+            Text(SignInCopy.signWorkspace)
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.mutedForeground)
                 .multilineTextAlignment(.center)
@@ -81,7 +81,7 @@ struct SignInView: View {
             // ⚠️ THE BROWSER HAND-OFF IS STATED UP FRONT. Sign-in leaves the app,
             // and a user who is not expecting that reads the browser opening as a
             // crash or a redirect they did not ask for.
-            Text("Opens your browser to sign in securely.")
+            Text(SignInCopy.opensBrowserSignSecurely)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
                 .multilineTextAlignment(.center)
@@ -160,7 +160,7 @@ struct SignInView: View {
             .disabled(isBusy)
             // ⚠️ THE LABEL IS APPLE'S OWN, localised by the control; the
             // identifier is set INSIDE the representable, see ``AppleIDButton``.
-            .accessibilityLabel("Sign in with Apple")
+            .accessibilityLabel(SignInCopy.signApple)
         }
     }
 
@@ -292,10 +292,12 @@ enum SignInStatusTone {
     /// ⛔ HOSTILE, NOT MERELY FAILED. A state mismatch is a REFUSED callback and a
     /// rejected refresh is how a replayed token presents, which the server treats
     /// as theft and answers by revoking the whole token family.
-    private static let danger: Set<String> = [
-        SessionCopy.signInNotVerified,
-        SessionCopy.refreshRejected,
-    ]
+    private static var danger: Set<String> {
+        [
+            SessionCopy.signInNotVerified,
+            SessionCopy.refreshRejected,
+        ]
+    }
 
     /// Recoverable by trying again: worth flagging, not worth alarming.
     ///
@@ -304,19 +306,21 @@ enum SignInStatusTone {
     /// spent — not a security event, and `SessionModel` carries a ⛔ saying it must
     /// never be worded as one. Colouring it red would say what the wording refuses
     /// to.
-    private static let warning: Set<String> = [
-        SessionCopy.signInExpired,
-        SessionCopy.tooManyAttempts,
-        SessionCopy.unreachable,
-        SessionCopy.refreshThrottled,
-        SessionCopy.refreshNotSent,
-        SessionCopy.storeUnavailable,
-        SessionCopy.markerNotDurable,
-        SessionCopy.interruptedRefresh,
-        SessionCopy.refreshUnreachable,
-        // The authenticator step's ticket ran out: recoverable by signing in again.
-        MfaCopy.expired,
-    ]
+    private static var warning: Set<String> {
+        [
+            SessionCopy.signInExpired,
+            SessionCopy.tooManyAttempts,
+            SessionCopy.unreachable,
+            SessionCopy.refreshThrottled,
+            SessionCopy.refreshNotSent,
+            SessionCopy.storeUnavailable,
+            SessionCopy.markerNotDurable,
+            SessionCopy.interruptedRefresh,
+            SessionCopy.refreshUnreachable,
+            // The authenticator step's ticket ran out: recoverable by signing in again.
+            MfaCopy.expired,
+        ]
+    }
 
     /// Nothing failed and nothing is worth retrying: the user needs something
     /// only another person can give them.
@@ -325,7 +329,9 @@ enum SignInStatusTone {
     /// ID with no account is an invitation problem, and colouring it as a failure
     /// invites the retry loop that cannot succeed; a "check your connection" answer
     /// reads to a reviewer as broken sign-in.
-    private static let info: Set<String> = [
-        SignInCopy.noAccount,
-    ]
+    private static var info: Set<String> {
+        [
+            SignInCopy.noAccount,
+        ]
+    }
 }

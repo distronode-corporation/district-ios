@@ -57,7 +57,7 @@ struct MessagingAccountSheet: View {
                 .foregroundStyle(colors.foreground)
             providerPicker(draft)
             sourcePicker(draft)
-            SettingsField(label: "Label", text: field(draft, \.label), enabled: !saving)
+            SettingsField(label: SettingsCopy.label, text: field(draft, \.label), enabled: !saving)
             numbers(draft)
             credentials(draft)
             defaultToggle(draft)
@@ -77,8 +77,8 @@ struct MessagingAccountSheet: View {
     /// does not have, and the route carries an unknown key through as a PLAINTEXT
     /// identifier.
     private func providerPicker(_ draft: MessagingDraft) -> some View {
-        labelled("Carrier") {
-            Picker("Carrier", selection: providerSelection(draft)) {
+        labelled(SettingsCopy.carrier) {
+            Picker(SettingsCopy.carrier, selection: providerSelection(draft)) {
                 ForEach(MessagingCatalog.providers, id: \.self) { provider in
                     Text(MessagingCatalog.providerLabel(provider)).tag(provider)
                 }
@@ -92,8 +92,8 @@ struct MessagingAccountSheet: View {
     /// independently and refuses with a 403 naming support; nothing this client can read
     /// tells it whether the workspace has one.
     private func sourcePicker(_ draft: MessagingDraft) -> some View {
-        labelled("Credentials") {
-            Picker("Credentials", selection: field(draft, \.credentialSource)) {
+        labelled(SettingsCopy.credentials) {
+            Picker(SettingsCopy.credentials, selection: field(draft, \.credentialSource)) {
                 ForEach(MessagingCatalog.credentialSources, id: \.self) { source in
                     Text(Self.sourceLabel(source)).tag(source)
                 }
@@ -121,7 +121,7 @@ struct MessagingAccountSheet: View {
     private func numbers(_ draft: MessagingDraft) -> some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
             SettingsField(
-                label: "Phone numbers, one per line",
+                label: SettingsCopy.phoneNumbersOnePer,
                 text: numbersBinding(draft),
                 enabled: !saving,
                 multiline: true
@@ -153,7 +153,7 @@ struct MessagingAccountSheet: View {
     /// of a workspace the default regardless, so a `false` would not prevent it and
     /// would claim an instruction nobody gave.
     private func defaultToggle(_ draft: MessagingDraft) -> some View {
-        Toggle("Make this the default sender", isOn: field(draft, \.makeDefault))
+        Toggle(SettingsCopy.makeDefaultSender, isOn: field(draft, \.makeDefault))
             .font(DistrictType.bodySmall)
             .foregroundStyle(colors.foreground)
             .disabled(saving)
@@ -170,13 +170,13 @@ struct MessagingAccountSheet: View {
         case .idle:
             EmptyView()
         case .running:
-            caption("Asking the carrier…", colors.mutedForeground)
+            caption(SettingsCopy.askingTheCarrier, colors.mutedForeground)
         case let .passed(detail):
             caption(Self.passedText(detail), colors.success)
         case let .rejected(message):
-            caption("Those credentials were refused: \(message)", colors.destructive)
+            caption(SettingsCopy.credentialsRefused(message), colors.destructive)
         case let .unreachable(failure):
-            caption("\(Self.probeUnreachablePrefix) \(failure.message)", colors.mutedForeground)
+            caption(SettingsCopy.probeUnreachable(failure.message), colors.mutedForeground)
         }
     }
 
@@ -200,14 +200,14 @@ struct MessagingAccountSheet: View {
     /// a create already on the wire.
     private func buttons(_ draft: MessagingDraft) -> some View {
         HStack(spacing: DistrictSpacing.tight) {
-            Button("Cancel", action: cancel)
+            Button(SettingsCopy.cancel, action: cancel)
                 .buttonStyle(.districtGhost)
                 .disabled(saving)
                 .keyboardShortcut(.cancelAction)
-            Button("Test", action: test)
+            Button(SettingsCopy.test, action: test)
                 .buttonStyle(.districtSecondary)
                 .disabled(!draft.canTest || !model.canEditNow)
-            Button(saving ? "Saving…" : "Save", action: submit)
+            Button(saving ? SettingsCopy.saving : SettingsCopy.save, action: submit)
                 .buttonStyle(.districtPrimary)
                 .disabled(!draft.canSave || !model.canEditNow)
                 .keyboardShortcut(.districtSubmit)
@@ -224,32 +224,29 @@ struct MessagingAccountSheet: View {
     // kind of inference question that produces an unreadable error.
 
     private func title(_ draft: MessagingDraft) -> String {
-        draft.isCreate ? "Add carrier account" : "Edit carrier account"
+        draft.isCreate ? SettingsCopy.addCarrierAccount : SettingsCopy.editCarrierAccount
     }
 
     private func numbersNote(_ draft: MessagingDraft) -> String {
         guard draft.numbersEdited else {
-            return "Shown as stored. They are only sent if you change them."
+            return SettingsCopy.shownStoredTheyAre
         }
-        return "These numbers will replace the account's current list when you save."
+        return SettingsCopy.theseNumbersWillReplace
     }
 
     private func credentialNote(_ draft: MessagingDraft) -> String {
         guard draft.secretsRequired else { return SettingsCopy.messagingCredentialsRedacted }
-        return "Every field is required, because this account has no stored credentials to keep."
+        return SettingsCopy.everyFieldRequiredBecause
     }
 
     private static func sourceLabel(_ source: String) -> String {
-        source == "byok" ? "This workspace's own" : "Managed by Distronode"
+        source == "byok" ? SettingsCopy.workspaceSOwn : SettingsCopy.managedByDistronode
     }
 
     private static func passedText(_ detail: String?) -> String {
-        guard let detail else { return "Those credentials work." }
-        return "Those credentials work: \(detail)"
+        guard let detail else { return SettingsCopy.thoseCredentialsWork }
+        return SettingsCopy.credentialsWorkDetail(detail)
     }
-
-    private static let probeUnreachablePrefix =
-        "We could not ask the carrier, so this says nothing about the credentials."
 
     // MARK: - Wiring
 

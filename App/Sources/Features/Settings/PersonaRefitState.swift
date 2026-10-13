@@ -15,15 +15,25 @@ enum PersonaRefitState: Equatable {
     /// What it did.
     case finished(VoiceStudioRefitOutcome)
 
-    static let runningLine = "Checking that the voice chain speaks the new language."
-    static let refittedLine = "The voice chain was moved to models that speak the new language. "
-        + "The Voice screen shows it."
-    static let noFitLine = "No model this workspace may use speaks the new language for every part "
-        + "of the voice chain. Choose them on the Voice screen."
-    static let failedLine = "The voice chain could not be moved to the new language. "
-        + "Fit it on the Voice screen."
-    static let notSeenLine = "The voice chain was saved, but the Voice screen does not show it fitting "
-        + "the new language. Check it there."
+    static var runningLine: String {
+        SettingsCopy.checkingVoiceChainSpeaks
+    }
+
+    static var refittedLine: String {
+        SettingsCopy.voiceChainWasMoved
+    }
+
+    static var noFitLine: String {
+        SettingsCopy.noModelWorkspaceMay
+    }
+
+    static var failedLine: String {
+        SettingsCopy.voiceChainCouldNot
+    }
+
+    static var notSeenLine: String {
+        SettingsCopy.voiceChainWasSaved
+    }
 
     var isRunning: Bool {
         self == .running
@@ -45,7 +55,7 @@ enum PersonaRefitState: Equatable {
         case .finished(.noFit):
             Self.noFitLine
         case let .finished(.failed(refusal)):
-            "\(Self.failedLine) \(VoiceStudioModel.failure(refusal).message)"
+            SettingsCopy.refitFailedBecause(VoiceStudioModel.failure(refusal).message)
         case .finished(.notSeen):
             Self.notSeenLine
         }

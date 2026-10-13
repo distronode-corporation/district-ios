@@ -127,7 +127,7 @@ private struct InboxScreen: View {
 
     var body: some View {
         content
-            .navigationTitle("Inbox")
+            .navigationTitle(InboxCopy.inbox)
             .toolbar { toolbar }
             .sheet(isPresented: $composing) {
                 // ⚠️ A CLOSURE LITERAL RATHER THAN `onSent: landed`. The measured
@@ -147,7 +147,7 @@ private struct InboxScreen: View {
             // every message in the workspace, including threads the conversation list's
             // 500-message scan window never reached, so a client-side filter over the
             // loaded rows would answer "no matches" for messages the workspace has.
-            .searchable(text: $searchText, prompt: "Search messages")
+            .searchable(text: $searchText, prompt: InboxCopy.searchMessages)
             .commandTargets(canCompose: model.canReply, composing: $composing)
             .onChange(of: searchText) { _, query in
                 model.searchQueryChanged(query)
@@ -204,12 +204,12 @@ private struct InboxScreen: View {
     private var toolbar: some ToolbarContent {
         if showsWriteControls {
             ToolbarItem(placement: .primaryAction) {
-                Button("New", systemImage: "square.and.pencil") { composing = true }
-                    .accessibilityLabel("New message")
+                Button(InboxCopy.new, systemImage: "square.and.pencil") { composing = true }
+                    .accessibilityLabel(InboxCopy.newMessage)
             }
             if model.unreadTotal > 0 {
                 ToolbarItem(placement: .secondaryAction) {
-                    Button("Mark all read") { Task { await model.markAllRead() } }
+                    Button(InboxCopy.markAllRead) { Task { await model.markAllRead() } }
                 }
             }
         }
@@ -272,8 +272,8 @@ private struct InboxScreen: View {
             // would be a false negative this app invented.
             EmptyStateView(
                 systemImage: "magnifyingglass",
-                title: "Keep typing",
-                message: "Search needs at least \(InboxModel.minimumSearchLength) characters."
+                title: InboxCopy.keepTyping,
+                message: InboxCopy.searchTooShort(InboxModel.minimumSearchLength)
             )
         case .searching:
             skeleton
@@ -284,8 +284,8 @@ private struct InboxScreen: View {
             // search ran rather than implying the workspace is empty.
             EmptyStateView(
                 systemImage: "magnifyingglass",
-                title: "No matches",
-                message: "No message in this workspace contains that."
+                title: InboxCopy.noMatches,
+                message: InboxCopy.noMessageWorkspaceContains
             )
         case let .failed(failure):
             // ⛔ A DIFFERENT SCREEN FROM "No matches", ON THE ONE SURFACE WHERE AN
@@ -326,8 +326,8 @@ private struct InboxScreen: View {
     private var noConversations: some View {
         EmptyStateView(
             systemImage: "tray",
-            title: "No conversations yet",
-            message: "Texts and emails from your customers will appear here."
+            title: InboxCopy.noConversationsYet,
+            message: InboxCopy.textsEmailsCustomersWill
         )
     }
 
@@ -415,7 +415,7 @@ private struct InboxScreen: View {
     /// full page as if it were every match is the same class of mistake as reporting
     /// a degraded region's absence as "you have no workspaces".
     private var cappedCaption: some View {
-        InboxListCaption(text: "Showing the most recent matches. Narrow the search to see older ones.")
+        InboxListCaption(text: InboxCopy.showingMostRecentMatches)
     }
 
     /// ⛔ STATED, NOT SWALLOWED. The scan window was exhausted, so a quiet older thread
@@ -423,7 +423,7 @@ private struct InboxScreen: View {
     /// class of mistake as reporting a degraded region's absence as "you have no
     /// workspaces". There is nothing to fetch, so this is a note rather than a control.
     private var partialCaption: some View {
-        InboxListCaption(text: "Showing recent conversations. Older, quieter threads are not listed.")
+        InboxListCaption(text: InboxCopy.showingRecentConversationsOlder)
     }
 
     // MARK: - Actions

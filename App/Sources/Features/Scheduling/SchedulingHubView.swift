@@ -88,7 +88,7 @@ struct SchedulingHubView: View {
             .districtReadableWidth()
         }
         .accessibilityIdentifier(A11yID.Scheduling.root)
-        .navigationTitle("Scheduling")
+        .navigationTitle(SchedulingCopy.scheduling)
         .navigationBarTitleDisplayMode(.inline)
         .districtRefreshable { await model.load(.manual) }
         .task { await model.load() }
@@ -196,7 +196,7 @@ struct SchedulingHubView: View {
     private var content: some View {
         switch model.state {
         case .loading:
-            LoadingView(message: "Loading scheduling…")
+            LoadingView(message: SchedulingCopy.loadingScheduling)
         case let .failed(failure):
             // ⛔ A FAILURE, NEVER AN EMPTY CARD. `tenant == nil` is a legitimate
             // answer on this surface, so the two would otherwise look identical.
@@ -229,7 +229,7 @@ struct SchedulingHubView: View {
 
     private func header(_ presentation: SchedulingPresentation) -> some View {
         HStack(spacing: DistrictSpacing.tight) {
-            DistrictEyebrow(text: "Booking page")
+            DistrictEyebrow(text: SchedulingCopy.bookingPage)
             Spacer(minLength: DistrictSpacing.tight)
             if let badge = presentation.badge {
                 DistrictBadge(text: badge.label, tone: badge.tone)
@@ -297,7 +297,7 @@ struct SchedulingHubView: View {
             // ⚠️ ONLY WHEN THE STRING PARSES. `ShareLink` needs a real `URL`, and
             // a share sheet is a nicety where the copy button is the guarantee.
             if let url = URL(string: link) {
-                ShareLink("Share", item: url)
+                ShareLink(SchedulingCopy.share, item: url)
             }
         }
     }
@@ -437,7 +437,7 @@ private struct SchedulingNotice: View {
             Text(message)
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.destructive)
-            Button("Dismiss", action: onDismiss)
+            Button(SchedulingCopy.dismiss, action: onDismiss)
                 .buttonStyle(.districtGhost)
         }
         .padding(DistrictSpacing.card)

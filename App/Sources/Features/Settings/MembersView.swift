@@ -146,7 +146,7 @@ struct MembersView: View {
                     titleVisibility: .visible
                 ) {
                     Button(SettingsCopy.membersRemove, role: .destructive, action: confirmRemoval)
-                    Button("Cancel", role: .cancel) { pendingRemoval = nil }
+                    Button(SettingsCopy.cancel, role: .cancel) { pendingRemoval = nil }
                 }
         }
         .padding(.top, DistrictSpacing.hairline)
@@ -191,7 +191,7 @@ struct MembersView: View {
     private var renameCard: some View {
         SettingsCard(eyebrow: SettingsCopy.membersRenameEyebrow) {
             if let stored = model.storedName {
-                SettingsReadOnlyRow(label: "Saved as", value: stored)
+                SettingsReadOnlyRow(label: SettingsCopy.savedAs, value: stored)
             }
             Text(SettingsCopy.membersRenameNote)
                 .font(DistrictType.caption)

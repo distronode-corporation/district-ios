@@ -183,7 +183,7 @@ struct DirectoryView: View {
                     .buttonStyle(.districtSecondary)
                     .disabled(model.save.isSaving)
                 SettingsSaveNotice(state: model.save, onReread: reload, onDismiss: model.dismissNotices)
-                Button(model.save.isSaving ? "Saving…" : SettingsCopy.directorySave, action: submit)
+                Button(model.save.isSaving ? SettingsCopy.saving : SettingsCopy.directorySave, action: submit)
                     .buttonStyle(.districtPrimary)
                     .disabled(!model.canSave)
                     // ⛔ THE ONE CONFIRMATION ON THIS SCREEN, ON THE SAVE THAT ASKS FOR IT,
@@ -197,7 +197,7 @@ struct DirectoryView: View {
                         titleVisibility: .visible
                     ) {
                         Button(SettingsCopy.directoryEmptyConfirmAction, role: .destructive, action: commit)
-                        Button("Cancel", role: .cancel) {}
+                        Button(SettingsCopy.cancel, role: .cancel) {}
                     }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

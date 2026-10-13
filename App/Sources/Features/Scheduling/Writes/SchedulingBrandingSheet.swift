@@ -120,7 +120,7 @@ struct SchedulingBrandingSheet: View {
         _ onChange: @escaping (Int) -> Void
     ) -> some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            Text("\(label): \(value)")
+            Text(CommonCopy.labelValue(label, "\(value)"))
                 .font(DistrictType.labelSmall)
             Slider(
                 value: Binding(get: { Double(value) }, set: { onChange(Int($0.rounded())) }),

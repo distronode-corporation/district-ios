@@ -40,7 +40,7 @@ struct DialerView: View {
 
     var body: some View {
         content
-            .navigationTitle("Dial")
+            .navigationTitle(DialerCopy.dial)
             .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -81,7 +81,7 @@ private struct DialerKeypadView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-                Text("Number")
+                Text(DialerCopy.number)
                     .font(DistrictType.labelSmall)
                     .foregroundStyle(colors.mutedForeground)
                 field
@@ -120,7 +120,7 @@ private struct DialerKeypadView: View {
     /// anyone here arrived from a restored back stack or a deep link, and a field that
     /// simply did nothing would read as a broken app.
     private var field: some View {
-        TextField("Number", text: entry)
+        TextField(DialerCopy.number, text: entry)
             .keyboardType(.phonePad)
             .textContentType(.telephoneNumber)
             .autocorrectionDisabled()
@@ -203,7 +203,7 @@ private struct DialerKeypadView: View {
             // ⚠️ A CLOSURE LITERAL RATHER THAN `action: model.placeCall`. A non-Sendable
             // escaping closure inherits the enclosing `body`'s main-actor isolation; a
             // method REFERENCE is a value conversion and does not, which Swift 6 rejects.
-            Button(model.placing ? "Calling…" : "Call") { model.placeCall() }
+            Button(model.placing ? DialerCopy.calling : DialerCopy.call) { model.placeCall() }
                 .buttonStyle(.districtPrimary)
                 .disabled(!model.canPlaceCall)
                 // ⚠️ IDENTITY, NOT THE LABEL: it reads "Calling…" while placing.

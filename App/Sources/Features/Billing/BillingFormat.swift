@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import Foundation
 
@@ -39,7 +40,16 @@ enum BillingFormat {
     /// ⛔ A NEGATIVE KEEPS ITS SIGN. Android drops it (it takes the absolute value of the
     /// remainder only), so a credited invoice renders there as a charge. A credit note
     /// is rare and the wrong direction is the expensive one.
+    ///
+    /// ⚠️ ENGLISH ONLY. In French the amount comes from the core's money table
+    /// (`L10nFormat`, « 1 204,25 », held to the website's vectors), still with no symbol:
+    /// the catalog's French sentence places the « $ ». English keeps the format above,
+    /// which has no thousands separator, because changing it would change what every
+    /// billing line shows today.
     static func money(cents: Int) -> String {
+        guard L10nRuntime.locale == .en else {
+            return L10nFormat.moneyOrBare(minorUnits: cents, currency: nil)
+        }
         // ⚠️ DIVIDED AND REMAINDERED BEFORE `abs`, so `Int.min` cannot trap: `Int.min /
         // 100` is representable while `abs(Int.min)` is not.
         let units = abs(cents / 100)

@@ -31,7 +31,7 @@ struct AnalyticsCardFailure: View {
                 .foregroundStyle(colors.destructive)
                 .multilineTextAlignment(.leading)
             if case .retry = failure.action {
-                Button("Try again", action: onRetry)
+                Button(AnalyticsCopy.tryAgain, action: onRetry)
                     .buttonStyle(DistrictButtonStyle(variant: .ghost, size: .small))
             }
         }

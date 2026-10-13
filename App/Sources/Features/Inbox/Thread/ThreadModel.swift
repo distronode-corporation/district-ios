@@ -462,8 +462,10 @@ final class ThreadModel {
 
     /// ⛔ NOT A RETRY. A thread key in neither documented form is a malformed
     /// destination, and asking for it again produces the identical nothing.
-    private static let unopenable = FailureText(
-        message: "This conversation could not be opened.",
-        action: .none
-    )
+    private static var unopenable: FailureText {
+        FailureText(
+            message: InboxCopy.conversationCouldNotOpened,
+            action: .none
+        )
+    }
 }

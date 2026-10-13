@@ -111,8 +111,7 @@ extension ThreadModel {
     /// operator's next action is either to switch back or to send without them, and
     /// only the first sentence tells them which is available.
     private static func attachmentsDropped(count: Int) -> String {
-        let noun = count == 1 ? "image was" : "\(count) images were"
-        return "\(noun) removed: email replies cannot carry attachments. Switch back to SMS to send them."
+        InboxCopy.attachmentsDropped(count)
     }
 
     // MARK: - The channel, said out loud
@@ -235,13 +234,13 @@ enum ThreadChannelName {
     /// information than silently drawing a control that says nothing.
     static func of(_ channel: String) -> String {
         if channel == MessageChannel.sms {
-            return "SMS"
+            return InboxCopy.sms
         }
         if channel == MessageChannel.email {
-            return "Email"
+            return InboxCopy.email
         }
         if channel == MessageChannel.whatsapp {
-            return "WhatsApp"
+            return InboxCopy.whatsapp
         }
         return channel.uppercased()
     }

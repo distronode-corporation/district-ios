@@ -22,14 +22,14 @@ extension SidebarItem {
         // ⚠️ THE `?? ""` IS UNREACHABLE: these five cases are exactly the ones with a tab.
         case .overview, .inbox, .calls, .contacts, .account: tab?.label ?? ""
         case .hq: HQCopy.title
-        case .analytics: "Analytics"
+        case .analytics: NavigationCopy.analytics
         case .marketplace: MarketplaceCopy.title
         case .billing: BillingCopy.title
         case .rooms: RoomsCopy.title
         case .workflows: WorkflowsCopy.title
         case .desk: DeskCopy.title
-        case .dialer: "Dial"
-        case .scheduling: "Scheduling"
+        case .dialer: NavigationCopy.dial
+        case .scheduling: NavigationCopy.scheduling
         case .support: SupportCopy.title
         case .settings: SettingsCopy.hubTitle
         }
@@ -81,11 +81,11 @@ extension SidebarItem {
     /// act on, and in portrait it is behind a button, so the sentence says what to do.
     var detailPlaceholder: (title: String, symbol: String)? {
         switch self {
-        case .inbox: ("Select a conversation", "tray")
-        case .calls: ("Select a call", "phone")
-        case .contacts: ("Select a contact", "person.2")
-        case .desk: ("Select a ticket", "tray.full")
-        case .support: ("Select a request", "lifepreserver")
+        case .inbox: (NavigationCopy.selectAConversation, "tray")
+        case .calls: (NavigationCopy.selectACall, "phone")
+        case .contacts: (NavigationCopy.selectAContact, "person.2")
+        case .desk: (NavigationCopy.selectATicket, "tray.full")
+        case .support: (NavigationCopy.selectARequest, "lifepreserver")
         case .overview, .account, .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .dialer,
              .scheduling, .settings:
             nil

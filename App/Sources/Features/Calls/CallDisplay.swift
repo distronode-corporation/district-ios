@@ -126,11 +126,11 @@ extension CallDisplay {
 extension CallDisplay {
     /// ⚠️ The placeholder is copy, not a wire value. See ``displayName``.
     var callerLabel: String {
-        displayName ?? "No caller ID"
+        displayName ?? CallsCopy.noCallerId
     }
 
     var directionLabel: String {
-        outbound ? "Outbound" : "Inbound"
+        outbound ? CallsCopy.outbound : CallsCopy.inbound
     }
 
     /// The summary to print, or nil when there is none to print.
@@ -154,15 +154,15 @@ extension CallDisplay {
     var aiSummaryNote: String? {
         switch aiSummary {
         case .text: nil
-        case .absent: "No AI summary for this call."
-        case .failed: "This call could not be summarised."
+        case .absent: CallsCopy.noAiSummaryCall
+        case .failed: CallsCopy.callCouldNotSummarised
         }
     }
 
     /// ⚠️ "Live" REPLACES the raw status rather than sitting beside it, so the log and
     /// the detail screen say the same word about the same call.
     var statusLabel: String {
-        live ? "Live" : status
+        live ? CallsCopy.live : status
     }
 
     /// ⚠️ A ONE-CHARACTER GLYPH, NOT A WORD, AND THE SAME PAIR THE INBOX USES.
@@ -192,10 +192,10 @@ extension CallDisplay {
     /// pair would drift the way this file's own ⛔ describes.
     var transferLabel: String? {
         if transferred {
-            return "Transferred"
+            return CallsCopy.transferred
         }
         if transferFailed {
-            return "Transfer failed"
+            return CallsCopy.transferFailed
         }
         return nil
     }

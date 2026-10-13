@@ -97,7 +97,7 @@ struct ReportSheet: View {
                     .disabled(model.isSending)
                     .accessibilityIdentifier(A11yID.Report.cancel)
                     .keyboardShortcut(.cancelAction)
-                Button(model.isSending ? "Reporting…" : ReportCopy.submit) {
+                Button(model.isSending ? SupportCopy.reporting : ReportCopy.submit) {
                     Task { await model.submit(note: noteText) }
                 }
                 .buttonStyle(.districtPrimary)
@@ -115,7 +115,7 @@ struct ReportSheet: View {
                 .foregroundStyle(colors.foreground)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier(A11yID.Report.confirmation)
-            Button("Done") { dismiss() }
+            Button(SupportCopy.done) { dismiss() }
                 .buttonStyle(.districtPrimary)
         }
     }

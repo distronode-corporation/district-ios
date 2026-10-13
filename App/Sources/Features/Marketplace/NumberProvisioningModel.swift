@@ -358,6 +358,6 @@ final class NumberProvisioningModel {
         guard error.httpStatus == 422 else { return FailureText.from(error) }
         let stated = error.localizedMessage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let sentence = stated.isEmpty ? MarketplaceCopy.submitRefusedReread : stated
-        return FailureText(message: "\(sentence) \(MarketplaceCopy.submitRefusedReread)", action: .none)
+        return FailureText(message: MarketplaceCopy.submitRefusedBecause(sentence), action: .none)
     }
 }

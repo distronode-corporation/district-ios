@@ -316,7 +316,7 @@ struct ShellView: View {
     private var gate: some View {
         switch workspaceSession.state {
         case .loading:
-            LoadingView(message: "Loading your workspaces…")
+            LoadingView(message: NavigationCopy.loadingYourWorkspaces)
         case .content, .partial:
             tabs.shellCommands(
                 commands,
@@ -330,8 +330,8 @@ struct ShellView: View {
         case .empty:
             EmptyStateView(
                 systemImage: "building.2",
-                title: "No workspaces yet",
-                message: "This account does not belong to a workspace. Ask whoever invited you to add you to one."
+                title: NavigationCopy.noWorkspacesYet,
+                message: NavigationCopy.accountDoesNotBelong
             )
         case let .lapsed(inactiveCount):
             lapsed(inactiveCount: inactiveCount)
@@ -348,11 +348,10 @@ struct ShellView: View {
     /// also never be worded as "you have no workspaces", which is the state next door and
     /// a different sentence entirely.
     private func lapsed(inactiveCount: Int) -> some View {
-        let noun = inactiveCount == 1 ? "workspace is" : "workspaces are"
-        return EmptyStateView(
+        EmptyStateView(
             systemImage: "creditcard",
-            title: "Subscription not active",
-            message: "Your \(noun) paused because the subscription is not active."
+            title: NavigationCopy.subscriptionNotActive,
+            message: inactiveCount == 1 ? NavigationCopy.lapsedOne : NavigationCopy.lapsedMany
         )
     }
 
@@ -468,7 +467,7 @@ struct ShellView: View {
                 AccountView(container: container, session: session, push: push)
             }
         } else {
-            LoadingView(message: "Loading your workspace…")
+            LoadingView(message: NavigationCopy.loadingYourWorkspace)
         }
     }
 

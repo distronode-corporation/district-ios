@@ -353,6 +353,7 @@ extension ShellView {
     /// workspace" and "does not exist", and 409 for a row with no addressable
     /// counterpart; pressing again produces the same answer. The sentence says what did
     /// not happen and where the text is.
-    private static let unresolvedThread =
-        "This conversation could not be opened, so the reply was not sent. Open the Inbox to send it."
+    private static var unresolvedThread: String {
+        NavigationCopy.conversationCouldNotOpened
+    }
 }

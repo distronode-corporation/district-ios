@@ -32,14 +32,14 @@ enum RowContextActions {
     /// because a withheld caller's `from` is an English sentence, not a number.
     static func call(direction: String?, from: String?) -> [RowContextAction] {
         guard direction == "inbound", let number = CallerIdentity.resolved(from) else { return [] }
-        return [RowContextAction(title: "Copy Number", value: number)]
+        return [RowContextAction(title: CommonCopy.copyNumber, value: number)]
     }
 
     /// A contact row: its phone number and its email, whichever it has.
     static func contact(phone: String?, email: String?) -> [RowContextAction] {
         [
-            usable(phone).map { RowContextAction(title: "Copy Number", value: $0) },
-            usable(email).map { RowContextAction(title: "Copy Email", value: $0) },
+            usable(phone).map { RowContextAction(title: CommonCopy.copyNumber, value: $0) },
+            usable(email).map { RowContextAction(title: CommonCopy.copyEmail, value: $0) },
         ].compactMap(\.self)
     }
 
@@ -53,7 +53,7 @@ enum RowContextActions {
         if let open = address.lastIndex(of: "<"), let close = address.lastIndex(of: ">"), open < close {
             address = String(address[address.index(after: open) ..< close])
         }
-        return usable(address).map { [RowContextAction(title: "Copy Address", value: $0)] } ?? []
+        return usable(address).map { [RowContextAction(title: CommonCopy.copyAddress, value: $0)] } ?? []
     }
 
     private static func usable(_ value: String?) -> String? {

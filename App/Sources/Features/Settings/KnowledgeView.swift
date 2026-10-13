@@ -122,7 +122,7 @@ struct KnowledgeView: View {
                         titleVisibility: .visible
                     ) {
                         Button(SettingsCopy.knowledgeModeConfirmAction, role: .destructive, action: confirmMode)
-                        Button("Cancel", role: .cancel) { pendingMode = nil }
+                        Button(SettingsCopy.cancel, role: .cancel) { pendingMode = nil }
                     }
             }
         }
@@ -152,7 +152,7 @@ struct KnowledgeView: View {
                     .foregroundStyle(colors.destructive)
             }
             SettingsSaveNotice(state: model.addSave, onReread: reload, onDismiss: model.dismissNotices)
-            Button(model.addSave.isSaving ? "Adding…" : SettingsCopy.knowledgeAdd, action: submitDocument)
+            Button(model.addSave.isSaving ? SettingsCopy.adding : SettingsCopy.knowledgeAdd, action: submitDocument)
                 .buttonStyle(.districtPrimary)
                 .disabled(!model.canAdd)
         }
@@ -197,7 +197,7 @@ struct KnowledgeView: View {
             Text(document.title)
                 .font(DistrictType.titleSmall)
                 .foregroundStyle(colors.foreground)
-            Text("\(document.sourceType) · \(document.status) · \(document.chunkCount) chunks")
+            Text(SettingsCopy.knowledgeDocumentMeta(document.sourceType, document.status, document.chunkCount))
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
         }

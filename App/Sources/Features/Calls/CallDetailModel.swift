@@ -108,6 +108,6 @@ final class CallDetailModel {
     /// register for either. Nothing to retry, so nothing is offered.
     private static func detailFailure(_ error: ApiError) -> FailureText {
         guard error.httpStatus == 404 else { return FailureText.from(error) }
-        return FailureText(message: "This call is not available.", action: .none)
+        return FailureText(message: CallsCopy.callNotAvailable, action: .none)
     }
 }

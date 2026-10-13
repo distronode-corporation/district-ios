@@ -58,12 +58,12 @@ struct CreateContactSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-            Text("Add contact")
+            Text(ContactsCopy.addContact)
                 .font(DistrictType.title)
                 .foregroundStyle(colors.foreground)
-            field("Name", text: $name)
-            field("Phone number", text: $phone)
-            field("Email", text: $email)
+            field(ContactsCopy.name, text: $name)
+            field(ContactsCopy.phoneNumber, text: $phone)
+            field(ContactsCopy.email, text: $email)
             hint
             failure
             buttons
@@ -91,7 +91,7 @@ struct CreateContactSheet: View {
     @ViewBuilder
     private var hint: some View {
         if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !hasContactMethod {
-            Text("Enter a phone number or an email address.")
+            Text(ContactsCopy.enterPhoneNumberEmail)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
         }
@@ -112,11 +112,11 @@ struct CreateContactSheet: View {
 
     private var buttons: some View {
         HStack(spacing: DistrictSpacing.tight) {
-            Button("Cancel", action: cancel)
+            Button(ContactsCopy.cancel, action: cancel)
                 .buttonStyle(.districtGhost)
                 .disabled(saving)
                 .keyboardShortcut(.cancelAction)
-            Button(saving ? "Adding…" : "Add", action: submit)
+            Button(saving ? ContactsCopy.adding : ContactsCopy.add, action: submit)
                 .buttonStyle(.districtPrimary)
                 .disabled(!canSubmit)
                 .keyboardShortcut(.districtSubmit)

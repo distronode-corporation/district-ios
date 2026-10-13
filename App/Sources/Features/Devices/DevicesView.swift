@@ -73,7 +73,7 @@ struct DevicesView: View {
             .padding(DistrictSpacing.gutter)
             .districtReadableWidth()
         }
-        .navigationTitle("Devices")
+        .navigationTitle(DevicesCopy.devices)
         // ⚠️ NOT KEYED ON `session.epoch`, UNLIKE THE ACCOUNT TAB. This view's
         // identity cannot outlive a session change: ``RootView`` swaps the whole
         // subtree out on a sign-out and builds a new ``ShellView`` on a sign-in,
@@ -96,7 +96,7 @@ struct DevicesView: View {
         }
         if model.nothingRevoked {
             DeviceNotice(
-                message: "That device was already signed out. The list has been refreshed.",
+                message: DevicesCopy.deviceWasAlreadySigned,
                 destructive: false,
                 onDismiss: model.dismissNotices
             )
@@ -154,8 +154,8 @@ struct DevicesView: View {
                         },
                         titleVisibility: .visible
                     ) {
-                        Button("Sign out", role: .destructive, action: confirmDevice)
-                        Button("Cancel", role: .cancel) { pending = nil }
+                        Button(DevicesCopy.signOut, role: .destructive, action: confirmDevice)
+                        Button(DevicesCopy.cancel, role: .cancel) { pending = nil }
                     }
                 }
             }
@@ -166,9 +166,8 @@ struct DevicesView: View {
     private var empty: some View {
         EmptyStateView(
             systemImage: "iphone",
-            title: "No other devices",
-            message: "Nothing else is signed in to this account right now. "
-                + "A device that just signed in can take a few minutes to appear."
+            title: DevicesCopy.noOtherDevices,
+            message: DevicesCopy.nothingElseSignedAccount
         )
     }
 
@@ -176,12 +175,12 @@ struct DevicesView: View {
     /// ``DistrictButtonVariant/destructive`` is: it reads as "this one is
     /// destructive" without looking like the screen's primary action.
     private var revokeAllButton: some View {
-        Button("Sign out everywhere") { confirmingAll = true }
+        Button(DevicesCopy.signOutEverywhere) { confirmingAll = true }
             .buttonStyle(.districtDestructive)
             .disabled(model.busy)
             .confirmationDialog(Self.confirmAllPrompt, isPresented: $confirmingAll, titleVisibility: .visible) {
-                Button("Sign out", role: .destructive, action: confirmAll)
-                Button("Cancel", role: .cancel) {}
+                Button(DevicesCopy.signOut, role: .destructive, action: confirmAll)
+                Button(DevicesCopy.cancel, role: .cancel) {}
             }
             .padding(.top, DistrictSpacing.tight)
     }
@@ -192,7 +191,7 @@ struct DevicesView: View {
     /// is the thing that ended.
     private func listFailure(_ failure: FailureText) -> some View {
         VStack(spacing: DistrictSpacing.tight) {
-            DistrictEyebrow(text: "Could not list your devices")
+            DistrictEyebrow(text: DevicesCopy.couldNotListDevices)
             FailureView(failure: failure, onRetry: reload, onSignIn: signIn)
         }
         .frame(maxWidth: .infinity)
@@ -206,16 +205,19 @@ struct DevicesView: View {
     /// `StringProtocol` one at the call site, which is exactly the kind of
     /// inference question that produces an unreadable error. A named `String` picks
     /// the second unambiguously.
-    private static let confirmOtherDevice =
-        "Sign this device out? It will need to sign in again to use District AI."
+    private static var confirmOtherDevice: String {
+        DevicesCopy.signDeviceOutWill
+    }
 
     /// ⚠️ SIGNING OUT THIS DEVICE ENDS THE SESSION IN THE USER'S HAND, which the
     /// generic wording above would not warn about.
-    private static let confirmThisDevice =
-        "This is the device you are using. Signing it out will return you to the sign-in screen."
+    private static var confirmThisDevice: String {
+        DevicesCopy.deviceAreUsingSigning
+    }
 
-    private static let confirmAllPrompt =
-        "Sign out of District AI on every device, including this one?"
+    private static var confirmAllPrompt: String {
+        DevicesCopy.signOutDistrictAi
+    }
 
     private var devicePrompt: String {
         guard let pending, pending.deviceId == model.thisDeviceId else { return Self.confirmOtherDevice }
@@ -282,7 +284,7 @@ private struct DeviceCard: View {
             // ⚠️ THE EYEBROW IS THE MARKER, and it is the ONLY place "this device"
             // is asserted — derived from the installation id, never from the name.
             if isThisDevice {
-                DistrictEyebrow(text: "This device")
+                DistrictEyebrow(text: DevicesCopy.thisDevice)
             }
             Text(name)
                 .font(DistrictType.title)
@@ -293,7 +295,7 @@ private struct DeviceCard: View {
             Text(lastActive)
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.mutedForeground)
-            Button("Sign out this device", action: onRequestRevoke)
+            Button(DevicesCopy.signOutDevice, action: onRequestRevoke)
                 .buttonStyle(.districtGhost)
                 .disabled(busy)
                 .padding(.top, DistrictSpacing.tight)
@@ -308,12 +310,12 @@ private struct DeviceCard: View {
     /// an identifier they should recognise.
     private var name: String {
         let trimmed = device.deviceName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return trimmed.isEmpty ? "Unnamed device" : trimmed
+        return trimmed.isEmpty ? DevicesCopy.unnamedDevice : trimmed
     }
 
     private var platform: String {
         let trimmed = device.platform.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? "Unknown platform" : trimmed
+        return trimmed.isEmpty ? DevicesCopy.unknownPlatform : trimmed
     }
 
     /// ⛔ "Last active", NEVER "last used" — see the ⚠️ on the screen. A device
@@ -321,8 +323,8 @@ private struct DeviceCard: View {
     /// its first ten minutes, so the absent case gets its own sentence rather than
     /// an empty line.
     private var lastActive: String {
-        guard let stamp = device.lastUsedAt else { return "Signed in recently" }
-        return "Last active \(stamp)"
+        guard let stamp = device.lastUsedAt else { return DevicesCopy.signedInRecently }
+        return DevicesCopy.lastActive(stamp)
     }
 }
 
@@ -343,7 +345,7 @@ private struct DeviceNotice: View {
             Text(message)
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(destructive ? colors.destructive : colors.mutedForeground)
-            Button("Dismiss", action: onDismiss)
+            Button(DevicesCopy.dismiss, action: onDismiss)
                 .buttonStyle(.districtGhost)
         }
         .padding(DistrictSpacing.card)

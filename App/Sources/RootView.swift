@@ -127,7 +127,7 @@ private struct SessionGate: View {
     private var content: some View {
         switch session.phase {
         case .checking:
-            LoadingView(message: "Checking your session…")
+            LoadingView(message: CommonCopy.checkingYourSession)
 
         case .signedIn:
             // ⛔ THE REGISTRAR GOES DOWN AS WELL AS BEING ENABLED HERE, AND THIS
@@ -161,7 +161,7 @@ private struct SessionGate: View {
         case let .signedOut(reason):
             SignInView(
                 reason: reason,
-                actionTitle: "Sign in",
+                actionTitle: CommonCopy.signIn,
                 isBusy: session.isBusy,
                 action: { Task { await session.signIn() } },
                 // ⛔ THE APPLE DOOR IS OFFERED ON THIS BRANCH AND ONLY THIS ONE.
@@ -193,7 +193,7 @@ private struct SessionGate: View {
             // intact here and the offer is "try again", not "sign in".
             SignInView(
                 reason: reason,
-                actionTitle: "Try again",
+                actionTitle: CommonCopy.tryAgain,
                 isBusy: session.isBusy,
                 action: { Task { await session.refreshPhase() } }
             )

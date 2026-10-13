@@ -1,3 +1,4 @@
+import DistrictL10n
 import Foundation
 
 /// Every sentence the phone-number marketplace says, and the three filter values the
@@ -66,8 +67,18 @@ enum MarketplaceCopy {
     /// shown bare rather than guessed at. ⚠️ The amount is the raw value rather than
     /// a locale-formatted one, matching Android: a currency-aware formatter needs a
     /// currency, which is exactly the thing that may be missing here.
+    ///
+    /// ⚠️ ENGLISH KEEPS THE RAW VALUE IT HAS ALWAYS SHOWN. In French a price with its
+    /// currency goes through the core's money table (`L10nFormat.isoAmount`, « 1,50 $ US »),
+    /// and one without stays a bare number in French digits.
     static func priceLabel(monthlyPrice: Double?, currency: String?) -> String? {
         guard let monthlyPrice else { return nil }
+        guard L10nRuntime.locale == .en else {
+            let code = currency?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            return code.isEmpty
+                ? L10nFormat.number(monthlyPrice)
+                : L10nFormat.isoAmount(monthlyPrice, isoCode: code)
+        }
         let amount = String(monthlyPrice)
         guard let currency else { return amount }
         let trimmed = currency.trimmingCharacters(in: .whitespacesAndNewlines)

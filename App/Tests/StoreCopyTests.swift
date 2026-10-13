@@ -95,18 +95,10 @@ final class StoreCopyTests: XCTestCase {
         "Features/Scheduling",
     ]
 
-    /// Exact literals permitted, keyed by path relative to `App/Sources`.
-    private static let allowedLiterals: [String: [String]] = [
-        "Features/Account/AccountView.swift": [
-            "Request deletion of your account and its data. Opens in your browser.",
-        ],
-        "Features/Contacts/ContactDetailView.swift": [
-            "Website",
-        ],
-        "Features/SignIn/SignInView.swift": [
-            "Opens your browser to sign in securely.",
-        ],
-    ]
+    /// Exact literals permitted, keyed by path relative to `App/Sources`. Empty since every
+    /// allowed sentence moved into the catalog (``allowedEntries``); kept so a literal that
+    /// must stay in Swift has a place that the stale-entry test also polices.
+    private static let allowedLiterals: [String: [String]] = [:]
 
     /// Catalog screens the gate does not scan: a `screen` equal to one of these or below it.
     private static let exemptScreens = [
@@ -119,6 +111,9 @@ final class StoreCopyTests: XCTestCase {
             + "above. PNG, JPEG or WebP, up to 512 KB. It is hosted publicly so their browser can load it, "
             + "and anyone with a thread link can see it.",
         "marketplace.a2p_website_label": "Website (optional)",
+        "account.request_deletion_account_its": "Request deletion of your account and its data. Opens in your browser.",
+        "contacts.website": "Website",
+        "sign_in.opens_browser_sign_securely": "Opens your browser to sign in securely.",
     ]
 
     // MARK: - The gate

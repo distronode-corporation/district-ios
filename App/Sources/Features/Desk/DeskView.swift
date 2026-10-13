@@ -272,9 +272,9 @@ struct DeskView: View {
     /// team waiting, which inverts the one thing the badge is for.
     static func label(for status: DeskTicketStatus) -> String {
         switch status {
-        case .open: "Open"
-        case .waiting: "Waiting on customer"
-        case .resolved: "Resolved"
+        case .open: DeskCopy.open
+        case .waiting: DeskCopy.waitingOnCustomer
+        case .resolved: DeskCopy.resolved
         }
     }
 

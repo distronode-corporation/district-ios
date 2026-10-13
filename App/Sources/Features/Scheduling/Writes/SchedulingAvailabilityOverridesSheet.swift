@@ -90,7 +90,7 @@ struct SchedulingAvailabilityOverridesSheet: View {
     private func overrideRow(_ row: SchedulingOverrideRow) -> some View {
         HStack(spacing: DistrictSpacing.tight) {
             VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-                Text(row.start == row.end ? row.start : "\(row.start) to \(row.end)")
+                Text(row.start == row.end ? row.start : SchedulingWriteCopy.dateRange(row.start, row.end))
                     .font(DistrictType.titleSmall)
                     .foregroundStyle(colors.foreground)
                 Text(SchedulingHoursFormat.overrideHours(row))
@@ -215,7 +215,7 @@ struct SchedulingAvailabilityOverridesSheet: View {
                     )
                 )
                 .districtField()
-                Text("to")
+                Text(SchedulingWriteCopy.rangeTo)
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
                 TextField(

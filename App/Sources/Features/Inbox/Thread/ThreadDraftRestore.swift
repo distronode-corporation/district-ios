@@ -186,8 +186,7 @@ extension ThreadModel {
     private static func draftUnread(_ error: ApiError) -> FailureText {
         let stated = FailureText.from(error)
         return FailureText(
-            message: "\(stated.message) A reply saved on this thread could not be loaded, so the box "
-                + "below may not be showing it, and anything you type will replace it.",
+            message: InboxCopy.draftUnread(stated.message),
             action: stated.action
         )
     }

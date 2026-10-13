@@ -141,7 +141,16 @@ struct A2PCard: View {
 struct TollFreeCard: View {
     let model: NumberProvisioningModel
 
-    private let useCases = ["Customer Support", "Marketing", "Notifications", "2FA / OTP"]
+    /// The route's four values, each with its label. ⚠️ The VALUE is what the carrier mapping
+    /// reads, so it stays English whatever the label says.
+    private var useCases: [(value: String, label: String)] {
+        [
+            ("Customer Support", MarketplaceCopy.tfvUseCaseCustomerSupport),
+            ("Marketing", MarketplaceCopy.tfvUseCaseMarketing),
+            ("Notifications", MarketplaceCopy.tfvUseCaseNotifications),
+            ("2FA / OTP", MarketplaceCopy.tfvUseCaseOtp),
+        ]
+    }
 
     var body: some View {
         SettingsCard(eyebrow: MarketplaceCopy.tfvTitle) {
@@ -196,11 +205,11 @@ struct TollFreeCard: View {
             Text(MarketplaceCopy.tfvUseCaseLabel)
                 .font(DistrictType.labelSmall)
             HStack(spacing: DistrictSpacing.tight) {
-                ForEach(useCases, id: \.self) { value in
-                    Button(value) { model.tfvDraft.useCase = value }
+                ForEach(useCases, id: \.value) { useCase in
+                    Button(useCase.label) { model.tfvDraft.useCase = useCase.value }
                         .buttonStyle(
                             DistrictButtonStyle(
-                                variant: model.tfvDraft.useCase == value ? .primary : .secondary,
+                                variant: model.tfvDraft.useCase == useCase.value ? .primary : .secondary,
                                 size: .small
                             )
                         )

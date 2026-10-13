@@ -55,7 +55,7 @@ struct ContactDetailView: View {
 
     var body: some View {
         content
-            .navigationTitle("Contact")
+            .navigationTitle(ContactsCopy.contact)
             .navigationBarTitleDisplayMode(.inline)
             // ⛔ `.contain` FIRST, or the dossier section below inherits this and the
             // two become indistinguishable. See SignInView's note.
@@ -85,7 +85,7 @@ struct ContactDetailView: View {
     private var content: some View {
         switch model.state {
         case .loading:
-            LoadingView(message: "Loading contact…")
+            LoadingView(message: ContactsCopy.loadingContact)
         case let .content(loaded):
             ContactDetailContentView(
                 loaded: loaded,
@@ -175,7 +175,7 @@ private struct ContactDetailContentView: View {
     /// in one workspace.
     private var identity: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            Text(contact.displayName ?? "Unnamed contact")
+            Text(contact.displayName ?? ContactsCopy.unnamedContact)
                 .font(DistrictType.headline)
                 .foregroundStyle(colors.foreground)
             // ⛔ IN THE HEADER, ABOVE THE IDENTIFIERS, BECAUSE IT CHANGES WHAT THE
@@ -196,7 +196,7 @@ private struct ContactDetailContentView: View {
                     .foregroundStyle(colors.mutedForeground)
             }
             if contact.phoneNumber == nil, contact.email == nil {
-                Text("No phone or email")
+                Text(ContactsCopy.noPhoneEmail)
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
             }
@@ -209,11 +209,11 @@ private struct ContactDetailContentView: View {
     /// not a surprise.
     @ViewBuilder
     private var attributes: some View {
-        card("Latest context", contact.latestContextSummary)
-        card("Budget", contact.budget)
-        card("Timeline", contact.timeline)
-        card("Website", contact.website)
-        card("Added", WireDate.display(contact.createdAt))
+        card(ContactsCopy.latestContext, contact.latestContextSummary)
+        card(ContactsCopy.budget, contact.budget)
+        card(ContactsCopy.timeline, contact.timeline)
+        card(ContactsCopy.website, contact.website)
+        card(ContactsCopy.added, WireDate.display(contact.createdAt))
     }
 
     /// ⚠️ Rendered only when the value is present AND not blank. `contacts/update`
@@ -238,7 +238,7 @@ private struct ContactDetailContentView: View {
                 Text(failure.message)
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.destructive)
-                Button("Dismiss") { model.clearMutationFailure() }
+                Button(ContactsCopy.dismiss) { model.clearMutationFailure() }
                     .buttonStyle(.districtGhost)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -253,7 +253,7 @@ private struct ContactDetailContentView: View {
     @ViewBuilder
     private var controls: some View {
         if model.canMutate {
-            Button("Rename") { renaming = true }
+            Button(ContactsCopy.rename) { renaming = true }
                 .buttonStyle(.districtSecondary)
                 .disabled(loaded.saving)
             // ⛔ THE GUIDELINE 1.2 CONTROL, AND IT SITS BETWEEN RENAME AND DELETE
@@ -269,22 +269,22 @@ private struct ContactDetailContentView: View {
                 store: blocked
             )
             BlockFailureNotice(store: blocked)
-            Button("Delete contact") { confirmingDelete = true }
+            Button(ContactsCopy.deleteContact) { confirmingDelete = true }
                 .buttonStyle(.districtDestructive)
                 .disabled(loaded.saving)
                 // ⛔ CONFIRMED, BECAUSE A DELETE IS IRREVERSIBLE and a mis-tap in a
                 // list costs a customer record. ⚠️ On the button, so the popover a
                 // regular-width layout draws points at it.
                 .confirmationDialog(
-                    "Delete this contact? This cannot be undone.",
+                    ContactsCopy.deleteContactCannotUndone,
                     isPresented: $confirmingDelete,
                     titleVisibility: .visible
                 ) {
-                    Button("Delete", role: .destructive, action: onDelete)
-                    Button("Cancel", role: .cancel) {}
+                    Button(ContactsCopy.delete, role: .destructive, action: onDelete)
+                    Button(ContactsCopy.cancel, role: .cancel) {}
                 }
         } else {
-            Text("Read-only access, editing is disabled.")
+            Text(ContactsCopy.readOnlyAccessEditing)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
         }
@@ -346,7 +346,7 @@ private struct ContactDetailContentView: View {
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.destructive)
                 .fixedSize(horizontal: false, vertical: true)
-            Button("Dismiss") { videoCall.reset() }
+            Button(ContactsCopy.dismiss) { videoCall.reset() }
                 .buttonStyle(.districtGhost)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -414,18 +414,18 @@ private struct RenameContactSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-            Text("Contact name")
+            Text(ContactsCopy.contactName)
                 .font(DistrictType.labelSmall)
                 .foregroundStyle(colors.mutedForeground)
-            TextField("Contact name", text: $value)
+            TextField(ContactsCopy.contactName, text: $value)
                 .disabled(saving)
                 .districtField()
             HStack(spacing: DistrictSpacing.tight) {
-                Button("Cancel") { dismiss() }
+                Button(ContactsCopy.cancel) { dismiss() }
                     .buttonStyle(.districtGhost)
                     .disabled(saving)
                     .keyboardShortcut(.cancelAction)
-                Button("Save") { onSave(value) }
+                Button(ContactsCopy.save) { onSave(value) }
                     .buttonStyle(.districtPrimary)
                     .disabled(!canSave)
                     .keyboardShortcut(.districtSubmit)

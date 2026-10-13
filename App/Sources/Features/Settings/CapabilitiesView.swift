@@ -97,7 +97,7 @@ struct CapabilitiesView: View {
     @ViewBuilder
     private var toolsControl: some View {
         if model.hasStoredTools {
-            Button(model.toolsSave.isSaving ? "Saving…" : SettingsCopy.capabilitiesSave, action: submitTools)
+            Button(model.toolsSave.isSaving ? SettingsCopy.saving : SettingsCopy.capabilitiesSave, action: submitTools)
                 .buttonStyle(.districtPrimary)
                 .disabled(!model.canSaveTools)
         } else {
@@ -142,9 +142,12 @@ struct CapabilitiesView: View {
                 .foregroundStyle(colors.foreground)
                 .disabled(model.enrichmentSave.isSaving)
             SettingsSaveNotice(state: model.enrichmentSave, onReread: reload, onDismiss: model.dismissNotices)
-            Button(model.enrichmentSave.isSaving ? "Saving…" : SettingsCopy.enrichmentSave, action: submitEnrichment)
-                .buttonStyle(.districtPrimary)
-                .disabled(!model.canSaveEnrichment)
+            Button(
+                model.enrichmentSave.isSaving ? SettingsCopy.saving : SettingsCopy.enrichmentSave,
+                action: submitEnrichment
+            )
+            .buttonStyle(.districtPrimary)
+            .disabled(!model.canSaveEnrichment)
         }
     }
 
@@ -157,15 +160,15 @@ struct CapabilitiesView: View {
     /// capabilities above: "Transfer to support" without a support number is a switch
     /// that does nothing.
     private var connected: some View {
-        SettingsCard(eyebrow: "Connected accounts") {
-            SettingsReadOnlyRow(label: "Calendar", value: model.load.config?.toolConfig?.calendarProvider)
-            SettingsReadOnlyRow(label: "Calendar id", value: model.load.config?.toolConfig?.calendarId)
+        SettingsCard(eyebrow: SettingsCopy.connectedAccounts) {
+            SettingsReadOnlyRow(label: SettingsCopy.calendar, value: model.load.config?.toolConfig?.calendarProvider)
+            SettingsReadOnlyRow(label: SettingsCopy.calendarId, value: model.load.config?.toolConfig?.calendarId)
             SettingsReadOnlyRow(
-                label: "Support number",
+                label: SettingsCopy.supportNumber,
                 value: model.load.config?.toolConfig?.supportPhoneNumber
             )
             SettingsReadOnlyRow(
-                label: "Email sender",
+                label: SettingsCopy.emailSender,
                 value: model.load.config?.toolConfig?.customEmailSenderName
             )
         }

@@ -340,6 +340,6 @@ final class ContactDetailModel {
     /// from one that never existed. Nothing to retry, so nothing is offered.
     private static func detailFailure(_ error: ApiError) -> FailureText {
         guard error.httpStatus == 404 else { return FailureText.from(error) }
-        return FailureText(message: "This contact is not available.", action: .none)
+        return FailureText(message: ContactsCopy.contactNotAvailable, action: .none)
     }
 }
