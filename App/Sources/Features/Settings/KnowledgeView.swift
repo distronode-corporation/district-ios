@@ -184,11 +184,9 @@ struct KnowledgeView: View {
             .buttonStyle(.districtSecondary)
             .disabled(!model.canReadFile)
             .accessibilityIdentifier(A11yID.Knowledge.readFile)
-            .fileImporter(
-                isPresented: $importingFile,
-                allowedContentTypes: Self.fileTypes,
-                allowsMultipleSelection: false
-            ) { result in
+            // ⚠️ THE SINGLE-FILE OVERLOAD, whose result is one URL. Passing
+            // `allowsMultipleSelection` picks the other overload, which hands back `[URL]`.
+            .fileImporter(isPresented: $importingFile, allowedContentTypes: Self.fileTypes) { result in
                 switch result {
                 case let .success(url):
                     Task { await model.readFile(at: url) }
