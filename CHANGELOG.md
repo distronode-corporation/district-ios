@@ -68,7 +68,13 @@ built from history before publication, so they have no tags in this repository.
   while French is off, or any `fr.lproj`. The unit tests run pinned to English, the UI
   tests find the Overview and settings rows, the report's Done and the block
   confirmations by identifier, and `StoreCopyTests` scans the catalog's French too.
-- DistrictCore 7.0.0-beta.2: the scheduling formatters write French dates and times as the
+- DistrictCore 7.0.0-beta.3: the contracts from monorepo 43eed5fd6 (French API errors,
+  masculine desk statuses), the billing currency, and the portal's four booking webhook
+  events. Billing amounts come from its `BillingMoneyFormat`: English exactly as before
+  ("$249.00"), French naming the currency (« 249,00 $ CA », « 249,00 $ US »); the five
+  billing sentences that placed a "$" around the amount no longer do. The webhook editor
+  offers the four booking events, and a save keeps an event already subscribed that the
+  form no longer offers. 7.0.0-beta.2: the scheduling formatters write French dates and times as the
   website does (« 12 sept. 2026, 15 h 04 », « 9 h 05 », « 1er août »), and a French range
   inside one year drops its first year; English is unchanged. 7.0.0-beta.1: the core's sentences come from its catalogs, every request
   sends `Accept-Language` (`en`), and errors are shown through `ApiError.localizedMessage`

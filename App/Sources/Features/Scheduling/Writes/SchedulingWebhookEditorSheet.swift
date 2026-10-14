@@ -91,7 +91,9 @@ struct SchedulingWebhookEditorSheet: View {
             Text(SchedulingWriteCopyC.webhookEventsHint)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
-            ForEach(SchedulingWebhookEvent.allCases, id: \.self) { event in
+            // ⚠️ THE PORTAL'S FOUR BOOKING EVENTS. One already subscribed but no longer offered
+            // is not drawn, and a save keeps it (``SchedulingDeveloperFormat/webhookEventsToSave(ticked:stored:)``).
+            ForEach(SchedulingWebhookEvent.offered, id: \.self) { event in
                 SchedulingWriteToggleRow(
                     label: event.rawValue,
                     isOn: eventBinding(event),

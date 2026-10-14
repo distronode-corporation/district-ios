@@ -29,13 +29,13 @@ final class SchedulingWritesCWebhookTests: XCTestCase {
         )
         model.draft.url = " https://example.com/hooks "
         // ⚠️ Inserted out of order on purpose: the request must not echo tick order.
-        model.draft.events = [.notesReady, .bookingCreated]
+        model.draft.events = [.bookingCancelled, .bookingCreated]
         await model.submit()
 
         let call = transport.calls.first
         XCTAssertEqual(transport.ops, ["webhooks.create"])
         XCTAssertEqual(call?.string("url"), "https://example.com/hooks")
-        XCTAssertEqual(call?.strings("events"), ["booking.created", "notes.ready"])
+        XCTAssertEqual(call?.strings("events"), ["booking.created", "booking.cancelled"])
         XCTAssertEqual(model.minted?.secret, "whsec_abc")
         XCTAssertEqual(changed, 1)
     }
@@ -174,6 +174,32 @@ final class SchedulingWritesCWebhookTests: XCTestCase {
         XCTAssertEqual(model.fixedURL, "https://example.com/hooks")
         XCTAssertEqual(changed, 1)
         XCTAssertEqual(model.savedNotice, SchedulingWriteCopyC.webhookUpdated)
+    }
+
+    /// ⛔ THE FORM OFFERS THE PORTAL'S FOUR BOOKING EVENTS, AND AN EDIT KEEPS ONE IT NO LONGER
+    /// OFFERS: `notes.ready` has no box to untick, so dropping it would be a silent change.
+    /// A create sends only what is offered.
+    func test_IOS_SCHW_C26b_anEditKeepsAStoredEventTheFormNoLongerOffers() async throws {
+        XCTAssertEqual(
+            SchedulingWebhookEvent.offered,
+            [.bookingCreated, .bookingCancelled, .bookingRescheduled, .bookingReminder]
+        )
+        let transport = SchedulingWritesCTransport([.noContent])
+        let webhook: SchedulingWebhook = try SchedulingWritesCRows.decode(#"""
+        {"id":"wh_2","url":"https://example.com/hooks","events":["booking.created","notes.ready"],
+         "fields":["id"],"is_active":true,"created_at":null}
+        """#)
+        let model = SchedulingWebhookEditorModel(
+            repository: .writesCTest(transport),
+            workspaceId: "ws_1",
+            mode: .edit(webhook),
+            onChanged: {}
+        )
+        model.draft.events.remove(.bookingCreated)
+        model.draft.events.insert(.bookingReminder)
+        await model.submit()
+
+        XCTAssertEqual(transport.calls.first?.strings("events"), ["booking.reminder", "notes.ready"])
     }
 
     /// ⛔ AN UNKNOWN EVENT IS NAMED RATHER THAN DROPPED IN SILENCE. The form cannot

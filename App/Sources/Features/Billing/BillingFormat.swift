@@ -22,43 +22,6 @@ import Foundation
 /// second quantity formatter is how two screens start quoting different figures for one
 /// metered number.
 enum BillingFormat {
-    /// Cents as a plain decimal amount: 24900 becomes "249.00".
-    ///
-    /// ⛔ NO CURRENCY SYMBOL AND NO CURRENCY CODE, BECAUSE THE ROUTE PUBLISHES NEITHER.
-    /// Nothing on `/api/billing` carries a currency, so the "$" is added by
-    /// ``BillingCopy/money(_:)`` in one place rather than being baked in here.
-    ///
-    /// ⚠️ ALWAYS TWO DECIMALS, unlike ``AnalyticsFormat/amount(_:)``, which drops a
-    /// trailing zero. A price of "249" beside a price of "249.99" reads as a different
-    /// KIND of number: money is padded and quantities are not.
-    ///
-    /// ⚠️ BUILT BY INTERPOLATION RATHER THAN `String(format:)`, deliberately. Swift's
-    /// interpolation of an `Int` is not localised, so the separator is always a "." —
-    /// which is what the web console shows, and what a decimal comma beside an
-    /// unlocalised "$" would quietly disagree with.
-    ///
-    /// ⛔ A NEGATIVE KEEPS ITS SIGN. Android drops it (it takes the absolute value of the
-    /// remainder only), so a credited invoice renders there as a charge. A credit note
-    /// is rare and the wrong direction is the expensive one.
-    ///
-    /// ⚠️ ENGLISH ONLY. In French the amount comes from the core's money table
-    /// (`L10nFormat`, « 1 204,25 », held to the website's vectors), still with no symbol:
-    /// the catalog's French sentence places the « $ ». English keeps the format above,
-    /// which has no thousands separator, because changing it would change what every
-    /// billing line shows today.
-    static func money(cents: Int) -> String {
-        guard L10nRuntime.locale == .en else {
-            return L10nFormat.moneyOrBare(minorUnits: cents, currency: nil)
-        }
-        // ⚠️ DIVIDED AND REMAINDERED BEFORE `abs`, so `Int.min` cannot trap: `Int.min /
-        // 100` is representable while `abs(Int.min)` is not.
-        let units = abs(cents / 100)
-        let fraction = abs(cents % 100)
-        let padded = fraction < 10 ? "0\(fraction)" : "\(fraction)"
-        let text = "\(units).\(padded)"
-        return cents < 0 ? "-\(text)" : text
-    }
-
     /// A unix-SECONDS timestamp as a short local date.
     ///
     /// ⚠️ THE MULTIPLICATION LIVES HERE AND NOWHERE ELSE. See the ⛔ on the type.

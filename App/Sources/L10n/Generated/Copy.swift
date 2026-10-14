@@ -282,7 +282,7 @@ extension AvailabilityCopy {
 extension BillingCopy {
     /// `billing.discount_amount`
     internal static func discountAmount(_ coupon: String, amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(coupon), \(amount)\u{00A0}$ de rabais" : "\(coupon), $\(amount) off"
+        AppL10n.copyLocale == .frCA ? "\(coupon), \(amount) de rabais" : "\(coupon), \(amount) off"
     }
 
     /// `billing.discount_percent`
@@ -297,7 +297,7 @@ extension BillingCopy {
 
     /// `billing.invoice_tax`
     internal static func invoiceTax(_ amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "dont \(amount)\u{00A0}$ de taxes" : "incl. $\(amount) tax"
+        AppL10n.copyLocale == .frCA ? "dont \(amount) de taxes" : "incl. \(amount) tax"
     }
 
     /// `billing.invoices_empty`
@@ -335,12 +335,12 @@ extension BillingCopy {
 
     /// `billing.money`
     internal static func money(_ amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(amount)\u{00A0}$" : "$\(amount)"
+        AppL10n.copyLocale == .frCA ? "\(amount)" : "\(amount)"
     }
 
     /// `billing.money_monthly`
     internal static func moneyMonthly(_ amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(amount)\u{00A0}$ / mois" : "$\(amount) / month"
+        AppL10n.copyLocale == .frCA ? "\(amount) / mois" : "\(amount) / month"
     }
 
     /// `billing.no_customer_body`
@@ -410,7 +410,7 @@ extension BillingCopy {
 
     /// `billing.spend_cap_set`
     internal static func spendCapSet(_ amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Les frais de dépassement de votre forfait sont plafonnés à \(amount)\u{00A0}$ par mois." : "Overage beyond your plan is capped at $\(amount) a month."
+        AppL10n.copyLocale == .frCA ? "Les frais de dépassement de votre forfait sont plafonnés à \(amount) par mois." : "Overage beyond your plan is capped at \(amount) a month."
     }
 
     /// `billing.spend_cap_title`
