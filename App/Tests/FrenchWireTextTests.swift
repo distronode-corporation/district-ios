@@ -47,6 +47,14 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(french { AppWire.count(1204) }, "1\(Self.nbsp)204")
     }
 
+    /// ⚠️ ONLY THE SERVICE'S OWN PLACEHOLDERS ARE TRANSLATED; a real name is data.
+    func testAPlaceholderAuthorIsTranslatedAndARealNameIsNot() {
+        XCTAssertEqual(AppWire.placeholder("You"), "You")
+        XCTAssertEqual(french { AppWire.placeholder("You") }, "Vous")
+        XCTAssertEqual(french { AppWire.placeholder("Distronode Support") }, "Soutien Distronode")
+        XCTAssertEqual(french { AppWire.placeholder("Dana Booker") }, "Dana Booker")
+    }
+
     // MARK: - Workflows
 
     /// ⛔ FRENCH SHOWS THE CODE'S LABEL AND NEVER THE ENGLISH DETAIL after the colon.

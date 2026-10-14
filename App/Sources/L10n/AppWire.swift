@@ -27,6 +27,14 @@ enum AppWire {
         return label(category, value)
     }
 
+    /// Text the service writes in English in place of a value (`You`, `Distronode Support`):
+    /// as sent in English, the vocabulary's label in French; any other text is data and is
+    /// shown as it is.
+    static func placeholder(_ text: String) -> String {
+        guard AppL10n.copyLocale == .frCA else { return text }
+        return WireLabel.placeholder(text) ?? text
+    }
+
     /// A call's length: the server's own `duration` text in English (`1m 5s`), and in French
     /// written from the seconds (« 1 min 5 s »), since the server writes English only.
     static func duration(sent: String, seconds: Int?) -> String {

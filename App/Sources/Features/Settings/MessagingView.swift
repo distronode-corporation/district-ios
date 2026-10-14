@@ -225,7 +225,8 @@ struct MessagingView: View {
             } else {
                 ForEach(response.channelDefaults.keys.sorted(), id: \.self) { channel in
                     SettingsReadOnlyRow(
-                        label: channel,
+                        // ⚠️ The wire key in English (`sms`), as it always was; French names it.
+                        label: AppL10n.copyLocale == .frCA ? ThreadChannelName.of(channel) : channel,
                         value: label(forAccountId: response.channelDefaults[channel], in: response)
                     )
                 }
