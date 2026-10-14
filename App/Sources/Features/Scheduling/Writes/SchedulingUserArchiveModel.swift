@@ -36,6 +36,10 @@ final class SchedulingUserArchiveModel {
     private(set) var state: SchedulingWriteState = .idle
     private(set) var upcoming: SchedulingUpcomingBookingsState = .loading
 
+    /// The zone the blocking bookings are told in: the viewer's scheduler profile, as on the
+    /// bookings screen and the web's archive dialog.
+    let timezone: String
+
     private let admin: SchedulingAdminRepository
     private let workspaceId: String
     private let userId: String
@@ -47,12 +51,14 @@ final class SchedulingUserArchiveModel {
         workspaceId: String,
         userId: String,
         userName: String,
+        timezone: String,
         onArchived: @escaping (String) -> Void
     ) {
         self.admin = admin
         self.workspaceId = workspaceId
         self.userId = userId
         self.userName = userName
+        self.timezone = timezone
         self.onArchived = onArchived
     }
 
@@ -85,6 +91,17 @@ final class SchedulingUserArchiveModel {
         case .failed:
             SchedulingTeamWriteCopy.archiveCounting
         }
+    }
+
+    /// When a blocking booking starts, as the web's archive dialog says it: `Today 14:30`,
+    /// `Sep 12, 10:00`.
+    ///
+    /// ⛔ NEVER THE WIRE'S `start_at`. It is an ISO instant in UTC, so shown as it came it
+    /// was English punctuation in every language and the wrong hour for everybody outside
+    /// UTC.
+    func when(_ booking: SchedulingUpcomingBooking) -> String {
+        SchedulingOverviewSummary.bookingWhen(startAt: booking.startAt, timezone: timezone)
+            ?? SchedulingCopy.unknownTime
     }
 
     func loadUpcoming() async {

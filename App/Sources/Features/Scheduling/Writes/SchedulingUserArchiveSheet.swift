@@ -70,6 +70,9 @@ struct SchedulingUserArchiveSheet: View {
             // beside a live Archive button is a sentence nobody needs; the enabled
             // button already says it.
             VStack(alignment: .leading, spacing: DistrictSpacing.tight) {
+                if !rows.isEmpty {
+                    SchedulingWriteHint(text: SchedulingCopy.timesIn(model.timezone))
+                }
                 ForEach(rows, id: \.id) { booking in
                     row(booking)
                 }
@@ -85,7 +88,7 @@ struct SchedulingUserArchiveSheet: View {
     private func row(_ booking: SchedulingUpcomingBooking) -> some View {
         SettingsReadOnlyRow(
             label: booking.eventTypeName,
-            value: "\(booking.attendeeName) · \(booking.startAt)"
+            value: "\(booking.attendeeName) · \(model.when(booking))"
         )
     }
 }

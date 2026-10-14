@@ -166,6 +166,31 @@ final class SchedulingSectionModelTests: SchedulingModelTestCase {
         XCTAssertEqual(model.strandedNotice?.contains("Ada"), true)
     }
 
+    /// ⚠️ THE ARCHIVE SHEET TELLS ITS BOOKINGS IN THE VIEWER'S ZONE, so the section reads the
+    /// profile beside the members, and stays on UTC when it cannot, as every other section does.
+    @MainActor
+    func test_IOS_SCHSECMODEL_06b_theTeamReadsTheViewersZoneForTheArchiveSheet() async {
+        let members = Reply(status: 200, body: #"{"success":true,"members":[]}"#)
+        let read = SchedulingTestTransport([
+            "members": members,
+            "users.list": .data("[]"),
+            "teams.list": .data(#"{"items":[]}"#),
+            "me.get": .me(timezone: "America/Toronto"),
+        ])
+        let model = team(read)
+        await model.load()
+        XCTAssertEqual(model.timezone, "America/Toronto")
+
+        let unread = SchedulingTestTransport([
+            "members": members,
+            "users.list": .data("[]"),
+            "teams.list": .data(#"{"items":[]}"#),
+        ])
+        let fallback = team(unread)
+        await fallback.load()
+        XCTAssertEqual(fallback.timezone, "UTC")
+    }
+
     // MARK: - Settings
 
     /// ⛔ THE SECOND TAB IS THE BOOKING ASSISTANT AND READS `settings.llm.get` ALONE. It

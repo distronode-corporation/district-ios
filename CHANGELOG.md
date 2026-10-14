@@ -68,7 +68,9 @@ built from history before publication, so they have no tags in this repository.
   while French is off, or any `fr.lproj`. The unit tests run pinned to English, the UI
   tests find the Overview and settings rows, the report's Done and the block
   confirmations by identifier, and `StoreCopyTests` scans the catalog's French too.
-- DistrictCore 7.0.0-beta.1: the core's sentences come from its catalogs, every request
+- DistrictCore 7.0.0-beta.2: the scheduling formatters write French dates and times as the
+  website does (« 12 sept. 2026, 15 h 04 », « 9 h 05 », « 1er août »), and a French range
+  inside one year drops its first year; English is unchanged. 7.0.0-beta.1: the core's sentences come from its catalogs, every request
   sends `Accept-Language` (`en`), and errors are shown through `ApiError.localizedMessage`
   (the same sentence in English).
 - DistrictCore 6.0.0: 4.0.0 resolves District Studio links, 5.0.0 adds the live

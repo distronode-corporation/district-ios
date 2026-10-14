@@ -15,6 +15,9 @@ import SwiftUI
 final class SchedulingTeamModel {
     private(set) var members: SchedulingSectionState<[SchedulingMemberRow]> = .loading
     private(set) var teams: SchedulingSectionState<[SchedulingTeam]> = .loading
+    /// The viewer's scheduler zone, for the archive sheet's booking times. UTC until the
+    /// profile is read, and when it cannot be, as on every other scheduling section.
+    private(set) var timezone = "UTC"
 
     private let repository: SchedulingAdminRepository
     private let workspaces: WorkspaceRepository
@@ -51,6 +54,13 @@ final class SchedulingTeamModel {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadMembers() }
             group.addTask { await self.loadTeams() }
+            group.addTask { await self.loadTimezone() }
+        }
+    }
+
+    private func loadTimezone() async {
+        if let me = try? await repository.me(workspaceId: workspaceId) {
+            timezone = me.displayTimezone
         }
     }
 
@@ -247,6 +257,7 @@ struct SchedulingTeamView: View {
                 workspaceId: workspaceId,
                 userId: userId,
                 userName: row.name,
+                timezone: model.timezone,
                 onChanged: reload
             )
         }
