@@ -5,25 +5,31 @@ apple = true
 
 [push.call_body]
 en = "Someone is calling your District line."
+fr = "Quelqu'un appelle votre ligne District."
 ctx = "notification"
 screen = "push"
 tier = "T0"
+state = "reviewed"
 id = { apple = "push.call.body" }
 note = "Read off a locked phone, so it names nobody: the push carries ids only. The server sends the KEY (loc-key) and iOS draws the text from Localizable.strings without waking the app."
 
 [push.call_title]
 en = "Incoming call"
+fr = "Appel entrant"
 ctx = "notification"
 screen = "push"
 tier = "T0"
+state = "reviewed"
 id = { apple = "push.call.title" }
 note = "Lock-screen title (title-loc-key) of an incoming call push. Names nobody."
 
 [push.generic_body]
 en = "You have a new notification."
+fr = "Vous avez une nouvelle notification."
 ctx = "notification"
 screen = "push"
 tier = "T0"
+state = "reviewed"
 id = { apple = "push.generic.body" }
 note = "The server's fallback for a push type the app has not been taught. Nothing sends it today, but a missing key would show the key itself on the lock screen."
 
@@ -38,16 +44,20 @@ note = "The app's name, as the generic push's title."
 
 [push.message_body]
 en = "A new message arrived in your inbox."
+fr = "Nouveau message dans votre boîte de réception."
 ctx = "notification"
 screen = "push"
 tier = "T0"
+state = "reviewed"
 id = { apple = "push.message.body" }
 note = "Read off a locked phone, so it names nobody: no sender, no body. Detail belongs behind the tap."
 
 [push.message_title]
 en = "New message"
+fr = "Nouveau message"
 ctx = "notification"
 screen = "push"
 tier = "T0"
+state = "reviewed"
 id = { apple = "push.message.title" }
 note = "Lock-screen title (title-loc-key) of a new message push."

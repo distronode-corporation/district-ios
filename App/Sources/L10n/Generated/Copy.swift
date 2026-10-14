@@ -2,43 +2,43 @@
 // swiftlint:disable all
 
 /// True when every entry has French; until then the French branch carries the English.
-internal let FR_COMPLETE: Bool = false
+internal let FR_COMPLETE: Bool = true
 
 extension AccountCopy {
     /// `account.account`
-    internal static var account: String { AppL10n.copyLocale == .frCA ? "Account" : "Account" }
+    internal static var account: String { AppL10n.copyLocale == .frCA ? "Compte" : "Account" }
 
     /// `account.delete_account`
-    internal static var deleteAccount: String { AppL10n.copyLocale == .frCA ? "Delete account" : "Delete account" }
+    internal static var deleteAccount: String { AppL10n.copyLocale == .frCA ? "Supprimer le compte" : "Delete account" }
 
     /// `account.devices`
-    internal static var devices: String { AppL10n.copyLocale == .frCA ? "Devices" : "Devices" }
+    internal static var devices: String { AppL10n.copyLocale == .frCA ? "Appareils" : "Devices" }
 
     /// `account.installation_id`
     internal static func installationId(_ id: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Installation id \(id)" : "Installation id \(id)"
+        AppL10n.copyLocale == .frCA ? "ID d'installation \(id)" : "Installation id \(id)"
     }
 
     /// `account.opaque_id_install_cleared`
-    internal static var opaqueIdInstallCleared: String { AppL10n.copyLocale == .frCA ? "An opaque id for this install. It is cleared when you delete the app, and it identifies no hardware." : "An opaque id for this install. It is cleared when you delete the app, and it identifies no hardware." }
+    internal static var opaqueIdInstallCleared: String { AppL10n.copyLocale == .frCA ? "Un identifiant opaque propre à cette installation. Il est effacé quand vous supprimez l'application et n'identifie aucun matériel." : "An opaque id for this install. It is cleared when you delete the app, and it identifies no hardware." }
 
     /// `account.request_deletion_account_its`
-    internal static var requestDeletionAccountIts: String { AppL10n.copyLocale == .frCA ? "Request deletion of your account and its data. Opens in your browser." : "Request deletion of your account and its data. Opens in your browser." }
+    internal static var requestDeletionAccountIts: String { AppL10n.copyLocale == .frCA ? "Demander la suppression de votre compte et de ses données. S'ouvre hors de l'application." : "Request deletion of your account and its data. Opens in your browser." }
 
     /// `account.see_where_are_signed`
-    internal static var seeWhereAreSigned: String { AppL10n.copyLocale == .frCA ? "See where you are signed in, and sign out a device you no longer have." : "See where you are signed in, and sign out a device you no longer have." }
+    internal static var seeWhereAreSigned: String { AppL10n.copyLocale == .frCA ? "Voyez où votre compte est connecté et déconnectez un appareil que vous n'avez plus." : "See where you are signed in, and sign out a device you no longer have." }
 
     /// `account.sign_out`
-    internal static var signOut: String { AppL10n.copyLocale == .frCA ? "Sign out" : "Sign out" }
+    internal static var signOut: String { AppL10n.copyLocale == .frCA ? "Se déconnecter" : "Sign out" }
 
     /// `account.sign_out_district_ai`
-    internal static var signOutDistrictAi: String { AppL10n.copyLocale == .frCA ? "Sign out of District AI on this device." : "Sign out of District AI on this device." }
+    internal static var signOutDistrictAi: String { AppL10n.copyLocale == .frCA ? "Se déconnecter de District AI sur cet appareil." : "Sign out of District AI on this device." }
 
     /// `account.this_device`
-    internal static var thisDevice: String { AppL10n.copyLocale == .frCA ? "This device" : "This device" }
+    internal static var thisDevice: String { AppL10n.copyLocale == .frCA ? "Cet appareil" : "This device" }
 
     /// `account.unknown_version`
-    internal static var unknownVersion: String { AppL10n.copyLocale == .frCA ? "unknown" : "unknown" }
+    internal static var unknownVersion: String { AppL10n.copyLocale == .frCA ? "inconnu" : "unknown" }
 
     /// `account.version_line`
     internal static func versionLine(_ version: String, _ build: String) -> String {
@@ -46,35 +46,35 @@ extension AccountCopy {
     }
 
     /// `account.your_account`
-    internal static var yourAccount: String { AppL10n.copyLocale == .frCA ? "Your account" : "Your account" }
+    internal static var yourAccount: String { AppL10n.copyLocale == .frCA ? "Votre compte" : "Your account" }
 }
 
 extension AnalyticsCopy {
     /// `analytics.abandoned`
-    internal static var abandoned: String { AppL10n.copyLocale == .frCA ? "Abandoned" : "Abandoned" }
+    internal static var abandoned: String { AppL10n.copyLocale == .frCA ? "Abandonné" : "Abandoned" }
 
     /// `analytics.analytics`
-    internal static var analytics: String { AppL10n.copyLocale == .frCA ? "Analytics" : "Analytics" }
+    internal static var analytics: String { AppL10n.copyLocale == .frCA ? "Analytique" : "Analytics" }
 
     /// `analytics.answered_calls_window`
-    internal static var answeredCallsWindow: String { AppL10n.copyLocale == .frCA ? "Answered calls, this window" : "Answered calls, this window" }
+    internal static var answeredCallsWindow: String { AppL10n.copyLocale == .frCA ? "Appels répondus pour cette période" : "Answered calls, this window" }
 
     /// `analytics.avg_call_duration`
-    internal static var avgCallDuration: String { AppL10n.copyLocale == .frCA ? "Avg Call Duration" : "Avg Call Duration" }
+    internal static var avgCallDuration: String { AppL10n.copyLocale == .frCA ? "Durée moyenne des appels" : "Avg Call Duration" }
 
     /// `analytics.bars_compare_metered_call`
-    internal static var barsCompareMeteredCall: String { AppL10n.copyLocale == .frCA ? "Bars compare metered call minutes across these months. A channel with nothing metered is labelled rather than shown as zero." : "Bars compare metered call minutes across these months. A channel with nothing metered is labelled rather than shown as zero." }
+    internal static var barsCompareMeteredCall: String { AppL10n.copyLocale == .frCA ? "Les barres comparent les minutes d'appel mesurées pour ces mois. Un canal sans utilisation mesurée est indiqué comme tel plutôt qu'affiché à zéro." : "Bars compare metered call minutes across these months. A channel with nothing metered is labelled rather than shown as zero." }
 
     /// `analytics.bucket`
-    internal static var bucket: String { AppL10n.copyLocale == .frCA ? "Bucket" : "Bucket" }
+    internal static var bucket: String { AppL10n.copyLocale == .frCA ? "Intervalle" : "Bucket" }
 
     /// `analytics.call_count`
     internal static func callCount(_ calls: Int) -> String {
         if AppL10n.copyLocale == .frCA {
-            if calls == 1 {
-                return "\(calls) call"
+            if calls == 0 || calls == 1 {
+                return "\(calls) appel"
             }
-            return "\(calls) calls"
+            return "\(calls) appels"
         }
         if calls == 1 {
             return "\(calls) call"
@@ -83,82 +83,82 @@ extension AnalyticsCopy {
     }
 
     /// `analytics.call_volume`
-    internal static var callVolume: String { AppL10n.copyLocale == .frCA ? "Call volume" : "Call volume" }
+    internal static var callVolume: String { AppL10n.copyLocale == .frCA ? "Volume d'appels" : "Call volume" }
 
     /// `analytics.call_volume_down`
     internal static func callVolumeDown(_ pct: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "▼ \(pct)% vs the previous period" : "▼ \(pct)% vs the previous period"
+        AppL10n.copyLocale == .frCA ? "▼ \(pct)\u{00A0}% par rapport à la période précédente" : "▼ \(pct)% vs the previous period"
     }
 
     /// `analytics.call_volume_now_and_prior`
     internal static func callVolumeNowAndPrior(_ current: Int, _ prior: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(current) now, \(prior) in the previous period" : "\(current) now, \(prior) in the previous period"
+        AppL10n.copyLocale == .frCA ? "\(current) pour cette période, \(prior) pour la précédente" : "\(current) now, \(prior) in the previous period"
     }
 
     /// `analytics.call_volume_trend`
-    internal static var callVolumeTrend: String { AppL10n.copyLocale == .frCA ? "Call volume trend" : "Call volume trend" }
+    internal static var callVolumeTrend: String { AppL10n.copyLocale == .frCA ? "Tendance des appels" : "Call volume trend" }
 
     /// `analytics.call_volume_up`
     internal static func callVolumeUp(_ pct: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "▲ \(pct)% vs the previous period" : "▲ \(pct)% vs the previous period"
+        AppL10n.copyLocale == .frCA ? "▲ \(pct)\u{00A0}% par rapport à la période précédente" : "▲ \(pct)% vs the previous period"
     }
 
     /// `analytics.caller_hung_up`
-    internal static var callerHungUp: String { AppL10n.copyLocale == .frCA ? "Caller hung up" : "Caller hung up" }
+    internal static var callerHungUp: String { AppL10n.copyLocale == .frCA ? "L'appelant a raccroché" : "Caller hung up" }
 
     /// `analytics.calls`
-    internal static var calls: String { AppL10n.copyLocale == .frCA ? "Calls" : "Calls" }
+    internal static var calls: String { AppL10n.copyLocale == .frCA ? "Appels" : "Calls" }
 
     /// `analytics.conversion_funnel`
-    internal static var conversionFunnel: String { AppL10n.copyLocale == .frCA ? "Conversion funnel" : "Conversion funnel" }
+    internal static var conversionFunnel: String { AppL10n.copyLocale == .frCA ? "Entonnoir de conversion" : "Conversion funnel" }
 
     /// `analytics.conversion_rate`
-    internal static var conversionRate: String { AppL10n.copyLocale == .frCA ? "Conversion Rate" : "Conversion Rate" }
+    internal static var conversionRate: String { AppL10n.copyLocale == .frCA ? "Taux de conversion" : "Conversion Rate" }
 
     /// `analytics.could_not_load_analytics`
-    internal static var couldNotLoadAnalytics: String { AppL10n.copyLocale == .frCA ? "Could not load analytics." : "Could not load analytics." }
+    internal static var couldNotLoadAnalytics: String { AppL10n.copyLocale == .frCA ? "Impossible de charger l'analytique." : "Could not load analytics." }
 
     /// `analytics.could_not_load_usage`
-    internal static var couldNotLoadUsage: String { AppL10n.copyLocale == .frCA ? "Could not load usage." : "Could not load usage." }
+    internal static var couldNotLoadUsage: String { AppL10n.copyLocale == .frCA ? "Impossible de charger l'utilisation." : "Could not load usage." }
 
     /// `analytics.could_not_load_usage2`
-    internal static var couldNotLoadUsage2: String { AppL10n.copyLocale == .frCA ? "Could not load usage history." : "Could not load usage history." }
+    internal static var couldNotLoadUsage2: String { AppL10n.copyLocale == .frCA ? "Impossible de charger l'historique d'utilisation." : "Could not load usage history." }
 
     /// `analytics.date_range`
     internal static func dateRange(_ first: String, _ last: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(first) to \(last)" : "\(first) to \(last)"
+        AppL10n.copyLocale == .frCA ? "Du \(first) au \(last)" : "\(first) to \(last)"
     }
 
     /// `analytics.duration_minutes_seconds`
     internal static func durationMinutesSeconds(_ minutes: Int, _ seconds: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(minutes)m \(seconds)s" : "\(minutes)m \(seconds)s"
+        AppL10n.copyLocale == .frCA ? "\(minutes)\u{00A0}min \(seconds)\u{00A0}s" : "\(minutes)m \(seconds)s"
     }
 
     /// `analytics.duration_seconds`
     internal static func durationSeconds(_ seconds: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(seconds)s" : "\(seconds)s"
+        AppL10n.copyLocale == .frCA ? "\(seconds)\u{00A0}s" : "\(seconds)s"
     }
 
     /// `analytics.in_this_window`
-    internal static var inThisWindow: String { AppL10n.copyLocale == .frCA ? "In this window" : "In this window" }
+    internal static var inThisWindow: String { AppL10n.copyLocale == .frCA ? "Pour cette période" : "In this window" }
 
     /// `analytics.inbound_call_minutes`
-    internal static var inboundCallMinutes: String { AppL10n.copyLocale == .frCA ? "Inbound call minutes" : "Inbound call minutes" }
+    internal static var inboundCallMinutes: String { AppL10n.copyLocale == .frCA ? "Minutes d'appels entrants" : "Inbound call minutes" }
 
     /// `analytics.loading_analytics`
-    internal static var loadingAnalytics: String { AppL10n.copyLocale == .frCA ? "Loading analytics…" : "Loading analytics…" }
+    internal static var loadingAnalytics: String { AppL10n.copyLocale == .frCA ? "Chargement de l'analytique…" : "Loading analytics…" }
 
     /// `analytics.messages`
     internal static var messages: String { AppL10n.copyLocale == .frCA ? "Messages" : "Messages" }
 
     /// `analytics.metered_call_minutes`
-    internal static var meteredCallMinutes: String { AppL10n.copyLocale == .frCA ? "Metered call minutes" : "Metered call minutes" }
+    internal static var meteredCallMinutes: String { AppL10n.copyLocale == .frCA ? "Minutes d'appel mesurées" : "Metered call minutes" }
 
     /// `analytics.missed_calls`
-    internal static var missedCalls: String { AppL10n.copyLocale == .frCA ? "Missed Calls" : "Missed Calls" }
+    internal static var missedCalls: String { AppL10n.copyLocale == .frCA ? "Appels manqués" : "Missed Calls" }
 
     /// `analytics.mms_sent`
-    internal static var mmsSent: String { AppL10n.copyLocale == .frCA ? "MMS sent" : "MMS sent" }
+    internal static var mmsSent: String { AppL10n.copyLocale == .frCA ? "MMS envoyés" : "MMS sent" }
 
     /// `analytics.month_year`
     internal static func monthYear(_ month: String, _ year: String) -> String {
@@ -166,206 +166,206 @@ extension AnalyticsCopy {
     }
 
     /// `analytics.n30_days`
-    internal static var n30Days: String { AppL10n.copyLocale == .frCA ? "30 days" : "30 days" }
+    internal static var n30Days: String { AppL10n.copyLocale == .frCA ? "30 jours" : "30 days" }
 
     /// `analytics.n7_days`
-    internal static var n7Days: String { AppL10n.copyLocale == .frCA ? "7 days" : "7 days" }
+    internal static var n7Days: String { AppL10n.copyLocale == .frCA ? "7 jours" : "7 days" }
 
     /// `analytics.n90_days`
-    internal static var n90Days: String { AppL10n.copyLocale == .frCA ? "90 days" : "90 days" }
+    internal static var n90Days: String { AppL10n.copyLocale == .frCA ? "90 jours" : "90 days" }
 
     /// `analytics.never_connected`
-    internal static var neverConnected: String { AppL10n.copyLocale == .frCA ? "Never connected" : "Never connected" }
+    internal static var neverConnected: String { AppL10n.copyLocale == .frCA ? "Jamais connectés" : "Never connected" }
 
     /// `analytics.new_no_previous_period`
-    internal static var newNoPreviousPeriod: String { AppL10n.copyLocale == .frCA ? "New, no previous period to compare" : "New, no previous period to compare" }
+    internal static var newNoPreviousPeriod: String { AppL10n.copyLocale == .frCA ? "Nouveau\u{00A0}: aucune période précédente à comparer" : "New, no previous period to compare" }
 
     /// `analytics.no_calls_analyse_yet`
-    internal static var noCallsAnalyseYet: String { AppL10n.copyLocale == .frCA ? "No calls to analyse yet." : "No calls to analyse yet." }
+    internal static var noCallsAnalyseYet: String { AppL10n.copyLocale == .frCA ? "Aucun appel analysé pour l'instant." : "No calls to analyse yet." }
 
     /// `analytics.no_calls_window`
-    internal static var noCallsWindow: String { AppL10n.copyLocale == .frCA ? "No calls in this window." : "No calls in this window." }
+    internal static var noCallsWindow: String { AppL10n.copyLocale == .frCA ? "Aucun appel pour cette période." : "No calls in this window." }
 
     /// `analytics.no_change_vs_previous`
-    internal static var noChangeVsPrevious: String { AppL10n.copyLocale == .frCA ? "No change vs the previous period" : "No change vs the previous period" }
+    internal static var noChangeVsPrevious: String { AppL10n.copyLocale == .frCA ? "Aucun changement par rapport à la période précédente" : "No change vs the previous period" }
 
     /// `analytics.no_usage_has_been`
-    internal static var noUsageHasBeen: String { AppL10n.copyLocale == .frCA ? "No usage has been recorded for this month yet." : "No usage has been recorded for this month yet." }
+    internal static var noUsageHasBeen: String { AppL10n.copyLocale == .frCA ? "Aucune utilisation n'a encore été mesurée ce mois-ci." : "No usage has been recorded for this month yet." }
 
     /// `analytics.no_usage_has_been2`
-    internal static var noUsageHasBeen2: String { AppL10n.copyLocale == .frCA ? "No usage has been recorded in any recent month yet." : "No usage has been recorded in any recent month yet." }
+    internal static var noUsageHasBeen2: String { AppL10n.copyLocale == .frCA ? "Aucune utilisation n'a encore été mesurée ces derniers mois." : "No usage has been recorded in any recent month yet." }
 
     /// `analytics.not_metered`
-    internal static var notMetered: String { AppL10n.copyLocale == .frCA ? "Not metered" : "Not metered" }
+    internal static var notMetered: String { AppL10n.copyLocale == .frCA ? "Non mesuré" : "Not metered" }
 
     /// `analytics.of_all_dials`
-    internal static var ofAllDials: String { AppL10n.copyLocale == .frCA ? "Of all dials" : "Of all dials" }
+    internal static var ofAllDials: String { AppL10n.copyLocale == .frCA ? "Sur tous les appels composés" : "Of all dials" }
 
     /// `analytics.outbound_call_minutes`
-    internal static var outboundCallMinutes: String { AppL10n.copyLocale == .frCA ? "Outbound call minutes" : "Outbound call minutes" }
+    internal static var outboundCallMinutes: String { AppL10n.copyLocale == .frCA ? "Minutes d'appels sortants" : "Outbound call minutes" }
 
     /// `analytics.percent_value`
     internal static func percentValue(_ value: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(value)%" : "\(value)%"
+        AppL10n.copyLocale == .frCA ? "\(value)\u{00A0}%" : "\(value)%"
     }
 
     /// `analytics.phone_numbers`
-    internal static var phoneNumbers: String { AppL10n.copyLocale == .frCA ? "Phone numbers" : "Phone numbers" }
+    internal static var phoneNumbers: String { AppL10n.copyLocale == .frCA ? "Numéros de téléphone" : "Phone numbers" }
 
     /// `analytics.recent_months`
-    internal static var recentMonths: String { AppL10n.copyLocale == .frCA ? "Recent months" : "Recent months" }
+    internal static var recentMonths: String { AppL10n.copyLocale == .frCA ? "Derniers mois" : "Recent months" }
 
     /// `analytics.sentiment`
     internal static var sentiment: String { AppL10n.copyLocale == .frCA ? "Sentiment" : "Sentiment" }
 
     /// `analytics.sms_received`
-    internal static var smsReceived: String { AppL10n.copyLocale == .frCA ? "SMS received" : "SMS received" }
+    internal static var smsReceived: String { AppL10n.copyLocale == .frCA ? "Textos reçus" : "SMS received" }
 
     /// `analytics.sms_sent`
-    internal static var smsSent: String { AppL10n.copyLocale == .frCA ? "SMS sent" : "SMS sent" }
+    internal static var smsSent: String { AppL10n.copyLocale == .frCA ? "Textos envoyés" : "SMS sent" }
 
     /// `analytics.stage`
-    internal static var stage: String { AppL10n.copyLocale == .frCA ? "Stage" : "Stage" }
+    internal static var stage: String { AppL10n.copyLocale == .frCA ? "Étape" : "Stage" }
 
     /// `analytics.total_calls`
-    internal static var totalCalls: String { AppL10n.copyLocale == .frCA ? "Total Calls" : "Total Calls" }
+    internal static var totalCalls: String { AppL10n.copyLocale == .frCA ? "Appels au total" : "Total Calls" }
 
     /// `analytics.try_again`
-    internal static var tryAgain: String { AppL10n.copyLocale == .frCA ? "Try again" : "Try again" }
+    internal static var tryAgain: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 
     /// `analytics.usage_month`
     internal static func usageMonth(_ month: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Month \(month)" : "Month \(month)"
+        AppL10n.copyLocale == .frCA ? "Mois\u{00A0}: \(month)" : "Month \(month)"
     }
 
     /// `analytics.usage_this_month`
-    internal static var usageThisMonth: String { AppL10n.copyLocale == .frCA ? "Usage this month" : "Usage this month" }
+    internal static var usageThisMonth: String { AppL10n.copyLocale == .frCA ? "Utilisation du mois" : "Usage this month" }
 
     /// `analytics.video_minutes_tracked`
-    internal static var videoMinutesTracked: String { AppL10n.copyLocale == .frCA ? "Video minutes (tracked)" : "Video minutes (tracked)" }
+    internal static var videoMinutesTracked: String { AppL10n.copyLocale == .frCA ? "Minutes de vidéo (suivies)" : "Video minutes (tracked)" }
 
     /// `analytics.whatsapp_received`
-    internal static var whatsappReceived: String { AppL10n.copyLocale == .frCA ? "WhatsApp received" : "WhatsApp received" }
+    internal static var whatsappReceived: String { AppL10n.copyLocale == .frCA ? "Messages WhatsApp reçus" : "WhatsApp received" }
 
     /// `analytics.whatsapp_sent`
-    internal static var whatsappSent: String { AppL10n.copyLocale == .frCA ? "WhatsApp sent" : "WhatsApp sent" }
+    internal static var whatsappSent: String { AppL10n.copyLocale == .frCA ? "Messages WhatsApp envoyés" : "WhatsApp sent" }
 
     /// `analytics.window`
-    internal static var window: String { AppL10n.copyLocale == .frCA ? "Window" : "Window" }
+    internal static var window: String { AppL10n.copyLocale == .frCA ? "Période" : "Window" }
 }
 
 extension AvailabilityCopy {
     /// `availability.card_title`
-    internal static var cardTitle: String { AppL10n.copyLocale == .frCA ? "Calls to you" : "Calls to you" }
+    internal static var cardTitle: String { AppL10n.copyLocale == .frCA ? "Appels pour vous" : "Calls to you" }
 
     /// `availability.load_failed`
-    internal static var loadFailed: String { AppL10n.copyLocale == .frCA ? "Could not read whether calls ring to you." : "Could not read whether calls ring to you." }
+    internal static var loadFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de savoir si les appels sonnent pour vous." : "Could not read whether calls ring to you." }
 
     /// `availability.reason_no_member_row`
-    internal static var reasonNoMemberRow: String { AppL10n.copyLocale == .frCA ? "You are not listed as a member of this workspace, so calls cannot be rung to you. Ask an administrator to add you." : "You are not listed as a member of this workspace, so calls cannot be rung to you. Ask an administrator to add you." }
+    internal static var reasonNoMemberRow: String { AppL10n.copyLocale == .frCA ? "Vous ne figurez pas parmi les membres de cet espace de travail\u{00A0}: les appels ne peuvent pas sonner pour vous. Demandez à un administrateur de vous ajouter." : "You are not listed as a member of this workspace, so calls cannot be rung to you. Ask an administrator to add you." }
 
     /// `availability.reason_role`
-    internal static var reasonRole: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer, so calls are never rung to you." : "You are in this workspace as a viewer, so calls are never rung to you." }
+    internal static var reasonRole: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur dans cet espace de travail, les appels ne sonnent jamais pour vous." : "You are in this workspace as a viewer, so calls are never rung to you." }
 
     /// `availability.reason_unknown`
-    internal static var reasonUnknown: String { AppL10n.copyLocale == .frCA ? "Calls are not being rung to you in this workspace." : "Calls are not being rung to you in this workspace." }
+    internal static var reasonUnknown: String { AppL10n.copyLocale == .frCA ? "Les appels ne sonnent pas pour vous dans cet espace de travail." : "Calls are not being rung to you in this workspace." }
 
     /// `availability.row_subtitle`
     internal static func rowSubtitle(_ workspace_name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Ring my phone for calls in \(workspace_name)." : "Ring my phone for calls in \(workspace_name)."
+        AppL10n.copyLocale == .frCA ? "Faire sonner mon téléphone pour les appels de l'espace \(workspace_name)." : "Ring my phone for calls in \(workspace_name)."
     }
 
     /// `availability.row_title`
-    internal static var rowTitle: String { AppL10n.copyLocale == .frCA ? "Available for calls" : "Available for calls" }
+    internal static var rowTitle: String { AppL10n.copyLocale == .frCA ? "Disponible pour les appels" : "Available for calls" }
 }
 
 extension BillingCopy {
     /// `billing.discount_amount`
     internal static func discountAmount(_ coupon: String, amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(coupon), $\(amount) off" : "\(coupon), $\(amount) off"
+        AppL10n.copyLocale == .frCA ? "\(coupon), \(amount)\u{00A0}$ de rabais" : "\(coupon), $\(amount) off"
     }
 
     /// `billing.discount_percent`
     internal static func discountPercent(_ coupon: String, percent: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(coupon), \(percent)% off" : "\(coupon), \(percent)% off"
+        AppL10n.copyLocale == .frCA ? "\(coupon), \(percent)\u{00A0}% de rabais" : "\(coupon), \(percent)% off"
     }
 
     /// `billing.ends_on`
     internal static func endsOn(_ date: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Ends \(date)" : "Ends \(date)"
+        AppL10n.copyLocale == .frCA ? "Fin le \(date)" : "Ends \(date)"
     }
 
     /// `billing.invoice_tax`
     internal static func invoiceTax(_ amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "incl. $\(amount) tax" : "incl. $\(amount) tax"
+        AppL10n.copyLocale == .frCA ? "dont \(amount)\u{00A0}$ de taxes" : "incl. $\(amount) tax"
     }
 
     /// `billing.invoices_empty`
-    internal static var invoicesEmpty: String { AppL10n.copyLocale == .frCA ? "No invoices yet." : "No invoices yet." }
+    internal static var invoicesEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune facture pour l'instant." : "No invoices yet." }
 
     /// `billing.invoices_title`
-    internal static var invoicesTitle: String { AppL10n.copyLocale == .frCA ? "Invoices" : "Invoices" }
+    internal static var invoicesTitle: String { AppL10n.copyLocale == .frCA ? "Factures" : "Invoices" }
 
     /// `billing.invoices_truncated`
-    internal static var invoicesTruncated: String { AppL10n.copyLocale == .frCA ? "Showing your most recent invoices. Older invoices are not available in this app." : "Showing your most recent invoices. Older invoices are not available in this app." }
+    internal static var invoicesTruncated: String { AppL10n.copyLocale == .frCA ? "Vos dernières factures sont affichées. Les plus anciennes ne sont pas disponibles dans l'app." : "Showing your most recent invoices. Older invoices are not available in this app." }
 
     /// `billing.loading`
-    internal static var loading: String { AppL10n.copyLocale == .frCA ? "Loading billing…" : "Loading billing…" }
+    internal static var loading: String { AppL10n.copyLocale == .frCA ? "Chargement de la facturation…" : "Loading billing…" }
 
     /// `billing.meter_month`
     internal static func meterMonth(_ month: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Billing month \(month)" : "Billing month \(month)"
+        AppL10n.copyLocale == .frCA ? "Mois de facturation \(month)" : "Billing month \(month)"
     }
 
     /// `billing.meter_title`
-    internal static var meterTitle: String { AppL10n.copyLocale == .frCA ? "Call minutes this month" : "Call minutes this month" }
+    internal static var meterTitle: String { AppL10n.copyLocale == .frCA ? "Minutes d'appel ce mois-ci" : "Call minutes this month" }
 
     /// `billing.meter_unmetered`
-    internal static var meterUnmetered: String { AppL10n.copyLocale == .frCA ? "No call minutes have been recorded this month yet." : "No call minutes have been recorded this month yet." }
+    internal static var meterUnmetered: String { AppL10n.copyLocale == .frCA ? "Aucune minute d'appel n'a encore été comptabilisée ce mois-ci." : "No call minutes have been recorded this month yet." }
 
     /// `billing.meter_used`
     internal static func meterUsed(_ amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(amount) minutes used" : "\(amount) minutes used"
+        AppL10n.copyLocale == .frCA ? "Minutes utilisées\u{00A0}: \(amount)" : "\(amount) minutes used"
     }
 
     /// `billing.meter_used_of`
     internal static func meterUsedOf(_ amount: String, included: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(amount) of \(included) included minutes used" : "\(amount) of \(included) included minutes used"
+        AppL10n.copyLocale == .frCA ? "Minutes utilisées\u{00A0}: \(amount) sur \(included) incluses" : "\(amount) of \(included) included minutes used"
     }
 
     /// `billing.money`
     internal static func money(_ amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "$\(amount)" : "$\(amount)"
+        AppL10n.copyLocale == .frCA ? "\(amount)\u{00A0}$" : "$\(amount)"
     }
 
     /// `billing.money_monthly`
     internal static func moneyMonthly(_ amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "$\(amount) / month" : "$\(amount) / month"
+        AppL10n.copyLocale == .frCA ? "\(amount)\u{00A0}$ / mois" : "$\(amount) / month"
     }
 
     /// `billing.no_customer_body`
-    internal static var noCustomerBody: String { AppL10n.copyLocale == .frCA ? "This account has no billing customer yet, so there is no subscription or invoice history to show. Nothing has gone wrong." : "This account has no billing customer yet, so there is no subscription or invoice history to show. Nothing has gone wrong." }
+    internal static var noCustomerBody: String { AppL10n.copyLocale == .frCA ? "Ce compte n'a pas encore de dossier de facturation, il n'y a donc aucun abonnement ni historique de factures à afficher. Aucun problème n'est survenu." : "This account has no billing customer yet, so there is no subscription or invoice history to show. Nothing has gone wrong." }
 
     /// `billing.no_customer_title`
-    internal static var noCustomerTitle: String { AppL10n.copyLocale == .frCA ? "No billing set up" : "No billing set up" }
+    internal static var noCustomerTitle: String { AppL10n.copyLocale == .frCA ? "Facturation non configurée" : "No billing set up" }
 
     /// `billing.other_workspace`
-    internal static var otherWorkspace: String { AppL10n.copyLocale == .frCA ? "These subscription and invoice details belong to another workspace on this account." : "These subscription and invoice details belong to another workspace on this account." }
+    internal static var otherWorkspace: String { AppL10n.copyLocale == .frCA ? "Cet abonnement et ces factures appartiennent à un autre espace de travail de ce compte." : "These subscription and invoice details belong to another workspace on this account." }
 
     /// `billing.overage_auto_bill`
-    internal static var overageAutoBill: String { AppL10n.copyLocale == .frCA ? "Extra minutes beyond your plan are billed automatically." : "Extra minutes beyond your plan are billed automatically." }
+    internal static var overageAutoBill: String { AppL10n.copyLocale == .frCA ? "Les minutes hors forfait sont facturées automatiquement." : "Extra minutes beyond your plan are billed automatically." }
 
     /// `billing.overage_blocked`
-    internal static var overageBlocked: String { AppL10n.copyLocale == .frCA ? "Calls are being declined, your included minutes are used up" : "Calls are being declined, your included minutes are used up" }
+    internal static var overageBlocked: String { AppL10n.copyLocale == .frCA ? "Les appels sont refusés\u{00A0}: vos minutes incluses sont épuisées" : "Calls are being declined, your included minutes are used up" }
 
     /// `billing.overage_exceeded`
-    internal static var overageExceeded: String { AppL10n.copyLocale == .frCA ? "Over your included minutes, the extra is being billed" : "Over your included minutes, the extra is being billed" }
+    internal static var overageExceeded: String { AppL10n.copyLocale == .frCA ? "Vous avez dépassé vos minutes incluses\u{00A0}: l'excédent est facturé" : "Over your included minutes, the extra is being billed" }
 
     /// `billing.overage_hard_cap`
-    internal static var overageHardCap: String { AppL10n.copyLocale == .frCA ? "Calls stop once your included minutes run out." : "Calls stop once your included minutes run out." }
+    internal static var overageHardCap: String { AppL10n.copyLocale == .frCA ? "Les appels cessent une fois vos minutes incluses épuisées." : "Calls stop once your included minutes run out." }
 
     /// `billing.overage_title`
-    internal static var overageTitle: String { AppL10n.copyLocale == .frCA ? "Going over your minutes" : "Going over your minutes" }
+    internal static var overageTitle: String { AppL10n.copyLocale == .frCA ? "Dépassement de vos minutes" : "Going over your minutes" }
 
     /// `billing.plan_name_voice_pro`
     internal static var planNameVoicePro: String { AppL10n.copyLocale == .frCA ? "Voice Pro" : "Voice Pro" }
@@ -380,202 +380,202 @@ extension BillingCopy {
     internal static var planNameVoiceStudio: String { AppL10n.copyLocale == .frCA ? "Voice Studio" : "Voice Studio" }
 
     /// `billing.plan_none`
-    internal static var planNone: String { AppL10n.copyLocale == .frCA ? "No plan on this workspace" : "No plan on this workspace" }
+    internal static var planNone: String { AppL10n.copyLocale == .frCA ? "Aucun forfait pour cet espace de travail" : "No plan on this workspace" }
 
     /// `billing.plan_title`
-    internal static var planTitle: String { AppL10n.copyLocale == .frCA ? "Plan" : "Plan" }
+    internal static var planTitle: String { AppL10n.copyLocale == .frCA ? "Forfait" : "Plan" }
 
     /// `billing.read_only`
-    internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Plan changes, payment methods and cancellations are not available in this app. This screen is read-only." : "Plan changes, payment methods and cancellations are not available in this app. This screen is read-only." }
+    internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Cette app ne permet pas de changer de forfait, de gérer les moyens de paiement ni de résilier. Cet écran est en lecture seule." : "Plan changes, payment methods and cancellations are not available in this app. This screen is read-only." }
 
     /// `billing.read_only_viewer`
-    internal static var readOnlyViewer: String { AppL10n.copyLocale == .frCA ? "This screen is read-only. Ask an agency or client member of this workspace to change the plan." : "This screen is read-only. Ask an agency or client member of this workspace to change the plan." }
+    internal static var readOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Cet écran est en lecture seule. Demandez à un membre ayant le rôle Agence ou Client de cet espace de travail de changer de forfait." : "This screen is read-only. Ask an agency or client member of this workspace to change the plan." }
 
     /// `billing.renews_on`
     internal static func renewsOn(_ date: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Renews \(date)" : "Renews \(date)"
+        AppL10n.copyLocale == .frCA ? "Renouvellement le \(date)" : "Renews \(date)"
     }
 
     /// `billing.retry`
-    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Try again" : "Try again" }
+    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 
     /// `billing.spend_cap_blocked`
-    internal static var spendCapBlocked: String { AppL10n.copyLocale == .frCA ? "Calls are being declined, this month's overage spending cap has been reached" : "Calls are being declined, this month's overage spending cap has been reached" }
+    internal static var spendCapBlocked: String { AppL10n.copyLocale == .frCA ? "Les appels sont refusés\u{00A0}: le plafond des frais de dépassement de ce mois-ci est atteint" : "Calls are being declined, this month's overage spending cap has been reached" }
 
     /// `billing.spend_cap_none`
-    internal static var spendCapNone: String { AppL10n.copyLocale == .frCA ? "No monthly cap is set on overage spending." : "No monthly cap is set on overage spending." }
+    internal static var spendCapNone: String { AppL10n.copyLocale == .frCA ? "Aucun plafond mensuel n'est fixé pour les frais de dépassement." : "No monthly cap is set on overage spending." }
 
     /// `billing.spend_cap_remedy`
-    internal static var spendCapRemedy: String { AppL10n.copyLocale == .frCA ? "The cap cannot be raised or removed in this app." : "The cap cannot be raised or removed in this app." }
+    internal static var spendCapRemedy: String { AppL10n.copyLocale == .frCA ? "Le plafond ne peut être ni relevé ni retiré dans cette app." : "The cap cannot be raised or removed in this app." }
 
     /// `billing.spend_cap_set`
     internal static func spendCapSet(_ amount: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Overage beyond your plan is capped at $\(amount) a month." : "Overage beyond your plan is capped at $\(amount) a month."
+        AppL10n.copyLocale == .frCA ? "Les frais de dépassement de votre forfait sont plafonnés à \(amount)\u{00A0}$ par mois." : "Overage beyond your plan is capped at $\(amount) a month."
     }
 
     /// `billing.spend_cap_title`
-    internal static var spendCapTitle: String { AppL10n.copyLocale == .frCA ? "Overage spending cap" : "Overage spending cap" }
+    internal static var spendCapTitle: String { AppL10n.copyLocale == .frCA ? "Plafond des frais de dépassement" : "Overage spending cap" }
 
     /// `billing.status_active`
-    internal static var statusActive: String { AppL10n.copyLocale == .frCA ? "Active" : "Active" }
+    internal static var statusActive: String { AppL10n.copyLocale == .frCA ? "Actif" : "Active" }
 
     /// `billing.status_canceled`
-    internal static var statusCanceled: String { AppL10n.copyLocale == .frCA ? "Cancelled" : "Cancelled" }
+    internal static var statusCanceled: String { AppL10n.copyLocale == .frCA ? "Annulé" : "Cancelled" }
 
     /// `billing.status_canceled_caption`
-    internal static var statusCanceledCaption: String { AppL10n.copyLocale == .frCA ? "This plan will not renew." : "This plan will not renew." }
+    internal static var statusCanceledCaption: String { AppL10n.copyLocale == .frCA ? "Ce forfait ne sera pas renouvelé." : "This plan will not renew." }
 
     /// `billing.status_none`
-    internal static var statusNone: String { AppL10n.copyLocale == .frCA ? "No subscription" : "No subscription" }
+    internal static var statusNone: String { AppL10n.copyLocale == .frCA ? "Aucun abonnement" : "No subscription" }
 
     /// `billing.status_past_due`
-    internal static var statusPastDue: String { AppL10n.copyLocale == .frCA ? "Past due" : "Past due" }
+    internal static var statusPastDue: String { AppL10n.copyLocale == .frCA ? "En retard" : "Past due" }
 
     /// `billing.status_past_due_caption`
-    internal static var statusPastDueCaption: String { AppL10n.copyLocale == .frCA ? "A payment did not go through. Service continues while it is retried." : "A payment did not go through. Service continues while it is retried." }
+    internal static var statusPastDueCaption: String { AppL10n.copyLocale == .frCA ? "Un paiement n'a pas abouti. Le service continue pendant les nouvelles tentatives de paiement." : "A payment did not go through. Service continues while it is retried." }
 
     /// `billing.stripe_failed`
-    internal static var stripeFailed: String { AppL10n.copyLocale == .frCA ? "Could not load your subscription and invoices." : "Could not load your subscription and invoices." }
+    internal static var stripeFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de charger votre abonnement et vos factures." : "Could not load your subscription and invoices." }
 
     /// `billing.subscriptions_empty`
-    internal static var subscriptionsEmpty: String { AppL10n.copyLocale == .frCA ? "No subscription is attached to this account." : "No subscription is attached to this account." }
+    internal static var subscriptionsEmpty: String { AppL10n.copyLocale == .frCA ? "Aucun abonnement n'est associé à ce compte." : "No subscription is attached to this account." }
 
     /// `billing.subscriptions_title`
-    internal static var subscriptionsTitle: String { AppL10n.copyLocale == .frCA ? "Subscription" : "Subscription" }
+    internal static var subscriptionsTitle: String { AppL10n.copyLocale == .frCA ? "Abonnement" : "Subscription" }
 
     /// `billing.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Billing" : "Billing" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Facturation" : "Billing" }
 
     /// `billing.unavailable_body`
-    internal static var unavailableBody: String { AppL10n.copyLocale == .frCA ? "We could not reach our payment provider just now, so your subscription and invoices are not shown. Your plan and your usage above are current, and nothing about your account has changed." : "We could not reach our payment provider just now, so your subscription and invoices are not shown. Your plan and your usage above are current, and nothing about your account has changed." }
+    internal static var unavailableBody: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu joindre notre fournisseur de paiement pour le moment, alors votre abonnement et vos factures ne sont pas affichés. Votre forfait et votre utilisation ci-dessus sont à jour, et rien n'a changé dans votre compte." : "We could not reach our payment provider just now, so your subscription and invoices are not shown. Your plan and your usage above are current, and nothing about your account has changed." }
 
     /// `billing.unavailable_title`
-    internal static var unavailableTitle: String { AppL10n.copyLocale == .frCA ? "Billing details unavailable" : "Billing details unavailable" }
+    internal static var unavailableTitle: String { AppL10n.copyLocale == .frCA ? "Données de facturation indisponibles" : "Billing details unavailable" }
 }
 
 extension CallsCopy {
     /// `calls.action_items`
-    internal static var actionItems: String { AppL10n.copyLocale == .frCA ? "Action items" : "Action items" }
+    internal static var actionItems: String { AppL10n.copyLocale == .frCA ? "Actions à faire" : "Action items" }
 
     /// `calls.ai_summary`
-    internal static var aiSummary: String { AppL10n.copyLocale == .frCA ? "AI summary" : "AI summary" }
+    internal static var aiSummary: String { AppL10n.copyLocale == .frCA ? "Résumé IA" : "AI summary" }
 
     /// `calls.call`
-    internal static var call: String { AppL10n.copyLocale == .frCA ? "Call" : "Call" }
+    internal static var call: String { AppL10n.copyLocale == .frCA ? "Appeler" : "Call" }
 
     /// `calls.call_could_not_summarised`
-    internal static var callCouldNotSummarised: String { AppL10n.copyLocale == .frCA ? "This call could not be summarised." : "This call could not be summarised." }
+    internal static var callCouldNotSummarised: String { AppL10n.copyLocale == .frCA ? "Cet appel n'a pas pu être résumé." : "This call could not be summarised." }
 
     /// `calls.call_log`
-    internal static var callLog: String { AppL10n.copyLocale == .frCA ? "Call log" : "Call log" }
+    internal static var callLog: String { AppL10n.copyLocale == .frCA ? "Journal des appels" : "Call log" }
 
     /// `calls.call_not_available`
-    internal static var callNotAvailable: String { AppL10n.copyLocale == .frCA ? "This call is not available." : "This call is not available." }
+    internal static var callNotAvailable: String { AppL10n.copyLocale == .frCA ? "Cet appel n'est pas disponible." : "This call is not available." }
 
     /// `calls.follow_up_sent`
-    internal static var followUpSent: String { AppL10n.copyLocale == .frCA ? "Follow-up sent" : "Follow-up sent" }
+    internal static var followUpSent: String { AppL10n.copyLocale == .frCA ? "Suivi envoyé" : "Follow-up sent" }
 
     /// `calls.inbound`
-    internal static var inbound: String { AppL10n.copyLocale == .frCA ? "Inbound" : "Inbound" }
+    internal static var inbound: String { AppL10n.copyLocale == .frCA ? "Entrant" : "Inbound" }
 
     /// `calls.inbound_outbound_calls_will`
-    internal static var inboundOutboundCallsWill: String { AppL10n.copyLocale == .frCA ? "Inbound and outbound calls will appear here as they happen." : "Inbound and outbound calls will appear here as they happen." }
+    internal static var inboundOutboundCallsWill: String { AppL10n.copyLocale == .frCA ? "Les appels entrants et sortants apparaîtront ici au fur et à mesure." : "Inbound and outbound calls will appear here as they happen." }
 
     /// `calls.key_points`
-    internal static var keyPoints: String { AppL10n.copyLocale == .frCA ? "Key points" : "Key points" }
+    internal static var keyPoints: String { AppL10n.copyLocale == .frCA ? "Points clés" : "Key points" }
 
     /// `calls.live`
-    internal static var live: String { AppL10n.copyLocale == .frCA ? "Live" : "Live" }
+    internal static var live: String { AppL10n.copyLocale == .frCA ? "En direct" : "Live" }
 
     /// `calls.loading_call`
-    internal static var loadingCall: String { AppL10n.copyLocale == .frCA ? "Loading call…" : "Loading call…" }
+    internal static var loadingCall: String { AppL10n.copyLocale == .frCA ? "Chargement de l'appel…" : "Loading call…" }
 
     /// `calls.manage`
-    internal static var manage: String { AppL10n.copyLocale == .frCA ? "Manage" : "Manage" }
+    internal static var manage: String { AppL10n.copyLocale == .frCA ? "Gérer" : "Manage" }
 
     /// `calls.no_ai_summary_call`
-    internal static var noAiSummaryCall: String { AppL10n.copyLocale == .frCA ? "No AI summary for this call." : "No AI summary for this call." }
+    internal static var noAiSummaryCall: String { AppL10n.copyLocale == .frCA ? "Aucun résumé IA pour cet appel." : "No AI summary for this call." }
 
     /// `calls.no_caller_id`
-    internal static var noCallerId: String { AppL10n.copyLocale == .frCA ? "No caller ID" : "No caller ID" }
+    internal static var noCallerId: String { AppL10n.copyLocale == .frCA ? "Aucun afficheur" : "No caller ID" }
 
     /// `calls.no_transcript_call`
-    internal static var noTranscriptCall: String { AppL10n.copyLocale == .frCA ? "No transcript for this call." : "No transcript for this call." }
+    internal static var noTranscriptCall: String { AppL10n.copyLocale == .frCA ? "Aucune transcription pour cet appel." : "No transcript for this call." }
 
     /// `calls.nothing_here_yet`
-    internal static var nothingHereYet: String { AppL10n.copyLocale == .frCA ? "Nothing here yet" : "Nothing here yet" }
+    internal static var nothingHereYet: String { AppL10n.copyLocale == .frCA ? "Rien pour l'instant" : "Nothing here yet" }
 
     /// `calls.objections`
     internal static var objections: String { AppL10n.copyLocale == .frCA ? "Objections" : "Objections" }
 
     /// `calls.outbound`
-    internal static var outbound: String { AppL10n.copyLocale == .frCA ? "Outbound" : "Outbound" }
+    internal static var outbound: String { AppL10n.copyLocale == .frCA ? "Sortant" : "Outbound" }
 
     /// `calls.outcome`
-    internal static var outcome: String { AppL10n.copyLocale == .frCA ? "Outcome" : "Outcome" }
+    internal static var outcome: String { AppL10n.copyLocale == .frCA ? "Résultat" : "Outcome" }
 
     /// `calls.sentiment`
     internal static var sentiment: String { AppL10n.copyLocale == .frCA ? "Sentiment" : "Sentiment" }
 
     /// `calls.show_transcript`
-    internal static var showTranscript: String { AppL10n.copyLocale == .frCA ? "Show transcript" : "Show transcript" }
+    internal static var showTranscript: String { AppL10n.copyLocale == .frCA ? "Voir la transcription" : "Show transcript" }
 
     /// `calls.topics`
-    internal static var topics: String { AppL10n.copyLocale == .frCA ? "Topics" : "Topics" }
+    internal static var topics: String { AppL10n.copyLocale == .frCA ? "Sujets" : "Topics" }
 
     /// `calls.transcript`
-    internal static var transcript: String { AppL10n.copyLocale == .frCA ? "Transcript" : "Transcript" }
+    internal static var transcript: String { AppL10n.copyLocale == .frCA ? "Transcription" : "Transcript" }
 
     /// `calls.transfer`
-    internal static var transfer: String { AppL10n.copyLocale == .frCA ? "Transfer" : "Transfer" }
+    internal static var transfer: String { AppL10n.copyLocale == .frCA ? "Transfert" : "Transfer" }
 
     /// `calls.transfer_failed`
-    internal static var transferFailed: String { AppL10n.copyLocale == .frCA ? "Transfer failed" : "Transfer failed" }
+    internal static var transferFailed: String { AppL10n.copyLocale == .frCA ? "Échec du transfert" : "Transfer failed" }
 
     /// `calls.transferred`
-    internal static var transferred: String { AppL10n.copyLocale == .frCA ? "Transferred" : "Transferred" }
+    internal static var transferred: String { AppL10n.copyLocale == .frCA ? "Transféré" : "Transferred" }
 }
 
 extension CommonCopy {
     /// `common.checking_your_session`
-    internal static var checkingYourSession: String { AppL10n.copyLocale == .frCA ? "Checking your session…" : "Checking your session…" }
+    internal static var checkingYourSession: String { AppL10n.copyLocale == .frCA ? "Vérification de la session…" : "Checking your session…" }
 
     /// `common.copy_address`
-    internal static var copyAddress: String { AppL10n.copyLocale == .frCA ? "Copy Address" : "Copy Address" }
+    internal static var copyAddress: String { AppL10n.copyLocale == .frCA ? "Copier l'adresse" : "Copy Address" }
 
     /// `common.copy_email`
-    internal static var copyEmail: String { AppL10n.copyLocale == .frCA ? "Copy Email" : "Copy Email" }
+    internal static var copyEmail: String { AppL10n.copyLocale == .frCA ? "Copier le courriel" : "Copy Email" }
 
     /// `common.copy_number`
-    internal static var copyNumber: String { AppL10n.copyLocale == .frCA ? "Copy Number" : "Copy Number" }
+    internal static var copyNumber: String { AppL10n.copyLocale == .frCA ? "Copier le numéro" : "Copy Number" }
 
     /// `common.could_not_load_more`
-    internal static var couldNotLoadMore: String { AppL10n.copyLocale == .frCA ? "Could not load more" : "Could not load more" }
+    internal static var couldNotLoadMore: String { AppL10n.copyLocale == .frCA ? "Impossible d'en charger plus" : "Could not load more" }
 
     /// `common.label_value`
     internal static func labelValue(_ label: String, _ value: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(label): \(value)" : "\(label): \(value)"
+        AppL10n.copyLocale == .frCA ? "\(label)\u{00A0}: \(value)" : "\(label): \(value)"
     }
 
     /// `common.mark_read`
-    internal static var markRead: String { AppL10n.copyLocale == .frCA ? "Mark read" : "Mark read" }
+    internal static var markRead: String { AppL10n.copyLocale == .frCA ? "Marquer comme lu" : "Mark read" }
 
     /// `common.reply`
-    internal static var reply: String { AppL10n.copyLocale == .frCA ? "Reply" : "Reply" }
+    internal static var reply: String { AppL10n.copyLocale == .frCA ? "Répondre" : "Reply" }
 
     /// `common.reply_failure_body`
     internal static func replyFailureBody(_ reason: String, _ text: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(reason)\n\nYour message: \(text)" : "\(reason)\n\nYour message: \(text)"
+        AppL10n.copyLocale == .frCA ? "\(reason)\n\nVotre message\u{00A0}: \(text)" : "\(reason)\n\nYour message: \(text)"
     }
 
     /// `common.reply_message`
-    internal static var replyMessage: String { AppL10n.copyLocale == .frCA ? "Reply to this message" : "Reply to this message" }
+    internal static var replyMessage: String { AppL10n.copyLocale == .frCA ? "Répondre à ce message" : "Reply to this message" }
 
     /// `common.reply_not_sent`
-    internal static var replyNotSent: String { AppL10n.copyLocale == .frCA ? "Reply not sent" : "Reply not sent" }
+    internal static var replyNotSent: String { AppL10n.copyLocale == .frCA ? "Réponse non envoyée" : "Reply not sent" }
 
     /// `common.send`
-    internal static var send: String { AppL10n.copyLocale == .frCA ? "Send" : "Send" }
+    internal static var send: String { AppL10n.copyLocale == .frCA ? "Envoyer" : "Send" }
 
     /// `common.sentence_then_reason`
     internal static func sentenceThenReason(_ sentence: String, _ reason: String) -> String {
@@ -583,642 +583,642 @@ extension CommonCopy {
     }
 
     /// `common.sign_in`
-    internal static var signIn: String { AppL10n.copyLocale == .frCA ? "Sign in" : "Sign in" }
+    internal static var signIn: String { AppL10n.copyLocale == .frCA ? "Se connecter" : "Sign in" }
 
     /// `common.try_again`
-    internal static var tryAgain: String { AppL10n.copyLocale == .frCA ? "Try again" : "Try again" }
+    internal static var tryAgain: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 }
 
 extension ContactBlockCopy {
     /// `contact_block.badge`
-    internal static var badge: String { AppL10n.copyLocale == .frCA ? "Blocked" : "Blocked" }
+    internal static var badge: String { AppL10n.copyLocale == .frCA ? "Bloqué" : "Blocked" }
 
     /// `contact_block.block`
-    internal static var block: String { AppL10n.copyLocale == .frCA ? "Block caller" : "Block caller" }
+    internal static var block: String { AppL10n.copyLocale == .frCA ? "Bloquer l'appelant" : "Block caller" }
 
     /// `contact_block.block_prompt`
-    internal static var blockPrompt: String { AppL10n.copyLocale == .frCA ? "Block this caller? Their conversations and calls stop appearing in this workspace. You can unblock them here at any time." : "Block this caller? Their conversations and calls stop appearing in this workspace. You can unblock them here at any time." }
+    internal static var blockPrompt: String { AppL10n.copyLocale == .frCA ? "Bloquer cet appelant? Ses conversations et ses appels cessent d'apparaître dans cet espace de travail. Vous pouvez le débloquer ici en tout temps." : "Block this caller? Their conversations and calls stop appearing in this workspace. You can unblock them here at any time." }
 
     /// `contact_block.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `contact_block.confirm_block`
-    internal static var confirmBlock: String { AppL10n.copyLocale == .frCA ? "Block" : "Block" }
+    internal static var confirmBlock: String { AppL10n.copyLocale == .frCA ? "Bloquer" : "Block" }
 
     /// `contact_block.confirm_unblock`
-    internal static var confirmUnblock: String { AppL10n.copyLocale == .frCA ? "Unblock" : "Unblock" }
+    internal static var confirmUnblock: String { AppL10n.copyLocale == .frCA ? "Débloquer" : "Unblock" }
 
     /// `contact_block.unblock`
-    internal static var unblock: String { AppL10n.copyLocale == .frCA ? "Unblock caller" : "Unblock caller" }
+    internal static var unblock: String { AppL10n.copyLocale == .frCA ? "Débloquer l'appelant" : "Unblock caller" }
 
     /// `contact_block.unblock_prompt`
-    internal static var unblockPrompt: String { AppL10n.copyLocale == .frCA ? "Unblock this caller? Their conversations and calls start appearing in this workspace again." : "Unblock this caller? Their conversations and calls start appearing in this workspace again." }
+    internal static var unblockPrompt: String { AppL10n.copyLocale == .frCA ? "Débloquer cet appelant? Ses conversations et ses appels recommencent à apparaître dans cet espace de travail." : "Unblock this caller? Their conversations and calls start appearing in this workspace again." }
 }
 
 extension ContactVideoCopy {
     /// `contact_video.action`
-    internal static var action: String { AppL10n.copyLocale == .frCA ? "Video call" : "Video call" }
+    internal static var action: String { AppL10n.copyLocale == .frCA ? "Appel vidéo" : "Video call" }
 
     /// `contact_video.could_not_start`
-    internal static var couldNotStart: String { AppL10n.copyLocale == .frCA ? "Could not start a video call for this workspace." : "Could not start a video call for this workspace." }
+    internal static var couldNotStart: String { AppL10n.copyLocale == .frCA ? "Impossible de lancer un appel vidéo dans cet espace de travail." : "Could not start a video call for this workspace." }
 
     /// `contact_video.email_subject`
-    internal static var emailSubject: String { AppL10n.copyLocale == .frCA ? "Video call invitation" : "Video call invitation" }
+    internal static var emailSubject: String { AppL10n.copyLocale == .frCA ? "Invitation à un appel vidéo" : "Video call invitation" }
 
     /// `contact_video.invitation`
     internal static func invitation(link: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Join me on a video call: \(link) (the link works for the next 12 hours)" : "Join me on a video call: \(link) (the link works for the next 12 hours)"
+        AppL10n.copyLocale == .frCA ? "Rejoignez-moi pour un appel vidéo\u{00A0}: \(link) (lien valide pendant les 12 prochaines heures)" : "Join me on a video call: \(link) (the link works for the next 12 hours)"
     }
 
     /// `contact_video.no_address`
-    internal static var noAddress: String { AppL10n.copyLocale == .frCA ? "This contact has no phone number or email address, so there is nowhere to send a video call link." : "This contact has no phone number or email address, so there is nowhere to send a video call link." }
+    internal static var noAddress: String { AppL10n.copyLocale == .frCA ? "Ce contact n'a ni numéro de téléphone ni adresse courriel\u{00A0}: il n'y a donc nulle part où envoyer un lien d'appel vidéo." : "This contact has no phone number or email address, so there is nowhere to send a video call link." }
 
     /// `contact_video.no_invite`
-    internal static var noInvite: String { AppL10n.copyLocale == .frCA ? "That room was created without a shareable link, so the contact cannot be invited to it." : "That room was created without a shareable link, so the contact cannot be invited to it." }
+    internal static var noInvite: String { AppL10n.copyLocale == .frCA ? "Cette salle a été créée sans lien de partage\u{00A0}: le contact ne peut donc pas y être invité." : "That room was created without a shareable link, so the contact cannot be invited to it." }
 
     /// `contact_video.send_failed`
-    internal static var sendFailed: String { AppL10n.copyLocale == .frCA ? "The room is ready but the invitation could not be sent." : "The room is ready but the invitation could not be sent." }
+    internal static var sendFailed: String { AppL10n.copyLocale == .frCA ? "La salle est prête, mais l'invitation n'a pas pu être envoyée." : "The room is ready but the invitation could not be sent." }
 
     /// `contact_video.starting`
-    internal static var starting: String { AppL10n.copyLocale == .frCA ? "Setting up…" : "Setting up…" }
+    internal static var starting: String { AppL10n.copyLocale == .frCA ? "Configuration…" : "Setting up…" }
 }
 
 extension ContactsCopy {
     /// `contacts.add`
-    internal static var add: String { AppL10n.copyLocale == .frCA ? "Add" : "Add" }
+    internal static var add: String { AppL10n.copyLocale == .frCA ? "Ajouter" : "Add" }
 
     /// `contacts.add_a_contact`
-    internal static var addAContact: String { AppL10n.copyLocale == .frCA ? "Add a contact" : "Add a contact" }
+    internal static var addAContact: String { AppL10n.copyLocale == .frCA ? "Ajouter un contact" : "Add a contact" }
 
     /// `contacts.add_contact`
-    internal static var addContact: String { AppL10n.copyLocale == .frCA ? "Add contact" : "Add contact" }
+    internal static var addContact: String { AppL10n.copyLocale == .frCA ? "Ajouter un contact" : "Add contact" }
 
     /// `contacts.added`
-    internal static var added: String { AppL10n.copyLocale == .frCA ? "Added" : "Added" }
+    internal static var added: String { AppL10n.copyLocale == .frCA ? "Ajouté" : "Added" }
 
     /// `contacts.adding`
-    internal static var adding: String { AppL10n.copyLocale == .frCA ? "Adding…" : "Adding…" }
+    internal static var adding: String { AppL10n.copyLocale == .frCA ? "Ajout en cours…" : "Adding…" }
 
     /// `contacts.budget`
     internal static var budget: String { AppL10n.copyLocale == .frCA ? "Budget" : "Budget" }
 
     /// `contacts.building_dossier`
-    internal static var buildingDossier: String { AppL10n.copyLocale == .frCA ? "Building dossier…" : "Building dossier…" }
+    internal static var buildingDossier: String { AppL10n.copyLocale == .frCA ? "Création de la fiche…" : "Building dossier…" }
 
     /// `contacts.callers_are_added_automatically`
-    internal static var callersAreAddedAutomatically: String { AppL10n.copyLocale == .frCA ? "Callers are added automatically as they come in." : "Callers are added automatically as they come in." }
+    internal static var callersAreAddedAutomatically: String { AppL10n.copyLocale == .frCA ? "Les appelants sont ajoutés automatiquement au fil des appels." : "Callers are added automatically as they come in." }
 
     /// `contacts.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `contacts.clear_contact_s_global`
-    internal static var clearContactSGlobal: String { AppL10n.copyLocale == .frCA ? "Clear this contact's Global Intelligence dossier? The contact, its phone number, email and timeline are kept. Getting the dossier back means running enrichment again." : "Clear this contact's Global Intelligence dossier? The contact, its phone number, email and timeline are kept. Getting the dossier back means running enrichment again." }
+    internal static var clearContactSGlobal: String { AppL10n.copyLocale == .frCA ? "Effacer la fiche de recherche Global Intelligence de ce contact? Le contact, son numéro de téléphone, son courriel et sa chronologie sont conservés. Pour récupérer la fiche, il faut relancer la recherche externe." : "Clear this contact's Global Intelligence dossier? The contact, its phone number, email and timeline are kept. Getting the dossier back means running enrichment again." }
 
     /// `contacts.clear_dossier`
-    internal static var clearDossier: String { AppL10n.copyLocale == .frCA ? "Clear dossier" : "Clear dossier" }
+    internal static var clearDossier: String { AppL10n.copyLocale == .frCA ? "Effacer la fiche de recherche" : "Clear dossier" }
 
     /// `contacts.company`
-    internal static var company: String { AppL10n.copyLocale == .frCA ? "Company" : "Company" }
+    internal static var company: String { AppL10n.copyLocale == .frCA ? "Entreprise" : "Company" }
 
     /// `contacts.contact`
     internal static var contact: String { AppL10n.copyLocale == .frCA ? "Contact" : "Contact" }
 
     /// `contacts.contact_name`
-    internal static var contactName: String { AppL10n.copyLocale == .frCA ? "Contact name" : "Contact name" }
+    internal static var contactName: String { AppL10n.copyLocale == .frCA ? "Nom du contact" : "Contact name" }
 
     /// `contacts.contact_not_available`
-    internal static var contactNotAvailable: String { AppL10n.copyLocale == .frCA ? "This contact is not available." : "This contact is not available." }
+    internal static var contactNotAvailable: String { AppL10n.copyLocale == .frCA ? "Ce contact n'est pas disponible." : "This contact is not available." }
 
     /// `contacts.contacts`
     internal static var contacts: String { AppL10n.copyLocale == .frCA ? "Contacts" : "Contacts" }
 
     /// `contacts.delete`
-    internal static var delete: String { AppL10n.copyLocale == .frCA ? "Delete" : "Delete" }
+    internal static var delete: String { AppL10n.copyLocale == .frCA ? "Supprimer" : "Delete" }
 
     /// `contacts.delete_contact`
-    internal static var deleteContact: String { AppL10n.copyLocale == .frCA ? "Delete contact" : "Delete contact" }
+    internal static var deleteContact: String { AppL10n.copyLocale == .frCA ? "Supprimer le contact" : "Delete contact" }
 
     /// `contacts.delete_contact_cannot_undone`
-    internal static var deleteContactCannotUndone: String { AppL10n.copyLocale == .frCA ? "Delete this contact? This cannot be undone." : "Delete this contact? This cannot be undone." }
+    internal static var deleteContactCannotUndone: String { AppL10n.copyLocale == .frCA ? "Supprimer ce contact? Cette action est irréversible." : "Delete this contact? This cannot be undone." }
 
     /// `contacts.dismiss`
-    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Dismiss" : "Dismiss" }
+    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Dismiss" }
 
     /// `contacts.domain`
-    internal static var domain: String { AppL10n.copyLocale == .frCA ? "Domain" : "Domain" }
+    internal static var domain: String { AppL10n.copyLocale == .frCA ? "Domaine Web" : "Domain" }
 
     /// `contacts.dossier_available`
-    internal static var dossierAvailable: String { AppL10n.copyLocale == .frCA ? "Dossier available" : "Dossier available" }
+    internal static var dossierAvailable: String { AppL10n.copyLocale == .frCA ? "Fiche de recherche disponible" : "Dossier available" }
 
     /// `contacts.dossier_failed`
     internal static func dossierFailed(_ error: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Dossier failed: \(error)" : "Dossier failed: \(error)"
+        AppL10n.copyLocale == .frCA ? "Échec de la recherche externe\u{00A0}: \(error)" : "Dossier failed: \(error)"
     }
 
     /// `contacts.email`
-    internal static var email: String { AppL10n.copyLocale == .frCA ? "Email" : "Email" }
+    internal static var email: String { AppL10n.copyLocale == .frCA ? "Courriel" : "Email" }
 
     /// `contacts.enter_phone_number_email`
-    internal static var enterPhoneNumberEmail: String { AppL10n.copyLocale == .frCA ? "Enter a phone number or an email address." : "Enter a phone number or an email address." }
+    internal static var enterPhoneNumberEmail: String { AppL10n.copyLocale == .frCA ? "Entrez un numéro de téléphone ou un courriel." : "Enter a phone number or an email address." }
 
     /// `contacts.industry`
-    internal static var industry: String { AppL10n.copyLocale == .frCA ? "Industry" : "Industry" }
+    internal static var industry: String { AppL10n.copyLocale == .frCA ? "Secteur" : "Industry" }
 
     /// `contacts.intelligence_dossier`
-    internal static var intelligenceDossier: String { AppL10n.copyLocale == .frCA ? "Intelligence dossier" : "Intelligence dossier" }
+    internal static var intelligenceDossier: String { AppL10n.copyLocale == .frCA ? "Fiche de recherche" : "Intelligence dossier" }
 
     /// `contacts.latest_context`
-    internal static var latestContext: String { AppL10n.copyLocale == .frCA ? "Latest context" : "Latest context" }
+    internal static var latestContext: String { AppL10n.copyLocale == .frCA ? "Contexte récent" : "Latest context" }
 
     /// `contacts.loading_contact`
-    internal static var loadingContact: String { AppL10n.copyLocale == .frCA ? "Loading contact…" : "Loading contact…" }
+    internal static var loadingContact: String { AppL10n.copyLocale == .frCA ? "Chargement du contact…" : "Loading contact…" }
 
     /// `contacts.name`
-    internal static var name: String { AppL10n.copyLocale == .frCA ? "Name" : "Name" }
+    internal static var name: String { AppL10n.copyLocale == .frCA ? "Nom" : "Name" }
 
     /// `contacts.no_contacts_yet`
-    internal static var noContactsYet: String { AppL10n.copyLocale == .frCA ? "No contacts yet" : "No contacts yet" }
+    internal static var noContactsYet: String { AppL10n.copyLocale == .frCA ? "Aucun contact" : "No contacts yet" }
 
     /// `contacts.no_dossier_contact`
-    internal static var noDossierContact: String { AppL10n.copyLocale == .frCA ? "No dossier for this contact." : "No dossier for this contact." }
+    internal static var noDossierContact: String { AppL10n.copyLocale == .frCA ? "Aucune fiche de recherche pour ce contact." : "No dossier for this contact." }
 
     /// `contacts.no_phone_email`
-    internal static var noPhoneEmail: String { AppL10n.copyLocale == .frCA ? "No phone or email" : "No phone or email" }
+    internal static var noPhoneEmail: String { AppL10n.copyLocale == .frCA ? "Ni téléphone ni courriel" : "No phone or email" }
 
     /// `contacts.phone_number`
-    internal static var phoneNumber: String { AppL10n.copyLocale == .frCA ? "Phone number" : "Phone number" }
+    internal static var phoneNumber: String { AppL10n.copyLocale == .frCA ? "Numéro de téléphone" : "Phone number" }
 
     /// `contacts.read_only_access_editing`
-    internal static var readOnlyAccessEditing: String { AppL10n.copyLocale == .frCA ? "Read-only access, editing is disabled." : "Read-only access, editing is disabled." }
+    internal static var readOnlyAccessEditing: String { AppL10n.copyLocale == .frCA ? "Accès en lecture seule, modification désactivée." : "Read-only access, editing is disabled." }
 
     /// `contacts.rename`
-    internal static var rename: String { AppL10n.copyLocale == .frCA ? "Rename" : "Rename" }
+    internal static var rename: String { AppL10n.copyLocale == .frCA ? "Renommer" : "Rename" }
 
     /// `contacts.run_global_intelligence`
-    internal static var runGlobalIntelligence: String { AppL10n.copyLocale == .frCA ? "Run Global Intelligence" : "Run Global Intelligence" }
+    internal static var runGlobalIntelligence: String { AppL10n.copyLocale == .frCA ? "Lancer Global Intelligence" : "Run Global Intelligence" }
 
     /// `contacts.save`
-    internal static var save: String { AppL10n.copyLocale == .frCA ? "Save" : "Save" }
+    internal static var save: String { AppL10n.copyLocale == .frCA ? "Enregistrer" : "Save" }
 
     /// `contacts.timeline`
-    internal static var timeline: String { AppL10n.copyLocale == .frCA ? "Timeline" : "Timeline" }
+    internal static var timeline: String { AppL10n.copyLocale == .frCA ? "Chronologie" : "Timeline" }
 
     /// `contacts.unnamed_contact`
-    internal static var unnamedContact: String { AppL10n.copyLocale == .frCA ? "Unnamed contact" : "Unnamed contact" }
+    internal static var unnamedContact: String { AppL10n.copyLocale == .frCA ? "Contact sans nom" : "Unnamed contact" }
 
     /// `contacts.website`
-    internal static var website: String { AppL10n.copyLocale == .frCA ? "Website" : "Website" }
+    internal static var website: String { AppL10n.copyLocale == .frCA ? "Site" : "Website" }
 }
 
 extension DeskCopy {
     /// `desk.all_filter`
-    internal static var allFilter: String { AppL10n.copyLocale == .frCA ? "All" : "All" }
+    internal static var allFilter: String { AppL10n.copyLocale == .frCA ? "Tout" : "All" }
 
     /// `desk.author_assistant`
-    internal static var authorAssistant: String { AppL10n.copyLocale == .frCA ? "District · your agent" : "District · your agent" }
+    internal static var authorAssistant: String { AppL10n.copyLocale == .frCA ? "District · votre agent" : "District · your agent" }
 
     /// `desk.author_customer_fallback`
-    internal static var authorCustomerFallback: String { AppL10n.copyLocale == .frCA ? "Your customer" : "Your customer" }
+    internal static var authorCustomerFallback: String { AppL10n.copyLocale == .frCA ? "Votre client" : "Your customer" }
 
     /// `desk.author_team`
-    internal static var authorTeam: String { AppL10n.copyLocale == .frCA ? "Your team" : "Your team" }
+    internal static var authorTeam: String { AppL10n.copyLocale == .frCA ? "Votre équipe" : "Your team" }
 
     /// `desk.author_unknown`
-    internal static var authorUnknown: String { AppL10n.copyLocale == .frCA ? "Someone on your team" : "Someone on your team" }
+    internal static var authorUnknown: String { AppL10n.copyLocale == .frCA ? "Un membre de votre équipe" : "Someone on your team" }
 
     /// `desk.brand_name_help`
-    internal static var brandNameHelp: String { AppL10n.copyLocale == .frCA ? "Shown at the top of the thread page your customers open from their email, and used to sign your team's replies. Leave it blank to use your workspace name." : "Shown at the top of the thread page your customers open from their email, and used to sign your team's replies. Leave it blank to use your workspace name." }
+    internal static var brandNameHelp: String { AppL10n.copyLocale == .frCA ? "Affiché en haut de la page du fil que vos clients ouvrent depuis leur courriel, et utilisé pour signer les réponses de votre équipe. Laissez ce champ vide pour utiliser le nom de votre espace de travail." : "Shown at the top of the thread page your customers open from their email, and used to sign your team's replies. Leave it blank to use your workspace name." }
 
     /// `desk.brand_name_label`
-    internal static var brandNameLabel: String { AppL10n.copyLocale == .frCA ? "The name your customers see" : "The name your customers see" }
+    internal static var brandNameLabel: String { AppL10n.copyLocale == .frCA ? "Le nom que vos clients voient" : "The name your customers see" }
 
     /// `desk.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `desk.compose_subtitle`
-    internal static var composeSubtitle: String { AppL10n.copyLocale == .frCA ? "For something a customer raised another way: a walk-in, an email, a note." : "For something a customer raised another way: a walk-in, an email, a note." }
+    internal static var composeSubtitle: String { AppL10n.copyLocale == .frCA ? "Pour un cas qu'un client a soulevé autrement\u{00A0}: en personne, par courriel ou par une note." : "For something a customer raised another way: a walk-in, an email, a note." }
 
     /// `desk.compose_title`
-    internal static var composeTitle: String { AppL10n.copyLocale == .frCA ? "New ticket" : "New ticket" }
+    internal static var composeTitle: String { AppL10n.copyLocale == .frCA ? "Nouveau billet" : "New ticket" }
 
     /// `desk.create_action`
-    internal static var createAction: String { AppL10n.copyLocale == .frCA ? "Open ticket" : "Open ticket" }
+    internal static var createAction: String { AppL10n.copyLocale == .frCA ? "Ouvrir le billet" : "Open ticket" }
 
     /// `desk.create_deduplicated`
-    internal static var createDeduplicated: String { AppL10n.copyLocale == .frCA ? "That ticket was already opened." : "That ticket was already opened." }
+    internal static var createDeduplicated: String { AppL10n.copyLocale == .frCA ? "Ce billet a déjà été créé." : "That ticket was already opened." }
 
     /// `desk.create_incomplete`
-    internal static var createIncomplete: String { AppL10n.copyLocale == .frCA ? "A subject and a description are both needed." : "A subject and a description are both needed." }
+    internal static var createIncomplete: String { AppL10n.copyLocale == .frCA ? "Un objet et une description sont tous deux requis." : "A subject and a description are both needed." }
 
     /// `desk.create_succeeded`
-    internal static var createSucceeded: String { AppL10n.copyLocale == .frCA ? "Ticket opened." : "Ticket opened." }
+    internal static var createSucceeded: String { AppL10n.copyLocale == .frCA ? "Billet créé." : "Ticket opened." }
 
     /// `desk.done`
-    internal static var done: String { AppL10n.copyLocale == .frCA ? "Done" : "Done" }
+    internal static var done: String { AppL10n.copyLocale == .frCA ? "OK" : "Done" }
 
     /// `desk.empty_message`
-    internal static var emptyMessage: String { AppL10n.copyLocale == .frCA ? "When a call your agent cannot resolve ends, it files the ticket here with the call's own summary. You can also open one yourself." : "When a call your agent cannot resolve ends, it files the ticket here with the call's own summary. You can also open one yourself." }
+    internal static var emptyMessage: String { AppL10n.copyLocale == .frCA ? "Quand un appel que votre agent ne peut pas régler se termine, il ouvre le billet ici avec le résumé de l'appel. Vous pouvez aussi en ouvrir un vous-même." : "When a call your agent cannot resolve ends, it files the ticket here with the call's own summary. You can also open one yourself." }
 
     /// `desk.empty_thread`
-    internal static var emptyThread: String { AppL10n.copyLocale == .frCA ? "Nothing on this ticket yet." : "Nothing on this ticket yet." }
+    internal static var emptyThread: String { AppL10n.copyLocale == .frCA ? "Rien sur ce billet pour l'instant." : "Nothing on this ticket yet." }
 
     /// `desk.empty_title`
-    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "No tickets yet" : "No tickets yet" }
+    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucun billet pour l'instant" : "No tickets yet" }
 
     /// `desk.enabled_help`
-    internal static var enabledHelp: String { AppL10n.copyLocale == .frCA ? "Calls your agent cannot resolve are filed here as tickets instead of reaching Distronode, and callers can ask it for the status of their own requests: status only, never the contents of a thread." : "Calls your agent cannot resolve are filed here as tickets instead of reaching Distronode, and callers can ask it for the status of their own requests: status only, never the contents of a thread." }
+    internal static var enabledHelp: String { AppL10n.copyLocale == .frCA ? "Les appels que votre agent ne peut pas régler sont consignés ici sous forme de billets plutôt que d'être transmis à Distronode, et les appelants peuvent lui demander l'état de leurs propres demandes\u{00A0}: l'état seulement, jamais le contenu d'un fil." : "Calls your agent cannot resolve are filed here as tickets instead of reaching Distronode, and callers can ask it for the status of their own requests: status only, never the contents of a thread." }
 
     /// `desk.enabled_label`
-    internal static var enabledLabel: String { AppL10n.copyLocale == .frCA ? "Run a desk for my customers" : "Run a desk for my customers" }
+    internal static var enabledLabel: String { AppL10n.copyLocale == .frCA ? "Offrir un comptoir à mes clients" : "Run a desk for my customers" }
 
     /// `desk.from_call`
-    internal static var fromCall: String { AppL10n.copyLocale == .frCA ? "From a phone call" : "From a phone call" }
+    internal static var fromCall: String { AppL10n.copyLocale == .frCA ? "Depuis un appel téléphonique" : "From a phone call" }
 
     /// `desk.loading_queue`
-    internal static var loadingQueue: String { AppL10n.copyLocale == .frCA ? "Loading your tickets…" : "Loading your tickets…" }
+    internal static var loadingQueue: String { AppL10n.copyLocale == .frCA ? "Chargement de vos billets…" : "Loading your tickets…" }
 
     /// `desk.loading_thread`
-    internal static var loadingThread: String { AppL10n.copyLocale == .frCA ? "Loading the conversation…" : "Loading the conversation…" }
+    internal static var loadingThread: String { AppL10n.copyLocale == .frCA ? "Chargement de la conversation…" : "Loading the conversation…" }
 
     /// `desk.logo_cleared_not_deleted`
-    internal static var logoClearedNotDeleted: String { AppL10n.copyLocale == .frCA ? "The logo is off your customers' page, but the stored image file was not deleted. Try removing it again." : "The logo is off your customers' page, but the stored image file was not deleted. Try removing it again." }
+    internal static var logoClearedNotDeleted: String { AppL10n.copyLocale == .frCA ? "Le logo n'est plus sur la page de vos clients, mais le fichier image conservé n'a pas été supprimé. Essayez de le retirer de nouveau." : "The logo is off your customers' page, but the stored image file was not deleted. Try removing it again." }
 
     /// `desk.logo_help`
-    internal static var logoHelp: String { AppL10n.copyLocale == .frCA ? "Shown at the top of the thread page your customers open, in place of the name above. PNG, JPEG or WebP, up to 512 KB. It is hosted publicly so their browser can load it, and anyone with a thread link can see it." : "Shown at the top of the thread page your customers open, in place of the name above. PNG, JPEG or WebP, up to 512 KB. It is hosted publicly so their browser can load it, and anyone with a thread link can see it." }
+    internal static var logoHelp: String { AppL10n.copyLocale == .frCA ? "Affiché en haut de la page du fil que vos clients ouvrent, à la place du nom ci-dessus. PNG, JPEG ou WebP, jusqu'à 512 Ko. Il est hébergé publiquement pour que la page puisse l'afficher chez eux, et toute personne qui a le lien d'un fil peut le voir." : "Shown at the top of the thread page your customers open, in place of the name above. PNG, JPEG or WebP, up to 512 KB. It is hosted publicly so their browser can load it, and anyone with a thread link can see it." }
 
     /// `desk.logo_label`
-    internal static var logoLabel: String { AppL10n.copyLocale == .frCA ? "The logo your customers see" : "The logo your customers see" }
+    internal static var logoLabel: String { AppL10n.copyLocale == .frCA ? "Le logo que vos clients voient" : "The logo your customers see" }
 
     /// `desk.logo_none`
-    internal static var logoNone: String { AppL10n.copyLocale == .frCA ? "No logo set." : "No logo set." }
+    internal static var logoNone: String { AppL10n.copyLocale == .frCA ? "Aucun logo." : "No logo set." }
 
     /// `desk.logo_set`
-    internal static var logoSet: String { AppL10n.copyLocale == .frCA ? "A logo is set." : "A logo is set." }
+    internal static var logoSet: String { AppL10n.copyLocale == .frCA ? "Logo défini." : "A logo is set." }
 
     /// `desk.logo_unreadable`
-    internal static var logoUnreadable: String { AppL10n.copyLocale == .frCA ? "That image could not be read. Please pick another." : "That image could not be read. Please pick another." }
+    internal static var logoUnreadable: String { AppL10n.copyLocale == .frCA ? "Impossible de lire cette image. Veuillez en choisir une autre." : "That image could not be read. Please pick another." }
 
     /// `desk.message_label`
-    internal static var messageLabel: String { AppL10n.copyLocale == .frCA ? "What they need" : "What they need" }
+    internal static var messageLabel: String { AppL10n.copyLocale == .frCA ? "Ce dont le client a besoin" : "What they need" }
 
     /// `desk.new_ticket_action`
-    internal static var newTicketAction: String { AppL10n.copyLocale == .frCA ? "New ticket" : "New ticket" }
+    internal static var newTicketAction: String { AppL10n.copyLocale == .frCA ? "Nouveau billet" : "New ticket" }
 
     /// `desk.no_contact_details`
-    internal static var noContactDetails: String { AppL10n.copyLocale == .frCA ? "No contact details recorded" : "No contact details recorded" }
+    internal static var noContactDetails: String { AppL10n.copyLocale == .frCA ? "Aucune coordonnée au dossier" : "No contact details recorded" }
 
     /// `desk.no_match_message`
-    internal static var noMatchMessage: String { AppL10n.copyLocale == .frCA ? "Choose All to see the whole queue." : "Choose All to see the whole queue." }
+    internal static var noMatchMessage: String { AppL10n.copyLocale == .frCA ? "Choisissez «\u{00A0}Tout\u{00A0}» pour voir toute la file." : "Choose All to see the whole queue." }
 
     /// `desk.no_match_title`
-    internal static var noMatchTitle: String { AppL10n.copyLocale == .frCA ? "No tickets match this filter" : "No tickets match this filter" }
+    internal static var noMatchTitle: String { AppL10n.copyLocale == .frCA ? "Aucun billet pour ce filtre" : "No tickets match this filter" }
 
     /// `desk.notify_help`
-    internal static var notifyHelp: String { AppL10n.copyLocale == .frCA ? "Best effort, and only when we hold an email address for them. It carries a private link where they can read the whole request and reply. Replies to the email itself are not tracked." : "Best effort, and only when we hold an email address for them. It carries a private link where they can read the whole request and reply. Replies to the email itself are not tracked." }
+    internal static var notifyHelp: String { AppL10n.copyLocale == .frCA ? "Dans la mesure du possible, et seulement si nous avons leur adresse de courriel. Le message contient un lien privé où ils peuvent lire toute la demande et y répondre. Les réponses envoyées directement au courriel ne sont pas suivies." : "Best effort, and only when we hold an email address for them. It carries a private link where they can read the whole request and reply. Replies to the email itself are not tracked." }
 
     /// `desk.notify_label`
-    internal static var notifyLabel: String { AppL10n.copyLocale == .frCA ? "Email customers when your team replies" : "Email customers when your team replies" }
+    internal static var notifyLabel: String { AppL10n.copyLocale == .frCA ? "Aviser les clients par courriel quand votre équipe répond" : "Email customers when your team replies" }
 
     /// `desk.off_action`
-    internal static var offAction: String { AppL10n.copyLocale == .frCA ? "Desk settings" : "Desk settings" }
+    internal static var offAction: String { AppL10n.copyLocale == .frCA ? "Réglages du comptoir" : "Desk settings" }
 
     /// `desk.off_message`
-    internal static var offMessage: String { AppL10n.copyLocale == .frCA ? "Turn it on and calls your agent cannot resolve are filed here as tickets, and callers can ask it for the status of their own requests. Nothing is recorded until you do." : "Turn it on and calls your agent cannot resolve are filed here as tickets, and callers can ask it for the status of their own requests. Nothing is recorded until you do." }
+    internal static var offMessage: String { AppL10n.copyLocale == .frCA ? "Activez-le et les appels que votre agent ne peut pas régler seront consignés ici sous forme de billets; les appelants pourront aussi lui demander l'état de leurs propres demandes. Rien n'est consigné avant l'activation." : "Turn it on and calls your agent cannot resolve are filed here as tickets, and callers can ask it for the status of their own requests. Nothing is recorded until you do." }
 
     /// `desk.off_title`
-    internal static var offTitle: String { AppL10n.copyLocale == .frCA ? "District Desk is off" : "District Desk is off" }
+    internal static var offTitle: String { AppL10n.copyLocale == .frCA ? "District Desk est désactivé" : "District Desk is off" }
 
     /// `desk.open`
-    internal static var `open`: String { AppL10n.copyLocale == .frCA ? "Open" : "Open" }
+    internal static var `open`: String { AppL10n.copyLocale == .frCA ? "Ouverte" : "Open" }
 
     /// `desk.remove_logo`
-    internal static var removeLogo: String { AppL10n.copyLocale == .frCA ? "Remove logo" : "Remove logo" }
+    internal static var removeLogo: String { AppL10n.copyLocale == .frCA ? "Retirer le logo" : "Remove logo" }
 
     /// `desk.replace_logo`
-    internal static var replaceLogo: String { AppL10n.copyLocale == .frCA ? "Replace logo" : "Replace logo" }
+    internal static var replaceLogo: String { AppL10n.copyLocale == .frCA ? "Remplacer le logo" : "Replace logo" }
 
     /// `desk.reply_placeholder`
-    internal static var replyPlaceholder: String { AppL10n.copyLocale == .frCA ? "Reply to your customer…" : "Reply to your customer…" }
+    internal static var replyPlaceholder: String { AppL10n.copyLocale == .frCA ? "Répondez à votre client…" : "Reply to your customer…" }
 
     /// `desk.reply_sent_not_shown`
-    internal static var replySentNotShown: String { AppL10n.copyLocale == .frCA ? "Your reply was sent. It is not shown here yet; reload the ticket to see it." : "Your reply was sent. It is not shown here yet; reload the ticket to see it." }
+    internal static var replySentNotShown: String { AppL10n.copyLocale == .frCA ? "Votre réponse a été envoyée. Elle n'apparaît pas encore ici; actualisez le billet pour la voir." : "Your reply was sent. It is not shown here yet; reload the ticket to see it." }
 
     /// `desk.requester_email_label`
-    internal static var requesterEmailLabel: String { AppL10n.copyLocale == .frCA ? "Email" : "Email" }
+    internal static var requesterEmailLabel: String { AppL10n.copyLocale == .frCA ? "Courriel" : "Email" }
 
     /// `desk.requester_name_label`
-    internal static var requesterNameLabel: String { AppL10n.copyLocale == .frCA ? "Customer name" : "Customer name" }
+    internal static var requesterNameLabel: String { AppL10n.copyLocale == .frCA ? "Nom du client" : "Customer name" }
 
     /// `desk.requester_phone_label`
-    internal static var requesterPhoneLabel: String { AppL10n.copyLocale == .frCA ? "Phone" : "Phone" }
+    internal static var requesterPhoneLabel: String { AppL10n.copyLocale == .frCA ? "Téléphone" : "Phone" }
 
     /// `desk.resolved`
-    internal static var resolved: String { AppL10n.copyLocale == .frCA ? "Resolved" : "Resolved" }
+    internal static var resolved: String { AppL10n.copyLocale == .frCA ? "Réglée" : "Resolved" }
 
     /// `desk.send_reply`
-    internal static var sendReply: String { AppL10n.copyLocale == .frCA ? "Send reply" : "Send reply" }
+    internal static var sendReply: String { AppL10n.copyLocale == .frCA ? "Envoyer la réponse" : "Send reply" }
 
     /// `desk.set_status`
-    internal static var setStatus: String { AppL10n.copyLocale == .frCA ? "Set status" : "Set status" }
+    internal static var setStatus: String { AppL10n.copyLocale == .frCA ? "Définir le statut" : "Set status" }
 
     /// `desk.settings_eyebrow`
     internal static var settingsEyebrow: String { AppL10n.copyLocale == .frCA ? "District Desk" : "District Desk" }
 
     /// `desk.settings_intro`
-    internal static var settingsIntro: String { AppL10n.copyLocale == .frCA ? "A ticket queue for your own customers, with your agent as its front line. Separate from raising a request with Distronode." : "A ticket queue for your own customers, with your agent as its front line. Separate from raising a request with Distronode." }
+    internal static var settingsIntro: String { AppL10n.copyLocale == .frCA ? "Une file de billets pour vos propres clients, avec votre agent en première ligne. À ne pas confondre avec une demande adressée à Distronode." : "A ticket queue for your own customers, with your agent as its front line. Separate from raising a request with Distronode." }
 
     /// `desk.settings_title`
-    internal static var settingsTitle: String { AppL10n.copyLocale == .frCA ? "Desk settings" : "Desk settings" }
+    internal static var settingsTitle: String { AppL10n.copyLocale == .frCA ? "Réglages du comptoir" : "Desk settings" }
 
     /// `desk.settings_unavailable`
-    internal static var settingsUnavailable: String { AppL10n.copyLocale == .frCA ? "We could not read your desk settings." : "We could not read your desk settings." }
+    internal static var settingsUnavailable: String { AppL10n.copyLocale == .frCA ? "Impossible de lire les réglages du comptoir." : "We could not read your desk settings." }
 
     /// `desk.subject_label`
-    internal static var subjectLabel: String { AppL10n.copyLocale == .frCA ? "Subject" : "Subject" }
+    internal static var subjectLabel: String { AppL10n.copyLocale == .frCA ? "Objet" : "Subject" }
 
     /// `desk.subtitle`
-    internal static var subtitle: String { AppL10n.copyLocale == .frCA ? "Your customers' tickets, filed by your agent when a call cannot be resolved. This is not where you raise something with Distronode." : "Your customers' tickets, filed by your agent when a call cannot be resolved. This is not where you raise something with Distronode." }
+    internal static var subtitle: String { AppL10n.copyLocale == .frCA ? "Les billets de vos clients, créés par votre agent lorsqu'un appel ne peut pas être réglé. Ce n'est pas ici que vous soumettez une demande à Distronode." : "Your customers' tickets, filed by your agent when a call cannot be resolved. This is not where you raise something with Distronode." }
 
     /// `desk.thread_fallback_title`
-    internal static var threadFallbackTitle: String { AppL10n.copyLocale == .frCA ? "Ticket" : "Ticket" }
+    internal static var threadFallbackTitle: String { AppL10n.copyLocale == .frCA ? "Billet" : "Ticket" }
 
     /// `desk.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Desk" : "Desk" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "District Desk" : "Desk" }
 
     /// `desk.unknown_message`
-    internal static var unknownMessage: String { AppL10n.copyLocale == .frCA ? "This is not the same as your desk being switched off, and it is not an empty queue. Nothing has changed; try again." : "This is not the same as your desk being switched off, and it is not an empty queue. Nothing has changed; try again." }
+    internal static var unknownMessage: String { AppL10n.copyLocale == .frCA ? "Cela ne veut pas dire que votre comptoir est désactivé, ni que la file est vide. Rien n'a changé; réessayez." : "This is not the same as your desk being switched off, and it is not an empty queue. Nothing has changed; try again." }
 
     /// `desk.unknown_title`
-    internal static var unknownTitle: String { AppL10n.copyLocale == .frCA ? "We could not check your desk" : "We could not check your desk" }
+    internal static var unknownTitle: String { AppL10n.copyLocale == .frCA ? "Impossible de vérifier le comptoir" : "We could not check your desk" }
 
     /// `desk.upload_logo`
-    internal static var uploadLogo: String { AppL10n.copyLocale == .frCA ? "Upload logo" : "Upload logo" }
+    internal static var uploadLogo: String { AppL10n.copyLocale == .frCA ? "Téléverser un logo" : "Upload logo" }
 
     /// `desk.uploading_logo`
-    internal static var uploadingLogo: String { AppL10n.copyLocale == .frCA ? "Uploading…" : "Uploading…" }
+    internal static var uploadingLogo: String { AppL10n.copyLocale == .frCA ? "Téléversement…" : "Uploading…" }
 
     /// `desk.viewer_note`
-    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "Desk is available to agency and client members." : "Desk is available to agency and client members." }
+    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "District Desk est accessible aux membres ayant le rôle Agence ou Client." : "Desk is available to agency and client members." }
 
     /// `desk.waiting_on_customer`
-    internal static var waitingOnCustomer: String { AppL10n.copyLocale == .frCA ? "Waiting on customer" : "Waiting on customer" }
+    internal static var waitingOnCustomer: String { AppL10n.copyLocale == .frCA ? "En attente du client" : "Waiting on customer" }
 }
 
 extension DevicesCopy {
     /// `devices.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `devices.could_not_list_devices`
-    internal static var couldNotListDevices: String { AppL10n.copyLocale == .frCA ? "Could not list your devices" : "Could not list your devices" }
+    internal static var couldNotListDevices: String { AppL10n.copyLocale == .frCA ? "Impossible d'afficher vos appareils" : "Could not list your devices" }
 
     /// `devices.device_are_using_signing`
-    internal static var deviceAreUsingSigning: String { AppL10n.copyLocale == .frCA ? "This is the device you are using. Signing it out will return you to the sign-in screen." : "This is the device you are using. Signing it out will return you to the sign-in screen." }
+    internal static var deviceAreUsingSigning: String { AppL10n.copyLocale == .frCA ? "C'est l'appareil que vous utilisez. Si vous le déconnectez, vous reviendrez à l'écran de connexion." : "This is the device you are using. Signing it out will return you to the sign-in screen." }
 
     /// `devices.device_was_already_signed`
-    internal static var deviceWasAlreadySigned: String { AppL10n.copyLocale == .frCA ? "That device was already signed out. The list has been refreshed." : "That device was already signed out. The list has been refreshed." }
+    internal static var deviceWasAlreadySigned: String { AppL10n.copyLocale == .frCA ? "Cet appareil était déjà déconnecté. La liste a été actualisée." : "That device was already signed out. The list has been refreshed." }
 
     /// `devices.devices`
-    internal static var devices: String { AppL10n.copyLocale == .frCA ? "Devices" : "Devices" }
+    internal static var devices: String { AppL10n.copyLocale == .frCA ? "Appareils" : "Devices" }
 
     /// `devices.dismiss`
-    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Dismiss" : "Dismiss" }
+    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Dismiss" }
 
     /// `devices.last_active`
     internal static func lastActive(_ stamp: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Last active \(stamp)" : "Last active \(stamp)"
+        AppL10n.copyLocale == .frCA ? "Dernière activité\u{00A0}: \(stamp)" : "Last active \(stamp)"
     }
 
     /// `devices.no_other_devices`
-    internal static var noOtherDevices: String { AppL10n.copyLocale == .frCA ? "No other devices" : "No other devices" }
+    internal static var noOtherDevices: String { AppL10n.copyLocale == .frCA ? "Aucun autre appareil" : "No other devices" }
 
     /// `devices.nothing_else_signed_account`
-    internal static var nothingElseSignedAccount: String { AppL10n.copyLocale == .frCA ? "Nothing else is signed in to this account right now. A device that just signed in can take a few minutes to appear." : "Nothing else is signed in to this account right now. A device that just signed in can take a few minutes to appear." }
+    internal static var nothingElseSignedAccount: String { AppL10n.copyLocale == .frCA ? "Aucun autre appareil n'est connecté à ce compte pour le moment. Un appareil qui vient de se connecter peut mettre quelques minutes à apparaître." : "Nothing else is signed in to this account right now. A device that just signed in can take a few minutes to appear." }
 
     /// `devices.sign_device_out_will`
-    internal static var signDeviceOutWill: String { AppL10n.copyLocale == .frCA ? "Sign this device out? It will need to sign in again to use District AI." : "Sign this device out? It will need to sign in again to use District AI." }
+    internal static var signDeviceOutWill: String { AppL10n.copyLocale == .frCA ? "Déconnecter cet appareil? Il devra se reconnecter pour utiliser District AI." : "Sign this device out? It will need to sign in again to use District AI." }
 
     /// `devices.sign_out`
-    internal static var signOut: String { AppL10n.copyLocale == .frCA ? "Sign out" : "Sign out" }
+    internal static var signOut: String { AppL10n.copyLocale == .frCA ? "Se déconnecter" : "Sign out" }
 
     /// `devices.sign_out_device`
-    internal static var signOutDevice: String { AppL10n.copyLocale == .frCA ? "Sign out this device" : "Sign out this device" }
+    internal static var signOutDevice: String { AppL10n.copyLocale == .frCA ? "Déconnecter cet appareil" : "Sign out this device" }
 
     /// `devices.sign_out_district_ai`
-    internal static var signOutDistrictAi: String { AppL10n.copyLocale == .frCA ? "Sign out of District AI on every device, including this one?" : "Sign out of District AI on every device, including this one?" }
+    internal static var signOutDistrictAi: String { AppL10n.copyLocale == .frCA ? "Vous déconnecter de District AI sur tous les appareils, y compris celui-ci?" : "Sign out of District AI on every device, including this one?" }
 
     /// `devices.sign_out_everywhere`
-    internal static var signOutEverywhere: String { AppL10n.copyLocale == .frCA ? "Sign out everywhere" : "Sign out everywhere" }
+    internal static var signOutEverywhere: String { AppL10n.copyLocale == .frCA ? "Se déconnecter partout" : "Sign out everywhere" }
 
     /// `devices.signed_in_recently`
-    internal static var signedInRecently: String { AppL10n.copyLocale == .frCA ? "Signed in recently" : "Signed in recently" }
+    internal static var signedInRecently: String { AppL10n.copyLocale == .frCA ? "Connecté récemment" : "Signed in recently" }
 
     /// `devices.this_device`
-    internal static var thisDevice: String { AppL10n.copyLocale == .frCA ? "This device" : "This device" }
+    internal static var thisDevice: String { AppL10n.copyLocale == .frCA ? "Cet appareil" : "This device" }
 
     /// `devices.unknown_platform`
-    internal static var unknownPlatform: String { AppL10n.copyLocale == .frCA ? "Unknown platform" : "Unknown platform" }
+    internal static var unknownPlatform: String { AppL10n.copyLocale == .frCA ? "Plateforme inconnue" : "Unknown platform" }
 
     /// `devices.unnamed_device`
-    internal static var unnamedDevice: String { AppL10n.copyLocale == .frCA ? "Unnamed device" : "Unnamed device" }
+    internal static var unnamedDevice: String { AppL10n.copyLocale == .frCA ? "Appareil sans nom" : "Unnamed device" }
 }
 
 extension DialerCopy {
     /// `dialer.call`
-    internal static var call: String { AppL10n.copyLocale == .frCA ? "Call" : "Call" }
+    internal static var call: String { AppL10n.copyLocale == .frCA ? "Appeler" : "Call" }
 
     /// `dialer.call_workspace_call_log`
-    internal static var callWorkspaceCallLog: String { AppL10n.copyLocale == .frCA ? "This call is in the workspace call log." : "This call is in the workspace call log." }
+    internal static var callWorkspaceCallLog: String { AppL10n.copyLocale == .frCA ? "Cet appel figure dans le journal des appels de l'espace de travail." : "This call is in the workspace call log." }
 
     /// `dialer.calling`
-    internal static var calling: String { AppL10n.copyLocale == .frCA ? "Calling…" : "Calling…" }
+    internal static var calling: String { AppL10n.copyLocale == .frCA ? "Appel…" : "Calling…" }
 
     /// `dialer.dial`
-    internal static var dial: String { AppL10n.copyLocale == .frCA ? "Dial" : "Dial" }
+    internal static var dial: String { AppL10n.copyLocale == .frCA ? "Composer" : "Dial" }
 
     /// `dialer.done`
-    internal static var done: String { AppL10n.copyLocale == .frCA ? "Done" : "Done" }
+    internal static var done: String { AppL10n.copyLocale == .frCA ? "OK" : "Done" }
 
     /// `dialer.hang_up`
-    internal static var hangUp: String { AppL10n.copyLocale == .frCA ? "Hang up" : "Hang up" }
+    internal static var hangUp: String { AppL10n.copyLocale == .frCA ? "Raccrocher" : "Hang up" }
 
     /// `dialer.mute`
-    internal static var mute: String { AppL10n.copyLocale == .frCA ? "Mute" : "Mute" }
+    internal static var mute: String { AppL10n.copyLocale == .frCA ? "Couper le micro" : "Mute" }
 
     /// `dialer.number`
-    internal static var number: String { AppL10n.copyLocale == .frCA ? "Number" : "Number" }
+    internal static var number: String { AppL10n.copyLocale == .frCA ? "Numéro" : "Number" }
 
     /// `dialer.reconnecting`
-    internal static var reconnecting: String { AppL10n.copyLocale == .frCA ? "Reconnecting…" : "Reconnecting…" }
+    internal static var reconnecting: String { AppL10n.copyLocale == .frCA ? "Reconnexion…" : "Reconnecting…" }
 
     /// `dialer.speaker_off`
-    internal static var speakerOff: String { AppL10n.copyLocale == .frCA ? "Speaker off" : "Speaker off" }
+    internal static var speakerOff: String { AppL10n.copyLocale == .frCA ? "Haut-parleur désactivé" : "Speaker off" }
 
     /// `dialer.speaker_on`
-    internal static var speakerOn: String { AppL10n.copyLocale == .frCA ? "Speaker on" : "Speaker on" }
+    internal static var speakerOn: String { AppL10n.copyLocale == .frCA ? "Haut-parleur activé" : "Speaker on" }
 
     /// `dialer.unmute`
-    internal static var unmute: String { AppL10n.copyLocale == .frCA ? "Unmute" : "Unmute" }
+    internal static var unmute: String { AppL10n.copyLocale == .frCA ? "Rétablir le micro" : "Unmute" }
 }
 
 extension DialerModel {
     /// `dialer.callback_hint`
-    internal static var callbackHint: String { AppL10n.copyLocale == .frCA ? "Fills the number into the keypad. You still press Call to dial." : "Fills the number into the keypad. You still press Call to dial." }
+    internal static var callbackHint: String { AppL10n.copyLocale == .frCA ? "Place ce numéro dans le champ de composition. Appuyez ensuite sur Appeler pour composer." : "Fills the number into the keypad. You still press Call to dial." }
 
     /// `dialer.callbacks_empty`
-    internal static var callbacksEmpty: String { AppL10n.copyLocale == .frCA ? "Numbers from incoming calls appear here so you can call someone back with one tap." : "Numbers from incoming calls appear here so you can call someone back with one tap." }
+    internal static var callbacksEmpty: String { AppL10n.copyLocale == .frCA ? "Les numéros des appels reçus s'affichent ici pour que vous puissiez rappeler quelqu'un d'un simple toucher." : "Numbers from incoming calls appear here so you can call someone back with one tap." }
 
     /// `dialer.callbacks_empty_title`
-    internal static var callbacksEmptyTitle: String { AppL10n.copyLocale == .frCA ? "No recent callers" : "No recent callers" }
+    internal static var callbacksEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucun appelant récent" : "No recent callers" }
 
     /// `dialer.callbacks_failed`
-    internal static var callbacksFailed: String { AppL10n.copyLocale == .frCA ? "Could not load recent callers" : "Could not load recent callers" }
+    internal static var callbacksFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de charger les appelants récents" : "Could not load recent callers" }
 
     /// `dialer.callbacks_loading`
-    internal static var callbacksLoading: String { AppL10n.copyLocale == .frCA ? "Looking for recent callers…" : "Looking for recent callers…" }
+    internal static var callbacksLoading: String { AppL10n.copyLocale == .frCA ? "Recherche des appelants récents…" : "Looking for recent callers…" }
 
     /// `dialer.callbacks_title`
-    internal static var callbacksTitle: String { AppL10n.copyLocale == .frCA ? "Call back" : "Call back" }
+    internal static var callbacksTitle: String { AppL10n.copyLocale == .frCA ? "Rappeler" : "Call back" }
 
     /// `dialer.do_not_call_fallback`
-    internal static var doNotCallFallback: String { AppL10n.copyLocale == .frCA ? "That number has opted out of calls from this workspace." : "That number has opted out of calls from this workspace." }
+    internal static var doNotCallFallback: String { AppL10n.copyLocale == .frCA ? "Ce numéro est exclu des appels de cet espace de travail, à sa demande." : "That number has opted out of calls from this workspace." }
 
     /// `dialer.dormant_fallback`
-    internal static var dormantFallback: String { AppL10n.copyLocale == .frCA ? "This workspace is paused for inactivity, so calls are on hold. Ask us to reactivate it." : "This workspace is paused for inactivity, so calls are on hold. Ask us to reactivate it." }
+    internal static var dormantFallback: String { AppL10n.copyLocale == .frCA ? "Cet espace de travail est en pause pour inactivité\u{00A0}: les appels sont suspendus. Demandez-nous de le réactiver." : "This workspace is paused for inactivity, so calls are on hold. Ask us to reactivate it." }
 
     /// `dialer.entry_hint`
-    internal static var entryHint: String { AppL10n.copyLocale == .frCA ? "Enter a number with its country code, for example +1 416 555 0100." : "Enter a number with its country code, for example +1 416 555 0100." }
+    internal static var entryHint: String { AppL10n.copyLocale == .frCA ? "Indiquez un numéro avec l'indicatif du pays, par exemple +1 416 555 0100." : "Enter a number with its country code, for example +1 416 555 0100." }
 
     /// `dialer.microphone_notice`
-    internal static var microphoneNotice: String { AppL10n.copyLocale == .frCA ? "Placing a call turns on your microphone." : "Placing a call turns on your microphone." }
+    internal static var microphoneNotice: String { AppL10n.copyLocale == .frCA ? "Passer un appel active votre microphone." : "Placing a call turns on your microphone." }
 
     /// `dialer.subscription_fallback`
-    internal static var subscriptionFallback: String { AppL10n.copyLocale == .frCA ? "This workspace's subscription is not active, so calls are paused." : "This workspace's subscription is not active, so calls are paused." }
+    internal static var subscriptionFallback: String { AppL10n.copyLocale == .frCA ? "L'abonnement de cet espace de travail n'est pas actif\u{00A0}: les appels sont suspendus." : "This workspace's subscription is not active, so calls are paused." }
 
     /// `dialer.viewer_notice`
-    internal static var viewerNotice: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer, so you cannot place calls." : "You are in this workspace as a viewer, so you cannot place calls." }
+    internal static var viewerNotice: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur dans cet espace de travail, vous ne pouvez pas passer d'appels." : "You are in this workspace as a viewer, so you cannot place calls." }
 
     /// `dialer_m.busy_message`
-    internal static var busyMessage: String { AppL10n.copyLocale == .frCA ? "There is already a call on this device. End it before placing another." : "There is already a call on this device. End it before placing another." }
+    internal static var busyMessage: String { AppL10n.copyLocale == .frCA ? "Un appel est déjà en cours sur cet appareil. Terminez-le avant d'en passer un autre." : "There is already a call on this device. End it before placing another." }
 
     /// `dialer_m.destination_named`
     internal static func destinationNamed(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "This number rings \(name)." : "This number rings \(name)."
+        AppL10n.copyLocale == .frCA ? "Pays du numéro\u{00A0}: \(name)." : "This number rings \(name)."
     }
 
     /// `dialer_m.destination_unrecognised`
-    internal static var destinationUnrecognised: String { AppL10n.copyLocale == .frCA ? "Unrecognised country code. Check the number before calling." : "Unrecognised country code. Check the number before calling." }
+    internal static var destinationUnrecognised: String { AppL10n.copyLocale == .frCA ? "Cet indicatif de pays n'est pas reconnu. Vérifiez le numéro avant d'appeler." : "Unrecognised country code. Check the number before calling." }
 
     /// `dialer_m.entry_emergency_number`
-    internal static var entryEmergencyNumber: String { AppL10n.copyLocale == .frCA ? "District cannot place emergency calls. Use the Phone app to call for help." : "District cannot place emergency calls. Use the Phone app to call for help." }
+    internal static var entryEmergencyNumber: String { AppL10n.copyLocale == .frCA ? "District ne peut pas appeler les urgences. Utilisez l'app Téléphone pour obtenir de l'aide." : "District cannot place emergency calls. Use the Phone app to call for help." }
 
     /// `dialer_m.entry_missing_country_code`
-    internal static var entryMissingCountryCode: String { AppL10n.copyLocale == .frCA ? "Start with a country code, for example +1 for Canada and the United States." : "Start with a country code, for example +1 for Canada and the United States." }
+    internal static var entryMissingCountryCode: String { AppL10n.copyLocale == .frCA ? "Commencez par l'indicatif du pays, par exemple +1 pour le Canada et les États-Unis." : "Start with a country code, for example +1 for Canada and the United States." }
 
     /// `dialer_m.entry_stray_plus`
-    internal static var entryStrayPlus: String { AppL10n.copyLocale == .frCA ? "A number may contain only digits after the +." : "A number may contain only digits after the +." }
+    internal static var entryStrayPlus: String { AppL10n.copyLocale == .frCA ? "Un numéro ne peut contenir que des chiffres après le +." : "A number may contain only digits after the +." }
 
     /// `dialer_m.entry_too_long`
     internal static func entryTooLong(_ maximum: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "That is too long. A number has at most \(maximum) digits after the +." : "That is too long. A number has at most \(maximum) digits after the +."
+        AppL10n.copyLocale == .frCA ? "Ce numéro est trop long. Un numéro compte au plus \(maximum) chiffres après le +." : "That is too long. A number has at most \(maximum) digits after the +."
     }
 
     /// `dialer_m.entry_too_short`
     internal static func entryTooShort(_ minimum: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "That is too short. A number has at least \(minimum) digits after the +." : "That is too short. A number has at least \(minimum) digits after the +."
+        AppL10n.copyLocale == .frCA ? "Ce numéro est trop court. Un numéro compte au moins \(minimum) chiffres après le +." : "That is too short. A number has at least \(minimum) digits after the +."
     }
 
     /// `dialer_m.in_room_message`
-    internal static var inRoomMessage: String { AppL10n.copyLocale == .frCA ? "You are in a room on this device. Leave it before placing a call." : "You are in a room on this device. Leave it before placing a call." }
+    internal static var inRoomMessage: String { AppL10n.copyLocale == .frCA ? "Vous êtes dans une salle de réunion sur cet appareil. Quittez-la avant de passer un appel." : "You are in a room on this device. Leave it before placing a call." }
 
     /// `dialer_m.microphone_off_message`
-    internal static var microphoneOffMessage: String { AppL10n.copyLocale == .frCA ? "Nothing was dialled because District AI cannot use the microphone. Turn it on in Settings." : "Nothing was dialled because District AI cannot use the microphone. Turn it on in Settings." }
+    internal static var microphoneOffMessage: String { AppL10n.copyLocale == .frCA ? "Aucun numéro n'a été composé, car District AI ne peut pas utiliser le microphone. Activez-le dans Réglages." : "Nothing was dialled because District AI cannot use the microphone. Turn it on in Settings." }
 
     /// `dialer_m.not_started_message`
-    internal static var notStartedMessage: String { AppL10n.copyLocale == .frCA ? "iOS did not start the call, so nothing was dialled. Another call may already be in progress." : "iOS did not start the call, so nothing was dialled. Another call may already be in progress." }
+    internal static var notStartedMessage: String { AppL10n.copyLocale == .frCA ? "iOS n'a pas lancé l'appel, donc aucun numéro n'a été composé. Un autre appel est peut-être déjà en cours." : "iOS did not start the call, so nothing was dialled. Another call may already be in progress." }
 }
 
 extension FinishSetupCopy {
     /// `finish_setup.action`
-    internal static var action: String { AppL10n.copyLocale == .frCA ? "Open setup" : "Open setup" }
+    internal static var action: String { AppL10n.copyLocale == .frCA ? "Configurer" : "Open setup" }
 
     /// `finish_setup.body`
-    internal static var body: String { AppL10n.copyLocale == .frCA ? "A few setup steps for this workspace are still open." : "A few setup steps for this workspace are still open." }
+    internal static var body: String { AppL10n.copyLocale == .frCA ? "Quelques étapes de configuration restent à terminer dans cet espace." : "A few setup steps for this workspace are still open." }
 
     /// `finish_setup.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Finish setting up" : "Finish setting up" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Terminer la configuration" : "Finish setting up" }
 }
 
 extension HQCopy {
     /// `hq.applied`
-    internal static var applied: String { AppL10n.copyLocale == .frCA ? "Applied." : "Applied." }
+    internal static var applied: String { AppL10n.copyLocale == .frCA ? "Appliqué." : "Applied." }
 
     /// `hq.applying`
-    internal static var applying: String { AppL10n.copyLocale == .frCA ? "Applying…" : "Applying…" }
+    internal static var applying: String { AppL10n.copyLocale == .frCA ? "Modification…" : "Applying…" }
 
     /// `hq.composer_blocked`
-    internal static var composerBlocked: String { AppL10n.copyLocale == .frCA ? "Confirm or dismiss the change above before asking something else." : "Confirm or dismiss the change above before asking something else." }
+    internal static var composerBlocked: String { AppL10n.copyLocale == .frCA ? "Confirmez ou écartez le changement ci-dessus avant de poser une autre question." : "Confirm or dismiss the change above before asking something else." }
 
     /// `hq.confirm_apply`
-    internal static var confirmApply: String { AppL10n.copyLocale == .frCA ? "Confirm" : "Confirm" }
+    internal static var confirmApply: String { AppL10n.copyLocale == .frCA ? "Confirmer" : "Confirm" }
 
     /// `hq.confirm_dismiss`
-    internal static var confirmDismiss: String { AppL10n.copyLocale == .frCA ? "Dismiss" : "Dismiss" }
+    internal static var confirmDismiss: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Dismiss" }
 
     /// `hq.confirm_failed_note`
-    internal static var confirmFailedNote: String { AppL10n.copyLocale == .frCA ? "That attempt failed. It may already have been applied, so check before confirming again." : "That attempt failed. It may already have been applied, so check before confirming again." }
+    internal static var confirmFailedNote: String { AppL10n.copyLocale == .frCA ? "Cette tentative a échoué. Le changement a peut-être déjà été appliqué\u{00A0}: vérifiez avant de confirmer de nouveau." : "That attempt failed. It may already have been applied, so check before confirming again." }
 
     /// `hq.confirm_note`
-    internal static var confirmNote: String { AppL10n.copyLocale == .frCA ? "Nothing has been changed yet." : "Nothing has been changed yet." }
+    internal static var confirmNote: String { AppL10n.copyLocale == .frCA ? "Rien n'a encore été modifié." : "Nothing has been changed yet." }
 
     /// `hq.confirm_retry`
-    internal static var confirmRetry: String { AppL10n.copyLocale == .frCA ? "Confirm again" : "Confirm again" }
+    internal static var confirmRetry: String { AppL10n.copyLocale == .frCA ? "Reconfirmer" : "Confirm again" }
 
     /// `hq.confirm_title`
-    internal static var confirmTitle: String { AppL10n.copyLocale == .frCA ? "Confirm this change" : "Confirm this change" }
+    internal static var confirmTitle: String { AppL10n.copyLocale == .frCA ? "Confirmer ce changement" : "Confirm this change" }
 
     /// `hq.empty`
-    internal static var empty: String { AppL10n.copyLocale == .frCA ? "Ask about your calls, contacts, the AI receptionist, or your knowledge base." : "Ask about your calls, contacts, the AI receptionist, or your knowledge base." }
+    internal static var empty: String { AppL10n.copyLocale == .frCA ? "Posez une question sur vos appels, vos contacts, la réceptionniste IA ou votre base de connaissances." : "Ask about your calls, contacts, the AI receptionist, or your knowledge base." }
 
     /// `hq.empty_title`
-    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "Ask District HQ" : "Ask District HQ" }
+    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "Poser une question à District HQ" : "Ask District HQ" }
 
     /// `hq.not_applied`
-    internal static var notApplied: String { AppL10n.copyLocale == .frCA ? "That change was not applied." : "That change was not applied." }
+    internal static var notApplied: String { AppL10n.copyLocale == .frCA ? "Ce changement n'a pas été appliqué." : "That change was not applied." }
 
     /// `hq.prompt_label`
-    internal static var promptLabel: String { AppL10n.copyLocale == .frCA ? "Ask" : "Ask" }
+    internal static var promptLabel: String { AppL10n.copyLocale == .frCA ? "Demander" : "Ask" }
 
     /// `hq.retry`
-    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Try again" : "Try again" }
+    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 
     /// `hq.send`
-    internal static var send: String { AppL10n.copyLocale == .frCA ? "Send" : "Send" }
+    internal static var send: String { AppL10n.copyLocale == .frCA ? "Envoyer" : "Send" }
 
     /// `hq.thinking`
-    internal static var thinking: String { AppL10n.copyLocale == .frCA ? "Thinking…" : "Thinking…" }
+    internal static var thinking: String { AppL10n.copyLocale == .frCA ? "Réflexion…" : "Thinking…" }
 
     /// `hq.title`
     internal static var title: String { AppL10n.copyLocale == .frCA ? "District HQ" : "District HQ" }
 
     /// `hq.viewer_cannot_confirm`
-    internal static var viewerCannotConfirm: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer, so ask an agency or client member to apply this." : "You are in this workspace as a viewer, so ask an agency or client member to apply this." }
+    internal static var viewerCannotConfirm: String { AppL10n.copyLocale == .frCA ? "Votre rôle dans cet espace de travail est Lecteur\u{00A0}: demandez à un membre ayant le rôle Agence ou Client de l'appliquer." : "You are in this workspace as a viewer, so ask an agency or client member to apply this." }
 }
 
 extension InCallCopy {
     /// `in_call.call_ended`
-    internal static var callEnded: String { AppL10n.copyLocale == .frCA ? "Call ended" : "Call ended" }
+    internal static var callEnded: String { AppL10n.copyLocale == .frCA ? "Appel terminé" : "Call ended" }
 
     /// `in_call.call_ended_because`
     internal static func callEndedBecause(_ word: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Call ended · \(word)" : "Call ended · \(word)"
+        AppL10n.copyLocale == .frCA ? "Appel terminé · \(word)" : "Call ended · \(word)"
     }
 
     /// `in_call.calling`
-    internal static var calling: String { AppL10n.copyLocale == .frCA ? "Calling…" : "Calling…" }
+    internal static var calling: String { AppL10n.copyLocale == .frCA ? "Appel…" : "Calling…" }
 
     /// `in_call.connected`
     internal static func connected(_ duration: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Connected · \(duration)" : "Connected · \(duration)"
+        AppL10n.copyLocale == .frCA ? "Connecté · \(duration)" : "Connected · \(duration)"
     }
 
     /// `in_call.ended_with_duration`
@@ -1227,47 +1227,47 @@ extension InCallCopy {
     }
 
     /// `in_call.ringing`
-    internal static var ringing: String { AppL10n.copyLocale == .frCA ? "Ringing…" : "Ringing…" }
+    internal static var ringing: String { AppL10n.copyLocale == .frCA ? "Sonnerie…" : "Ringing…" }
 
     /// `in_call.word_answer_refused`
-    internal static var wordAnswerRefused: String { AppL10n.copyLocale == .frCA ? "the answer was refused" : "the answer was refused" }
+    internal static var wordAnswerRefused: String { AppL10n.copyLocale == .frCA ? "la prise de l'appel a été refusée" : "the answer was refused" }
 
     /// `in_call.word_caller_cancelled`
-    internal static var wordCallerCancelled: String { AppL10n.copyLocale == .frCA ? "the caller hung up" : "the caller hung up" }
+    internal static var wordCallerCancelled: String { AppL10n.copyLocale == .frCA ? "l'appelant a raccroché" : "the caller hung up" }
 
     /// `in_call.word_declined`
-    internal static var wordDeclined: String { AppL10n.copyLocale == .frCA ? "declined" : "declined" }
+    internal static var wordDeclined: String { AppL10n.copyLocale == .frCA ? "refusé" : "declined" }
 
     /// `in_call.word_failed`
-    internal static var wordFailed: String { AppL10n.copyLocale == .frCA ? "the call could not be connected" : "the call could not be connected" }
+    internal static var wordFailed: String { AppL10n.copyLocale == .frCA ? "l'appel n'a pas pu être établi" : "the call could not be connected" }
 
     /// `in_call.word_hung_up_locally`
-    internal static var wordHungUpLocally: String { AppL10n.copyLocale == .frCA ? "you hung up" : "you hung up" }
+    internal static var wordHungUpLocally: String { AppL10n.copyLocale == .frCA ? "vous avez raccroché" : "you hung up" }
 
     /// `in_call.word_remote_ended`
-    internal static var wordRemoteEnded: String { AppL10n.copyLocale == .frCA ? "the other end ended it" : "the other end ended it" }
+    internal static var wordRemoteEnded: String { AppL10n.copyLocale == .frCA ? "l'autre personne y a mis fin" : "the other end ended it" }
 
     /// `in_call.word_remote_hung_up`
-    internal static var wordRemoteHungUp: String { AppL10n.copyLocale == .frCA ? "they hung up" : "they hung up" }
+    internal static var wordRemoteHungUp: String { AppL10n.copyLocale == .frCA ? "l'autre personne a raccroché" : "they hung up" }
 
     /// `in_call.word_ring_timed_out`
-    internal static var wordRingTimedOut: String { AppL10n.copyLocale == .frCA ? "nobody answered" : "nobody answered" }
+    internal static var wordRingTimedOut: String { AppL10n.copyLocale == .frCA ? "aucune réponse" : "nobody answered" }
 }
 
 extension InboxCopy {
     /// `inbox.attach_image`
-    internal static var attachImage: String { AppL10n.copyLocale == .frCA ? "Attach image" : "Attach image" }
+    internal static var attachImage: String { AppL10n.copyLocale == .frCA ? "Joindre une image" : "Attach image" }
 
     /// `inbox.attaching`
-    internal static var attaching: String { AppL10n.copyLocale == .frCA ? "Attaching…" : "Attaching…" }
+    internal static var attaching: String { AppL10n.copyLocale == .frCA ? "Ajout en cours…" : "Attaching…" }
 
     /// `inbox.attachment_count`
     internal static func attachmentCount(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
-            if count == 1 {
-                return "\(count) attachment"
+            if count == 0 || count == 1 {
+                return "\(count) pièce jointe"
             }
-            return "\(count) attachments"
+            return "\(count) pièces jointes"
         }
         if count == 1 {
             return "\(count) attachment"
@@ -1278,10 +1278,10 @@ extension InboxCopy {
     /// `inbox.attachments_dropped`
     internal static func attachmentsDropped(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
-            if count == 1 {
-                return "image was removed: email replies cannot carry attachments. Switch back to SMS to send them."
+            if count == 0 || count == 1 {
+                return "\(count) image a été retirée\u{00A0}: les réponses par courriel n'acceptent pas les pièces jointes. Revenez au texto pour l'envoyer."
             }
-            return "\(count) images were removed: email replies cannot carry attachments. Switch back to SMS to send them."
+            return "\(count) images ont été retirées\u{00A0}: les réponses par courriel n'acceptent pas les pièces jointes. Revenez au texto pour les envoyer."
         }
         if count == 1 {
             return "image was removed: email replies cannot carry attachments. Switch back to SMS to send them."
@@ -1290,192 +1290,195 @@ extension InboxCopy {
     }
 
     /// `inbox.call`
-    internal static var call: String { AppL10n.copyLocale == .frCA ? "Call" : "Call" }
+    internal static var call: String { AppL10n.copyLocale == .frCA ? "Appeler" : "Call" }
 
     /// `inbox.can_attach_up5`
-    internal static var canAttachUp5: String { AppL10n.copyLocale == .frCA ? "You can attach up to 5 images to one message." : "You can attach up to 5 images to one message." }
+    internal static var canAttachUp5: String { AppL10n.copyLocale == .frCA ? "Vous pouvez joindre jusqu'à 5 images par message." : "You can attach up to 5 images to one message." }
 
     /// `inbox.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `inbox.change`
-    internal static var change: String { AppL10n.copyLocale == .frCA ? "Change" : "Change" }
+    internal static var change: String { AppL10n.copyLocale == .frCA ? "Changer" : "Change" }
 
     /// `inbox.contact_has_no_phone`
-    internal static var contactHasNoPhone: String { AppL10n.copyLocale == .frCA ? "This contact has no phone number or email address on file." : "This contact has no phone number or email address on file." }
+    internal static var contactHasNoPhone: String { AppL10n.copyLocale == .frCA ? "Ce contact n'a aucun numéro de téléphone ni adresse courriel au dossier." : "This contact has no phone number or email address on file." }
 
     /// `inbox.conversation`
     internal static var conversation: String { AppL10n.copyLocale == .frCA ? "Conversation" : "Conversation" }
 
     /// `inbox.conversation_could_not_opened`
-    internal static var conversationCouldNotOpened: String { AppL10n.copyLocale == .frCA ? "This conversation could not be opened." : "This conversation could not be opened." }
+    internal static var conversationCouldNotOpened: String { AppL10n.copyLocale == .frCA ? "Cette conversation n'a pas pu être ouverte." : "This conversation could not be opened." }
 
     /// `inbox.dismiss`
-    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Dismiss" : "Dismiss" }
+    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Dismiss" }
 
     /// `inbox.draft`
-    internal static var draft: String { AppL10n.copyLocale == .frCA ? "Draft" : "Draft" }
+    internal static var draft: String { AppL10n.copyLocale == .frCA ? "Brouillon" : "Draft" }
 
     /// `inbox.draft_not_saved_will`
-    internal static var draftNotSavedWill: String { AppL10n.copyLocale == .frCA ? "Draft not saved. It will be saved again as you type." : "Draft not saved. It will be saved again as you type." }
+    internal static var draftNotSavedWill: String { AppL10n.copyLocale == .frCA ? "Brouillon non sauvegardé. Il le sera à mesure que vous écrivez." : "Draft not saved. It will be saved again as you type." }
 
     /// `inbox.draft_reply`
-    internal static var draftReply: String { AppL10n.copyLocale == .frCA ? "Draft reply" : "Draft reply" }
+    internal static var draftReply: String { AppL10n.copyLocale == .frCA ? "Ébaucher une réponse" : "Draft reply" }
 
     /// `inbox.draft_unread`
     internal static func draftUnread(_ message: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(message) A reply saved on this thread could not be loaded, so the box below may not be showing it, and anything you type will replace it." : "\(message) A reply saved on this thread could not be loaded, so the box below may not be showing it, and anything you type will replace it."
+        AppL10n.copyLocale == .frCA ? "\(message) Un brouillon de réponse sauvegardé dans ce fil n'a pas pu être chargé\u{00A0}: la zone ci-dessous ne l'affiche peut-être pas, et tout ce que vous saisirez le remplacera." : "\(message) A reply saved on this thread could not be loaded, so the box below may not be showing it, and anything you type will replace it."
     }
 
     /// `inbox.drafting`
-    internal static var drafting: String { AppL10n.copyLocale == .frCA ? "Drafting…" : "Drafting…" }
+    internal static var drafting: String { AppL10n.copyLocale == .frCA ? "Ébauche en cours…" : "Drafting…" }
 
     /// `inbox.duration_minutes_seconds`
     internal static func durationMinutesSeconds(_ minutes: Int, _ seconds: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(minutes)m \(seconds)s" : "\(minutes)m \(seconds)s"
+        AppL10n.copyLocale == .frCA ? "\(minutes)\u{00A0}min \(seconds)\u{00A0}s" : "\(minutes)m \(seconds)s"
     }
 
     /// `inbox.duration_seconds`
     internal static func durationSeconds(_ seconds: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(seconds)s" : "\(seconds)s"
+        AppL10n.copyLocale == .frCA ? "\(seconds)\u{00A0}s" : "\(seconds)s"
     }
 
     /// `inbox.email`
-    internal static var email: String { AppL10n.copyLocale == .frCA ? "Email" : "Email" }
+    internal static var email: String { AppL10n.copyLocale == .frCA ? "Courriel" : "Email" }
 
     /// `inbox.image_could_not_read`
-    internal static var imageCouldNotRead: String { AppL10n.copyLocale == .frCA ? "That image could not be read. Try picking it again." : "That image could not be read. Try picking it again." }
+    internal static var imageCouldNotRead: String { AppL10n.copyLocale == .frCA ? "Impossible de lire cette image. Sélectionnez-la de nouveau." : "That image could not be read. Try picking it again." }
 
     /// `inbox.image_unavailable`
-    internal static var imageUnavailable: String { AppL10n.copyLocale == .frCA ? "Image unavailable" : "Image unavailable" }
+    internal static var imageUnavailable: String { AppL10n.copyLocale == .frCA ? "Image indisponible" : "Image unavailable" }
 
     /// `inbox.inbox`
-    internal static var inbox: String { AppL10n.copyLocale == .frCA ? "Inbox" : "Inbox" }
+    internal static var inbox: String { AppL10n.copyLocale == .frCA ? "Boîte de réception" : "Inbox" }
 
     /// `inbox.keep_typing`
-    internal static var keepTyping: String { AppL10n.copyLocale == .frCA ? "Keep typing" : "Keep typing" }
+    internal static var keepTyping: String { AppL10n.copyLocale == .frCA ? "Continuez à taper" : "Keep typing" }
 
     /// `inbox.loading_image`
-    internal static var loadingImage: String { AppL10n.copyLocale == .frCA ? "Loading image" : "Loading image" }
+    internal static var loadingImage: String { AppL10n.copyLocale == .frCA ? "Chargement de l'image" : "Loading image" }
 
     /// `inbox.loading_older`
-    internal static var loadingOlder: String { AppL10n.copyLocale == .frCA ? "Loading older…" : "Loading older…" }
+    internal static var loadingOlder: String { AppL10n.copyLocale == .frCA ? "Chargement…" : "Loading older…" }
 
     /// `inbox.manage`
-    internal static var manage: String { AppL10n.copyLocale == .frCA ? "Manage" : "Manage" }
+    internal static var manage: String { AppL10n.copyLocale == .frCA ? "Gérer" : "Manage" }
 
     /// `inbox.mark_all_read`
-    internal static var markAllRead: String { AppL10n.copyLocale == .frCA ? "Mark all read" : "Mark all read" }
+    internal static var markAllRead: String { AppL10n.copyLocale == .frCA ? "Tout marquer comme lu" : "Mark all read" }
 
     /// `inbox.message2`
     internal static var message2: String { AppL10n.copyLocale == .frCA ? "Message" : "Message" }
 
     /// `inbox.message_address`
     internal static func messageAddress(_ address: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Message \(address)" : "Message \(address)"
+        AppL10n.copyLocale == .frCA ? "Écrire à \(address)" : "Message \(address)"
     }
 
     /// `inbox.messages_calls_contact_will`
-    internal static var messagesCallsContactWill: String { AppL10n.copyLocale == .frCA ? "Messages and calls with this contact will appear here." : "Messages and calls with this contact will appear here." }
+    internal static var messagesCallsContactWill: String { AppL10n.copyLocale == .frCA ? "Les messages et les appels avec ce contact apparaîtront ici." : "Messages and calls with this contact will appear here." }
 
     /// `inbox.missed_call`
-    internal static var missedCall: String { AppL10n.copyLocale == .frCA ? "Missed call" : "Missed call" }
+    internal static var missedCall: String { AppL10n.copyLocale == .frCA ? "Appel manqué" : "Missed call" }
 
     /// `inbox.new`
-    internal static var new: String { AppL10n.copyLocale == .frCA ? "New" : "New" }
+    internal static var new: String { AppL10n.copyLocale == .frCA ? "Nouveau" : "New" }
 
     /// `inbox.new_message`
-    internal static var newMessage: String { AppL10n.copyLocale == .frCA ? "New message" : "New message" }
+    internal static var newMessage: String { AppL10n.copyLocale == .frCA ? "Nouveau message" : "New message" }
 
     /// `inbox.no_conversations_yet`
-    internal static var noConversationsYet: String { AppL10n.copyLocale == .frCA ? "No conversations yet" : "No conversations yet" }
+    internal static var noConversationsYet: String { AppL10n.copyLocale == .frCA ? "Aucune conversation" : "No conversations yet" }
 
     /// `inbox.no_matches`
-    internal static var noMatches: String { AppL10n.copyLocale == .frCA ? "No matches" : "No matches" }
+    internal static var noMatches: String { AppL10n.copyLocale == .frCA ? "Aucun résultat" : "No matches" }
 
     /// `inbox.no_message_body`
-    internal static var noMessageBody: String { AppL10n.copyLocale == .frCA ? "No message body" : "No message body" }
+    internal static var noMessageBody: String { AppL10n.copyLocale == .frCA ? "Message vide" : "No message body" }
 
     /// `inbox.no_message_workspace_contains`
-    internal static var noMessageWorkspaceContains: String { AppL10n.copyLocale == .frCA ? "No message in this workspace contains that." : "No message in this workspace contains that." }
+    internal static var noMessageWorkspaceContains: String { AppL10n.copyLocale == .frCA ? "Aucun message de cet espace de travail ne correspond." : "No message in this workspace contains that." }
 
     /// `inbox.nothing_thread`
-    internal static var nothingThread: String { AppL10n.copyLocale == .frCA ? "Nothing in this thread" : "Nothing in this thread" }
+    internal static var nothingThread: String { AppL10n.copyLocale == .frCA ? "Ce fil est vide" : "Nothing in this thread" }
 
     /// `inbox.older_messages`
-    internal static var olderMessages: String { AppL10n.copyLocale == .frCA ? "Older messages" : "Older messages" }
+    internal static var olderMessages: String { AppL10n.copyLocale == .frCA ? "Anciens messages" : "Older messages" }
 
     /// `inbox.only_jpeg_png_gif`
-    internal static var onlyJpegPngGif: String { AppL10n.copyLocale == .frCA ? "Only JPEG, PNG, GIF or WebP images can be attached." : "Only JPEG, PNG, GIF or WebP images can be attached." }
+    internal static var onlyJpegPngGif: String { AppL10n.copyLocale == .frCA ? "Seules les images JPEG, PNG, GIF ou WebP peuvent être jointes." : "Only JPEG, PNG, GIF or WebP images can be attached." }
 
     /// `inbox.part_conversation_could_not`
-    internal static var partConversationCouldNot: String { AppL10n.copyLocale == .frCA ? "Part of this conversation could not be read, so some entries are missing." : "Part of this conversation could not be read, so some entries are missing." }
+    internal static var partConversationCouldNot: String { AppL10n.copyLocale == .frCA ? "Une partie de cette conversation n'a pas pu être lue; certains éléments sont donc manquants." : "Part of this conversation could not be read, so some entries are missing." }
 
     /// `inbox.remove`
-    internal static var remove: String { AppL10n.copyLocale == .frCA ? "Remove" : "Remove" }
+    internal static var remove: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
 
     /// `inbox.remove_attachment`
-    internal static var removeAttachment: String { AppL10n.copyLocale == .frCA ? "Remove attachment" : "Remove attachment" }
+    internal static var removeAttachment: String { AppL10n.copyLocale == .frCA ? "Retirer la pièce jointe" : "Remove attachment" }
 
     /// `inbox.reply`
-    internal static var reply: String { AppL10n.copyLocale == .frCA ? "Reply" : "Reply" }
+    internal static var reply: String { AppL10n.copyLocale == .frCA ? "Réponse" : "Reply" }
 
     /// `inbox.search_messages`
-    internal static var searchMessages: String { AppL10n.copyLocale == .frCA ? "Search messages" : "Search messages" }
+    internal static var searchMessages: String { AppL10n.copyLocale == .frCA ? "Rechercher les messages" : "Search messages" }
 
     /// `inbox.search_too_short`
     internal static func searchTooShort(_ minimum: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "Search needs at least \(minimum) characters." : "Search needs at least \(minimum) characters."
+        AppL10n.copyLocale == .frCA ? "La recherche nécessite au moins \(minimum) caractères." : "Search needs at least \(minimum) characters."
     }
 
     /// `inbox.send`
-    internal static var send: String { AppL10n.copyLocale == .frCA ? "Send" : "Send" }
+    internal static var send: String { AppL10n.copyLocale == .frCA ? "Envoyer" : "Send" }
 
     /// `inbox.send_on`
-    internal static var sendOn: String { AppL10n.copyLocale == .frCA ? "Send on" : "Send on" }
+    internal static var sendOn: String { AppL10n.copyLocale == .frCA ? "Envoyer par" : "Send on" }
 
     /// `inbox.sending`
-    internal static var sending: String { AppL10n.copyLocale == .frCA ? "Sending…" : "Sending…" }
+    internal static var sending: String { AppL10n.copyLocale == .frCA ? "Envoi en cours…" : "Sending…" }
 
     /// `inbox.sent_saved_draft_could`
-    internal static var sentSavedDraftCould: String { AppL10n.copyLocale == .frCA ? "Sent. The saved draft could not be cleared, so check it before replying elsewhere." : "Sent. The saved draft could not be cleared, so check it before replying elsewhere." }
+    internal static var sentSavedDraftCould: String { AppL10n.copyLocale == .frCA ? "Envoyé. Le brouillon sauvegardé n'a pas pu être effacé\u{00A0}: vérifiez-le avant de répondre ailleurs." : "Sent. The saved draft could not be cleared, so check it before replying elsewhere." }
 
     /// `inbox.showing_most_recent_contacts`
-    internal static var showingMostRecentContacts: String { AppL10n.copyLocale == .frCA ? "Showing your most recent contacts. For anyone else, type their number or email." : "Showing your most recent contacts. For anyone else, type their number or email." }
+    internal static var showingMostRecentContacts: String { AppL10n.copyLocale == .frCA ? "Voici vos contacts les plus récents. Pour joindre quelqu'un d'autre, tapez son numéro ou son courriel." : "Showing your most recent contacts. For anyone else, type their number or email." }
 
     /// `inbox.showing_most_recent_matches`
-    internal static var showingMostRecentMatches: String { AppL10n.copyLocale == .frCA ? "Showing the most recent matches. Narrow the search to see older ones." : "Showing the most recent matches. Narrow the search to see older ones." }
+    internal static var showingMostRecentMatches: String { AppL10n.copyLocale == .frCA ? "Voici les résultats les plus récents. Précisez la recherche pour voir les plus anciens." : "Showing the most recent matches. Narrow the search to see older ones." }
 
     /// `inbox.showing_recent_conversations_older`
-    internal static var showingRecentConversationsOlder: String { AppL10n.copyLocale == .frCA ? "Showing recent conversations. Older, quieter threads are not listed." : "Showing recent conversations. Older, quieter threads are not listed." }
+    internal static var showingRecentConversationsOlder: String { AppL10n.copyLocale == .frCA ? "Voici les conversations récentes. Les plus anciennes et moins actives n'y figurent pas." : "Showing recent conversations. Older, quieter threads are not listed." }
 
     /// `inbox.sms`
     internal static var sms: String { AppL10n.copyLocale == .frCA ? "SMS" : "SMS" }
 
     /// `inbox.subject`
-    internal static var subject: String { AppL10n.copyLocale == .frCA ? "Subject" : "Subject" }
+    internal static var subject: String { AppL10n.copyLocale == .frCA ? "Objet" : "Subject" }
 
     /// `inbox.suggestions_failed`
     internal static func suggestionsFailed(_ message: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(message) You can still enter a number or an email address above." : "\(message) You can still enter a number or an email address above."
+        AppL10n.copyLocale == .frCA ? "\(message) Vous pouvez quand même saisir un numéro ou une adresse courriel ci-dessus." : "\(message) You can still enter a number or an email address above."
     }
 
     /// `inbox.texts_emails_customers_will`
-    internal static var textsEmailsCustomersWill: String { AppL10n.copyLocale == .frCA ? "Texts and emails from your customers will appear here." : "Texts and emails from your customers will appear here." }
+    internal static var textsEmailsCustomersWill: String { AppL10n.copyLocale == .frCA ? "Les textos et les courriels de vos clients apparaîtront ici." : "Texts and emails from your customers will appear here." }
 
     /// `inbox.to`
-    internal static var to: String { AppL10n.copyLocale == .frCA ? "To" : "To" }
+    internal static var to: String { AppL10n.copyLocale == .frCA ? "À" : "To" }
 
     /// `inbox.transcript`
-    internal static var transcript: String { AppL10n.copyLocale == .frCA ? "Transcript" : "Transcript" }
+    internal static var transcript: String { AppL10n.copyLocale == .frCA ? "Transcription" : "Transcript" }
 
     /// `inbox.try_again`
-    internal static var tryAgain: String { AppL10n.copyLocale == .frCA ? "Try again" : "Try again" }
+    internal static var tryAgain: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 
     /// `inbox.unread_count`
     internal static func unreadCount(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
-            return "\(count) unread"
+            if count == 0 || count == 1 {
+                return "\(count) non lu"
+            }
+            return "\(count) non lus"
         }
         return "\(count) unread"
     }
@@ -1486,13 +1489,13 @@ extension InboxCopy {
 
 extension IncomingCallCopy {
     /// `incoming_call.answer`
-    internal static var answer: String { AppL10n.copyLocale == .frCA ? "Answer" : "Answer" }
+    internal static var answer: String { AppL10n.copyLocale == .frCA ? "Répondre" : "Answer" }
 
     /// `incoming_call.answer_notice`
-    internal static var answerNotice: String { AppL10n.copyLocale == .frCA ? "Answering turns on your microphone." : "Answering turns on your microphone." }
+    internal static var answerNotice: String { AppL10n.copyLocale == .frCA ? "Répondre active votre microphone." : "Answering turns on your microphone." }
 
     /// `incoming_call.answering`
-    internal static var answering: String { AppL10n.copyLocale == .frCA ? "Answering…" : "Answering…" }
+    internal static var answering: String { AppL10n.copyLocale == .frCA ? "Réponse…" : "Answering…" }
 
     /// `incoming_call.caller_line_with_workspace`
     internal static func callerLineWithWorkspace(_ lead: String, _ workspace: String) -> String {
@@ -1501,154 +1504,154 @@ extension IncomingCallCopy {
 
     /// `incoming_call.connected`
     internal static func connected(_ duration: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Connected · \(duration)" : "Connected · \(duration)"
+        AppL10n.copyLocale == .frCA ? "Connecté · \(duration)" : "Connected · \(duration)"
     }
 
     /// `incoming_call.decline`
-    internal static var decline: String { AppL10n.copyLocale == .frCA ? "Decline" : "Decline" }
+    internal static var decline: String { AppL10n.copyLocale == .frCA ? "Refuser" : "Decline" }
 
     /// `incoming_call.done`
-    internal static var done: String { AppL10n.copyLocale == .frCA ? "Done" : "Done" }
+    internal static var done: String { AppL10n.copyLocale == .frCA ? "OK" : "Done" }
 
     /// `incoming_call.incoming_call`
-    internal static var incomingCall: String { AppL10n.copyLocale == .frCA ? "Incoming call" : "Incoming call" }
+    internal static var incomingCall: String { AppL10n.copyLocale == .frCA ? "Appel entrant" : "Incoming call" }
 
     /// `incoming_call.ringing`
-    internal static var ringing: String { AppL10n.copyLocale == .frCA ? "Ringing…" : "Ringing…" }
+    internal static var ringing: String { AppL10n.copyLocale == .frCA ? "Sonnerie…" : "Ringing…" }
 }
 
 extension LiveTranscriptCopy {
     /// `live_transcript.connecting`
-    internal static var connecting: String { AppL10n.copyLocale == .frCA ? "Connecting…" : "Connecting…" }
+    internal static var connecting: String { AppL10n.copyLocale == .frCA ? "Connexion…" : "Connecting…" }
 
     /// `live_transcript.ended`
-    internal static var ended: String { AppL10n.copyLocale == .frCA ? "Call ended" : "Call ended" }
+    internal static var ended: String { AppL10n.copyLocale == .frCA ? "Appel terminé" : "Call ended" }
 
     /// `live_transcript.full_transcript`
-    internal static var fullTranscript: String { AppL10n.copyLocale == .frCA ? "Transcript" : "Transcript" }
+    internal static var fullTranscript: String { AppL10n.copyLocale == .frCA ? "Transcription" : "Transcript" }
 
     /// `live_transcript.heading`
-    internal static var heading: String { AppL10n.copyLocale == .frCA ? "Live transcript" : "Live transcript" }
+    internal static var heading: String { AppL10n.copyLocale == .frCA ? "Transcription en direct" : "Live transcript" }
 
     /// `live_transcript.incomplete`
-    internal static var incomplete: String { AppL10n.copyLocale == .frCA ? "Earlier lines will appear in the full transcript after the call." : "Earlier lines will appear in the full transcript after the call." }
+    internal static var incomplete: String { AppL10n.copyLocale == .frCA ? "Les répliques précédentes figureront dans la transcription complète après l'appel." : "Earlier lines will appear in the full transcript after the call." }
 
     /// `live_transcript.interrupted`
-    internal static var interrupted: String { AppL10n.copyLocale == .frCA ? "Interrupted" : "Interrupted" }
+    internal static var interrupted: String { AppL10n.copyLocale == .frCA ? "Interrompue" : "Interrupted" }
 
     /// `live_transcript.live`
-    internal static var live: String { AppL10n.copyLocale == .frCA ? "Live" : "Live" }
+    internal static var live: String { AppL10n.copyLocale == .frCA ? "En direct" : "Live" }
 
     /// `live_transcript.loading_full`
-    internal static var loadingFull: String { AppL10n.copyLocale == .frCA ? "Loading the full transcript…" : "Loading the full transcript…" }
+    internal static var loadingFull: String { AppL10n.copyLocale == .frCA ? "Chargement de la transcription complète…" : "Loading the full transcript…" }
 
     /// `live_transcript.no_transcript`
-    internal static var noTranscript: String { AppL10n.copyLocale == .frCA ? "No transcript for this call." : "No transcript for this call." }
+    internal static var noTranscript: String { AppL10n.copyLocale == .frCA ? "Aucune transcription pour cet appel." : "No transcript for this call." }
 
     /// `live_transcript.reconnecting`
-    internal static var reconnecting: String { AppL10n.copyLocale == .frCA ? "Reconnecting…" : "Reconnecting…" }
+    internal static var reconnecting: String { AppL10n.copyLocale == .frCA ? "Reconnexion…" : "Reconnecting…" }
 
     /// `live_transcript.speaker_assistant`
-    internal static var speakerAssistant: String { AppL10n.copyLocale == .frCA ? "Assistant" : "Assistant" }
+    internal static var speakerAssistant: String { AppL10n.copyLocale == .frCA ? "Assistante" : "Assistant" }
 
     /// `live_transcript.speaker_caller`
-    internal static var speakerCaller: String { AppL10n.copyLocale == .frCA ? "Caller" : "Caller" }
+    internal static var speakerCaller: String { AppL10n.copyLocale == .frCA ? "Appelant" : "Caller" }
 
     /// `live_transcript.speaker_other`
-    internal static var speakerOther: String { AppL10n.copyLocale == .frCA ? "Other speaker" : "Other speaker" }
+    internal static var speakerOther: String { AppL10n.copyLocale == .frCA ? "Autre participant" : "Other speaker" }
 
     /// `live_transcript.waiting`
-    internal static var waiting: String { AppL10n.copyLocale == .frCA ? "Nothing has been said yet." : "Nothing has been said yet." }
+    internal static var waiting: String { AppL10n.copyLocale == .frCA ? "Rien n'a encore été dit." : "Nothing has been said yet." }
 }
 
 extension MarketplaceCopy {
     /// `marketplace.a2p_business_label`
-    internal static var a2pBusinessLabel: String { AppL10n.copyLocale == .frCA ? "Legal business name" : "Legal business name" }
+    internal static var a2pBusinessLabel: String { AppL10n.copyLocale == .frCA ? "Dénomination sociale" : "Legal business name" }
 
     /// `marketplace.a2p_caption`
-    internal static var a2pCaption: String { AppL10n.copyLocale == .frCA ? "Required before this workspace can send text messages to US numbers from a local number." : "Required before this workspace can send text messages to US numbers from a local number." }
+    internal static var a2pCaption: String { AppL10n.copyLocale == .frCA ? "Obligatoire pour que cet espace de travail envoie des textos aux numéros des États-Unis depuis un numéro local." : "Required before this workspace can send text messages to US numbers from a local number." }
 
     /// `marketplace.a2p_confirm_action`
-    internal static var a2pConfirmAction: String { AppL10n.copyLocale == .frCA ? "Submit it" : "Submit it" }
+    internal static var a2pConfirmAction: String { AppL10n.copyLocale == .frCA ? "Soumettre" : "Submit it" }
 
     /// `marketplace.a2p_confirm_body`
-    internal static var a2pConfirmBody: String { AppL10n.copyLocale == .frCA ? "This registers a brand and a campaign on your carrier account. The carrier charges a one-off brand fee and a monthly campaign fee, and a repeated submission leaves duplicates somebody has to clear by hand." : "This registers a brand and a campaign on your carrier account. The carrier charges a one-off brand fee and a monthly campaign fee, and a repeated submission leaves duplicates somebody has to clear by hand." }
+    internal static var a2pConfirmBody: String { AppL10n.copyLocale == .frCA ? "Cette action inscrit une marque et une campagne dans votre compte de transporteur. Le transporteur facture des frais uniques pour la marque et des frais mensuels pour la campagne, et une soumission répétée laisse des doublons que quelqu'un devra supprimer à la main." : "This registers a brand and a campaign on your carrier account. The carrier charges a one-off brand fee and a monthly campaign fee, and a repeated submission leaves duplicates somebody has to clear by hand." }
 
     /// `marketplace.a2p_confirm_title`
-    internal static var a2pConfirmTitle: String { AppL10n.copyLocale == .frCA ? "Submit this registration?" : "Submit this registration?" }
+    internal static var a2pConfirmTitle: String { AppL10n.copyLocale == .frCA ? "Soumettre cette inscription?" : "Submit this registration?" }
 
     /// `marketplace.a2p_description_label`
-    internal static var a2pDescriptionLabel: String { AppL10n.copyLocale == .frCA ? "What you will send" : "What you will send" }
+    internal static var a2pDescriptionLabel: String { AppL10n.copyLocale == .frCA ? "Ce que vous enverrez" : "What you will send" }
 
     /// `marketplace.a2p_ein_label`
-    internal static var a2pEinLabel: String { AppL10n.copyLocale == .frCA ? "EIN or company number (optional)" : "EIN or company number (optional)" }
+    internal static var a2pEinLabel: String { AppL10n.copyLocale == .frCA ? "EIN ou numéro d'entreprise (facultatif)" : "EIN or company number (optional)" }
 
     /// `marketplace.a2p_sample_one_label`
-    internal static var a2pSampleOneLabel: String { AppL10n.copyLocale == .frCA ? "Example message 1" : "Example message 1" }
+    internal static var a2pSampleOneLabel: String { AppL10n.copyLocale == .frCA ? "Exemple de message 1" : "Example message 1" }
 
     /// `marketplace.a2p_sample_two_label`
-    internal static var a2pSampleTwoLabel: String { AppL10n.copyLocale == .frCA ? "Example message 2" : "Example message 2" }
+    internal static var a2pSampleTwoLabel: String { AppL10n.copyLocale == .frCA ? "Exemple de message 2" : "Example message 2" }
 
     /// `marketplace.a2p_submit_action`
-    internal static var a2pSubmitAction: String { AppL10n.copyLocale == .frCA ? "Submit registration" : "Submit registration" }
+    internal static var a2pSubmitAction: String { AppL10n.copyLocale == .frCA ? "Soumettre l'inscription" : "Submit registration" }
 
     /// `marketplace.a2p_submitted`
     internal static func a2pSubmitted(status: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Submitted. The carrier reports \(status)." : "Submitted. The carrier reports \(status)."
+        AppL10n.copyLocale == .frCA ? "Soumise. État selon le transporteur\u{00A0}: \(status)." : "Submitted. The carrier reports \(status)."
     }
 
     /// `marketplace.a2p_title`
-    internal static var a2pTitle: String { AppL10n.copyLocale == .frCA ? "A2P 10DLC registration" : "A2P 10DLC registration" }
+    internal static var a2pTitle: String { AppL10n.copyLocale == .frCA ? "Inscription A2P 10DLC" : "A2P 10DLC registration" }
 
     /// `marketplace.a2p_vertical_label`
-    internal static var a2pVerticalLabel: String { AppL10n.copyLocale == .frCA ? "Industry (optional)" : "Industry (optional)" }
+    internal static var a2pVerticalLabel: String { AppL10n.copyLocale == .frCA ? "Secteur (facultatif)" : "Industry (optional)" }
 
     /// `marketplace.a2p_website_label`
-    internal static var a2pWebsiteLabel: String { AppL10n.copyLocale == .frCA ? "Website (optional)" : "Website (optional)" }
+    internal static var a2pWebsiteLabel: String { AppL10n.copyLocale == .frCA ? "Site Internet (facultatif)" : "Website (optional)" }
 
     /// `marketplace.area_code_label`
-    internal static var areaCodeLabel: String { AppL10n.copyLocale == .frCA ? "Area code" : "Area code" }
+    internal static var areaCodeLabel: String { AppL10n.copyLocale == .frCA ? "Indicatif régional" : "Area code" }
 
     /// `marketplace.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `marketplace.carrier`
     internal static func carrier(_ provider: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Carrier: \(provider)" : "Carrier: \(provider)"
+        AppL10n.copyLocale == .frCA ? "Transporteur\u{00A0}: \(provider)" : "Carrier: \(provider)"
     }
 
     /// `marketplace.carrier_balance_amount`
     internal static func carrierBalanceAmount(_ balance: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Balance \(balance)" : "Balance \(balance)"
+        AppL10n.copyLocale == .frCA ? "Solde\u{00A0}: \(balance)" : "Balance \(balance)"
     }
 
     /// `marketplace.carrier_balance_with_currency`
     internal static func carrierBalanceWithCurrency(_ balance: String, _ currency: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Balance \(balance) \(currency)" : "Balance \(balance) \(currency)"
+        AppL10n.copyLocale == .frCA ? "Solde\u{00A0}: \(balance) \(currency)" : "Balance \(balance) \(currency)"
     }
 
     /// `marketplace.carrier_connected`
-    internal static var carrierConnected: String { AppL10n.copyLocale == .frCA ? "Connected" : "Connected" }
+    internal static var carrierConnected: String { AppL10n.copyLocale == .frCA ? "Connecté" : "Connected" }
 
     /// `marketplace.carrier_eyebrow`
-    internal static var carrierEyebrow: String { AppL10n.copyLocale == .frCA ? "Carrier accounts" : "Carrier accounts" }
+    internal static var carrierEyebrow: String { AppL10n.copyLocale == .frCA ? "Comptes de transporteur" : "Carrier accounts" }
 
     /// `marketplace.carrier_managed`
-    internal static var carrierManaged: String { AppL10n.copyLocale == .frCA ? "Held by Distronode. Account details are not this workspace's to see." : "Held by Distronode. Account details are not this workspace's to see." }
+    internal static var carrierManaged: String { AppL10n.copyLocale == .frCA ? "Détenu par Distronode. Cet espace de travail n'a pas accès aux détails du compte." : "Held by Distronode. Account details are not this workspace's to see." }
 
     /// `marketplace.carrier_none_body`
-    internal static var carrierNoneBody: String { AppL10n.copyLocale == .frCA ? "This workspace has no carrier credentials, so numbers cannot be searched, configured or registered yet." : "This workspace has no carrier credentials, so numbers cannot be searched, configured or registered yet." }
+    internal static var carrierNoneBody: String { AppL10n.copyLocale == .frCA ? "Sans identifiants de transporteur, cet espace de travail ne permet encore ni la recherche, ni la configuration, ni l'inscription de numéros." : "This workspace has no carrier credentials, so numbers cannot be searched, configured or registered yet." }
 
     /// `marketplace.carrier_none_title`
-    internal static var carrierNoneTitle: String { AppL10n.copyLocale == .frCA ? "No carrier connected" : "No carrier connected" }
+    internal static var carrierNoneTitle: String { AppL10n.copyLocale == .frCA ? "Aucun transporteur connecté" : "No carrier connected" }
 
     /// `marketplace.carrier_number_count`
     internal static func carrierNumberCount(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
-            if count == 1 {
-                return "\(count) number on this account"
+            if count == 0 || count == 1 {
+                return "\(count) numéro dans ce compte"
             }
-            return "\(count) numbers on this account"
+            return "\(count) numéros dans ce compte"
         }
         if count == 1 {
             return "\(count) number on this account"
@@ -1657,73 +1660,73 @@ extension MarketplaceCopy {
     }
 
     /// `marketplace.carrier_refused`
-    internal static var carrierRefused: String { AppL10n.copyLocale == .frCA ? "These credentials were refused. The account cannot be reconnected in this app." : "These credentials were refused. The account cannot be reconnected in this app." }
+    internal static var carrierRefused: String { AppL10n.copyLocale == .frCA ? "Ces identifiants ont été refusés. Le compte ne peut pas être reconnecté dans cette app." : "These credentials were refused. The account cannot be reconnected in this app." }
 
     /// `marketplace.carrier_refused_badge`
-    internal static var carrierRefusedBadge: String { AppL10n.copyLocale == .frCA ? "Credentials refused" : "Credentials refused" }
+    internal static var carrierRefusedBadge: String { AppL10n.copyLocale == .frCA ? "Identifiants refusés" : "Credentials refused" }
 
     /// `marketplace.close`
-    internal static var close: String { AppL10n.copyLocale == .frCA ? "Close" : "Close" }
+    internal static var close: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Close" }
 
     /// `marketplace.compliance_eyebrow`
-    internal static var complianceEyebrow: String { AppL10n.copyLocale == .frCA ? "Messaging compliance" : "Messaging compliance" }
+    internal static var complianceEyebrow: String { AppL10n.copyLocale == .frCA ? "Conformité des messages" : "Messaging compliance" }
 
     /// `marketplace.compliance_no_status`
-    internal static var complianceNoStatus: String { AppL10n.copyLocale == .frCA ? "Neither registration can be checked from the app. What you see here is what the carrier answered when it was submitted." : "Neither registration can be checked from the app. What you see here is what the carrier answered when it was submitted." }
+    internal static var complianceNoStatus: String { AppL10n.copyLocale == .frCA ? "Aucune des deux inscriptions ne peut être vérifiée dans l'app. Vous voyez ici la réponse du transporteur au moment de la soumission." : "Neither registration can be checked from the app. What you see here is what the carrier answered when it was submitted." }
 
     /// `marketplace.configure_action`
-    internal static var configureAction: String { AppL10n.copyLocale == .frCA ? "Reapply call routing" : "Reapply call routing" }
+    internal static var configureAction: String { AppL10n.copyLocale == .frCA ? "Rétablir l'acheminement" : "Reapply call routing" }
 
     /// `marketplace.configure_caption`
-    internal static var configureCaption: String { AppL10n.copyLocale == .frCA ? "Points this number's calls and messages back at this workspace, and re-pins an EU number to its European bridge." : "Points this number's calls and messages back at this workspace, and re-pins an EU number to its European bridge." }
+    internal static var configureCaption: String { AppL10n.copyLocale == .frCA ? "Cette action réachemine les appels et les messages de ce numéro vers cet espace de travail, et rattache un numéro de l'UE à la passerelle européenne." : "Points this number's calls and messages back at this workspace, and re-pins an EU number to its European bridge." }
 
     /// `marketplace.configure_done`
-    internal static var configureDone: String { AppL10n.copyLocale == .frCA ? "Routing reapplied." : "Routing reapplied." }
+    internal static var configureDone: String { AppL10n.copyLocale == .frCA ? "Acheminement rétabli." : "Routing reapplied." }
 
     /// `marketplace.country_label`
-    internal static var countryLabel: String { AppL10n.copyLocale == .frCA ? "Country" : "Country" }
+    internal static var countryLabel: String { AppL10n.copyLocale == .frCA ? "Pays" : "Country" }
 
     /// `marketplace.default_country`
-    internal static var defaultCountry: String { AppL10n.copyLocale == .frCA ? "US" : "US" }
+    internal static var defaultCountry: String { AppL10n.copyLocale == .frCA ? "États-Unis" : "US" }
 
     /// `marketplace.document_remove_action`
-    internal static var documentRemoveAction: String { AppL10n.copyLocale == .frCA ? "Remove" : "Remove" }
+    internal static var documentRemoveAction: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
 
     /// `marketplace.lookup_action`
-    internal static var lookupAction: String { AppL10n.copyLocale == .frCA ? "Look this number up" : "Look this number up" }
+    internal static var lookupAction: String { AppL10n.copyLocale == .frCA ? "Rechercher ce numéro" : "Look this number up" }
 
     /// `marketplace.lookup_confirm_action`
-    internal static var lookupConfirmAction: String { AppL10n.copyLocale == .frCA ? "Run it" : "Run it" }
+    internal static var lookupConfirmAction: String { AppL10n.copyLocale == .frCA ? "Lancer" : "Run it" }
 
     /// `marketplace.lookup_confirm_body`
-    internal static var lookupConfirmBody: String { AppL10n.copyLocale == .frCA ? "Your carrier charges for each lookup, including one that comes back invalid. One tap runs exactly one lookup." : "Your carrier charges for each lookup, including one that comes back invalid. One tap runs exactly one lookup." }
+    internal static var lookupConfirmBody: String { AppL10n.copyLocale == .frCA ? "Votre transporteur facture chaque recherche, y compris celles dont le résultat est invalide. Chaque appui lance une seule recherche." : "Your carrier charges for each lookup, including one that comes back invalid. One tap runs exactly one lookup." }
 
     /// `marketplace.lookup_confirm_title`
-    internal static var lookupConfirmTitle: String { AppL10n.copyLocale == .frCA ? "Run a paid lookup?" : "Run a paid lookup?" }
+    internal static var lookupConfirmTitle: String { AppL10n.copyLocale == .frCA ? "Lancer une recherche payante?" : "Run a paid lookup?" }
 
     /// `marketplace.lookup_eyebrow`
-    internal static var lookupEyebrow: String { AppL10n.copyLocale == .frCA ? "Number lookup" : "Number lookup" }
+    internal static var lookupEyebrow: String { AppL10n.copyLocale == .frCA ? "Recherche de numéro" : "Number lookup" }
 
     /// `marketplace.lookup_invalid`
-    internal static var lookupInvalid: String { AppL10n.copyLocale == .frCA ? "The carrier could not recognise that number." : "The carrier could not recognise that number." }
+    internal static var lookupInvalid: String { AppL10n.copyLocale == .frCA ? "Le transporteur n'a pas reconnu ce numéro." : "The carrier could not recognise that number." }
 
     /// `marketplace.lookup_number_label`
-    internal static var lookupNumberLabel: String { AppL10n.copyLocale == .frCA ? "Phone number, in full" : "Phone number, in full" }
+    internal static var lookupNumberLabel: String { AppL10n.copyLocale == .frCA ? "Numéro de téléphone complet" : "Phone number, in full" }
 
     /// `marketplace.managed`
-    internal static var managed: String { AppL10n.copyLocale == .frCA ? "Managed by Distronode" : "Managed by Distronode" }
+    internal static var managed: String { AppL10n.copyLocale == .frCA ? "Géré par Distronode" : "Managed by Distronode" }
 
     /// `marketplace.managed_no_release`
-    internal static var managedNoRelease: String { AppL10n.copyLocale == .frCA ? "This line is held on Distronode's carrier account, so it is yours to use and not to release or reconfigure." : "This line is held on Distronode's carrier account, so it is yours to use and not to release or reconfigure." }
+    internal static var managedNoRelease: String { AppL10n.copyLocale == .frCA ? "Cette ligne est détenue sur le compte de transporteur de Distronode\u{00A0}: vous pouvez l'utiliser, mais pas la libérer ni la reconfigurer." : "This line is held on Distronode's carrier account, so it is yours to use and not to release or reconfigure." }
 
     /// `marketplace.not_configured_fallback`
-    internal static var notConfiguredFallback: String { AppL10n.copyLocale == .frCA ? "This workspace has no carrier connected yet. A carrier cannot be connected in this app." : "This workspace has no carrier connected yet. A carrier cannot be connected in this app." }
+    internal static var notConfiguredFallback: String { AppL10n.copyLocale == .frCA ? "Aucun transporteur n'est encore connecté à cet espace de travail. Cette app ne permet pas d'en connecter un." : "This workspace has no carrier connected yet. A carrier cannot be connected in this app." }
 
     /// `marketplace.not_configured_title`
-    internal static var notConfiguredTitle: String { AppL10n.copyLocale == .frCA ? "No carrier connected" : "No carrier connected" }
+    internal static var notConfiguredTitle: String { AppL10n.copyLocale == .frCA ? "Aucun transporteur connecté" : "No carrier connected" }
 
     /// `marketplace.number_actions_title`
-    internal static var numberActionsTitle: String { AppL10n.copyLocale == .frCA ? "This number" : "This number" }
+    internal static var numberActionsTitle: String { AppL10n.copyLocale == .frCA ? "Ce numéro" : "This number" }
 
     /// `marketplace.number_meta`
     internal static func numberMeta(provider: String, status: String) -> String {
@@ -1731,78 +1734,78 @@ extension MarketplaceCopy {
     }
 
     /// `marketplace.owned_empty_body`
-    internal static var ownedEmptyBody: String { AppL10n.copyLocale == .frCA ? "This workspace has no active phone numbers." : "This workspace has no active phone numbers." }
+    internal static var ownedEmptyBody: String { AppL10n.copyLocale == .frCA ? "Cet espace de travail n'a aucun numéro actif." : "This workspace has no active phone numbers." }
 
     /// `marketplace.owned_empty_title`
-    internal static var ownedEmptyTitle: String { AppL10n.copyLocale == .frCA ? "No numbers yet" : "No numbers yet" }
+    internal static var ownedEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucun numéro" : "No numbers yet" }
 
     /// `marketplace.owned_failed`
-    internal static var ownedFailed: String { AppL10n.copyLocale == .frCA ? "Could not load this workspace's numbers." : "Could not load this workspace's numbers." }
+    internal static var ownedFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de charger les numéros de cet espace de travail." : "Could not load this workspace's numbers." }
 
     /// `marketplace.partial_banner_named`
     internal static func partialBannerNamed(_ providers: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Could not reach \(providers), so this list may be missing numbers." : "Could not reach \(providers), so this list may be missing numbers."
+        AppL10n.copyLocale == .frCA ? "Impossible de joindre \(providers), donc cette liste pourrait être incomplète." : "Could not reach \(providers), so this list may be missing numbers."
     }
 
     /// `marketplace.partial_banner_unnamed`
-    internal static var partialBannerUnnamed: String { AppL10n.copyLocale == .frCA ? "A carrier did not answer, so this list may be missing numbers." : "A carrier did not answer, so this list may be missing numbers." }
+    internal static var partialBannerUnnamed: String { AppL10n.copyLocale == .frCA ? "Un transporteur n'a pas répondu, donc cette liste pourrait être incomplète." : "A carrier did not answer, so this list may be missing numbers." }
 
     /// `marketplace.purchase_elsewhere`
-    internal static var purchaseElsewhere: String { AppL10n.copyLocale == .frCA ? "New numbers cannot be purchased in this app. Everything else about a number, including its paperwork and releasing it, is here." : "New numbers cannot be purchased in this app. Everything else about a number, including its paperwork and releasing it, is here." }
+    internal static var purchaseElsewhere: String { AppL10n.copyLocale == .frCA ? "Cette app ne permet pas d'acheter de nouveaux numéros. Tout le reste concernant un numéro, y compris ses inscriptions et sa libération, se trouve ici." : "New numbers cannot be purchased in this app. Everything else about a number, including its paperwork and releasing it, is here." }
 
     /// `marketplace.read_only`
-    internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Everything else about your numbers is on the other tabs." : "Everything else about your numbers is on the other tabs." }
+    internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Tout le reste concernant vos numéros se trouve dans les autres onglets." : "Everything else about your numbers is on the other tabs." }
 
     /// `marketplace.read_only_viewer`
-    internal static var readOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Changing a number needs an agency or client role. Ask someone on this workspace who has one." : "Changing a number needs an agency or client role. Ask someone on this workspace who has one." }
+    internal static var readOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Modifier un numéro exige un rôle Agence ou Client. Demandez à un membre de cet espace de travail qui en a un." : "Changing a number needs an agency or client role. Ask someone on this workspace who has one." }
 
     /// `marketplace.ready_buy_today`
-    internal static var readyBuyToday: String { AppL10n.copyLocale == .frCA ? "Ready to buy today" : "Ready to buy today" }
+    internal static var readyBuyToday: String { AppL10n.copyLocale == .frCA ? "Achat immédiat" : "Ready to buy today" }
 
     /// `marketplace.registration_country_label`
-    internal static var registrationCountryLabel: String { AppL10n.copyLocale == .frCA ? "Country (two letters)" : "Country (two letters)" }
+    internal static var registrationCountryLabel: String { AppL10n.copyLocale == .frCA ? "Pays (deux lettres)" : "Country (two letters)" }
 
     /// `marketplace.registration_document_filed`
-    internal static var registrationDocumentFiled: String { AppL10n.copyLocale == .frCA ? "Filed with the carrier" : "Filed with the carrier" }
+    internal static var registrationDocumentFiled: String { AppL10n.copyLocale == .frCA ? "Déposé chez le transporteur" : "Filed with the carrier" }
 
     /// `marketplace.registration_document_recorded`
-    internal static var registrationDocumentRecorded: String { AppL10n.copyLocale == .frCA ? "Recorded, no file yet" : "Recorded, no file yet" }
+    internal static var registrationDocumentRecorded: String { AppL10n.copyLocale == .frCA ? "Consigné, aucun fichier pour l'instant" : "Recorded, no file yet" }
 
     /// `marketplace.registration_document_stored`
-    internal static var registrationDocumentStored: String { AppL10n.copyLocale == .frCA ? "Stored, not yet filed" : "Stored, not yet filed" }
+    internal static var registrationDocumentStored: String { AppL10n.copyLocale == .frCA ? "Stocké, pas encore déposé" : "Stored, not yet filed" }
 
     /// `marketplace.registration_documents_eyebrow`
     internal static var registrationDocumentsEyebrow: String { AppL10n.copyLocale == .frCA ? "Documents" : "Documents" }
 
     /// `marketplace.registration_name_label`
-    internal static var registrationNameLabel: String { AppL10n.copyLocale == .frCA ? "Name for your carrier console (optional)" : "Name for your carrier console (optional)" }
+    internal static var registrationNameLabel: String { AppL10n.copyLocale == .frCA ? "Nom dans votre console de transporteur (facultatif)" : "Name for your carrier console (optional)" }
 
     /// `marketplace.registration_reasons_eyebrow`
-    internal static var registrationReasonsEyebrow: String { AppL10n.copyLocale == .frCA ? "What the carrier objected to" : "What the carrier objected to" }
+    internal static var registrationReasonsEyebrow: String { AppL10n.copyLocale == .frCA ? "Objections du transporteur" : "What the carrier objected to" }
 
     /// `marketplace.registration_start_action`
-    internal static var registrationStartAction: String { AppL10n.copyLocale == .frCA ? "Start registration" : "Start registration" }
+    internal static var registrationStartAction: String { AppL10n.copyLocale == .frCA ? "Commencer l'inscription" : "Start registration" }
 
     /// `marketplace.registration_start_title`
-    internal static var registrationStartTitle: String { AppL10n.copyLocale == .frCA ? "Start a registration" : "Start a registration" }
+    internal static var registrationStartTitle: String { AppL10n.copyLocale == .frCA ? "Commencer une inscription" : "Start a registration" }
 
     /// `marketplace.registration_status_approved`
-    internal static var registrationStatusApproved: String { AppL10n.copyLocale == .frCA ? "Approved" : "Approved" }
+    internal static var registrationStatusApproved: String { AppL10n.copyLocale == .frCA ? "Approuvée" : "Approved" }
 
     /// `marketplace.registration_status_caption`
-    internal static var registrationStatusCaption: String { AppL10n.copyLocale == .frCA ? "Statuses are refreshed when this list loads. A review can take a day or more." : "Statuses are refreshed when this list loads. A review can take a day or more." }
+    internal static var registrationStatusCaption: String { AppL10n.copyLocale == .frCA ? "Les états sont actualisés au chargement de cette liste. Un examen peut prendre un jour ou plus." : "Statuses are refreshed when this list loads. A review can take a day or more." }
 
     /// `marketplace.registration_status_draft`
-    internal static var registrationStatusDraft: String { AppL10n.copyLocale == .frCA ? "Draft, not yet filed" : "Draft, not yet filed" }
+    internal static var registrationStatusDraft: String { AppL10n.copyLocale == .frCA ? "Brouillon, non déposé" : "Draft, not yet filed" }
 
     /// `marketplace.registration_status_in_review`
-    internal static var registrationStatusInReview: String { AppL10n.copyLocale == .frCA ? "Under review" : "Under review" }
+    internal static var registrationStatusInReview: String { AppL10n.copyLocale == .frCA ? "En cours d'examen" : "Under review" }
 
     /// `marketplace.registration_status_pending_review`
-    internal static var registrationStatusPendingReview: String { AppL10n.copyLocale == .frCA ? "Filed, waiting for review" : "Filed, waiting for review" }
+    internal static var registrationStatusPendingReview: String { AppL10n.copyLocale == .frCA ? "Déposée, en attente d'examen" : "Filed, waiting for review" }
 
     /// `marketplace.registration_status_refused`
-    internal static var registrationStatusRefused: String { AppL10n.copyLocale == .frCA ? "Refused" : "Refused" }
+    internal static var registrationStatusRefused: String { AppL10n.copyLocale == .frCA ? "Refusée" : "Refused" }
 
     /// `marketplace.registration_title`
     internal static func registrationTitle(country: String, numberType number_type: String) -> String {
@@ -1810,83 +1813,83 @@ extension MarketplaceCopy {
     }
 
     /// `marketplace.registrations_empty_body`
-    internal static var registrationsEmptyBody: String { AppL10n.copyLocale == .frCA ? "Some countries require a registration before a number there can be bought. Start one for the country you want." : "Some countries require a registration before a number there can be bought. Start one for the country you want." }
+    internal static var registrationsEmptyBody: String { AppL10n.copyLocale == .frCA ? "Certains pays exigent une inscription avant qu'un numéro puisse y être acheté. Commencez-en une pour le pays voulu." : "Some countries require a registration before a number there can be bought. Start one for the country you want." }
 
     /// `marketplace.registrations_empty_title`
-    internal static var registrationsEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Nothing filed yet" : "Nothing filed yet" }
+    internal static var registrationsEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucune demande déposée" : "Nothing filed yet" }
 
     /// `marketplace.registrations_eyebrow`
-    internal static var registrationsEyebrow: String { AppL10n.copyLocale == .frCA ? "Regulatory registrations" : "Regulatory registrations" }
+    internal static var registrationsEyebrow: String { AppL10n.copyLocale == .frCA ? "Inscriptions réglementaires" : "Regulatory registrations" }
 
     /// `marketplace.registrations_failed`
-    internal static var registrationsFailed: String { AppL10n.copyLocale == .frCA ? "Could not load this workspace's registrations." : "Could not load this workspace's registrations." }
+    internal static var registrationsFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de charger les inscriptions de cet espace de travail." : "Could not load this workspace's registrations." }
 
     /// `marketplace.release_action`
-    internal static var releaseAction: String { AppL10n.copyLocale == .frCA ? "Release this number" : "Release this number" }
+    internal static var releaseAction: String { AppL10n.copyLocale == .frCA ? "Libérer ce numéro" : "Release this number" }
 
     /// `marketplace.release_confirm_action`
-    internal static var releaseConfirmAction: String { AppL10n.copyLocale == .frCA ? "Release it" : "Release it" }
+    internal static var releaseConfirmAction: String { AppL10n.copyLocale == .frCA ? "Libérer" : "Release it" }
 
     /// `marketplace.release_confirm_body`
     internal static func releaseConfirmBody(_ phone_number: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(phone_number) goes back to the carrier's pool and generally cannot be reclaimed. Calls and messages to it stop immediately, so anyone dialling it reaches nothing. Its monthly charge ends." : "\(phone_number) goes back to the carrier's pool and generally cannot be reclaimed. Calls and messages to it stop immediately, so anyone dialling it reaches nothing. Its monthly charge ends."
+        AppL10n.copyLocale == .frCA ? "\(phone_number) retourne dans la réserve du transporteur et ne peut généralement pas être récupéré. Les appels et les messages vers ce numéro cessent immédiatement\u{00A0}: quiconque le compose ne joint plus personne. Ses frais mensuels prennent fin." : "\(phone_number) goes back to the carrier's pool and generally cannot be reclaimed. Calls and messages to it stop immediately, so anyone dialling it reaches nothing. Its monthly charge ends."
     }
 
     /// `marketplace.release_confirm_title`
-    internal static var releaseConfirmTitle: String { AppL10n.copyLocale == .frCA ? "Release this number?" : "Release this number?" }
+    internal static var releaseConfirmTitle: String { AppL10n.copyLocale == .frCA ? "Libérer ce numéro?" : "Release this number?" }
 
     /// `marketplace.release_done`
-    internal static var releaseDone: String { AppL10n.copyLocale == .frCA ? "Released. Reload your numbers." : "Released. Reload your numbers." }
+    internal static var releaseDone: String { AppL10n.copyLocale == .frCA ? "Numéro libéré. Actualisez la liste de vos numéros." : "Released. Reload your numbers." }
 
     /// `marketplace.release_warning_eyebrow`
-    internal static var releaseWarningEyebrow: String { AppL10n.copyLocale == .frCA ? "Released, but" : "Released, but" }
+    internal static var releaseWarningEyebrow: String { AppL10n.copyLocale == .frCA ? "Numéro libéré, mais" : "Released, but" }
 
     /// `marketplace.requirement_kind_document`
     internal static var requirementKindDocument: String { AppL10n.copyLocale == .frCA ? "Document" : "Document" }
 
     /// `marketplace.requirement_kind_field`
-    internal static var requirementKindField: String { AppL10n.copyLocale == .frCA ? "Detail" : "Detail" }
+    internal static var requirementKindField: String { AppL10n.copyLocale == .frCA ? "Détail" : "Detail" }
 
     /// `marketplace.requirement_no_fields`
-    internal static var requirementNoFields: String { AppL10n.copyLocale == .frCA ? "No fields" : "No fields" }
+    internal static var requirementNoFields: String { AppL10n.copyLocale == .frCA ? "Aucun champ" : "No fields" }
 
     /// `marketplace.requirements_check_action`
-    internal static var requirementsCheckAction: String { AppL10n.copyLocale == .frCA ? "Check requirements" : "Check requirements" }
+    internal static var requirementsCheckAction: String { AppL10n.copyLocale == .frCA ? "Vérifier les exigences" : "Check requirements" }
 
     /// `marketplace.requirements_eyebrow`
-    internal static var requirementsEyebrow: String { AppL10n.copyLocale == .frCA ? "What this country asks for" : "What this country asks for" }
+    internal static var requirementsEyebrow: String { AppL10n.copyLocale == .frCA ? "Exigences de ce pays" : "What this country asks for" }
 
     /// `marketplace.requirements_none_body`
-    internal static var requirementsNoneBody: String { AppL10n.copyLocale == .frCA ? "This country publishes no regulation for this number type, so there is nothing to file." : "This country publishes no regulation for this number type, so there is nothing to file." }
+    internal static var requirementsNoneBody: String { AppL10n.copyLocale == .frCA ? "Ce pays ne publie aucune réglementation pour ce type de numéro; il n'y a donc rien à déposer." : "This country publishes no regulation for this number type, so there is nothing to file." }
 
     /// `marketplace.requirements_none_title`
-    internal static var requirementsNoneTitle: String { AppL10n.copyLocale == .frCA ? "No registration required" : "No registration required" }
+    internal static var requirementsNoneTitle: String { AppL10n.copyLocale == .frCA ? "Aucune inscription requise" : "No registration required" }
 
     /// `marketplace.requirements_not_purchasable`
-    internal static var requirementsNotPurchasable: String { AppL10n.copyLocale == .frCA ? "Numbers in this country are not purchasable through Distronode today, even with a registration." : "Numbers in this country are not purchasable through Distronode today, even with a registration." }
+    internal static var requirementsNotPurchasable: String { AppL10n.copyLocale == .frCA ? "Les numéros de ce pays ne peuvent pas être achetés auprès de Distronode pour l'instant, même avec une inscription." : "Numbers in this country are not purchasable through Distronode today, even with a registration." }
 
     /// `marketplace.retry`
-    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Try again" : "Try again" }
+    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 
     /// `marketplace.search_action`
-    internal static var searchAction: String { AppL10n.copyLocale == .frCA ? "Search available numbers" : "Search available numbers" }
+    internal static var searchAction: String { AppL10n.copyLocale == .frCA ? "Trouver des numéros disponibles" : "Search available numbers" }
 
     /// `marketplace.search_empty_body`
-    internal static var searchEmptyBody: String { AppL10n.copyLocale == .frCA ? "The carrier has no numbers matching these filters. Try a different area code or number type." : "The carrier has no numbers matching these filters. Try a different area code or number type." }
+    internal static var searchEmptyBody: String { AppL10n.copyLocale == .frCA ? "Le transporteur n'a aucun numéro correspondant à ces filtres. Essayez un autre indicatif régional ou type de numéro." : "The carrier has no numbers matching these filters. Try a different area code or number type." }
 
     /// `marketplace.search_empty_title`
-    internal static var searchEmptyTitle: String { AppL10n.copyLocale == .frCA ? "No matches" : "No matches" }
+    internal static var searchEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucun résultat" : "No matches" }
 
     /// `marketplace.search_failed`
-    internal static var searchFailed: String { AppL10n.copyLocale == .frCA ? "Could not search for numbers." : "Could not search for numbers." }
+    internal static var searchFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de rechercher des numéros." : "Could not search for numbers." }
 
     /// `marketplace.sip_address_count`
     internal static func sipAddressCount(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
-            if count == 1 {
-                return "\(count) address"
+            if count == 0 || count == 1 {
+                return "\(count) adresse"
             }
-            return "\(count) addresses"
+            return "\(count) adresses"
         }
         if count == 1 {
             return "\(count) address"
@@ -1895,31 +1898,31 @@ extension MarketplaceCopy {
     }
 
     /// `marketplace.sip_create_action`
-    internal static var sipCreateAction: String { AppL10n.copyLocale == .frCA ? "Create trunk" : "Create trunk" }
+    internal static var sipCreateAction: String { AppL10n.copyLocale == .frCA ? "Créer le raccordement" : "Create trunk" }
 
     /// `marketplace.sip_domain_caption`
-    internal static var sipDomainCaption: String { AppL10n.copyLocale == .frCA ? "The carrier adds .sip.twilio.com, so enter the label only." : "The carrier adds .sip.twilio.com, so enter the label only." }
+    internal static var sipDomainCaption: String { AppL10n.copyLocale == .frCA ? "Le transporteur ajoute .sip.twilio.com\u{00A0}: saisissez seulement l'étiquette." : "The carrier adds .sip.twilio.com, so enter the label only." }
 
     /// `marketplace.sip_domain_label`
-    internal static var sipDomainLabel: String { AppL10n.copyLocale == .frCA ? "Domain label" : "Domain label" }
+    internal static var sipDomainLabel: String { AppL10n.copyLocale == .frCA ? "Étiquette de domaine" : "Domain label" }
 
     /// `marketplace.sip_empty_body`
-    internal static var sipEmptyBody: String { AppL10n.copyLocale == .frCA ? "A SIP trunk lets your own PBX send and receive calls on this workspace's numbers." : "A SIP trunk lets your own PBX send and receive calls on this workspace's numbers." }
+    internal static var sipEmptyBody: String { AppL10n.copyLocale == .frCA ? "Avec un raccordement SIP, votre PBX passe et reçoit des appels sur les numéros de cet espace de travail." : "A SIP trunk lets your own PBX send and receive calls on this workspace's numbers." }
 
     /// `marketplace.sip_empty_title`
-    internal static var sipEmptyTitle: String { AppL10n.copyLocale == .frCA ? "No SIP trunks" : "No SIP trunks" }
+    internal static var sipEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucun raccordement SIP" : "No SIP trunks" }
 
     /// `marketplace.sip_eyebrow`
-    internal static var sipEyebrow: String { AppL10n.copyLocale == .frCA ? "SIP trunks" : "SIP trunks" }
+    internal static var sipEyebrow: String { AppL10n.copyLocale == .frCA ? "Raccordements SIP" : "SIP trunks" }
 
     /// `marketplace.sip_ip_label`
-    internal static var sipIpLabel: String { AppL10n.copyLocale == .frCA ? "Allowed IPs or ranges, one per line" : "Allowed IPs or ranges, one per line" }
+    internal static var sipIpLabel: String { AppL10n.copyLocale == .frCA ? "Adresses IP ou plages permises, une par ligne" : "Allowed IPs or ranges, one per line" }
 
     /// `marketplace.sip_name_label`
-    internal static var sipNameLabel: String { AppL10n.copyLocale == .frCA ? "Trunk name" : "Trunk name" }
+    internal static var sipNameLabel: String { AppL10n.copyLocale == .frCA ? "Nom du raccordement" : "Trunk name" }
 
     /// `marketplace.sip_one_way`
-    internal static var sipOneWay: String { AppL10n.copyLocale == .frCA ? "Creating a trunk adds a $25 per month charge, and it cannot be removed in this app." : "Creating a trunk adds a $25 per month charge, and it cannot be removed in this app." }
+    internal static var sipOneWay: String { AppL10n.copyLocale == .frCA ? "Un raccordement ajoute des frais de 25\u{00A0}$ par mois et ne peut pas être supprimé dans cette app." : "Creating a trunk adds a $25 per month charge, and it cannot be removed in this app." }
 
     /// `marketplace.sip_trunk_meta_line`
     internal static func sipTrunkMetaLine(_ status: String, _ addresses: String) -> String {
@@ -1927,79 +1930,79 @@ extension MarketplaceCopy {
     }
 
     /// `marketplace.sip_unprovisioned`
-    internal static var sipUnprovisioned: String { AppL10n.copyLocale == .frCA ? "No carrier resources are recorded for this trunk." : "No carrier resources are recorded for this trunk." }
+    internal static var sipUnprovisioned: String { AppL10n.copyLocale == .frCA ? "Aucune ressource du transporteur n'est consignée pour ce raccordement." : "No carrier resources are recorded for this trunk." }
 
     /// `marketplace.submit_confirm_action`
-    internal static var submitConfirmAction: String { AppL10n.copyLocale == .frCA ? "File it" : "File it" }
+    internal static var submitConfirmAction: String { AppL10n.copyLocale == .frCA ? "Déposer" : "File it" }
 
     /// `marketplace.submit_confirm_body`
     internal static func submitConfirmBody(country: String) -> String {
-        AppL10n.copyLocale == .frCA ? "This uploads your documents to the carrier and files a regulatory application for \(country) in your business's name. Review can take a day or more, and the filing cannot be edited while it is under review." : "This uploads your documents to the carrier and files a regulatory application for \(country) in your business's name. Review can take a day or more, and the filing cannot be edited while it is under review."
+        AppL10n.copyLocale == .frCA ? "Cette action téléverse vos documents vers le transporteur et dépose une demande réglementaire au nom de votre entreprise (pays\u{00A0}: \(country)). L'examen peut prendre un jour ou plus, et le dépôt ne peut pas être modifié pendant l'examen." : "This uploads your documents to the carrier and files a regulatory application for \(country) in your business's name. Review can take a day or more, and the filing cannot be edited while it is under review."
     }
 
     /// `marketplace.submit_confirm_title`
-    internal static var submitConfirmTitle: String { AppL10n.copyLocale == .frCA ? "File this registration?" : "File this registration?" }
+    internal static var submitConfirmTitle: String { AppL10n.copyLocale == .frCA ? "Déposer cette inscription?" : "File this registration?" }
 
     /// `marketplace.submit_filed`
-    internal static var submitFiled: String { AppL10n.copyLocale == .frCA ? "Filed. The carrier is reviewing it." : "Filed. The carrier is reviewing it." }
+    internal static var submitFiled: String { AppL10n.copyLocale == .frCA ? "Déposée. Le transporteur l'examine." : "Filed. The carrier is reviewing it." }
 
     /// `marketplace.submit_refused_because`
     internal static func submitRefusedBecause(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(reason) The carrier refused it. Reload the list to see what it objected to." : "\(reason) The carrier refused it. Reload the list to see what it objected to."
+        AppL10n.copyLocale == .frCA ? "\(reason) Le transporteur a refusé le dépôt. Actualisez la liste pour voir ses objections." : "\(reason) The carrier refused it. Reload the list to see what it objected to."
     }
 
     /// `marketplace.submit_refused_reread`
-    internal static var submitRefusedReread: String { AppL10n.copyLocale == .frCA ? "The carrier refused it. Reload the list to see what it objected to." : "The carrier refused it. Reload the list to see what it objected to." }
+    internal static var submitRefusedReread: String { AppL10n.copyLocale == .frCA ? "Le transporteur a refusé le dépôt. Actualisez la liste pour voir ses objections." : "The carrier refused it. Reload the list to see what it objected to." }
 
     /// `marketplace.tab_carrier`
-    internal static var tabCarrier: String { AppL10n.copyLocale == .frCA ? "Carrier" : "Carrier" }
+    internal static var tabCarrier: String { AppL10n.copyLocale == .frCA ? "Transporteur" : "Carrier" }
 
     /// `marketplace.tab_owned`
-    internal static var tabOwned: String { AppL10n.copyLocale == .frCA ? "My numbers" : "My numbers" }
+    internal static var tabOwned: String { AppL10n.copyLocale == .frCA ? "Mes numéros" : "My numbers" }
 
     /// `marketplace.tab_registrations`
-    internal static var tabRegistrations: String { AppL10n.copyLocale == .frCA ? "Registrations" : "Registrations" }
+    internal static var tabRegistrations: String { AppL10n.copyLocale == .frCA ? "Inscriptions" : "Registrations" }
 
     /// `marketplace.tab_search`
-    internal static var tabSearch: String { AppL10n.copyLocale == .frCA ? "Search" : "Search" }
+    internal static var tabSearch: String { AppL10n.copyLocale == .frCA ? "Rechercher" : "Search" }
 
     /// `marketplace.tfv_caption`
-    internal static var tfvCaption: String { AppL10n.copyLocale == .frCA ? "Required before a toll-free number can send text messages." : "Required before a toll-free number can send text messages." }
+    internal static var tfvCaption: String { AppL10n.copyLocale == .frCA ? "Obligatoire avant qu'un numéro sans frais puisse envoyer des textos." : "Required before a toll-free number can send text messages." }
 
     /// `marketplace.tfv_confirm_action`
-    internal static var tfvConfirmAction: String { AppL10n.copyLocale == .frCA ? "Submit it" : "Submit it" }
+    internal static var tfvConfirmAction: String { AppL10n.copyLocale == .frCA ? "Soumettre" : "Submit it" }
 
     /// `marketplace.tfv_confirm_body`
-    internal static var tfvConfirmBody: String { AppL10n.copyLocale == .frCA ? "This files a verification with the carrier for a number that is already answering calls, and puts it into a manual review that takes days. Repeated submissions for one number can put your carrier account's standing in question." : "This files a verification with the carrier for a number that is already answering calls, and puts it into a manual review that takes days. Repeated submissions for one number can put your carrier account's standing in question." }
+    internal static var tfvConfirmBody: String { AppL10n.copyLocale == .frCA ? "Cette action dépose auprès du transporteur une demande de vérification pour un numéro qui répond déjà aux appels, et la soumet à un examen manuel de plusieurs jours. Des soumissions répétées pour un même numéro peuvent nuire à la réputation de votre compte de transporteur." : "This files a verification with the carrier for a number that is already answering calls, and puts it into a manual review that takes days. Repeated submissions for one number can put your carrier account's standing in question." }
 
     /// `marketplace.tfv_confirm_title`
-    internal static var tfvConfirmTitle: String { AppL10n.copyLocale == .frCA ? "Submit this verification?" : "Submit this verification?" }
+    internal static var tfvConfirmTitle: String { AppL10n.copyLocale == .frCA ? "Soumettre cette vérification?" : "Submit this verification?" }
 
     /// `marketplace.tfv_message_label`
-    internal static var tfvMessageLabel: String { AppL10n.copyLocale == .frCA ? "Example message (optional)" : "Example message (optional)" }
+    internal static var tfvMessageLabel: String { AppL10n.copyLocale == .frCA ? "Exemple de message (facultatif)" : "Example message (optional)" }
 
     /// `marketplace.tfv_opt_in_caption`
-    internal static var tfvOptInCaption: String { AppL10n.copyLocale == .frCA ? "A reviewer opens this by hand. It must be publicly reachable and show your own consent wording." : "A reviewer opens this by hand. It must be publicly reachable and show your own consent wording." }
+    internal static var tfvOptInCaption: String { AppL10n.copyLocale == .frCA ? "Un examinateur ouvre ce lien manuellement. Le lien doit être accessible publiquement et afficher votre propre texte de consentement." : "A reviewer opens this by hand. It must be publicly reachable and show your own consent wording." }
 
     /// `marketplace.tfv_opt_in_label`
-    internal static var tfvOptInLabel: String { AppL10n.copyLocale == .frCA ? "Link to your opt-in form or screenshot" : "Link to your opt-in form or screenshot" }
+    internal static var tfvOptInLabel: String { AppL10n.copyLocale == .frCA ? "Lien vers votre formulaire de consentement ou une capture d'écran" : "Link to your opt-in form or screenshot" }
 
     /// `marketplace.tfv_submit_action`
-    internal static var tfvSubmitAction: String { AppL10n.copyLocale == .frCA ? "Submit verification" : "Submit verification" }
+    internal static var tfvSubmitAction: String { AppL10n.copyLocale == .frCA ? "Soumettre la vérification" : "Submit verification" }
 
     /// `marketplace.tfv_submitted`
     internal static func tfvSubmitted(status: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Submitted. The carrier reports \(status)." : "Submitted. The carrier reports \(status)."
+        AppL10n.copyLocale == .frCA ? "Soumise. État selon le transporteur\u{00A0}: \(status)." : "Submitted. The carrier reports \(status)."
     }
 
     /// `marketplace.tfv_title`
-    internal static var tfvTitle: String { AppL10n.copyLocale == .frCA ? "Toll-free verification" : "Toll-free verification" }
+    internal static var tfvTitle: String { AppL10n.copyLocale == .frCA ? "Vérification du numéro sans frais" : "Toll-free verification" }
 
     /// `marketplace.tfv_use_case_customer_support`
-    internal static var tfvUseCaseCustomerSupport: String { AppL10n.copyLocale == .frCA ? "Customer Support" : "Customer Support" }
+    internal static var tfvUseCaseCustomerSupport: String { AppL10n.copyLocale == .frCA ? "Soutien à la clientèle" : "Customer Support" }
 
     /// `marketplace.tfv_use_case_label`
-    internal static var tfvUseCaseLabel: String { AppL10n.copyLocale == .frCA ? "Use case" : "Use case" }
+    internal static var tfvUseCaseLabel: String { AppL10n.copyLocale == .frCA ? "Utilisation" : "Use case" }
 
     /// `marketplace.tfv_use_case_marketing`
     internal static var tfvUseCaseMarketing: String { AppL10n.copyLocale == .frCA ? "Marketing" : "Marketing" }
@@ -2008,10 +2011,10 @@ extension MarketplaceCopy {
     internal static var tfvUseCaseNotifications: String { AppL10n.copyLocale == .frCA ? "Notifications" : "Notifications" }
 
     /// `marketplace.tfv_use_case_otp`
-    internal static var tfvUseCaseOtp: String { AppL10n.copyLocale == .frCA ? "2FA / OTP" : "2FA / OTP" }
+    internal static var tfvUseCaseOtp: String { AppL10n.copyLocale == .frCA ? "2FA / code unique" : "2FA / OTP" }
 
     /// `marketplace.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Phone numbers" : "Phone numbers" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Numéros de téléphone" : "Phone numbers" }
 
     /// `marketplace.type_local_label`
     internal static var typeLocalLabel: String { AppL10n.copyLocale == .frCA ? "Local" : "Local" }
@@ -2020,172 +2023,172 @@ extension MarketplaceCopy {
     internal static var typeMobileLabel: String { AppL10n.copyLocale == .frCA ? "Mobile" : "Mobile" }
 
     /// `marketplace.type_toll_free_label`
-    internal static var typeTollFreeLabel: String { AppL10n.copyLocale == .frCA ? "Toll-free" : "Toll-free" }
+    internal static var typeTollFreeLabel: String { AppL10n.copyLocale == .frCA ? "Sans frais" : "Toll-free" }
 
     /// `marketplace.verify_disable_action`
-    internal static var verifyDisableAction: String { AppL10n.copyLocale == .frCA ? "Stop using one-time passcodes" : "Stop using one-time passcodes" }
+    internal static var verifyDisableAction: String { AppL10n.copyLocale == .frCA ? "Désactiver les codes à usage unique" : "Stop using one-time passcodes" }
 
     /// `marketplace.verify_disable_caption`
-    internal static var verifyDisableCaption: String { AppL10n.copyLocale == .frCA ? "Turning this off stops Distronode using the service. The carrier keeps it, and its history, on your account." : "Turning this off stops Distronode using the service. The carrier keeps it, and its history, on your account." }
+    internal static var verifyDisableCaption: String { AppL10n.copyLocale == .frCA ? "Une fois désactivé, ce service n'est plus utilisé par Distronode. Le transporteur le conserve, avec son historique, dans votre compte." : "Turning this off stops Distronode using the service. The carrier keeps it, and its history, on your account." }
 
     /// `marketplace.verify_enable_action`
-    internal static var verifyEnableAction: String { AppL10n.copyLocale == .frCA ? "Enable one-time passcodes" : "Enable one-time passcodes" }
+    internal static var verifyEnableAction: String { AppL10n.copyLocale == .frCA ? "Activer les codes à usage unique" : "Enable one-time passcodes" }
 
     /// `marketplace.verify_enable_caption`
-    internal static var verifyEnableCaption: String { AppL10n.copyLocale == .frCA ? "Creates a one-time passcode sender on your carrier account. The carrier charges for the messages it sends." : "Creates a one-time passcode sender on your carrier account. The carrier charges for the messages it sends." }
+    internal static var verifyEnableCaption: String { AppL10n.copyLocale == .frCA ? "Cette option crée un expéditeur de codes à usage unique dans votre compte de transporteur. Le transporteur facture les messages qu'il envoie." : "Creates a one-time passcode sender on your carrier account. The carrier charges for the messages it sends." }
 
     /// `marketplace.verify_eyebrow`
-    internal static var verifyEyebrow: String { AppL10n.copyLocale == .frCA ? "One-time passcodes" : "One-time passcodes" }
+    internal static var verifyEyebrow: String { AppL10n.copyLocale == .frCA ? "Codes à usage unique" : "One-time passcodes" }
 
     /// `marketplace.verify_off`
-    internal static var verifyOff: String { AppL10n.copyLocale == .frCA ? "Not enabled" : "Not enabled" }
+    internal static var verifyOff: String { AppL10n.copyLocale == .frCA ? "Non activé" : "Not enabled" }
 
     /// `marketplace.verify_on`
-    internal static var verifyOn: String { AppL10n.copyLocale == .frCA ? "Enabled" : "Enabled" }
+    internal static var verifyOn: String { AppL10n.copyLocale == .frCA ? "Activé" : "Enabled" }
 
     /// `marketplace.viewer_cannot_provision`
-    internal static var viewerCannotProvision: String { AppL10n.copyLocale == .frCA ? "Registrations, carrier setup and number changes need an agency or client role. Ask someone on this workspace who has one." : "Registrations, carrier setup and number changes need an agency or client role. Ask someone on this workspace who has one." }
+    internal static var viewerCannotProvision: String { AppL10n.copyLocale == .frCA ? "Les inscriptions, la configuration du transporteur et la gestion des numéros exigent le rôle Agence ou Client. Demandez à un membre qui a l'un de ces rôles." : "Registrations, carrier setup and number changes need an agency or client role. Ask someone on this workspace who has one." }
 
     /// `marketplace.working`
-    internal static var working: String { AppL10n.copyLocale == .frCA ? "Working…" : "Working…" }
+    internal static var working: String { AppL10n.copyLocale == .frCA ? "En cours…" : "Working…" }
 
     /// `marketplace.write_unrepeatable`
-    internal static var writeUnrepeatable: String { AppL10n.copyLocale == .frCA ? "We could not confirm whether that went through, so it is not offered again. Reload to see where things stand." : "We could not confirm whether that went through, so it is not offered again. Reload to see where things stand." }
+    internal static var writeUnrepeatable: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu confirmer si l'opération a abouti; elle n'est donc pas proposée de nouveau. Actualisez pour voir où en sont les choses." : "We could not confirm whether that went through, so it is not offered again. Reload to see where things stand." }
 
     /// `marketplace.your_approvals`
-    internal static var yourApprovals: String { AppL10n.copyLocale == .frCA ? "Your approvals" : "Your approvals" }
+    internal static var yourApprovals: String { AppL10n.copyLocale == .frCA ? "Vos approbations" : "Your approvals" }
 }
 
 extension MfaCopy {
     /// `mfa.authenticator_placeholder`
-    internal static var authenticatorPlaceholder: String { AppL10n.copyLocale == .frCA ? "6-digit code" : "6-digit code" }
+    internal static var authenticatorPlaceholder: String { AppL10n.copyLocale == .frCA ? "Code à 6 chiffres" : "6-digit code" }
 
     /// `mfa.authenticator_prompt`
-    internal static var authenticatorPrompt: String { AppL10n.copyLocale == .frCA ? "Your account uses an authenticator app. Enter the 6-digit code it shows for District AI." : "Your account uses an authenticator app. Enter the 6-digit code it shows for District AI." }
+    internal static var authenticatorPrompt: String { AppL10n.copyLocale == .frCA ? "Votre compte utilise une app d'authentification. Entrez le code à 6 chiffres qu'elle affiche pour District AI." : "Your account uses an authenticator app. Enter the 6-digit code it shows for District AI." }
 
     /// `mfa.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `mfa.expired`
-    internal static var expired: String { AppL10n.copyLocale == .frCA ? "That sign-in timed out. Sign in with Apple again." : "That sign-in timed out. Sign in with Apple again." }
+    internal static var expired: String { AppL10n.copyLocale == .frCA ? "Cette connexion a expiré. Connectez-vous de nouveau avec Apple." : "That sign-in timed out. Sign in with Apple again." }
 
     /// `mfa.recovery_placeholder`
-    internal static var recoveryPlaceholder: String { AppL10n.copyLocale == .frCA ? "Recovery code" : "Recovery code" }
+    internal static var recoveryPlaceholder: String { AppL10n.copyLocale == .frCA ? "Code de récupération" : "Recovery code" }
 
     /// `mfa.recovery_prompt`
-    internal static var recoveryPrompt: String { AppL10n.copyLocale == .frCA ? "Enter one of the recovery codes you saved when you set up your authenticator app. Each code works once." : "Enter one of the recovery codes you saved when you set up your authenticator app. Each code works once." }
+    internal static var recoveryPrompt: String { AppL10n.copyLocale == .frCA ? "Entrez l'un des codes de récupération que vous avez conservés lors de la configuration de votre app d'authentification. Chaque code ne sert qu'une fois." : "Enter one of the recovery codes you saved when you set up your authenticator app. Each code works once." }
 
     /// `mfa.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Enter your code" : "Enter your code" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Entrez votre code" : "Enter your code" }
 
     /// `mfa.use_authenticator`
-    internal static var useAuthenticator: String { AppL10n.copyLocale == .frCA ? "Use your authenticator app instead" : "Use your authenticator app instead" }
+    internal static var useAuthenticator: String { AppL10n.copyLocale == .frCA ? "Utiliser votre app d'authentification" : "Use your authenticator app instead" }
 
     /// `mfa.use_recovery`
-    internal static var useRecovery: String { AppL10n.copyLocale == .frCA ? "Use a recovery code instead" : "Use a recovery code instead" }
+    internal static var useRecovery: String { AppL10n.copyLocale == .frCA ? "Utiliser un code de récupération" : "Use a recovery code instead" }
 
     /// `mfa.verify`
-    internal static var verify: String { AppL10n.copyLocale == .frCA ? "Verify" : "Verify" }
+    internal static var verify: String { AppL10n.copyLocale == .frCA ? "Vérifier" : "Verify" }
 
     /// `mfa.wrong_code`
-    internal static var wrongCode: String { AppL10n.copyLocale == .frCA ? "That code did not work. Check the code and try again." : "That code did not work. Check the code and try again." }
+    internal static var wrongCode: String { AppL10n.copyLocale == .frCA ? "Ce code n'a pas fonctionné. Vérifiez-le et réessayez." : "That code did not work. Check the code and try again." }
 }
 
 extension NavigationCopy {
     /// `navigation.account_does_not_belong`
-    internal static var accountDoesNotBelong: String { AppL10n.copyLocale == .frCA ? "This account does not belong to a workspace. Ask whoever invited you to add you to one." : "This account does not belong to a workspace. Ask whoever invited you to add you to one." }
+    internal static var accountDoesNotBelong: String { AppL10n.copyLocale == .frCA ? "Ce compte n'appartient à aucun espace de travail. Demandez à la personne à l'origine de l'invitation de vous ajouter." : "This account does not belong to a workspace. Ask whoever invited you to add you to one." }
 
     /// `navigation.analytics`
-    internal static var analytics: String { AppL10n.copyLocale == .frCA ? "Analytics" : "Analytics" }
+    internal static var analytics: String { AppL10n.copyLocale == .frCA ? "Analytique" : "Analytics" }
 
     /// `navigation.conversation_could_not_opened`
-    internal static var conversationCouldNotOpened: String { AppL10n.copyLocale == .frCA ? "This conversation could not be opened, so the reply was not sent. Open the Inbox to send it." : "This conversation could not be opened, so the reply was not sent. Open the Inbox to send it." }
+    internal static var conversationCouldNotOpened: String { AppL10n.copyLocale == .frCA ? "Impossible d'ouvrir cette conversation; la réponse n'a donc pas été envoyée. Ouvrez la boîte de réception pour l'envoyer." : "This conversation could not be opened, so the reply was not sent. Open the Inbox to send it." }
 
     /// `navigation.dial`
-    internal static var dial: String { AppL10n.copyLocale == .frCA ? "Dial" : "Dial" }
+    internal static var dial: String { AppL10n.copyLocale == .frCA ? "Composer" : "Dial" }
 
     /// `navigation.go`
-    internal static var go: String { AppL10n.copyLocale == .frCA ? "Go" : "Go" }
+    internal static var go: String { AppL10n.copyLocale == .frCA ? "Aller" : "Go" }
 
     /// `navigation.lapsed_many`
-    internal static var lapsedMany: String { AppL10n.copyLocale == .frCA ? "Your workspaces are paused because the subscription is not active." : "Your workspaces are paused because the subscription is not active." }
+    internal static var lapsedMany: String { AppL10n.copyLocale == .frCA ? "Vos espaces de travail sont suspendus, car l'abonnement n'est pas actif." : "Your workspaces are paused because the subscription is not active." }
 
     /// `navigation.lapsed_one`
-    internal static var lapsedOne: String { AppL10n.copyLocale == .frCA ? "Your workspace is paused because the subscription is not active." : "Your workspace is paused because the subscription is not active." }
+    internal static var lapsedOne: String { AppL10n.copyLocale == .frCA ? "Votre espace de travail est suspendu, car l'abonnement n'est pas actif." : "Your workspace is paused because the subscription is not active." }
 
     /// `navigation.loading_your_workspace`
-    internal static var loadingYourWorkspace: String { AppL10n.copyLocale == .frCA ? "Loading your workspace…" : "Loading your workspace…" }
+    internal static var loadingYourWorkspace: String { AppL10n.copyLocale == .frCA ? "Chargement de votre espace de travail…" : "Loading your workspace…" }
 
     /// `navigation.loading_your_workspaces`
-    internal static var loadingYourWorkspaces: String { AppL10n.copyLocale == .frCA ? "Loading your workspaces…" : "Loading your workspaces…" }
+    internal static var loadingYourWorkspaces: String { AppL10n.copyLocale == .frCA ? "Chargement de vos espaces de travail…" : "Loading your workspaces…" }
 
     /// `navigation.new_message`
-    internal static var newMessage: String { AppL10n.copyLocale == .frCA ? "New Message" : "New Message" }
+    internal static var newMessage: String { AppL10n.copyLocale == .frCA ? "Nouveau message" : "New Message" }
 
     /// `navigation.no_workspaces_yet`
-    internal static var noWorkspacesYet: String { AppL10n.copyLocale == .frCA ? "No workspaces yet" : "No workspaces yet" }
+    internal static var noWorkspacesYet: String { AppL10n.copyLocale == .frCA ? "Aucun espace de travail" : "No workspaces yet" }
 
     /// `navigation.read_only`
-    internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Read-only" : "Read-only" }
+    internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Lecture seule" : "Read-only" }
 
     /// `navigation.refresh`
-    internal static var refresh: String { AppL10n.copyLocale == .frCA ? "Refresh" : "Refresh" }
+    internal static var refresh: String { AppL10n.copyLocale == .frCA ? "Actualiser" : "Refresh" }
 
     /// `navigation.scheduling`
-    internal static var scheduling: String { AppL10n.copyLocale == .frCA ? "Scheduling" : "Scheduling" }
+    internal static var scheduling: String { AppL10n.copyLocale == .frCA ? "Rendez-vous" : "Scheduling" }
 
     /// `navigation.search_messages`
-    internal static var searchMessages: String { AppL10n.copyLocale == .frCA ? "Search Messages" : "Search Messages" }
+    internal static var searchMessages: String { AppL10n.copyLocale == .frCA ? "Rechercher des messages" : "Search Messages" }
 
     /// `navigation.select_a_call`
-    internal static var selectACall: String { AppL10n.copyLocale == .frCA ? "Select a call" : "Select a call" }
+    internal static var selectACall: String { AppL10n.copyLocale == .frCA ? "Choisissez un appel" : "Select a call" }
 
     /// `navigation.select_a_contact`
-    internal static var selectAContact: String { AppL10n.copyLocale == .frCA ? "Select a contact" : "Select a contact" }
+    internal static var selectAContact: String { AppL10n.copyLocale == .frCA ? "Choisissez un contact" : "Select a contact" }
 
     /// `navigation.select_a_conversation`
-    internal static var selectAConversation: String { AppL10n.copyLocale == .frCA ? "Select a conversation" : "Select a conversation" }
+    internal static var selectAConversation: String { AppL10n.copyLocale == .frCA ? "Choisissez une conversation" : "Select a conversation" }
 
     /// `navigation.select_a_request`
-    internal static var selectARequest: String { AppL10n.copyLocale == .frCA ? "Select a request" : "Select a request" }
+    internal static var selectARequest: String { AppL10n.copyLocale == .frCA ? "Choisissez une demande" : "Select a request" }
 
     /// `navigation.select_a_ticket`
-    internal static var selectATicket: String { AppL10n.copyLocale == .frCA ? "Select a ticket" : "Select a ticket" }
+    internal static var selectATicket: String { AppL10n.copyLocale == .frCA ? "Choisissez un billet" : "Select a ticket" }
 
     /// `navigation.subscription_not_active`
-    internal static var subscriptionNotActive: String { AppL10n.copyLocale == .frCA ? "Subscription not active" : "Subscription not active" }
+    internal static var subscriptionNotActive: String { AppL10n.copyLocale == .frCA ? "Abonnement inactif" : "Subscription not active" }
 
     /// `navigation.tab_account`
-    internal static var tabAccount: String { AppL10n.copyLocale == .frCA ? "Account" : "Account" }
+    internal static var tabAccount: String { AppL10n.copyLocale == .frCA ? "Compte" : "Account" }
 
     /// `navigation.tab_calls`
-    internal static var tabCalls: String { AppL10n.copyLocale == .frCA ? "Calls" : "Calls" }
+    internal static var tabCalls: String { AppL10n.copyLocale == .frCA ? "Appels" : "Calls" }
 
     /// `navigation.tab_contacts`
     internal static var tabContacts: String { AppL10n.copyLocale == .frCA ? "Contacts" : "Contacts" }
 
     /// `navigation.tab_inbox`
-    internal static var tabInbox: String { AppL10n.copyLocale == .frCA ? "Inbox" : "Inbox" }
+    internal static var tabInbox: String { AppL10n.copyLocale == .frCA ? "Boîte de réception" : "Inbox" }
 
     /// `navigation.tab_overview`
-    internal static var tabOverview: String { AppL10n.copyLocale == .frCA ? "Overview" : "Overview" }
+    internal static var tabOverview: String { AppL10n.copyLocale == .frCA ? "Vue d'ensemble" : "Overview" }
 }
 
 extension OverviewCopy {
     /// `overview.analytics`
-    internal static var analytics: String { AppL10n.copyLocale == .frCA ? "Analytics" : "Analytics" }
+    internal static var analytics: String { AppL10n.copyLocale == .frCA ? "Analytique" : "Analytics" }
 
     /// `overview.avg_call_duration`
-    internal static var avgCallDuration: String { AppL10n.copyLocale == .frCA ? "Avg Call Duration" : "Avg Call Duration" }
+    internal static var avgCallDuration: String { AppL10n.copyLocale == .frCA ? "Durée moyenne des appels" : "Avg Call Duration" }
 
     /// `overview.billing`
-    internal static var billing: String { AppL10n.copyLocale == .frCA ? "Billing" : "Billing" }
+    internal static var billing: String { AppL10n.copyLocale == .frCA ? "Facturation" : "Billing" }
 
     /// `overview.call_logs`
-    internal static var callLogs: String { AppL10n.copyLocale == .frCA ? "Call Logs" : "Call Logs" }
+    internal static var callLogs: String { AppL10n.copyLocale == .frCA ? "Journal des appels" : "Call Logs" }
 
     /// `overview.completed_all_time`
-    internal static var completedAllTime: String { AppL10n.copyLocale == .frCA ? "Completed, all time" : "Completed, all time" }
+    internal static var completedAllTime: String { AppL10n.copyLocale == .frCA ? "Appels terminés, au total" : "Completed, all time" }
 
     /// `overview.contacts`
     internal static var contacts: String { AppL10n.copyLocale == .frCA ? "Contacts" : "Contacts" }
@@ -2194,127 +2197,127 @@ extension OverviewCopy {
     internal static var crm: String { AppL10n.copyLocale == .frCA ? "CRM" : "CRM" }
 
     /// `overview.cumulative`
-    internal static var cumulative: String { AppL10n.copyLocale == .frCA ? "Cumulative" : "Cumulative" }
+    internal static var cumulative: String { AppL10n.copyLocale == .frCA ? "Cumulatif" : "Cumulative" }
 
     /// `overview.customer_contacts`
-    internal static var customerContacts: String { AppL10n.copyLocale == .frCA ? "Customer Contacts" : "Customer Contacts" }
+    internal static var customerContacts: String { AppL10n.copyLocale == .frCA ? "Contacts clients" : "Customer Contacts" }
 
     /// `overview.desk`
     internal static var desk: String { AppL10n.copyLocale == .frCA ? "Desk" : "Desk" }
 
     /// `overview.dial`
-    internal static var dial: String { AppL10n.copyLocale == .frCA ? "Dial" : "Dial" }
+    internal static var dial: String { AppL10n.copyLocale == .frCA ? "Composer" : "Dial" }
 
     /// `overview.inbound`
-    internal static var inbound: String { AppL10n.copyLocale == .frCA ? "Inbound" : "Inbound" }
+    internal static var inbound: String { AppL10n.copyLocale == .frCA ? "Entrant" : "Inbound" }
 
     /// `overview.inbound_outbound_calls_will`
-    internal static var inboundOutboundCallsWill: String { AppL10n.copyLocale == .frCA ? "Inbound and outbound calls will appear here as they happen." : "Inbound and outbound calls will appear here as they happen." }
+    internal static var inboundOutboundCallsWill: String { AppL10n.copyLocale == .frCA ? "Les appels entrants et sortants apparaîtront ici au fur et à mesure." : "Inbound and outbound calls will appear here as they happen." }
 
     /// `overview.last7_days`
-    internal static var last7Days: String { AppL10n.copyLocale == .frCA ? "Last 7 days" : "Last 7 days" }
+    internal static var last7Days: String { AppL10n.copyLocale == .frCA ? "7 derniers jours" : "Last 7 days" }
 
     /// `overview.live`
-    internal static var live: String { AppL10n.copyLocale == .frCA ? "Live" : "Live" }
+    internal static var live: String { AppL10n.copyLocale == .frCA ? "En direct" : "Live" }
 
     /// `overview.loading_your_overview`
-    internal static var loadingYourOverview: String { AppL10n.copyLocale == .frCA ? "Loading your overview…" : "Loading your overview…" }
+    internal static var loadingYourOverview: String { AppL10n.copyLocale == .frCA ? "Chargement de la vue d'ensemble…" : "Loading your overview…" }
 
     /// `overview.no_caller_id`
-    internal static var noCallerId: String { AppL10n.copyLocale == .frCA ? "No caller ID" : "No caller ID" }
+    internal static var noCallerId: String { AppL10n.copyLocale == .frCA ? "Aucun afficheur" : "No caller ID" }
 
     /// `overview.nothing_here_yet`
-    internal static var nothingHereYet: String { AppL10n.copyLocale == .frCA ? "Nothing here yet" : "Nothing here yet" }
+    internal static var nothingHereYet: String { AppL10n.copyLocale == .frCA ? "Rien pour l'instant" : "Nothing here yet" }
 
     /// `overview.open_district_hq`
-    internal static var openDistrictHq: String { AppL10n.copyLocale == .frCA ? "Open District HQ" : "Open District HQ" }
+    internal static var openDistrictHq: String { AppL10n.copyLocale == .frCA ? "Ouvrir District HQ" : "Open District HQ" }
 
     /// `overview.outbound`
-    internal static var outbound: String { AppL10n.copyLocale == .frCA ? "Outbound" : "Outbound" }
+    internal static var outbound: String { AppL10n.copyLocale == .frCA ? "Sortant" : "Outbound" }
 
     /// `overview.phone_numbers`
-    internal static var phoneNumbers: String { AppL10n.copyLocale == .frCA ? "Phone numbers" : "Phone numbers" }
+    internal static var phoneNumbers: String { AppL10n.copyLocale == .frCA ? "Numéros de téléphone" : "Phone numbers" }
 
     /// `overview.read_only`
-    internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Read-only" : "Read-only" }
+    internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Lecture seule" : "Read-only" }
 
     /// `overview.recent_activity`
-    internal static var recentActivity: String { AppL10n.copyLocale == .frCA ? "Recent Activity" : "Recent Activity" }
+    internal static var recentActivity: String { AppL10n.copyLocale == .frCA ? "Activité récente" : "Recent Activity" }
 
     /// `overview.rooms`
-    internal static var rooms: String { AppL10n.copyLocale == .frCA ? "Rooms" : "Rooms" }
+    internal static var rooms: String { AppL10n.copyLocale == .frCA ? "Salles" : "Rooms" }
 
     /// `overview.scheduling`
-    internal static var scheduling: String { AppL10n.copyLocale == .frCA ? "Scheduling" : "Scheduling" }
+    internal static var scheduling: String { AppL10n.copyLocale == .frCA ? "Rendez-vous" : "Scheduling" }
 
     /// `overview.support`
-    internal static var support: String { AppL10n.copyLocale == .frCA ? "Support" : "Support" }
+    internal static var support: String { AppL10n.copyLocale == .frCA ? "Soutien" : "Support" }
 
     /// `overview.total_calls_routed`
-    internal static var totalCallsRouted: String { AppL10n.copyLocale == .frCA ? "Total Calls Routed" : "Total Calls Routed" }
+    internal static var totalCallsRouted: String { AppL10n.copyLocale == .frCA ? "Appels acheminés au total" : "Total Calls Routed" }
 
     /// `overview.transfer_failed`
-    internal static var transferFailed: String { AppL10n.copyLocale == .frCA ? "Transfer failed" : "Transfer failed" }
+    internal static var transferFailed: String { AppL10n.copyLocale == .frCA ? "Échec du transfert" : "Transfer failed" }
 
     /// `overview.transferred`
-    internal static var transferred: String { AppL10n.copyLocale == .frCA ? "Transferred" : "Transferred" }
+    internal static var transferred: String { AppL10n.copyLocale == .frCA ? "Transféré" : "Transferred" }
 
     /// `overview.weekly_call_volume`
-    internal static var weeklyCallVolume: String { AppL10n.copyLocale == .frCA ? "Weekly Call Volume" : "Weekly Call Volume" }
+    internal static var weeklyCallVolume: String { AppL10n.copyLocale == .frCA ? "Volume d'appels hebdomadaire" : "Weekly Call Volume" }
 
     /// `overview.workflows`
-    internal static var workflows: String { AppL10n.copyLocale == .frCA ? "Workflows" : "Workflows" }
+    internal static var workflows: String { AppL10n.copyLocale == .frCA ? "Flux de travail" : "Workflows" }
 
     /// `overview.workspace`
-    internal static var workspace: String { AppL10n.copyLocale == .frCA ? "Workspace" : "Workspace" }
+    internal static var workspace: String { AppL10n.copyLocale == .frCA ? "Espace de travail" : "Workspace" }
 
     /// `overview.workspace_selected_no_longer`
-    internal static var workspaceSelectedNoLonger: String { AppL10n.copyLocale == .frCA ? "The workspace you selected is no longer the one we can report on. Please try again." : "The workspace you selected is no longer the one we can report on. Please try again." }
+    internal static var workspaceSelectedNoLonger: String { AppL10n.copyLocale == .frCA ? "L'espace de travail sélectionné n'est plus accessible. Veuillez réessayer." : "The workspace you selected is no longer the one we can report on. Please try again." }
 
     /// `overview.workspace_settings`
-    internal static var workspaceSettings: String { AppL10n.copyLocale == .frCA ? "Workspace settings" : "Workspace settings" }
+    internal static var workspaceSettings: String { AppL10n.copyLocale == .frCA ? "Réglages de l'espace" : "Workspace settings" }
 }
 
 extension PushStatusCopy {
     /// `push_status.apns_refused`
-    internal static var apnsRefused: String { AppL10n.copyLocale == .frCA ? "Allowed, but Apple did not issue a token for this device. Restart the app; if it persists, contact support." : "Allowed, but Apple did not issue a token for this device. Restart the app; if it persists, contact support." }
+    internal static var apnsRefused: String { AppL10n.copyLocale == .frCA ? "Autorisées, mais Apple n'a pas émis de jeton pour cet appareil. Redémarrez l'application; si cela persiste, communiquez avec le soutien." : "Allowed, but Apple did not issue a token for this device. Restart the app; if it persists, contact support." }
 
     /// `push_status.denied`
-    internal static var denied: String { AppL10n.copyLocale == .frCA ? "Turned off. Allow notifications for District AI in iOS Settings to receive calls and messages." : "Turned off. Allow notifications for District AI in iOS Settings to receive calls and messages." }
+    internal static var denied: String { AppL10n.copyLocale == .frCA ? "Désactivées. Pour recevoir appels et messages, il faut autoriser les notifications de District AI dans l'app Réglages." : "Turned off. Allow notifications for District AI in iOS Settings to receive calls and messages." }
 
     /// `push_status.not_asked`
-    internal static var notAsked: String { AppL10n.copyLocale == .frCA ? "Not set up on this device yet." : "Not set up on this device yet." }
+    internal static var notAsked: String { AppL10n.copyLocale == .frCA ? "Appareil pas encore configuré." : "Not set up on this device yet." }
 
     /// `push_status.not_attempted`
-    internal static var notAttempted: String { AppL10n.copyLocale == .frCA ? "Allowed. Setting up this device." : "Allowed. Setting up this device." }
+    internal static var notAttempted: String { AppL10n.copyLocale == .frCA ? "Autorisées. Configuration de cet appareil." : "Allowed. Setting up this device." }
 
     /// `push_status.refused`
     internal static func refused(_ status: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "Allowed, but District AI refused to set up this device (error \(status)). Contact support if it continues." : "Allowed, but District AI refused to set up this device (error \(status)). Contact support if it continues."
+        AppL10n.copyLocale == .frCA ? "Autorisées, mais District AI a refusé de configurer cet appareil (erreur \(status)). Communiquez avec le soutien si le problème persiste." : "Allowed, but District AI refused to set up this device (error \(status)). Contact support if it continues."
     }
 
     /// `push_status.registered`
-    internal static var registered: String { AppL10n.copyLocale == .frCA ? "Allowed. This device is set up to receive calls and messages." : "Allowed. This device is set up to receive calls and messages." }
+    internal static var registered: String { AppL10n.copyLocale == .frCA ? "Autorisées. Cet appareil est configuré pour recevoir les appels et les messages." : "Allowed. This device is set up to receive calls and messages." }
 
     /// `push_status.session_expired`
-    internal static var sessionExpired: String { AppL10n.copyLocale == .frCA ? "Allowed, but your session has expired. Sign out and sign in again." : "Allowed, but your session has expired. Sign out and sign in again." }
+    internal static var sessionExpired: String { AppL10n.copyLocale == .frCA ? "Autorisées, mais votre session a expiré. Déconnectez-vous, puis reconnectez-vous." : "Allowed, but your session has expired. Sign out and sign in again." }
 
     /// `push_status.title`
     internal static var title: String { AppL10n.copyLocale == .frCA ? "Notifications" : "Notifications" }
 
     /// `push_status.too_many_attempts`
-    internal static var tooManyAttempts: String { AppL10n.copyLocale == .frCA ? "Allowed, but too many attempts were made. This will retry shortly." : "Allowed, but too many attempts were made. This will retry shortly." }
+    internal static var tooManyAttempts: String { AppL10n.copyLocale == .frCA ? "Autorisées, mais il y a eu trop de tentatives. Une nouvelle tentative suivra sous peu." : "Allowed, but too many attempts were made. This will retry shortly." }
 
     /// `push_status.unavailable`
-    internal static var unavailable: String { AppL10n.copyLocale == .frCA ? "This device could not be asked for permission. Try again, or restart the app." : "This device could not be asked for permission. Try again, or restart the app." }
+    internal static var unavailable: String { AppL10n.copyLocale == .frCA ? "Impossible de demander l'autorisation sur cet appareil. Réessayez ou redémarrez l'application." : "This device could not be asked for permission. Try again, or restart the app." }
 
     /// `push_status.unreachable`
-    internal static var unreachable: String { AppL10n.copyLocale == .frCA ? "Allowed, but this device could not reach District AI. Check your connection." : "Allowed, but this device could not reach District AI. Check your connection." }
+    internal static var unreachable: String { AppL10n.copyLocale == .frCA ? "Autorisées, mais cet appareil n'a pas pu joindre District AI. Vérifiez votre connexion." : "Allowed, but this device could not reach District AI. Check your connection." }
 }
 
 extension RegionCopy {
     /// `region.apac`
-    internal static var apac: String { AppL10n.copyLocale == .frCA ? "APAC" : "APAC" }
+    internal static var apac: String { AppL10n.copyLocale == .frCA ? "Asie-Pacifique" : "APAC" }
 
     /// `region.ca`
     internal static var ca: String { AppL10n.copyLocale == .frCA ? "Canada" : "Canada" }
@@ -2323,44 +2326,44 @@ extension RegionCopy {
     internal static var eu: String { AppL10n.copyLocale == .frCA ? "Europe" : "Europe" }
 
     /// `region.us`
-    internal static var us: String { AppL10n.copyLocale == .frCA ? "US" : "US" }
+    internal static var us: String { AppL10n.copyLocale == .frCA ? "États-Unis" : "US" }
 }
 
 extension ReportCopy {
     /// `report.accepted`
-    internal static var accepted: String { AppL10n.copyLocale == .frCA ? "Reported. We'll review it." : "Reported. We'll review it." }
+    internal static var accepted: String { AppL10n.copyLocale == .frCA ? "Signalé. Nous allons l'examiner." : "Reported. We'll review it." }
 
     /// `report.already_reported`
-    internal static var alreadyReported: String { AppL10n.copyLocale == .frCA ? "You have already reported this. We'll review it." : "You have already reported this. We'll review it." }
+    internal static var alreadyReported: String { AppL10n.copyLocale == .frCA ? "Vous avez déjà fait ce signalement. Nous allons l'examiner." : "You have already reported this. We'll review it." }
 
     /// `report.base_subject`
     internal static var baseSubject: String { AppL10n.copyLocale == .frCA ? "Report: objectionable content" : "Report: objectionable content" }
 
     /// `report.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `report.headline_call`
-    internal static var headlineCall: String { AppL10n.copyLocale == .frCA ? "Report this call?" : "Report this call?" }
+    internal static var headlineCall: String { AppL10n.copyLocale == .frCA ? "Signaler cet appel?" : "Report this call?" }
 
     /// `report.headline_conversation`
-    internal static var headlineConversation: String { AppL10n.copyLocale == .frCA ? "Report this conversation?" : "Report this conversation?" }
+    internal static var headlineConversation: String { AppL10n.copyLocale == .frCA ? "Signaler cette conversation?" : "Report this conversation?" }
 
     /// `report.headline_conversation_with`
     internal static func headlineConversationWith(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Report this conversation with \(name)?" : "Report this conversation with \(name)?"
+        AppL10n.copyLocale == .frCA ? "Signaler la conversation avec \(name)?" : "Report this conversation with \(name)?"
     }
 
     /// `report.no_note`
     internal static var noNote: String { AppL10n.copyLocale == .frCA ? "No note was added." : "No note was added." }
 
     /// `report.note_label`
-    internal static var noteLabel: String { AppL10n.copyLocale == .frCA ? "What is wrong with it?" : "What is wrong with it?" }
+    internal static var noteLabel: String { AppL10n.copyLocale == .frCA ? "Quel est le problème?" : "What is wrong with it?" }
 
     /// `report.note_prompt`
-    internal static var notePrompt: String { AppL10n.copyLocale == .frCA ? "Add a note (optional)" : "Add a note (optional)" }
+    internal static var notePrompt: String { AppL10n.copyLocale == .frCA ? "Ajoutez une note (facultatif)" : "Add a note (optional)" }
 
     /// `report.pending`
-    internal static var pending: String { AppL10n.copyLocale == .frCA ? "Reported. We have it and it is catching up." : "Reported. We have it and it is catching up." }
+    internal static var pending: String { AppL10n.copyLocale == .frCA ? "Signalé. Nous l'avons reçu; le traitement est en cours." : "Reported. We have it and it is catching up." }
 
     /// `report.preamble`
     internal static var preamble: String { AppL10n.copyLocale == .frCA ? "Objectionable content was reported from the District AI iOS app." : "Objectionable content was reported from the District AI iOS app." }
@@ -2379,325 +2382,325 @@ extension ReportCopy {
     }
 
     /// `report.report_call`
-    internal static var reportCall: String { AppL10n.copyLocale == .frCA ? "Report call" : "Report call" }
+    internal static var reportCall: String { AppL10n.copyLocale == .frCA ? "Signaler l'appel" : "Report call" }
 
     /// `report.report_conversation`
-    internal static var reportConversation: String { AppL10n.copyLocale == .frCA ? "Report conversation" : "Report conversation" }
+    internal static var reportConversation: String { AppL10n.copyLocale == .frCA ? "Signaler la conversation" : "Report conversation" }
 
     /// `report.subject_recording`
     internal static var subjectRecording: String { AppL10n.copyLocale == .frCA ? "Report: objectionable content (review recording)" : "Report: objectionable content (review recording)" }
 
     /// `report.submit`
-    internal static var submit: String { AppL10n.copyLocale == .frCA ? "Report" : "Report" }
+    internal static var submit: String { AppL10n.copyLocale == .frCA ? "Signaler" : "Report" }
 
     /// `report.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Report content" : "Report content" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Signaler un contenu" : "Report content" }
 }
 
 extension RoomsCopy {
     /// `rooms.alone_body`
-    internal static var aloneBody: String { AppL10n.copyLocale == .frCA ? "Share the invite, or wait for someone to join with the same room name." : "Share the invite, or wait for someone to join with the same room name." }
+    internal static var aloneBody: String { AppL10n.copyLocale == .frCA ? "Partagez l'invitation, ou attendez qu'une personne vous rejoigne avec le même nom de salle." : "Share the invite, or wait for someone to join with the same room name." }
 
     /// `rooms.alone_title`
-    internal static var aloneTitle: String { AppL10n.copyLocale == .frCA ? "Nobody else here yet" : "Nobody else here yet" }
+    internal static var aloneTitle: String { AppL10n.copyLocale == .frCA ? "Personne d'autre pour l'instant" : "Nobody else here yet" }
 
     /// `rooms.busy_with_call_message`
-    internal static var busyWithCallMessage: String { AppL10n.copyLocale == .frCA ? "There is a call on this device. End it before joining a room." : "There is a call on this device. End it before joining a room." }
+    internal static var busyWithCallMessage: String { AppL10n.copyLocale == .frCA ? "Cet appareil a un appel en cours. Terminez-le avant de rejoindre une salle." : "There is a call on this device. End it before joining a room." }
 
     /// `rooms.busy_with_room_message`
-    internal static var busyWithRoomMessage: String { AppL10n.copyLocale == .frCA ? "You are already in a room on this device. Leave it before joining another." : "You are already in a room on this device. Leave it before joining another." }
+    internal static var busyWithRoomMessage: String { AppL10n.copyLocale == .frCA ? "Vous êtes déjà dans une salle sur cet appareil. Quittez-la avant d'en rejoindre une autre." : "You are already in a room on this device. Leave it before joining another." }
 
     /// `rooms.camera_off`
-    internal static var cameraOff: String { AppL10n.copyLocale == .frCA ? "Start video" : "Start video" }
+    internal static var cameraOff: String { AppL10n.copyLocale == .frCA ? "Activer la vidéo" : "Start video" }
 
     /// `rooms.camera_on`
-    internal static var cameraOn: String { AppL10n.copyLocale == .frCA ? "Stop video" : "Stop video" }
+    internal static var cameraOn: String { AppL10n.copyLocale == .frCA ? "Couper la vidéo" : "Stop video" }
 
     /// `rooms.companion_notes`
-    internal static var companionNotes: String { AppL10n.copyLocale == .frCA ? "Companion is taking notes." : "Companion is taking notes." }
+    internal static var companionNotes: String { AppL10n.copyLocale == .frCA ? "Le Compagnon prend des notes." : "Companion is taking notes." }
 
     /// `rooms.companion_notice`
-    internal static var companionNotice: String { AppL10n.copyLocale == .frCA ? "The Companion joins every room and writes up the minutes." : "The Companion joins every room and writes up the minutes." }
+    internal static var companionNotice: String { AppL10n.copyLocale == .frCA ? "Le Compagnon se joint à chaque salle et en rédige le procès-verbal." : "The Companion joins every room and writes up the minutes." }
 
     /// `rooms.could_not_change_camera`
-    internal static var couldNotChangeCamera: String { AppL10n.copyLocale == .frCA ? "Could not change your camera. It is as the button shows." : "Could not change your camera. It is as the button shows." }
+    internal static var couldNotChangeCamera: String { AppL10n.copyLocale == .frCA ? "La caméra n'a pas pu changer d'état. Le bouton indique son état actuel." : "Could not change your camera. It is as the button shows." }
 
     /// `rooms.could_not_change_microphone`
-    internal static var couldNotChangeMicrophone: String { AppL10n.copyLocale == .frCA ? "Could not change your microphone. It is as the button shows." : "Could not change your microphone. It is as the button shows." }
+    internal static var couldNotChangeMicrophone: String { AppL10n.copyLocale == .frCA ? "Le micro n'a pas pu changer d'état. Le bouton indique son état actuel." : "Could not change your microphone. It is as the button shows." }
 
     /// `rooms.empty_body`
-    internal static var emptyBody: String { AppL10n.copyLocale == .frCA ? "Meetings appear here once one has been held, with the minutes the Companion wrote." : "Meetings appear here once one has been held, with the minutes the Companion wrote." }
+    internal static var emptyBody: String { AppL10n.copyLocale == .frCA ? "Les réunions s'affichent ici dès qu'elles ont eu lieu, avec le procès-verbal rédigé par le Compagnon." : "Meetings appear here once one has been held, with the minutes the Companion wrote." }
 
     /// `rooms.empty_title`
-    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "No meetings yet" : "No meetings yet" }
+    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucune réunion pour l'instant" : "No meetings yet" }
 
     /// `rooms.flip`
-    internal static var flip: String { AppL10n.copyLocale == .frCA ? "Flip camera" : "Flip camera" }
+    internal static var flip: String { AppL10n.copyLocale == .frCA ? "Changer de caméra" : "Flip camera" }
 
     /// `rooms.flip_failed`
-    internal static var flipFailed: String { AppL10n.copyLocale == .frCA ? "Could not switch cameras. You are still on the same one." : "Could not switch cameras. You are still on the same one." }
+    internal static var flipFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de changer de caméra. Vous utilisez toujours la même." : "Could not switch cameras. You are still on the same one." }
 
     /// `rooms.history_label`
-    internal static var historyLabel: String { AppL10n.copyLocale == .frCA ? "Recent meetings" : "Recent meetings" }
+    internal static var historyLabel: String { AppL10n.copyLocale == .frCA ? "Réunions récentes" : "Recent meetings" }
 
     /// `rooms.join`
-    internal static var join: String { AppL10n.copyLocale == .frCA ? "Join room" : "Join room" }
+    internal static var join: String { AppL10n.copyLocale == .frCA ? "Rejoindre" : "Join room" }
 
     /// `rooms.join_failed`
-    internal static var joinFailed: String { AppL10n.copyLocale == .frCA ? "Could not join" : "Could not join" }
+    internal static var joinFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de rejoindre" : "Could not join" }
 
     /// `rooms.join_now`
-    internal static var joinNow: String { AppL10n.copyLocale == .frCA ? "Join" : "Join" }
+    internal static var joinNow: String { AppL10n.copyLocale == .frCA ? "Rejoindre" : "Join" }
 
     /// `rooms.leave`
-    internal static var leave: String { AppL10n.copyLocale == .frCA ? "Leave" : "Leave" }
+    internal static var leave: String { AppL10n.copyLocale == .frCA ? "Quitter" : "Leave" }
 
     /// `rooms.mic_off`
-    internal static var micOff: String { AppL10n.copyLocale == .frCA ? "Unmute" : "Unmute" }
+    internal static var micOff: String { AppL10n.copyLocale == .frCA ? "Rétablir le micro" : "Unmute" }
 
     /// `rooms.mic_on`
-    internal static var micOn: String { AppL10n.copyLocale == .frCA ? "Mute" : "Mute" }
+    internal static var micOn: String { AppL10n.copyLocale == .frCA ? "Couper le micro" : "Mute" }
 
     /// `rooms.most_recent_records_workspace`
-    internal static var mostRecentRecordsWorkspace: String { AppL10n.copyLocale == .frCA ? "The most recent records for this workspace are not meetings this app shows. There may be meetings further back that this app does not show." : "The most recent records for this workspace are not meetings this app shows. There may be meetings further back that this app does not show." }
+    internal static var mostRecentRecordsWorkspace: String { AppL10n.copyLocale == .frCA ? "Les éléments les plus récents de cet espace de travail ne sont pas des réunions que cette app affiche. Des réunions plus anciennes, non affichées ici, pourraient exister." : "The most recent records for this workspace are not meetings this app shows. There may be meetings further back that this app does not show." }
 
     /// `rooms.muted_participant`
     internal static func mutedParticipant(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(name), muted" : "\(name), muted"
+        AppL10n.copyLocale == .frCA ? "\(name), micro coupé" : "\(name), muted"
     }
 
     /// `rooms.name_hint`
-    internal static var nameHint: String { AppL10n.copyLocale == .frCA ? "Name the room. Anyone in this workspace who types the same name joins you." : "Name the room. Anyone in this workspace who types the same name joins you." }
+    internal static var nameHint: String { AppL10n.copyLocale == .frCA ? "Nommez la salle. Toute personne de cet espace de travail qui saisit le même nom vous rejoint." : "Name the room. Anyone in this workspace who types the same name joins you." }
 
     /// `rooms.name_label`
-    internal static var nameLabel: String { AppL10n.copyLocale == .frCA ? "Room name" : "Room name" }
+    internal static var nameLabel: String { AppL10n.copyLocale == .frCA ? "Nom de salle" : "Room name" }
 
     /// `rooms.name_preview`
     internal static func namePreview(_ normalized: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Everyone joining “\(normalized)” lands in the same room." : "Everyone joining “\(normalized)” lands in the same room."
+        AppL10n.copyLocale == .frCA ? "Quiconque rejoint «\u{00A0}\(normalized)\u{00A0}» se retrouve dans cette même salle." : "Everyone joining “\(normalized)” lands in the same room."
     }
 
     /// `rooms.no_camera`
-    internal static var noCamera: String { AppL10n.copyLocale == .frCA ? "Camera access is off, so you are here without video." : "Camera access is off, so you are here without video." }
+    internal static var noCamera: String { AppL10n.copyLocale == .frCA ? "L'accès à la caméra est désactivé\u{00A0}: vous participez donc sans vidéo." : "Camera access is off, so you are here without video." }
 
     /// `rooms.no_meetings_page`
-    internal static var noMeetingsPage: String { AppL10n.copyLocale == .frCA ? "No meetings on this page" : "No meetings on this page" }
+    internal static var noMeetingsPage: String { AppL10n.copyLocale == .frCA ? "Aucune réunion sur cette page" : "No meetings on this page" }
 
     /// `rooms.no_microphone`
-    internal static var noMicrophone: String { AppL10n.copyLocale == .frCA ? "Microphone access is off, so others cannot hear you. You can still listen." : "Microphone access is off, so others cannot hear you. You can still listen." }
+    internal static var noMicrophone: String { AppL10n.copyLocale == .frCA ? "L'accès au microphone est désactivé\u{00A0}: les autres ne vous entendent pas, mais vous pouvez écouter." : "Microphone access is off, so others cannot hear you. You can still listen." }
 
     /// `rooms.no_minutes`
-    internal static var noMinutes: String { AppL10n.copyLocale == .frCA ? "No minutes were saved for this meeting." : "No minutes were saved for this meeting." }
+    internal static var noMinutes: String { AppL10n.copyLocale == .frCA ? "Aucun procès-verbal n'a été conservé pour cette réunion." : "No minutes were saved for this meeting." }
 
     /// `rooms.no_minutes_yet`
-    internal static var noMinutesYet: String { AppL10n.copyLocale == .frCA ? "Minutes are written when the meeting ends." : "Minutes are written when the meeting ends." }
+    internal static var noMinutesYet: String { AppL10n.copyLocale == .frCA ? "Le procès-verbal est rédigé à la fin de la réunion." : "Minutes are written when the meeting ends." }
 
     /// `rooms.open_meeting`
-    internal static var openMeeting: String { AppL10n.copyLocale == .frCA ? "Read the minutes" : "Read the minutes" }
+    internal static var openMeeting: String { AppL10n.copyLocale == .frCA ? "Lire le procès-verbal" : "Read the minutes" }
 
     /// `rooms.preview`
     internal static func preview(_ text: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Preview: \(text)" : "Preview: \(text)"
+        AppL10n.copyLocale == .frCA ? "Aperçu\u{00A0}: \(text)" : "Preview: \(text)"
     }
 
     /// `rooms.ready_body`
     internal static func readyBody(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "You are about to join “\(name)”. The Companion joins every room and writes up the minutes." : "You are about to join “\(name)”. The Companion joins every room and writes up the minutes."
+        AppL10n.copyLocale == .frCA ? "Vous êtes sur le point de rejoindre «\u{00A0}\(name)\u{00A0}». Le Compagnon se joint à chaque salle et en rédige le procès-verbal." : "You are about to join “\(name)”. The Companion joins every room and writes up the minutes."
     }
 
     /// `rooms.ready_title`
-    internal static var readyTitle: String { AppL10n.copyLocale == .frCA ? "Ready to join" : "Ready to join" }
+    internal static var readyTitle: String { AppL10n.copyLocale == .frCA ? "Tout est prêt" : "Ready to join" }
 
     /// `rooms.record_close`
-    internal static var recordClose: String { AppL10n.copyLocale == .frCA ? "Close" : "Close" }
+    internal static var recordClose: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Close" }
 
     /// `rooms.record_failed`
-    internal static var recordFailed: String { AppL10n.copyLocale == .frCA ? "Could not open that meeting" : "Could not open that meeting" }
+    internal static var recordFailed: String { AppL10n.copyLocale == .frCA ? "Impossible d'ouvrir cette réunion" : "Could not open that meeting" }
 
     /// `rooms.record_minutes`
-    internal static var recordMinutes: String { AppL10n.copyLocale == .frCA ? "Minutes" : "Minutes" }
+    internal static var recordMinutes: String { AppL10n.copyLocale == .frCA ? "Procès-verbal" : "Minutes" }
 
     /// `rooms.record_title`
-    internal static var recordTitle: String { AppL10n.copyLocale == .frCA ? "Meeting record" : "Meeting record" }
+    internal static var recordTitle: String { AppL10n.copyLocale == .frCA ? "Dossier de réunion" : "Meeting record" }
 
     /// `rooms.record_transcript`
-    internal static var recordTranscript: String { AppL10n.copyLocale == .frCA ? "Transcript" : "Transcript" }
+    internal static var recordTranscript: String { AppL10n.copyLocale == .frCA ? "Transcription" : "Transcript" }
 
     /// `rooms.rejoin`
-    internal static var rejoin: String { AppL10n.copyLocale == .frCA ? "Rejoin" : "Rejoin" }
+    internal static var rejoin: String { AppL10n.copyLocale == .frCA ? "Rejoindre" : "Rejoin" }
 
     /// `rooms.rejoin_room`
-    internal static var rejoinRoom: String { AppL10n.copyLocale == .frCA ? "Rejoin this room" : "Rejoin this room" }
+    internal static var rejoinRoom: String { AppL10n.copyLocale == .frCA ? "Rejoindre la salle" : "Rejoin this room" }
 
     /// `rooms.share_invite`
-    internal static var shareInvite: String { AppL10n.copyLocale == .frCA ? "Share guest link" : "Share guest link" }
+    internal static var shareInvite: String { AppL10n.copyLocale == .frCA ? "Partager le lien d'invitation" : "Share guest link" }
 
     /// `rooms.showing_most_recent_meetings`
-    internal static var showingMostRecentMeetings: String { AppL10n.copyLocale == .frCA ? "Showing the most recent meetings. The full history is not available in this app." : "Showing the most recent meetings. The full history is not available in this app." }
+    internal static var showingMostRecentMeetings: String { AppL10n.copyLocale == .frCA ? "Les réunions les plus récentes sont affichées. L'historique complet n'est pas disponible dans cette app." : "Showing the most recent meetings. The full history is not available in this app." }
 
     /// `rooms.speaker_off`
-    internal static var speakerOff: String { AppL10n.copyLocale == .frCA ? "Speaker off" : "Speaker off" }
+    internal static var speakerOff: String { AppL10n.copyLocale == .frCA ? "Haut-parleur désactivé" : "Speaker off" }
 
     /// `rooms.speaker_on`
-    internal static var speakerOn: String { AppL10n.copyLocale == .frCA ? "Speaker on" : "Speaker on" }
+    internal static var speakerOn: String { AppL10n.copyLocale == .frCA ? "Haut-parleur activé" : "Speaker on" }
 
     /// `rooms.start_label`
-    internal static var startLabel: String { AppL10n.copyLocale == .frCA ? "Start or join a room" : "Start or join a room" }
+    internal static var startLabel: String { AppL10n.copyLocale == .frCA ? "Créer ou rejoindre une salle" : "Start or join a room" }
 
     /// `rooms.state_connecting`
-    internal static var stateConnecting: String { AppL10n.copyLocale == .frCA ? "Connecting…" : "Connecting…" }
+    internal static var stateConnecting: String { AppL10n.copyLocale == .frCA ? "Connexion…" : "Connecting…" }
 
     /// `rooms.state_dropped`
-    internal static var stateDropped: String { AppL10n.copyLocale == .frCA ? "You were disconnected from this room." : "You were disconnected from this room." }
+    internal static var stateDropped: String { AppL10n.copyLocale == .frCA ? "Votre connexion à cette salle a été coupée." : "You were disconnected from this room." }
 
     /// `rooms.state_dropped_because`
     internal static func stateDroppedBecause(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "You were disconnected from this room. (\(reason))" : "You were disconnected from this room. (\(reason))"
+        AppL10n.copyLocale == .frCA ? "Votre connexion à cette salle a été coupée. (\(reason))" : "You were disconnected from this room. (\(reason))"
     }
 
     /// `rooms.state_failed`
-    internal static var stateFailed: String { AppL10n.copyLocale == .frCA ? "The connection to this room was lost." : "The connection to this room was lost." }
+    internal static var stateFailed: String { AppL10n.copyLocale == .frCA ? "La connexion à cette salle a été perdue." : "The connection to this room was lost." }
 
     /// `rooms.state_left`
-    internal static var stateLeft: String { AppL10n.copyLocale == .frCA ? "You have left this room." : "You have left this room." }
+    internal static var stateLeft: String { AppL10n.copyLocale == .frCA ? "Vous avez quitté cette salle." : "You have left this room." }
 
     /// `rooms.state_reconnecting`
-    internal static var stateReconnecting: String { AppL10n.copyLocale == .frCA ? "Reconnecting. Hold on, the meeting is still here." : "Reconnecting. Hold on, the meeting is still here." }
+    internal static var stateReconnecting: String { AppL10n.copyLocale == .frCA ? "Reconnexion en cours. Un instant, la réunion se poursuit." : "Reconnecting. Hold on, the meeting is still here." }
 
     /// `rooms.state_yielded_to_call`
-    internal static var stateYieldedToCall: String { AppL10n.copyLocale == .frCA ? "A phone call came in, so you were taken out of this room." : "A phone call came in, so you were taken out of this room." }
+    internal static var stateYieldedToCall: String { AppL10n.copyLocale == .frCA ? "Un appel téléphonique est arrivé, ce qui vous a fait sortir de cette salle." : "A phone call came in, so you were taken out of this room." }
 
     /// `rooms.state_yielded_to_session`
-    internal static var stateYieldedToSession: String { AppL10n.copyLocale == .frCA ? "You were taken out of this room when the session ended." : "You were taken out of this room when the session ended." }
+    internal static var stateYieldedToSession: String { AppL10n.copyLocale == .frCA ? "La fin de la séance vous a fait sortir de cette salle." : "You were taken out of this room when the session ended." }
 
     /// `rooms.state_yielded_to_workspace`
-    internal static var stateYieldedToWorkspace: String { AppL10n.copyLocale == .frCA ? "You were taken out of this room when the workspace changed." : "You were taken out of this room when the workspace changed." }
+    internal static var stateYieldedToWorkspace: String { AppL10n.copyLocale == .frCA ? "Le changement d'espace de travail vous a fait sortir de cette salle." : "You were taken out of this room when the workspace changed." }
 
     /// `rooms.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Rooms" : "Rooms" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Salles" : "Rooms" }
 
     /// `rooms.unnamed_participant`
-    internal static var unnamedParticipant: String { AppL10n.copyLocale == .frCA ? "Someone" : "Someone" }
+    internal static var unnamedParticipant: String { AppL10n.copyLocale == .frCA ? "Quelqu'un" : "Someone" }
 
     /// `rooms.unusable_name_message`
-    internal static var unusableNameMessage: String { AppL10n.copyLocale == .frCA ? "That room name cannot be used. Try letters, numbers and hyphens." : "That room name cannot be used. Try letters, numbers and hyphens." }
+    internal static var unusableNameMessage: String { AppL10n.copyLocale == .frCA ? "Ce nom de salle ne convient pas. Essayez des lettres, des chiffres et des tirets." : "That room name cannot be used. Try letters, numbers and hyphens." }
 
     /// `rooms.viewer_cannot_start`
-    internal static var viewerCannotStart: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer, so you cannot start a room. You can still join a meeting that is already running." : "You are in this workspace as a viewer, so you cannot start a room. You can still join a meeting that is already running." }
+    internal static var viewerCannotStart: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur dans cet espace de travail, vous ne pouvez pas créer de salle. Vous pouvez toutefois rejoindre une réunion déjà en cours." : "You are in this workspace as a viewer, so you cannot start a room. You can still join a meeting that is already running." }
 
     /// `rooms.viewer_notice`
-    internal static var viewerNotice: String { AppL10n.copyLocale == .frCA ? "You are in this room as a viewer, so your microphone and camera stay off." : "You are in this room as a viewer, so your microphone and camera stay off." }
+    internal static var viewerNotice: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur, votre micro et votre caméra restent désactivés dans cette salle." : "You are in this room as a viewer, so your microphone and camera stay off." }
 }
 
 extension SchedulingBookingWriteCopy {
     /// `scheduling_booking_write.cancel_body`
-    internal static var cancelBody: String { AppL10n.copyLocale == .frCA ? "The attendee gets a cancellation email." : "The attendee gets a cancellation email." }
+    internal static var cancelBody: String { AppL10n.copyLocale == .frCA ? "Le participant recevra un courriel d'annulation." : "The attendee gets a cancellation email." }
 
     /// `scheduling_booking_write.cancel_confirm`
-    internal static var cancelConfirm: String { AppL10n.copyLocale == .frCA ? "Cancel booking" : "Cancel booking" }
+    internal static var cancelConfirm: String { AppL10n.copyLocale == .frCA ? "Annuler le rendez-vous" : "Cancel booking" }
 
     /// `scheduling_booking_write.cancel_done`
-    internal static var cancelDone: String { AppL10n.copyLocale == .frCA ? "Booking cancelled" : "Booking cancelled" }
+    internal static var cancelDone: String { AppL10n.copyLocale == .frCA ? "Rendez-vous annulé" : "Booking cancelled" }
 
     /// `scheduling_booking_write.cancel_keep`
-    internal static var cancelKeep: String { AppL10n.copyLocale == .frCA ? "Keep it" : "Keep it" }
+    internal static var cancelKeep: String { AppL10n.copyLocale == .frCA ? "Le conserver" : "Keep it" }
 
     /// `scheduling_booking_write.cancel_reason_hint`
-    internal static var cancelReasonHint: String { AppL10n.copyLocale == .frCA ? "Optional. It goes in the email." : "Optional. It goes in the email." }
+    internal static var cancelReasonHint: String { AppL10n.copyLocale == .frCA ? "Facultatif. Il figurera dans le courriel." : "Optional. It goes in the email." }
 
     /// `scheduling_booking_write.cancel_reason_label`
-    internal static var cancelReasonLabel: String { AppL10n.copyLocale == .frCA ? "Reason" : "Reason" }
+    internal static var cancelReasonLabel: String { AppL10n.copyLocale == .frCA ? "Motif" : "Reason" }
 
     /// `scheduling_booking_write.cancel_reason_too_long`
-    internal static var cancelReasonTooLong: String { AppL10n.copyLocale == .frCA ? "That reason is longer than 1000 characters." : "That reason is longer than 1000 characters." }
+    internal static var cancelReasonTooLong: String { AppL10n.copyLocale == .frCA ? "Ce motif dépasse 1000 caractères." : "That reason is longer than 1000 characters." }
 
     /// `scheduling_booking_write.cancel_title`
-    internal static var cancelTitle: String { AppL10n.copyLocale == .frCA ? "Cancel this booking?" : "Cancel this booking?" }
+    internal static var cancelTitle: String { AppL10n.copyLocale == .frCA ? "Annuler ce rendez-vous?" : "Cancel this booking?" }
 
     /// `scheduling_booking_write.reassign_body`
-    internal static var reassignBody: String { AppL10n.copyLocale == .frCA ? "The booking keeps its time. Both hosts get an email about the change." : "The booking keeps its time. Both hosts get an email about the change." }
+    internal static var reassignBody: String { AppL10n.copyLocale == .frCA ? "Le rendez-vous garde son heure. Les deux hôtes recevront un courriel à ce sujet." : "The booking keeps its time. Both hosts get an email about the change." }
 
     /// `scheduling_booking_write.reassign_cancel`
-    internal static var reassignCancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var reassignCancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `scheduling_booking_write.reassign_confirm`
-    internal static var reassignConfirm: String { AppL10n.copyLocale == .frCA ? "Change host" : "Change host" }
+    internal static var reassignConfirm: String { AppL10n.copyLocale == .frCA ? "Changer d'hôte" : "Change host" }
 
     /// `scheduling_booking_write.reassign_done`
-    internal static var reassignDone: String { AppL10n.copyLocale == .frCA ? "Host changed" : "Host changed" }
+    internal static var reassignDone: String { AppL10n.copyLocale == .frCA ? "Hôte changé" : "Host changed" }
 
     /// `scheduling_booking_write.reassign_host_label`
-    internal static var reassignHostLabel: String { AppL10n.copyLocale == .frCA ? "New host" : "New host" }
+    internal static var reassignHostLabel: String { AppL10n.copyLocale == .frCA ? "Nouvel hôte" : "New host" }
 
     /// `scheduling_booking_write.reassign_host_placeholder`
-    internal static var reassignHostPlaceholder: String { AppL10n.copyLocale == .frCA ? "Choose a host" : "Choose a host" }
+    internal static var reassignHostPlaceholder: String { AppL10n.copyLocale == .frCA ? "Choisissez un hôte" : "Choose a host" }
 
     /// `scheduling_booking_write.reassign_no_hosts`
-    internal static var reassignNoHosts: String { AppL10n.copyLocale == .frCA ? "No other host can take it." : "No other host can take it." }
+    internal static var reassignNoHosts: String { AppL10n.copyLocale == .frCA ? "Aucun autre hôte ne peut le prendre." : "No other host can take it." }
 
     /// `scheduling_booking_write.reassign_title`
-    internal static var reassignTitle: String { AppL10n.copyLocale == .frCA ? "Reassign this booking?" : "Reassign this booking?" }
+    internal static var reassignTitle: String { AppL10n.copyLocale == .frCA ? "Réattribuer ce rendez-vous?" : "Reassign this booking?" }
 
     /// `scheduling_booking_write.reschedule_body`
-    internal static var rescheduleBody: String { AppL10n.copyLocale == .frCA ? "The attendee gets an email with the new time." : "The attendee gets an email with the new time." }
+    internal static var rescheduleBody: String { AppL10n.copyLocale == .frCA ? "Le participant recevra un courriel avec la nouvelle heure." : "The attendee gets an email with the new time." }
 
     /// `scheduling_booking_write.reschedule_cancel`
-    internal static var rescheduleCancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var rescheduleCancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `scheduling_booking_write.reschedule_confirm`
-    internal static var rescheduleConfirm: String { AppL10n.copyLocale == .frCA ? "Move booking" : "Move booking" }
+    internal static var rescheduleConfirm: String { AppL10n.copyLocale == .frCA ? "Reporter le rendez-vous" : "Move booking" }
 
     /// `scheduling_booking_write.reschedule_day_label`
-    internal static var rescheduleDayLabel: String { AppL10n.copyLocale == .frCA ? "Day" : "Day" }
+    internal static var rescheduleDayLabel: String { AppL10n.copyLocale == .frCA ? "Jour" : "Day" }
 
     /// `scheduling_booking_write.reschedule_done`
-    internal static var rescheduleDone: String { AppL10n.copyLocale == .frCA ? "Booking moved" : "Booking moved" }
+    internal static var rescheduleDone: String { AppL10n.copyLocale == .frCA ? "Rendez-vous reporté" : "Booking moved" }
 
     /// `scheduling_booking_write.reschedule_done_at`
     internal static func rescheduleDoneAt(_ when: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Booking moved to \(when)" : "Booking moved to \(when)"
+        AppL10n.copyLocale == .frCA ? "Rendez-vous reporté\u{00A0}: \(when)" : "Booking moved to \(when)"
     }
 
     /// `scheduling_booking_write.reschedule_no_slots`
-    internal static var rescheduleNoSlots: String { AppL10n.copyLocale == .frCA ? "Nothing free that day. Try another." : "Nothing free that day. Try another." }
+    internal static var rescheduleNoSlots: String { AppL10n.copyLocale == .frCA ? "Aucune disponibilité ce jour-là. Essayez une autre date." : "Nothing free that day. Try another." }
 
     /// `scheduling_booking_write.reschedule_pick_time`
-    internal static var reschedulePickTime: String { AppL10n.copyLocale == .frCA ? "Pick a time." : "Pick a time." }
+    internal static var reschedulePickTime: String { AppL10n.copyLocale == .frCA ? "Choisissez une heure." : "Pick a time." }
 
     /// `scheduling_booking_write.reschedule_time_label`
-    internal static var rescheduleTimeLabel: String { AppL10n.copyLocale == .frCA ? "Time" : "Time" }
+    internal static var rescheduleTimeLabel: String { AppL10n.copyLocale == .frCA ? "Heure" : "Time" }
 
     /// `scheduling_booking_write.reschedule_title`
-    internal static var rescheduleTitle: String { AppL10n.copyLocale == .frCA ? "Reschedule this booking?" : "Reschedule this booking?" }
+    internal static var rescheduleTitle: String { AppL10n.copyLocale == .frCA ? "Reporter ce rendez-vous?" : "Reschedule this booking?" }
 }
 
 extension SchedulingCopy {
     /// `scheduling.active`
-    internal static var active: String { AppL10n.copyLocale == .frCA ? "Active" : "Active" }
+    internal static var active: String { AppL10n.copyLocale == .frCA ? "Actif" : "Active" }
 
     /// `scheduling.answers_eyebrow`
-    internal static var answersEyebrow: String { AppL10n.copyLocale == .frCA ? "Answers" : "Answers" }
+    internal static var answersEyebrow: String { AppL10n.copyLocale == .frCA ? "Réponses" : "Answers" }
 
     /// `scheduling.apps_empty`
-    internal static var appsEmpty: String { AppL10n.copyLocale == .frCA ? "No connected apps." : "No connected apps." }
+    internal static var appsEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune application connectée." : "No connected apps." }
 
     /// `scheduling.apps_eyebrow`
-    internal static var appsEyebrow: String { AppL10n.copyLocale == .frCA ? "Connected apps" : "Connected apps" }
+    internal static var appsEyebrow: String { AppL10n.copyLocale == .frCA ? "Applications connectées" : "Connected apps" }
 
     /// `scheduling.apps_subtitle`
-    internal static var appsSubtitle: String { AppL10n.copyLocale == .frCA ? "Every connected app reaches the same booking data. There are no partial permissions, so revoking is the only way to narrow one." : "Every connected app reaches the same booking data. There are no partial permissions, so revoking is the only way to narrow one." }
+    internal static var appsSubtitle: String { AppL10n.copyLocale == .frCA ? "Chaque application connectée accède aux mêmes données de rendez-vous. Sans autorisations partielles, seule la révocation permet de limiter l'accès d'une application." : "Every connected app reaches the same booking data. There are no partial permissions, so revoking is the only way to narrow one." }
 
     /// `scheduling.archived`
-    internal static var archived: String { AppL10n.copyLocale == .frCA ? "Archived" : "Archived" }
+    internal static var archived: String { AppL10n.copyLocale == .frCA ? "Archivé" : "Archived" }
 
     /// `scheduling.assistant_enabled`
-    internal static var assistantEnabled: String { AppL10n.copyLocale == .frCA ? "Booking assistant" : "Booking assistant" }
+    internal static var assistantEnabled: String { AppL10n.copyLocale == .frCA ? "Assistante de réservation" : "Booking assistant" }
 
     /// `scheduling.assistant_instructions`
-    internal static var assistantInstructions: String { AppL10n.copyLocale == .frCA ? "Extra instructions" : "Extra instructions" }
+    internal static var assistantInstructions: String { AppL10n.copyLocale == .frCA ? "Instructions supplémentaires" : "Extra instructions" }
 
     /// `scheduling.booking_page`
-    internal static var bookingPage: String { AppL10n.copyLocale == .frCA ? "Booking page" : "Booking page" }
+    internal static var bookingPage: String { AppL10n.copyLocale == .frCA ? "Page de réservation" : "Booking page" }
 
     /// `scheduling.booking_subtitle`
     internal static func bookingSubtitle(who: String, eventType event_type: String, host: String) -> String {
@@ -2705,84 +2708,84 @@ extension SchedulingCopy {
     }
 
     /// `scheduling.bookings_empty_cancelled`
-    internal static var bookingsEmptyCancelled: String { AppL10n.copyLocale == .frCA ? "No cancelled bookings." : "No cancelled bookings." }
+    internal static var bookingsEmptyCancelled: String { AppL10n.copyLocale == .frCA ? "Aucun rendez-vous annulé." : "No cancelled bookings." }
 
     /// `scheduling.bookings_empty_past`
-    internal static var bookingsEmptyPast: String { AppL10n.copyLocale == .frCA ? "No past bookings." : "No past bookings." }
+    internal static var bookingsEmptyPast: String { AppL10n.copyLocale == .frCA ? "Aucun rendez-vous passé." : "No past bookings." }
 
     /// `scheduling.bookings_empty_title`
-    internal static var bookingsEmptyTitle: String { AppL10n.copyLocale == .frCA ? "No bookings" : "No bookings" }
+    internal static var bookingsEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucun rendez-vous" : "No bookings" }
 
     /// `scheduling.bookings_empty_upcoming`
-    internal static var bookingsEmptyUpcoming: String { AppL10n.copyLocale == .frCA ? "Nothing is booked yet. Share your booking page and bookings appear here." : "Nothing is booked yet. Share your booking page and bookings appear here." }
+    internal static var bookingsEmptyUpcoming: String { AppL10n.copyLocale == .frCA ? "Aucun rendez-vous pour l'instant. Partagez votre page de réservation et ils apparaîtront ici." : "Nothing is booked yet. Share your booking page and bookings appear here." }
 
     /// `scheduling.branding_banner`
-    internal static var brandingBanner: String { AppL10n.copyLocale == .frCA ? "Banner" : "Banner" }
+    internal static var brandingBanner: String { AppL10n.copyLocale == .frCA ? "Bannière" : "Banner" }
 
     /// `scheduling.branding_business_name`
-    internal static var brandingBusinessName: String { AppL10n.copyLocale == .frCA ? "Business name" : "Business name" }
+    internal static var brandingBusinessName: String { AppL10n.copyLocale == .frCA ? "Nom de l'entreprise" : "Business name" }
 
     /// `scheduling.branding_locale`
-    internal static var brandingLocale: String { AppL10n.copyLocale == .frCA ? "Page language" : "Page language" }
+    internal static var brandingLocale: String { AppL10n.copyLocale == .frCA ? "Langue de la page" : "Page language" }
 
     /// `scheduling.branding_logo`
     internal static var brandingLogo: String { AppL10n.copyLocale == .frCA ? "Logo" : "Logo" }
 
     /// `scheduling.branding_privacy`
-    internal static var brandingPrivacy: String { AppL10n.copyLocale == .frCA ? "Privacy policy link" : "Privacy policy link" }
+    internal static var brandingPrivacy: String { AppL10n.copyLocale == .frCA ? "Lien vers la politique de confidentialité" : "Privacy policy link" }
 
     /// `scheduling.branding_terms`
-    internal static var brandingTerms: String { AppL10n.copyLocale == .frCA ? "Terms link" : "Terms link" }
+    internal static var brandingTerms: String { AppL10n.copyLocale == .frCA ? "Lien vers les conditions" : "Terms link" }
 
     /// `scheduling.calendar_account`
-    internal static var calendarAccount: String { AppL10n.copyLocale == .frCA ? "Account" : "Account" }
+    internal static var calendarAccount: String { AppL10n.copyLocale == .frCA ? "Compte" : "Account" }
 
     /// `scheduling.calendar_conflicts`
-    internal static var calendarConflicts: String { AppL10n.copyLocale == .frCA ? "Checked for conflicts" : "Checked for conflicts" }
+    internal static var calendarConflicts: String { AppL10n.copyLocale == .frCA ? "Vérifié pour les conflits" : "Checked for conflicts" }
 
     /// `scheduling.calendar_connect_another`
-    internal static var calendarConnectAnother: String { AppL10n.copyLocale == .frCA ? "Another account can be connected to check it for conflicts as well." : "Another account can be connected to check it for conflicts as well." }
+    internal static var calendarConnectAnother: String { AppL10n.copyLocale == .frCA ? "Vous pouvez aussi connecter un autre compte pour y vérifier les conflits." : "Another account can be connected to check it for conflicts as well." }
 
     /// `scheduling.calendar_connect_eyebrow`
-    internal static var calendarConnectEyebrow: String { AppL10n.copyLocale == .frCA ? "Connecting a calendar" : "Connecting a calendar" }
+    internal static var calendarConnectEyebrow: String { AppL10n.copyLocale == .frCA ? "Connexion d'un calendrier" : "Connecting a calendar" }
 
     /// `scheduling.calendar_destination`
-    internal static var calendarDestination: String { AppL10n.copyLocale == .frCA ? "Receives bookings" : "Receives bookings" }
+    internal static var calendarDestination: String { AppL10n.copyLocale == .frCA ? "Reçoit les rendez-vous" : "Receives bookings" }
 
     /// `scheduling.calendar_none_connected`
-    internal static var calendarNoneConnected: String { AppL10n.copyLocale == .frCA ? "No calendar is connected yet, so nothing is checked for conflicts and bookings are not written anywhere." : "No calendar is connected yet, so nothing is checked for conflicts and bookings are not written anywhere." }
+    internal static var calendarNoneConnected: String { AppL10n.copyLocale == .frCA ? "Aucun calendrier n'est encore connecté\u{00A0}: les conflits ne sont donc pas vérifiés, et les rendez-vous ne sont inscrits nulle part." : "No calendar is connected yet, so nothing is checked for conflicts and bookings are not written anywhere." }
 
     /// `scheduling.calendar_not_configured`
-    internal static var calendarNotConfigured: String { AppL10n.copyLocale == .frCA ? "Calendar connections are not set up on this scheduler yet." : "Calendar connections are not set up on this scheduler yet." }
+    internal static var calendarNotConfigured: String { AppL10n.copyLocale == .frCA ? "Les connexions de calendrier ne sont pas encore configurées pour la prise de rendez-vous." : "Calendar connections are not set up on this scheduler yet." }
 
     /// `scheduling.calendar_zoom`
     internal static var calendarZoom: String { AppL10n.copyLocale == .frCA ? "Zoom" : "Zoom" }
 
     /// `scheduling.coming_up_empty`
-    internal static var comingUpEmpty: String { AppL10n.copyLocale == .frCA ? "No bookings yet. Share your booking page and they will appear here." : "No bookings yet. Share your booking page and they will appear here." }
+    internal static var comingUpEmpty: String { AppL10n.copyLocale == .frCA ? "Aucun rendez-vous pour l'instant. Partagez votre page de réservation et ils apparaîtront ici." : "No bookings yet. Share your booking page and they will appear here." }
 
     /// `scheduling.coming_up_eyebrow`
-    internal static var comingUpEyebrow: String { AppL10n.copyLocale == .frCA ? "Coming up" : "Coming up" }
+    internal static var comingUpEyebrow: String { AppL10n.copyLocale == .frCA ? "À venir" : "Coming up" }
 
     /// `scheduling.connected`
-    internal static var connected: String { AppL10n.copyLocale == .frCA ? "Connected" : "Connected" }
+    internal static var connected: String { AppL10n.copyLocale == .frCA ? "Connecté" : "Connected" }
 
     /// `scheduling.copied`
-    internal static var copied: String { AppL10n.copyLocale == .frCA ? "Link copied" : "Link copied" }
+    internal static var copied: String { AppL10n.copyLocale == .frCA ? "Lien copié" : "Link copied" }
 
     /// `scheduling.copy_link`
-    internal static var copyLink: String { AppL10n.copyLocale == .frCA ? "Copy link" : "Copy link" }
+    internal static var copyLink: String { AppL10n.copyLocale == .frCA ? "Copier le lien" : "Copy link" }
 
     /// `scheduling.day_not_bookable`
-    internal static var dayNotBookable: String { AppL10n.copyLocale == .frCA ? "Not bookable" : "Not bookable" }
+    internal static var dayNotBookable: String { AppL10n.copyLocale == .frCA ? "Non réservable" : "Not bookable" }
 
     /// `scheduling.days_label`
     internal static func daysLabel(_ days: Int) -> String {
         if AppL10n.copyLocale == .frCA {
-            if days == 1 {
-                return "\(days) day ahead"
+            if days == 0 || days == 1 {
+                return "\(days) jour à l'avance"
             }
-            return "\(days) days ahead"
+            return "\(days) jours à l'avance"
         }
         if days == 1 {
             return "\(days) day ahead"
@@ -2791,67 +2794,67 @@ extension SchedulingCopy {
     }
 
     /// `scheduling.deliveries`
-    internal static var deliveries: String { AppL10n.copyLocale == .frCA ? "Deliveries" : "Deliveries" }
+    internal static var deliveries: String { AppL10n.copyLocale == .frCA ? "Envois" : "Deliveries" }
 
     /// `scheduling.deliveries_empty`
-    internal static var deliveriesEmpty: String { AppL10n.copyLocale == .frCA ? "Nothing delivered yet." : "Nothing delivered yet." }
+    internal static var deliveriesEmpty: String { AppL10n.copyLocale == .frCA ? "Aucun envoi pour l'instant." : "Nothing delivered yet." }
 
     /// `scheduling.desk_booking_page`
-    internal static var deskBookingPage: String { AppL10n.copyLocale == .frCA ? "Booking page" : "Booking page" }
+    internal static var deskBookingPage: String { AppL10n.copyLocale == .frCA ? "Page de réservation" : "Booking page" }
 
     /// `scheduling.desk_calendar`
-    internal static var deskCalendar: String { AppL10n.copyLocale == .frCA ? "Calendar" : "Calendar" }
+    internal static var deskCalendar: String { AppL10n.copyLocale == .frCA ? "Calendrier" : "Calendar" }
 
     /// `scheduling.desk_event_types`
-    internal static var deskEventTypes: String { AppL10n.copyLocale == .frCA ? "Event types" : "Event types" }
+    internal static var deskEventTypes: String { AppL10n.copyLocale == .frCA ? "Types de rendez-vous" : "Event types" }
 
     /// `scheduling.desk_eyebrow`
-    internal static var deskEyebrow: String { AppL10n.copyLocale == .frCA ? "Your booking desk" : "Your booking desk" }
+    internal static var deskEyebrow: String { AppL10n.copyLocale == .frCA ? "Votre centre de réservation" : "Your booking desk" }
 
     /// `scheduling.desk_hours`
-    internal static var deskHours: String { AppL10n.copyLocale == .frCA ? "Working hours" : "Working hours" }
+    internal static var deskHours: String { AppL10n.copyLocale == .frCA ? "Heures de disponibilité" : "Working hours" }
 
     /// `scheduling.desk_next_booking`
-    internal static var deskNextBooking: String { AppL10n.copyLocale == .frCA ? "Next booking" : "Next booking" }
+    internal static var deskNextBooking: String { AppL10n.copyLocale == .frCA ? "Prochain rendez-vous" : "Next booking" }
 
     /// `scheduling.desk_no_bookings`
-    internal static var deskNoBookings: String { AppL10n.copyLocale == .frCA ? "None yet." : "None yet." }
+    internal static var deskNoBookings: String { AppL10n.copyLocale == .frCA ? "Aucun pour l'instant." : "None yet." }
 
     /// `scheduling.desk_no_calendar`
-    internal static var deskNoCalendar: String { AppL10n.copyLocale == .frCA ? "No calendar is connected, so nothing is checked for conflicts." : "No calendar is connected, so nothing is checked for conflicts." }
+    internal static var deskNoCalendar: String { AppL10n.copyLocale == .frCA ? "Aucun calendrier n'est connecté\u{00A0}: les conflits ne sont donc pas vérifiés." : "No calendar is connected, so nothing is checked for conflicts." }
 
     /// `scheduling.desk_no_event_types`
-    internal static var deskNoEventTypes: String { AppL10n.copyLocale == .frCA ? "No event types yet, so there is nothing to book." : "No event types yet, so there is nothing to book." }
+    internal static var deskNoEventTypes: String { AppL10n.copyLocale == .frCA ? "Aucun type de rendez-vous\u{00A0}: rien à réserver pour l'instant." : "No event types yet, so there is nothing to book." }
 
     /// `scheduling.desk_no_host`
-    internal static var deskNoHost: String { AppL10n.copyLocale == .frCA ? "The booking address is not ready yet." : "The booking address is not ready yet." }
+    internal static var deskNoHost: String { AppL10n.copyLocale == .frCA ? "Le lien de réservation n'est pas encore prêt." : "The booking address is not ready yet." }
 
     /// `scheduling.desk_no_hours`
-    internal static var deskNoHours: String { AppL10n.copyLocale == .frCA ? "Not bookable on any day yet." : "Not bookable on any day yet." }
+    internal static var deskNoHours: String { AppL10n.copyLocale == .frCA ? "Aucune journée réservable pour l'instant." : "Not bookable on any day yet." }
 
     /// `scheduling.dismiss`
-    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Dismiss" : "Dismiss" }
+    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Dismiss" }
 
     /// `scheduling.enable`
-    internal static var enable: String { AppL10n.copyLocale == .frCA ? "Enable scheduling" : "Enable scheduling" }
+    internal static var enable: String { AppL10n.copyLocale == .frCA ? "Activer la prise de rendez-vous" : "Enable scheduling" }
 
     /// `scheduling.enable_failed_fallback`
-    internal static var enableFailedFallback: String { AppL10n.copyLocale == .frCA ? "Setting up scheduling did not finish, and no reason was recorded." : "Setting up scheduling did not finish, and no reason was recorded." }
+    internal static var enableFailedFallback: String { AppL10n.copyLocale == .frCA ? "La configuration de la prise de rendez-vous n'a pas abouti, et aucun motif n'a été consigné." : "Setting up scheduling did not finish, and no reason was recorded." }
 
     /// `scheduling.enabling`
-    internal static var enabling: String { AppL10n.copyLocale == .frCA ? "Setting up…" : "Setting up…" }
+    internal static var enabling: String { AppL10n.copyLocale == .frCA ? "Configuration…" : "Setting up…" }
 
     /// `scheduling.event_type_details_eyebrow`
-    internal static var eventTypeDetailsEyebrow: String { AppL10n.copyLocale == .frCA ? "Details" : "Details" }
+    internal static var eventTypeDetailsEyebrow: String { AppL10n.copyLocale == .frCA ? "Détails" : "Details" }
 
     /// `scheduling.event_type_hosts_eyebrow`
-    internal static var eventTypeHostsEyebrow: String { AppL10n.copyLocale == .frCA ? "Hosts" : "Hosts" }
+    internal static var eventTypeHostsEyebrow: String { AppL10n.copyLocale == .frCA ? "Hôtes" : "Hosts" }
 
     /// `scheduling.event_type_no_hosts`
-    internal static var eventTypeNoHosts: String { AppL10n.copyLocale == .frCA ? "No hosts are assigned, so this event type cannot be booked." : "No hosts are assigned, so this event type cannot be booked." }
+    internal static var eventTypeNoHosts: String { AppL10n.copyLocale == .frCA ? "Aucun hôte n'est attribué\u{00A0}: ce type de rendez-vous n'est donc pas réservable." : "No hosts are assigned, so this event type cannot be booked." }
 
     /// `scheduling.event_type_no_questions`
-    internal static var eventTypeNoQuestions: String { AppL10n.copyLocale == .frCA ? "This event type asks no questions." : "This event type asks no questions." }
+    internal static var eventTypeNoQuestions: String { AppL10n.copyLocale == .frCA ? "Ce type de rendez-vous ne pose aucune question." : "This event type asks no questions." }
 
     /// `scheduling.event_type_questions_eyebrow`
     internal static var eventTypeQuestionsEyebrow: String { AppL10n.copyLocale == .frCA ? "Questions" : "Questions" }
@@ -2862,160 +2865,160 @@ extension SchedulingCopy {
     }
 
     /// `scheduling.event_types_empty_body`
-    internal static var eventTypesEmptyBody: String { AppL10n.copyLocale == .frCA ? "An event type is a page a customer can book. Create one in a browser and its booking page goes live." : "An event type is a page a customer can book. Create one in a browser and its booking page goes live." }
+    internal static var eventTypesEmptyBody: String { AppL10n.copyLocale == .frCA ? "Un type de rendez-vous a sa propre page où un client peut réserver. Créez-en un hors de l'app et sa page de réservation sera en ligne." : "An event type is a page a customer can book. Create one in a browser and its booking page goes live." }
 
     /// `scheduling.event_types_empty_title`
-    internal static var eventTypesEmptyTitle: String { AppL10n.copyLocale == .frCA ? "No event types yet" : "No event types yet" }
+    internal static var eventTypesEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucun type de rendez-vous" : "No event types yet" }
 
     /// `scheduling.fact_buffer_after`
-    internal static var factBufferAfter: String { AppL10n.copyLocale == .frCA ? "Buffer after" : "Buffer after" }
+    internal static var factBufferAfter: String { AppL10n.copyLocale == .frCA ? "Battement après" : "Buffer after" }
 
     /// `scheduling.fact_buffer_before`
-    internal static var factBufferBefore: String { AppL10n.copyLocale == .frCA ? "Buffer before" : "Buffer before" }
+    internal static var factBufferBefore: String { AppL10n.copyLocale == .frCA ? "Battement avant" : "Buffer before" }
 
     /// `scheduling.fact_duration`
-    internal static var factDuration: String { AppL10n.copyLocale == .frCA ? "Duration" : "Duration" }
+    internal static var factDuration: String { AppL10n.copyLocale == .frCA ? "Durée" : "Duration" }
 
     /// `scheduling.fact_horizon`
-    internal static var factHorizon: String { AppL10n.copyLocale == .frCA ? "Bookable up to" : "Bookable up to" }
+    internal static var factHorizon: String { AppL10n.copyLocale == .frCA ? "Réservable jusqu'à" : "Bookable up to" }
 
     /// `scheduling.fact_interval`
-    internal static var factInterval: String { AppL10n.copyLocale == .frCA ? "Starts every" : "Starts every" }
+    internal static var factInterval: String { AppL10n.copyLocale == .frCA ? "Intervalle" : "Starts every" }
 
     /// `scheduling.fact_location`
-    internal static var factLocation: String { AppL10n.copyLocale == .frCA ? "Location" : "Location" }
+    internal static var factLocation: String { AppL10n.copyLocale == .frCA ? "Lieu" : "Location" }
 
     /// `scheduling.fact_location_value`
-    internal static var factLocationValue: String { AppL10n.copyLocale == .frCA ? "Address" : "Address" }
+    internal static var factLocationValue: String { AppL10n.copyLocale == .frCA ? "Adresse" : "Address" }
 
     /// `scheduling.fact_notice`
-    internal static var factNotice: String { AppL10n.copyLocale == .frCA ? "Minimum notice" : "Minimum notice" }
+    internal static var factNotice: String { AppL10n.copyLocale == .frCA ? "Préavis minimal" : "Minimum notice" }
 
     /// `scheduling.fact_state`
-    internal static var factState: String { AppL10n.copyLocale == .frCA ? "State" : "State" }
+    internal static var factState: String { AppL10n.copyLocale == .frCA ? "État" : "State" }
 
     /// `scheduling.failed_provision`
-    internal static var failedProvision: String { AppL10n.copyLocale == .frCA ? "Setup did not finish." : "Setup did not finish." }
+    internal static var failedProvision: String { AppL10n.copyLocale == .frCA ? "Configuration inachevée." : "Setup did not finish." }
 
     /// `scheduling.hand_off_failed`
-    internal static var handOffFailed: String { AppL10n.copyLocale == .frCA ? "The website could not be opened. Try again." : "The website could not be opened. Try again." }
+    internal static var handOffFailed: String { AppL10n.copyLocale == .frCA ? "Impossible d'ouvrir la page. Réessayez." : "The website could not be opened. Try again." }
 
     /// `scheduling.host_archived`
     internal static func hostArchived(_ role: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(role) · archived" : "\(role) · archived"
+        AppL10n.copyLocale == .frCA ? "\(role) · archivé" : "\(role) · archived"
     }
 
     /// `scheduling.host_line`
     internal static func hostLine(_ host: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Served from \(host)" : "Served from \(host)"
+        AppL10n.copyLocale == .frCA ? "Serveur\u{00A0}: \(host)" : "Served from \(host)"
     }
 
     /// `scheduling.hours_none_at_all`
-    internal static var hoursNoneAtAll: String { AppL10n.copyLocale == .frCA ? "Not bookable on any day yet." : "Not bookable on any day yet." }
+    internal static var hoursNoneAtAll: String { AppL10n.copyLocale == .frCA ? "Aucune journée réservable pour l'instant." : "Not bookable on any day yet." }
 
     /// `scheduling.hours_range`
     internal static func hoursRange(_ start: String, _ end: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(start) to \(end)" : "\(start) to \(end)"
+        AppL10n.copyLocale == .frCA ? "\(start) à \(end)" : "\(start) to \(end)"
     }
 
     /// `scheduling.inactive`
-    internal static var inactive: String { AppL10n.copyLocale == .frCA ? "Inactive" : "Inactive" }
+    internal static var inactive: String { AppL10n.copyLocale == .frCA ? "Inactif" : "Inactive" }
 
     /// `scheduling.key_value`
     internal static func keyValue(created: String, lastUsed last_used: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Created \(created) · Last used \(last_used)" : "Created \(created) · Last used \(last_used)"
+        AppL10n.copyLocale == .frCA ? "Créée le \(created) · Dernière utilisation\u{00A0}: \(last_used)" : "Created \(created) · Last used \(last_used)"
     }
 
     /// `scheduling.keys_empty`
-    internal static var keysEmpty: String { AppL10n.copyLocale == .frCA ? "No API keys yet." : "No API keys yet." }
+    internal static var keysEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune clé d'API." : "No API keys yet." }
 
     /// `scheduling.keys_eyebrow`
-    internal static var keysEyebrow: String { AppL10n.copyLocale == .frCA ? "Your API keys" : "Your API keys" }
+    internal static var keysEyebrow: String { AppL10n.copyLocale == .frCA ? "Vos clés d'API" : "Your API keys" }
 
     /// `scheduling.keys_subtitle`
-    internal static var keysSubtitle: String { AppL10n.copyLocale == .frCA ? "A key lets your own tools and scripts reach this workspace's booking data." : "A key lets your own tools and scripts reach this workspace's booking data." }
+    internal static var keysSubtitle: String { AppL10n.copyLocale == .frCA ? "Une clé permet à vos propres outils et scripts d'accéder aux données de rendez-vous de cet espace de travail." : "A key lets your own tools and scripts reach this workspace's booking data." }
 
     /// `scheduling.last_checked`
     internal static func lastChecked(_ stamp: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Last checked \(stamp)" : "Last checked \(stamp)"
+        AppL10n.copyLocale == .frCA ? "Dernière vérification\u{00A0}: \(stamp)" : "Last checked \(stamp)"
     }
 
     /// `scheduling.legacy`
-    internal static var legacy: String { AppL10n.copyLocale == .frCA ? "Scheduling is available for this workspace. Turn it on to give customers a booking page of their own." : "Scheduling is available for this workspace. Turn it on to give customers a booking page of their own." }
+    internal static var legacy: String { AppL10n.copyLocale == .frCA ? "La prise de rendez-vous est disponible pour cet espace de travail. Activez-la pour offrir à vos clients une page de réservation dédiée." : "Scheduling is available for this workspace. Turn it on to give customers a booking page of their own." }
 
     /// `scheduling.live`
-    internal static var live: String { AppL10n.copyLocale == .frCA ? "Your booking page is live." : "Your booking page is live." }
+    internal static var live: String { AppL10n.copyLocale == .frCA ? "Votre page de réservation est en ligne." : "Your booking page is live." }
 
     /// `scheduling.live2`
-    internal static var live2: String { AppL10n.copyLocale == .frCA ? "Live" : "Live" }
+    internal static var live2: String { AppL10n.copyLocale == .frCA ? "En direct" : "Live" }
 
     /// `scheduling.live_without_link`
-    internal static var liveWithoutLink: String { AppL10n.copyLocale == .frCA ? "This workspace has a booking page, but the server did not send its address." : "This workspace has a booking page, but the server did not send its address." }
+    internal static var liveWithoutLink: String { AppL10n.copyLocale == .frCA ? "Cet espace de travail a une page de réservation, mais le serveur n'a pas envoyé son adresse." : "This workspace has a booking page, but the server did not send its address." }
 
     /// `scheduling.load_more`
-    internal static var loadMore: String { AppL10n.copyLocale == .frCA ? "Load more" : "Load more" }
+    internal static var loadMore: String { AppL10n.copyLocale == .frCA ? "Afficher plus" : "Load more" }
 
     /// `scheduling.loading_bookings`
-    internal static var loadingBookings: String { AppL10n.copyLocale == .frCA ? "Loading bookings…" : "Loading bookings…" }
+    internal static var loadingBookings: String { AppL10n.copyLocale == .frCA ? "Chargement des rendez-vous…" : "Loading bookings…" }
 
     /// `scheduling.loading_calendar`
-    internal static var loadingCalendar: String { AppL10n.copyLocale == .frCA ? "Loading calendar…" : "Loading calendar…" }
+    internal static var loadingCalendar: String { AppL10n.copyLocale == .frCA ? "Chargement du calendrier…" : "Loading calendar…" }
 
     /// `scheduling.loading_event_types`
-    internal static var loadingEventTypes: String { AppL10n.copyLocale == .frCA ? "Loading event types…" : "Loading event types…" }
+    internal static var loadingEventTypes: String { AppL10n.copyLocale == .frCA ? "Chargement des types de rendez-vous…" : "Loading event types…" }
 
     /// `scheduling.loading_more`
-    internal static var loadingMore: String { AppL10n.copyLocale == .frCA ? "Loading…" : "Loading…" }
+    internal static var loadingMore: String { AppL10n.copyLocale == .frCA ? "Chargement…" : "Loading…" }
 
     /// `scheduling.loading_scheduling`
-    internal static var loadingScheduling: String { AppL10n.copyLocale == .frCA ? "Loading scheduling…" : "Loading scheduling…" }
+    internal static var loadingScheduling: String { AppL10n.copyLocale == .frCA ? "Chargement de la prise de rendez-vous…" : "Loading scheduling…" }
 
     /// `scheduling.location_built_in_video`
-    internal static var locationBuiltInVideo: String { AppL10n.copyLocale == .frCA ? "Built-in video" : "Built-in video" }
+    internal static var locationBuiltInVideo: String { AppL10n.copyLocale == .frCA ? "Vidéo intégrée" : "Built-in video" }
 
     /// `scheduling.location_custom_video`
-    internal static var locationCustomVideo: String { AppL10n.copyLocale == .frCA ? "Video link" : "Video link" }
+    internal static var locationCustomVideo: String { AppL10n.copyLocale == .frCA ? "Lien vidéo" : "Video link" }
 
     /// `scheduling.location_google_meet`
     internal static var locationGoogleMeet: String { AppL10n.copyLocale == .frCA ? "Google Meet" : "Google Meet" }
 
     /// `scheduling.location_in_person`
-    internal static var locationInPerson: String { AppL10n.copyLocale == .frCA ? "In person" : "In person" }
+    internal static var locationInPerson: String { AppL10n.copyLocale == .frCA ? "En personne" : "In person" }
 
     /// `scheduling.location_link`
-    internal static var locationLink: String { AppL10n.copyLocale == .frCA ? "Link" : "Link" }
+    internal static var locationLink: String { AppL10n.copyLocale == .frCA ? "Lien" : "Link" }
 
     /// `scheduling.location_not_set`
-    internal static var locationNotSet: String { AppL10n.copyLocale == .frCA ? "Not set" : "Not set" }
+    internal static var locationNotSet: String { AppL10n.copyLocale == .frCA ? "Non défini" : "Not set" }
 
     /// `scheduling.location_phone`
-    internal static var locationPhone: String { AppL10n.copyLocale == .frCA ? "Phone" : "Phone" }
+    internal static var locationPhone: String { AppL10n.copyLocale == .frCA ? "Téléphone" : "Phone" }
 
     /// `scheduling.location_teams`
     internal static var locationTeams: String { AppL10n.copyLocale == .frCA ? "Microsoft Teams" : "Microsoft Teams" }
 
     /// `scheduling.mcp_auth_label`
-    internal static var mcpAuthLabel: String { AppL10n.copyLocale == .frCA ? "Authorization header" : "Authorization header" }
+    internal static var mcpAuthLabel: String { AppL10n.copyLocale == .frCA ? "En-tête Authorization" : "Authorization header" }
 
     /// `scheduling.mcp_eyebrow`
-    internal static var mcpEyebrow: String { AppL10n.copyLocale == .frCA ? "Connect an AI assistant" : "Connect an AI assistant" }
+    internal static var mcpEyebrow: String { AppL10n.copyLocale == .frCA ? "Connecter un assistant IA" : "Connect an AI assistant" }
 
     /// `scheduling.mcp_no_host`
-    internal static var mcpNoHost: String { AppL10n.copyLocale == .frCA ? "Your booking address is not ready yet. It appears here once scheduling is set up." : "Your booking address is not ready yet. It appears here once scheduling is set up." }
+    internal static var mcpNoHost: String { AppL10n.copyLocale == .frCA ? "Votre lien de réservation n'est pas encore prêt. Il apparaîtra ici une fois la prise de rendez-vous configurée." : "Your booking address is not ready yet. It appears here once scheduling is set up." }
 
     /// `scheduling.mcp_note`
-    internal static var mcpNote: String { AppL10n.copyLocale == .frCA ? "Use a key from the API keys tab. Anyone holding it can do everything on this workspace's bookings, so give each assistant its own and revoke it when you are done with it." : "Use a key from the API keys tab. Anyone holding it can do everything on this workspace's bookings, so give each assistant its own and revoke it when you are done with it." }
+    internal static var mcpNote: String { AppL10n.copyLocale == .frCA ? "Utilisez une clé de l'onglet Clés d'API. Quiconque la détient peut tout faire sur les rendez-vous de cet espace de travail, alors donnez-en une propre à chaque assistant et révoquez-la quand vous avez terminé." : "Use a key from the API keys tab. Anyone holding it can do everything on this workspace's bookings, so give each assistant its own and revoke it when you are done with it." }
 
     /// `scheduling.mcp_url_label`
-    internal static var mcpUrlLabel: String { AppL10n.copyLocale == .frCA ? "MCP URL" : "MCP URL" }
+    internal static var mcpUrlLabel: String { AppL10n.copyLocale == .frCA ? "URL MCP" : "MCP URL" }
 
     /// `scheduling.member_count`
     internal static func memberCount(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
-            if count == 1 {
-                return "\(count) member"
+            if count == 0 || count == 1 {
+                return "\(count) membre"
             }
-            return "\(count) members"
+            return "\(count) membres"
         }
         if count == 1 {
             return "\(count) member"
@@ -3029,1476 +3032,1476 @@ extension SchedulingCopy {
     }
 
     /// `scheduling.members_degraded`
-    internal static var membersDegraded: String { AppL10n.copyLocale == .frCA ? "The workspace's members could not be read, so roles are not shown." : "The workspace's members could not be read, so roles are not shown." }
+    internal static var membersDegraded: String { AppL10n.copyLocale == .frCA ? "Impossible de lire les membres de l'espace de travail; les rôles ne sont pas affichés." : "The workspace's members could not be read, so roles are not shown." }
 
     /// `scheduling.members_empty`
-    internal static var membersEmpty: String { AppL10n.copyLocale == .frCA ? "Nobody else is in this workspace yet." : "Nobody else is in this workspace yet." }
+    internal static var membersEmpty: String { AppL10n.copyLocale == .frCA ? "Personne d'autre ne fait partie de cet espace de travail." : "Nobody else is in this workspace yet." }
 
     /// `scheduling.members_eyebrow`
-    internal static var membersEyebrow: String { AppL10n.copyLocale == .frCA ? "Members" : "Members" }
+    internal static var membersEyebrow: String { AppL10n.copyLocale == .frCA ? "Membres" : "Members" }
 
     /// `scheduling.needs_attention`
-    internal static var needsAttention: String { AppL10n.copyLocale == .frCA ? "Needs attention" : "Needs attention" }
+    internal static var needsAttention: String { AppL10n.copyLocale == .frCA ? "À vérifier" : "Needs attention" }
 
     /// `scheduling.never`
-    internal static var never: String { AppL10n.copyLocale == .frCA ? "Never" : "Never" }
+    internal static var never: String { AppL10n.copyLocale == .frCA ? "Jamais" : "Never" }
 
     /// `scheduling.not_connected`
-    internal static var notConnected: String { AppL10n.copyLocale == .frCA ? "Not connected" : "Not connected" }
+    internal static var notConnected: String { AppL10n.copyLocale == .frCA ? "Non connecté" : "Not connected" }
 
     /// `scheduling.not_eligible`
-    internal static var notEligible: String { AppL10n.copyLocale == .frCA ? "Scheduling is not enabled for this workspace." : "Scheduling is not enabled for this workspace." }
+    internal static var notEligible: String { AppL10n.copyLocale == .frCA ? "La prise de rendez-vous n'est pas activée pour cet espace de travail." : "Scheduling is not enabled for this workspace." }
 
     /// `scheduling.not_public`
-    internal static var notPublic: String { AppL10n.copyLocale == .frCA ? "Not public" : "Not public" }
+    internal static var notPublic: String { AppL10n.copyLocale == .frCA ? "Non public" : "Not public" }
 
     /// `scheduling.not_ready_yet`
-    internal static var notReadyYet: String { AppL10n.copyLocale == .frCA ? "Scheduling is not ready yet. Turn it on, or wait for setup to finish." : "Scheduling is not ready yet. Turn it on, or wait for setup to finish." }
+    internal static var notReadyYet: String { AppL10n.copyLocale == .frCA ? "La prise de rendez-vous n'est pas encore prête. Activez-la ou attendez la fin de la configuration." : "Scheduling is not ready yet. Turn it on, or wait for setup to finish." }
 
     /// `scheduling.not_set`
-    internal static var notSet: String { AppL10n.copyLocale == .frCA ? "Not set" : "Not set" }
+    internal static var notSet: String { AppL10n.copyLocale == .frCA ? "Non défini" : "Not set" }
 
     /// `scheduling.not_tried_yet`
-    internal static var notTriedYet: String { AppL10n.copyLocale == .frCA ? "Not tried yet" : "Not tried yet" }
+    internal static var notTriedYet: String { AppL10n.copyLocale == .frCA ? "Pas encore tenté" : "Not tried yet" }
 
     /// `scheduling.off`
-    internal static var off: String { AppL10n.copyLocale == .frCA ? "Off" : "Off" }
+    internal static var off: String { AppL10n.copyLocale == .frCA ? "Désactivé" : "Off" }
 
     /// `scheduling.on`
-    internal static var on: String { AppL10n.copyLocale == .frCA ? "On" : "On" }
+    internal static var on: String { AppL10n.copyLocale == .frCA ? "Activé" : "On" }
 
     /// `scheduling.open_in_browser`
-    internal static var openInBrowser: String { AppL10n.copyLocale == .frCA ? "Open in browser" : "Open in browser" }
+    internal static var openInBrowser: String { AppL10n.copyLocale == .frCA ? "Ouvrir hors de l'app" : "Open in browser" }
 
     /// `scheduling.opening`
-    internal static var opening: String { AppL10n.copyLocale == .frCA ? "Opening…" : "Opening…" }
+    internal static var opening: String { AppL10n.copyLocale == .frCA ? "Ouverture…" : "Opening…" }
 
     /// `scheduling.overrides_empty`
-    internal static var overridesEmpty: String { AppL10n.copyLocale == .frCA ? "No overrides ahead." : "No overrides ahead." }
+    internal static var overridesEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune exception à venir." : "No overrides ahead." }
 
     /// `scheduling.overrides_eyebrow`
-    internal static var overridesEyebrow: String { AppL10n.copyLocale == .frCA ? "Date overrides" : "Date overrides" }
+    internal static var overridesEyebrow: String { AppL10n.copyLocale == .frCA ? "Exceptions" : "Date overrides" }
 
     /// `scheduling.overrides_subtitle`
-    internal static var overridesSubtitle: String { AppL10n.copyLocale == .frCA ? "Days you are away, or working different hours from usual." : "Days you are away, or working different hours from usual." }
+    internal static var overridesSubtitle: String { AppL10n.copyLocale == .frCA ? "Les journées d'absence, ou celles où vous travaillez à des heures différentes." : "Days you are away, or working different hours from usual." }
 
     /// `scheduling.profile_date_format`
-    internal static var profileDateFormat: String { AppL10n.copyLocale == .frCA ? "Date format" : "Date format" }
+    internal static var profileDateFormat: String { AppL10n.copyLocale == .frCA ? "Format de date" : "Date format" }
 
     /// `scheduling.profile_name`
-    internal static var profileName: String { AppL10n.copyLocale == .frCA ? "Name" : "Name" }
+    internal static var profileName: String { AppL10n.copyLocale == .frCA ? "Nom" : "Name" }
 
     /// `scheduling.profile_time_format`
-    internal static var profileTimeFormat: String { AppL10n.copyLocale == .frCA ? "Time format" : "Time format" }
+    internal static var profileTimeFormat: String { AppL10n.copyLocale == .frCA ? "Format de l'heure" : "Time format" }
 
     /// `scheduling.profile_timezone`
-    internal static var profileTimezone: String { AppL10n.copyLocale == .frCA ? "Timezone" : "Timezone" }
+    internal static var profileTimezone: String { AppL10n.copyLocale == .frCA ? "Fuseau horaire" : "Timezone" }
 
     /// `scheduling.profile_week_start`
-    internal static var profileWeekStart: String { AppL10n.copyLocale == .frCA ? "Week starts on" : "Week starts on" }
+    internal static var profileWeekStart: String { AppL10n.copyLocale == .frCA ? "La semaine commence le" : "Week starts on" }
 
     /// `scheduling.provisioning`
-    internal static var provisioning: String { AppL10n.copyLocale == .frCA ? "Your booking page is being set up. This usually takes under a minute, and it is re-checked automatically every hour if anything stalls." : "Your booking page is being set up. This usually takes under a minute, and it is re-checked automatically every hour if anything stalls." }
+    internal static var provisioning: String { AppL10n.copyLocale == .frCA ? "Votre page de réservation est en cours de configuration. Cela prend habituellement moins d'une minute, et elle est revérifiée automatiquement chaque heure en cas de blocage." : "Your booking page is being set up. This usually takes under a minute, and it is re-checked automatically every hour if anything stalls." }
 
     /// `scheduling.question_required`
     internal static func questionRequired(_ type: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(type) · required" : "\(type) · required"
+        AppL10n.copyLocale == .frCA ? "\(type) · obligatoire" : "\(type) · required"
     }
 
     /// `scheduling.refresh`
-    internal static var refresh: String { AppL10n.copyLocale == .frCA ? "Refresh" : "Refresh" }
+    internal static var refresh: String { AppL10n.copyLocale == .frCA ? "Actualiser" : "Refresh" }
 
     /// `scheduling.scheduling`
-    internal static var scheduling: String { AppL10n.copyLocale == .frCA ? "Scheduling" : "Scheduling" }
+    internal static var scheduling: String { AppL10n.copyLocale == .frCA ? "Rendez-vous" : "Scheduling" }
 
     /// `scheduling.section_subtitle_bookings`
-    internal static var sectionSubtitleBookings: String { AppL10n.copyLocale == .frCA ? "Every booking in this workspace, upcoming and past" : "Every booking in this workspace, upcoming and past" }
+    internal static var sectionSubtitleBookings: String { AppL10n.copyLocale == .frCA ? "Tous les rendez-vous de cet espace de travail, à venir et passés" : "Every booking in this workspace, upcoming and past" }
 
     /// `scheduling.section_subtitle_calendar`
-    internal static var sectionSubtitleCalendar: String { AppL10n.copyLocale == .frCA ? "The accounts bookings are written to and checked against" : "The accounts bookings are written to and checked against" }
+    internal static var sectionSubtitleCalendar: String { AppL10n.copyLocale == .frCA ? "Les comptes où les rendez-vous sont inscrits et où les conflits sont vérifiés" : "The accounts bookings are written to and checked against" }
 
     /// `scheduling.section_subtitle_developer`
-    internal static var sectionSubtitleDeveloper: String { AppL10n.copyLocale == .frCA ? "API keys, connected apps and webhooks" : "API keys, connected apps and webhooks" }
+    internal static var sectionSubtitleDeveloper: String { AppL10n.copyLocale == .frCA ? "Clés d'API, applications connectées et webhooks" : "API keys, connected apps and webhooks" }
 
     /// `scheduling.section_subtitle_event_types`
-    internal static var sectionSubtitleEventTypes: String { AppL10n.copyLocale == .frCA ? "The pages a customer can book, and how long each one runs" : "The pages a customer can book, and how long each one runs" }
+    internal static var sectionSubtitleEventTypes: String { AppL10n.copyLocale == .frCA ? "Les pages où un client peut réserver, et la durée de chaque rendez-vous" : "The pages a customer can book, and how long each one runs" }
 
     /// `scheduling.section_subtitle_hours`
-    internal static var sectionSubtitleHours: String { AppL10n.copyLocale == .frCA ? "The weekly hours you are bookable, and the dates you are not" : "The weekly hours you are bookable, and the dates you are not" }
+    internal static var sectionSubtitleHours: String { AppL10n.copyLocale == .frCA ? "Vos heures réservables de la semaine, et les dates où vous n'êtes pas réservable" : "The weekly hours you are bookable, and the dates you are not" }
 
     /// `scheduling.section_subtitle_overview`
-    internal static var sectionSubtitleOverview: String { AppL10n.copyLocale == .frCA ? "Your booking desk, and what is coming up" : "Your booking desk, and what is coming up" }
+    internal static var sectionSubtitleOverview: String { AppL10n.copyLocale == .frCA ? "Votre centre de réservation et ce qui est à venir" : "Your booking desk, and what is coming up" }
 
     /// `scheduling.section_subtitle_settings`
-    internal static var sectionSubtitleSettings: String { AppL10n.copyLocale == .frCA ? "Your booking page, your booking assistant, and how the scheduler treats you" : "Your booking page, your booking assistant, and how the scheduler treats you" }
+    internal static var sectionSubtitleSettings: String { AppL10n.copyLocale == .frCA ? "Votre page et votre assistante de réservation, et vos préférences" : "Your booking page, your booking assistant, and how the scheduler treats you" }
 
     /// `scheduling.section_subtitle_team`
-    internal static var sectionSubtitleTeam: String { AppL10n.copyLocale == .frCA ? "The hosts who can be booked, and the teams they route through" : "The hosts who can be booked, and the teams they route through" }
+    internal static var sectionSubtitleTeam: String { AppL10n.copyLocale == .frCA ? "Les hôtes réservables et leurs équipes d'acheminement" : "The hosts who can be booked, and the teams they route through" }
 
     /// `scheduling.section_title_booking`
-    internal static var sectionTitleBooking: String { AppL10n.copyLocale == .frCA ? "Booking" : "Booking" }
+    internal static var sectionTitleBooking: String { AppL10n.copyLocale == .frCA ? "Rendez-vous" : "Booking" }
 
     /// `scheduling.section_title_bookings`
-    internal static var sectionTitleBookings: String { AppL10n.copyLocale == .frCA ? "Bookings" : "Bookings" }
+    internal static var sectionTitleBookings: String { AppL10n.copyLocale == .frCA ? "Rendez-vous" : "Bookings" }
 
     /// `scheduling.section_title_calendar`
-    internal static var sectionTitleCalendar: String { AppL10n.copyLocale == .frCA ? "Calendar" : "Calendar" }
+    internal static var sectionTitleCalendar: String { AppL10n.copyLocale == .frCA ? "Calendrier" : "Calendar" }
 
     /// `scheduling.section_title_developer`
-    internal static var sectionTitleDeveloper: String { AppL10n.copyLocale == .frCA ? "Developer" : "Developer" }
+    internal static var sectionTitleDeveloper: String { AppL10n.copyLocale == .frCA ? "Développeur" : "Developer" }
 
     /// `scheduling.section_title_event_type`
-    internal static var sectionTitleEventType: String { AppL10n.copyLocale == .frCA ? "Event type" : "Event type" }
+    internal static var sectionTitleEventType: String { AppL10n.copyLocale == .frCA ? "Type de rendez-vous" : "Event type" }
 
     /// `scheduling.section_title_event_types`
-    internal static var sectionTitleEventTypes: String { AppL10n.copyLocale == .frCA ? "Event types" : "Event types" }
+    internal static var sectionTitleEventTypes: String { AppL10n.copyLocale == .frCA ? "Types de rendez-vous" : "Event types" }
 
     /// `scheduling.section_title_hours`
-    internal static var sectionTitleHours: String { AppL10n.copyLocale == .frCA ? "Working hours" : "Working hours" }
+    internal static var sectionTitleHours: String { AppL10n.copyLocale == .frCA ? "Heures de disponibilité" : "Working hours" }
 
     /// `scheduling.section_title_hub`
-    internal static var sectionTitleHub: String { AppL10n.copyLocale == .frCA ? "Scheduling" : "Scheduling" }
+    internal static var sectionTitleHub: String { AppL10n.copyLocale == .frCA ? "Rendez-vous" : "Scheduling" }
 
     /// `scheduling.section_title_overview`
-    internal static var sectionTitleOverview: String { AppL10n.copyLocale == .frCA ? "Overview" : "Overview" }
+    internal static var sectionTitleOverview: String { AppL10n.copyLocale == .frCA ? "Vue d'ensemble" : "Overview" }
 
     /// `scheduling.section_title_settings`
-    internal static var sectionTitleSettings: String { AppL10n.copyLocale == .frCA ? "Settings" : "Settings" }
+    internal static var sectionTitleSettings: String { AppL10n.copyLocale == .frCA ? "Réglages" : "Settings" }
 
     /// `scheduling.section_title_team`
-    internal static var sectionTitleTeam: String { AppL10n.copyLocale == .frCA ? "Team" : "Team" }
+    internal static var sectionTitleTeam: String { AppL10n.copyLocale == .frCA ? "Équipe" : "Team" }
 
     /// `scheduling.sections_eyebrow`
-    internal static var sectionsEyebrow: String { AppL10n.copyLocale == .frCA ? "Manage" : "Manage" }
+    internal static var sectionsEyebrow: String { AppL10n.copyLocale == .frCA ? "Gérer" : "Manage" }
 
     /// `scheduling.sections_footnote`
-    internal static var sectionsFootnote: String { AppL10n.copyLocale == .frCA ? "These sections are read-only for now. Anything that changes a booking page opens in a browser." : "These sections are read-only for now. Anything that changes a booking page opens in a browser." }
+    internal static var sectionsFootnote: String { AppL10n.copyLocale == .frCA ? "Ces sections sont en lecture seule pour l'instant. Tout ce qui modifie une page de réservation s'ouvre hors de l'app." : "These sections are read-only for now. Anything that changes a booking page opens in a browser." }
 
     /// `scheduling.set`
-    internal static var set: String { AppL10n.copyLocale == .frCA ? "Set" : "Set" }
+    internal static var set: String { AppL10n.copyLocale == .frCA ? "Défini" : "Set" }
 
     /// `scheduling.setting_up`
-    internal static var settingUp: String { AppL10n.copyLocale == .frCA ? "Setting up" : "Setting up" }
+    internal static var settingUp: String { AppL10n.copyLocale == .frCA ? "Configuration en cours" : "Setting up" }
 
     /// `scheduling.setup_failed_because`
     internal static func setupFailedBecause(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Setup did not finish. \(reason)" : "Setup did not finish. \(reason)"
+        AppL10n.copyLocale == .frCA ? "Configuration inachevée. \(reason)" : "Setup did not finish. \(reason)"
     }
 
     /// `scheduling.setup_failed_no_reason`
-    internal static var setupFailedNoReason: String { AppL10n.copyLocale == .frCA ? "Setup did not finish. No reason was recorded." : "Setup did not finish. No reason was recorded." }
+    internal static var setupFailedNoReason: String { AppL10n.copyLocale == .frCA ? "Configuration inachevée. Aucun motif n'a été consigné." : "Setup did not finish. No reason was recorded." }
 
     /// `scheduling.share`
-    internal static var share: String { AppL10n.copyLocale == .frCA ? "Share" : "Share" }
+    internal static var share: String { AppL10n.copyLocale == .frCA ? "Partager" : "Share" }
 
     /// `scheduling.stranded_eyebrow`
-    internal static var strandedEyebrow: String { AppL10n.copyLocale == .frCA ? "Someone who has left still has bookings" : "Someone who has left still has bookings" }
+    internal static var strandedEyebrow: String { AppL10n.copyLocale == .frCA ? "Une personne partie a encore des rendez-vous" : "Someone who has left still has bookings" }
 
     /// `scheduling.switched_off`
-    internal static var switchedOff: String { AppL10n.copyLocale == .frCA ? "Scheduling is turned off for this workspace." : "Scheduling is turned off for this workspace." }
+    internal static var switchedOff: String { AppL10n.copyLocale == .frCA ? "La prise de rendez-vous est désactivée pour cet espace de travail." : "Scheduling is turned off for this workspace." }
 
     /// `scheduling.switched_off2`
-    internal static var switchedOff2: String { AppL10n.copyLocale == .frCA ? "Switched off" : "Switched off" }
+    internal static var switchedOff2: String { AppL10n.copyLocale == .frCA ? "Désactivée" : "Switched off" }
 
     /// `scheduling.teams_empty`
-    internal static var teamsEmpty: String { AppL10n.copyLocale == .frCA ? "No teams yet." : "No teams yet." }
+    internal static var teamsEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune équipe." : "No teams yet." }
 
     /// `scheduling.teams_eyebrow`
-    internal static var teamsEyebrow: String { AppL10n.copyLocale == .frCA ? "Teams" : "Teams" }
+    internal static var teamsEyebrow: String { AppL10n.copyLocale == .frCA ? "Équipes" : "Teams" }
 
     /// `scheduling.teams_subtitle`
-    internal static var teamsSubtitle: String { AppL10n.copyLocale == .frCA ? "A team rotates bookings through its hosts, in routing-priority order." : "A team rotates bookings through its hosts, in routing-priority order." }
+    internal static var teamsSubtitle: String { AppL10n.copyLocale == .frCA ? "Une équipe répartit les rendez-vous entre ses hôtes, selon la priorité d'acheminement." : "A team rotates bookings through its hosts, in routing-priority order." }
 
     /// `scheduling.times_in`
     internal static func timesIn(_ zone: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Times in \(zone)" : "Times in \(zone)"
+        AppL10n.copyLocale == .frCA ? "Fuseau horaire\u{00A0}: \(zone)" : "Times in \(zone)"
     }
 
     /// `scheduling.too_many_attempts`
-    internal static var tooManyAttempts: String { AppL10n.copyLocale == .frCA ? "Too many attempts, try again in an hour." : "Too many attempts, try again in an hour." }
+    internal static var tooManyAttempts: String { AppL10n.copyLocale == .frCA ? "Trop de tentatives. Réessayez dans une heure." : "Too many attempts, try again in an hour." }
 
     /// `scheduling.unknown_time`
-    internal static var unknownTime: String { AppL10n.copyLocale == .frCA ? "Unknown" : "Unknown" }
+    internal static var unknownTime: String { AppL10n.copyLocale == .frCA ? "Inconnu" : "Unknown" }
 
     /// `scheduling.update_to_open_website`
-    internal static var updateToOpenWebsite: String { AppL10n.copyLocale == .frCA ? "Update the app to open the website from it." : "Update the app to open the website from it." }
+    internal static var updateToOpenWebsite: String { AppL10n.copyLocale == .frCA ? "Mettez l'app à jour pour pouvoir ouvrir cette page." : "Update the app to open the website from it." }
 
     /// `scheduling.webhooks_empty`
-    internal static var webhooksEmpty: String { AppL10n.copyLocale == .frCA ? "No webhooks yet." : "No webhooks yet." }
+    internal static var webhooksEmpty: String { AppL10n.copyLocale == .frCA ? "Aucun webhook." : "No webhooks yet." }
 
     /// `scheduling.webhooks_eyebrow`
     internal static var webhooksEyebrow: String { AppL10n.copyLocale == .frCA ? "Webhooks" : "Webhooks" }
 
     /// `scheduling.webhooks_subtitle`
-    internal static var webhooksSubtitle: String { AppL10n.copyLocale == .frCA ? "Bookings already reach your District inbox and workflows; webhooks are for other systems." : "Bookings already reach your District inbox and workflows; webhooks are for other systems." }
+    internal static var webhooksSubtitle: String { AppL10n.copyLocale == .frCA ? "Les rendez-vous arrivent déjà dans votre boîte de réception District et vos flux de travail; les webhooks servent aux autres systèmes." : "Bookings already reach your District inbox and workflows; webhooks are for other systems." }
 }
 
 extension SchedulingFailureCopy {
     /// `scheduling_failure.forbidden`
-    internal static var forbidden: String { AppL10n.copyLocale == .frCA ? "You can view this but not change it." : "You can view this but not change it." }
+    internal static var forbidden: String { AppL10n.copyLocale == .frCA ? "Vous pouvez consulter ceci, mais pas le modifier." : "You can view this but not change it." }
 
     /// `scheduling_failure.not_ready`
-    internal static var notReady: String { AppL10n.copyLocale == .frCA ? "Scheduling is not set up for this workspace yet." : "Scheduling is not set up for this workspace yet." }
+    internal static var notReady: String { AppL10n.copyLocale == .frCA ? "La prise de rendez-vous n'est pas encore configurée pour cet espace de travail." : "Scheduling is not set up for this workspace yet." }
 
     /// `scheduling_failure.offline`
-    internal static var offline: String { AppL10n.copyLocale == .frCA ? "You appear to be offline. Check your connection and try again." : "You appear to be offline. Check your connection and try again." }
+    internal static var offline: String { AppL10n.copyLocale == .frCA ? "Vous semblez être hors ligne. Vérifiez votre connexion et réessayez." : "You appear to be offline. Check your connection and try again." }
 
     /// `scheduling_failure.slot_taken`
-    internal static var slotTaken: String { AppL10n.copyLocale == .frCA ? "That time was just taken. Pick another." : "That time was just taken. Pick another." }
+    internal static var slotTaken: String { AppL10n.copyLocale == .frCA ? "Cette heure vient d'être prise. Choisissez-en une autre." : "That time was just taken. Pick another." }
 
     /// `scheduling_failure.stale_build`
-    internal static var staleBuild: String { AppL10n.copyLocale == .frCA ? "This version of the app could not read that response. Please update." : "This version of the app could not read that response. Please update." }
+    internal static var staleBuild: String { AppL10n.copyLocale == .frCA ? "Cette version de l'app n'a pas pu lire cette réponse. Veuillez mettre l'app à jour." : "This version of the app could not read that response. Please update." }
 
     /// `scheduling_failure.unavailable`
-    internal static var unavailable: String { AppL10n.copyLocale == .frCA ? "The booking system did not answer. Try again in a minute." : "The booking system did not answer. Try again in a minute." }
+    internal static var unavailable: String { AppL10n.copyLocale == .frCA ? "Le système de réservation n'a pas répondu. Réessayez dans une minute." : "The booking system did not answer. Try again in a minute." }
 
     /// `scheduling_failure.unknown`
-    internal static var unknown: String { AppL10n.copyLocale == .frCA ? "That did not save. Try again." : "That did not save. Try again." }
+    internal static var unknown: String { AppL10n.copyLocale == .frCA ? "Rien n'a été enregistré. Réessayez." : "That did not save. Try again." }
 }
 
 extension SchedulingSettingsWriteCopy {
     /// `scheduling_settings_write.assistant_hint`
-    internal static var assistantHint: String { AppL10n.copyLocale == .frCA ? "The assistant that answers questions on your booking page." : "The assistant that answers questions on your booking page." }
+    internal static var assistantHint: String { AppL10n.copyLocale == .frCA ? "L'assistante qui répond aux questions sur votre page de réservation." : "The assistant that answers questions on your booking page." }
 
     /// `scheduling_settings_write.assistant_instructions_hint`
-    internal static var assistantInstructionsHint: String { AppL10n.copyLocale == .frCA ? "Extra instructions for the booking assistant. Up to 4000 characters." : "Extra instructions for the booking assistant. Up to 4000 characters." }
+    internal static var assistantInstructionsHint: String { AppL10n.copyLocale == .frCA ? "Instructions supplémentaires pour l'assistante de réservation. Jusqu'à 4000 caractères." : "Extra instructions for the booking assistant. Up to 4000 characters." }
 
     /// `scheduling_settings_write.assistant_instructions_label`
-    internal static var assistantInstructionsLabel: String { AppL10n.copyLocale == .frCA ? "Extra instructions for the booking assistant" : "Extra instructions for the booking assistant" }
+    internal static var assistantInstructionsLabel: String { AppL10n.copyLocale == .frCA ? "Instructions supplémentaires pour l'assistante de réservation" : "Extra instructions for the booking assistant" }
 
     /// `scheduling_settings_write.assistant_instructions_placeholder`
-    internal static var assistantInstructionsPlaceholder: String { AppL10n.copyLocale == .frCA ? "We are closed on public holidays. Always ask which location the customer means." : "We are closed on public holidays. Always ask which location the customer means." }
+    internal static var assistantInstructionsPlaceholder: String { AppL10n.copyLocale == .frCA ? "Nous sommes fermés les jours fériés. Demandez toujours de quelle succursale le client parle." : "We are closed on public holidays. Always ask which location the customer means." }
 
     /// `scheduling_settings_write.assistant_instructions_too_long`
-    internal static var assistantInstructionsTooLong: String { AppL10n.copyLocale == .frCA ? "That is longer than 4000 characters." : "That is longer than 4000 characters." }
+    internal static var assistantInstructionsTooLong: String { AppL10n.copyLocale == .frCA ? "Ce texte dépasse 4000 caractères." : "That is longer than 4000 characters." }
 
     /// `scheduling_settings_write.assistant_label`
-    internal static var assistantLabel: String { AppL10n.copyLocale == .frCA ? "Booking assistant" : "Booking assistant" }
+    internal static var assistantLabel: String { AppL10n.copyLocale == .frCA ? "Assistante de réservation" : "Booking assistant" }
 
     /// `scheduling_settings_write.assistant_toggle`
-    internal static var assistantToggle: String { AppL10n.copyLocale == .frCA ? "Turn the booking assistant on" : "Turn the booking assistant on" }
+    internal static var assistantToggle: String { AppL10n.copyLocale == .frCA ? "Activer l'assistante de réservation" : "Turn the booking assistant on" }
 
     /// `scheduling_settings_write.attendee_group`
-    internal static var attendeeGroup: String { AppL10n.copyLocale == .frCA ? "As an attendee" : "As an attendee" }
+    internal static var attendeeGroup: String { AppL10n.copyLocale == .frCA ? "Comme participant" : "As an attendee" }
 
     /// `scheduling_settings_write.automation_done`
-    internal static var automationDone: String { AppL10n.copyLocale == .frCA ? "Booking assistant saved" : "Booking assistant saved" }
+    internal static var automationDone: String { AppL10n.copyLocale == .frCA ? "Assistante de réservation enregistrée" : "Booking assistant saved" }
 
     /// `scheduling_settings_write.automation_save`
-    internal static var automationSave: String { AppL10n.copyLocale == .frCA ? "Save booking assistant" : "Save booking assistant" }
+    internal static var automationSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer l'assistante" : "Save booking assistant" }
 
     /// `scheduling_settings_write.automation_title`
-    internal static var automationTitle: String { AppL10n.copyLocale == .frCA ? "Booking assistant" : "Booking assistant" }
+    internal static var automationTitle: String { AppL10n.copyLocale == .frCA ? "Assistante de réservation" : "Booking assistant" }
 
     /// `scheduling_settings_write.avatar_label`
-    internal static var avatarLabel: String { AppL10n.copyLocale == .frCA ? "Profile picture" : "Profile picture" }
+    internal static var avatarLabel: String { AppL10n.copyLocale == .frCA ? "Photo de profil" : "Profile picture" }
 
     /// `scheduling_settings_write.banner_label`
-    internal static var bannerLabel: String { AppL10n.copyLocale == .frCA ? "Banner" : "Banner" }
+    internal static var bannerLabel: String { AppL10n.copyLocale == .frCA ? "Bannière" : "Banner" }
 
     /// `scheduling_settings_write.banner_opacity_label`
-    internal static var bannerOpacityLabel: String { AppL10n.copyLocale == .frCA ? "Banner opacity" : "Banner opacity" }
+    internal static var bannerOpacityLabel: String { AppL10n.copyLocale == .frCA ? "Opacité de la bannière" : "Banner opacity" }
 
     /// `scheduling_settings_write.branding_done`
-    internal static var brandingDone: String { AppL10n.copyLocale == .frCA ? "Booking page saved" : "Booking page saved" }
+    internal static var brandingDone: String { AppL10n.copyLocale == .frCA ? "Page de réservation enregistrée" : "Booking page saved" }
 
     /// `scheduling_settings_write.branding_save`
-    internal static var brandingSave: String { AppL10n.copyLocale == .frCA ? "Save booking page" : "Save booking page" }
+    internal static var brandingSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer la page" : "Save booking page" }
 
     /// `scheduling_settings_write.branding_title`
-    internal static var brandingTitle: String { AppL10n.copyLocale == .frCA ? "Booking page" : "Booking page" }
+    internal static var brandingTitle: String { AppL10n.copyLocale == .frCA ? "Page de réservation" : "Booking page" }
 
     /// `scheduling_settings_write.business_name_hint`
-    internal static var businessNameHint: String { AppL10n.copyLocale == .frCA ? "Shown at the top of every booking page." : "Shown at the top of every booking page." }
+    internal static var businessNameHint: String { AppL10n.copyLocale == .frCA ? "Affiché en haut de chaque page de réservation." : "Shown at the top of every booking page." }
 
     /// `scheduling_settings_write.business_name_label`
-    internal static var businessNameLabel: String { AppL10n.copyLocale == .frCA ? "Business name" : "Business name" }
+    internal static var businessNameLabel: String { AppL10n.copyLocale == .frCA ? "Nom de l'entreprise" : "Business name" }
 
     /// `scheduling_settings_write.business_name_too_long`
-    internal static var businessNameTooLong: String { AppL10n.copyLocale == .frCA ? "That name is longer than 200 characters." : "That name is longer than 200 characters." }
+    internal static var businessNameTooLong: String { AppL10n.copyLocale == .frCA ? "Ce nom dépasse 200 caractères." : "That name is longer than 200 characters." }
 
     /// `scheduling_settings_write.date_format_dmy`
     internal static var dateFormatDmy: String { AppL10n.copyLocale == .frCA ? "31/12/2026" : "31/12/2026" }
 
     /// `scheduling_settings_write.date_format_label`
-    internal static var dateFormatLabel: String { AppL10n.copyLocale == .frCA ? "Date format" : "Date format" }
+    internal static var dateFormatLabel: String { AppL10n.copyLocale == .frCA ? "Format de date" : "Date format" }
 
     /// `scheduling_settings_write.date_format_mdy`
     internal static var dateFormatMdy: String { AppL10n.copyLocale == .frCA ? "12/31/2026" : "12/31/2026" }
 
     /// `scheduling_settings_write.date_format_required`
-    internal static var dateFormatRequired: String { AppL10n.copyLocale == .frCA ? "Choose how dates are written." : "Choose how dates are written." }
+    internal static var dateFormatRequired: String { AppL10n.copyLocale == .frCA ? "Choisissez la façon d'écrire les dates." : "Choose how dates are written." }
 
     /// `scheduling_settings_write.date_format_ymd`
     internal static var dateFormatYmd: String { AppL10n.copyLocale == .frCA ? "2026-12-31" : "2026-12-31" }
 
     /// `scheduling_settings_write.fallback_locale_hint`
-    internal static var fallbackLocaleHint: String { AppL10n.copyLocale == .frCA ? "The language a visitor gets when their browser asks for one we do not have." : "The language a visitor gets when their browser asks for one we do not have." }
+    internal static var fallbackLocaleHint: String { AppL10n.copyLocale == .frCA ? "La langue affichée à un visiteur dont la langue demandée n'est pas prise en charge." : "The language a visitor gets when their browser asks for one we do not have." }
 
     /// `scheduling_settings_write.fallback_locale_label`
-    internal static var fallbackLocaleLabel: String { AppL10n.copyLocale == .frCA ? "Page language" : "Page language" }
+    internal static var fallbackLocaleLabel: String { AppL10n.copyLocale == .frCA ? "Langue de la page" : "Page language" }
 
     /// `scheduling_settings_write.fallback_locale_required`
-    internal static var fallbackLocaleRequired: String { AppL10n.copyLocale == .frCA ? "Choose the language the booking page falls back to." : "Choose the language the booking page falls back to." }
+    internal static var fallbackLocaleRequired: String { AppL10n.copyLocale == .frCA ? "Choisissez la langue de repli de la page de réservation." : "Choose the language the booking page falls back to." }
 
     /// `scheduling_settings_write.host_group`
-    internal static var hostGroup: String { AppL10n.copyLocale == .frCA ? "As a host" : "As a host" }
+    internal static var hostGroup: String { AppL10n.copyLocale == .frCA ? "Comme hôte" : "As a host" }
 
     /// `scheduling_settings_write.image_choose`
-    internal static var imageChoose: String { AppL10n.copyLocale == .frCA ? "Choose image" : "Choose image" }
+    internal static var imageChoose: String { AppL10n.copyLocale == .frCA ? "Choisir une image" : "Choose image" }
 
     /// `scheduling_settings_write.image_hint`
-    internal static var imageHint: String { AppL10n.copyLocale == .frCA ? "JPEG, PNG, GIF or WebP, up to 5 MB." : "JPEG, PNG, GIF or WebP, up to 5 MB." }
+    internal static var imageHint: String { AppL10n.copyLocale == .frCA ? "JPEG, PNG, GIF ou WebP, jusqu'à 5 Mo." : "JPEG, PNG, GIF or WebP, up to 5 MB." }
 
     /// `scheduling_settings_write.image_immediate`
-    internal static var imageImmediate: String { AppL10n.copyLocale == .frCA ? "Images save as soon as you choose or remove them." : "Images save as soon as you choose or remove them." }
+    internal static var imageImmediate: String { AppL10n.copyLocale == .frCA ? "Le choix ou le retrait d'une image s'applique immédiatement." : "Images save as soon as you choose or remove them." }
 
     /// `scheduling_settings_write.image_remove`
-    internal static var imageRemove: String { AppL10n.copyLocale == .frCA ? "Remove" : "Remove" }
+    internal static var imageRemove: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
 
     /// `scheduling_settings_write.image_removed`
     internal static func imageRemoved(_ label: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(label) removed" : "\(label) removed"
+        AppL10n.copyLocale == .frCA ? "Image retirée\u{00A0}: \(label)" : "\(label) removed"
     }
 
     /// `scheduling_settings_write.image_too_large`
-    internal static var imageTooLarge: String { AppL10n.copyLocale == .frCA ? "That image is larger than 5 MB. Choose a smaller one." : "That image is larger than 5 MB. Choose a smaller one." }
+    internal static var imageTooLarge: String { AppL10n.copyLocale == .frCA ? "Cette image dépasse 5 Mo. Choisissez-en une plus petite." : "That image is larger than 5 MB. Choose a smaller one." }
 
     /// `scheduling_settings_write.image_unreadable`
-    internal static var imageUnreadable: String { AppL10n.copyLocale == .frCA ? "That image could not be read. Choose another." : "That image could not be read. Choose another." }
+    internal static var imageUnreadable: String { AppL10n.copyLocale == .frCA ? "Cette image n'a pas pu être lue. Choisissez-en une autre." : "That image could not be read. Choose another." }
 
     /// `scheduling_settings_write.image_uploaded`
     internal static func imageUploaded(_ label: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(label) uploaded" : "\(label) uploaded"
+        AppL10n.copyLocale == .frCA ? "Image téléversée\u{00A0}: \(label)" : "\(label) uploaded"
     }
 
     /// `scheduling_settings_write.image_wrong_type`
-    internal static var imageWrongType: String { AppL10n.copyLocale == .frCA ? "That file is not an image we can use. Choose a JPEG, PNG, GIF or WebP." : "That file is not an image we can use. Choose a JPEG, PNG, GIF or WebP." }
+    internal static var imageWrongType: String { AppL10n.copyLocale == .frCA ? "Ce fichier n'est pas une image utilisable. Choisissez un fichier JPEG, PNG, GIF ou WebP." : "That file is not an image we can use. Choose a JPEG, PNG, GIF or WebP." }
 
     /// `scheduling_settings_write.legal_url_hint`
-    internal static var legalUrlHint: String { AppL10n.copyLocale == .frCA ? "Linked in the footer of the booking page. Leave it empty for none." : "Linked in the footer of the booking page. Leave it empty for none." }
+    internal static var legalUrlHint: String { AppL10n.copyLocale == .frCA ? "Affiché en lien au pied de la page de réservation. Laissez vide pour n'en afficher aucun." : "Linked in the footer of the booking page. Leave it empty for none." }
 
     /// `scheduling_settings_write.logo_height_hint`
-    internal static var logoHeightHint: String { AppL10n.copyLocale == .frCA ? "In pixels, between 16 and 64." : "In pixels, between 16 and 64." }
+    internal static var logoHeightHint: String { AppL10n.copyLocale == .frCA ? "En pixels, entre 16 et 64." : "In pixels, between 16 and 64." }
 
     /// `scheduling_settings_write.logo_height_label`
-    internal static var logoHeightLabel: String { AppL10n.copyLocale == .frCA ? "Logo height" : "Logo height" }
+    internal static var logoHeightLabel: String { AppL10n.copyLocale == .frCA ? "Hauteur du logo" : "Logo height" }
 
     /// `scheduling_settings_write.logo_label`
     internal static var logoLabel: String { AppL10n.copyLocale == .frCA ? "Logo" : "Logo" }
 
     /// `scheduling_settings_write.logo_opacity_label`
-    internal static var logoOpacityLabel: String { AppL10n.copyLocale == .frCA ? "Logo opacity" : "Logo opacity" }
+    internal static var logoOpacityLabel: String { AppL10n.copyLocale == .frCA ? "Opacité du logo" : "Logo opacity" }
 
     /// `scheduling_settings_write.name_label`
-    internal static var nameLabel: String { AppL10n.copyLocale == .frCA ? "Name" : "Name" }
+    internal static var nameLabel: String { AppL10n.copyLocale == .frCA ? "Nom" : "Name" }
 
     /// `scheduling_settings_write.name_required`
-    internal static var nameRequired: String { AppL10n.copyLocale == .frCA ? "Give your name." : "Give your name." }
+    internal static var nameRequired: String { AppL10n.copyLocale == .frCA ? "Indiquez votre nom." : "Give your name." }
 
     /// `scheduling_settings_write.name_too_long`
-    internal static var nameTooLong: String { AppL10n.copyLocale == .frCA ? "That name is longer than 200 characters." : "That name is longer than 200 characters." }
+    internal static var nameTooLong: String { AppL10n.copyLocale == .frCA ? "Ce nom dépasse 200 caractères." : "That name is longer than 200 characters." }
 
     /// `scheduling_settings_write.not_editable`
-    internal static var notEditable: String { AppL10n.copyLocale == .frCA ? "You can view this but not change it." : "You can view this but not change it." }
+    internal static var notEditable: String { AppL10n.copyLocale == .frCA ? "Vous pouvez consulter ceci, mais pas le modifier." : "You can view this but not change it." }
 
     /// `scheduling_settings_write.notifications_done`
-    internal static var notificationsDone: String { AppL10n.copyLocale == .frCA ? "Notifications saved" : "Notifications saved" }
+    internal static var notificationsDone: String { AppL10n.copyLocale == .frCA ? "Notifications enregistrées" : "Notifications saved" }
 
     /// `scheduling_settings_write.notifications_save`
-    internal static var notificationsSave: String { AppL10n.copyLocale == .frCA ? "Save notifications" : "Save notifications" }
+    internal static var notificationsSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer les notifications" : "Save notifications" }
 
     /// `scheduling_settings_write.notifications_title`
-    internal static var notificationsTitle: String { AppL10n.copyLocale == .frCA ? "Email notifications" : "Email notifications" }
+    internal static var notificationsTitle: String { AppL10n.copyLocale == .frCA ? "Notifications par courriel" : "Email notifications" }
 
     /// `scheduling_settings_write.notify_cancellation`
-    internal static var notifyCancellation: String { AppL10n.copyLocale == .frCA ? "Booking cancelled" : "Booking cancelled" }
+    internal static var notifyCancellation: String { AppL10n.copyLocale == .frCA ? "Rendez-vous annulé" : "Booking cancelled" }
 
     /// `scheduling_settings_write.notify_confirmation`
-    internal static var notifyConfirmation: String { AppL10n.copyLocale == .frCA ? "Booking confirmed" : "Booking confirmed" }
+    internal static var notifyConfirmation: String { AppL10n.copyLocale == .frCA ? "Rendez-vous confirmé" : "Booking confirmed" }
 
     /// `scheduling_settings_write.notify_host_booking`
-    internal static var notifyHostBooking: String { AppL10n.copyLocale == .frCA ? "Someone booked with you" : "Someone booked with you" }
+    internal static var notifyHostBooking: String { AppL10n.copyLocale == .frCA ? "Quelqu'un a pris rendez-vous" : "Someone booked with you" }
 
     /// `scheduling_settings_write.notify_host_cancel`
-    internal static var notifyHostCancel: String { AppL10n.copyLocale == .frCA ? "Someone cancelled with you" : "Someone cancelled with you" }
+    internal static var notifyHostCancel: String { AppL10n.copyLocale == .frCA ? "Quelqu'un a annulé un rendez-vous" : "Someone cancelled with you" }
 
     /// `scheduling_settings_write.notify_host_reschedule`
-    internal static var notifyHostReschedule: String { AppL10n.copyLocale == .frCA ? "Someone rescheduled with you" : "Someone rescheduled with you" }
+    internal static var notifyHostReschedule: String { AppL10n.copyLocale == .frCA ? "Quelqu'un a reporté un rendez-vous" : "Someone rescheduled with you" }
 
     /// `scheduling_settings_write.notify_reminder`
-    internal static var notifyReminder: String { AppL10n.copyLocale == .frCA ? "Booking reminder" : "Booking reminder" }
+    internal static var notifyReminder: String { AppL10n.copyLocale == .frCA ? "Rappel de rendez-vous" : "Booking reminder" }
 
     /// `scheduling_settings_write.notify_reschedule`
-    internal static var notifyReschedule: String { AppL10n.copyLocale == .frCA ? "Booking rescheduled" : "Booking rescheduled" }
+    internal static var notifyReschedule: String { AppL10n.copyLocale == .frCA ? "Rendez-vous reporté" : "Booking rescheduled" }
 
     /// `scheduling_settings_write.opacity_hint`
-    internal static var opacityHint: String { AppL10n.copyLocale == .frCA ? "A percentage, between 20 and 100." : "A percentage, between 20 and 100." }
+    internal static var opacityHint: String { AppL10n.copyLocale == .frCA ? "Un pourcentage, entre 20 et 100." : "A percentage, between 20 and 100." }
 
     /// `scheduling_settings_write.privacy_url_label`
-    internal static var privacyUrlLabel: String { AppL10n.copyLocale == .frCA ? "Privacy policy link" : "Privacy policy link" }
+    internal static var privacyUrlLabel: String { AppL10n.copyLocale == .frCA ? "Lien vers la politique de confidentialité" : "Privacy policy link" }
 
     /// `scheduling_settings_write.profile_done`
-    internal static var profileDone: String { AppL10n.copyLocale == .frCA ? "Profile saved" : "Profile saved" }
+    internal static var profileDone: String { AppL10n.copyLocale == .frCA ? "Profil enregistré" : "Profile saved" }
 
     /// `scheduling_settings_write.profile_save`
-    internal static var profileSave: String { AppL10n.copyLocale == .frCA ? "Save profile" : "Save profile" }
+    internal static var profileSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer le profil" : "Save profile" }
 
     /// `scheduling_settings_write.profile_title`
-    internal static var profileTitle: String { AppL10n.copyLocale == .frCA ? "Your scheduler profile" : "Your scheduler profile" }
+    internal static var profileTitle: String { AppL10n.copyLocale == .frCA ? "Votre profil de réservation" : "Your scheduler profile" }
 
     /// `scheduling_settings_write.terms_url_label`
-    internal static var termsUrlLabel: String { AppL10n.copyLocale == .frCA ? "Terms link" : "Terms link" }
+    internal static var termsUrlLabel: String { AppL10n.copyLocale == .frCA ? "Lien vers les conditions" : "Terms link" }
 
     /// `scheduling_settings_write.time_format12h`
-    internal static var timeFormat12h: String { AppL10n.copyLocale == .frCA ? "12-hour (2:30 pm)" : "12-hour (2:30 pm)" }
+    internal static var timeFormat12h: String { AppL10n.copyLocale == .frCA ? "12 heures (2:30 pm)" : "12-hour (2:30 pm)" }
 
     /// `scheduling_settings_write.time_format24h`
-    internal static var timeFormat24h: String { AppL10n.copyLocale == .frCA ? "24-hour (14:30)" : "24-hour (14:30)" }
+    internal static var timeFormat24h: String { AppL10n.copyLocale == .frCA ? "24 heures (14:30)" : "24-hour (14:30)" }
 
     /// `scheduling_settings_write.time_format_label`
-    internal static var timeFormatLabel: String { AppL10n.copyLocale == .frCA ? "Time format" : "Time format" }
+    internal static var timeFormatLabel: String { AppL10n.copyLocale == .frCA ? "Format de l'heure" : "Time format" }
 
     /// `scheduling_settings_write.time_format_required`
-    internal static var timeFormatRequired: String { AppL10n.copyLocale == .frCA ? "Choose 12-hour or 24-hour." : "Choose 12-hour or 24-hour." }
+    internal static var timeFormatRequired: String { AppL10n.copyLocale == .frCA ? "Choisissez le format 12 heures ou 24 heures." : "Choose 12-hour or 24-hour." }
 
     /// `scheduling_settings_write.timezone_label`
-    internal static var timezoneLabel: String { AppL10n.copyLocale == .frCA ? "Timezone" : "Timezone" }
+    internal static var timezoneLabel: String { AppL10n.copyLocale == .frCA ? "Fuseau horaire" : "Timezone" }
 
     /// `scheduling_settings_write.timezone_required`
-    internal static var timezoneRequired: String { AppL10n.copyLocale == .frCA ? "Choose your timezone." : "Choose your timezone." }
+    internal static var timezoneRequired: String { AppL10n.copyLocale == .frCA ? "Choisissez votre fuseau horaire." : "Choose your timezone." }
 
     /// `scheduling_settings_write.url_not_absolute`
-    internal static var urlNotAbsolute: String { AppL10n.copyLocale == .frCA ? "Give the full address, starting with https://" : "Give the full address, starting with https://" }
+    internal static var urlNotAbsolute: String { AppL10n.copyLocale == .frCA ? "Indiquez l'adresse complète, qui commence par https://" : "Give the full address, starting with https://" }
 
     /// `scheduling_settings_write.url_too_long`
-    internal static var urlTooLong: String { AppL10n.copyLocale == .frCA ? "That link is too long." : "That link is too long." }
+    internal static var urlTooLong: String { AppL10n.copyLocale == .frCA ? "Ce lien est trop long." : "That link is too long." }
 
     /// `scheduling_settings_write.week_start_label`
-    internal static var weekStartLabel: String { AppL10n.copyLocale == .frCA ? "Week starts on" : "Week starts on" }
+    internal static var weekStartLabel: String { AppL10n.copyLocale == .frCA ? "La semaine commence le" : "Week starts on" }
 
     /// `scheduling_settings_write.week_start_required`
-    internal static var weekStartRequired: String { AppL10n.copyLocale == .frCA ? "Choose the day your week starts on." : "Choose the day your week starts on." }
+    internal static var weekStartRequired: String { AppL10n.copyLocale == .frCA ? "Choisissez le jour où commence votre semaine." : "Choose the day your week starts on." }
 
     /// `scheduling_settings_write.whole_number_between`
     internal static func wholeNumberBetween(_ min: Int, _ max: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "Give a whole number between \(min) and \(max)." : "Give a whole number between \(min) and \(max)."
+        AppL10n.copyLocale == .frCA ? "Indiquez un nombre entier entre \(min) et \(max)." : "Give a whole number between \(min) and \(max)."
     }
 }
 
 extension SchedulingTeamWriteCopy {
     /// `scheduling_team_write.add`
-    internal static var add: String { AppL10n.copyLocale == .frCA ? "Add member" : "Add member" }
+    internal static var add: String { AppL10n.copyLocale == .frCA ? "Ajouter le membre" : "Add member" }
 
     /// `scheduling_team_write.add_done`
-    internal static var addDone: String { AppL10n.copyLocale == .frCA ? "Host added to the team" : "Host added to the team" }
+    internal static var addDone: String { AppL10n.copyLocale == .frCA ? "Hôte ajouté à l'équipe" : "Host added to the team" }
 
     /// `scheduling_team_write.add_label`
-    internal static var addLabel: String { AppL10n.copyLocale == .frCA ? "Host" : "Host" }
+    internal static var addLabel: String { AppL10n.copyLocale == .frCA ? "Hôte" : "Host" }
 
     /// `scheduling_team_write.add_none`
-    internal static var addNone: String { AppL10n.copyLocale == .frCA ? "Every host is already in this team." : "Every host is already in this team." }
+    internal static var addNone: String { AppL10n.copyLocale == .frCA ? "Tous les hôtes font déjà partie de cette équipe." : "Every host is already in this team." }
 
     /// `scheduling_team_write.add_placeholder`
-    internal static var addPlaceholder: String { AppL10n.copyLocale == .frCA ? "Choose a host" : "Choose a host" }
+    internal static var addPlaceholder: String { AppL10n.copyLocale == .frCA ? "Choisissez un hôte" : "Choose a host" }
 
     /// `scheduling_team_write.add_required`
-    internal static var addRequired: String { AppL10n.copyLocale == .frCA ? "Choose a host to add." : "Choose a host to add." }
+    internal static var addRequired: String { AppL10n.copyLocale == .frCA ? "Choisissez un hôte à ajouter." : "Choose a host to add." }
 
     /// `scheduling_team_write.archive`
-    internal static var archive: String { AppL10n.copyLocale == .frCA ? "Archive account" : "Archive account" }
+    internal static var archive: String { AppL10n.copyLocale == .frCA ? "Archiver le compte" : "Archive account" }
 
     /// `scheduling_team_write.archive_blocked`
-    internal static var archiveBlocked: String { AppL10n.copyLocale == .frCA ? "Reassign or cancel their upcoming bookings first." : "Reassign or cancel their upcoming bookings first." }
+    internal static var archiveBlocked: String { AppL10n.copyLocale == .frCA ? "Réattribuez ou annulez d'abord ses rendez-vous à venir." : "Reassign or cancel their upcoming bookings first." }
 
     /// `scheduling_team_write.archive_body`
-    internal static var archiveBody: String { AppL10n.copyLocale == .frCA ? "They can no longer sign in, they are skipped in routing, and their event types stop taking bookings. The account is kept." : "They can no longer sign in, they are skipped in routing, and their event types stop taking bookings. The account is kept." }
+    internal static var archiveBody: String { AppL10n.copyLocale == .frCA ? "Cette personne ne pourra plus se connecter, sera exclue de l'acheminement et ses types de rendez-vous ne seront plus réservables. Le compte est conservé." : "They can no longer sign in, they are skipped in routing, and their event types stop taking bookings. The account is kept." }
 
     /// `scheduling_team_write.archive_confirm`
-    internal static var archiveConfirm: String { AppL10n.copyLocale == .frCA ? "Archive account" : "Archive account" }
+    internal static var archiveConfirm: String { AppL10n.copyLocale == .frCA ? "Archiver le compte" : "Archive account" }
 
     /// `scheduling_team_write.archive_counting`
-    internal static var archiveCounting: String { AppL10n.copyLocale == .frCA ? "Checking their upcoming bookings…" : "Checking their upcoming bookings…" }
+    internal static var archiveCounting: String { AppL10n.copyLocale == .frCA ? "Vérification de ses rendez-vous à venir…" : "Checking their upcoming bookings…" }
 
     /// `scheduling_team_write.archive_done`
-    internal static var archiveDone: String { AppL10n.copyLocale == .frCA ? "Scheduler account closed" : "Scheduler account closed" }
+    internal static var archiveDone: String { AppL10n.copyLocale == .frCA ? "Compte de réservation fermé" : "Scheduler account closed" }
 
     /// `scheduling_team_write.archive_done_named`
     internal static func archiveDoneNamed(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(name)'s scheduler account is closed" : "\(name)'s scheduler account is closed"
+        AppL10n.copyLocale == .frCA ? "Le compte de réservation de \(name) est fermé" : "\(name)'s scheduler account is closed"
     }
 
     /// `scheduling_team_write.archive_keep`
-    internal static var archiveKeep: String { AppL10n.copyLocale == .frCA ? "Keep account" : "Keep account" }
+    internal static var archiveKeep: String { AppL10n.copyLocale == .frCA ? "Conserver le compte" : "Keep account" }
 
     /// `scheduling_team_write.archive_refused`
-    internal static var archiveRefused: String { AppL10n.copyLocale == .frCA ? "That account could not be archived. It may still hold upcoming bookings, it may be the workspace owner, or it may be archived already." : "That account could not be archived. It may still hold upcoming bookings, it may be the workspace owner, or it may be archived already." }
+    internal static var archiveRefused: String { AppL10n.copyLocale == .frCA ? "Ce compte n'a pas pu être archivé. Il se peut qu'il ait encore des rendez-vous à venir, qu'il soit celui du propriétaire de l'espace de travail ou qu'il soit déjà archivé." : "That account could not be archived. It may still hold upcoming bookings, it may be the workspace owner, or it may be archived already." }
 
     /// `scheduling_team_write.archive_title`
-    internal static var archiveTitle: String { AppL10n.copyLocale == .frCA ? "Archive this account?" : "Archive this account?" }
+    internal static var archiveTitle: String { AppL10n.copyLocale == .frCA ? "Archiver ce compte?" : "Archive this account?" }
 
     /// `scheduling_team_write.archive_title_named`
     internal static func archiveTitleNamed(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Archive \(name)'s account?" : "Archive \(name)'s account?"
+        AppL10n.copyLocale == .frCA ? "Archiver le compte de \(name)?" : "Archive \(name)'s account?"
     }
 
     /// `scheduling_team_write.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `scheduling_team_write.close`
-    internal static var close: String { AppL10n.copyLocale == .frCA ? "Done" : "Done" }
+    internal static var close: String { AppL10n.copyLocale == .frCA ? "OK" : "Done" }
 
     /// `scheduling_team_write.create`
-    internal static var create: String { AppL10n.copyLocale == .frCA ? "Create team" : "Create team" }
+    internal static var create: String { AppL10n.copyLocale == .frCA ? "Créer une équipe" : "Create team" }
 
     /// `scheduling_team_write.create_done`
-    internal static var createDone: String { AppL10n.copyLocale == .frCA ? "Team created" : "Team created" }
+    internal static var createDone: String { AppL10n.copyLocale == .frCA ? "Équipe créée" : "Team created" }
 
     /// `scheduling_team_write.create_title`
-    internal static var createTitle: String { AppL10n.copyLocale == .frCA ? "New team" : "New team" }
+    internal static var createTitle: String { AppL10n.copyLocale == .frCA ? "Nouvelle équipe" : "New team" }
 
     /// `scheduling_team_write.delete_body`
-    internal static var deleteBody: String { AppL10n.copyLocale == .frCA ? "Event types that route to this team stop rotating through it." : "Event types that route to this team stop rotating through it." }
+    internal static var deleteBody: String { AppL10n.copyLocale == .frCA ? "Les types de rendez-vous associés à cette équipe cesseront d'être répartis entre ses hôtes." : "Event types that route to this team stop rotating through it." }
 
     /// `scheduling_team_write.delete_confirm`
-    internal static var deleteConfirm: String { AppL10n.copyLocale == .frCA ? "Delete team" : "Delete team" }
+    internal static var deleteConfirm: String { AppL10n.copyLocale == .frCA ? "Supprimer l'équipe" : "Delete team" }
 
     /// `scheduling_team_write.delete_done`
-    internal static var deleteDone: String { AppL10n.copyLocale == .frCA ? "Team deleted" : "Team deleted" }
+    internal static var deleteDone: String { AppL10n.copyLocale == .frCA ? "Équipe supprimée" : "Team deleted" }
 
     /// `scheduling_team_write.delete_keep`
-    internal static var deleteKeep: String { AppL10n.copyLocale == .frCA ? "Keep team" : "Keep team" }
+    internal static var deleteKeep: String { AppL10n.copyLocale == .frCA ? "Conserver l'équipe" : "Keep team" }
 
     /// `scheduling_team_write.delete_title`
-    internal static var deleteTitle: String { AppL10n.copyLocale == .frCA ? "Delete this team?" : "Delete this team?" }
+    internal static var deleteTitle: String { AppL10n.copyLocale == .frCA ? "Supprimer cette équipe?" : "Delete this team?" }
 
     /// `scheduling_team_write.delete_title_named`
     internal static func deleteTitleNamed(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Delete \(name)?" : "Delete \(name)?"
+        AppL10n.copyLocale == .frCA ? "Supprimer \(name)?" : "Delete \(name)?"
     }
 
     /// `scheduling_team_write.members_button`
-    internal static var membersButton: String { AppL10n.copyLocale == .frCA ? "Hosts" : "Hosts" }
+    internal static var membersButton: String { AppL10n.copyLocale == .frCA ? "Hôtes" : "Hosts" }
 
     /// `scheduling_team_write.members_empty`
-    internal static var membersEmpty: String { AppL10n.copyLocale == .frCA ? "No hosts yet. Nothing routes through this team until one is added." : "No hosts yet. Nothing routes through this team until one is added." }
+    internal static var membersEmpty: String { AppL10n.copyLocale == .frCA ? "Aucun hôte pour l'instant. Aucun rendez-vous ne passe par cette équipe avant l'ajout d'un hôte." : "No hosts yet. Nothing routes through this team until one is added." }
 
     /// `scheduling_team_write.members_hint`
-    internal static var membersHint: String { AppL10n.copyLocale == .frCA ? "A lower routing priority is offered a booking first." : "A lower routing priority is offered a booking first." }
+    internal static var membersHint: String { AppL10n.copyLocale == .frCA ? "Le rendez-vous est d'abord proposé à la priorité d'acheminement la plus basse." : "A lower routing priority is offered a booking first." }
 
     /// `scheduling_team_write.name_label`
-    internal static var nameLabel: String { AppL10n.copyLocale == .frCA ? "Name" : "Name" }
+    internal static var nameLabel: String { AppL10n.copyLocale == .frCA ? "Nom" : "Name" }
 
     /// `scheduling_team_write.name_placeholder`
-    internal static var namePlaceholder: String { AppL10n.copyLocale == .frCA ? "Front desk" : "Front desk" }
+    internal static var namePlaceholder: String { AppL10n.copyLocale == .frCA ? "Réception" : "Front desk" }
 
     /// `scheduling_team_write.name_required`
-    internal static var nameRequired: String { AppL10n.copyLocale == .frCA ? "Give the team a name." : "Give the team a name." }
+    internal static var nameRequired: String { AppL10n.copyLocale == .frCA ? "Donnez un nom à l'équipe." : "Give the team a name." }
 
     /// `scheduling_team_write.name_too_long`
-    internal static var nameTooLong: String { AppL10n.copyLocale == .frCA ? "That name is longer than 200 characters." : "That name is longer than 200 characters." }
+    internal static var nameTooLong: String { AppL10n.copyLocale == .frCA ? "Ce nom dépasse 200 caractères." : "That name is longer than 200 characters." }
 
     /// `scheduling_team_write.priority_done`
-    internal static var priorityDone: String { AppL10n.copyLocale == .frCA ? "Routing priority saved" : "Routing priority saved" }
+    internal static var priorityDone: String { AppL10n.copyLocale == .frCA ? "Priorité d'acheminement enregistrée" : "Routing priority saved" }
 
     /// `scheduling_team_write.priority_invalid`
-    internal static var priorityInvalid: String { AppL10n.copyLocale == .frCA ? "A routing priority is a whole number, zero or more." : "A routing priority is a whole number, zero or more." }
+    internal static var priorityInvalid: String { AppL10n.copyLocale == .frCA ? "Une priorité d'acheminement est un nombre entier, zéro ou plus." : "A routing priority is a whole number, zero or more." }
 
     /// `scheduling_team_write.priority_label`
-    internal static var priorityLabel: String { AppL10n.copyLocale == .frCA ? "Routing priority" : "Routing priority" }
+    internal static var priorityLabel: String { AppL10n.copyLocale == .frCA ? "Priorité d'acheminement" : "Routing priority" }
 
     /// `scheduling_team_write.remove`
-    internal static var remove: String { AppL10n.copyLocale == .frCA ? "Remove" : "Remove" }
+    internal static var remove: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
 
     /// `scheduling_team_write.remove_body`
-    internal static var removeBody: String { AppL10n.copyLocale == .frCA ? "Bookings stop routing to them through this team. Their routing priority is not kept." : "Bookings stop routing to them through this team. Their routing priority is not kept." }
+    internal static var removeBody: String { AppL10n.copyLocale == .frCA ? "Cette équipe ne lui acheminera plus de rendez-vous. Sa priorité d'acheminement ne sera pas conservée." : "Bookings stop routing to them through this team. Their routing priority is not kept." }
 
     /// `scheduling_team_write.remove_done`
-    internal static var removeDone: String { AppL10n.copyLocale == .frCA ? "Host removed from the team" : "Host removed from the team" }
+    internal static var removeDone: String { AppL10n.copyLocale == .frCA ? "Hôte retiré de l'équipe" : "Host removed from the team" }
 
     /// `scheduling_team_write.remove_keep`
-    internal static var removeKeep: String { AppL10n.copyLocale == .frCA ? "Keep them" : "Keep them" }
+    internal static var removeKeep: String { AppL10n.copyLocale == .frCA ? "Ne pas retirer" : "Keep them" }
 
     /// `scheduling_team_write.remove_title`
-    internal static var removeTitle: String { AppL10n.copyLocale == .frCA ? "Remove this host?" : "Remove this host?" }
+    internal static var removeTitle: String { AppL10n.copyLocale == .frCA ? "Retirer cet hôte?" : "Remove this host?" }
 
     /// `scheduling_team_write.rename`
-    internal static var rename: String { AppL10n.copyLocale == .frCA ? "Save name" : "Save name" }
+    internal static var rename: String { AppL10n.copyLocale == .frCA ? "Enregistrer le nom" : "Save name" }
 
     /// `scheduling_team_write.rename_done`
-    internal static var renameDone: String { AppL10n.copyLocale == .frCA ? "Team renamed" : "Team renamed" }
+    internal static var renameDone: String { AppL10n.copyLocale == .frCA ? "Équipe renommée" : "Team renamed" }
 
     /// `scheduling_team_write.save_priority`
-    internal static var savePriority: String { AppL10n.copyLocale == .frCA ? "Save priority" : "Save priority" }
+    internal static var savePriority: String { AppL10n.copyLocale == .frCA ? "Enregistrer la priorité" : "Save priority" }
 
     /// `scheduling_team_write.slug_read_only_hint`
-    internal static var slugReadOnlyHint: String { AppL10n.copyLocale == .frCA ? "The booking-page address cannot be changed here." : "The booking-page address cannot be changed here." }
+    internal static var slugReadOnlyHint: String { AppL10n.copyLocale == .frCA ? "L'adresse de la page de réservation n'est pas modifiable ici." : "The booking-page address cannot be changed here." }
 
     /// `scheduling_team_write.stranded_many`
     internal static func strandedMany(_ subject: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(subject) are no longer in this workspace but still hold upcoming bookings, so the scheduler kept their accounts open. Reassign or cancel those bookings, then archive the accounts." : "\(subject) are no longer in this workspace but still hold upcoming bookings, so the scheduler kept their accounts open. Reassign or cancel those bookings, then archive the accounts."
+        AppL10n.copyLocale == .frCA ? "\(subject) ne font plus partie de cet espace de travail, mais ont encore des rendez-vous à venir; le système de réservation a donc gardé leurs comptes ouverts. Réattribuez ou annulez ces rendez-vous, puis archivez les comptes." : "\(subject) are no longer in this workspace but still hold upcoming bookings, so the scheduler kept their accounts open. Reassign or cancel those bookings, then archive the accounts."
     }
 
     /// `scheduling_team_write.stranded_one`
     internal static func strandedOne(_ subject: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(subject) is no longer in this workspace but still holds upcoming bookings, so the scheduler kept their account open. Reassign or cancel those bookings, then archive the account." : "\(subject) is no longer in this workspace but still holds upcoming bookings, so the scheduler kept their account open. Reassign or cancel those bookings, then archive the account."
+        AppL10n.copyLocale == .frCA ? "\(subject) ne fait plus partie de cet espace de travail, mais a encore des rendez-vous à venir; le système de réservation a donc gardé son compte ouvert. Réattribuez ou annulez ces rendez-vous, puis archivez le compte." : "\(subject) is no longer in this workspace but still holds upcoming bookings, so the scheduler kept their account open. Reassign or cancel those bookings, then archive the account."
     }
 
     /// `scheduling_team_write.stranded_title`
-    internal static var strandedTitle: String { AppL10n.copyLocale == .frCA ? "Someone who has left still has bookings" : "Someone who has left still has bookings" }
+    internal static var strandedTitle: String { AppL10n.copyLocale == .frCA ? "Une personne partie a encore des rendez-vous" : "Someone who has left still has bookings" }
 
     /// `scheduling_team_write.teams_hint`
-    internal static var teamsHint: String { AppL10n.copyLocale == .frCA ? "A team rotates bookings through its hosts, in routing-priority order." : "A team rotates bookings through its hosts, in routing-priority order." }
+    internal static var teamsHint: String { AppL10n.copyLocale == .frCA ? "Une équipe répartit les rendez-vous entre ses hôtes, selon la priorité d'acheminement." : "A team rotates bookings through its hosts, in routing-priority order." }
 }
 
 extension SchedulingWriteCopy {
     /// `scheduling_write.active_toggle`
-    internal static var activeToggle: String { AppL10n.copyLocale == .frCA ? "Active" : "Active" }
+    internal static var activeToggle: String { AppL10n.copyLocale == .frCA ? "Actif" : "Active" }
 
     /// `scheduling_write.add`
-    internal static var add: String { AppL10n.copyLocale == .frCA ? "Add" : "Add" }
+    internal static var add: String { AppL10n.copyLocale == .frCA ? "Ajouter" : "Add" }
 
     /// `scheduling_write.address`
-    internal static var address: String { AppL10n.copyLocale == .frCA ? "Address" : "Address" }
+    internal static var address: String { AppL10n.copyLocale == .frCA ? "Adresse" : "Address" }
 
     /// `scheduling_write.archive`
-    internal static var archive: String { AppL10n.copyLocale == .frCA ? "Archive" : "Archive" }
+    internal static var archive: String { AppL10n.copyLocale == .frCA ? "Archiver" : "Archive" }
 
     /// `scheduling_write.archived`
-    internal static var archived: String { AppL10n.copyLocale == .frCA ? "Event type archived" : "Event type archived" }
+    internal static var archived: String { AppL10n.copyLocale == .frCA ? "Type de rendez-vous archivé" : "Event type archived" }
 
     /// `scheduling_write.at_least_one_minute`
-    internal static var atLeastOneMinute: String { AppL10n.copyLocale == .frCA ? "Has to be a whole number of minutes, at least 1." : "Has to be a whole number of minutes, at least 1." }
+    internal static var atLeastOneMinute: String { AppL10n.copyLocale == .frCA ? "Doit être un nombre entier de minutes, au moins 1." : "Has to be a whole number of minutes, at least 1." }
 
     /// `scheduling_write.at_least_zero`
-    internal static var atLeastZero: String { AppL10n.copyLocale == .frCA ? "Has to be a whole number, 0 or more." : "Has to be a whole number, 0 or more." }
+    internal static var atLeastZero: String { AppL10n.copyLocale == .frCA ? "Doit être un nombre entier, 0 ou plus." : "Has to be a whole number, 0 or more." }
 
     /// `scheduling_write.automation_edit`
-    internal static var automationEdit: String { AppL10n.copyLocale == .frCA ? "Edit booking assistant" : "Edit booking assistant" }
+    internal static var automationEdit: String { AppL10n.copyLocale == .frCA ? "Modifier l'assistante" : "Edit booking assistant" }
 
     /// `scheduling_write.booking_page_hint`
-    internal static var bookingPageHint: String { AppL10n.copyLocale == .frCA ? "The address customers use. It cannot be changed: links you have already shared point at it." : "The address customers use. It cannot be changed: links you have already shared point at it." }
+    internal static var bookingPageHint: String { AppL10n.copyLocale == .frCA ? "L'adresse que vos clients utilisent. Elle ne peut pas être modifiée\u{00A0}: les liens déjà partagés pointent vers elle." : "The address customers use. It cannot be changed: links you have already shared point at it." }
 
     /// `scheduling_write.booking_page_label`
-    internal static var bookingPageLabel: String { AppL10n.copyLocale == .frCA ? "Booking page" : "Booking page" }
+    internal static var bookingPageLabel: String { AppL10n.copyLocale == .frCA ? "Page de réservation" : "Booking page" }
 
     /// `scheduling_write.branding_edit`
-    internal static var brandingEdit: String { AppL10n.copyLocale == .frCA ? "Edit booking page" : "Edit booking page" }
+    internal static var brandingEdit: String { AppL10n.copyLocale == .frCA ? "Modifier la page" : "Edit booking page" }
 
     /// `scheduling_write.buffer_after_hint`
-    internal static var bufferAfterHint: String { AppL10n.copyLocale == .frCA ? "Minutes kept free after a booking." : "Minutes kept free after a booking." }
+    internal static var bufferAfterHint: String { AppL10n.copyLocale == .frCA ? "Minutes gardées libres après un rendez-vous." : "Minutes kept free after a booking." }
 
     /// `scheduling_write.buffer_after_label`
-    internal static var bufferAfterLabel: String { AppL10n.copyLocale == .frCA ? "Buffer after" : "Buffer after" }
+    internal static var bufferAfterLabel: String { AppL10n.copyLocale == .frCA ? "Battement après" : "Buffer after" }
 
     /// `scheduling_write.buffer_before_hint`
-    internal static var bufferBeforeHint: String { AppL10n.copyLocale == .frCA ? "Minutes kept free before a booking." : "Minutes kept free before a booking." }
+    internal static var bufferBeforeHint: String { AppL10n.copyLocale == .frCA ? "Minutes gardées libres avant un rendez-vous." : "Minutes kept free before a booking." }
 
     /// `scheduling_write.buffer_before_label`
-    internal static var bufferBeforeLabel: String { AppL10n.copyLocale == .frCA ? "Buffer before" : "Buffer before" }
+    internal static var bufferBeforeLabel: String { AppL10n.copyLocale == .frCA ? "Battement avant" : "Buffer before" }
 
     /// `scheduling_write.built_in_video`
-    internal static var builtInVideo: String { AppL10n.copyLocale == .frCA ? "Built-in video" : "Built-in video" }
+    internal static var builtInVideo: String { AppL10n.copyLocale == .frCA ? "Vidéo intégrée" : "Built-in video" }
 
     /// `scheduling_write.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `scheduling_write.create_duration_invalid`
-    internal static var createDurationInvalid: String { AppL10n.copyLocale == .frCA ? "The duration has to be a whole number of minutes, at least 1." : "The duration has to be a whole number of minutes, at least 1." }
+    internal static var createDurationInvalid: String { AppL10n.copyLocale == .frCA ? "La durée doit être un nombre entier de minutes, au moins 1." : "The duration has to be a whole number of minutes, at least 1." }
 
     /// `scheduling_write.create_title`
-    internal static var createTitle: String { AppL10n.copyLocale == .frCA ? "Create event type" : "Create event type" }
+    internal static var createTitle: String { AppL10n.copyLocale == .frCA ? "Créer un type de rendez-vous" : "Create event type" }
 
     /// `scheduling_write.created`
-    internal static var created: String { AppL10n.copyLocale == .frCA ? "Event type created" : "Event type created" }
+    internal static var created: String { AppL10n.copyLocale == .frCA ? "Type de rendez-vous créé" : "Event type created" }
 
     /// `scheduling_write.date_range`
     internal static func dateRange(_ start: String, _ end: String) -> String {
-        AppL10n.copyLocale == .frCA ? "\(start) to \(end)" : "\(start) to \(end)"
+        AppL10n.copyLocale == .frCA ? "\(start) à \(end)" : "\(start) to \(end)"
     }
 
     /// `scheduling_write.delete`
-    internal static var delete: String { AppL10n.copyLocale == .frCA ? "Delete" : "Delete" }
+    internal static var delete: String { AppL10n.copyLocale == .frCA ? "Supprimer" : "Delete" }
 
     /// `scheduling_write.delete_event_type_body`
-    internal static var deleteEventTypeBody: String { AppL10n.copyLocale == .frCA ? "Its booking page stops working. Existing bookings keep their times." : "Its booking page stops working. Existing bookings keep their times." }
+    internal static var deleteEventTypeBody: String { AppL10n.copyLocale == .frCA ? "Sa page de réservation cessera de fonctionner. Les rendez-vous existants gardent leur heure." : "Its booking page stops working. Existing bookings keep their times." }
 
     /// `scheduling_write.delete_event_type_confirm`
-    internal static var deleteEventTypeConfirm: String { AppL10n.copyLocale == .frCA ? "Delete event type" : "Delete event type" }
+    internal static var deleteEventTypeConfirm: String { AppL10n.copyLocale == .frCA ? "Supprimer le type de rendez-vous" : "Delete event type" }
 
     /// `scheduling_write.delete_event_type_title`
-    internal static var deleteEventTypeTitle: String { AppL10n.copyLocale == .frCA ? "Delete event type?" : "Delete event type?" }
+    internal static var deleteEventTypeTitle: String { AppL10n.copyLocale == .frCA ? "Supprimer le type de rendez-vous?" : "Delete event type?" }
 
     /// `scheduling_write.description_hint`
-    internal static var descriptionHint: String { AppL10n.copyLocale == .frCA ? "Shown on the booking page." : "Shown on the booking page." }
+    internal static var descriptionHint: String { AppL10n.copyLocale == .frCA ? "Affichée sur la page de réservation." : "Shown on the booking page." }
 
     /// `scheduling_write.description_label`
     internal static var descriptionLabel: String { AppL10n.copyLocale == .frCA ? "Description" : "Description" }
 
     /// `scheduling_write.dismiss`
-    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Dismiss" : "Dismiss" }
+    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Dismiss" }
 
     /// `scheduling_write.duration_hint`
-    internal static var durationHint: String { AppL10n.copyLocale == .frCA ? "How long the meeting runs, in minutes." : "How long the meeting runs, in minutes." }
+    internal static var durationHint: String { AppL10n.copyLocale == .frCA ? "La durée de la rencontre, en minutes." : "How long the meeting runs, in minutes." }
 
     /// `scheduling_write.duration_label`
-    internal static var durationLabel: String { AppL10n.copyLocale == .frCA ? "Duration" : "Duration" }
+    internal static var durationLabel: String { AppL10n.copyLocale == .frCA ? "Durée" : "Duration" }
 
     /// `scheduling_write.edit`
-    internal static var edit: String { AppL10n.copyLocale == .frCA ? "Edit" : "Edit" }
+    internal static var edit: String { AppL10n.copyLocale == .frCA ? "Modifier" : "Edit" }
 
     /// `scheduling_write.edit_title`
-    internal static var editTitle: String { AppL10n.copyLocale == .frCA ? "Edit event type" : "Edit event type" }
+    internal static var editTitle: String { AppL10n.copyLocale == .frCA ? "Modifier le type de rendez-vous" : "Edit event type" }
 
     /// `scheduling_write.email_template_cancellation`
-    internal static var emailTemplateCancellation: String { AppL10n.copyLocale == .frCA ? "Cancellation" : "Cancellation" }
+    internal static var emailTemplateCancellation: String { AppL10n.copyLocale == .frCA ? "Annulation" : "Cancellation" }
 
     /// `scheduling_write.email_template_confirmation`
     internal static var emailTemplateConfirmation: String { AppL10n.copyLocale == .frCA ? "Confirmation" : "Confirmation" }
 
     /// `scheduling_write.email_template_reminder`
-    internal static var emailTemplateReminder: String { AppL10n.copyLocale == .frCA ? "Reminder" : "Reminder" }
+    internal static var emailTemplateReminder: String { AppL10n.copyLocale == .frCA ? "Rappel" : "Reminder" }
 
     /// `scheduling_write.email_template_reschedule`
-    internal static var emailTemplateReschedule: String { AppL10n.copyLocale == .frCA ? "Reschedule" : "Reschedule" }
+    internal static var emailTemplateReschedule: String { AppL10n.copyLocale == .frCA ? "Reporter" : "Reschedule" }
 
     /// `scheduling_write.event_type_deleted`
-    internal static var eventTypeDeleted: String { AppL10n.copyLocale == .frCA ? "Event type deleted" : "Event type deleted" }
+    internal static var eventTypeDeleted: String { AppL10n.copyLocale == .frCA ? "Type de rendez-vous supprimé" : "Event type deleted" }
 
     /// `scheduling_write.host_priority_invalid`
-    internal static var hostPriorityInvalid: String { AppL10n.copyLocale == .frCA ? "A host's priority has to be a whole number, 0 or more." : "A host's priority has to be a whole number, 0 or more." }
+    internal static var hostPriorityInvalid: String { AppL10n.copyLocale == .frCA ? "La priorité d'un hôte doit être un nombre entier, 0 ou plus." : "A host's priority has to be a whole number, 0 or more." }
 
     /// `scheduling_write.host_role_optional`
-    internal static var hostRoleOptional: String { AppL10n.copyLocale == .frCA ? "Optional" : "Optional" }
+    internal static var hostRoleOptional: String { AppL10n.copyLocale == .frCA ? "Facultatif" : "Optional" }
 
     /// `scheduling_write.host_role_required`
-    internal static var hostRoleRequired: String { AppL10n.copyLocale == .frCA ? "Required" : "Required" }
+    internal static var hostRoleRequired: String { AppL10n.copyLocale == .frCA ? "Obligatoire" : "Required" }
 
     /// `scheduling_write.host_role_rotation`
     internal static var hostRoleRotation: String { AppL10n.copyLocale == .frCA ? "Rotation" : "Rotation" }
 
     /// `scheduling_write.hosts_empty`
-    internal static var hostsEmpty: String { AppL10n.copyLocale == .frCA ? "No hosts yet. Add at least one or nobody can be booked." : "No hosts yet. Add at least one or nobody can be booked." }
+    internal static var hostsEmpty: String { AppL10n.copyLocale == .frCA ? "Aucun hôte. Ajoutez-en au moins un pour permettre les rendez-vous." : "No hosts yet. Add at least one or nobody can be booked." }
 
     /// `scheduling_write.hosts_need_one`
-    internal static var hostsNeedOne: String { AppL10n.copyLocale == .frCA ? "An event type needs at least one host." : "An event type needs at least one host." }
+    internal static var hostsNeedOne: String { AppL10n.copyLocale == .frCA ? "Un type de rendez-vous a besoin d'au moins un hôte." : "An event type needs at least one host." }
 
     /// `scheduling_write.hosts_saved`
-    internal static var hostsSaved: String { AppL10n.copyLocale == .frCA ? "Hosts saved" : "Hosts saved" }
+    internal static var hostsSaved: String { AppL10n.copyLocale == .frCA ? "Hôtes enregistrés" : "Hosts saved" }
 
     /// `scheduling_write.hosts_title`
-    internal static var hostsTitle: String { AppL10n.copyLocale == .frCA ? "Hosts" : "Hosts" }
+    internal static var hostsTitle: String { AppL10n.copyLocale == .frCA ? "Hôtes" : "Hosts" }
 
     /// `scheduling_write.hours_add_range`
-    internal static var hoursAddRange: String { AppL10n.copyLocale == .frCA ? "Add range" : "Add range" }
+    internal static var hoursAddRange: String { AppL10n.copyLocale == .frCA ? "Ajouter une plage" : "Add range" }
 
     /// `scheduling_write.hours_copy_to_weekdays`
-    internal static var hoursCopyToWeekdays: String { AppL10n.copyLocale == .frCA ? "Copy to all weekdays" : "Copy to all weekdays" }
+    internal static var hoursCopyToWeekdays: String { AppL10n.copyLocale == .frCA ? "Copier sur tous les jours de semaine" : "Copy to all weekdays" }
 
     /// `scheduling_write.hours_never_bookable`
-    internal static var hoursNeverBookable: String { AppL10n.copyLocale == .frCA ? "Not bookable on any day yet." : "Not bookable on any day yet." }
+    internal static var hoursNeverBookable: String { AppL10n.copyLocale == .frCA ? "Aucune journée réservable pour l'instant." : "Not bookable on any day yet." }
 
     /// `scheduling_write.hours_not_bookable`
-    internal static var hoursNotBookable: String { AppL10n.copyLocale == .frCA ? "Not bookable" : "Not bookable" }
+    internal static var hoursNotBookable: String { AppL10n.copyLocale == .frCA ? "Non réservable" : "Not bookable" }
 
     /// `scheduling_write.hours_nothing_to_save`
-    internal static var hoursNothingToSave: String { AppL10n.copyLocale == .frCA ? "Nothing to save." : "Nothing to save." }
+    internal static var hoursNothingToSave: String { AppL10n.copyLocale == .frCA ? "Rien à enregistrer." : "Nothing to save." }
 
     /// `scheduling_write.hours_remove_range`
-    internal static var hoursRemoveRange: String { AppL10n.copyLocale == .frCA ? "Remove" : "Remove" }
+    internal static var hoursRemoveRange: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
 
     /// `scheduling_write.hours_saved`
-    internal static var hoursSaved: String { AppL10n.copyLocale == .frCA ? "Working hours saved" : "Working hours saved" }
+    internal static var hoursSaved: String { AppL10n.copyLocale == .frCA ? "Heures de disponibilité enregistrées" : "Working hours saved" }
 
     /// `scheduling_write.hours_title`
-    internal static var hoursTitle: String { AppL10n.copyLocale == .frCA ? "Your working hours" : "Your working hours" }
+    internal static var hoursTitle: String { AppL10n.copyLocale == .frCA ? "Vos heures de disponibilité" : "Your working hours" }
 
     /// `scheduling_write.in_person`
-    internal static var inPerson: String { AppL10n.copyLocale == .frCA ? "In person" : "In person" }
+    internal static var inPerson: String { AppL10n.copyLocale == .frCA ? "En personne" : "In person" }
 
     /// `scheduling_write.interval_hint`
-    internal static var intervalHint: String { AppL10n.copyLocale == .frCA ? "How often a booking may start. Independent of the duration." : "How often a booking may start. Independent of the duration." }
+    internal static var intervalHint: String { AppL10n.copyLocale == .frCA ? "Fréquence à laquelle un rendez-vous peut commencer, indépendamment de la durée." : "How often a booking may start. Independent of the duration." }
 
     /// `scheduling_write.interval_label`
-    internal static var intervalLabel: String { AppL10n.copyLocale == .frCA ? "Starts every" : "Starts every" }
+    internal static var intervalLabel: String { AppL10n.copyLocale == .frCA ? "Intervalle" : "Starts every" }
 
     /// `scheduling_write.link`
-    internal static var link: String { AppL10n.copyLocale == .frCA ? "Link" : "Link" }
+    internal static var link: String { AppL10n.copyLocale == .frCA ? "Lien" : "Link" }
 
     /// `scheduling_write.listed_toggle`
-    internal static var listedToggle: String { AppL10n.copyLocale == .frCA ? "Listed on your booking page" : "Listed on your booking page" }
+    internal static var listedToggle: String { AppL10n.copyLocale == .frCA ? "Affiché sur votre page de réservation" : "Listed on your booking page" }
 
     /// `scheduling_write.location_label`
-    internal static var locationLabel: String { AppL10n.copyLocale == .frCA ? "Location" : "Location" }
+    internal static var locationLabel: String { AppL10n.copyLocale == .frCA ? "Lieu" : "Location" }
 
     /// `scheduling_write.manage`
-    internal static var manage: String { AppL10n.copyLocale == .frCA ? "Manage" : "Manage" }
+    internal static var manage: String { AppL10n.copyLocale == .frCA ? "Gérer" : "Manage" }
 
     /// `scheduling_write.max_active_label`
-    internal static var maxActiveLabel: String { AppL10n.copyLocale == .frCA ? "Active bookings per attendee" : "Active bookings per attendee" }
+    internal static var maxActiveLabel: String { AppL10n.copyLocale == .frCA ? "Rendez-vous actifs par participant" : "Active bookings per attendee" }
 
     /// `scheduling_write.max_future_label`
-    internal static var maxFutureLabel: String { AppL10n.copyLocale == .frCA ? "Bookable ahead" : "Bookable ahead" }
+    internal static var maxFutureLabel: String { AppL10n.copyLocale == .frCA ? "Réservable d'avance" : "Bookable ahead" }
 
     /// `scheduling_write.meeting_link`
-    internal static var meetingLink: String { AppL10n.copyLocale == .frCA ? "Meeting link" : "Meeting link" }
+    internal static var meetingLink: String { AppL10n.copyLocale == .frCA ? "Lien de réunion" : "Meeting link" }
 
     /// `scheduling_write.min_notice_hint`
-    internal static var minNoticeHint: String { AppL10n.copyLocale == .frCA ? "Minutes. How soon from now a customer may book." : "Minutes. How soon from now a customer may book." }
+    internal static var minNoticeHint: String { AppL10n.copyLocale == .frCA ? "En minutes. Délai minimal avant qu'un client puisse réserver." : "Minutes. How soon from now a customer may book." }
 
     /// `scheduling_write.min_notice_label`
-    internal static var minNoticeLabel: String { AppL10n.copyLocale == .frCA ? "Minimum notice" : "Minimum notice" }
+    internal static var minNoticeLabel: String { AppL10n.copyLocale == .frCA ? "Préavis minimal" : "Minimum notice" }
 
     /// `scheduling_write.name_label`
-    internal static var nameLabel: String { AppL10n.copyLocale == .frCA ? "Name" : "Name" }
+    internal static var nameLabel: String { AppL10n.copyLocale == .frCA ? "Nom" : "Name" }
 
     /// `scheduling_write.name_missing`
-    internal static var nameMissing: String { AppL10n.copyLocale == .frCA ? "Give the event type a name." : "Give the event type a name." }
+    internal static var nameMissing: String { AppL10n.copyLocale == .frCA ? "Donnez un nom au type de rendez-vous." : "Give the event type a name." }
 
     /// `scheduling_write.name_placeholder`
-    internal static var namePlaceholder: String { AppL10n.copyLocale == .frCA ? "Phone consultation" : "Phone consultation" }
+    internal static var namePlaceholder: String { AppL10n.copyLocale == .frCA ? "Consultation téléphonique" : "Phone consultation" }
 
     /// `scheduling_write.no_limit_hint`
-    internal static var noLimitHint: String { AppL10n.copyLocale == .frCA ? "0 means no limit." : "0 means no limit." }
+    internal static var noLimitHint: String { AppL10n.copyLocale == .frCA ? "0 signifie aucune limite." : "0 means no limit." }
 
     /// `scheduling_write.notifications_edit`
-    internal static var notificationsEdit: String { AppL10n.copyLocale == .frCA ? "Edit notifications" : "Edit notifications" }
+    internal static var notificationsEdit: String { AppL10n.copyLocale == .frCA ? "Modifier les notifications" : "Edit notifications" }
 
     /// `scheduling_write.override_add_button`
-    internal static var overrideAddButton: String { AppL10n.copyLocale == .frCA ? "Add override" : "Add override" }
+    internal static var overrideAddButton: String { AppL10n.copyLocale == .frCA ? "Ajouter l'exception" : "Add override" }
 
     /// `scheduling_write.override_add_title`
-    internal static var overrideAddTitle: String { AppL10n.copyLocale == .frCA ? "Add an override" : "Add an override" }
+    internal static var overrideAddTitle: String { AppL10n.copyLocale == .frCA ? "Ajouter une exception" : "Add an override" }
 
     /// `scheduling_write.override_added`
-    internal static var overrideAdded: String { AppL10n.copyLocale == .frCA ? "Override added" : "Override added" }
+    internal static var overrideAdded: String { AppL10n.copyLocale == .frCA ? "Exception ajoutée" : "Override added" }
 
     /// `scheduling_write.override_custom_hours`
-    internal static var overrideCustomHours: String { AppL10n.copyLocale == .frCA ? "Custom hours" : "Custom hours" }
+    internal static var overrideCustomHours: String { AppL10n.copyLocale == .frCA ? "Heures personnalisées" : "Custom hours" }
 
     /// `scheduling_write.override_date_label`
     internal static var overrideDateLabel: String { AppL10n.copyLocale == .frCA ? "Date" : "Date" }
 
     /// `scheduling_write.override_date_missing`
-    internal static var overrideDateMissing: String { AppL10n.copyLocale == .frCA ? "Pick a date." : "Pick a date." }
+    internal static var overrideDateMissing: String { AppL10n.copyLocale == .frCA ? "Choisissez une date." : "Pick a date." }
 
     /// `scheduling_write.override_delete_confirm`
-    internal static var overrideDeleteConfirm: String { AppL10n.copyLocale == .frCA ? "Delete override" : "Delete override" }
+    internal static var overrideDeleteConfirm: String { AppL10n.copyLocale == .frCA ? "Supprimer l'exception" : "Delete override" }
 
     /// `scheduling_write.override_delete_group_body`
     internal static func overrideDeleteGroupBody(days: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "All \(days) days go back to your weekly hours." : "All \(days) days go back to your weekly hours."
+        AppL10n.copyLocale == .frCA ? "Ces \(days) journées reprennent vos heures hebdomadaires." : "All \(days) days go back to your weekly hours."
     }
 
     /// `scheduling_write.override_delete_single_body`
-    internal static var overrideDeleteSingleBody: String { AppL10n.copyLocale == .frCA ? "That day goes back to your weekly hours." : "That day goes back to your weekly hours." }
+    internal static var overrideDeleteSingleBody: String { AppL10n.copyLocale == .frCA ? "Cette journée reprend vos heures hebdomadaires." : "That day goes back to your weekly hours." }
 
     /// `scheduling_write.override_delete_title`
-    internal static var overrideDeleteTitle: String { AppL10n.copyLocale == .frCA ? "Delete this override?" : "Delete this override?" }
+    internal static var overrideDeleteTitle: String { AppL10n.copyLocale == .frCA ? "Supprimer cette exception?" : "Delete this override?" }
 
     /// `scheduling_write.override_deleted`
-    internal static var overrideDeleted: String { AppL10n.copyLocale == .frCA ? "Override deleted" : "Override deleted" }
+    internal static var overrideDeleted: String { AppL10n.copyLocale == .frCA ? "Exception supprimée" : "Override deleted" }
 
     /// `scheduling_write.override_end_before_start`
-    internal static var overrideEndBeforeStart: String { AppL10n.copyLocale == .frCA ? "The last day has to be on or after the first." : "The last day has to be on or after the first." }
+    internal static var overrideEndBeforeStart: String { AppL10n.copyLocale == .frCA ? "Le dernier jour doit être identique ou postérieur au premier." : "The last day has to be on or after the first." }
 
     /// `scheduling_write.override_first_day_label`
-    internal static var overrideFirstDayLabel: String { AppL10n.copyLocale == .frCA ? "First day" : "First day" }
+    internal static var overrideFirstDayLabel: String { AppL10n.copyLocale == .frCA ? "Premier jour" : "First day" }
 
     /// `scheduling_write.override_hours_label`
-    internal static var overrideHoursLabel: String { AppL10n.copyLocale == .frCA ? "Hours that day" : "Hours that day" }
+    internal static var overrideHoursLabel: String { AppL10n.copyLocale == .frCA ? "Heures ce jour-là" : "Hours that day" }
 
     /// `scheduling_write.override_kind_label`
-    internal static var overrideKindLabel: String { AppL10n.copyLocale == .frCA ? "What happens that day" : "What happens that day" }
+    internal static var overrideKindLabel: String { AppL10n.copyLocale == .frCA ? "Ce qui se passe ce jour-là" : "What happens that day" }
 
     /// `scheduling_write.override_last_day_hint`
-    internal static var overrideLastDayHint: String { AppL10n.copyLocale == .frCA ? "Leave blank for a single day." : "Leave blank for a single day." }
+    internal static var overrideLastDayHint: String { AppL10n.copyLocale == .frCA ? "Laissez vide pour une seule journée." : "Leave blank for a single day." }
 
     /// `scheduling_write.override_last_day_label`
-    internal static var overrideLastDayLabel: String { AppL10n.copyLocale == .frCA ? "Last day" : "Last day" }
+    internal static var overrideLastDayLabel: String { AppL10n.copyLocale == .frCA ? "Dernier jour" : "Last day" }
 
     /// `scheduling_write.override_unavailable`
-    internal static var overrideUnavailable: String { AppL10n.copyLocale == .frCA ? "Unavailable" : "Unavailable" }
+    internal static var overrideUnavailable: String { AppL10n.copyLocale == .frCA ? "Indisponible" : "Unavailable" }
 
     /// `scheduling_write.overrides_empty`
-    internal static var overridesEmpty: String { AppL10n.copyLocale == .frCA ? "No overrides ahead. Add one for a day off or different hours." : "No overrides ahead. Add one for a day off or different hours." }
+    internal static var overridesEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune exception à venir. Ajoutez-en une pour un congé ou des heures différentes." : "No overrides ahead. Add one for a day off or different hours." }
 
     /// `scheduling_write.overrides_hint`
-    internal static var overridesHint: String { AppL10n.copyLocale == .frCA ? "Days you are away, or working different hours from usual." : "Days you are away, or working different hours from usual." }
+    internal static var overridesHint: String { AppL10n.copyLocale == .frCA ? "Les journées d'absence, ou celles où vous travaillez à des heures différentes." : "Days you are away, or working different hours from usual." }
 
     /// `scheduling_write.overrides_title`
-    internal static var overridesTitle: String { AppL10n.copyLocale == .frCA ? "Date overrides" : "Date overrides" }
+    internal static var overridesTitle: String { AppL10n.copyLocale == .frCA ? "Exceptions" : "Date overrides" }
 
     /// `scheduling_write.phone`
-    internal static var phone: String { AppL10n.copyLocale == .frCA ? "Phone" : "Phone" }
+    internal static var phone: String { AppL10n.copyLocale == .frCA ? "Téléphone" : "Phone" }
 
     /// `scheduling_write.phone_number`
-    internal static var phoneNumber: String { AppL10n.copyLocale == .frCA ? "Phone number" : "Phone number" }
+    internal static var phoneNumber: String { AppL10n.copyLocale == .frCA ? "Numéro de téléphone" : "Phone number" }
 
     /// `scheduling_write.priority_label`
-    internal static var priorityLabel: String { AppL10n.copyLocale == .frCA ? "Priority" : "Priority" }
+    internal static var priorityLabel: String { AppL10n.copyLocale == .frCA ? "Priorité" : "Priority" }
 
     /// `scheduling_write.profile_edit`
-    internal static var profileEdit: String { AppL10n.copyLocale == .frCA ? "Edit profile" : "Edit profile" }
+    internal static var profileEdit: String { AppL10n.copyLocale == .frCA ? "Modifier le profil" : "Edit profile" }
 
     /// `scheduling_write.question_add_option`
-    internal static var questionAddOption: String { AppL10n.copyLocale == .frCA ? "Add option" : "Add option" }
+    internal static var questionAddOption: String { AppL10n.copyLocale == .frCA ? "Ajouter l'option" : "Add option" }
 
     /// `scheduling_write.question_add_title`
-    internal static var questionAddTitle: String { AppL10n.copyLocale == .frCA ? "Add question" : "Add question" }
+    internal static var questionAddTitle: String { AppL10n.copyLocale == .frCA ? "Ajouter une question" : "Add question" }
 
     /// `scheduling_write.question_added`
-    internal static var questionAdded: String { AppL10n.copyLocale == .frCA ? "Question added" : "Question added" }
+    internal static var questionAdded: String { AppL10n.copyLocale == .frCA ? "Question ajoutée" : "Question added" }
 
     /// `scheduling_write.question_delete_body`
-    internal static var questionDeleteBody: String { AppL10n.copyLocale == .frCA ? "Customers stop being asked it. Answers already given stay on their bookings." : "Customers stop being asked it. Answers already given stay on their bookings." }
+    internal static var questionDeleteBody: String { AppL10n.copyLocale == .frCA ? "Cette question ne sera plus posée aux clients. Les réponses déjà données restent dans leurs rendez-vous." : "Customers stop being asked it. Answers already given stay on their bookings." }
 
     /// `scheduling_write.question_delete_confirm`
-    internal static var questionDeleteConfirm: String { AppL10n.copyLocale == .frCA ? "Delete question" : "Delete question" }
+    internal static var questionDeleteConfirm: String { AppL10n.copyLocale == .frCA ? "Supprimer la question" : "Delete question" }
 
     /// `scheduling_write.question_delete_title`
-    internal static var questionDeleteTitle: String { AppL10n.copyLocale == .frCA ? "Delete question?" : "Delete question?" }
+    internal static var questionDeleteTitle: String { AppL10n.copyLocale == .frCA ? "Supprimer la question?" : "Delete question?" }
 
     /// `scheduling_write.question_deleted`
-    internal static var questionDeleted: String { AppL10n.copyLocale == .frCA ? "Question deleted" : "Question deleted" }
+    internal static var questionDeleted: String { AppL10n.copyLocale == .frCA ? "Question supprimée" : "Question deleted" }
 
     /// `scheduling_write.question_edit_title`
-    internal static var questionEditTitle: String { AppL10n.copyLocale == .frCA ? "Edit question" : "Edit question" }
+    internal static var questionEditTitle: String { AppL10n.copyLocale == .frCA ? "Modifier la question" : "Edit question" }
 
     /// `scheduling_write.question_label_label`
-    internal static var questionLabelLabel: String { AppL10n.copyLocale == .frCA ? "Label" : "Label" }
+    internal static var questionLabelLabel: String { AppL10n.copyLocale == .frCA ? "Libellé" : "Label" }
 
     /// `scheduling_write.question_label_missing`
-    internal static var questionLabelMissing: String { AppL10n.copyLocale == .frCA ? "Give the question a label." : "Give the question a label." }
+    internal static var questionLabelMissing: String { AppL10n.copyLocale == .frCA ? "Donnez un libellé à la question." : "Give the question a label." }
 
     /// `scheduling_write.question_label_placeholder`
-    internal static var questionLabelPlaceholder: String { AppL10n.copyLocale == .frCA ? "What would you like to talk about?" : "What would you like to talk about?" }
+    internal static var questionLabelPlaceholder: String { AppL10n.copyLocale == .frCA ? "De quoi aimeriez-vous discuter?" : "What would you like to talk about?" }
 
     /// `scheduling_write.question_needs_option`
-    internal static var questionNeedsOption: String { AppL10n.copyLocale == .frCA ? "A Select question needs at least one option." : "A Select question needs at least one option." }
+    internal static var questionNeedsOption: String { AppL10n.copyLocale == .frCA ? "Une question à liste déroulante a besoin d'au moins une option." : "A Select question needs at least one option." }
 
     /// `scheduling_write.question_option_placeholder`
-    internal static var questionOptionPlaceholder: String { AppL10n.copyLocale == .frCA ? "Add an option" : "Add an option" }
+    internal static var questionOptionPlaceholder: String { AppL10n.copyLocale == .frCA ? "Ajouter une option" : "Add an option" }
 
     /// `scheduling_write.question_options_hint`
-    internal static var questionOptionsHint: String { AppL10n.copyLocale == .frCA ? "What the customer can choose from." : "What the customer can choose from." }
+    internal static var questionOptionsHint: String { AppL10n.copyLocale == .frCA ? "Ce que le client peut choisir." : "What the customer can choose from." }
 
     /// `scheduling_write.question_options_label`
     internal static var questionOptionsLabel: String { AppL10n.copyLocale == .frCA ? "Options" : "Options" }
 
     /// `scheduling_write.question_position_hint`
-    internal static var questionPositionHint: String { AppL10n.copyLocale == .frCA ? "Lower numbers are asked first." : "Lower numbers are asked first." }
+    internal static var questionPositionHint: String { AppL10n.copyLocale == .frCA ? "Les questions aux numéros les plus bas sont posées en premier." : "Lower numbers are asked first." }
 
     /// `scheduling_write.question_position_invalid`
-    internal static var questionPositionInvalid: String { AppL10n.copyLocale == .frCA ? "Position has to be a whole number, 0 or more." : "Position has to be a whole number, 0 or more." }
+    internal static var questionPositionInvalid: String { AppL10n.copyLocale == .frCA ? "La position doit être un nombre entier, 0 ou plus." : "Position has to be a whole number, 0 or more." }
 
     /// `scheduling_write.question_position_label`
     internal static var questionPositionLabel: String { AppL10n.copyLocale == .frCA ? "Position" : "Position" }
 
     /// `scheduling_write.question_required_toggle`
-    internal static var questionRequiredToggle: String { AppL10n.copyLocale == .frCA ? "Required" : "Required" }
+    internal static var questionRequiredToggle: String { AppL10n.copyLocale == .frCA ? "Obligatoire" : "Required" }
 
     /// `scheduling_write.question_save_button`
-    internal static var questionSaveButton: String { AppL10n.copyLocale == .frCA ? "Save question" : "Save question" }
+    internal static var questionSaveButton: String { AppL10n.copyLocale == .frCA ? "Enregistrer la question" : "Save question" }
 
     /// `scheduling_write.question_saved`
-    internal static var questionSaved: String { AppL10n.copyLocale == .frCA ? "Question saved" : "Question saved" }
+    internal static var questionSaved: String { AppL10n.copyLocale == .frCA ? "Question enregistrée" : "Question saved" }
 
     /// `scheduling_write.question_type_checkbox`
-    internal static var questionTypeCheckbox: String { AppL10n.copyLocale == .frCA ? "Checkbox" : "Checkbox" }
+    internal static var questionTypeCheckbox: String { AppL10n.copyLocale == .frCA ? "Case à cocher" : "Checkbox" }
 
     /// `scheduling_write.question_type_label`
     internal static var questionTypeLabel: String { AppL10n.copyLocale == .frCA ? "Type" : "Type" }
 
     /// `scheduling_write.question_type_select`
-    internal static var questionTypeSelect: String { AppL10n.copyLocale == .frCA ? "Select" : "Select" }
+    internal static var questionTypeSelect: String { AppL10n.copyLocale == .frCA ? "Liste déroulante" : "Select" }
 
     /// `scheduling_write.question_type_text`
-    internal static var questionTypeText: String { AppL10n.copyLocale == .frCA ? "Text" : "Text" }
+    internal static var questionTypeText: String { AppL10n.copyLocale == .frCA ? "Texte" : "Text" }
 
     /// `scheduling_write.questions_empty`
-    internal static var questionsEmpty: String { AppL10n.copyLocale == .frCA ? "No questions yet. Customers give their name, email and nothing else." : "No questions yet. Customers give their name, email and nothing else." }
+    internal static var questionsEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune question. Les clients donnent leur nom et leur courriel, rien de plus." : "No questions yet. Customers give their name, email and nothing else." }
 
     /// `scheduling_write.questions_title`
     internal static var questionsTitle: String { AppL10n.copyLocale == .frCA ? "Questions" : "Questions" }
 
     /// `scheduling_write.range_to`
-    internal static var rangeTo: String { AppL10n.copyLocale == .frCA ? "to" : "to" }
+    internal static var rangeTo: String { AppL10n.copyLocale == .frCA ? "à" : "to" }
 
     /// `scheduling_write.remove`
-    internal static var remove: String { AppL10n.copyLocale == .frCA ? "Remove" : "Remove" }
+    internal static var remove: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
 
     /// `scheduling_write.restore`
-    internal static var restore: String { AppL10n.copyLocale == .frCA ? "Restore" : "Restore" }
+    internal static var restore: String { AppL10n.copyLocale == .frCA ? "Restaurer" : "Restore" }
 
     /// `scheduling_write.restored`
-    internal static var restored: String { AppL10n.copyLocale == .frCA ? "Event type restored" : "Event type restored" }
+    internal static var restored: String { AppL10n.copyLocale == .frCA ? "Type de rendez-vous restauré" : "Event type restored" }
 
     /// `scheduling_write.retry`
-    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Try again" : "Try again" }
+    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 
     /// `scheduling_write.rotation_hint`
-    internal static var rotationHint: String { AppL10n.copyLocale == .frCA ? "Which host the next booking goes to." : "Which host the next booking goes to." }
+    internal static var rotationHint: String { AppL10n.copyLocale == .frCA ? "L'hôte qui recevra le prochain rendez-vous." : "Which host the next booking goes to." }
 
     /// `scheduling_write.rotation_label`
     internal static var rotationLabel: String { AppL10n.copyLocale == .frCA ? "Rotation" : "Rotation" }
 
     /// `scheduling_write.rotation_strategy_even`
-    internal static var rotationStrategyEven: String { AppL10n.copyLocale == .frCA ? "Even" : "Even" }
+    internal static var rotationStrategyEven: String { AppL10n.copyLocale == .frCA ? "Équilibrée" : "Even" }
 
     /// `scheduling_write.rotation_strategy_priority`
-    internal static var rotationStrategyPriority: String { AppL10n.copyLocale == .frCA ? "Priority" : "Priority" }
+    internal static var rotationStrategyPriority: String { AppL10n.copyLocale == .frCA ? "Priorité" : "Priority" }
 
     /// `scheduling_write.rotation_strategy_soonest`
-    internal static var rotationStrategySoonest: String { AppL10n.copyLocale == .frCA ? "Soonest" : "Soonest" }
+    internal static var rotationStrategySoonest: String { AppL10n.copyLocale == .frCA ? "Au plus tôt" : "Soonest" }
 
     /// `scheduling_write.routing_mode_collective`
-    internal static var routingModeCollective: String { AppL10n.copyLocale == .frCA ? "Collective" : "Collective" }
+    internal static var routingModeCollective: String { AppL10n.copyLocale == .frCA ? "Collectif" : "Collective" }
 
     /// `scheduling_write.routing_mode_fixed`
-    internal static var routingModeFixed: String { AppL10n.copyLocale == .frCA ? "Fixed" : "Fixed" }
+    internal static var routingModeFixed: String { AppL10n.copyLocale == .frCA ? "Fixe" : "Fixed" }
 
     /// `scheduling_write.routing_mode_label`
-    internal static var routingModeLabel: String { AppL10n.copyLocale == .frCA ? "Routing" : "Routing" }
+    internal static var routingModeLabel: String { AppL10n.copyLocale == .frCA ? "Acheminement" : "Routing" }
 
     /// `scheduling_write.routing_mode_round_robin`
-    internal static var routingModeRoundRobin: String { AppL10n.copyLocale == .frCA ? "Round robin" : "Round robin" }
+    internal static var routingModeRoundRobin: String { AppL10n.copyLocale == .frCA ? "À tour de rôle" : "Round robin" }
 
     /// `scheduling_write.save`
-    internal static var save: String { AppL10n.copyLocale == .frCA ? "Save" : "Save" }
+    internal static var save: String { AppL10n.copyLocale == .frCA ? "Enregistrer" : "Save" }
 
     /// `scheduling_write.saved`
-    internal static var saved: String { AppL10n.copyLocale == .frCA ? "Event type saved" : "Event type saved" }
+    internal static var saved: String { AppL10n.copyLocale == .frCA ? "Type de rendez-vous enregistré" : "Event type saved" }
 
     /// `scheduling_write.saving`
-    internal static var saving: String { AppL10n.copyLocale == .frCA ? "Saving…" : "Saving…" }
+    internal static var saving: String { AppL10n.copyLocale == .frCA ? "Sauvegarde…" : "Saving…" }
 
     /// `scheduling_write.send_test_email`
-    internal static var sendTestEmail: String { AppL10n.copyLocale == .frCA ? "Send test email" : "Send test email" }
+    internal static var sendTestEmail: String { AppL10n.copyLocale == .frCA ? "Envoyer un courriel test" : "Send test email" }
 
     /// `scheduling_write.show_taken_toggle`
-    internal static var showTakenToggle: String { AppL10n.copyLocale == .frCA ? "Show taken times as taken" : "Show taken times as taken" }
+    internal static var showTakenToggle: String { AppL10n.copyLocale == .frCA ? "Afficher les plages occupées comme occupées" : "Show taken times as taken" }
 
     /// `scheduling_write.test_email_not_sent`
-    internal static var testEmailNotSent: String { AppL10n.copyLocale == .frCA ? "The booking system did not send the test email." : "The booking system did not send the test email." }
+    internal static var testEmailNotSent: String { AppL10n.copyLocale == .frCA ? "Le système de réservation n'a pas envoyé le courriel test." : "The booking system did not send the test email." }
 
     /// `scheduling_write.test_email_sent`
     internal static func testEmailSent(to address: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Test email sent to \(address)" : "Test email sent to \(address)"
+        AppL10n.copyLocale == .frCA ? "Courriel d'essai envoyé à \(address)" : "Test email sent to \(address)"
     }
 
     /// `scheduling_write.time_format_error`
-    internal static var timeFormatError: String { AppL10n.copyLocale == .frCA ? "Enter a time as HH:MM." : "Enter a time as HH:MM." }
+    internal static var timeFormatError: String { AppL10n.copyLocale == .frCA ? "Entrez une heure au format HH:MM." : "Enter a time as HH:MM." }
 
     /// `scheduling_write.time_order_error`
-    internal static var timeOrderError: String { AppL10n.copyLocale == .frCA ? "The end has to be after the start." : "The end has to be after the start." }
+    internal static var timeOrderError: String { AppL10n.copyLocale == .frCA ? "La fin doit être après le début." : "The end has to be after the start." }
 
     /// `scheduling_write.time_overlap_error`
-    internal static var timeOverlapError: String { AppL10n.copyLocale == .frCA ? "These hours overlap another range on this day." : "These hours overlap another range on this day." }
+    internal static var timeOverlapError: String { AppL10n.copyLocale == .frCA ? "Ces heures chevauchent une autre plage de cette journée." : "These hours overlap another range on this day." }
 
     /// `scheduling_write.turn_off`
-    internal static var turnOff: String { AppL10n.copyLocale == .frCA ? "Turn off" : "Turn off" }
+    internal static var turnOff: String { AppL10n.copyLocale == .frCA ? "Désactiver" : "Turn off" }
 
     /// `scheduling_write.turn_on`
-    internal static var turnOn: String { AppL10n.copyLocale == .frCA ? "Turn on" : "Turn on" }
+    internal static var turnOn: String { AppL10n.copyLocale == .frCA ? "Activer" : "Turn on" }
 
     /// `scheduling_write.turned_off`
-    internal static var turnedOff: String { AppL10n.copyLocale == .frCA ? "Event type turned off" : "Event type turned off" }
+    internal static var turnedOff: String { AppL10n.copyLocale == .frCA ? "Type de rendez-vous désactivé" : "Event type turned off" }
 
     /// `scheduling_write.turned_on`
-    internal static var turnedOn: String { AppL10n.copyLocale == .frCA ? "Event type turned on" : "Event type turned on" }
+    internal static var turnedOn: String { AppL10n.copyLocale == .frCA ? "Type de rendez-vous activé" : "Event type turned on" }
 
     /// `scheduling_write.weekday_friday`
-    internal static var weekdayFriday: String { AppL10n.copyLocale == .frCA ? "Friday" : "Friday" }
+    internal static var weekdayFriday: String { AppL10n.copyLocale == .frCA ? "Vendredi" : "Friday" }
 
     /// `scheduling_write.weekday_monday`
-    internal static var weekdayMonday: String { AppL10n.copyLocale == .frCA ? "Monday" : "Monday" }
+    internal static var weekdayMonday: String { AppL10n.copyLocale == .frCA ? "Lundi" : "Monday" }
 
     /// `scheduling_write.weekday_saturday`
-    internal static var weekdaySaturday: String { AppL10n.copyLocale == .frCA ? "Saturday" : "Saturday" }
+    internal static var weekdaySaturday: String { AppL10n.copyLocale == .frCA ? "Samedi" : "Saturday" }
 
     /// `scheduling_write.weekday_sunday`
-    internal static var weekdaySunday: String { AppL10n.copyLocale == .frCA ? "Sunday" : "Sunday" }
+    internal static var weekdaySunday: String { AppL10n.copyLocale == .frCA ? "Dimanche" : "Sunday" }
 
     /// `scheduling_write.weekday_thursday`
-    internal static var weekdayThursday: String { AppL10n.copyLocale == .frCA ? "Thursday" : "Thursday" }
+    internal static var weekdayThursday: String { AppL10n.copyLocale == .frCA ? "Jeudi" : "Thursday" }
 
     /// `scheduling_write.weekday_tuesday`
-    internal static var weekdayTuesday: String { AppL10n.copyLocale == .frCA ? "Tuesday" : "Tuesday" }
+    internal static var weekdayTuesday: String { AppL10n.copyLocale == .frCA ? "Mardi" : "Tuesday" }
 
     /// `scheduling_write.weekday_wednesday`
-    internal static var weekdayWednesday: String { AppL10n.copyLocale == .frCA ? "Wednesday" : "Wednesday" }
+    internal static var weekdayWednesday: String { AppL10n.copyLocale == .frCA ? "Mercredi" : "Wednesday" }
 }
 
 extension SchedulingWriteCopyC {
     /// `scheduling_write_c.app_revoke_action`
-    internal static var appRevokeAction: String { AppL10n.copyLocale == .frCA ? "Revoke access" : "Revoke access" }
+    internal static var appRevokeAction: String { AppL10n.copyLocale == .frCA ? "Révoquer l'accès" : "Revoke access" }
 
     /// `scheduling_write_c.app_revoke_confirm`
-    internal static var appRevokeConfirm: String { AppL10n.copyLocale == .frCA ? "It stops reaching this workspace's booking data now." : "It stops reaching this workspace's booking data now." }
+    internal static var appRevokeConfirm: String { AppL10n.copyLocale == .frCA ? "Elle cessera immédiatement d'accéder aux données de rendez-vous." : "It stops reaching this workspace's booking data now." }
 
     /// `scheduling_write_c.app_revoke_prompt`
     internal static func appRevokePrompt(_ client_name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Revoke \(client_name)?" : "Revoke \(client_name)?"
+        AppL10n.copyLocale == .frCA ? "Révoquer \(client_name)?" : "Revoke \(client_name)?"
     }
 
     /// `scheduling_write_c.caldav_connect_action`
-    internal static var caldavConnectAction: String { AppL10n.copyLocale == .frCA ? "Connect calendar" : "Connect calendar" }
+    internal static var caldavConnectAction: String { AppL10n.copyLocale == .frCA ? "Connecter le calendrier" : "Connect calendar" }
 
     /// `scheduling_write_c.caldav_connected`
-    internal static var caldavConnected: String { AppL10n.copyLocale == .frCA ? "Calendar connected" : "Calendar connected" }
+    internal static var caldavConnected: String { AppL10n.copyLocale == .frCA ? "Calendrier connecté" : "Calendar connected" }
 
     /// `scheduling_write_c.caldav_connected_to_line`
     internal static func caldavConnectedToLine(_ account: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Calendar connected: \(account)" : "Calendar connected: \(account)"
+        AppL10n.copyLocale == .frCA ? "Calendrier connecté\u{00A0}: \(account)" : "Calendar connected: \(account)"
     }
 
     /// `scheduling_write_c.caldav_connecting`
-    internal static var caldavConnecting: String { AppL10n.copyLocale == .frCA ? "Connecting…" : "Connecting…" }
+    internal static var caldavConnecting: String { AppL10n.copyLocale == .frCA ? "Connexion…" : "Connecting…" }
 
     /// `scheduling_write_c.caldav_password_hint`
-    internal static var caldavPasswordHint: String { AppL10n.copyLocale == .frCA ? "An app-specific password from the provider, not the account password." : "An app-specific password from the provider, not the account password." }
+    internal static var caldavPasswordHint: String { AppL10n.copyLocale == .frCA ? "Un mot de passe d'application obtenu auprès du fournisseur, et non le mot de passe du compte." : "An app-specific password from the provider, not the account password." }
 
     /// `scheduling_write_c.caldav_password_label`
-    internal static var caldavPasswordLabel: String { AppL10n.copyLocale == .frCA ? "App password" : "App password" }
+    internal static var caldavPasswordLabel: String { AppL10n.copyLocale == .frCA ? "Mot de passe d'application" : "App password" }
 
     /// `scheduling_write_c.caldav_password_missing`
-    internal static var caldavPasswordMissing: String { AppL10n.copyLocale == .frCA ? "Enter the app password." : "Enter the app password." }
+    internal static var caldavPasswordMissing: String { AppL10n.copyLocale == .frCA ? "Entrez le mot de passe d'application." : "Enter the app password." }
 
     /// `scheduling_write_c.caldav_preset_custom`
-    internal static var caldavPresetCustom: String { AppL10n.copyLocale == .frCA ? "Other server URL" : "Other server URL" }
+    internal static var caldavPresetCustom: String { AppL10n.copyLocale == .frCA ? "URL d'un autre serveur" : "Other server URL" }
 
     /// `scheduling_write_c.caldav_preset_custom_note`
-    internal static var caldavPresetCustomNote: String { AppL10n.copyLocale == .frCA ? "Any other CalDAV server." : "Any other CalDAV server." }
+    internal static var caldavPresetCustomNote: String { AppL10n.copyLocale == .frCA ? "Tout autre serveur CalDAV." : "Any other CalDAV server." }
 
     /// `scheduling_write_c.caldav_preset_fastmail`
     internal static var caldavPresetFastmail: String { AppL10n.copyLocale == .frCA ? "Fastmail" : "Fastmail" }
 
     /// `scheduling_write_c.caldav_preset_fastmail_note`
-    internal static var caldavPresetFastmailNote: String { AppL10n.copyLocale == .frCA ? "Fastmail's calendar. Create an app password in Fastmail settings." : "Fastmail's calendar. Create an app password in Fastmail settings." }
+    internal static var caldavPresetFastmailNote: String { AppL10n.copyLocale == .frCA ? "Le calendrier de Fastmail. Créez un mot de passe d'application dans votre compte Fastmail." : "Fastmail's calendar. Create an app password in Fastmail settings." }
 
     /// `scheduling_write_c.caldav_preset_i_cloud`
     internal static var caldavPresetICloud: String { AppL10n.copyLocale == .frCA ? "iCloud" : "iCloud" }
 
     /// `scheduling_write_c.caldav_preset_i_cloud_note`
-    internal static var caldavPresetICloudNote: String { AppL10n.copyLocale == .frCA ? "Apple's calendar. Create an app-specific password at appleid.apple.com." : "Apple's calendar. Create an app-specific password at appleid.apple.com." }
+    internal static var caldavPresetICloudNote: String { AppL10n.copyLocale == .frCA ? "Le calendrier d'Apple. Créez un mot de passe pour app sur appleid.apple.com." : "Apple's calendar. Create an app-specific password at appleid.apple.com." }
 
     /// `scheduling_write_c.caldav_preset_label`
-    internal static var caldavPresetLabel: String { AppL10n.copyLocale == .frCA ? "Where the calendar lives" : "Where the calendar lives" }
+    internal static var caldavPresetLabel: String { AppL10n.copyLocale == .frCA ? "Où se trouve le calendrier" : "Where the calendar lives" }
 
     /// `scheduling_write_c.caldav_preset_nextcloud`
     internal static var caldavPresetNextcloud: String { AppL10n.copyLocale == .frCA ? "Nextcloud" : "Nextcloud" }
 
     /// `scheduling_write_c.caldav_preset_nextcloud_note`
-    internal static var caldavPresetNextcloudNote: String { AppL10n.copyLocale == .frCA ? "Your own Nextcloud server, at its DAV address." : "Your own Nextcloud server, at its DAV address." }
+    internal static var caldavPresetNextcloudNote: String { AppL10n.copyLocale == .frCA ? "Votre propre serveur Nextcloud, à son adresse DAV." : "Your own Nextcloud server, at its DAV address." }
 
     /// `scheduling_write_c.caldav_refused`
-    internal static var caldavRefused: String { AppL10n.copyLocale == .frCA ? "Could not connect. Check the server, username and app password." : "Could not connect. Check the server, username and app password." }
+    internal static var caldavRefused: String { AppL10n.copyLocale == .frCA ? "Connexion impossible. Vérifiez le serveur, le nom d'utilisateur et le mot de passe d'application." : "Could not connect. Check the server, username and app password." }
 
     /// `scheduling_write_c.caldav_server_url_hint`
-    internal static var caldavServerUrlHint: String { AppL10n.copyLocale == .frCA ? "The base address of the CalDAV server." : "The base address of the CalDAV server." }
+    internal static var caldavServerUrlHint: String { AppL10n.copyLocale == .frCA ? "L'adresse de base du serveur CalDAV." : "The base address of the CalDAV server." }
 
     /// `scheduling_write_c.caldav_server_url_is_ip`
-    internal static var caldavServerUrlIsIp: String { AppL10n.copyLocale == .frCA ? "Enter the server's hostname rather than an IP address." : "Enter the server's hostname rather than an IP address." }
+    internal static var caldavServerUrlIsIp: String { AppL10n.copyLocale == .frCA ? "Entrez le nom d'hôte du serveur plutôt qu'une adresse IP." : "Enter the server's hostname rather than an IP address." }
 
     /// `scheduling_write_c.caldav_server_url_label`
-    internal static var caldavServerUrlLabel: String { AppL10n.copyLocale == .frCA ? "Server URL" : "Server URL" }
+    internal static var caldavServerUrlLabel: String { AppL10n.copyLocale == .frCA ? "URL du serveur" : "Server URL" }
 
     /// `scheduling_write_c.caldav_server_url_missing`
-    internal static var caldavServerUrlMissing: String { AppL10n.copyLocale == .frCA ? "Enter the server URL." : "Enter the server URL." }
+    internal static var caldavServerUrlMissing: String { AppL10n.copyLocale == .frCA ? "Entrez l'URL du serveur." : "Enter the server URL." }
 
     /// `scheduling_write_c.caldav_server_url_not_a_url`
-    internal static var caldavServerUrlNotAUrl: String { AppL10n.copyLocale == .frCA ? "That does not look like a server address. It should start with https://" : "That does not look like a server address. It should start with https://" }
+    internal static var caldavServerUrlNotAUrl: String { AppL10n.copyLocale == .frCA ? "Cela ne ressemble pas à une adresse de serveur. Elle doit commencer par https://" : "That does not look like a server address. It should start with https://" }
 
     /// `scheduling_write_c.caldav_server_url_not_https`
-    internal static var caldavServerUrlNotHttps: String { AppL10n.copyLocale == .frCA ? "The server address must start with https://, because an app password sent over http:// travels in the clear." : "The server address must start with https://, because an app password sent over http:// travels in the clear." }
+    internal static var caldavServerUrlNotHttps: String { AppL10n.copyLocale == .frCA ? "L'adresse du serveur doit commencer par https://, car un mot de passe d'application envoyé par http:// circule en clair." : "The server address must start with https://, because an app password sent over http:// travels in the clear." }
 
     /// `scheduling_write_c.caldav_title`
-    internal static var caldavTitle: String { AppL10n.copyLocale == .frCA ? "Connect a CalDAV calendar" : "Connect a CalDAV calendar" }
+    internal static var caldavTitle: String { AppL10n.copyLocale == .frCA ? "Connecter un calendrier CalDAV" : "Connect a CalDAV calendar" }
 
     /// `scheduling_write_c.caldav_username_label`
-    internal static var caldavUsernameLabel: String { AppL10n.copyLocale == .frCA ? "Username" : "Username" }
+    internal static var caldavUsernameLabel: String { AppL10n.copyLocale == .frCA ? "Nom d'utilisateur" : "Username" }
 
     /// `scheduling_write_c.caldav_username_missing`
-    internal static var caldavUsernameMissing: String { AppL10n.copyLocale == .frCA ? "Enter the username." : "Enter the username." }
+    internal static var caldavUsernameMissing: String { AppL10n.copyLocale == .frCA ? "Entrez le nom d'utilisateur." : "Enter the username." }
 
     /// `scheduling_write_c.calendars_conflicts_hint`
-    internal static var calendarsConflictsHint: String { AppL10n.copyLocale == .frCA ? "A booking is refused when it clashes with an event on a checked calendar." : "A booking is refused when it clashes with an event on a checked calendar." }
+    internal static var calendarsConflictsHint: String { AppL10n.copyLocale == .frCA ? "Un rendez-vous est refusé lorsqu'il entre en conflit avec un événement d'un calendrier vérifié." : "A booking is refused when it clashes with an event on a checked calendar." }
 
     /// `scheduling_write_c.calendars_conflicts_label`
-    internal static var calendarsConflictsLabel: String { AppL10n.copyLocale == .frCA ? "Checked for conflicts" : "Checked for conflicts" }
+    internal static var calendarsConflictsLabel: String { AppL10n.copyLocale == .frCA ? "Vérifié pour les conflits" : "Checked for conflicts" }
 
     /// `scheduling_write_c.calendars_destination_hint`
-    internal static var calendarsDestinationHint: String { AppL10n.copyLocale == .frCA ? "New bookings are written to this calendar." : "New bookings are written to this calendar." }
+    internal static var calendarsDestinationHint: String { AppL10n.copyLocale == .frCA ? "Les nouveaux rendez-vous sont inscrits dans ce calendrier." : "New bookings are written to this calendar." }
 
     /// `scheduling_write_c.calendars_destination_label`
-    internal static var calendarsDestinationLabel: String { AppL10n.copyLocale == .frCA ? "Receives bookings" : "Receives bookings" }
+    internal static var calendarsDestinationLabel: String { AppL10n.copyLocale == .frCA ? "Reçoit les rendez-vous" : "Receives bookings" }
 
     /// `scheduling_write_c.calendars_loading`
-    internal static var calendarsLoading: String { AppL10n.copyLocale == .frCA ? "Loading calendars…" : "Loading calendars…" }
+    internal static var calendarsLoading: String { AppL10n.copyLocale == .frCA ? "Chargement des calendriers…" : "Loading calendars…" }
 
     /// `scheduling_write_c.calendars_open`
-    internal static var calendarsOpen: String { AppL10n.copyLocale == .frCA ? "Choose calendars" : "Choose calendars" }
+    internal static var calendarsOpen: String { AppL10n.copyLocale == .frCA ? "Choisir les calendriers" : "Choose calendars" }
 
     /// `scheduling_write_c.calendars_save_action`
-    internal static var calendarsSaveAction: String { AppL10n.copyLocale == .frCA ? "Save changes" : "Save changes" }
+    internal static var calendarsSaveAction: String { AppL10n.copyLocale == .frCA ? "Enregistrer les modifications" : "Save changes" }
 
     /// `scheduling_write_c.calendars_saved`
-    internal static var calendarsSaved: String { AppL10n.copyLocale == .frCA ? "Calendars saved" : "Calendars saved" }
+    internal static var calendarsSaved: String { AppL10n.copyLocale == .frCA ? "Calendriers enregistrés" : "Calendars saved" }
 
     /// `scheduling_write_c.calendars_saving`
-    internal static var calendarsSaving: String { AppL10n.copyLocale == .frCA ? "Saving…" : "Saving…" }
+    internal static var calendarsSaving: String { AppL10n.copyLocale == .frCA ? "Sauvegarde…" : "Saving…" }
 
     /// `scheduling_write_c.calendars_title`
     internal static func calendarsTitle(_ account_email: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Calendars in \(account_email)" : "Calendars in \(account_email)"
+        AppL10n.copyLocale == .frCA ? "Calendriers\u{00A0}: \(account_email)" : "Calendars in \(account_email)"
     }
 
     /// `scheduling_write_c.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `scheduling_write_c.connect_hand_off_note`
-    internal static var connectHandOffNote: String { AppL10n.copyLocale == .frCA ? "Finish in the browser, then come back: this page re-reads itself." : "Finish in the browser, then come back: this page re-reads itself." }
+    internal static var connectHandOffNote: String { AppL10n.copyLocale == .frCA ? "Terminez hors de l'app, puis revenez\u{00A0}: cette page s'actualisera d'elle-même." : "Finish in the browser, then come back: this page re-reads itself." }
 
     /// `scheduling_write_c.connect_not_configured`
-    internal static var connectNotConfigured: String { AppL10n.copyLocale == .frCA ? "Calendar connections are not set up on this scheduler yet." : "Calendar connections are not set up on this scheduler yet." }
+    internal static var connectNotConfigured: String { AppL10n.copyLocale == .frCA ? "Les connexions de calendrier ne sont pas encore configurées pour la prise de rendez-vous." : "Calendar connections are not set up on this scheduler yet." }
 
     /// `scheduling_write_c.connect_not_ready_yet`
-    internal static var connectNotReadyYet: String { AppL10n.copyLocale == .frCA ? "Scheduling is still being set up for this workspace. Try again shortly." : "Scheduling is still being set up for this workspace. Try again shortly." }
+    internal static var connectNotReadyYet: String { AppL10n.copyLocale == .frCA ? "La prise de rendez-vous est encore en cours de configuration pour cet espace de travail. Réessayez sous peu." : "Scheduling is still being set up for this workspace. Try again shortly." }
 
     /// `scheduling_write_c.connect_provider_named`
     internal static func connectProviderNamed(_ provider: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Connect \(provider)" : "Connect \(provider)"
+        AppL10n.copyLocale == .frCA ? "Connecter \(provider)" : "Connect \(provider)"
     }
 
     /// `scheduling_write_c.disconnect_action`
-    internal static var disconnectAction: String { AppL10n.copyLocale == .frCA ? "Disconnect" : "Disconnect" }
+    internal static var disconnectAction: String { AppL10n.copyLocale == .frCA ? "Déconnecter" : "Disconnect" }
 
     /// `scheduling_write_c.disconnect_confirm`
-    internal static var disconnectConfirm: String { AppL10n.copyLocale == .frCA ? "Bookings stop syncing to it. Existing events stay." : "Bookings stop syncing to it. Existing events stay." }
+    internal static var disconnectConfirm: String { AppL10n.copyLocale == .frCA ? "Les rendez-vous cesseront d'y être synchronisés. Les événements existants restent." : "Bookings stop syncing to it. Existing events stay." }
 
     /// `scheduling_write_c.disconnect_keep`
-    internal static var disconnectKeep: String { AppL10n.copyLocale == .frCA ? "Keep it connected" : "Keep it connected" }
+    internal static var disconnectKeep: String { AppL10n.copyLocale == .frCA ? "Le garder connecté" : "Keep it connected" }
 
     /// `scheduling_write_c.disconnect_prompt`
     internal static func disconnectPrompt(_ account_email: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Disconnect \(account_email)?" : "Disconnect \(account_email)?"
+        AppL10n.copyLocale == .frCA ? "Déconnecter \(account_email)?" : "Disconnect \(account_email)?"
     }
 
     /// `scheduling_write_c.disconnected`
-    internal static var disconnected: String { AppL10n.copyLocale == .frCA ? "Calendar disconnected" : "Calendar disconnected" }
+    internal static var disconnected: String { AppL10n.copyLocale == .frCA ? "Calendrier déconnecté" : "Calendar disconnected" }
 
     /// `scheduling_write_c.disconnected_last_destination`
-    internal static var disconnectedLastDestination: String { AppL10n.copyLocale == .frCA ? "No calendar receives new bookings now. Connect one, or choose a calendar in another account." : "No calendar receives new bookings now. Connect one, or choose a calendar in another account." }
+    internal static var disconnectedLastDestination: String { AppL10n.copyLocale == .frCA ? "Aucun calendrier ne reçoit plus les nouveaux rendez-vous. Connectez-en un ou choisissez un calendrier d'un autre compte." : "No calendar receives new bookings now. Connect one, or choose a calendar in another account." }
 
     /// `scheduling_write_c.key_copied`
-    internal static var keyCopied: String { AppL10n.copyLocale == .frCA ? "Copied" : "Copied" }
+    internal static var keyCopied: String { AppL10n.copyLocale == .frCA ? "Copié" : "Copied" }
 
     /// `scheduling_write_c.key_copy_action`
-    internal static var keyCopyAction: String { AppL10n.copyLocale == .frCA ? "Copy key" : "Copy key" }
+    internal static var keyCopyAction: String { AppL10n.copyLocale == .frCA ? "Copier la clé" : "Copy key" }
 
     /// `scheduling_write_c.key_create`
-    internal static var keyCreate: String { AppL10n.copyLocale == .frCA ? "Create key" : "Create key" }
+    internal static var keyCreate: String { AppL10n.copyLocale == .frCA ? "Créer une clé" : "Create key" }
 
     /// `scheduling_write_c.key_creating`
-    internal static var keyCreating: String { AppL10n.copyLocale == .frCA ? "Creating…" : "Creating…" }
+    internal static var keyCreating: String { AppL10n.copyLocale == .frCA ? "Création en cours…" : "Creating…" }
 
     /// `scheduling_write_c.key_done`
-    internal static var keyDone: String { AppL10n.copyLocale == .frCA ? "Done" : "Done" }
+    internal static var keyDone: String { AppL10n.copyLocale == .frCA ? "C'est fait" : "Done" }
 
     /// `scheduling_write_c.key_name_hint`
-    internal static var keyNameHint: String { AppL10n.copyLocale == .frCA ? "What will use this key. You will see it in the list and nowhere else." : "What will use this key. You will see it in the list and nowhere else." }
+    internal static var keyNameHint: String { AppL10n.copyLocale == .frCA ? "Indiquez ce qui utilisera cette clé. Ce nom n'apparaît que dans la liste." : "What will use this key. You will see it in the list and nowhere else." }
 
     /// `scheduling_write_c.key_name_label`
-    internal static var keyNameLabel: String { AppL10n.copyLocale == .frCA ? "Name" : "Name" }
+    internal static var keyNameLabel: String { AppL10n.copyLocale == .frCA ? "Nom" : "Name" }
 
     /// `scheduling_write_c.key_name_missing`
-    internal static var keyNameMissing: String { AppL10n.copyLocale == .frCA ? "Give the key a name." : "Give the key a name." }
+    internal static var keyNameMissing: String { AppL10n.copyLocale == .frCA ? "Donnez un nom à la clé." : "Give the key a name." }
 
     /// `scheduling_write_c.key_reveal_title`
     internal static func keyRevealTitle(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Your key for \(name)" : "Your key for \(name)"
+        AppL10n.copyLocale == .frCA ? "Votre clé pour \(name)" : "Your key for \(name)"
     }
 
     /// `scheduling_write_c.key_reveal_warning`
-    internal static var keyRevealWarning: String { AppL10n.copyLocale == .frCA ? "Copy it now. It is not shown again." : "Copy it now. It is not shown again." }
+    internal static var keyRevealWarning: String { AppL10n.copyLocale == .frCA ? "Copiez-le maintenant. Il ne sera plus affiché." : "Copy it now. It is not shown again." }
 
     /// `scheduling_write_c.key_revoke_action`
-    internal static var keyRevokeAction: String { AppL10n.copyLocale == .frCA ? "Revoke key" : "Revoke key" }
+    internal static var keyRevokeAction: String { AppL10n.copyLocale == .frCA ? "Révoquer la clé" : "Revoke key" }
 
     /// `scheduling_write_c.key_revoke_confirm`
-    internal static var keyRevokeConfirm: String { AppL10n.copyLocale == .frCA ? "Anything using it stops working now." : "Anything using it stops working now." }
+    internal static var keyRevokeConfirm: String { AppL10n.copyLocale == .frCA ? "Tout ce qui l'utilise cessera de fonctionner immédiatement." : "Anything using it stops working now." }
 
     /// `scheduling_write_c.key_revoke_prompt`
     internal static func keyRevokePrompt(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Revoke \(name)?" : "Revoke \(name)?"
+        AppL10n.copyLocale == .frCA ? "Révoquer \(name)?" : "Revoke \(name)?"
     }
 
     /// `scheduling_write_c.key_sheet_title`
-    internal static var keySheetTitle: String { AppL10n.copyLocale == .frCA ? "Create key" : "Create key" }
+    internal static var keySheetTitle: String { AppL10n.copyLocale == .frCA ? "Créer une clé" : "Create key" }
 
     /// `scheduling_write_c.webhook_add_action`
-    internal static var webhookAddAction: String { AppL10n.copyLocale == .frCA ? "Add webhook" : "Add webhook" }
+    internal static var webhookAddAction: String { AppL10n.copyLocale == .frCA ? "Ajouter un webhook" : "Add webhook" }
 
     /// `scheduling_write_c.webhook_add_title`
-    internal static var webhookAddTitle: String { AppL10n.copyLocale == .frCA ? "Add webhook" : "Add webhook" }
+    internal static var webhookAddTitle: String { AppL10n.copyLocale == .frCA ? "Ajouter un webhook" : "Add webhook" }
 
     /// `scheduling_write_c.webhook_added`
-    internal static var webhookAdded: String { AppL10n.copyLocale == .frCA ? "Webhook added" : "Webhook added" }
+    internal static var webhookAdded: String { AppL10n.copyLocale == .frCA ? "Webhook ajouté" : "Webhook added" }
 
     /// `scheduling_write_c.webhook_delete_action`
-    internal static var webhookDeleteAction: String { AppL10n.copyLocale == .frCA ? "Delete webhook" : "Delete webhook" }
+    internal static var webhookDeleteAction: String { AppL10n.copyLocale == .frCA ? "Supprimer le webhook" : "Delete webhook" }
 
     /// `scheduling_write_c.webhook_delete_confirm`
-    internal static var webhookDeleteConfirm: String { AppL10n.copyLocale == .frCA ? "It stops receiving booking changes now, and its signing secret cannot be recovered." : "It stops receiving booking changes now, and its signing secret cannot be recovered." }
+    internal static var webhookDeleteConfirm: String { AppL10n.copyLocale == .frCA ? "Il cessera aussitôt de recevoir les changements de rendez-vous; son secret de signature sera irrécupérable." : "It stops receiving booking changes now, and its signing secret cannot be recovered." }
 
     /// `scheduling_write_c.webhook_delete_prompt`
-    internal static var webhookDeletePrompt: String { AppL10n.copyLocale == .frCA ? "Delete this webhook?" : "Delete this webhook?" }
+    internal static var webhookDeletePrompt: String { AppL10n.copyLocale == .frCA ? "Supprimer ce webhook?" : "Delete this webhook?" }
 
     /// `scheduling_write_c.webhook_dropped_events_line`
     internal static func webhookDroppedEventsLine(_ events: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Saving will stop sending \(events). This app does not know those events, so it cannot send them back." : "Saving will stop sending \(events). This app does not know those events, so it cannot send them back."
+        AppL10n.copyLocale == .frCA ? "Si vous enregistrez, l'envoi de ces événements s'arrêtera\u{00A0}: \(events). Cette application ne les connaît pas et ne peut donc pas les rétablir." : "Saving will stop sending \(events). This app does not know those events, so it cannot send them back."
     }
 
     /// `scheduling_write_c.webhook_edit_title`
-    internal static var webhookEditTitle: String { AppL10n.copyLocale == .frCA ? "Edit webhook" : "Edit webhook" }
+    internal static var webhookEditTitle: String { AppL10n.copyLocale == .frCA ? "Modifier le webhook" : "Edit webhook" }
 
     /// `scheduling_write_c.webhook_events_hint`
-    internal static var webhookEventsHint: String { AppL10n.copyLocale == .frCA ? "What to send. Each one is a separate delivery." : "What to send. Each one is a separate delivery." }
+    internal static var webhookEventsHint: String { AppL10n.copyLocale == .frCA ? "Ce qu'il faut envoyer. Chacun fait l'objet d'un envoi distinct." : "What to send. Each one is a separate delivery." }
 
     /// `scheduling_write_c.webhook_events_label`
-    internal static var webhookEventsLabel: String { AppL10n.copyLocale == .frCA ? "Events" : "Events" }
+    internal static var webhookEventsLabel: String { AppL10n.copyLocale == .frCA ? "Événements" : "Events" }
 
     /// `scheduling_write_c.webhook_events_missing`
-    internal static var webhookEventsMissing: String { AppL10n.copyLocale == .frCA ? "Choose at least one event." : "Choose at least one event." }
+    internal static var webhookEventsMissing: String { AppL10n.copyLocale == .frCA ? "Choisissez au moins un événement." : "Choose at least one event." }
 
     /// `scheduling_write_c.webhook_fields_hint`
-    internal static var webhookFieldsHint: String { AppL10n.copyLocale == .frCA ? "Which parts of the booking each delivery carries." : "Which parts of the booking each delivery carries." }
+    internal static var webhookFieldsHint: String { AppL10n.copyLocale == .frCA ? "Les parties du rendez-vous incluses dans chaque envoi." : "Which parts of the booking each delivery carries." }
 
     /// `scheduling_write_c.webhook_fields_label`
-    internal static var webhookFieldsLabel: String { AppL10n.copyLocale == .frCA ? "Data to send" : "Data to send" }
+    internal static var webhookFieldsLabel: String { AppL10n.copyLocale == .frCA ? "Données à envoyer" : "Data to send" }
 
     /// `scheduling_write_c.webhook_personal_data`
-    internal static var webhookPersonalData: String { AppL10n.copyLocale == .frCA ? "Personal data" : "Personal data" }
+    internal static var webhookPersonalData: String { AppL10n.copyLocale == .frCA ? "Renseignements personnels" : "Personal data" }
 
     /// `scheduling_write_c.webhook_save_action`
-    internal static var webhookSaveAction: String { AppL10n.copyLocale == .frCA ? "Save changes" : "Save changes" }
+    internal static var webhookSaveAction: String { AppL10n.copyLocale == .frCA ? "Enregistrer les modifications" : "Save changes" }
 
     /// `scheduling_write_c.webhook_saving`
-    internal static var webhookSaving: String { AppL10n.copyLocale == .frCA ? "Saving…" : "Saving…" }
+    internal static var webhookSaving: String { AppL10n.copyLocale == .frCA ? "Sauvegarde…" : "Saving…" }
 
     /// `scheduling_write_c.webhook_secret_copy_action`
-    internal static var webhookSecretCopyAction: String { AppL10n.copyLocale == .frCA ? "Copy signing secret" : "Copy signing secret" }
+    internal static var webhookSecretCopyAction: String { AppL10n.copyLocale == .frCA ? "Copier le secret" : "Copy signing secret" }
 
     /// `scheduling_write_c.webhook_secret_note`
     internal static func webhookSecretNote(_ url: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Every delivery to \(url) is signed with it, in the X-Calnode-Signature header." : "Every delivery to \(url) is signed with it, in the X-Calnode-Signature header."
+        AppL10n.copyLocale == .frCA ? "Chaque envoi vers \(url) est signé avec ce secret, dans l'en-tête X-Calnode-Signature." : "Every delivery to \(url) is signed with it, in the X-Calnode-Signature header."
     }
 
     /// `scheduling_write_c.webhook_secret_title`
-    internal static var webhookSecretTitle: String { AppL10n.copyLocale == .frCA ? "Your signing secret" : "Your signing secret" }
+    internal static var webhookSecretTitle: String { AppL10n.copyLocale == .frCA ? "Votre secret de signature" : "Your signing secret" }
 
     /// `scheduling_write_c.webhook_updated`
-    internal static var webhookUpdated: String { AppL10n.copyLocale == .frCA ? "Webhook updated" : "Webhook updated" }
+    internal static var webhookUpdated: String { AppL10n.copyLocale == .frCA ? "Webhook mis à jour" : "Webhook updated" }
 
     /// `scheduling_write_c.webhook_url_fixed`
-    internal static var webhookUrlFixed: String { AppL10n.copyLocale == .frCA ? "The URL cannot be changed. Delete this webhook and add another to move it." : "The URL cannot be changed. Delete this webhook and add another to move it." }
+    internal static var webhookUrlFixed: String { AppL10n.copyLocale == .frCA ? "L'URL ne peut pas être modifiée. Supprimez ce webhook et ajoutez-en un autre pour la déplacer." : "The URL cannot be changed. Delete this webhook and add another to move it." }
 
     /// `scheduling_write_c.webhook_url_hint`
-    internal static var webhookUrlHint: String { AppL10n.copyLocale == .frCA ? "Where each delivery is posted. https only." : "Where each delivery is posted. https only." }
+    internal static var webhookUrlHint: String { AppL10n.copyLocale == .frCA ? "Où chaque envoi est transmis. https seulement." : "Where each delivery is posted. https only." }
 
     /// `scheduling_write_c.webhook_url_label`
-    internal static var webhookUrlLabel: String { AppL10n.copyLocale == .frCA ? "Endpoint URL" : "Endpoint URL" }
+    internal static var webhookUrlLabel: String { AppL10n.copyLocale == .frCA ? "URL du point d'accès" : "Endpoint URL" }
 
     /// `scheduling_write_c.webhook_url_missing`
-    internal static var webhookUrlMissing: String { AppL10n.copyLocale == .frCA ? "Give the webhook a URL." : "Give the webhook a URL." }
+    internal static var webhookUrlMissing: String { AppL10n.copyLocale == .frCA ? "Donnez une URL au webhook." : "Give the webhook a URL." }
 
     /// `scheduling_write_c.webhook_url_not_a_url`
-    internal static var webhookUrlNotAUrl: String { AppL10n.copyLocale == .frCA ? "That is not a URL. It has to start with https://." : "That is not a URL. It has to start with https://." }
+    internal static var webhookUrlNotAUrl: String { AppL10n.copyLocale == .frCA ? "Ce n'est pas une URL. Elle doit commencer par https://." : "That is not a URL. It has to start with https://." }
 
     /// `scheduling_write_c.webhook_url_not_https`
-    internal static var webhookUrlNotHttps: String { AppL10n.copyLocale == .frCA ? "The URL has to start with https://." : "The URL has to start with https://." }
+    internal static var webhookUrlNotHttps: String { AppL10n.copyLocale == .frCA ? "L'URL doit commencer par https://." : "The URL has to start with https://." }
 
     /// `scheduling_write_c.webhook_url_private`
-    internal static var webhookUrlPrivate: String { AppL10n.copyLocale == .frCA ? "That address is not reachable from the internet. Use a public https URL." : "That address is not reachable from the internet. Use a public https URL." }
+    internal static var webhookUrlPrivate: String { AppL10n.copyLocale == .frCA ? "Cette adresse n'est pas joignable depuis Internet. Utilisez une URL https publique." : "That address is not reachable from the internet. Use a public https URL." }
 }
 
 extension SessionCopy {
     /// `session.appear_offline_check_connection`
-    internal static var appearOfflineCheckConnection: String { AppL10n.copyLocale == .frCA ? "You appear to be offline. Check your connection and try again." : "You appear to be offline. Check your connection and try again." }
+    internal static var appearOfflineCheckConnection: String { AppL10n.copyLocale == .frCA ? "Vous semblez être hors ligne. Vérifiez votre connexion et réessayez." : "You appear to be offline. Check your connection and try again." }
 
     /// `session.degraded_every_region`
-    internal static var degradedEveryRegion: String { AppL10n.copyLocale == .frCA ? "Your account is unchanged, but we could not reach every region. Please try again." : "Your account is unchanged, but we could not reach every region. Please try again." }
+    internal static var degradedEveryRegion: String { AppL10n.copyLocale == .frCA ? "Votre compte est inchangé, mais au moins une région est injoignable. Veuillez réessayer." : "Your account is unchanged, but we could not reach every region. Please try again." }
 
     /// `session.degraded_named_regions`
     internal static func degradedNamedRegions(_ regions: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Your account is unchanged, but we could not reach \(regions). Some workspaces are missing from this list." : "Your account is unchanged, but we could not reach \(regions). Some workspaces are missing from this list."
+        AppL10n.copyLocale == .frCA ? "Votre compte est inchangé, mais certaines régions n'ont pas répondu (\(regions)). Il manque des espaces de travail dans la liste." : "Your account is unchanged, but we could not reach \(regions). Some workspaces are missing from this list."
     }
 
     /// `session.do_not_have_permission`
-    internal static var doNotHavePermission: String { AppL10n.copyLocale == .frCA ? "You do not have permission to do that in this workspace." : "You do not have permission to do that in this workspace." }
+    internal static var doNotHavePermission: String { AppL10n.copyLocale == .frCA ? "Vous n'avez pas la permission de faire cela dans cet espace de travail." : "You do not have permission to do that in this workspace." }
 
     /// `session.interrupted_refresh`
-    internal static var interruptedRefresh: String { AppL10n.copyLocale == .frCA ? "Your session ended unexpectedly. Please sign in again." : "Your session ended unexpectedly. Please sign in again." }
+    internal static var interruptedRefresh: String { AppL10n.copyLocale == .frCA ? "Votre session a pris fin de façon imprévue. Veuillez vous reconnecter." : "Your session ended unexpectedly. Please sign in again." }
 
     /// `session.marker_not_durable`
-    internal static var markerNotDurable: String { AppL10n.copyLocale == .frCA ? "We could not safely refresh your session. Please try again." : "We could not safely refresh your session. Please try again." }
+    internal static var markerNotDurable: String { AppL10n.copyLocale == .frCA ? "Le renouvellement sécurisé de votre session a échoué. Veuillez réessayer." : "We could not safely refresh your session. Please try again." }
 
     /// `session.no_longer_available`
-    internal static var noLongerAvailable: String { AppL10n.copyLocale == .frCA ? "That is no longer available." : "That is no longer available." }
+    internal static var noLongerAvailable: String { AppL10n.copyLocale == .frCA ? "Cet élément n'est plus disponible." : "That is no longer available." }
 
     /// `session.refresh_not_sent`
-    internal static var refreshNotSent: String { AppL10n.copyLocale == .frCA ? "You appear to be offline. Your session is still active." : "You appear to be offline. Your session is still active." }
+    internal static var refreshNotSent: String { AppL10n.copyLocale == .frCA ? "Vous semblez être hors ligne. Votre session est toujours active." : "You appear to be offline. Your session is still active." }
 
     /// `session.refresh_rejected`
-    internal static var refreshRejected: String { AppL10n.copyLocale == .frCA ? "Your session is no longer valid. Please sign in again." : "Your session is no longer valid. Please sign in again." }
+    internal static var refreshRejected: String { AppL10n.copyLocale == .frCA ? "Votre session n'est plus valide. Veuillez vous reconnecter." : "Your session is no longer valid. Please sign in again." }
 
     /// `session.refresh_throttled`
-    internal static var refreshThrottled: String { AppL10n.copyLocale == .frCA ? "Too many requests. Please try again shortly." : "Too many requests. Please try again shortly." }
+    internal static var refreshThrottled: String { AppL10n.copyLocale == .frCA ? "Trop de requêtes. Veuillez réessayer sous peu." : "Too many requests. Please try again shortly." }
 
     /// `session.refresh_token_expired`
-    internal static var refreshTokenExpired: String { AppL10n.copyLocale == .frCA ? "You have been signed out after 60 days. Please sign in again." : "You have been signed out after 60 days. Please sign in again." }
+    internal static var refreshTokenExpired: String { AppL10n.copyLocale == .frCA ? "Votre session a été fermée après 60 jours. Veuillez vous reconnecter." : "You have been signed out after 60 days. Please sign in again." }
 
     /// `session.refresh_unreachable`
-    internal static var refreshUnreachable: String { AppL10n.copyLocale == .frCA ? "We could not confirm your session. Please sign in again." : "We could not confirm your session. Please sign in again." }
+    internal static var refreshUnreachable: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu confirmer votre session. Veuillez vous reconnecter." : "We could not confirm your session. Please sign in again." }
 
     /// `session.request_could_not_completed`
-    internal static var requestCouldNotCompleted: String { AppL10n.copyLocale == .frCA ? "That request could not be completed." : "That request could not be completed." }
+    internal static var requestCouldNotCompleted: String { AppL10n.copyLocale == .frCA ? "Cette requête n'a pas pu être traitée." : "That request could not be completed." }
 
     /// `session.session_has_ended_please`
-    internal static var sessionHasEndedPlease: String { AppL10n.copyLocale == .frCA ? "Your session has ended. Please sign in again." : "Your session has ended. Please sign in again." }
+    internal static var sessionHasEndedPlease: String { AppL10n.copyLocale == .frCA ? "Votre session a pris fin. Veuillez vous reconnecter." : "Your session has ended. Please sign in again." }
 
     /// `session.sign_in_expired`
-    internal static var signInExpired: String { AppL10n.copyLocale == .frCA ? "That sign-in expired. Please try again." : "That sign-in expired. Please try again." }
+    internal static var signInExpired: String { AppL10n.copyLocale == .frCA ? "Cette tentative de connexion a expiré. Veuillez réessayer." : "That sign-in expired. Please try again." }
 
     /// `session.sign_in_not_completed`
     internal static func signInNotCompleted(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Sign-in was not completed (\(reason))." : "Sign-in was not completed (\(reason))."
+        AppL10n.copyLocale == .frCA ? "La connexion n'a pas abouti (\(reason))." : "Sign-in was not completed (\(reason))."
     }
 
     /// `session.sign_in_not_verified`
-    internal static var signInNotVerified: String { AppL10n.copyLocale == .frCA ? "That sign-in could not be verified. Please try again." : "That sign-in could not be verified. Please try again." }
+    internal static var signInNotVerified: String { AppL10n.copyLocale == .frCA ? "Cette connexion n'a pas pu être vérifiée. Veuillez réessayer." : "That sign-in could not be verified. Please try again." }
 
     /// `session.signed_out`
-    internal static var signedOut: String { AppL10n.copyLocale == .frCA ? "You are signed out." : "You are signed out." }
+    internal static var signedOut: String { AppL10n.copyLocale == .frCA ? "Déconnexion effectuée." : "You are signed out." }
 
     /// `session.something_went_wrong_our`
-    internal static var somethingWentWrongOur: String { AppL10n.copyLocale == .frCA ? "Something went wrong on our side. Please try again." : "Something went wrong on our side. Please try again." }
+    internal static var somethingWentWrongOur: String { AppL10n.copyLocale == .frCA ? "Une erreur est survenue de notre côté. Veuillez réessayer." : "Something went wrong on our side. Please try again." }
 
     /// `session.store_unavailable`
-    internal static var storeUnavailable: String { AppL10n.copyLocale == .frCA ? "We could not read your saved session. Please try again." : "We could not read your saved session. Please try again." }
+    internal static var storeUnavailable: String { AppL10n.copyLocale == .frCA ? "Impossible de lire votre session sauvegardée. Veuillez réessayer." : "We could not read your saved session. Please try again." }
 
     /// `session.too_many_attempts`
-    internal static var tooManyAttempts: String { AppL10n.copyLocale == .frCA ? "Too many attempts. Please try again shortly." : "Too many attempts. Please try again shortly." }
+    internal static var tooManyAttempts: String { AppL10n.copyLocale == .frCA ? "Trop de tentatives. Veuillez réessayer sous peu." : "Too many attempts. Please try again shortly." }
 
     /// `session.unreachable`
-    internal static var unreachable: String { AppL10n.copyLocale == .frCA ? "We could not reach District AI. Check your connection." : "We could not reach District AI. Check your connection." }
+    internal static var unreachable: String { AppL10n.copyLocale == .frCA ? "Impossible de joindre District AI. Vérifiez votre connexion Internet." : "We could not reach District AI. Check your connection." }
 
     /// `session.version_app_could_not`
-    internal static var versionAppCouldNot: String { AppL10n.copyLocale == .frCA ? "This version of the app could not read that response. Please update." : "This version of the app could not read that response. Please update." }
+    internal static var versionAppCouldNot: String { AppL10n.copyLocale == .frCA ? "Cette version de l'app n'a pas pu lire cette réponse. Veuillez mettre l'app à jour." : "This version of the app could not read that response. Please update." }
 
     /// `session.workspace_s_subscription_not`
-    internal static var workspaceSSubscriptionNot: String { AppL10n.copyLocale == .frCA ? "This workspace's subscription is not active." : "This workspace's subscription is not active." }
+    internal static var workspaceSSubscriptionNot: String { AppL10n.copyLocale == .frCA ? "L'abonnement de cet espace de travail n'est pas actif." : "This workspace's subscription is not active." }
 }
 
 extension SettingsCopy {
@@ -4506,249 +4509,252 @@ extension SettingsCopy {
     internal static var accountSid: String { AppL10n.copyLocale == .frCA ? "Account SID" : "Account SID" }
 
     /// `settings.add_carrier_account`
-    internal static var addCarrierAccount: String { AppL10n.copyLocale == .frCA ? "Add carrier account" : "Add carrier account" }
+    internal static var addCarrierAccount: String { AppL10n.copyLocale == .frCA ? "Ajouter un compte" : "Add carrier account" }
 
     /// `settings.adding`
-    internal static var adding: String { AppL10n.copyLocale == .frCA ? "Adding…" : "Adding…" }
+    internal static var adding: String { AppL10n.copyLocale == .frCA ? "Ajout en cours…" : "Adding…" }
 
     /// `settings.answer_knowledge_base`
-    internal static var answerKnowledgeBase: String { AppL10n.copyLocale == .frCA ? "Answer from the knowledge base" : "Answer from the knowledge base" }
+    internal static var answerKnowledgeBase: String { AppL10n.copyLocale == .frCA ? "Répondre avec la base de connaissances" : "Answer from the knowledge base" }
 
     /// `settings.api_key`
-    internal static var apiKey: String { AppL10n.copyLocale == .frCA ? "API key" : "API key" }
+    internal static var apiKey: String { AppL10n.copyLocale == .frCA ? "Clé d'API" : "API key" }
 
     /// `settings.application_key`
-    internal static var applicationKey: String { AppL10n.copyLocale == .frCA ? "Application key" : "Application key" }
+    internal static var applicationKey: String { AppL10n.copyLocale == .frCA ? "Clé d'application" : "Application key" }
 
     /// `settings.application_secret`
-    internal static var applicationSecret: String { AppL10n.copyLocale == .frCA ? "Application secret" : "Application secret" }
+    internal static var applicationSecret: String { AppL10n.copyLocale == .frCA ? "Secret d'application" : "Application secret" }
 
     /// `settings.asking_the_carrier`
-    internal static var askingTheCarrier: String { AppL10n.copyLocale == .frCA ? "Asking the carrier…" : "Asking the carrier…" }
+    internal static var askingTheCarrier: String { AppL10n.copyLocale == .frCA ? "Interrogation du transporteur…" : "Asking the carrier…" }
 
     /// `settings.auth_token`
-    internal static var authToken: String { AppL10n.copyLocale == .frCA ? "Auth token" : "Auth token" }
+    internal static var authToken: String { AppL10n.copyLocale == .frCA ? "Jeton d'authentification" : "Auth token" }
 
     /// `settings.book_an_appointment`
-    internal static var bookAnAppointment: String { AppL10n.copyLocale == .frCA ? "Book an appointment" : "Book an appointment" }
+    internal static var bookAnAppointment: String { AppL10n.copyLocale == .frCA ? "Fixer un rendez-vous" : "Book an appointment" }
 
     /// `settings.calendar`
-    internal static var calendar: String { AppL10n.copyLocale == .frCA ? "Calendar" : "Calendar" }
+    internal static var calendar: String { AppL10n.copyLocale == .frCA ? "Calendrier" : "Calendar" }
 
     /// `settings.calendar_id`
-    internal static var calendarId: String { AppL10n.copyLocale == .frCA ? "Calendar id" : "Calendar id" }
+    internal static var calendarId: String { AppL10n.copyLocale == .frCA ? "ID du calendrier" : "Calendar id" }
 
     /// `settings.calls_load_failed_eyebrow`
-    internal static var callsLoadFailedEyebrow: String { AppL10n.copyLocale == .frCA ? "Could not load how calls are answered" : "Could not load how calls are answered" }
+    internal static var callsLoadFailedEyebrow: String { AppL10n.copyLocale == .frCA ? "Impossible de charger la façon de répondre aux appels" : "Could not load how calls are answered" }
 
     /// `settings.calls_mode_ai_first`
-    internal static var callsModeAiFirst: String { AppL10n.copyLocale == .frCA ? "The agent answers everything" : "The agent answers everything" }
+    internal static var callsModeAiFirst: String { AppL10n.copyLocale == .frCA ? "L'agent répond à tout" : "The agent answers everything" }
 
     /// `settings.calls_mode_ai_then_app`
-    internal static var callsModeAiThenApp: String { AppL10n.copyLocale == .frCA ? "The agent answers, then rings your phone" : "The agent answers, then rings your phone" }
+    internal static var callsModeAiThenApp: String { AppL10n.copyLocale == .frCA ? "L'agent répond, puis fait sonner votre téléphone" : "The agent answers, then rings your phone" }
 
     /// `settings.calls_mode_app_first`
-    internal static var callsModeAppFirst: String { AppL10n.copyLocale == .frCA ? "Your phone rings first" : "Your phone rings first" }
+    internal static var callsModeAppFirst: String { AppL10n.copyLocale == .frCA ? "Votre téléphone sonne d'abord" : "Your phone rings first" }
 
     /// `settings.calls_mode_eyebrow`
-    internal static var callsModeEyebrow: String { AppL10n.copyLocale == .frCA ? "Who answers" : "Who answers" }
+    internal static var callsModeEyebrow: String { AppL10n.copyLocale == .frCA ? "Qui répond" : "Who answers" }
 
     /// `settings.calls_mode_unknown`
-    internal static var callsModeUnknown: String { AppL10n.copyLocale == .frCA ? "A setting this version of the app does not recognise" : "A setting this version of the app does not recognise" }
+    internal static var callsModeUnknown: String { AppL10n.copyLocale == .frCA ? "Un réglage que cette version de l'app ne reconnaît pas" : "A setting this version of the app does not recognise" }
 
     /// `settings.calls_ring_eyebrow`
-    internal static var callsRingEyebrow: String { AppL10n.copyLocale == .frCA ? "How long your phone rings" : "How long your phone rings" }
+    internal static var callsRingEyebrow: String { AppL10n.copyLocale == .frCA ? "Durée de sonnerie du téléphone" : "How long your phone rings" }
 
     /// `settings.calls_ring_label`
-    internal static var callsRingLabel: String { AppL10n.copyLocale == .frCA ? "Ring for" : "Ring for" }
+    internal static var callsRingLabel: String { AppL10n.copyLocale == .frCA ? "Durée de sonnerie" : "Ring for" }
 
     /// `settings.calls_ring_note`
-    internal static var callsRingNote: String { AppL10n.copyLocale == .frCA ? "This applies when your phone is rung. On \"The agent answers everything\" nothing rings, so it has no effect." : "This applies when your phone is rung. On \"The agent answers everything\" nothing rings, so it has no effect." }
+    internal static var callsRingNote: String { AppL10n.copyLocale == .frCA ? "Ce réglage s'applique quand votre téléphone sonne. Avec «\u{00A0}L'agent répond à tout\u{00A0}», rien ne sonne\u{00A0}: ce réglage est donc sans effet." : "This applies when your phone is rung. On \"The agent answers everything\" nothing rings, so it has no effect." }
 
     /// `settings.calls_ring_value`
     internal static func callsRingValue(_ seconds: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(seconds) seconds" : "\(seconds) seconds"
+        AppL10n.copyLocale == .frCA ? "\(seconds) secondes" : "\(seconds) seconds"
     }
 
     /// `settings.calls_save`
-    internal static var callsSave: String { AppL10n.copyLocale == .frCA ? "Save" : "Save" }
+    internal static var callsSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer" : "Save" }
 
     /// `settings.calls_saved`
-    internal static var callsSaved: String { AppL10n.copyLocale == .frCA ? "Saved." : "Saved." }
+    internal static var callsSaved: String { AppL10n.copyLocale == .frCA ? "Enregistré." : "Saved." }
 
     /// `settings.calls_subtitle`
-    internal static var callsSubtitle: String { AppL10n.copyLocale == .frCA ? "The agent, your phone, or both" : "The agent, your phone, or both" }
+    internal static var callsSubtitle: String { AppL10n.copyLocale == .frCA ? "L'agent, votre téléphone ou les deux" : "The agent, your phone, or both" }
 
     /// `settings.calls_title`
-    internal static var callsTitle: String { AppL10n.copyLocale == .frCA ? "How calls are answered" : "How calls are answered" }
+    internal static var callsTitle: String { AppL10n.copyLocale == .frCA ? "Façon de répondre aux appels" : "How calls are answered" }
 
     /// `settings.calls_viewer_note`
-    internal static var callsViewerNote: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer, so you can see how calls are answered and not change it." : "You are in this workspace as a viewer, so you can see how calls are answered and not change it." }
+    internal static var callsViewerNote: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur dans cet espace de travail, vous pouvez voir la façon de répondre aux appels, mais pas la modifier." : "You are in this workspace as a viewer, so you can see how calls are answered and not change it." }
 
     /// `settings.cancel`
-    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `settings.capabilities_eyebrow`
-    internal static var capabilitiesEyebrow: String { AppL10n.copyLocale == .frCA ? "What the agent may do" : "What the agent may do" }
+    internal static var capabilitiesEyebrow: String { AppL10n.copyLocale == .frCA ? "Ce que l'agent peut faire" : "What the agent may do" }
 
     /// `settings.capabilities_no_stored_list`
-    internal static var capabilitiesNoStoredList: String { AppL10n.copyLocale == .frCA ? "This workspace has never chosen which capabilities are on, so they all are. Choosing them here would switch off anything District AI has added since this version of the app shipped, so the first choice cannot be made in this app. After that they can be changed here." : "This workspace has never chosen which capabilities are on, so they all are. Choosing them here would switch off anything District AI has added since this version of the app shipped, so the first choice cannot be made in this app. After that they can be changed here." }
+    internal static var capabilitiesNoStoredList: String { AppL10n.copyLocale == .frCA ? "Cet espace de travail n'a jamais choisi quelles capacités sont activées\u{00A0}: elles le sont donc toutes. Les choisir ici désactiverait tout ce que District AI a ajouté depuis la sortie de cette version de l'app; ce premier choix ne peut donc pas se faire dans cette app. Ensuite, elles pourront être modifiées ici." : "This workspace has never chosen which capabilities are on, so they all are. Choosing them here would switch off anything District AI has added since this version of the app shipped, so the first choice cannot be made in this app. After that they can be changed here." }
 
     /// `settings.capabilities_note`
-    internal static var capabilitiesNote: String { AppL10n.copyLocale == .frCA ? "Turning everything off leaves the agent able to talk and nothing else." : "Turning everything off leaves the agent able to talk and nothing else." }
+    internal static var capabilitiesNote: String { AppL10n.copyLocale == .frCA ? "Si tout est désactivé, l'agent peut parler, mais rien de plus." : "Turning everything off leaves the agent able to talk and nothing else." }
 
     /// `settings.capabilities_save`
-    internal static var capabilitiesSave: String { AppL10n.copyLocale == .frCA ? "Save capabilities" : "Save capabilities" }
+    internal static var capabilitiesSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer les capacités" : "Save capabilities" }
 
     /// `settings.capabilities_subtitle`
-    internal static var capabilitiesSubtitle: String { AppL10n.copyLocale == .frCA ? "What the agent may do on a call" : "What the agent may do on a call" }
+    internal static var capabilitiesSubtitle: String { AppL10n.copyLocale == .frCA ? "Ce que l'agent peut faire durant un appel" : "What the agent may do on a call" }
 
     /// `settings.capabilities_title`
-    internal static var capabilitiesTitle: String { AppL10n.copyLocale == .frCA ? "Skills" : "Skills" }
+    internal static var capabilitiesTitle: String { AppL10n.copyLocale == .frCA ? "Compétences" : "Skills" }
 
     /// `settings.capabilities_unknown_row`
-    internal static var capabilitiesUnknownRow: String { AppL10n.copyLocale == .frCA ? "Stored by this workspace and not recognised by this version of the app. It is kept when you save." : "Stored by this workspace and not recognised by this version of the app. It is kept when you save." }
+    internal static var capabilitiesUnknownRow: String { AppL10n.copyLocale == .frCA ? "Cet élément, stocké par l'espace de travail, n'est pas reconnu par cette version de l'app. Il est conservé si vous enregistrez." : "Stored by this workspace and not recognised by this version of the app. It is kept when you save." }
 
     /// `settings.carrier`
-    internal static var carrier: String { AppL10n.copyLocale == .frCA ? "Carrier" : "Carrier" }
+    internal static var carrier: String { AppL10n.copyLocale == .frCA ? "Transporteur" : "Carrier" }
 
     /// `settings.carrier_refused_those_credentials`
-    internal static var carrierRefusedThoseCredentials: String { AppL10n.copyLocale == .frCA ? "The carrier refused those credentials." : "The carrier refused those credentials." }
+    internal static var carrierRefusedThoseCredentials: String { AppL10n.copyLocale == .frCA ? "Le transporteur a refusé ces identifiants." : "The carrier refused those credentials." }
 
     /// `settings.check_the_calendar`
-    internal static var checkTheCalendar: String { AppL10n.copyLocale == .frCA ? "Check the calendar" : "Check the calendar" }
+    internal static var checkTheCalendar: String { AppL10n.copyLocale == .frCA ? "Consulter le calendrier" : "Check the calendar" }
 
     /// `settings.checking_voice_chain_speaks`
-    internal static var checkingVoiceChainSpeaks: String { AppL10n.copyLocale == .frCA ? "Checking that the voice chain speaks the new language." : "Checking that the voice chain speaks the new language." }
+    internal static var checkingVoiceChainSpeaks: String { AppL10n.copyLocale == .frCA ? "Nous vérifions que la chaîne vocale parle la nouvelle langue." : "Checking that the voice chain speaks the new language." }
 
     /// `settings.close`
-    internal static var close: String { AppL10n.copyLocale == .frCA ? "Close" : "Close" }
+    internal static var close: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Close" }
 
     /// `settings.connected_accounts`
-    internal static var connectedAccounts: String { AppL10n.copyLocale == .frCA ? "Connected accounts" : "Connected accounts" }
+    internal static var connectedAccounts: String { AppL10n.copyLocale == .frCA ? "Comptes connectés" : "Connected accounts" }
 
     /// `settings.credentials`
-    internal static var credentials: String { AppL10n.copyLocale == .frCA ? "Credentials" : "Credentials" }
+    internal static var credentials: String { AppL10n.copyLocale == .frCA ? "Identifiants" : "Credentials" }
 
     /// `settings.credentials_refused`
     internal static func credentialsRefused(_ message: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Those credentials were refused: \(message)" : "Those credentials were refused: \(message)"
+        AppL10n.copyLocale == .frCA ? "Ces identifiants ont été refusés\u{00A0}: \(message)" : "Those credentials were refused: \(message)"
     }
 
     /// `settings.credentials_work_detail`
     internal static func credentialsWorkDetail(_ detail: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Those credentials work: \(detail)" : "Those credentials work: \(detail)"
+        AppL10n.copyLocale == .frCA ? "Ces identifiants sont valides\u{00A0}: \(detail)" : "Those credentials work: \(detail)"
     }
 
     /// `settings.directory_add`
-    internal static var directoryAdd: String { AppL10n.copyLocale == .frCA ? "Add someone" : "Add someone" }
+    internal static var directoryAdd: String { AppL10n.copyLocale == .frCA ? "Ajouter une personne" : "Add someone" }
 
     /// `settings.directory_empty_body`
-    internal static var directoryEmptyBody: String { AppL10n.copyLocale == .frCA ? "The agent has nobody to put a caller through to, so it will take a message instead." : "The agent has nobody to put a caller through to, so it will take a message instead." }
+    internal static var directoryEmptyBody: String { AppL10n.copyLocale == .frCA ? "L'agent n'a personne vers qui transférer un appelant; il prendra donc un message." : "The agent has nobody to put a caller through to, so it will take a message instead." }
 
     /// `settings.directory_empty_confirm`
-    internal static var directoryEmptyConfirm: String { AppL10n.copyLocale == .frCA ? "Save an empty directory? The agent will have nobody to put a live caller through to and will take a message instead. There is no undo." : "Save an empty directory? The agent will have nobody to put a live caller through to and will take a message instead. There is no undo." }
+    internal static var directoryEmptyConfirm: String { AppL10n.copyLocale == .frCA ? "Enregistrer un répertoire vide? L'agent n'aura personne vers qui transférer un appel en cours et prendra plutôt un message. Cette action est irréversible." : "Save an empty directory? The agent will have nobody to put a live caller through to and will take a message instead. There is no undo." }
 
     /// `settings.directory_empty_confirm_action`
-    internal static var directoryEmptyConfirmAction: String { AppL10n.copyLocale == .frCA ? "Save an empty directory" : "Save an empty directory" }
+    internal static var directoryEmptyConfirmAction: String { AppL10n.copyLocale == .frCA ? "Enregistrer un répertoire vide" : "Save an empty directory" }
 
     /// `settings.directory_empty_title`
-    internal static var directoryEmptyTitle: String { AppL10n.copyLocale == .frCA ? "No transfer targets" : "No transfer targets" }
+    internal static var directoryEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucune destination" : "No transfer targets" }
 
     /// `settings.directory_incomplete`
-    internal static var directoryIncomplete: String { AppL10n.copyLocale == .frCA ? "This row has no number, so the agent cannot transfer to it." : "This row has no number, so the agent cannot transfer to it." }
+    internal static var directoryIncomplete: String { AppL10n.copyLocale == .frCA ? "Cette entrée n'a aucun numéro; l'agent ne peut donc pas y transférer d'appel." : "This row has no number, so the agent cannot transfer to it." }
 
     /// `settings.directory_name_label`
-    internal static var directoryNameLabel: String { AppL10n.copyLocale == .frCA ? "Name" : "Name" }
+    internal static var directoryNameLabel: String { AppL10n.copyLocale == .frCA ? "Nom" : "Name" }
 
     /// `settings.directory_note`
-    internal static var directoryNote: String { AppL10n.copyLocale == .frCA ? "The agent puts a live caller through to these people. Saving replaces the whole list, so anything removed here is gone." : "The agent puts a live caller through to these people. Saving replaces the whole list, so anything removed here is gone." }
+    internal static var directoryNote: String { AppL10n.copyLocale == .frCA ? "L'agent transfère les appels en cours vers ces personnes. Chaque sauvegarde remplace toute la liste\u{00A0}: ce que vous retirez ici disparaît." : "The agent puts a live caller through to these people. Saving replaces the whole list, so anything removed here is gone." }
 
     /// `settings.directory_number_label`
-    internal static var directoryNumberLabel: String { AppL10n.copyLocale == .frCA ? "Phone number" : "Phone number" }
+    internal static var directoryNumberLabel: String { AppL10n.copyLocale == .frCA ? "Numéro de téléphone" : "Phone number" }
 
     /// `settings.directory_remove`
-    internal static var directoryRemove: String { AppL10n.copyLocale == .frCA ? "Remove" : "Remove" }
+    internal static var directoryRemove: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
 
     /// `settings.directory_save`
-    internal static var directorySave: String { AppL10n.copyLocale == .frCA ? "Save directory" : "Save directory" }
+    internal static var directorySave: String { AppL10n.copyLocale == .frCA ? "Enregistrer le répertoire" : "Save directory" }
 
     /// `settings.directory_subtitle`
-    internal static var directorySubtitle: String { AppL10n.copyLocale == .frCA ? "Who a live caller can be put through to" : "Who a live caller can be put through to" }
+    internal static var directorySubtitle: String { AppL10n.copyLocale == .frCA ? "Vers qui un appel en cours peut être transféré" : "Who a live caller can be put through to" }
 
     /// `settings.directory_title`
-    internal static var directoryTitle: String { AppL10n.copyLocale == .frCA ? "Transfer directory" : "Transfer directory" }
+    internal static var directoryTitle: String { AppL10n.copyLocale == .frCA ? "Répertoire de transfert" : "Transfer directory" }
 
     /// `settings.directory_type_app`
-    internal static var directoryTypeApp: String { AppL10n.copyLocale == .frCA ? "District AI app" : "District AI app" }
+    internal static var directoryTypeApp: String { AppL10n.copyLocale == .frCA ? "Application District AI" : "District AI app" }
 
     /// `settings.directory_type_label`
-    internal static var directoryTypeLabel: String { AppL10n.copyLocale == .frCA ? "Reached by" : "Reached by" }
+    internal static var directoryTypeLabel: String { AppL10n.copyLocale == .frCA ? "Joignable par" : "Reached by" }
 
     /// `settings.directory_type_note`
-    internal static var directoryTypeNote: String { AppL10n.copyLocale == .frCA ? "\"District AI app\" rings this person in the app instead of dialling the number. The number is still used if they cannot be reached." : "\"District AI app\" rings this person in the app instead of dialling the number. The number is still used if they cannot be reached." }
+    internal static var directoryTypeNote: String { AppL10n.copyLocale == .frCA ? "«\u{00A0}Application District AI\u{00A0}» fait sonner cette personne dans l'app au lieu de composer son numéro. Le numéro est quand même composé si elle est injoignable." : "\"District AI app\" rings this person in the app instead of dialling the number. The number is still used if they cannot be reached." }
 
     /// `settings.directory_type_pstn`
-    internal static var directoryTypePstn: String { AppL10n.copyLocale == .frCA ? "Phone number" : "Phone number" }
+    internal static var directoryTypePstn: String { AppL10n.copyLocale == .frCA ? "Numéro de téléphone" : "Phone number" }
 
     /// `settings.dismiss`
-    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Dismiss" : "Dismiss" }
+    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Dismiss" }
 
     /// `settings.edit`
-    internal static var edit: String { AppL10n.copyLocale == .frCA ? "Edit" : "Edit" }
+    internal static var edit: String { AppL10n.copyLocale == .frCA ? "Modifier" : "Edit" }
 
     /// `settings.edit_carrier_account`
-    internal static var editCarrierAccount: String { AppL10n.copyLocale == .frCA ? "Edit carrier account" : "Edit carrier account" }
+    internal static var editCarrierAccount: String { AppL10n.copyLocale == .frCA ? "Modifier le compte" : "Edit carrier account" }
 
     /// `settings.email_sender`
-    internal static var emailSender: String { AppL10n.copyLocale == .frCA ? "Email sender" : "Email sender" }
+    internal static var emailSender: String { AppL10n.copyLocale == .frCA ? "Expéditeur courriel" : "Email sender" }
 
     /// `settings.enrichment_body`
-    internal static var enrichmentBody: String { AppL10n.copyLocale == .frCA ? "Look up public information about an unknown caller from an outside provider. Off unless someone in this workspace turns it on." : "Look up public information about an unknown caller from an outside provider. Off unless someone in this workspace turns it on." }
+    internal static var enrichmentBody: String { AppL10n.copyLocale == .frCA ? "Cette option cherche des renseignements publics sur un appelant inconnu auprès d'un fournisseur externe. Désactivée tant que personne de cet espace ne l'active." : "Look up public information about an unknown caller from an outside provider. Off unless someone in this workspace turns it on." }
 
     /// `settings.enrichment_eyebrow`
-    internal static var enrichmentEyebrow: String { AppL10n.copyLocale == .frCA ? "Lead enrichment" : "Lead enrichment" }
+    internal static var enrichmentEyebrow: String { AppL10n.copyLocale == .frCA ? "Enrichissement des prospects" : "Lead enrichment" }
 
     /// `settings.enrichment_save`
-    internal static var enrichmentSave: String { AppL10n.copyLocale == .frCA ? "Save lead enrichment" : "Save lead enrichment" }
+    internal static var enrichmentSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer l'enrichissement" : "Save lead enrichment" }
 
     /// `settings.enrichment_toggle`
-    internal static var enrichmentToggle: String { AppL10n.copyLocale == .frCA ? "Enrich unknown callers" : "Enrich unknown callers" }
+    internal static var enrichmentToggle: String { AppL10n.copyLocale == .frCA ? "Enrichir les appelants inconnus" : "Enrich unknown callers" }
 
     /// `settings.every_field_required_because`
-    internal static var everyFieldRequiredBecause: String { AppL10n.copyLocale == .frCA ? "Every field is required, because this account has no stored credentials to keep." : "Every field is required, because this account has no stored credentials to keep." }
+    internal static var everyFieldRequiredBecause: String { AppL10n.copyLocale == .frCA ? "Tous les champs sont obligatoires, car ce compte n'a aucun identifiant stocké à conserver." : "Every field is required, because this account has no stored credentials to keep." }
 
     /// `settings.hub_title`
-    internal static var hubTitle: String { AppL10n.copyLocale == .frCA ? "Workspace settings" : "Workspace settings" }
+    internal static var hubTitle: String { AppL10n.copyLocale == .frCA ? "Réglages de l'espace" : "Workspace settings" }
 
     /// `settings.key_id`
-    internal static var keyId: String { AppL10n.copyLocale == .frCA ? "Key id" : "Key id" }
+    internal static var keyId: String { AppL10n.copyLocale == .frCA ? "ID de clé" : "Key id" }
 
     /// `settings.key_secret`
-    internal static var keySecret: String { AppL10n.copyLocale == .frCA ? "Key secret" : "Key secret" }
+    internal static var keySecret: String { AppL10n.copyLocale == .frCA ? "Secret de clé" : "Key secret" }
 
     /// `settings.knowledge_add`
-    internal static var knowledgeAdd: String { AppL10n.copyLocale == .frCA ? "Add document" : "Add document" }
+    internal static var knowledgeAdd: String { AppL10n.copyLocale == .frCA ? "Ajouter un document" : "Add document" }
 
     /// `settings.knowledge_add_eyebrow`
-    internal static var knowledgeAddEyebrow: String { AppL10n.copyLocale == .frCA ? "Add a document" : "Add a document" }
+    internal static var knowledgeAddEyebrow: String { AppL10n.copyLocale == .frCA ? "Ajouter un document" : "Add a document" }
 
     /// `settings.knowledge_add_note`
-    internal static var knowledgeAddNote: String { AppL10n.copyLocale == .frCA ? "The text is split into chunks and each one is indexed, so a long document costs more than a short one. This cannot be undone from the app." : "The text is split into chunks and each one is indexed, so a long document costs more than a short one. This cannot be undone from the app." }
+    internal static var knowledgeAddNote: String { AppL10n.copyLocale == .frCA ? "Le texte est découpé en segments, et chacun est indexé\u{00A0}: un long document coûte donc plus cher qu'un document court. Cette action ne peut pas être annulée depuis l'app." : "The text is split into chunks and each one is indexed, so a long document costs more than a short one. This cannot be undone from the app." }
 
     /// `settings.knowledge_add_rejected`
-    internal static var knowledgeAddRejected: String { AppL10n.copyLocale == .frCA ? "A title and some text are both needed." : "A title and some text are both needed." }
+    internal static var knowledgeAddRejected: String { AppL10n.copyLocale == .frCA ? "Un titre et un texte sont tous deux requis." : "A title and some text are both needed." }
 
     /// `settings.knowledge_added`
-    internal static var knowledgeAdded: String { AppL10n.copyLocale == .frCA ? "Added." : "Added." }
+    internal static var knowledgeAdded: String { AppL10n.copyLocale == .frCA ? "Ajouté." : "Added." }
 
     /// `settings.knowledge_content_label`
-    internal static var knowledgeContentLabel: String { AppL10n.copyLocale == .frCA ? "Text" : "Text" }
+    internal static var knowledgeContentLabel: String { AppL10n.copyLocale == .frCA ? "Texte" : "Text" }
 
     /// `settings.knowledge_document_meta`
     internal static func knowledgeDocumentMeta(_ source: String, _ status: String, _ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
-            return "\(source) · \(status) · \(count) chunks"
+            if count == 0 || count == 1 {
+                return "\(source) · \(status) · \(count) segment"
+            }
+            return "\(source) · \(status) · \(count) segments"
         }
         return "\(source) · \(status) · \(count) chunks"
     }
@@ -4757,139 +4763,139 @@ extension SettingsCopy {
     internal static var knowledgeDocumentsEyebrow: String { AppL10n.copyLocale == .frCA ? "Documents" : "Documents" }
 
     /// `settings.knowledge_empty_body`
-    internal static var knowledgeEmptyBody: String { AppL10n.copyLocale == .frCA ? "The agent answers from its persona and its capabilities until something is added here." : "The agent answers from its persona and its capabilities until something is added here." }
+    internal static var knowledgeEmptyBody: String { AppL10n.copyLocale == .frCA ? "L'agent répond à partir de sa persona et de ses capacités tant que rien n'est ajouté ici." : "The agent answers from its persona and its capabilities until something is added here." }
 
     /// `settings.knowledge_empty_title`
-    internal static var knowledgeEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Nothing uploaded yet" : "Nothing uploaded yet" }
+    internal static var knowledgeEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucun document téléversé" : "Nothing uploaded yet" }
 
     /// `settings.knowledge_file_action`
-    internal static var knowledgeFileAction: String { AppL10n.copyLocale == .frCA ? "Read a text file" : "Read a text file" }
+    internal static var knowledgeFileAction: String { AppL10n.copyLocale == .frCA ? "Importer un fichier texte" : "Read a text file" }
 
     /// `settings.knowledge_file_empty`
-    internal static var knowledgeFileEmpty: String { AppL10n.copyLocale == .frCA ? "This file is empty." : "This file is empty." }
+    internal static var knowledgeFileEmpty: String { AppL10n.copyLocale == .frCA ? "Ce fichier est vide." : "This file is empty." }
 
     /// `settings.knowledge_file_hint`
-    internal static var knowledgeFileHint: String { AppL10n.copyLocale == .frCA ? "A plain text file (.txt or .md) of up to 1 MB fills the title and the text. Nothing is added until you press Add document." : "A plain text file (.txt or .md) of up to 1 MB fills the title and the text. Nothing is added until you press Add document." }
+    internal static var knowledgeFileHint: String { AppL10n.copyLocale == .frCA ? "Un fichier en texte brut (.txt ou .md) d'au plus 1 Mo remplit le titre et le texte. Rien n'est ajouté avant que vous appuyiez sur Ajouter un document." : "A plain text file (.txt or .md) of up to 1 MB fills the title and the text. Nothing is added until you press Add document." }
 
     /// `settings.knowledge_file_no_text`
-    internal static var knowledgeFileNoText: String { AppL10n.copyLocale == .frCA ? "This file has no text to add." : "This file has no text to add." }
+    internal static var knowledgeFileNoText: String { AppL10n.copyLocale == .frCA ? "Ce fichier ne contient aucun texte." : "This file has no text to add." }
 
     /// `settings.knowledge_file_not_text`
-    internal static var knowledgeFileNotText: String { AppL10n.copyLocale == .frCA ? "Only a plain text file (.txt or .md) can be read in. Copy the text of another kind of document into the box instead." : "Only a plain text file (.txt or .md) can be read in. Copy the text of another kind of document into the box instead." }
+    internal static var knowledgeFileNotText: String { AppL10n.copyLocale == .frCA ? "Seul un fichier en texte brut (.txt ou .md) peut être lu. Pour un autre type de document, copiez-en plutôt le texte dans le champ de texte." : "Only a plain text file (.txt or .md) can be read in. Copy the text of another kind of document into the box instead." }
 
     /// `settings.knowledge_file_too_large`
-    internal static var knowledgeFileTooLarge: String { AppL10n.copyLocale == .frCA ? "The file must be 1 MB or smaller." : "The file must be 1 MB or smaller." }
+    internal static var knowledgeFileTooLarge: String { AppL10n.copyLocale == .frCA ? "Le fichier ne doit pas dépasser 1 Mo." : "The file must be 1 MB or smaller." }
 
     /// `settings.knowledge_file_unreadable`
-    internal static var knowledgeFileUnreadable: String { AppL10n.copyLocale == .frCA ? "This file could not be read." : "This file could not be read." }
+    internal static var knowledgeFileUnreadable: String { AppL10n.copyLocale == .frCA ? "Impossible de lire ce fichier." : "This file could not be read." }
 
     /// `settings.knowledge_mode_confirm`
-    internal static var knowledgeModeConfirm: String { AppL10n.copyLocale == .frCA ? "Switching to the help centre sends this workspace's caller questions to Atlassian to compose an answer. Its own documents will not be used." : "Switching to the help centre sends this workspace's caller questions to Atlassian to compose an answer. Its own documents will not be used." }
+    internal static var knowledgeModeConfirm: String { AppL10n.copyLocale == .frCA ? "Avec le centre d'aide, les questions des appelants de cet espace de travail sont envoyées à Atlassian, qui rédige la réponse. Les documents de l'espace ne seront pas utilisés." : "Switching to the help centre sends this workspace's caller questions to Atlassian to compose an answer. Its own documents will not be used." }
 
     /// `settings.knowledge_mode_confirm_action`
-    internal static var knowledgeModeConfirmAction: String { AppL10n.copyLocale == .frCA ? "Send questions to the help centre" : "Send questions to the help centre" }
+    internal static var knowledgeModeConfirmAction: String { AppL10n.copyLocale == .frCA ? "Envoyer les questions au centre d'aide" : "Send questions to the help centre" }
 
     /// `settings.knowledge_mode_eyebrow`
-    internal static var knowledgeModeEyebrow: String { AppL10n.copyLocale == .frCA ? "Where answers come from" : "Where answers come from" }
+    internal static var knowledgeModeEyebrow: String { AppL10n.copyLocale == .frCA ? "Source des réponses" : "Where answers come from" }
 
     /// `settings.knowledge_mode_internal`
-    internal static var knowledgeModeInternal: String { AppL10n.copyLocale == .frCA ? "This workspace's own documents" : "This workspace's own documents" }
+    internal static var knowledgeModeInternal: String { AppL10n.copyLocale == .frCA ? "Les documents propres à cet espace" : "This workspace's own documents" }
 
     /// `settings.knowledge_mode_linked`
-    internal static var knowledgeModeLinked: String { AppL10n.copyLocale == .frCA ? "The District AI help centre" : "The District AI help centre" }
+    internal static var knowledgeModeLinked: String { AppL10n.copyLocale == .frCA ? "Le centre d'aide de District AI" : "The District AI help centre" }
 
     /// `settings.knowledge_mode_unavailable`
-    internal static var knowledgeModeUnavailable: String { AppL10n.copyLocale == .frCA ? "We could not read which knowledge source this workspace uses, so it is not shown and cannot be changed here." : "We could not read which knowledge source this workspace uses, so it is not shown and cannot be changed here." }
+    internal static var knowledgeModeUnavailable: String { AppL10n.copyLocale == .frCA ? "Impossible de lire la source de connaissances de cet espace de travail\u{00A0}: elle n'est donc ni affichée ni modifiable ici." : "We could not read which knowledge source this workspace uses, so it is not shown and cannot be changed here." }
 
     /// `settings.knowledge_mode_unknown`
-    internal static var knowledgeModeUnknown: String { AppL10n.copyLocale == .frCA ? "A source this version of the app does not recognise." : "A source this version of the app does not recognise." }
+    internal static var knowledgeModeUnknown: String { AppL10n.copyLocale == .frCA ? "Une source que cette version de l'app ne reconnaît pas." : "A source this version of the app does not recognise." }
 
     /// `settings.knowledge_subtitle`
-    internal static var knowledgeSubtitle: String { AppL10n.copyLocale == .frCA ? "What the agent answers from" : "What the agent answers from" }
+    internal static var knowledgeSubtitle: String { AppL10n.copyLocale == .frCA ? "Sources des réponses de l'agent" : "What the agent answers from" }
 
     /// `settings.knowledge_title`
-    internal static var knowledgeTitle: String { AppL10n.copyLocale == .frCA ? "Knowledge" : "Knowledge" }
+    internal static var knowledgeTitle: String { AppL10n.copyLocale == .frCA ? "Connaissances" : "Knowledge" }
 
     /// `settings.knowledge_title_label`
-    internal static var knowledgeTitleLabel: String { AppL10n.copyLocale == .frCA ? "Title" : "Title" }
+    internal static var knowledgeTitleLabel: String { AppL10n.copyLocale == .frCA ? "Titre" : "Title" }
 
     /// `settings.knowledge_viewer_note`
-    internal static var knowledgeViewerNote: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer, so you can read the knowledge base and not change it." : "You are in this workspace as a viewer, so you can read the knowledge base and not change it." }
+    internal static var knowledgeViewerNote: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur dans cet espace de travail, vous pouvez consulter la base de connaissances, mais pas la modifier." : "You are in this workspace as a viewer, so you can read the knowledge base and not change it." }
 
     /// `settings.label`
-    internal static var label: String { AppL10n.copyLocale == .frCA ? "Label" : "Label" }
+    internal static var label: String { AppL10n.copyLocale == .frCA ? "Libellé" : "Label" }
 
     /// `settings.load_failed_eyebrow`
-    internal static var loadFailedEyebrow: String { AppL10n.copyLocale == .frCA ? "Could not load this workspace's configuration" : "Could not load this workspace's configuration" }
+    internal static var loadFailedEyebrow: String { AppL10n.copyLocale == .frCA ? "Impossible de charger la configuration de cet espace" : "Could not load this workspace's configuration" }
 
     /// `settings.make_default_sender`
-    internal static var makeDefaultSender: String { AppL10n.copyLocale == .frCA ? "Make this the default sender" : "Make this the default sender" }
+    internal static var makeDefaultSender: String { AppL10n.copyLocale == .frCA ? "Définir comme expéditeur par défaut" : "Make this the default sender" }
 
     /// `settings.managed_by_distronode`
-    internal static var managedByDistronode: String { AppL10n.copyLocale == .frCA ? "Managed by Distronode" : "Managed by Distronode" }
+    internal static var managedByDistronode: String { AppL10n.copyLocale == .frCA ? "Géré par Distronode" : "Managed by Distronode" }
 
     /// `settings.members_add`
-    internal static var membersAdd: String { AppL10n.copyLocale == .frCA ? "Add member" : "Add member" }
+    internal static var membersAdd: String { AppL10n.copyLocale == .frCA ? "Ajouter le membre" : "Add member" }
 
     /// `settings.members_add_eyebrow`
-    internal static var membersAddEyebrow: String { AppL10n.copyLocale == .frCA ? "Add someone" : "Add someone" }
+    internal static var membersAddEyebrow: String { AppL10n.copyLocale == .frCA ? "Ajouter une personne" : "Add someone" }
 
     /// `settings.members_add_note`
-    internal static var membersAddNote: String { AppL10n.copyLocale == .frCA ? "No invitation is sent. If that address has never signed up, the membership waits until it does." : "No invitation is sent. If that address has never signed up, the membership waits until it does." }
+    internal static var membersAddNote: String { AppL10n.copyLocale == .frCA ? "Aucune invitation n'est envoyée. Si aucun compte n'a encore été créé avec cette adresse, l'ajout reste en attente jusque-là." : "No invitation is sent. If that address has never signed up, the membership waits until it does." }
 
     /// `settings.members_add_rejected`
-    internal static var membersAddRejected: String { AppL10n.copyLocale == .frCA ? "That does not look like an email address." : "That does not look like an email address." }
+    internal static var membersAddRejected: String { AppL10n.copyLocale == .frCA ? "Ceci ne ressemble pas à une adresse courriel." : "That does not look like an email address." }
 
     /// `settings.members_client_note`
-    internal static var membersClientNote: String { AppL10n.copyLocale == .frCA ? "Adding, removing and changing roles is limited to workspace administrators." : "Adding, removing and changing roles is limited to workspace administrators." }
+    internal static var membersClientNote: String { AppL10n.copyLocale == .frCA ? "L'ajout, le retrait et le changement des rôles sont réservés aux administrateurs de l'espace." : "Adding, removing and changing roles is limited to workspace administrators." }
 
     /// `settings.members_duplicate`
-    internal static var membersDuplicate: String { AppL10n.copyLocale == .frCA ? "That address is already a member of this workspace." : "That address is already a member of this workspace." }
+    internal static var membersDuplicate: String { AppL10n.copyLocale == .frCA ? "Cette adresse appartient déjà à un membre de cet espace de travail." : "That address is already a member of this workspace." }
 
     /// `settings.members_email_label`
-    internal static var membersEmailLabel: String { AppL10n.copyLocale == .frCA ? "Email address" : "Email address" }
+    internal static var membersEmailLabel: String { AppL10n.copyLocale == .frCA ? "Adresse courriel" : "Email address" }
 
     /// `settings.members_last_agency`
-    internal static var membersLastAgency: String { AppL10n.copyLocale == .frCA ? "This workspace would be left with no administrator, so that change was refused." : "This workspace would be left with no administrator, so that change was refused." }
+    internal static var membersLastAgency: String { AppL10n.copyLocale == .frCA ? "Ce changement a été refusé, car l'espace de travail se retrouverait sans administrateur." : "This workspace would be left with no administrator, so that change was refused." }
 
     /// `settings.members_remove`
-    internal static var membersRemove: String { AppL10n.copyLocale == .frCA ? "Remove" : "Remove" }
+    internal static var membersRemove: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
 
     /// `settings.members_remove_confirm`
-    internal static var membersRemoveConfirm: String { AppL10n.copyLocale == .frCA ? "Remove this person? They lose access to every call, contact and conversation in this workspace on their next request." : "Remove this person? They lose access to every call, contact and conversation in this workspace on their next request." }
+    internal static var membersRemoveConfirm: String { AppL10n.copyLocale == .frCA ? "Retirer cette personne? Elle perdra l'accès à tous les appels, contacts et conversations de cet espace de travail dès sa prochaine utilisation de l'app." : "Remove this person? They lose access to every call, contact and conversation in this workspace on their next request." }
 
     /// `settings.members_rename`
-    internal static var membersRename: String { AppL10n.copyLocale == .frCA ? "Rename workspace" : "Rename workspace" }
+    internal static var membersRename: String { AppL10n.copyLocale == .frCA ? "Renommer l'espace" : "Rename workspace" }
 
     /// `settings.members_rename_eyebrow`
-    internal static var membersRenameEyebrow: String { AppL10n.copyLocale == .frCA ? "Workspace name" : "Workspace name" }
+    internal static var membersRenameEyebrow: String { AppL10n.copyLocale == .frCA ? "Nom de l'espace" : "Workspace name" }
 
     /// `settings.members_rename_label`
-    internal static var membersRenameLabel: String { AppL10n.copyLocale == .frCA ? "New name" : "New name" }
+    internal static var membersRenameLabel: String { AppL10n.copyLocale == .frCA ? "Nouveau nom" : "New name" }
 
     /// `settings.members_rename_note`
-    internal static var membersRenameNote: String { AppL10n.copyLocale == .frCA ? "The current name is not readable here, so this box asks for a new one. What you save replaces it." : "The current name is not readable here, so this box asks for a new one. What you save replaces it." }
+    internal static var membersRenameNote: String { AppL10n.copyLocale == .frCA ? "Le nom actuel ne peut pas être lu ici\u{00A0}: ce champ demande donc un nouveau nom. Ce que vous enregistrez le remplace." : "The current name is not readable here, so this box asks for a new one. What you save replaces it." }
 
     /// `settings.members_role_label`
-    internal static var membersRoleLabel: String { AppL10n.copyLocale == .frCA ? "Role" : "Role" }
+    internal static var membersRoleLabel: String { AppL10n.copyLocale == .frCA ? "Rôle" : "Role" }
 
     /// `settings.members_role_note`
-    internal static var membersRoleNote: String { AppL10n.copyLocale == .frCA ? "Someone added without changing this becomes a member who can use and change the workspace." : "Someone added without changing this becomes a member who can use and change the workspace." }
+    internal static var membersRoleNote: String { AppL10n.copyLocale == .frCA ? "Si ce choix reste inchangé, la personne ajoutée devient un membre qui peut utiliser et modifier l'espace de travail." : "Someone added without changing this becomes a member who can use and change the workspace." }
 
     /// `settings.members_roster_eyebrow`
-    internal static var membersRosterEyebrow: String { AppL10n.copyLocale == .frCA ? "Roster" : "Roster" }
+    internal static var membersRosterEyebrow: String { AppL10n.copyLocale == .frCA ? "Membres" : "Roster" }
 
     /// `settings.members_subtitle`
-    internal static var membersSubtitle: String { AppL10n.copyLocale == .frCA ? "Who has access to this workspace" : "Who has access to this workspace" }
+    internal static var membersSubtitle: String { AppL10n.copyLocale == .frCA ? "Qui a accès à cet espace de travail" : "Who has access to this workspace" }
 
     /// `settings.members_title`
-    internal static var membersTitle: String { AppL10n.copyLocale == .frCA ? "Members" : "Members" }
+    internal static var membersTitle: String { AppL10n.copyLocale == .frCA ? "Membres" : "Members" }
 
     /// `settings.members_viewer_note`
-    internal static var membersViewerNote: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer, so you can see who has access and not change it." : "You are in this workspace as a viewer, so you can see who has access and not change it." }
+    internal static var membersViewerNote: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur dans cet espace de travail, vous pouvez voir qui y a accès, mais pas modifier ces accès." : "You are in this workspace as a viewer, so you can see who has access and not change it." }
 
     /// `settings.messaging_account_fallback`
-    internal static var messagingAccountFallback: String { AppL10n.copyLocale == .frCA ? "Account" : "Account" }
+    internal static var messagingAccountFallback: String { AppL10n.copyLocale == .frCA ? "Compte" : "Account" }
 
     /// `settings.messaging_account_subtitle`
     internal static func messagingAccountSubtitle(_ carrier: String, _ source: String, _ numbers: String) -> String {
@@ -4897,380 +4903,380 @@ extension SettingsCopy {
     }
 
     /// `settings.messaging_accounts_eyebrow`
-    internal static var messagingAccountsEyebrow: String { AppL10n.copyLocale == .frCA ? "Carrier accounts" : "Carrier accounts" }
+    internal static var messagingAccountsEyebrow: String { AppL10n.copyLocale == .frCA ? "Comptes de transporteur" : "Carrier accounts" }
 
     /// `settings.messaging_billed_through_distronode`
-    internal static var messagingBilledThroughDistronode: String { AppL10n.copyLocale == .frCA ? "billed through Distronode" : "billed through Distronode" }
+    internal static var messagingBilledThroughDistronode: String { AppL10n.copyLocale == .frCA ? "facturé par Distronode" : "billed through Distronode" }
 
     /// `settings.messaging_channels_eyebrow`
-    internal static var messagingChannelsEyebrow: String { AppL10n.copyLocale == .frCA ? "Per-channel senders" : "Per-channel senders" }
+    internal static var messagingChannelsEyebrow: String { AppL10n.copyLocale == .frCA ? "Expéditeurs par canal" : "Per-channel senders" }
 
     /// `settings.messaging_creator_cell_eyebrow`
-    internal static var messagingCreatorCellEyebrow: String { AppL10n.copyLocale == .frCA ? "Creator cell number" : "Creator cell number" }
+    internal static var messagingCreatorCellEyebrow: String { AppL10n.copyLocale == .frCA ? "Cellulaire du créateur" : "Creator cell number" }
 
     /// `settings.messaging_creator_cell_label`
-    internal static var messagingCreatorCellLabel: String { AppL10n.copyLocale == .frCA ? "New number" : "New number" }
+    internal static var messagingCreatorCellLabel: String { AppL10n.copyLocale == .frCA ? "Nouveau numéro" : "New number" }
 
     /// `settings.messaging_creator_cell_note`
-    internal static var messagingCreatorCellNote: String { AppL10n.copyLocale == .frCA ? "This number is not readable by the app, so the box is always empty. Anything entered here replaces what is stored." : "This number is not readable by the app, so the box is always empty. Anything entered here replaces what is stored." }
+    internal static var messagingCreatorCellNote: String { AppL10n.copyLocale == .frCA ? "L'app ne peut pas lire ce numéro\u{00A0}: le champ est donc toujours vide. Ce que vous saisissez ici remplace la valeur stockée." : "This number is not readable by the app, so the box is always empty. Anything entered here replaces what is stored." }
 
     /// `settings.messaging_creator_cell_save`
-    internal static var messagingCreatorCellSave: String { AppL10n.copyLocale == .frCA ? "Save number" : "Save number" }
+    internal static var messagingCreatorCellSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer le numéro" : "Save number" }
 
     /// `settings.messaging_credentials_redacted`
-    internal static var messagingCredentialsRedacted: String { AppL10n.copyLocale == .frCA ? "Credentials are not shown, and they are not sent back when you save." : "Credentials are not shown, and they are not sent back when you save." }
+    internal static var messagingCredentialsRedacted: String { AppL10n.copyLocale == .frCA ? "Les identifiants ne sont pas affichés et ne sont pas retransmis quand vous enregistrez." : "Credentials are not shown, and they are not sent back when you save." }
 
     /// `settings.messaging_default_badge`
-    internal static var messagingDefaultBadge: String { AppL10n.copyLocale == .frCA ? "Default sender" : "Default sender" }
+    internal static var messagingDefaultBadge: String { AppL10n.copyLocale == .frCA ? "Expéditeur par défaut" : "Default sender" }
 
     /// `settings.messaging_delete`
-    internal static var messagingDelete: String { AppL10n.copyLocale == .frCA ? "Remove account" : "Remove account" }
+    internal static var messagingDelete: String { AppL10n.copyLocale == .frCA ? "Retirer le compte" : "Remove account" }
 
     /// `settings.messaging_delete_confirm`
-    internal static var messagingDeleteConfirm: String { AppL10n.copyLocale == .frCA ? "Remove this account? Every phone number only it holds is released, and another business can then claim one. Getting a number back means proving ownership at the carrier again." : "Remove this account? Every phone number only it holds is released, and another business can then claim one. Getting a number back means proving ownership at the carrier again." }
+    internal static var messagingDeleteConfirm: String { AppL10n.copyLocale == .frCA ? "Retirer ce compte? Tout numéro de téléphone que lui seul détient est libéré, et une autre entreprise peut alors le réclamer. Pour récupérer un numéro, il faut en prouver de nouveau la propriété auprès du transporteur." : "Remove this account? Every phone number only it holds is released, and another business can then claim one. Getting a number back means proving ownership at the carrier again." }
 
     /// `settings.messaging_empty_body`
-    internal static var messagingEmptyBody: String { AppL10n.copyLocale == .frCA ? "Messages cannot be sent from this workspace until a carrier account is added." : "Messages cannot be sent from this workspace until a carrier account is added." }
+    internal static var messagingEmptyBody: String { AppL10n.copyLocale == .frCA ? "Cet espace de travail ne peut pas envoyer de messages avant l'ajout d'un compte de transporteur." : "Messages cannot be sent from this workspace until a carrier account is added." }
 
     /// `settings.messaging_empty_title`
-    internal static var messagingEmptyTitle: String { AppL10n.copyLocale == .frCA ? "No carrier connected" : "No carrier connected" }
+    internal static var messagingEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucun transporteur connecté" : "No carrier connected" }
 
     /// `settings.messaging_managed_eyebrow`
-    internal static var messagingManagedEyebrow: String { AppL10n.copyLocale == .frCA ? "Numbers Distronode holds for you" : "Numbers Distronode holds for you" }
+    internal static var messagingManagedEyebrow: String { AppL10n.copyLocale == .frCA ? "Numéros que Distronode détient pour vous" : "Numbers Distronode holds for you" }
 
     /// `settings.messaging_managed_note`
-    internal static var messagingManagedNote: String { AppL10n.copyLocale == .frCA ? "These are on Distronode's own carrier account. They cannot be picked as a sender here." : "These are on Distronode's own carrier account. They cannot be picked as a sender here." }
+    internal static var messagingManagedNote: String { AppL10n.copyLocale == .frCA ? "Ces numéros sont sur le compte de transporteur de Distronode\u{00A0}: impossible de les choisir comme expéditeur ici." : "These are on Distronode's own carrier account. They cannot be picked as a sender here." }
 
     /// `settings.messaging_no_channel_overrides`
-    internal static var messagingNoChannelOverrides: String { AppL10n.copyLocale == .frCA ? "Every channel uses the default sender." : "Every channel uses the default sender." }
+    internal static var messagingNoChannelOverrides: String { AppL10n.copyLocale == .frCA ? "Chaque canal utilise l'expéditeur par défaut." : "Every channel uses the default sender." }
 
     /// `settings.messaging_no_default`
-    internal static var messagingNoDefault: String { AppL10n.copyLocale == .frCA ? "No default sender is set, so the workspace has not chosen which identity a message leaves from." : "No default sender is set, so the workspace has not chosen which identity a message leaves from." }
+    internal static var messagingNoDefault: String { AppL10n.copyLocale == .frCA ? "Aucun expéditeur par défaut n'est défini\u{00A0}: l'espace de travail n'a donc pas choisi l'identité d'envoi des messages." : "No default sender is set, so the workspace has not chosen which identity a message leaves from." }
 
     /// `settings.messaging_no_numbers_yet`
-    internal static var messagingNoNumbersYet: String { AppL10n.copyLocale == .frCA ? "no numbers yet" : "no numbers yet" }
+    internal static var messagingNoNumbersYet: String { AppL10n.copyLocale == .frCA ? "aucun numéro" : "no numbers yet" }
 
     /// `settings.messaging_own_carrier_account`
-    internal static var messagingOwnCarrierAccount: String { AppL10n.copyLocale == .frCA ? "own carrier account" : "own carrier account" }
+    internal static var messagingOwnCarrierAccount: String { AppL10n.copyLocale == .frCA ? "son propre compte" : "own carrier account" }
 
     /// `settings.messaging_set_default`
-    internal static var messagingSetDefault: String { AppL10n.copyLocale == .frCA ? "Make default" : "Make default" }
+    internal static var messagingSetDefault: String { AppL10n.copyLocale == .frCA ? "Définir par défaut" : "Make default" }
 
     /// `settings.messaging_subtitle`
-    internal static var messagingSubtitle: String { AppL10n.copyLocale == .frCA ? "Which identity messages leave from" : "Which identity messages leave from" }
+    internal static var messagingSubtitle: String { AppL10n.copyLocale == .frCA ? "Identité d'envoi des messages" : "Which identity messages leave from" }
 
     /// `settings.messaging_title`
-    internal static var messagingTitle: String { AppL10n.copyLocale == .frCA ? "Messaging" : "Messaging" }
+    internal static var messagingTitle: String { AppL10n.copyLocale == .frCA ? "Messagerie" : "Messaging" }
 
     /// `settings.messaging_viewer_note`
-    internal static var messagingViewerNote: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer, so you can see which identity messages leave from and not change it." : "You are in this workspace as a viewer, so you can see which identity messages leave from and not change it." }
+    internal static var messagingViewerNote: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur dans cet espace de travail, vous pouvez voir l'identité d'envoi des messages, mais pas la modifier." : "You are in this workspace as a viewer, so you can see which identity messages leave from and not change it." }
 
     /// `settings.more_on_web`
-    internal static var moreOnWeb: String { AppL10n.copyLocale == .frCA ? "Campaign settings and the avatar configuration are not available in this app." : "Campaign settings and the avatar configuration are not available in this app." }
+    internal static var moreOnWeb: String { AppL10n.copyLocale == .frCA ? "Les réglages de campagne et la configuration de l'avatar ne sont pas disponibles dans cette app." : "Campaign settings and the avatar configuration are not available in this app." }
 
     /// `settings.no_model_workspace_may`
-    internal static var noModelWorkspaceMay: String { AppL10n.copyLocale == .frCA ? "No model this workspace may use speaks the new language for every part of the voice chain. Choose them on the Voice screen." : "No model this workspace may use speaks the new language for every part of the voice chain. Choose them on the Voice screen." }
+    internal static var noModelWorkspaceMay: String { AppL10n.copyLocale == .frCA ? "Pour au moins un maillon de la chaîne vocale, aucun modèle permis dans cet espace de travail ne parle la nouvelle langue. Choisissez les modèles dans l'écran Voix." : "No model this workspace may use speaks the new language for every part of the voice chain. Choose them on the Voice screen." }
 
     /// `settings.not_editable_body`
-    internal static var notEditableBody: String { AppL10n.copyLocale == .frCA ? "This value was written before the settings routes validated it, so showing it here could not be done without misrepresenting part of it. It cannot be read or changed in this app." : "This value was written before the settings routes validated it, so showing it here could not be done without misrepresenting part of it. It cannot be read or changed in this app." }
+    internal static var notEditableBody: String { AppL10n.copyLocale == .frCA ? "Cette valeur a été écrite avant que le serveur ne valide ces réglages; il serait impossible de l'afficher ici sans en déformer une partie. Elle ne peut être ni lue ni modifiée dans cette app." : "This value was written before the settings routes validated it, so showing it here could not be done without misrepresenting part of it. It cannot be read or changed in this app." }
 
     /// `settings.not_editable_eyebrow`
-    internal static var notEditableEyebrow: String { AppL10n.copyLocale == .frCA ? "Stored in a shape this app cannot edit" : "Stored in a shape this app cannot edit" }
+    internal static var notEditableEyebrow: String { AppL10n.copyLocale == .frCA ? "Format non modifiable dans cette app" : "Stored in a shape this app cannot edit" }
 
     /// `settings.off`
-    internal static var off: String { AppL10n.copyLocale == .frCA ? "Off" : "Off" }
+    internal static var off: String { AppL10n.copyLocale == .frCA ? "Désactivé" : "Off" }
 
     /// `settings.on`
-    internal static var on: String { AppL10n.copyLocale == .frCA ? "On" : "On" }
+    internal static var on: String { AppL10n.copyLocale == .frCA ? "Activé" : "On" }
 
     /// `settings.persona_answer_length_label`
-    internal static var personaAnswerLengthLabel: String { AppL10n.copyLocale == .frCA ? "Answer length" : "Answer length" }
+    internal static var personaAnswerLengthLabel: String { AppL10n.copyLocale == .frCA ? "Longueur des réponses" : "Answer length" }
 
     /// `settings.persona_answer_length_note`
-    internal static var personaAnswerLengthNote: String { AppL10n.copyLocale == .frCA ? "How long each spoken reply may run. Saved separately for each engine, so a different engine on the Voice screen keeps its own setting." : "How long each spoken reply may run. Saved separately for each engine, so a different engine on the Voice screen keeps its own setting." }
+    internal static var personaAnswerLengthNote: String { AppL10n.copyLocale == .frCA ? "Durée maximale de chaque réponse parlée. Ce réglage est enregistré séparément pour chaque moteur\u{00A0}: un autre moteur choisi dans l'écran Voix garde son propre réglage." : "How long each spoken reply may run. Saved separately for each engine, so a different engine on the Voice screen keeps its own setting." }
 
     /// `settings.persona_avatar_label`
     internal static var personaAvatarLabel: String { AppL10n.copyLocale == .frCA ? "Avatar" : "Avatar" }
 
     /// `settings.persona_avatar_note`
-    internal static var personaAvatarNote: String { AppL10n.copyLocale == .frCA ? "The avatar starts a charged video session, so it is shown here and set up elsewhere." : "The avatar starts a charged video session, so it is shown here and set up elsewhere." }
+    internal static var personaAvatarNote: String { AppL10n.copyLocale == .frCA ? "L'avatar lance une session vidéo facturée\u{00A0}: il est donc affiché ici, mais se configure ailleurs." : "The avatar starts a charged video session, so it is shown here and set up elsewhere." }
 
     /// `settings.persona_greeting_label`
-    internal static var personaGreetingLabel: String { AppL10n.copyLocale == .frCA ? "Greeting" : "Greeting" }
+    internal static var personaGreetingLabel: String { AppL10n.copyLocale == .frCA ? "Message d'accueil" : "Greeting" }
 
     /// `settings.persona_language_eyebrow`
-    internal static var personaLanguageEyebrow: String { AppL10n.copyLocale == .frCA ? "Language and answers" : "Language and answers" }
+    internal static var personaLanguageEyebrow: String { AppL10n.copyLocale == .frCA ? "Langue et réponses" : "Language and answers" }
 
     /// `settings.persona_language_label`
-    internal static var personaLanguageLabel: String { AppL10n.copyLocale == .frCA ? "Language" : "Language" }
+    internal static var personaLanguageLabel: String { AppL10n.copyLocale == .frCA ? "Langue" : "Language" }
 
     /// `settings.persona_language_unset`
-    internal static var personaLanguageUnset: String { AppL10n.copyLocale == .frCA ? "No language is set for this persona. Choose one." : "No language is set for this persona. Choose one." }
+    internal static var personaLanguageUnset: String { AppL10n.copyLocale == .frCA ? "Cette persona n'a aucune langue définie. Choisissez-en une." : "No language is set for this persona. Choose one." }
 
     /// `settings.persona_name_label`
-    internal static var personaNameLabel: String { AppL10n.copyLocale == .frCA ? "Agent name" : "Agent name" }
+    internal static var personaNameLabel: String { AppL10n.copyLocale == .frCA ? "Nom de l'agent" : "Agent name" }
 
     /// `settings.persona_options_failed_eyebrow`
-    internal static var personaOptionsFailedEyebrow: String { AppL10n.copyLocale == .frCA ? "Could not read the lists this form chooses from" : "Could not read the lists this form chooses from" }
+    internal static var personaOptionsFailedEyebrow: String { AppL10n.copyLocale == .frCA ? "Impossible de lire les listes utilisées par ce formulaire" : "Could not read the lists this form chooses from" }
 
     /// `settings.persona_options_failed_note`
-    internal static var personaOptionsFailedNote: String { AppL10n.copyLocale == .frCA ? "The language and answer length are chosen from lists this workspace's server publishes. Until those load, what is stored is shown as it is and cannot be changed. The name, greeting and personality can still be edited and saved." : "The language and answer length are chosen from lists this workspace's server publishes. Until those load, what is stored is shown as it is and cannot be changed. The name, greeting and personality can still be edited and saved." }
+    internal static var personaOptionsFailedNote: String { AppL10n.copyLocale == .frCA ? "La langue et la longueur des réponses se choisissent dans les listes que publie le serveur de l'espace de travail. Avant leur chargement, les valeurs enregistrées s'affichent sans pouvoir être modifiées. Le nom, le message d'accueil et la personnalité peuvent encore être modifiés et enregistrés." : "The language and answer length are chosen from lists this workspace's server publishes. Until those load, what is stored is shown as it is and cannot be changed. The name, greeting and personality can still be edited and saved." }
 
     /// `settings.persona_personality_label`
-    internal static var personaPersonalityLabel: String { AppL10n.copyLocale == .frCA ? "Personality" : "Personality" }
+    internal static var personaPersonalityLabel: String { AppL10n.copyLocale == .frCA ? "Personnalité" : "Personality" }
 
     /// `settings.persona_read_only_note`
-    internal static var personaReadOnlyNote: String { AppL10n.copyLocale == .frCA ? "The language and answer length come from the lists this workspace's own server publishes, so nothing here can offer a value the agent would not honour." : "The language and answer length come from the lists this workspace's own server publishes, so nothing here can offer a value the agent would not honour." }
+    internal static var personaReadOnlyNote: String { AppL10n.copyLocale == .frCA ? "La langue et la longueur des réponses proviennent des listes publiées par le serveur de cet espace de travail; rien ici ne peut donc proposer une valeur que l'agent ne respecterait pas." : "The language and answer length come from the lists this workspace's own server publishes, so nothing here can offer a value the agent would not honour." }
 
     /// `settings.persona_save`
-    internal static var personaSave: String { AppL10n.copyLocale == .frCA ? "Save persona" : "Save persona" }
+    internal static var personaSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer la persona" : "Save persona" }
 
     /// `settings.persona_subtitle`
-    internal static var personaSubtitle: String { AppL10n.copyLocale == .frCA ? "Name, greeting, personality and language" : "Name, greeting, personality and language" }
+    internal static var personaSubtitle: String { AppL10n.copyLocale == .frCA ? "Nom, message d'accueil, personnalité et langue" : "Name, greeting, personality and language" }
 
     /// `settings.persona_title`
     internal static var personaTitle: String { AppL10n.copyLocale == .frCA ? "Persona" : "Persona" }
 
     /// `settings.persona_unset`
-    internal static var personaUnset: String { AppL10n.copyLocale == .frCA ? "Not set" : "Not set" }
+    internal static var personaUnset: String { AppL10n.copyLocale == .frCA ? "Non défini" : "Not set" }
 
     /// `settings.persona_voice_studio_note`
-    internal static var personaVoiceStudioNote: String { AppL10n.copyLocale == .frCA ? "The voice, the engine and how fast the agent replies are set on the Voice screen, under District Studio in workspace settings." : "The voice, the engine and how fast the agent replies are set on the Voice screen, under District Studio in workspace settings." }
+    internal static var personaVoiceStudioNote: String { AppL10n.copyLocale == .frCA ? "La voix, le moteur et la vitesse de réponse de l'agent se règlent dans l'écran Voix, sous District Studio, dans les réglages de l'espace de travail." : "The voice, the engine and how fast the agent replies are set on the Voice screen, under District Studio in workspace settings." }
 
     /// `settings.phone_numbers_one_per`
-    internal static var phoneNumbersOnePer: String { AppL10n.copyLocale == .frCA ? "Phone numbers, one per line" : "Phone numbers, one per line" }
+    internal static var phoneNumbersOnePer: String { AppL10n.copyLocale == .frCA ? "Numéros de téléphone, un par ligne" : "Phone numbers, one per line" }
 
     /// `settings.preview_busy_call`
-    internal static var previewBusyCall: String { AppL10n.copyLocale == .frCA ? "There is a call on this device. End it before previewing the persona." : "There is a call on this device. End it before previewing the persona." }
+    internal static var previewBusyCall: String { AppL10n.copyLocale == .frCA ? "Un appel occupe cet appareil. Terminez-le avant de lancer l'aperçu de la persona." : "There is a call on this device. End it before previewing the persona." }
 
     /// `settings.preview_busy_room`
-    internal static var previewBusyRoom: String { AppL10n.copyLocale == .frCA ? "You are in a room on this device. Leave it before previewing the persona." : "You are in a room on this device. Leave it before previewing the persona." }
+    internal static var previewBusyRoom: String { AppL10n.copyLocale == .frCA ? "Vous êtes dans une salle de réunion sur cet appareil. Quittez-la avant de lancer l'aperçu de la persona." : "You are in a room on this device. Leave it before previewing the persona." }
 
     /// `settings.preview_connecting`
-    internal static var previewConnecting: String { AppL10n.copyLocale == .frCA ? "Connecting to the agent…" : "Connecting to the agent…" }
+    internal static var previewConnecting: String { AppL10n.copyLocale == .frCA ? "Connexion à l'agent en cours…" : "Connecting to the agent…" }
 
     /// `settings.preview_cooldown`
-    internal static var previewCooldown: String { AppL10n.copyLocale == .frCA ? "Give the last session a moment to finish before starting another." : "Give the last session a moment to finish before starting another." }
+    internal static var previewCooldown: String { AppL10n.copyLocale == .frCA ? "Laissez la session précédente se terminer avant d'en lancer une autre." : "Give the last session a moment to finish before starting another." }
 
     /// `settings.preview_dropped`
-    internal static var previewDropped: String { AppL10n.copyLocale == .frCA ? "The preview ended without being stopped here." : "The preview ended without being stopped here." }
+    internal static var previewDropped: String { AppL10n.copyLocale == .frCA ? "L'aperçu a pris fin sans avoir été arrêté ici." : "The preview ended without being stopped here." }
 
     /// `settings.preview_dropped_because`
     internal static func previewDroppedBecause(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "The preview ended without being stopped here. \(reason)" : "The preview ended without being stopped here. \(reason)"
+        AppL10n.copyLocale == .frCA ? "L'aperçu a pris fin sans avoir été arrêté ici. \(reason)" : "The preview ended without being stopped here. \(reason)"
     }
 
     /// `settings.preview_end`
-    internal static var previewEnd: String { AppL10n.copyLocale == .frCA ? "End preview" : "End preview" }
+    internal static var previewEnd: String { AppL10n.copyLocale == .frCA ? "Arrêter l'aperçu" : "End preview" }
 
     /// `settings.preview_ended`
-    internal static var previewEnded: String { AppL10n.copyLocale == .frCA ? "Preview ended." : "Preview ended." }
+    internal static var previewEnded: String { AppL10n.copyLocale == .frCA ? "Aperçu terminé." : "Preview ended." }
 
     /// `settings.preview_intro`
-    internal static var previewIntro: String { AppL10n.copyLocale == .frCA ? "Speak to the persona as it is on screen, before saving it. This places a real call to the agent and is charged like one." : "Speak to the persona as it is on screen, before saving it. This places a real call to the agent and is charged like one." }
+    internal static var previewIntro: String { AppL10n.copyLocale == .frCA ? "Parlez à la persona telle qu'elle est à l'écran, avant de l'enregistrer. Cette action passe un véritable appel à l'agent, facturé comme tel." : "Speak to the persona as it is on screen, before saving it. This places a real call to the agent and is charged like one." }
 
     /// `settings.preview_level_label`
-    internal static var previewLevelLabel: String { AppL10n.copyLocale == .frCA ? "Agent audio" : "Agent audio" }
+    internal static var previewLevelLabel: String { AppL10n.copyLocale == .frCA ? "Audio de l'agent" : "Agent audio" }
 
     /// `settings.preview_level_percent`
     internal static func previewLevelPercent(_ value: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(value) percent" : "\(value) percent"
+        AppL10n.copyLocale == .frCA ? "\(value) pour cent" : "\(value) percent"
     }
 
     /// `settings.preview_live`
-    internal static var previewLive: String { AppL10n.copyLocale == .frCA ? "The agent is listening. Say something." : "The agent is listening. Say something." }
+    internal static var previewLive: String { AppL10n.copyLocale == .frCA ? "L'agent vous écoute. Dites quelque chose." : "The agent is listening. Say something." }
 
     /// `settings.preview_microphone_denied`
-    internal static var previewMicrophoneDenied: String { AppL10n.copyLocale == .frCA ? "The microphone is not available to this app, so the agent will not hear you. You can still hear it answer." : "The microphone is not available to this app, so the agent will not hear you. You can still hear it answer." }
+    internal static var previewMicrophoneDenied: String { AppL10n.copyLocale == .frCA ? "Le micro n'est pas accessible à cette app\u{00A0}: l'agent ne vous entendra donc pas. Vous pouvez quand même l'entendre répondre." : "The microphone is not available to this app, so the agent will not hear you. You can still hear it answer." }
 
     /// `settings.preview_reconnecting`
-    internal static var previewReconnecting: String { AppL10n.copyLocale == .frCA ? "The connection dropped and is being re-established." : "The connection dropped and is being re-established." }
+    internal static var previewReconnecting: String { AppL10n.copyLocale == .frCA ? "La connexion a été interrompue. Rétablissement en cours." : "The connection dropped and is being re-established." }
 
     /// `settings.preview_start`
-    internal static var previewStart: String { AppL10n.copyLocale == .frCA ? "Start preview" : "Start preview" }
+    internal static var previewStart: String { AppL10n.copyLocale == .frCA ? "Lancer l'aperçu" : "Start preview" }
 
     /// `settings.preview_title`
-    internal static var previewTitle: String { AppL10n.copyLocale == .frCA ? "Preview persona" : "Preview persona" }
+    internal static var previewTitle: String { AppL10n.copyLocale == .frCA ? "Aperçu de la persona" : "Preview persona" }
 
     /// `settings.preview_waiting`
-    internal static var previewWaiting: String { AppL10n.copyLocale == .frCA ? "Connected. Waiting for the agent to join…" : "Connected. Waiting for the agent to join…" }
+    internal static var previewWaiting: String { AppL10n.copyLocale == .frCA ? "Connexion établie. En attente de l'agent…" : "Connected. Waiting for the agent to join…" }
 
     /// `settings.preview_yielded_to_call`
-    internal static var previewYieldedToCall: String { AppL10n.copyLocale == .frCA ? "A call arrived on this device, so the preview was ended." : "A call arrived on this device, so the preview was ended." }
+    internal static var previewYieldedToCall: String { AppL10n.copyLocale == .frCA ? "Un appel est arrivé sur cet appareil\u{00A0}: l'aperçu a donc pris fin." : "A call arrived on this device, so the preview was ended." }
 
     /// `settings.probe_unreachable`
     internal static func probeUnreachable(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "We could not ask the carrier, so this says nothing about the credentials. \(reason)" : "We could not ask the carrier, so this says nothing about the credentials. \(reason)"
+        AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu interroger le transporteur; ce résultat ne dit donc rien sur les identifiants. \(reason)" : "We could not ask the carrier, so this says nothing about the credentials. \(reason)"
     }
 
     /// `settings.project_id`
-    internal static var projectId: String { AppL10n.copyLocale == .frCA ? "Project id" : "Project id" }
+    internal static var projectId: String { AppL10n.copyLocale == .frCA ? "ID du projet" : "Project id" }
 
     /// `settings.refit_failed_because`
     internal static func refitFailedBecause(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "The voice chain could not be moved to the new language. Fit it on the Voice screen. \(reason)" : "The voice chain could not be moved to the new language. Fit it on the Voice screen. \(reason)"
+        AppL10n.copyLocale == .frCA ? "La chaîne vocale n'a pas pu être adaptée à la nouvelle langue. Ajustez-la dans l'écran Voix. \(reason)" : "The voice chain could not be moved to the new language. Fit it on the Voice screen. \(reason)"
     }
 
     /// `settings.reread`
-    internal static var reread: String { AppL10n.copyLocale == .frCA ? "Reload" : "Reload" }
+    internal static var reread: String { AppL10n.copyLocale == .frCA ? "Actualiser" : "Reload" }
 
     /// `settings.retry`
-    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Try again" : "Try again" }
+    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 
     /// `settings.routing_add`
-    internal static var routingAdd: String { AppL10n.copyLocale == .frCA ? "Add a rule" : "Add a rule" }
+    internal static var routingAdd: String { AppL10n.copyLocale == .frCA ? "Nouvelle règle" : "Add a rule" }
 
     /// `settings.routing_empty_body`
-    internal static var routingEmptyBody: String { AppL10n.copyLocale == .frCA ? "Every caller hears the persona exactly as it is configured above." : "Every caller hears the persona exactly as it is configured above." }
+    internal static var routingEmptyBody: String { AppL10n.copyLocale == .frCA ? "Chaque appelant entend la persona exactement telle qu'elle est configurée ci-dessus." : "Every caller hears the persona exactly as it is configured above." }
 
     /// `settings.routing_empty_confirm`
-    internal static var routingEmptyConfirm: String { AppL10n.copyLocale == .frCA ? "Save with no rules? Every caller will hear the persona exactly as configured, and the rules are gone. There is no undo." : "Save with no rules? Every caller will hear the persona exactly as configured, and the rules are gone. There is no undo." }
+    internal static var routingEmptyConfirm: String { AppL10n.copyLocale == .frCA ? "Enregistrer sans règle? Chaque appelant entendra la persona exactement telle que configurée, et les règles disparaîtront. Cette action est irréversible." : "Save with no rules? Every caller will hear the persona exactly as configured, and the rules are gone. There is no undo." }
 
     /// `settings.routing_empty_confirm_action`
-    internal static var routingEmptyConfirmAction: String { AppL10n.copyLocale == .frCA ? "Save with no rules" : "Save with no rules" }
+    internal static var routingEmptyConfirmAction: String { AppL10n.copyLocale == .frCA ? "Enregistrer sans règle" : "Save with no rules" }
 
     /// `settings.routing_empty_title`
-    internal static var routingEmptyTitle: String { AppL10n.copyLocale == .frCA ? "No dynamic persona rules" : "No dynamic persona rules" }
+    internal static var routingEmptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucune règle de persona dynamique" : "No dynamic persona rules" }
 
     /// `settings.routing_field_label`
-    internal static var routingFieldLabel: String { AppL10n.copyLocale == .frCA ? "When this caller detail" : "When this caller detail" }
+    internal static var routingFieldLabel: String { AppL10n.copyLocale == .frCA ? "Si ce champ de l'appelant" : "When this caller detail" }
 
     /// `settings.routing_incomplete`
-    internal static var routingIncomplete: String { AppL10n.copyLocale == .frCA ? "This rule has nothing to match on, so it never fires." : "This rule has nothing to match on, so it never fires." }
+    internal static var routingIncomplete: String { AppL10n.copyLocale == .frCA ? "Cette règle n'a aucun critère\u{00A0}: elle ne s'applique donc jamais." : "This rule has nothing to match on, so it never fires." }
 
     /// `settings.routing_instruction_label`
-    internal static var routingInstructionLabel: String { AppL10n.copyLocale == .frCA ? "And tell the agent" : "And tell the agent" }
+    internal static var routingInstructionLabel: String { AppL10n.copyLocale == .frCA ? "Et dire à l'agent" : "And tell the agent" }
 
     /// `settings.routing_model_inherit`
-    internal static var routingModelInherit: String { AppL10n.copyLocale == .frCA ? "The workspace's engine" : "The workspace's engine" }
+    internal static var routingModelInherit: String { AppL10n.copyLocale == .frCA ? "Moteur de l'espace de travail" : "The workspace's engine" }
 
     /// `settings.routing_model_label`
-    internal static var routingModelLabel: String { AppL10n.copyLocale == .frCA ? "Use this engine" : "Use this engine" }
+    internal static var routingModelLabel: String { AppL10n.copyLocale == .frCA ? "Utiliser ce moteur" : "Use this engine" }
 
     /// `settings.routing_note`
-    internal static var routingNote: String { AppL10n.copyLocale == .frCA ? "Each rule changes the agent's voice or model for callers it matches. Saving replaces the whole list, so anything removed here is gone." : "Each rule changes the agent's voice or model for callers it matches. Saving replaces the whole list, so anything removed here is gone." }
+    internal static var routingNote: String { AppL10n.copyLocale == .frCA ? "Chaque règle change la voix ou le modèle de l'agent pour les appelants qui y correspondent. Chaque sauvegarde remplace toute la liste\u{00A0}: ce que vous retirez ici disparaît." : "Each rule changes the agent's voice or model for callers it matches. Saving replaces the whole list, so anything removed here is gone." }
 
     /// `settings.routing_operator_label`
-    internal static var routingOperatorLabel: String { AppL10n.copyLocale == .frCA ? "Is compared by" : "Is compared by" }
+    internal static var routingOperatorLabel: String { AppL10n.copyLocale == .frCA ? "Comparaison" : "Is compared by" }
 
     /// `settings.routing_remove`
-    internal static var routingRemove: String { AppL10n.copyLocale == .frCA ? "Remove" : "Remove" }
+    internal static var routingRemove: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
 
     /// `settings.routing_rule_eyebrow`
-    internal static var routingRuleEyebrow: String { AppL10n.copyLocale == .frCA ? "Rule" : "Rule" }
+    internal static var routingRuleEyebrow: String { AppL10n.copyLocale == .frCA ? "Règle" : "Rule" }
 
     /// `settings.routing_save`
-    internal static var routingSave: String { AppL10n.copyLocale == .frCA ? "Save rules" : "Save rules" }
+    internal static var routingSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer les règles" : "Save rules" }
 
     /// `settings.routing_save_hint`
-    internal static var routingSaveHint: String { AppL10n.copyLocale == .frCA ? "A workspace can restrict which voices and engines a rule may name. If one is refused, the reason above names it." : "A workspace can restrict which voices and engines a rule may name. If one is refused, the reason above names it." }
+    internal static var routingSaveHint: String { AppL10n.copyLocale == .frCA ? "Un espace de travail peut limiter les voix et les moteurs qu'une règle peut désigner. Si l'un d'eux est refusé, le motif ci-dessus le nomme." : "A workspace can restrict which voices and engines a rule may name. If one is refused, the reason above names it." }
 
     /// `settings.routing_subtitle`
-    internal static var routingSubtitle: String { AppL10n.copyLocale == .frCA ? "How the agent adapts to who is calling" : "How the agent adapts to who is calling" }
+    internal static var routingSubtitle: String { AppL10n.copyLocale == .frCA ? "Comment l'agent s'adapte à l'appelant" : "How the agent adapts to who is calling" }
 
     /// `settings.routing_title`
-    internal static var routingTitle: String { AppL10n.copyLocale == .frCA ? "Dynamic persona rules" : "Dynamic persona rules" }
+    internal static var routingTitle: String { AppL10n.copyLocale == .frCA ? "Règles de persona dynamique" : "Dynamic persona rules" }
 
     /// `settings.routing_unrecognised`
-    internal static var routingUnrecognised: String { AppL10n.copyLocale == .frCA ? "This rule was written in a shape this app does not recognise. It is shown so it is not a surprise, it is kept exactly as it is when you save, and it cannot be changed here." : "This rule was written in a shape this app does not recognise. It is shown so it is not a surprise, it is kept exactly as it is when you save, and it cannot be changed here." }
+    internal static var routingUnrecognised: String { AppL10n.copyLocale == .frCA ? "Cette règle a été écrite dans un format que cette app ne reconnaît pas. Elle est affichée pour éviter toute surprise, conservée telle quelle lorsque vous enregistrez, et ne peut pas être modifiée ici." : "This rule was written in a shape this app does not recognise. It is shown so it is not a surprise, it is kept exactly as it is when you save, and it cannot be changed here." }
 
     /// `settings.routing_value_label`
-    internal static var routingValueLabel: String { AppL10n.copyLocale == .frCA ? "To this value" : "To this value" }
+    internal static var routingValueLabel: String { AppL10n.copyLocale == .frCA ? "À cette valeur" : "To this value" }
 
     /// `settings.routing_voice_label`
-    internal static var routingVoiceLabel: String { AppL10n.copyLocale == .frCA ? "Use this voice" : "Use this voice" }
+    internal static var routingVoiceLabel: String { AppL10n.copyLocale == .frCA ? "Utiliser cette voix" : "Use this voice" }
 
     /// `settings.routing_voices_empty`
-    internal static var routingVoicesEmpty: String { AppL10n.copyLocale == .frCA ? "No voices are published for rules, so this rule's voice is shown as stored and cannot be changed." : "No voices are published for rules, so this rule's voice is shown as stored and cannot be changed." }
+    internal static var routingVoicesEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune voix n'est publiée pour les règles\u{00A0}: la voix de cette règle s'affiche telle qu'enregistrée et n'est pas modifiable." : "No voices are published for rules, so this rule's voice is shown as stored and cannot be changed." }
 
     /// `settings.save`
-    internal static var save: String { AppL10n.copyLocale == .frCA ? "Save" : "Save" }
+    internal static var save: String { AppL10n.copyLocale == .frCA ? "Enregistrer" : "Save" }
 
     /// `settings.save_caller_s_details`
-    internal static var saveCallerSDetails: String { AppL10n.copyLocale == .frCA ? "Save a caller's details" : "Save a caller's details" }
+    internal static var saveCallerSDetails: String { AppL10n.copyLocale == .frCA ? "Enregistrer les coordonnées" : "Save a caller's details" }
 
     /// `settings.saved`
-    internal static var saved: String { AppL10n.copyLocale == .frCA ? "Saved." : "Saved." }
+    internal static var saved: String { AppL10n.copyLocale == .frCA ? "Enregistré." : "Saved." }
 
     /// `settings.saved_as`
-    internal static var savedAs: String { AppL10n.copyLocale == .frCA ? "Saved as" : "Saved as" }
+    internal static var savedAs: String { AppL10n.copyLocale == .frCA ? "Nom actuel" : "Saved as" }
 
     /// `settings.saved_but_stale`
-    internal static var savedButStale: String { AppL10n.copyLocale == .frCA ? "Saved. We could not read the configuration back, so what is on screen may be out of date." : "Saved. We could not read the configuration back, so what is on screen may be out of date." }
+    internal static var savedButStale: String { AppL10n.copyLocale == .frCA ? "Enregistré. Nous n'avons pas pu relire la configuration; l'affichage n'est peut-être plus à jour." : "Saved. We could not read the configuration back, so what is on screen may be out of date." }
 
     /// `settings.saved_but_stale_because`
     internal static func savedButStaleBecause(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Saved. We could not read the configuration back, so what is on screen may be out of date. \(reason)" : "Saved. We could not read the configuration back, so what is on screen may be out of date. \(reason)"
+        AppL10n.copyLocale == .frCA ? "Enregistré. Nous n'avons pas pu relire la configuration; l'affichage n'est peut-être plus à jour. \(reason)" : "Saved. We could not read the configuration back, so what is on screen may be out of date. \(reason)"
     }
 
     /// `settings.saving`
-    internal static var saving: String { AppL10n.copyLocale == .frCA ? "Saving…" : "Saving…" }
+    internal static var saving: String { AppL10n.copyLocale == .frCA ? "Sauvegarde…" : "Saving…" }
 
     /// `settings.scheduling_subtitle`
-    internal static var schedulingSubtitle: String { AppL10n.copyLocale == .frCA ? "The workspace's booking pages" : "The workspace's booking pages" }
+    internal static var schedulingSubtitle: String { AppL10n.copyLocale == .frCA ? "Les pages de réservation de l'espace de travail" : "The workspace's booking pages" }
 
     /// `settings.scheduling_title`
-    internal static var schedulingTitle: String { AppL10n.copyLocale == .frCA ? "Scheduling" : "Scheduling" }
+    internal static var schedulingTitle: String { AppL10n.copyLocale == .frCA ? "Rendez-vous" : "Scheduling" }
 
     /// `settings.send_an_email`
-    internal static var sendAnEmail: String { AppL10n.copyLocale == .frCA ? "Send an email" : "Send an email" }
+    internal static var sendAnEmail: String { AppL10n.copyLocale == .frCA ? "Envoyer un courriel" : "Send an email" }
 
     /// `settings.shown_stored_they_are`
-    internal static var shownStoredTheyAre: String { AppL10n.copyLocale == .frCA ? "Shown as stored. They are only sent if you change them." : "Shown as stored. They are only sent if you change them." }
+    internal static var shownStoredTheyAre: String { AppL10n.copyLocale == .frCA ? "Affichés tels qu'enregistrés. Ils ne sont transmis que si vous les modifiez." : "Shown as stored. They are only sent if you change them." }
 
     /// `settings.studio_group_title`
     internal static var studioGroupTitle: String { AppL10n.copyLocale == .frCA ? "District Studio" : "District Studio" }
 
     /// `settings.support_number`
-    internal static var supportNumber: String { AppL10n.copyLocale == .frCA ? "Support number" : "Support number" }
+    internal static var supportNumber: String { AppL10n.copyLocale == .frCA ? "Numéro de soutien" : "Support number" }
 
     /// `settings.take_a_message`
-    internal static var takeAMessage: String { AppL10n.copyLocale == .frCA ? "Take a message" : "Take a message" }
+    internal static var takeAMessage: String { AppL10n.copyLocale == .frCA ? "Prendre un message" : "Take a message" }
 
     /// `settings.test`
-    internal static var test: String { AppL10n.copyLocale == .frCA ? "Test" : "Test" }
+    internal static var test: String { AppL10n.copyLocale == .frCA ? "Tester" : "Test" }
 
     /// `settings.text_the_caller`
-    internal static var textTheCaller: String { AppL10n.copyLocale == .frCA ? "Text the caller" : "Text the caller" }
+    internal static var textTheCaller: String { AppL10n.copyLocale == .frCA ? "Envoyer un texto" : "Text the caller" }
 
     /// `settings.these_numbers_will_replace`
-    internal static var theseNumbersWillReplace: String { AppL10n.copyLocale == .frCA ? "These numbers will replace the account's current list when you save." : "These numbers will replace the account's current list when you save." }
+    internal static var theseNumbersWillReplace: String { AppL10n.copyLocale == .frCA ? "Ces numéros remplaceront la liste actuelle du compte lorsque vous enregistrerez." : "These numbers will replace the account's current list when you save." }
 
     /// `settings.those_credentials_work`
-    internal static var thoseCredentialsWork: String { AppL10n.copyLocale == .frCA ? "Those credentials work." : "Those credentials work." }
+    internal static var thoseCredentialsWork: String { AppL10n.copyLocale == .frCA ? "Ces identifiants sont valides." : "Those credentials work." }
 
     /// `settings.transfer_person`
-    internal static var transferPerson: String { AppL10n.copyLocale == .frCA ? "Transfer to a person" : "Transfer to a person" }
+    internal static var transferPerson: String { AppL10n.copyLocale == .frCA ? "Transférer à une personne" : "Transfer to a person" }
 
     /// `settings.transfer_to_support`
-    internal static var transferToSupport: String { AppL10n.copyLocale == .frCA ? "Transfer to support" : "Transfer to support" }
+    internal static var transferToSupport: String { AppL10n.copyLocale == .frCA ? "Transférer au soutien" : "Transfer to support" }
 
     /// `settings.viewer_note`
-    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer, so the sections that change how the agent behaves are not available to you." : "You are in this workspace as a viewer, so the sections that change how the agent behaves are not available to you." }
+    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur dans cet espace de travail, vous n'avez pas accès aux sections qui modifient le comportement de l'agent." : "You are in this workspace as a viewer, so the sections that change how the agent behaves are not available to you." }
 
     /// `settings.voice_chain_could_not`
-    internal static var voiceChainCouldNot: String { AppL10n.copyLocale == .frCA ? "The voice chain could not be moved to the new language. Fit it on the Voice screen." : "The voice chain could not be moved to the new language. Fit it on the Voice screen." }
+    internal static var voiceChainCouldNot: String { AppL10n.copyLocale == .frCA ? "La chaîne vocale n'a pas pu être adaptée à la nouvelle langue. Ajustez-la dans l'écran Voix." : "The voice chain could not be moved to the new language. Fit it on the Voice screen." }
 
     /// `settings.voice_chain_was_moved`
-    internal static var voiceChainWasMoved: String { AppL10n.copyLocale == .frCA ? "The voice chain was moved to models that speak the new language. The Voice screen shows it." : "The voice chain was moved to models that speak the new language. The Voice screen shows it." }
+    internal static var voiceChainWasMoved: String { AppL10n.copyLocale == .frCA ? "La chaîne vocale utilise maintenant des modèles qui parlent la nouvelle langue. L'écran Voix l'affiche." : "The voice chain was moved to models that speak the new language. The Voice screen shows it." }
 
     /// `settings.voice_chain_was_saved`
-    internal static var voiceChainWasSaved: String { AppL10n.copyLocale == .frCA ? "The voice chain was saved, but the Voice screen does not show it fitting the new language. Check it there." : "The voice chain was saved, but the Voice screen does not show it fitting the new language. Check it there." }
+    internal static var voiceChainWasSaved: String { AppL10n.copyLocale == .frCA ? "La chaîne vocale a été enregistrée, mais l'écran Voix ne la montre pas adaptée à la nouvelle langue. Vérifiez-la dans l'écran Voix." : "The voice chain was saved, but the Voice screen does not show it fitting the new language. Check it there." }
 
     /// `settings.voice_studio_subtitle`
-    internal static var voiceStudioSubtitle: String { AppL10n.copyLocale == .frCA ? "Recipes, the signal chain, voices and tuning, with how fast the agent replies" : "Recipes, the signal chain, voices and tuning, with how fast the agent replies" }
+    internal static var voiceStudioSubtitle: String { AppL10n.copyLocale == .frCA ? "Points de départ, chaîne de traitement, voix et ajustements, avec la vitesse de réponse de l'agent" : "Recipes, the signal chain, voices and tuning, with how fast the agent replies" }
 
     /// `settings.voice_studio_title`
-    internal static var voiceStudioTitle: String { AppL10n.copyLocale == .frCA ? "Voice" : "Voice" }
+    internal static var voiceStudioTitle: String { AppL10n.copyLocale == .frCA ? "Voix" : "Voice" }
 
     /// `settings.we_could_not_ask`
-    internal static var weCouldNotAsk: String { AppL10n.copyLocale == .frCA ? "We could not ask the carrier, so this says nothing about the credentials." : "We could not ask the carrier, so this says nothing about the credentials." }
+    internal static var weCouldNotAsk: String { AppL10n.copyLocale == .frCA ? "Impossible d'interroger le transporteur; ce résultat ne dit donc rien sur les identifiants." : "We could not ask the carrier, so this says nothing about the credentials." }
 
     /// `settings.workspace_group_title`
-    internal static var workspaceGroupTitle: String { AppL10n.copyLocale == .frCA ? "Workspace" : "Workspace" }
+    internal static var workspaceGroupTitle: String { AppL10n.copyLocale == .frCA ? "Espace de travail" : "Workspace" }
 
     /// `settings.workspace_s_own`
-    internal static var workspaceSOwn: String { AppL10n.copyLocale == .frCA ? "This workspace's own" : "This workspace's own" }
+    internal static var workspaceSOwn: String { AppL10n.copyLocale == .frCA ? "Propre à cet espace de travail" : "This workspace's own" }
 }
 
 extension SignInCopy {
@@ -5278,324 +5284,324 @@ extension SignInCopy {
     internal static var districtAi: String { AppL10n.copyLocale == .frCA ? "District AI" : "District AI" }
 
     /// `sign_in.no_account`
-    internal static var noAccount: String { AppL10n.copyLocale == .frCA ? "No District AI account uses this Apple ID. Ask your organization's administrator to invite you, then sign in with the invited email." : "No District AI account uses this Apple ID. Ask your organization's administrator to invite you, then sign in with the invited email." }
+    internal static var noAccount: String { AppL10n.copyLocale == .frCA ? "Aucun compte District AI n'utilise cet identifiant Apple. Demandez à l'administrateur de votre organisation de vous inviter, puis connectez-vous avec l'adresse courriel invitée." : "No District AI account uses this Apple ID. Ask your organization's administrator to invite you, then sign in with the invited email." }
 
     /// `sign_in.opens_browser_sign_securely`
-    internal static var opensBrowserSignSecurely: String { AppL10n.copyLocale == .frCA ? "Opens your browser to sign in securely." : "Opens your browser to sign in securely." }
+    internal static var opensBrowserSignSecurely: String { AppL10n.copyLocale == .frCA ? "Une page de connexion sécurisée s'ouvre." : "Opens your browser to sign in securely." }
 
     /// `sign_in.sign_apple`
-    internal static var signApple: String { AppL10n.copyLocale == .frCA ? "Sign in with Apple" : "Sign in with Apple" }
+    internal static var signApple: String { AppL10n.copyLocale == .frCA ? "Se connecter avec Apple" : "Sign in with Apple" }
 
     /// `sign_in.sign_workspace`
-    internal static var signWorkspace: String { AppL10n.copyLocale == .frCA ? "Sign in to your workspace." : "Sign in to your workspace." }
+    internal static var signWorkspace: String { AppL10n.copyLocale == .frCA ? "Connectez-vous à votre espace de travail." : "Sign in to your workspace." }
 }
 
 extension SignInTermsCopy {
     /// `sign_in_terms.agreement`
     internal static func agreement(_ terms: String, _ privacy: String) -> String {
-        AppL10n.copyLocale == .frCA ? "By continuing you agree to the \(terms) and \(privacy)." : "By continuing you agree to the \(terms) and \(privacy)."
+        AppL10n.copyLocale == .frCA ? "En continuant, vous acceptez les \(terms) et la \(privacy)." : "By continuing you agree to the \(terms) and \(privacy)."
     }
 
     /// `sign_in_terms.conjunction`
-    internal static var conjunction: String { AppL10n.copyLocale == .frCA ? " and " : " and " }
+    internal static var conjunction: String { AppL10n.copyLocale == .frCA ? " et la " : " and " }
 
     /// `sign_in_terms.prefix`
-    internal static var prefix: String { AppL10n.copyLocale == .frCA ? "By continuing you agree to the" : "By continuing you agree to the" }
+    internal static var prefix: String { AppL10n.copyLocale == .frCA ? "En continuant, vous acceptez les" : "By continuing you agree to the" }
 
     /// `sign_in_terms.privacy_name`
-    internal static var privacyName: String { AppL10n.copyLocale == .frCA ? "Privacy Policy" : "Privacy Policy" }
+    internal static var privacyName: String { AppL10n.copyLocale == .frCA ? "politique de confidentialité" : "Privacy Policy" }
 
     /// `sign_in_terms.terminator`
     internal static var terminator: String { AppL10n.copyLocale == .frCA ? "." : "." }
 
     /// `sign_in_terms.terms_name`
-    internal static var termsName: String { AppL10n.copyLocale == .frCA ? "Terms of Service" : "Terms of Service" }
+    internal static var termsName: String { AppL10n.copyLocale == .frCA ? "conditions d'utilisation" : "Terms of Service" }
 }
 
 extension SupportCopy {
     /// `support.close`
-    internal static var close: String { AppL10n.copyLocale == .frCA ? "Mark resolved" : "Mark resolved" }
+    internal static var close: String { AppL10n.copyLocale == .frCA ? "Marquer comme réglée" : "Mark resolved" }
 
     /// `support.closed`
     internal static func closed(_ status_name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "This request is now \(status_name). Reply if it is not resolved." : "This request is now \(status_name). Reply if it is not resolved."
+        AppL10n.copyLocale == .frCA ? "État de cette demande\u{00A0}: \(status_name). Répondez si elle n'est pas réglée." : "This request is now \(status_name). Reply if it is not resolved."
     }
 
     /// `support.closing`
-    internal static var closing: String { AppL10n.copyLocale == .frCA ? "Closing…" : "Closing…" }
+    internal static var closing: String { AppL10n.copyLocale == .frCA ? "Fermeture…" : "Closing…" }
 
     /// `support.compose_cancel`
-    internal static var composeCancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var composeCancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `support.compose_incomplete`
-    internal static var composeIncomplete: String { AppL10n.copyLocale == .frCA ? "A subject and a description are both needed." : "A subject and a description are both needed." }
+    internal static var composeIncomplete: String { AppL10n.copyLocale == .frCA ? "Un objet et une description sont tous deux requis." : "A subject and a description are both needed." }
 
     /// `support.compose_kind`
-    internal static var composeKind: String { AppL10n.copyLocale == .frCA ? "What is it about" : "What is it about" }
+    internal static var composeKind: String { AppL10n.copyLocale == .frCA ? "De quoi s'agit-il" : "What is it about" }
 
     /// `support.compose_message`
-    internal static var composeMessage: String { AppL10n.copyLocale == .frCA ? "What is happening" : "What is happening" }
+    internal static var composeMessage: String { AppL10n.copyLocale == .frCA ? "Ce qui se passe" : "What is happening" }
 
     /// `support.compose_message_hint`
-    internal static var composeMessageHint: String { AppL10n.copyLocale == .frCA ? "What you expected, what happened instead, and when it started." : "What you expected, what happened instead, and when it started." }
+    internal static var composeMessageHint: String { AppL10n.copyLocale == .frCA ? "Ce que vous attendiez, ce qui s'est produit à la place, et quand cela a commencé." : "What you expected, what happened instead, and when it started." }
 
     /// `support.compose_send`
-    internal static var composeSend: String { AppL10n.copyLocale == .frCA ? "Send to Distronode" : "Send to Distronode" }
+    internal static var composeSend: String { AppL10n.copyLocale == .frCA ? "Envoyer à Distronode" : "Send to Distronode" }
 
     /// `support.compose_sending`
-    internal static var composeSending: String { AppL10n.copyLocale == .frCA ? "Sending…" : "Sending…" }
+    internal static var composeSending: String { AppL10n.copyLocale == .frCA ? "Envoi en cours…" : "Sending…" }
 
     /// `support.compose_subject`
-    internal static var composeSubject: String { AppL10n.copyLocale == .frCA ? "Subject" : "Subject" }
+    internal static var composeSubject: String { AppL10n.copyLocale == .frCA ? "Objet" : "Subject" }
 
     /// `support.compose_title`
-    internal static var composeTitle: String { AppL10n.copyLocale == .frCA ? "New support request" : "New support request" }
+    internal static var composeTitle: String { AppL10n.copyLocale == .frCA ? "Nouvelle demande de soutien" : "New support request" }
 
     /// `support.deduplicated`
-    internal static var deduplicated: String { AppL10n.copyLocale == .frCA ? "That request is already open. We reply by email and here." : "That request is already open. We reply by email and here." }
+    internal static var deduplicated: String { AppL10n.copyLocale == .frCA ? "Cette demande est déjà ouverte. Nous répondons par courriel et ici." : "That request is already open. We reply by email and here." }
 
     /// `support.dismiss`
-    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Dismiss" : "Dismiss" }
+    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Dismiss" }
 
     /// `support.done`
-    internal static var done: String { AppL10n.copyLocale == .frCA ? "Done" : "Done" }
+    internal static var done: String { AppL10n.copyLocale == .frCA ? "OK" : "Done" }
 
     /// `support.empty_body`
-    internal static var emptyBody: String { AppL10n.copyLocale == .frCA ? "Anything broken, unclear or missing, open a request and it goes straight to our team." : "Anything broken, unclear or missing, open a request and it goes straight to our team." }
+    internal static var emptyBody: String { AppL10n.copyLocale == .frCA ? "Quelque chose ne fonctionne pas, n'est pas clair ou manque? Ouvrez une demande et elle sera transmise directement à notre équipe." : "Anything broken, unclear or missing, open a request and it goes straight to our team." }
 
     /// `support.empty_title`
-    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "No support requests yet" : "No support requests yet" }
+    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "Aucune demande de soutien pour l'instant" : "No support requests yet" }
 
     /// `support.filed`
-    internal static var filed: String { AppL10n.copyLocale == .frCA ? "Your request is open. We reply by email and here." : "Your request is open. We reply by email and here." }
+    internal static var filed: String { AppL10n.copyLocale == .frCA ? "Votre demande est ouverte. Nous répondons par courriel et ici." : "Your request is open. We reply by email and here." }
 
     /// `support.from_phone_call`
-    internal static var fromPhoneCall: String { AppL10n.copyLocale == .frCA ? "From a phone call" : "From a phone call" }
+    internal static var fromPhoneCall: String { AppL10n.copyLocale == .frCA ? "Depuis un appel téléphonique" : "From a phone call" }
 
     /// `support.kind_problem`
-    internal static var kindProblem: String { AppL10n.copyLocale == .frCA ? "Something is broken" : "Something is broken" }
+    internal static var kindProblem: String { AppL10n.copyLocale == .frCA ? "Quelque chose ne fonctionne pas" : "Something is broken" }
 
     /// `support.kind_question`
-    internal static var kindQuestion: String { AppL10n.copyLocale == .frCA ? "A question" : "A question" }
+    internal static var kindQuestion: String { AppL10n.copyLocale == .frCA ? "Une question" : "A question" }
 
     /// `support.kind_suggestion`
-    internal static var kindSuggestion: String { AppL10n.copyLocale == .frCA ? "A suggestion" : "A suggestion" }
+    internal static var kindSuggestion: String { AppL10n.copyLocale == .frCA ? "Une suggestion" : "A suggestion" }
 
     /// `support.list_failed_body`
-    internal static var listFailedBody: String { AppL10n.copyLocale == .frCA ? "Your requests are still open, this screen just could not read them." : "Your requests are still open, this screen just could not read them." }
+    internal static var listFailedBody: String { AppL10n.copyLocale == .frCA ? "Vos demandes sont toujours ouvertes; c'est seulement cet écran qui n'a pas pu les lire." : "Your requests are still open, this screen just could not read them." }
 
     /// `support.list_failed_title`
-    internal static var listFailedTitle: String { AppL10n.copyLocale == .frCA ? "We could not load your support requests." : "We could not load your support requests." }
+    internal static var listFailedTitle: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu charger vos demandes de soutien." : "We could not load your support requests." }
 
     /// `support.new_request`
-    internal static var newRequest: String { AppL10n.copyLocale == .frCA ? "New request" : "New request" }
+    internal static var newRequest: String { AppL10n.copyLocale == .frCA ? "Nouvelle demande" : "New request" }
 
     /// `support.not_filed_yet`
-    internal static var notFiledYet: String { AppL10n.copyLocale == .frCA ? "This request is still being opened. You will be able to reply in a moment." : "This request is still being opened. You will be able to reply in a moment." }
+    internal static var notFiledYet: String { AppL10n.copyLocale == .frCA ? "Cette demande est encore en cours d'ouverture. Vous pourrez y répondre dans un instant." : "This request is still being opened. You will be able to reply in a moment." }
 
     /// `support.opened`
     internal static func opened(_ readable_date: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Opened \(readable_date)" : "Opened \(readable_date)"
+        AppL10n.copyLocale == .frCA ? "Ouverte\u{00A0}: \(readable_date)" : "Opened \(readable_date)"
     }
 
     /// `support.pending`
-    internal static var pending: String { AppL10n.copyLocale == .frCA ? "We have your request. It is being opened now and will appear here shortly." : "We have your request. It is being opened now and will appear here shortly." }
+    internal static var pending: String { AppL10n.copyLocale == .frCA ? "Nous avons bien reçu votre demande. Elle est en cours d'ouverture et apparaîtra ici sous peu." : "We have your request. It is being opened now and will appear here shortly." }
 
     /// `support.reply_label`
-    internal static var replyLabel: String { AppL10n.copyLocale == .frCA ? "Your reply" : "Your reply" }
+    internal static var replyLabel: String { AppL10n.copyLocale == .frCA ? "Votre réponse" : "Your reply" }
 
     /// `support.reply_placeholder`
-    internal static var replyPlaceholder: String { AppL10n.copyLocale == .frCA ? "Add to this request…" : "Add to this request…" }
+    internal static var replyPlaceholder: String { AppL10n.copyLocale == .frCA ? "Ajoutez à cette demande…" : "Add to this request…" }
 
     /// `support.reply_placeholder_resolved`
-    internal static var replyPlaceholderResolved: String { AppL10n.copyLocale == .frCA ? "This request is resolved. Reply if it is not." : "This request is resolved. Reply if it is not." }
+    internal static var replyPlaceholderResolved: String { AppL10n.copyLocale == .frCA ? "Cette demande est réglée. Répondez si elle ne l'est pas." : "This request is resolved. Reply if it is not." }
 
     /// `support.reply_send`
-    internal static var replySend: String { AppL10n.copyLocale == .frCA ? "Send reply" : "Send reply" }
+    internal static var replySend: String { AppL10n.copyLocale == .frCA ? "Envoyer la réponse" : "Send reply" }
 
     /// `support.reply_sending`
-    internal static var replySending: String { AppL10n.copyLocale == .frCA ? "Sending…" : "Sending…" }
+    internal static var replySending: String { AppL10n.copyLocale == .frCA ? "Envoi en cours…" : "Sending…" }
 
     /// `support.reporting`
-    internal static var reporting: String { AppL10n.copyLocale == .frCA ? "Reporting…" : "Reporting…" }
+    internal static var reporting: String { AppL10n.copyLocale == .frCA ? "Signalement en cours…" : "Reporting…" }
 
     /// `support.sla`
-    internal static var sla: String { AppL10n.copyLocale == .frCA ? "We reply within one business day." : "We reply within one business day." }
+    internal static var sla: String { AppL10n.copyLocale == .frCA ? "Nous répondons dans un délai d'un jour ouvrable." : "We reply within one business day." }
 
     /// `support.subtitle`
-    internal static var subtitle: String { AppL10n.copyLocale == .frCA ? "Requests you have raised with the Distronode team." : "Requests you have raised with the Distronode team." }
+    internal static var subtitle: String { AppL10n.copyLocale == .frCA ? "Les demandes que vous avez soumises à l'équipe de Distronode." : "Requests you have raised with the Distronode team." }
 
     /// `support.thread_empty`
-    internal static var threadEmpty: String { AppL10n.copyLocale == .frCA ? "No replies yet. We reply within one business day." : "No replies yet. We reply within one business day." }
+    internal static var threadEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune réponse pour l'instant. Nous répondons dans un délai d'un jour ouvrable." : "No replies yet. We reply within one business day." }
 
     /// `support.thread_failed`
-    internal static var threadFailed: String { AppL10n.copyLocale == .frCA ? "We could not open that request." : "We could not open that request." }
+    internal static var threadFailed: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu ouvrir cette demande." : "We could not open that request." }
 
     /// `support.thread_loading`
-    internal static var threadLoading: String { AppL10n.copyLocale == .frCA ? "Loading the conversation…" : "Loading the conversation…" }
+    internal static var threadLoading: String { AppL10n.copyLocale == .frCA ? "Chargement de la conversation…" : "Loading the conversation…" }
 
     /// `support.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Support" : "Support" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Soutien" : "Support" }
 
     /// `support.unfiled_status`
-    internal static var unfiledStatus: String { AppL10n.copyLocale == .frCA ? "Being opened" : "Being opened" }
+    internal static var unfiledStatus: String { AppL10n.copyLocale == .frCA ? "En cours d'ouverture" : "Being opened" }
 
     /// `support.write_unrepeatable`
-    internal static var writeUnrepeatable: String { AppL10n.copyLocale == .frCA ? "This will not be sent again from here. The answer did not come back, so it may already have gone through. Reopen the request to check." : "This will not be sent again from here. The answer did not come back, so it may already have gone through. Reopen the request to check." }
+    internal static var writeUnrepeatable: String { AppL10n.copyLocale == .frCA ? "Rien ne sera renvoyé d'ici. Le serveur n'a pas confirmé la réception; l'envoi a donc peut-être déjà abouti. Rouvrez la demande pour vérifier." : "This will not be sent again from here. The answer did not come back, so it may already have gone through. Reopen the request to check." }
 }
 
 extension VoiceStudioCopy {
     /// `voice_studio.advanced_hide`
-    internal static var advancedHide: String { AppL10n.copyLocale == .frCA ? "Hide" : "Hide" }
+    internal static var advancedHide: String { AppL10n.copyLocale == .frCA ? "Masquer" : "Hide" }
 
     /// `voice_studio.advanced_show`
-    internal static var advancedShow: String { AppL10n.copyLocale == .frCA ? "Show" : "Show" }
+    internal static var advancedShow: String { AppL10n.copyLocale == .frCA ? "Afficher" : "Show" }
 
     /// `voice_studio.invalid_engine_mix`
-    internal static var invalidEngineMix: String { AppL10n.copyLocale == .frCA ? "That voice chain cannot be saved: a model, voice or location in it is not available for this workspace and language." : "That voice chain cannot be saved: a model, voice or location in it is not available for this workspace and language." }
+    internal static var invalidEngineMix: String { AppL10n.copyLocale == .frCA ? "Impossible d'enregistrer cette chaîne vocale\u{00A0}: un de ses modèles, voix ou emplacements n'est pas disponible pour cet espace de travail et cette langue." : "That voice chain cannot be saved: a model, voice or location in it is not available for this workspace and language." }
 
     /// `voice_studio.model_unavailable_in_region`
-    internal static var modelUnavailableInRegion: String { AppL10n.copyLocale == .frCA ? "That model is not available for workspaces in this region." : "That model is not available for workspaces in this region." }
+    internal static var modelUnavailableInRegion: String { AppL10n.copyLocale == .frCA ? "Ce modèle n'est pas disponible pour les espaces de travail de cette région." : "That model is not available for workspaces in this region." }
 
     /// `voice_studio.saving`
-    internal static var saving: String { AppL10n.copyLocale == .frCA ? "Saving…" : "Saving…" }
+    internal static var saving: String { AppL10n.copyLocale == .frCA ? "Sauvegarde…" : "Saving…" }
 
     /// `voice_studio.selected`
-    internal static var selected: String { AppL10n.copyLocale == .frCA ? "Selected" : "Selected" }
+    internal static var selected: String { AppL10n.copyLocale == .frCA ? "Sélectionné" : "Selected" }
 
     /// `voice_studio.use_default`
-    internal static var useDefault: String { AppL10n.copyLocale == .frCA ? "Use the default" : "Use the default" }
+    internal static var useDefault: String { AppL10n.copyLocale == .frCA ? "Par défaut" : "Use the default" }
 }
 
 extension WorkflowsCopy {
     /// `workflows.added_do_not_call`
-    internal static var addedDoNotCall: String { AppL10n.copyLocale == .frCA ? "Added to do-not-call" : "Added to do-not-call" }
+    internal static var addedDoNotCall: String { AppL10n.copyLocale == .frCA ? "Ajout à la liste d'exclusion" : "Added to do-not-call" }
 
     /// `workflows.after_answered_call`
-    internal static var afterAnsweredCall: String { AppL10n.copyLocale == .frCA ? "After an answered call" : "After an answered call" }
+    internal static var afterAnsweredCall: String { AppL10n.copyLocale == .frCA ? "Après un appel répondu" : "After an answered call" }
 
     /// `workflows.after_any_call_ends`
-    internal static var afterAnyCallEnds: String { AppL10n.copyLocale == .frCA ? "After any call ends" : "After any call ends" }
+    internal static var afterAnyCallEnds: String { AppL10n.copyLocale == .frCA ? "À la fin de chaque appel" : "After any call ends" }
 
     /// `workflows.after_missed_call`
-    internal static var afterMissedCall: String { AppL10n.copyLocale == .frCA ? "After a missed call" : "After a missed call" }
+    internal static var afterMissedCall: String { AppL10n.copyLocale == .frCA ? "Après un appel manqué" : "After a missed call" }
 
     /// `workflows.batch_line`
     internal static func batchLine(_ size: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(size) contacts per batch" : "\(size) contacts per batch"
+        AppL10n.copyLocale == .frCA ? "Contacts par lot\u{00A0}: \(size)" : "\(size) contacts per batch"
     }
 
     /// `workflows.campaign_active`
-    internal static var campaignActive: String { AppL10n.copyLocale == .frCA ? "Active" : "Active" }
+    internal static var campaignActive: String { AppL10n.copyLocale == .frCA ? "Actif" : "Active" }
 
     /// `workflows.campaign_batch_unset`
-    internal static var campaignBatchUnset: String { AppL10n.copyLocale == .frCA ? "No batch size configured yet." : "No batch size configured yet." }
+    internal static var campaignBatchUnset: String { AppL10n.copyLocale == .frCA ? "Taille du lot pas encore configurée." : "No batch size configured yet." }
 
     /// `workflows.campaign_cancel`
-    internal static var campaignCancel: String { AppL10n.copyLocale == .frCA ? "Cancel" : "Cancel" }
+    internal static var campaignCancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
 
     /// `workflows.campaign_failed`
-    internal static var campaignFailed: String { AppL10n.copyLocale == .frCA ? "Could not load the campaign" : "Could not load the campaign" }
+    internal static var campaignFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de charger la campagne" : "Could not load the campaign" }
 
     /// `workflows.campaign_label`
-    internal static var campaignLabel: String { AppL10n.copyLocale == .frCA ? "Outbound campaign" : "Outbound campaign" }
+    internal static var campaignLabel: String { AppL10n.copyLocale == .frCA ? "Campagne sortante" : "Outbound campaign" }
 
     /// `workflows.campaign_no_goal`
-    internal static var campaignNoGoal: String { AppL10n.copyLocale == .frCA ? "No goal configured yet." : "No goal configured yet." }
+    internal static var campaignNoGoal: String { AppL10n.copyLocale == .frCA ? "Aucun objectif configuré pour l'instant." : "No goal configured yet." }
 
     /// `workflows.campaign_pause`
-    internal static var campaignPause: String { AppL10n.copyLocale == .frCA ? "Pause campaign" : "Pause campaign" }
+    internal static var campaignPause: String { AppL10n.copyLocale == .frCA ? "Mettre la campagne en pause" : "Pause campaign" }
 
     /// `workflows.campaign_pause_prompt`
-    internal static var campaignPausePrompt: String { AppL10n.copyLocale == .frCA ? "Pause the outbound campaign? The always-on SDR engine stops working through your contacts. Nothing is deleted, and the campaign goal and batch size are kept, so resuming picks up where it left off." : "Pause the outbound campaign? The always-on SDR engine stops working through your contacts. Nothing is deleted, and the campaign goal and batch size are kept, so resuming picks up where it left off." }
+    internal static var campaignPausePrompt: String { AppL10n.copyLocale == .frCA ? "Mettre la campagne sortante en pause? Le moteur de prospection, qui tourne en continu, cesse de parcourir vos contacts. Rien n'est supprimé, et l'objectif et la taille de lot de la campagne sont conservés\u{00A0}: à la reprise, elle repart là où elle s'était arrêtée." : "Pause the outbound campaign? The always-on SDR engine stops working through your contacts. Nothing is deleted, and the campaign goal and batch size are kept, so resuming picks up where it left off." }
 
     /// `workflows.campaign_paused`
-    internal static var campaignPaused: String { AppL10n.copyLocale == .frCA ? "Paused" : "Paused" }
+    internal static var campaignPaused: String { AppL10n.copyLocale == .frCA ? "En pause" : "Paused" }
 
     /// `workflows.campaign_read_only`
-    internal static var campaignReadOnly: String { AppL10n.copyLocale == .frCA ? "The campaign goal and batch size cannot be changed in this app." : "The campaign goal and batch size cannot be changed in this app." }
+    internal static var campaignReadOnly: String { AppL10n.copyLocale == .frCA ? "L'objectif et la taille de lot de la campagne ne se modifient pas dans cette app." : "The campaign goal and batch size cannot be changed in this app." }
 
     /// `workflows.campaign_read_only_viewer`
-    internal static var campaignReadOnlyViewer: String { AppL10n.copyLocale == .frCA ? "You are in this workspace as a viewer. Ask an agency or client member to change the campaign." : "You are in this workspace as a viewer. Ask an agency or client member to change the campaign." }
+    internal static var campaignReadOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Votre rôle dans cet espace de travail est Lecteur. Demandez à un membre ayant le rôle Agence ou Client de modifier la campagne." : "You are in this workspace as a viewer. Ask an agency or client member to change the campaign." }
 
     /// `workflows.campaign_resume`
-    internal static var campaignResume: String { AppL10n.copyLocale == .frCA ? "Resume campaign" : "Resume campaign" }
+    internal static var campaignResume: String { AppL10n.copyLocale == .frCA ? "Reprendre la campagne" : "Resume campaign" }
 
     /// `workflows.campaign_resume_prompt`
-    internal static var campaignResumePrompt: String { AppL10n.copyLocale == .frCA ? "Resume the outbound campaign? The SDR engine starts calling and messaging your contacts again, which spends call and message credit." : "Resume the outbound campaign? The SDR engine starts calling and messaging your contacts again, which spends call and message credit." }
+    internal static var campaignResumePrompt: String { AppL10n.copyLocale == .frCA ? "Reprendre la campagne sortante? Le moteur de prospection recommence à appeler vos contacts et à leur envoyer des messages, ce qui consomme du crédit d'appels et de messages." : "Resume the outbound campaign? The SDR engine starts calling and messaging your contacts again, which spends call and message credit." }
 
     /// `workflows.campaign_working`
-    internal static var campaignWorking: String { AppL10n.copyLocale == .frCA ? "Saving…" : "Saving…" }
+    internal static var campaignWorking: String { AppL10n.copyLocale == .frCA ? "Sauvegarde…" : "Saving…" }
 
     /// `workflows.dismiss`
-    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Dismiss" : "Dismiss" }
+    internal static var dismiss: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Dismiss" }
 
     /// `workflows.empty_body`
-    internal static var emptyBody: String { AppL10n.copyLocale == .frCA ? "Workflows run an action after a call, a message or a new contact. They cannot be created in this app." : "Workflows run an action after a call, a message or a new contact. They cannot be created in this app." }
+    internal static var emptyBody: String { AppL10n.copyLocale == .frCA ? "Les flux de travail lancent une action après un appel, un message ou un nouveau contact. Cette app ne permet pas d'en créer." : "Workflows run an action after a call, a message or a new contact. They cannot be created in this app." }
 
     /// `workflows.empty_title`
-    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "No workflows yet" : "No workflows yet" }
+    internal static var emptyTitle: String { AppL10n.copyLocale == .frCA ? "Pas encore de flux de travail" : "No workflows yet" }
 
     /// `workflows.intent_detected`
-    internal static var intentDetected: String { AppL10n.copyLocale == .frCA ? "Intent detected" : "Intent detected" }
+    internal static var intentDetected: String { AppL10n.copyLocale == .frCA ? "Intention détectée" : "Intent detected" }
 
     /// `workflows.list_failed`
-    internal static var listFailed: String { AppL10n.copyLocale == .frCA ? "Could not load workflows" : "Could not load workflows" }
+    internal static var listFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de charger les flux de travail" : "Could not load workflows" }
 
     /// `workflows.message_received`
-    internal static var messageReceived: String { AppL10n.copyLocale == .frCA ? "Message received" : "Message received" }
+    internal static var messageReceived: String { AppL10n.copyLocale == .frCA ? "Message reçu" : "Message received" }
 
     /// `workflows.negative_sentiment`
-    internal static var negativeSentiment: String { AppL10n.copyLocale == .frCA ? "Negative sentiment" : "Negative sentiment" }
+    internal static var negativeSentiment: String { AppL10n.copyLocale == .frCA ? "Sentiment négatif" : "Negative sentiment" }
 
     /// `workflows.neutral_sentiment`
-    internal static var neutralSentiment: String { AppL10n.copyLocale == .frCA ? "Neutral sentiment" : "Neutral sentiment" }
+    internal static var neutralSentiment: String { AppL10n.copyLocale == .frCA ? "Sentiment neutre" : "Neutral sentiment" }
 
     /// `workflows.never_run`
-    internal static var neverRun: String { AppL10n.copyLocale == .frCA ? "Never run" : "Never run" }
+    internal static var neverRun: String { AppL10n.copyLocale == .frCA ? "Jamais exécuté" : "Never run" }
 
     /// `workflows.new_contact`
-    internal static var newContact: String { AppL10n.copyLocale == .frCA ? "New contact" : "New contact" }
+    internal static var newContact: String { AppL10n.copyLocale == .frCA ? "Nouveau contact" : "New contact" }
 
     /// `workflows.positive_sentiment`
-    internal static var positiveSentiment: String { AppL10n.copyLocale == .frCA ? "Positive sentiment" : "Positive sentiment" }
+    internal static var positiveSentiment: String { AppL10n.copyLocale == .frCA ? "Sentiment positif" : "Positive sentiment" }
 
     /// `workflows.retry`
-    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Try again" : "Try again" }
+    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 
     /// `workflows.run_unfinished`
-    internal static var runUnfinished: String { AppL10n.copyLocale == .frCA ? "Did not finish" : "Did not finish" }
+    internal static var runUnfinished: String { AppL10n.copyLocale == .frCA ? "Non terminée" : "Did not finish" }
 
     /// `workflows.runs_empty`
-    internal static var runsEmpty: String { AppL10n.copyLocale == .frCA ? "This workflow has not run yet." : "This workflow has not run yet." }
+    internal static var runsEmpty: String { AppL10n.copyLocale == .frCA ? "Ce flux de travail n'a pas encore été exécuté." : "This workflow has not run yet." }
 
     /// `workflows.runs_heading`
-    internal static var runsHeading: String { AppL10n.copyLocale == .frCA ? "Recent runs" : "Recent runs" }
+    internal static var runsHeading: String { AppL10n.copyLocale == .frCA ? "Exécutions récentes" : "Recent runs" }
 
     /// `workflows.runs_more`
-    internal static var runsMore: String { AppL10n.copyLocale == .frCA ? "Load more runs" : "Load more runs" }
+    internal static var runsMore: String { AppL10n.copyLocale == .frCA ? "Charger plus d'exécutions" : "Load more runs" }
 
     /// `workflows.section`
-    internal static var section: String { AppL10n.copyLocale == .frCA ? "Workflows" : "Workflows" }
+    internal static var section: String { AppL10n.copyLocale == .frCA ? "Flux de travail" : "Workflows" }
 
     /// `workflows.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Workflows" : "Workflows" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Flux de travail" : "Workflows" }
 }
 
 extension WorkspacesCopy {
     /// `workspaces.administrator`
-    internal static var administrator: String { AppL10n.copyLocale == .frCA ? "Administrator" : "Administrator" }
+    internal static var administrator: String { AppL10n.copyLocale == .frCA ? "Administrateur" : "Administrator" }
 
     /// `workspaces.member`
-    internal static var member: String { AppL10n.copyLocale == .frCA ? "Member" : "Member" }
+    internal static var member: String { AppL10n.copyLocale == .frCA ? "Membre" : "Member" }
 
     /// `workspaces.missing_regions`
     internal static func missingRegions(_ regions: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Some workspaces are missing: we could not reach \(regions)." : "Some workspaces are missing: we could not reach \(regions)."
+        AppL10n.copyLocale == .frCA ? "Certains espaces de travail sont absents (sans réponse\u{00A0}: \(regions))." : "Some workspaces are missing: we could not reach \(regions)."
     }
 
     /// `workspaces.read_only_access`
-    internal static var readOnlyAccess: String { AppL10n.copyLocale == .frCA ? "Read-only access" : "Read-only access" }
+    internal static var readOnlyAccess: String { AppL10n.copyLocale == .frCA ? "Lecture seule" : "Read-only access" }
 
     /// `workspaces.region_and_role`
     internal static func regionAndRole(_ region: String, _ role: String) -> String {
@@ -5604,18 +5610,18 @@ extension WorkspacesCopy {
 
     /// `workspaces.region_line`
     internal static func regionLine(_ region: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Region: \(region)" : "Region: \(region)"
+        AppL10n.copyLocale == .frCA ? "Région\u{00A0}: \(region)" : "Region: \(region)"
     }
 
     /// `workspaces.switch_workspace`
-    internal static var switchWorkspace: String { AppL10n.copyLocale == .frCA ? "Switch workspace" : "Switch workspace" }
+    internal static var switchWorkspace: String { AppL10n.copyLocale == .frCA ? "Changer d'espace" : "Switch workspace" }
 
     /// `workspaces.viewer`
-    internal static var viewer: String { AppL10n.copyLocale == .frCA ? "Viewer" : "Viewer" }
+    internal static var viewer: String { AppL10n.copyLocale == .frCA ? "Lecteur" : "Viewer" }
 
     /// `workspaces.workspace`
-    internal static var workspace: String { AppL10n.copyLocale == .frCA ? "Workspace" : "Workspace" }
+    internal static var workspace: String { AppL10n.copyLocale == .frCA ? "Espace de travail" : "Workspace" }
 
     /// `workspaces.workspaces`
-    internal static var workspaces: String { AppL10n.copyLocale == .frCA ? "Workspaces" : "Workspaces" }
+    internal static var workspaces: String { AppL10n.copyLocale == .frCA ? "Espaces de travail" : "Workspaces" }
 }
