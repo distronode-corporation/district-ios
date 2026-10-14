@@ -238,8 +238,8 @@ fi
 echo "IOS-SEC-01 ok - no UI-test seam in the archived binary"
 
 # ── French stays out until it is switched on ─────────────────────────────────
-# ⛔ THE ARCHIVE IS DISCARDED IF IT HOLDS fr-CA.lproj WHILE DISTRICT_FRENCH IS OFF.
-# French enters the app only through project.fr.yml, which `xcodegen generate` above
+# ⛔ THE ARCHIVE IS DISCARDED IF IT HOLDS fr-CA.lproj WHILE DISTRICT_FRENCH IS OFF,
+# OR LACKS ITS TABLES WHILE DISTRICT_FRENCH IS ON. French enters the app only through project.fr.yml, which `xcodegen generate` above
 # includes when DISTRICT_FRENCH is a true value; with it unset the bundle must hold
 # en.lproj alone. A French table in an English release would turn the push titles
 # and the permission prompts French for every French device, and AppL10n would then
@@ -247,18 +247,50 @@ echo "IOS-SEC-01 ok - no UI-test seam in the archived binary"
 # French that has not been reviewed. Same verdict as the seam guard: deleted, not
 # warned about.
 #
-# ⛔ AND NEVER A PLAIN fr.lproj, EVEN WITH FRENCH ON. Beside fr-CA.lproj it would
-# take every fr-FR, fr-BE and fr-CH device, which must read the Canadian French.
+# ⛔ AND NEVER ANOTHER FRENCH .lproj, EVEN WITH FRENCH ON: fr.lproj, fr_CA.lproj,
+# fr-FR.lproj, any spelling, any case. Beside fr-CA.lproj a plain fr.lproj would take
+# every fr-FR, fr-BE and fr-CH device, which must read the Canadian French, and
+# AppL10n turns the app French for ANY bundle localization starting with "fr", so a
+# French table under another name is French switched on all the same.
+#
+# ⛔ WITH FRENCH ON, fr-CA.lproj MUST HOLD BOTH TABLES. At the 3.0 cut this is the
+# proof French arrived: a DISTRICT_FRENCH build without them would show English
+# push titles and permission prompts on French devices.
+#
+# ⚠️ THE APP'S OWN TOP LEVEL ONLY, never Frameworks/: AppL10n reads the main
+# bundle's localizations, and a dependency's own .lproj tables are not this app's
+# French. Bash builtins only (the glob, `[[ ]]` under nocasematch), which also run
+# on the harness's stub PATH.
 APP_DIR="$ARCHIVE_PATH/Products/Applications/DistrictAI.app"
 case "${DISTRICT_FRENCH:-}" in
   YES | yes | true | TRUE | 1) FRENCH_ON=1 ;;
   *) FRENCH_ON=0 ;;
 esac
+HAS_FR_CA=0
+OTHER_FRENCH=""
+shopt -s nocasematch
+for lproj in "$APP_DIR"/*.lproj; do
+  [ -d "$lproj" ] || continue
+  name="${lproj##*/}"
+  if [ "$name" = "fr-CA.lproj" ]; then
+    HAS_FR_CA=1
+  elif [[ "$name" == fr* ]]; then
+    OTHER_FRENCH="$OTHER_FRENCH $name"
+  fi
+done
+shopt -u nocasematch
 FRENCH_REFUSAL=""
-if [ -e "$APP_DIR/fr.lproj" ]; then
-  FRENCH_REFUSAL="the archived app holds fr.lproj, which is never shipped (fr-CA.lproj is the only French)."
-elif [ "$FRENCH_ON" = "0" ] && [ -e "$APP_DIR/fr-CA.lproj" ]; then
+if [ -n "$OTHER_FRENCH" ]; then
+  FRENCH_REFUSAL="the archived app holds$OTHER_FRENCH, which is never shipped (fr-CA.lproj is the only French)."
+elif [ "$FRENCH_ON" = "0" ] && [ "$HAS_FR_CA" = "1" ]; then
   FRENCH_REFUSAL="the archived app holds fr-CA.lproj, but DISTRICT_FRENCH is not set, so French is off."
+elif [ "$FRENCH_ON" = "1" ]; then
+  MISSING_TABLES=""
+  for table in Localizable InfoPlist; do
+    [ -f "$APP_DIR/fr-CA.lproj/$table.strings" ] || MISSING_TABLES="$MISSING_TABLES fr-CA.lproj/$table.strings"
+  done
+  [ -z "$MISSING_TABLES" ] ||
+    FRENCH_REFUSAL="DISTRICT_FRENCH is on, but the archived app has no$MISSING_TABLES."
 fi
 if [ -n "$FRENCH_REFUSAL" ]; then
   rm -rf "$ARCHIVE_PATH"
@@ -267,7 +299,7 @@ if [ -n "$FRENCH_REFUSAL" ]; then
   exit 1
 fi
 if [ "$FRENCH_ON" = "1" ]; then
-  echo "French ok - DISTRICT_FRENCH is on"
+  echo "French ok - DISTRICT_FRENCH is on, and fr-CA.lproj holds both tables"
 else
   echo "French ok - no French localization in the archived app"
 fi
