@@ -220,9 +220,17 @@ if [ "$PHASE" = archive ]; then
     printf 'stub release binary\n' >"$app/DistrictAI"
   fi
   # The localizations the bundle would hold: STUB_ARCHIVE_LPROJ is a space-separated
-  # list of .lproj names (fr-CA.lproj, fr.lproj) for the French guard.
+  # list of paths inside the app for the French guard. A path ending in .strings is a
+  # table, written with its folder (fr-CA.lproj/Localizable.strings); anything else is
+  # a folder (fr.lproj, Frameworks/Vendor.framework/fr.lproj).
   for lproj in ${STUB_ARCHIVE_LPROJ:-}; do
-    mkdir -p "$app/$lproj"
+    case "$lproj" in
+      *.strings)
+        mkdir -p "$app/${lproj%/*}"
+        : >"$app/$lproj"
+        ;;
+      *) mkdir -p "$app/$lproj" ;;
+    esac
   done
 fi
 exit 0
@@ -533,9 +541,12 @@ assert_not_contains "$(calls)" "-exportArchive" "nothing is exported without a b
 
 # ── 13b. French stays out until it is switched on ────────────────────────────
 # ⛔ SEEN TO FIRE, AND SEEN TO STAND ASIDE. An English release with a French table is
-# refused and deleted; the same bundle with DISTRICT_FRENCH on goes through; fr.lproj
-# is refused either way.
-echo "13b. refuses fr-CA.lproj while French is off, and fr.lproj always"
+# refused and deleted; the same bundle with DISTRICT_FRENCH on goes through only when
+# fr-CA.lproj holds both tables; any other French .lproj at the app's top level (any
+# spelling, any case) is refused either way; a dependency's own French inside
+# Frameworks/ is not the app's and is left alone.
+FR_CA_TABLES="fr-CA.lproj/Localizable.strings fr-CA.lproj/InfoPlist.strings"
+echo "13b. refuses fr-CA.lproj while French is off, requires it while on, and refuses any other French"
 new_case
 run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
   STUB_ARCHIVE_LPROJ="en.lproj fr-CA.lproj"
@@ -551,16 +562,94 @@ assert_not_contains "$(calls)" "-exportArchive" "nothing is exported"
 
 new_case
 run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
-  STUB_ARCHIVE_LPROJ="en.lproj fr-CA.lproj" DISTRICT_FRENCH=YES
-assert_zero "$RC" "fr-CA.lproj with DISTRICT_FRENCH=YES is accepted"
-assert_contains "$OUT" "French ok - DISTRICT_FRENCH is on" "the guard says French is on"
+  STUB_ARCHIVE_LPROJ="en.lproj $FR_CA_TABLES" DISTRICT_FRENCH=YES
+assert_zero "$RC" "fr-CA.lproj with both tables and DISTRICT_FRENCH=YES is accepted"
+assert_contains "$OUT" "French ok - DISTRICT_FRENCH is on, and fr-CA.lproj holds both tables" "the guard says French is on and present"
+assert_contains "$(calls)" "-exportArchive" "a complete French build is exported"
+
+# French on, but French did not arrive: the 3.0 cut's own failure.
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj" DISTRICT_FRENCH=YES
+assert_nonzero "$RC" "DISTRICT_FRENCH=YES with no fr-CA.lproj fails the script"
+assert_contains "$OUT" "DISTRICT_FRENCH is on, but the archived app has no fr-CA.lproj/Localizable.strings fr-CA.lproj/InfoPlist.strings." "the message names both missing tables"
+assert_contains "$OUT" "has been DELETED" "the archive without French is deleted"
+assert_not_contains "$(calls)" "-exportArchive" "nothing is exported without the French"
 
 new_case
 run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
-  STUB_ARCHIVE_LPROJ="en.lproj fr-CA.lproj fr.lproj" DISTRICT_FRENCH=YES
+  STUB_ARCHIVE_LPROJ="en.lproj fr-CA.lproj" DISTRICT_FRENCH=YES
+assert_nonzero "$RC" "an empty fr-CA.lproj with French on fails the script"
+assert_contains "$OUT" "has no fr-CA.lproj/Localizable.strings fr-CA.lproj/InfoPlist.strings." "the message names both tables of the empty folder"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj fr-CA.lproj/Localizable.strings" DISTRICT_FRENCH=YES
+assert_nonzero "$RC" "fr-CA.lproj without InfoPlist.strings fails with French on"
+assert_contains "$OUT" "has no fr-CA.lproj/InfoPlist.strings." "the message names the one missing table"
+assert_not_contains "$OUT" "has no fr-CA.lproj/Localizable.strings" "the table that is there is not named"
+assert_not_contains "$(calls)" "-exportArchive" "nothing is exported with half the French"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj $FR_CA_TABLES fr.lproj" DISTRICT_FRENCH=YES
 assert_nonzero "$RC" "fr.lproj fails the script even with French on"
 assert_contains "$OUT" "holds fr.lproj" "the message names fr.lproj"
 assert_not_contains "$(calls)" "-exportArchive" "nothing is exported with fr.lproj"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj $FR_CA_TABLES fr-FR.lproj" DISTRICT_FRENCH=YES
+assert_nonzero "$RC" "fr-FR.lproj beside a complete fr-CA.lproj fails with French on"
+assert_contains "$OUT" "holds fr-FR.lproj, which is never shipped" "the message names fr-FR.lproj"
+
+# The same table under another spelling: AppL10n's "fr" prefix would switch it on.
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj fr-ca.lproj/Localizable.strings fr-ca.lproj/InfoPlist.strings" DISTRICT_FRENCH=YES
+assert_nonzero "$RC" "fr-ca.lproj (lower case) is not fr-CA.lproj, even with French on"
+assert_contains "$OUT" "holds fr-ca.lproj, which is never shipped" "the message names the misspelt folder"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj fr.lproj"
+assert_nonzero "$RC" "fr.lproj fails the script with French off"
+assert_contains "$OUT" "holds fr.lproj, which is never shipped" "the message names fr.lproj"
+assert_contains "$OUT" "has been DELETED" "the archive with fr.lproj is deleted"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj fr_CA.lproj"
+assert_nonzero "$RC" "fr_CA.lproj (underscore) fails the script with French off"
+assert_contains "$OUT" "holds fr_CA.lproj" "the message names fr_CA.lproj"
+assert_not_contains "$(calls)" "-exportArchive" "nothing is exported with fr_CA.lproj"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj FR.lproj"
+assert_nonzero "$RC" "FR.lproj (upper case) fails the script with French off"
+assert_contains "$OUT" "holds FR.lproj" "the match ignores case"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj fr.lproj fr_CA.lproj"
+assert_nonzero "$RC" "two stray French folders fail the script"
+assert_contains "$OUT" " fr.lproj" "the message names fr.lproj"
+assert_contains "$OUT" " fr_CA.lproj" "the message names fr_CA.lproj too"
+
+# ⚠️ NOT THE APP'S FRENCH. A framework's own tables live under Frameworks/ and do not
+# change what AppL10n reads; the guard stays at the app's top level.
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj Frameworks/Vendor.framework/fr.lproj Frameworks/Vendor.framework/fr-CA.lproj"
+assert_zero "$RC" "a framework's own French with French off is accepted"
+assert_contains "$OUT" "French ok - no French localization" "the framework's French is not the app's"
+
+# Names that merely contain "fr" elsewhere are not French.
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj af.lproj Base.lproj"
+assert_zero "$RC" "af.lproj and Base.lproj are not French"
 
 new_case
 run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \

@@ -69,6 +69,13 @@ jobs:
       SENTRY_CLI_VERSION: 3.8.0
       SENTRY_CLI_SHA256: 2c26914636c47ab9bf9e710484ad7b44d371cbec8bd29cafb36b3cf877bf4285
       SENTRY_ORG: distronode-corporation-eu
+      # ⛔ FRENCH (fr-CA) IS OFF UNTIL THE 3.0 CUT, AND THIS LINE IS THE ONE SWITCH.
+      # archive-imac.sh hands it to `xcodegen generate`, which merges project.fr.yml
+      # (the fr-CA.lproj tables) only when it is YES, and its French guard reads the
+      # same value: with "NO" an archive holding fr-CA.lproj is deleted, with "YES" one
+      # LACKING fr-CA.lproj's two tables is, and any other French .lproj is refused
+      # either way. At the cut it becomes "YES" and nothing else changes.
+      DISTRICT_FRENCH: "NO"
     steps:
       # ⛔ THE WHOLE HISTORY. The build number is 4101 plus `git rev-list --count HEAD`,
       # and a shallow clone answers 1; the preflight refuses one.
