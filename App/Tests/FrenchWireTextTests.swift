@@ -96,6 +96,26 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(french { AnalyticsFormat.amount(412) }, "412")
     }
 
+    /// ⛔ WHOLE MINUTES DROP THE SECONDS IN FRENCH (format-vectors.json, formatMinutesSeconds).
+    func testAnAverageDurationIsTheCoresInFrench() {
+        XCTAssertEqual(AnalyticsFormat.duration(seconds: 120), "2m 0s")
+        XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 120) }, "2\(Self.nbsp)min")
+        XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 3600) }, "60\(Self.nbsp)min")
+        XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 65) }, "1\(Self.nbsp)min 5\(Self.nbsp)s")
+    }
+
+    func testTheIncludedMinutesAreGroupedInFrench() {
+        let amount = french { AnalyticsFormat.amount(1522.75) }
+        XCTAssertEqual(
+            french { BillingCopy.meterUsedOf(amount, included: AppWire.count(1500)) },
+            "Minutes utilisées\(Self.nbsp): 1\(Self.nbsp)522,75 sur 1\(Self.nbsp)500 incluses"
+        )
+        XCTAssertEqual(
+            BillingCopy.meterUsedOf(AnalyticsFormat.amount(1522.75), included: AppWire.count(1500)),
+            "1522.75 of 1500 included minutes used"
+        )
+    }
+
     func testAMonthIsAsSentInEnglishAndWrittenOutInFrench() {
         XCTAssertEqual(AnalyticsFormat.sentMonth("2026-08"), "2026-08")
         XCTAssertEqual(french { AnalyticsFormat.sentMonth("2026-08") }, "août 2026")

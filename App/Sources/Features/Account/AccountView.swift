@@ -87,6 +87,8 @@ struct AccountView: View {
             }
             .padding(DistrictSpacing.gutter)
             .districtReadableWidth()
+            // ⚠️ EVERY ROW'S SENTENCE IN FULL. See ``EnvironmentValues/districtRowWrapsSubtitle``.
+            .environment(\.districtRowWrapsSubtitle, true)
         }
         // ⛔ `.contain` BEFORE THE IDENTIFIER, ALWAYS. Applied alone to a container,
         // `.accessibilityIdentifier` PROPAGATES to every descendant and overwrites

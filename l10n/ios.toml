@@ -790,7 +790,7 @@ fr = "Minutes utilisées\u00A0: {amount} sur {included} incluses"
 ctx = "body"
 screen = "billing"
 tier = "T1"
-args = { amount = "str", included = "int" }
+args = { amount = "str", included = "str" }
 state = "reviewed"
 id = { swift = "BillingCopy.meterUsedOf(_:included:)" }
 note = "⚠️ THE REAL NUMBERS, EVEN PAST THE ALLOWANCE. The BAR clamps; this label must not. See ``BillingFormat/meterFraction(used:included:)``."

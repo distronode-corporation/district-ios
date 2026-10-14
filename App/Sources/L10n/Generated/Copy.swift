@@ -329,7 +329,7 @@ extension BillingCopy {
     }
 
     /// `billing.meter_used_of`
-    internal static func meterUsedOf(_ amount: String, included: Int) -> String {
+    internal static func meterUsedOf(_ amount: String, included: String) -> String {
         AppL10n.copyLocale == .frCA ? "Minutes utilisées\u{00A0}: \(amount) sur \(included) incluses" : "\(amount) of \(included) included minutes used"
     }
 
