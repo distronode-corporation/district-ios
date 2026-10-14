@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import DistrictNetwork
 import Foundation
@@ -80,8 +81,11 @@ enum MessagingCatalog {
         }
     }
 
+    /// ⚠️ ENGLISH CAPITALISES THE WIRE WORD, AS IT ALWAYS HAS; French reads the
+    /// vocabulary's carrier name (`messagingCarrier`), « Autre » for one it does not list.
     static func providerLabel(_ provider: String) -> String {
-        provider.prefix(1).uppercased() + provider.dropFirst()
+        guard AppL10n.copyLocale == .en else { return WireLabel.label(.messagingCarrier, provider) }
+        return provider.prefix(1).uppercased() + provider.dropFirst()
     }
 }
 

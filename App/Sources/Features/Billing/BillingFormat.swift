@@ -68,6 +68,10 @@ enum BillingFormat {
     /// static of one is a concurrency error under Swift 6 rather than a saving.
     static func date(unixSeconds: Int) -> String {
         let moment = Date(timeIntervalSince1970: TimeInterval(unixSeconds))
+        // ⚠️ French through the core (« 1er août 2026 »), as ``WireDate`` does.
+        if L10nRuntime.locale == .frCA {
+            return L10nFormat.date(moment, timezone: TimeZone.current.identifier)
+        }
         return moment.formatted(date: .abbreviated, time: .omitted)
     }
 

@@ -135,7 +135,7 @@ struct SupportThreadView: View {
     private func messageCard(_ message: SupportMessage) -> some View {
         DistrictCard {
             HStack(spacing: DistrictSpacing.tight) {
-                Text(message.author)
+                Text(AppWire.placeholder(message.author))
                     .font(DistrictType.labelSmall)
                     .foregroundStyle(tone(for: message).ink(colors))
                 Spacer(minLength: 0)

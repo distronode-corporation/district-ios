@@ -1,3 +1,5 @@
+import DistrictL10n
+import DistrictModel
 import Foundation
 
 // Every sentence the phone-number PROVISIONING surfaces say: the regulatory filings, the
@@ -75,5 +77,16 @@ extension MarketplaceCopy {
 
     static func sipTrunkMeta(status: String, addresses: Int) -> String {
         sipTrunkMetaLine(status, sipAddressCount(addresses))
+    }
+}
+
+/// A held number's carrier and status, as the owned list and its actions sheet print them:
+/// as sent in English (`twilio · active`), the vocabulary's labels in French.
+enum NumberWireText {
+    static func meta(_ number: ListedNumber) -> String {
+        MarketplaceCopy.numberMeta(
+            provider: AppWire.label(.numberProvider, number.provider),
+            status: AppWire.label(.numberStatus, number.status)
+        )
     }
 }

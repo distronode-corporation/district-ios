@@ -111,6 +111,8 @@ struct SchedulingUserArchiveButton: View {
     let workspaceId: String
     let userId: String
     let userName: String
+    /// The viewer's scheduler zone, which the blocking bookings are told in.
+    let timezone: String
     let onChanged: () -> Void
 
     @State private var archiving: SchedulingWritePresentation<SchedulingUserArchiveModel>?
@@ -134,6 +136,7 @@ struct SchedulingUserArchiveButton: View {
             workspaceId: workspaceId,
             userId: userId,
             userName: userName,
+            timezone: timezone,
             onArchived: { _ in onChanged() }
         )
     }

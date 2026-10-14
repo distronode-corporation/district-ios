@@ -1,4 +1,5 @@
 import DistrictL10n
+import DistrictModel
 import Foundation
 import SwiftUI
 
@@ -55,6 +56,10 @@ enum AnalyticsFormat {
     static func amount(_ value: Double) -> String {
         guard value.isFinite else { return absent }
         let rounded = (value * 100).rounded() / 100
+        // ⚠️ FRENCH WRITES ITS OWN SEPARATORS (« 1 204,25 »); the `.` below is English's.
+        if AppL10n.copyLocale == .frCA {
+            return L10nFormat.number(rounded)
+        }
         // ⚠️ `String(format:)` WITH NO `locale:` FORMATS WITHOUT LOCALISATION, so the
         // separator is always a `.` — which is what the web console shows and what a
         // decimal comma here would quietly disagree with.
@@ -132,6 +137,28 @@ enum AnalyticsFormat {
         guard parts.count == 2, parts[0].count == 4, Int(parts[0]) != nil else { return month }
         guard let ordinal = Int(parts[1]), let name = L10nFormat.monthAbbreviation(ordinal) else { return month }
         return AnalyticsCopy.monthYear(name, String(parts[0]))
+    }
+
+    /// A trend bucket's day: the server's English `date` in English (`Aug 9`), and in French
+    /// written from `isoDate` (« 9 août 2026 »), since the server writes English only.
+    ///
+    /// ⚠️ READ AS A CALENDAR DAY IN UTC AND WRITTEN BACK IN UTC, for the reason
+    /// ``monthLabel(_:)`` gives: `isoDate` is a key, not an instant.
+    static func bucketLabel(_ point: EngagementPoint) -> String {
+        guard AppL10n.copyLocale == .frCA else { return point.date }
+        let parts = point.isoDate.split(separator: "-").compactMap { Int($0) }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .gmt
+        guard parts.count == 3,
+              let day = calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+        else { return point.date }
+        return L10nFormat.date(day, timezone: "UTC")
+    }
+
+    /// A `YYYY-MM` month for a sentence: as sent in English, as it always was, and
+    /// ``monthLabel(_:)`` in French (« août 2026 »).
+    static func sentMonth(_ month: String) -> String {
+        AppL10n.copyLocale == .frCA ? monthLabel(month) : month
     }
 
     /// Parse a server-supplied hex colour, or nil if it cannot be read.

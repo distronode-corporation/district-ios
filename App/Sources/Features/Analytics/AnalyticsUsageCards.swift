@@ -25,7 +25,7 @@ struct AnalyticsUsageCard: View {
     var body: some View {
         DistrictCard(eyebrow: AnalyticsCopy.usageThisMonth) {
             if let usage {
-                Text(AnalyticsCopy.usageMonth(usage.month))
+                Text(AnalyticsCopy.usageMonth(AnalyticsFormat.sentMonth(usage.month)))
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
                 ForEach(Self.rows(usage), id: \.label) { row in

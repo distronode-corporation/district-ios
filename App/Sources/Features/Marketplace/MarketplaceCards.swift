@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import Foundation
 import SwiftUI
@@ -98,7 +99,7 @@ struct SearchResultsList: View {
     @ViewBuilder
     private var carrier: some View {
         if !provider.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            DistrictEyebrow(text: MarketplaceCopy.carrier(provider))
+            DistrictEyebrow(text: MarketplaceCopy.carrier(AppWire.label(.numberProvider, provider)))
         }
     }
 }
@@ -157,8 +158,8 @@ private struct AvailableNumberRow: View {
     /// ⚠️ PRESENT AND POSSIBLY EMPTY rather than absent, so an empty list falls back
     /// to the number's type instead of leaving a blank line.
     private var capabilities: String {
-        let joined = number.capabilities.joined(separator: " · ")
-        return joined.isEmpty ? number.type : joined
+        let joined = number.capabilities.map { AppWire.label(.numberCapability, $0) }.joined(separator: " · ")
+        return joined.isEmpty ? AppWire.label(.numberType, number.type) : joined
     }
 
     /// ⛔ AN ABSENT PRICE MEANS "not published", NOT "free". The carrier's pricing
@@ -252,7 +253,7 @@ private struct ListedNumberRow: View {
                 .font(DistrictType.title)
                 .foregroundStyle(colors.foreground)
             friendlyName
-            Text(MarketplaceCopy.numberMeta(provider: number.provider, status: number.status))
+            Text(NumberWireText.meta(number))
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.mutedForeground)
             managed

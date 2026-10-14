@@ -232,6 +232,24 @@ final class SchedulingWritesBTeamTests: XCTestCase {
         XCTAssertEqual(transport.requests.count, 1, "the archive itself must not be sent")
     }
 
+    /// ⛔ A BLOCKING BOOKING IS TOLD IN THE VIEWER'S ZONE, NEVER AS THE WIRE'S ISO INSTANT.
+    /// `2099-09-20T15:00:00Z` is 11:00 in Toronto; an unreadable stamp says Unknown rather
+    /// than echoing the raw text.
+    func testABlockingBookingIsToldInTheViewersZoneNotAsTheWireInstant() async {
+        let upcoming = """
+        {"items":[{"id":"bk-1","start_at":"2099-09-20T15:00:00Z","end_at":"2099-09-20T15:30:00Z",
+        "event_type_name":"Intro","event_type_slug":"intro","attendee_name":"Sam",
+        "attendee_email":"sam@example.com"},
+        {"id":"bk-2","start_at":"not a time","end_at":"","event_type_name":"Intro",
+        "event_type_slug":"intro","attendee_name":"Kim","attendee_email":"kim@example.com"}]}
+        """
+        let transport = SettingsTransport([Fixtures.ok(upcoming)])
+        let model = Self.archiveModel(transport, timezone: "America/Toronto")
+        await model.loadUpcoming()
+
+        XCTAssertEqual(model.bookings.map(model.when), ["Sep 20, 11:00", SchedulingCopy.unknownTime])
+    }
+
     /// ⛔ A FAILED READ IS NOT AN EMPTY DIARY. "We could not look" and "there is
     /// nothing" are different answers and only one of them may unlock the button.
     func testAFailedUpcomingReadLeavesTheArchiveLocked() async {
@@ -254,6 +272,7 @@ final class SchedulingWritesBTeamTests: XCTestCase {
             workspaceId: Fixtures.workspaceId,
             userId: "u-9",
             userName: "Grace",
+            timezone: "UTC",
             onArchived: { archived = $0 }
         )
         await model.loadUpcoming()
@@ -302,12 +321,16 @@ final class SchedulingWritesBTeamTests: XCTestCase {
         return try JSONDecoder().decode(SchedulingTeam.self, from: Data(json.utf8))
     }
 
-    private static func archiveModel(_ transport: SettingsTransport) -> SchedulingUserArchiveModel {
+    private static func archiveModel(
+        _ transport: SettingsTransport,
+        timezone: String = "UTC"
+    ) -> SchedulingUserArchiveModel {
         SchedulingUserArchiveModel(
             admin: SchedulingWritesBFixtures.repository(transport),
             workspaceId: SchedulingWritesBFixtures.workspaceId,
             userId: "u-9",
             userName: "Grace",
+            timezone: timezone,
             onArchived: { _ in }
         )
     }

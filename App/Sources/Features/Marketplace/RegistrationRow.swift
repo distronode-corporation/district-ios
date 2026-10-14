@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -45,7 +46,7 @@ struct RegistrationRow: View {
             Text(
                 MarketplaceCopy.registrationTitle(
                     country: registration.isoCountry,
-                    numberType: registration.numberType
+                    numberType: AppWire.label(.numberType, registration.numberType)
                 )
             )
             .font(DistrictType.title)

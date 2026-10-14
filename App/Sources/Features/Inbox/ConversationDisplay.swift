@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import Foundation
 
@@ -68,7 +69,7 @@ extension ConversationDisplay {
             avatarTone: contactName == nil ? .neutral : .district,
             subtitle: Self.subtitle(body: last.body, outbound: outbound),
             channelLabels: Self.channelLabels(conversation.channels),
-            statusLabel: outbound ? last.status : nil,
+            statusLabel: outbound ? AppWire.label(.messageDeliveryStatus, last.status) : nil,
             statusTone: MessageStatusTone.tone(for: last.status)
         )
     }
@@ -85,7 +86,10 @@ extension ConversationDisplay {
     /// badge on every row is noise that hides the one badge that matters.
     private static func channelLabels(_ channels: [String]) -> [String] {
         guard channels.count > 1 else { return [] }
-        return channels.map { $0.uppercased() }
+        // ⚠️ English keeps the wire word in capitals (`EMAIL`), as it always has; French
+        // names the channel (« COURRIEL »).
+        guard AppL10n.copyLocale == .frCA else { return channels.map { $0.uppercased() } }
+        return channels.map { ThreadChannelName.of($0).uppercased() }
     }
 
     /// ⚠️ A ONE-CHARACTER GLYPH, NOT A WORD. The Android row's note argues against a

@@ -314,8 +314,7 @@ private struct DeviceCard: View {
     }
 
     private var platform: String {
-        let trimmed = device.platform.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? DevicesCopy.unknownPlatform : trimmed
+        DevicePlatformName.of(device.platform)
     }
 
     /// ⛔ "Last active", NEVER "last used" — see the ⚠️ on the screen. A device
@@ -324,7 +323,9 @@ private struct DeviceCard: View {
     /// an empty line.
     private var lastActive: String {
         guard let stamp = device.lastUsedAt else { return DevicesCopy.signedInRecently }
-        return DevicesCopy.lastActive(stamp)
+        // ⛔ FORMATTED, NEVER THE WIRE'S ISO INSTANT, which read as
+        // "Last active 2026-08-15T14:30:00.000Z" in every language.
+        return DevicesCopy.lastActive(WireDate.display(stamp))
     }
 }
 
@@ -352,4 +353,25 @@ private struct DeviceNotice: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .districtCardSurface(bordered: false)
     }
+}
+
+/// A device's platform as people write it: the product name for the five the service
+/// registers (`ios` is iOS), the value as sent for anything else, and a placeholder for none.
+///
+/// ⚠️ THE SAME IN BOTH LANGUAGES: these are product names, not words to translate. English
+/// read `ios` and `android` until 3.0, as district-android did; both now say the product.
+enum DevicePlatformName {
+    static func of(_ platform: String) -> String {
+        let trimmed = platform.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return DevicesCopy.unknownPlatform }
+        return products[trimmed.lowercased()] ?? trimmed
+    }
+
+    private static let products = [
+        "ios": "iOS",
+        "android": "Android",
+        "macos": "macOS",
+        "windows": "Windows",
+        "linux": "Linux",
+    ]
 }

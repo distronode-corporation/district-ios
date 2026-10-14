@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -275,7 +276,7 @@ struct MembersView: View {
     /// schema-level possibility; ``WorkspaceRole/fromWire(_:)`` fails closed to nil and
     /// showing that as "Viewer" would be a claim about privileges nobody granted.
     private static func roleText(_ member: WorkspaceMember) -> String {
-        guard let role = member.parsedRole else { return member.role }
+        guard let role = member.parsedRole else { return AppWire.label(.memberRole, member.role) }
         return role.displayLabel
     }
 }

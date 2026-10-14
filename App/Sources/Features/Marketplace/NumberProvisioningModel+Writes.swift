@@ -1,4 +1,5 @@
 import DistrictData
+import DistrictL10n
 import DistrictModel
 import Foundation
 
@@ -171,7 +172,10 @@ extension NumberProvisioningModel {
         )
         switch outcome {
         case let .success(response):
-            carrierWrite = .done(MarketplaceCopy.a2pSubmitted(status: response.status))
+            carrierWrite = .done(MarketplaceCopy.a2pSubmitted(status: AppWire.label(
+                .a2pRegistrationStatus,
+                response.status
+            )))
         case let .failure(error):
             carrierWrite = .failed(FailureText.from(error), .after(error, .once))
         }
@@ -197,7 +201,10 @@ extension NumberProvisioningModel {
         )
         switch outcome {
         case let .success(response):
-            carrierWrite = .done(MarketplaceCopy.tfvSubmitted(status: response.status))
+            carrierWrite = .done(MarketplaceCopy.tfvSubmitted(status: AppWire.label(
+                .tollFreeVerificationStatus,
+                response.status
+            )))
         case let .failure(error):
             carrierWrite = .failed(FailureText.from(error), .after(error, .once))
         }
