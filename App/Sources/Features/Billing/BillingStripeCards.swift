@@ -1,3 +1,4 @@
+import DistrictData
 import DistrictL10n
 import DistrictModel
 import SwiftUI
@@ -5,8 +6,10 @@ import SwiftUI
 // The cards built from STRIPE's answer, plus the two answers that arrive on a 200 and
 // are not failures.
 //
-// ⛔ EVERY MONEY VALUE THAT REACHES THIS FILE IS IN **CENTS** and goes through
-// `BillingFormat.money(cents:)`. There is no other conversion anywhere in the screen;
+// ⛔ EVERY MONEY VALUE THAT REACHES THIS FILE IS IN **CENTS** and goes through the core's
+// `BillingMoneyFormat` (`subscription.price(cents:)`, `invoice.price(cents:)`): English
+// exactly as before ("$249.00"), French with the currency Stripe names (« 249,00 $ CA »).
+// The catalog sentences carry no "$" of their own. There is no other conversion anywhere in the screen;
 // adding a second one is how two surfaces start quoting different numbers for one
 // invoice.
 //
@@ -69,7 +72,7 @@ struct BillingSubscriptionRow: View {
                 // would quote a free plan to someone who is paying. The route writes
                 // `price?.unit_amount` and both halves of that can be absent.
                 if let amount = subscription.amount {
-                    Text(BillingCopy.moneyMonthly(BillingFormat.money(cents: amount)))
+                    Text(BillingCopy.moneyMonthly(subscription.price(cents: amount)))
                         .font(DistrictType.bodySmall)
                         .foregroundStyle(colors.foreground)
                 }
@@ -82,7 +85,7 @@ struct BillingSubscriptionRow: View {
             // neither key when Stripe's field was null, so a coupon with neither still
             // renders, by name.
             if let discount = subscription.discount {
-                Text(Self.discountText(discount))
+                Text(Self.discountText(discount, in: subscription))
                     .font(DistrictType.bodySmall)
                     .foregroundStyle(colors.success)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -96,12 +99,12 @@ struct BillingSubscriptionRow: View {
         return subscription.cancelAtPeriodEnd ? BillingCopy.endsOn(date) : BillingCopy.renewsOn(date)
     }
 
-    private static func discountText(_ discount: BillingDiscount) -> String {
+    private static func discountText(_ discount: BillingDiscount, in subscription: BillingSubscription) -> String {
         if let percent = discount.percentOff {
             return BillingCopy.discountPercent(discount.couponName, percent: AnalyticsFormat.amount(percent))
         }
         if let amount = discount.amountOff {
-            return BillingCopy.discountAmount(discount.couponName, amount: BillingFormat.money(cents: amount))
+            return BillingCopy.discountAmount(discount.couponName, amount: subscription.price(cents: amount))
         }
         return discount.couponName
     }
@@ -141,7 +144,8 @@ struct BillingSpendCapCard: View {
     /// customer with no cap that they are capped at nothing.
     private var capText: String {
         guard let cents = detail.overageSpendCapCents else { return BillingCopy.spendCapNone }
-        return BillingCopy.spendCapSet(BillingFormat.money(cents: cents))
+        // ⚠️ OUR OWN CEILING, WITH NO CURRENCY ON IT: « 50,00 $ » in French, "$50.00" in English.
+        return BillingCopy.spendCapSet(BillingMoneyFormat.price(cents: cents, currency: nil))
     }
 }
 
@@ -194,7 +198,7 @@ struct BillingInvoiceRow: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 // ⛔ CENTS, and an OPEN invoice shows what is OWED rather than the zero it
                 // has been paid. See ``BillingFormat/invoiceAmountCents(_:)``.
-                Text(BillingCopy.money(BillingFormat.money(cents: BillingFormat.invoiceAmountCents(invoice))))
+                Text(BillingCopy.money(invoice.price(cents: BillingFormat.invoiceAmountCents(invoice))))
                     .font(DistrictType.bodySmall)
                     .foregroundStyle(colors.foreground)
             }
@@ -206,7 +210,7 @@ struct BillingInvoiceRow: View {
                 // absent. Shown only when non-zero: an "incl. $0.00 tax" line is noise on
                 // every untaxed invoice.
                 if invoice.tax > 0 {
-                    Text(BillingCopy.invoiceTax(BillingFormat.money(cents: invoice.tax)))
+                    Text(BillingCopy.invoiceTax(invoice.price(cents: invoice.tax)))
                         .font(DistrictType.caption)
                         .foregroundStyle(colors.mutedForeground)
                 }

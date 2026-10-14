@@ -668,8 +668,8 @@ state = "reviewed"
 id = { swift = "AvailabilityCopy.rowTitle" }
 
 [billing.discount_amount]
-en = "{coupon}, ${amount} off"
-fr = "{coupon}, {amount}\u00A0$ de rabais"
+en = "{coupon}, {amount} off"
+fr = "{coupon}, {amount} de rabais"
 ctx = "label"
 screen = "billing"
 tier = "T1"
@@ -698,8 +698,8 @@ state = "reviewed"
 id = { swift = "BillingCopy.endsOn(_:)" }
 
 [billing.invoice_tax]
-en = "incl. ${amount} tax"
-fr = "dont {amount}\u00A0$ de taxes"
+en = "incl. {amount} tax"
+fr = "dont {amount} de taxes"
 ctx = "label"
 screen = "billing"
 tier = "T1"
@@ -790,14 +790,14 @@ fr = "Minutes utilisées\u00A0: {amount} sur {included} incluses"
 ctx = "body"
 screen = "billing"
 tier = "T1"
-args = { amount = "str", included = "int" }
+args = { amount = "str", included = "str" }
 state = "reviewed"
 id = { swift = "BillingCopy.meterUsedOf(_:included:)" }
 note = "⚠️ THE REAL NUMBERS, EVEN PAST THE ALLOWANCE. The BAR clamps; this label must not. See ``BillingFormat/meterFraction(used:included:)``."
 
 [billing.money]
-en = "${amount}"
-fr = "{amount}\u00A0$"
+en = "{amount}"
+fr = "{amount}"
 ctx = "label"
 screen = "billing"
 tier = "T1"
@@ -807,8 +807,8 @@ id = { swift = "BillingCopy.money(_:)" }
 note = "⚠️ THE \"$\" IS THIS CLIENT MIRRORING THE WEB CONSOLE. Nothing on `/api/billing` carries a currency, so the assumption lives here, in one place, rather than being concatenated beside every amount."
 
 [billing.money_monthly]
-en = "${amount} / month"
-fr = "{amount}\u00A0$ / mois"
+en = "{amount} / month"
+fr = "{amount} / mois"
 ctx = "label"
 screen = "billing"
 tier = "T1"
@@ -1017,8 +1017,8 @@ state = "reviewed"
 id = { swift = "BillingCopy.spendCapRemedy" }
 
 [billing.spend_cap_set]
-en = "Overage beyond your plan is capped at ${amount} a month."
-fr = "Les frais de dépassement de votre forfait sont plafonnés à {amount}\u00A0$ par mois."
+en = "Overage beyond your plan is capped at {amount} a month."
+fr = "Les frais de dépassement de votre forfait sont plafonnés à {amount} par mois."
 ctx = "body"
 screen = "billing"
 tier = "T1"

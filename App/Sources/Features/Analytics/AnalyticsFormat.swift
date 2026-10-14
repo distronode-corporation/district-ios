@@ -37,6 +37,11 @@ enum AnalyticsFormat {
 
     static func duration(seconds: Int) -> String {
         let safe = max(seconds, 0)
+        // ⚠️ FRENCH THROUGH THE CORE, WHICH DROPS ZERO SECONDS: « 2 min », never « 2 min 0 s »
+        // (`contracts/i18n/format-vectors.json`, formatMinutesSeconds). English keeps `2m 0s`.
+        if AppL10n.copyLocale == .frCA {
+            return L10nFormat.minutesSeconds(safe)
+        }
         let minutes = safe / 60
         let remainder = safe % 60
         return minutes > 0 ? AnalyticsCopy.durationMinutesSeconds(minutes, remainder) : AnalyticsCopy

@@ -137,7 +137,8 @@ final class SchedulingWebhookEditorModel {
             let created = try await repository.createWebhook(
                 workspaceId: workspaceId,
                 url: draft.url.trimmingCharacters(in: .whitespacesAndNewlines),
-                events: draft.orderedEvents,
+                events: SchedulingDeveloperFormat.webhookEventsToSave(ticked: draft.events)
+                    .compactMap(SchedulingWebhookEvent.init(rawValue:)),
                 fields: draft.orderedFields
             )
             if let secret = created.secret {
@@ -161,7 +162,9 @@ final class SchedulingWebhookEditorModel {
             _ = try await repository.updateWebhook(
                 workspaceId: workspaceId,
                 webhookId: webhook.id,
-                events: draft.orderedEvents.map(\.rawValue),
+                // ⚠️ AN EVENT ALREADY SUBSCRIBED BUT NO LONGER OFFERED IS KEPT, since the form
+                // no longer draws a box that could untick it.
+                events: SchedulingDeveloperFormat.webhookEventsToSave(ticked: draft.events, stored: webhook.events),
                 fields: draft.orderedFields
             )
             savedNotice = SchedulingWriteCopyC.webhookUpdated

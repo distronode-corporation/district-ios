@@ -1,4 +1,5 @@
 @testable import DistrictAI
+import DistrictData
 import DistrictL10n
 import DistrictModel
 import Foundation
@@ -94,6 +95,56 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(french { AnalyticsFormat.amount(1204.25) }, "1\(Self.nbsp)204,25")
         XCTAssertEqual(french { AnalyticsFormat.amount(318.5) }, "318,5")
         XCTAssertEqual(french { AnalyticsFormat.amount(412) }, "412")
+    }
+
+    /// ⛔ WHOLE MINUTES DROP THE SECONDS IN FRENCH (format-vectors.json, formatMinutesSeconds).
+    func testAnAverageDurationIsTheCoresInFrench() {
+        XCTAssertEqual(AnalyticsFormat.duration(seconds: 120), "2m 0s")
+        XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 120) }, "2\(Self.nbsp)min")
+        XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 3600) }, "60\(Self.nbsp)min")
+        XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 65) }, "1\(Self.nbsp)min 5\(Self.nbsp)s")
+    }
+
+    func testTheIncludedMinutesAreGroupedInFrench() {
+        let amount = french { AnalyticsFormat.amount(1522.75) }
+        XCTAssertEqual(
+            french { BillingCopy.meterUsedOf(amount, included: AppWire.count(1500)) },
+            "Minutes utilisées\(Self.nbsp): 1\(Self.nbsp)522,75 sur 1\(Self.nbsp)500 incluses"
+        )
+        XCTAssertEqual(
+            BillingCopy.meterUsedOf(AnalyticsFormat.amount(1522.75), included: AppWire.count(1500)),
+            "1522.75 of 1500 included minutes used"
+        )
+    }
+
+    // MARK: - Billing money
+
+    /// ⛔ ENGLISH IS BYTE-IDENTICAL TO WHAT THE BILLING SCREEN SHOWED BEFORE THE "$" LEFT THE
+    /// CATALOG: each line below is the old English, glyph and all, for the same cents.
+    func testEnglishBillingLinesAreUnchangedWithTheDollarOutOfTheCatalog() {
+        let price = { (cents: Int, currency: String?) in BillingMoneyFormat.price(cents: cents, currency: currency) }
+        XCTAssertEqual(BillingCopy.money(price(24900, "cad")), "$249.00")
+        XCTAssertEqual(BillingCopy.money(price(-1500, nil)), "$-15.00")
+        XCTAssertEqual(BillingCopy.money(price(120_425, "usd")), "$1204.25")
+        XCTAssertEqual(BillingCopy.moneyMonthly(price(24900, "cad")), "$249.00 / month")
+        XCTAssertEqual(BillingCopy.invoiceTax(price(3237, "cad")), "incl. $32.37 tax")
+        XCTAssertEqual(BillingCopy.discountAmount("Founding", amount: price(500, "cad")), "Founding, $5.00 off")
+        XCTAssertEqual(
+            BillingCopy.spendCapSet(price(5000, nil)),
+            "Overage beyond your plan is capped at $50.00 a month."
+        )
+    }
+
+    /// French names the currency Stripe sends (« $ CA », « $ US ») and a bare « $ » without one.
+    func testFrenchBillingLinesNameTheCurrency() {
+        let price = { (cents: Int, currency: String?) in BillingMoneyFormat.price(cents: cents, currency: currency) }
+        let nbsp = Self.nbsp
+        XCTAssertEqual(french { BillingCopy.money(price(24900, "cad")) }, "249,00\(nbsp)$\(nbsp)CA")
+        XCTAssertEqual(french { BillingCopy.moneyMonthly(price(24900, "usd")) }, "249,00\(nbsp)$\(nbsp)US / mois")
+        XCTAssertEqual(
+            french { BillingCopy.spendCapSet(price(5000, nil)) },
+            "Les frais de dépassement de votre forfait sont plafonnés à 50,00\(nbsp)$ par mois."
+        )
     }
 
     func testAMonthIsAsSentInEnglishAndWrittenOutInFrench() {
