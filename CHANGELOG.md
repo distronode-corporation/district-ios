@@ -80,6 +80,11 @@ built from history before publication, so they have no tags in this repository.
   English.
 - `release.yml` has a `build_only` dispatch input: it archives and signs on the runner and
   uploads nothing.
+- The catalogs carry their reviewed Canadian French (fr-CA): 1,728 entries in
+  `l10n/ios.toml`, `l10n/push.toml` and `l10n/infoplist.toml`, regenerated into `Copy.swift`
+  and the `fr-CA.lproj` strings, so `FR_COMPLETE` is true. French stays switched off: the
+  French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
+  the release guard is unchanged.
 
 ## [2.2.1] - 2026-10-13
 
