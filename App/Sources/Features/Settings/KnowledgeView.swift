@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 import UniformTypeIdentifiers
@@ -242,9 +243,13 @@ struct KnowledgeView: View {
             Text(document.title)
                 .font(DistrictType.titleSmall)
                 .foregroundStyle(colors.foreground)
-            Text(SettingsCopy.knowledgeDocumentMeta(document.sourceType, document.status, document.chunkCount))
-                .font(DistrictType.caption)
-                .foregroundStyle(colors.mutedForeground)
+            Text(SettingsCopy.knowledgeDocumentMeta(
+                document.sourceType,
+                AppWire.label(.knowledgeDocumentStatus, document.status),
+                document.chunkCount
+            ))
+            .font(DistrictType.caption)
+            .foregroundStyle(colors.mutedForeground)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

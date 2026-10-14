@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -153,7 +154,7 @@ struct CarrierRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
             HStack(spacing: DistrictSpacing.tight) {
-                Text(name)
+                Text(AppWire.label(.numberProvider, name))
                     .font(DistrictType.titleSmall)
                     .foregroundStyle(colors.foreground)
                 DistrictBadge(
@@ -224,7 +225,7 @@ struct SipCard: View {
                     SettingsReadOnlyRow(
                         label: trunk.domain,
                         value: MarketplaceCopy.sipTrunkMeta(
-                            status: trunk.status,
+                            status: AppWire.label(.sipTrunkStatus, trunk.status),
                             addresses: trunk.ipAccessControlList.count
                         )
                     )

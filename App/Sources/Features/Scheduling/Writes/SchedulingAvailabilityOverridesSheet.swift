@@ -90,7 +90,10 @@ struct SchedulingAvailabilityOverridesSheet: View {
     private func overrideRow(_ row: SchedulingOverrideRow) -> some View {
         HStack(spacing: DistrictSpacing.tight) {
             VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-                Text(row.start == row.end ? row.start : SchedulingWriteCopy.dateRange(row.start, row.end))
+                // ⛔ THE HOURS SCREEN'S OWN DATES (`Sep 12 to Sep 14, 2026`), NEVER THE WIRE'S
+                // `2026-09-12`, which this sheet showed in both languages while the screen
+                // behind it already wrote them out.
+                Text(SchedulingHoursFormat.formatOverrideDates(start: row.start, end: row.end))
                     .font(DistrictType.titleSmall)
                     .foregroundStyle(colors.foreground)
                 Text(SchedulingHoursFormat.overrideHours(row))

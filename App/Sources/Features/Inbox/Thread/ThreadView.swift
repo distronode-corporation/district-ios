@@ -1,4 +1,5 @@
 import DistrictData
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -342,7 +343,10 @@ private struct MessageBubble: View {
             // artefact; on an outbound one it is the delivery answer the operator is
             // actually looking for after a send.
             if event.isOutbound, !event.status.isEmpty {
-                DistrictBadge(text: event.status, tone: ThreadMessageTone.tone(for: event.status))
+                DistrictBadge(
+                    text: AppWire.label(.messageDeliveryStatus, event.status),
+                    tone: ThreadMessageTone.tone(for: event.status)
+                )
             }
             if !event.mediaUrls.isEmpty {
                 DistrictBadge(text: attachmentLabel, tone: .info)

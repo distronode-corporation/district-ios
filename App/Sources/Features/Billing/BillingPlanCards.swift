@@ -186,7 +186,7 @@ struct BillingUsageMeterCard: View {
             bar(BillingFormat.meterFraction(used: used, included: included))
         }
         if let month = usage?.month, !month.trimmingCharacters(in: .whitespaces).isEmpty {
-            BillingNote(text: BillingCopy.meterMonth(month))
+            BillingNote(text: BillingCopy.meterMonth(AnalyticsFormat.sentMonth(month)))
         }
     }
 

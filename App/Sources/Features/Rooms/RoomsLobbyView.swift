@@ -1,4 +1,5 @@
 import DistrictData
+import DistrictL10n
 import DistrictModel
 import DistrictNetwork
 import SwiftUI
@@ -285,7 +286,7 @@ struct MeetingRow: View {
                     .font(DistrictType.titleSmall)
                     .foregroundStyle(colors.foreground)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                DistrictBadge(text: meeting.status, tone: isLive ? .district : .neutral)
+                DistrictBadge(text: AppWire.label(.meetingStatus, meeting.status), tone: isLive ? .district : .neutral)
             }
             Text(subtitle)
                 .font(DistrictType.bodySmall)

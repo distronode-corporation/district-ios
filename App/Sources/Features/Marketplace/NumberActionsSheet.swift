@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -37,11 +38,9 @@ struct NumberActionsSheet: View {
                 Text(number.phoneNumber)
                     .font(DistrictType.titleLarge)
                     .foregroundStyle(colors.foreground)
-                Text(
-                    MarketplaceCopy.numberMeta(provider: number.provider, status: number.status)
-                )
-                .font(DistrictType.bodySmall)
-                .foregroundStyle(colors.mutedForeground)
+                Text(NumberWireText.meta(number))
+                    .font(DistrictType.bodySmall)
+                    .foregroundStyle(colors.mutedForeground)
                 NumberWriteNotice(state: model.numberWrite)
                 actions
             }

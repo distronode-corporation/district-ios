@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -181,19 +182,19 @@ struct OverviewView: View {
             HStack(spacing: DistrictSpacing.row) {
                 DistrictMetricTile(
                     label: OverviewCopy.totalCallsRouted,
-                    value: "\(metrics.totalCalls)",
+                    value: AppWire.count(metrics.totalCalls),
                     caption: OverviewCopy.cumulative
                 )
                 DistrictMetricTile(
                     label: OverviewCopy.weeklyCallVolume,
-                    value: "\(metrics.callsThisWeek)",
+                    value: AppWire.count(metrics.callsThisWeek),
                     caption: OverviewCopy.last7Days
                 )
             }
             HStack(spacing: DistrictSpacing.row) {
                 DistrictMetricTile(
                     label: OverviewCopy.customerContacts,
-                    value: "\(metrics.totalContacts)",
+                    value: AppWire.count(metrics.totalContacts),
                     caption: OverviewCopy.crm
                 )
                 // ⛔ THE SERVER'S LABEL, NOT A LOCAL FORMAT. Two duration formats
@@ -215,7 +216,7 @@ struct OverviewView: View {
                 // what tell an operator why. Do not make them agree by editing the copy.
                 DistrictMetricTile(
                     label: OverviewCopy.avgCallDuration,
-                    value: response.avgDurationLabel,
+                    value: AppWire.duration(sent: response.avgDurationLabel, seconds: metrics.avgDuration),
                     caption: OverviewCopy.completedAllTime
                 )
             }
@@ -435,7 +436,7 @@ private struct ActivityRow: View {
     }
 
     private var statusLabel: String {
-        isLive ? OverviewCopy.live : call.status
+        isLive ? OverviewCopy.live : AppWire.label(.callStatus, call.status)
     }
 
     /// ⚠️ IN PROGRESS IS NOT A VERDICT, so a live call wears the accent rather than

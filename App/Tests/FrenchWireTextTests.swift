@@ -1,0 +1,112 @@
+@testable import DistrictAI
+import DistrictL10n
+import DistrictModel
+import Foundation
+import XCTest
+
+/// What the W4 French pass changed: a French screen shows the vocabulary's labels, the
+/// core's dates and numbers, never an English wire word or an ISO instant, while English
+/// shows what it always has.
+final class FrenchWireTextTests: XCTestCase {
+    private static let nbsp = "\u{00A0}"
+
+    private func french<T>(_ body: () -> T) -> T {
+        L10nRuntime.withLocale(.frCA, body)
+    }
+
+    // MARK: - Wire labels
+
+    func testEnglishShowsTheWireValueAsSentAndFrenchTheVocabularysLabel() {
+        XCTAssertEqual(AppWire.label(.callStatus, "completed"), "completed")
+        XCTAssertEqual(french { AppWire.label(.callStatus, "completed") }, "Terminé")
+        XCTAssertEqual(french { AppWire.label(.messageDeliveryStatus, "delivered") }, "Livré")
+        XCTAssertEqual(french { AppWire.label(.numberStatus, "active") }, "Actif")
+    }
+
+    /// ⛔ AN UNLISTED VALUE IS NEVER SHOWN AS ITSELF IN FRENCH: it takes the category's
+    /// fallback, or « Autre ».
+    func testAnUnlistedValueReadsAsTheFallbackInFrench() {
+        XCTAssertEqual(AppWire.label(.callStatus, "machine"), "machine")
+        XCTAssertEqual(french { AppWire.label(.callStatus, "machine") }, "Autre")
+    }
+
+    /// ⚠️ A BLANK VALUE STAYS ABSENT, so a card's own blank guard still hides it.
+    func testAnAbsentOrBlankValueHasNoLabel() {
+        XCTAssertNil(french { AppWire.label(.sentiment, ifAny: nil) })
+        XCTAssertNil(french { AppWire.label(.sentiment, ifAny: "  ") })
+        XCTAssertEqual(AppWire.label(.sentiment, ifAny: "positive"), "positive")
+    }
+
+    func testACallLengthIsTheServersInEnglishAndWrittenFromTheSecondsInFrench() {
+        XCTAssertEqual(AppWire.duration(sent: "1m 5s", seconds: 65), "1m 5s")
+        XCTAssertEqual(french { AppWire.duration(sent: "1m 5s", seconds: 65) }, "1\(Self.nbsp)min 5\(Self.nbsp)s")
+    }
+
+    func testACountIsPlainInEnglishAndGroupedInFrench() {
+        XCTAssertEqual(AppWire.count(1204), "1204")
+        XCTAssertEqual(french { AppWire.count(1204) }, "1\(Self.nbsp)204")
+    }
+
+    // MARK: - Workflows
+
+    /// ⛔ FRENCH SHOWS THE CODE'S LABEL AND NEVER THE ENGLISH DETAIL after the colon.
+    func testAnActionReasonIsTheSentenceInEnglishAndTheCodesLabelInFrench() {
+        XCTAssertEqual(
+            WorkflowActionReason.label("dnc: +14165550100 is on the list"),
+            "dnc: +14165550100 is on the list"
+        )
+        XCTAssertEqual(french { WorkflowActionReason.label("dnc: +14165550100 is on the list") }, "Liste d'exclusion")
+        XCTAssertEqual(french { WorkflowActionReason.label("http-503: upstream down") }, "HTTP 503")
+        XCTAssertEqual(french { WorkflowActionReason.label("something-new") }, "Autre")
+    }
+
+    // MARK: - Devices
+
+    func testADevicePlatformIsTheProductName() {
+        XCTAssertEqual(DevicePlatformName.of("ios"), "iOS")
+        XCTAssertEqual(DevicePlatformName.of(" android "), "Android")
+        XCTAssertEqual(DevicePlatformName.of("tizen"), "tizen")
+        XCTAssertEqual(DevicePlatformName.of(" "), DevicesCopy.unknownPlatform)
+    }
+
+    // MARK: - Dates and numbers
+
+    /// ⛔ THE CORE'S FRENCH, WHATEVER FRENCH THE DEVICE SPEAKS: « 12 sept. 2026, 10 h 30 ».
+    func testAnInstantIsWrittenByTheCoreInFrench() {
+        let toronto = TimeZone(identifier: "America/Toronto")
+        XCTAssertEqual(
+            french { WireDate.display("2026-09-12T14:30:00Z", in: toronto) },
+            "12 sept. 2026, 10 h 30"
+        )
+        XCTAssertEqual(french { WireDate.display("soon") }, "soon")
+    }
+
+    func testAMeteredAmountUsesFrenchSeparators() {
+        XCTAssertEqual(AnalyticsFormat.amount(1204.25), "1204.25")
+        XCTAssertEqual(french { AnalyticsFormat.amount(1204.25) }, "1\(Self.nbsp)204,25")
+        XCTAssertEqual(french { AnalyticsFormat.amount(318.5) }, "318,5")
+        XCTAssertEqual(french { AnalyticsFormat.amount(412) }, "412")
+    }
+
+    func testAMonthIsAsSentInEnglishAndWrittenOutInFrench() {
+        XCTAssertEqual(AnalyticsFormat.sentMonth("2026-08"), "2026-08")
+        XCTAssertEqual(french { AnalyticsFormat.sentMonth("2026-08") }, "août 2026")
+        XCTAssertEqual(french { AnalyticsFormat.sentMonth("soon") }, "soon")
+    }
+
+    func testATrendBucketIsTheServersDayInEnglishAndTheIsoDayInFrench() throws {
+        let json = #"{"date":"Aug 1","isoDate":"2026-08-01","calls":3,"avgDuration":60}"#
+        let point = try JSONDecoder().decode(EngagementPoint.self, from: Data(json.utf8))
+        XCTAssertEqual(AnalyticsFormat.bucketLabel(point), "Aug 1")
+        XCTAssertEqual(french { AnalyticsFormat.bucketLabel(point) }, "1er août 2026")
+    }
+
+    // MARK: - Messaging
+
+    func testAMessagingCarrierIsCapitalisedInEnglishAndNamedInFrench() {
+        XCTAssertEqual(MessagingCatalog.providerLabel("twilio"), "Twilio")
+        XCTAssertEqual(MessagingCatalog.providerLabel("unknown"), "Unknown")
+        XCTAssertEqual(french { MessagingCatalog.providerLabel("twilio") }, "Twilio")
+        XCTAssertEqual(french { MessagingCatalog.providerLabel("unknown") }, "Autre")
+    }
+}

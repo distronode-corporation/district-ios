@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import Foundation
 
@@ -105,7 +106,7 @@ extension CallDisplay {
             transferred: call.transferStatus == CallWire.transferSuccess,
             transferFailed: call.transferStatus == CallWire.transferFailure,
             time: WireDate.display(call.createdAt),
-            durationLabel: seconds > 0 ? call.duration : nil,
+            durationLabel: seconds > 0 ? AppWire.duration(sent: call.duration, seconds: seconds) : nil,
             aiSummary: CallNarrative.summary(call.aiSummary)
         )
     }
@@ -162,7 +163,7 @@ extension CallDisplay {
     /// ⚠️ "Live" REPLACES the raw status rather than sitting beside it, so the log and
     /// the detail screen say the same word about the same call.
     var statusLabel: String {
-        live ? CallsCopy.live : status
+        live ? CallsCopy.live : AppWire.label(.callStatus, status)
     }
 
     /// ⚠️ A ONE-CHARACTER GLYPH, NOT A WORD, AND THE SAME PAIR THE INBOX USES.

@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -199,7 +200,7 @@ struct BillingInvoiceRow: View {
             }
             HStack(alignment: .firstTextBaseline, spacing: DistrictSpacing.tight) {
                 if let status = invoice.status, !status.isEmpty {
-                    DistrictBadge(text: status, tone: Self.tone(status))
+                    DistrictBadge(text: AppWire.label(.billingInvoiceStatus, status), tone: Self.tone(status))
                 }
                 // ⚠️ TAX IS SUMMED SERVER-SIDE, so a zero here is measured rather than
                 // absent. Shown only when non-zero: an "incl. $0.00 tax" line is noise on

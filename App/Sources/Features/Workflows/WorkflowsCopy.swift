@@ -1,3 +1,4 @@
+import DistrictL10n
 import Foundation
 
 /// Every sentence the automation monitor says, plus the two vocabularies it has to
@@ -28,7 +29,7 @@ enum WorkflowsCopy {}
 /// alongside it, exactly one per call. A workflow on all three runs twice.
 enum WorkflowTrigger {
     static func label(_ trigger: String) -> String {
-        labels[trigger] ?? trigger
+        labels[trigger] ?? AppWire.label(.workflowTrigger, trigger)
     }
 
     private static var labels: [String: String] {
@@ -45,6 +46,26 @@ enum WorkflowTrigger {
             "dnc_registered": WorkflowsCopy.addedDoNotCall,
         ]
     }
+}
+
+/// An action's `reason`, which the engine writes as an English sentence, `<code>: <detail>`.
+///
+/// ⛔ ENGLISH SHOWS THE SENTENCE AS SENT, AS THE PORTAL DOES. French shows the code's label from
+/// the vocabulary and never the English detail (`workflowActionReason`), with the status of an
+/// `http-503` code filled into its « HTTP {status} ».
+enum WorkflowActionReason {
+    static func label(_ reason: String) -> String {
+        guard AppL10n.copyLocale == .frCA else { return reason }
+        let code = reason.split(separator: ":", maxSplits: 1).first
+            .map { $0.trimmingCharacters(in: .whitespaces) } ?? reason
+        guard code.hasPrefix(httpPrefix) else { return WireLabel.label(.workflowActionReason, code) }
+        let status = String(code.dropFirst(httpPrefix.count))
+        return WireLabel.label(.workflowActionReason, httpPattern)
+            .replacingOccurrences(of: "{status}", with: status)
+    }
+
+    private static let httpPrefix = "http-"
+    private static let httpPattern = "http-{status}"
 }
 
 extension Tone {

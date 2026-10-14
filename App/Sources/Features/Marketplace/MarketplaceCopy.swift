@@ -49,7 +49,7 @@ enum MarketplaceCopy {
         guard !failedProviders.isEmpty else {
             return partialBannerUnnamed
         }
-        let named = failedProviders.joined(separator: ", ")
+        let named = failedProviders.map { AppWire.label(.numberProvider, $0) }.joined(separator: ", ")
         return partialBannerNamed(named)
     }
 

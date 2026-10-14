@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -225,7 +226,7 @@ struct LatestRunBadge: View {
     var body: some View {
         if let run = workflow.latestRun {
             VStack(alignment: .trailing, spacing: 2) {
-                DistrictBadge(text: run.status, tone: .forRunStatus(run.status))
+                DistrictBadge(text: AppWire.label(.workflowRunStatus, run.status), tone: .forRunStatus(run.status))
                 Text(WireDate.display(run.startedAt))
                     .font(DistrictType.labelSmall)
                     .foregroundStyle(colors.mutedForeground)
@@ -387,7 +388,7 @@ struct RunCard: View {
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: DistrictSpacing.hairline))
             : AnyLayout(HStackLayout(spacing: DistrictSpacing.tight))
         return layout {
-            DistrictBadge(text: run.status, tone: .forRunStatus(run.status))
+            DistrictBadge(text: AppWire.label(.workflowRunStatus, run.status), tone: .forRunStatus(run.status))
             Text(WireDate.display(run.startedAt))
                 .font(DistrictType.labelSmall)
                 .foregroundStyle(colors.mutedForeground)
@@ -409,13 +410,16 @@ struct RunCard: View {
     /// act on.
     private func actionRow(_ action: WorkflowActionResult) -> some View {
         HStack(alignment: .top, spacing: DistrictSpacing.tight) {
-            DistrictBadge(text: action.outcome, tone: .forActionOutcome(action.outcome))
+            DistrictBadge(
+                text: AppWire.label(.workflowActionOutcome, action.outcome),
+                tone: .forActionOutcome(action.outcome)
+            )
             VStack(alignment: .leading, spacing: 2) {
-                Text(action.type)
+                Text(AppWire.label(.workflowAction, action.type))
                     .font(DistrictType.bodySmall)
                     .foregroundStyle(colors.foreground)
                 if let reason = action.reason {
-                    Text(reason)
+                    Text(WorkflowActionReason.label(reason))
                         .font(DistrictType.caption)
                         .foregroundStyle(colors.mutedForeground)
                         .fixedSize(horizontal: false, vertical: true)

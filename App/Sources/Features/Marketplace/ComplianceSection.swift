@@ -1,3 +1,4 @@
+import DistrictL10n
 import SwiftUI
 
 // Messaging compliance: A2P 10DLC and toll-free verification.
@@ -110,10 +111,16 @@ struct A2PCard: View {
         )
     }
 
+    /// ⚠️ STACKED IN FRENCH, where each chip is a phrase (« Faible volume mixte (moins de
+    /// 15 k messages/mois) ») rather than English's wire word, and four in a row would squeeze
+    /// every label until its words split.
     private var types: some View {
-        HStack(spacing: DistrictSpacing.tight) {
+        let layout = AppL10n.copyLocale == .frCA
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DistrictSpacing.tight))
+            : AnyLayout(HStackLayout(spacing: DistrictSpacing.tight))
+        return layout {
             ForEach(campaignTypes, id: \.self) { value in
-                Button(value) { model.a2pDraft.campaignType = value }
+                Button(AppWire.label(.a2pCampaignType, value)) { model.a2pDraft.campaignType = value }
                     .buttonStyle(
                         DistrictButtonStyle(
                             variant: model.a2pDraft.campaignType == value ? .primary : .secondary,

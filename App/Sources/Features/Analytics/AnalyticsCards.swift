@@ -1,4 +1,5 @@
 import Charts
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -20,7 +21,7 @@ struct AnalyticsMetricTiles: View {
             HStack(spacing: DistrictSpacing.row) {
                 DistrictMetricTile(
                     label: AnalyticsCopy.totalCalls,
-                    value: "\(metrics.totalCalls)",
+                    value: AppWire.count(metrics.totalCalls),
                     caption: AnalyticsCopy.inThisWindow
                 )
                 DistrictMetricTile(
@@ -52,13 +53,13 @@ struct AnalyticsMetricTiles: View {
                 )
                 DistrictMetricTile(
                     label: AnalyticsCopy.missedCalls,
-                    value: "\(metrics.missedCalls)",
+                    value: AppWire.count(metrics.missedCalls),
                     caption: AnalyticsCopy.neverConnected
                 )
             }
             DistrictMetricTile(
                 label: AnalyticsCopy.abandoned,
-                value: "\(metrics.abandonedCalls)",
+                value: AppWire.count(metrics.abandonedCalls),
                 caption: AnalyticsCopy.callerHungUp
             )
         }
@@ -149,7 +150,7 @@ struct AnalyticsTrendCard: View {
         DistrictCard(eyebrow: AnalyticsCopy.callVolumeTrend) {
             if let first = points.first, let last = points.last {
                 chart
-                Text(AnalyticsCopy.dateRange(first.date, last.date))
+                Text(AnalyticsCopy.dateRange(AnalyticsFormat.bucketLabel(first), AnalyticsFormat.bucketLabel(last)))
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
             }
@@ -179,11 +180,11 @@ struct AnalyticsTrendCard: View {
         Chart {
             ForEach(points, id: \.isoDate) { point in
                 BarMark(
-                    x: .value(AnalyticsCopy.bucket, point.date),
+                    x: .value(AnalyticsCopy.bucket, AnalyticsFormat.bucketLabel(point)),
                     y: .value(AnalyticsCopy.calls, point.calls)
                 )
                 .foregroundStyle(colors.district)
-                .accessibilityLabel(point.date)
+                .accessibilityLabel(AnalyticsFormat.bucketLabel(point))
                 .accessibilityValue(AnalyticsFormat.callCount(point.calls))
             }
         }
@@ -217,10 +218,10 @@ struct AnalyticsFunnelCard: View {
                 ForEach(stages, id: \.name) { stage in
                     BarMark(
                         x: .value(AnalyticsCopy.calls, stage.count),
-                        y: .value(AnalyticsCopy.stage, stage.name)
+                        y: .value(AnalyticsCopy.stage, AppWire.label(.funnelStage, stage.name))
                     )
                     .foregroundStyle(colors.district)
-                    .accessibilityLabel(stage.name)
+                    .accessibilityLabel(AppWire.label(.funnelStage, stage.name))
                     .accessibilityValue(AnalyticsFormat.callCount(stage.count))
                 }
             }
@@ -308,11 +309,11 @@ struct AnalyticsSentimentCard: View {
             Circle()
                 .fill(color(for: slice))
                 .frame(width: swatch, height: swatch)
-            Text(slice.name)
+            Text(AppWire.label(.analyticsSentiment, slice.name))
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.mutedForeground)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text("\(slice.value)")
+            Text(AppWire.count(slice.value))
                 .font(DistrictType.bodySmall)
                 .foregroundStyle(colors.foreground)
         }

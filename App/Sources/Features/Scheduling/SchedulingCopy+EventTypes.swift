@@ -1,4 +1,5 @@
 import DistrictData
+import DistrictL10n
 import DistrictModel
 import Foundation
 
@@ -27,12 +28,14 @@ extension SchedulingCopy {
     /// is still ON the event type — the fork keeps the link — so hiding the row would make
     /// a rota look complete when it is not.
     static func hostValue(role: String, archived: Bool) -> String {
-        archived ? hostArchived(role) : role
+        let label = AppWire.label(.schedulingHostRole, role)
+        return archived ? hostArchived(label) : label
     }
 
     /// ⚠️ THE TYPE AND WHETHER IT IS COMPULSORY. Optional is the default and says nothing,
     /// so only "required" is worth the word.
     static func questionValue(type: String, required: Bool) -> String {
-        required ? questionRequired(type) : type
+        let label = AppWire.label(.schedulingQuestionType, type)
+        return required ? questionRequired(label) : label
     }
 }

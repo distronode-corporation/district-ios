@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -85,7 +86,7 @@ struct SchedulingEventTypeQuestionsSheet: View {
                 .font(DistrictType.titleSmall)
                 .foregroundStyle(colors.foreground)
             HStack(spacing: DistrictSpacing.tight) {
-                Text(question.type)
+                Text(AppWire.label(.schedulingQuestionType, question.type))
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
                 Spacer(minLength: 0)

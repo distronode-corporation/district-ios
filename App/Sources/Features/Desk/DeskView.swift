@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 
@@ -215,7 +216,7 @@ struct DeskView: View {
         return Button { model.select(status) } label: {
             // ⚠️ SPELLED OUT FOR ACCESSIBILITY. SwiftUI concatenates the label and the
             // count into one token, so the computed name reads "All3" without this.
-            Text("\(label) \(count)")
+            Text("\(label) \(AppWire.count(count))")
                 .font(DistrictType.label)
                 .foregroundStyle(active ? colors.district : colors.mutedForeground)
                 .padding(.horizontal, DistrictSpacing.row)
@@ -298,7 +299,7 @@ struct DeskView: View {
     /// rather than as a guess — painting it "Resolved" would tell an operator a
     /// customer has been dealt with.
     static func label(forWire status: String) -> String {
-        guard let known = DeskTicketStatus(rawValue: status) else { return status }
+        guard let known = DeskTicketStatus(rawValue: status) else { return AppWire.label(.deskTicketStatus, status) }
         return label(for: known)
     }
 
