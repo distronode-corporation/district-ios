@@ -35,9 +35,10 @@ struct SafariView: UIViewControllerRepresentable {
     ///
     /// ⚠️ ONLY THE HAND-OFF'S LEG 1 SETS IT. A working leg 1 never renders a page (it
     /// answers a 302 to `districtai://handoff`), so a page that loaded is the 404 or
-    /// 400 of a server without leg 1, and the hand-off can fall back at once rather
-    /// than at its timeout. What `SFSafariViewController` reports for a redirect to an
-    /// app scheme is not documented; it is on the device-proof list.
+    /// 400 of a server without leg 1, and the hand-off ends at once, minting nothing and
+    /// showing the no-callback notice (DistrictCore 7.0.1, S33), rather than at its
+    /// timeout. What `SFSafariViewController` reports for a redirect to an app scheme is
+    /// not documented; it is on the device-proof list.
     var onInitialLoad: ((Bool) -> Void)?
 
     func makeCoordinator() -> Coordinator {
