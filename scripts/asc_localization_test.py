@@ -106,6 +106,34 @@ class InfoWrites(unittest.TestCase):
         self.assertEqual((writes[0][0], writes[0][1]), ("PATCH", "/appInfoLocalizations/il-fr"))
 
 
+class VersionFields(unittest.TestCase):
+    URLS = {"supportUrl": "https://distronode.ca/fr/support", "marketingUrl": "https://distronode.ca/fr/district-ai"}
+
+    def test_the_urls_join_the_texts(self):
+        fields = loc.version_fields({**LISTING, "urls": self.URLS})
+        self.assertEqual(fields, {**FIELDS, **self.URLS})
+
+    def test_a_listing_without_a_support_url_stops_the_run(self):
+        for urls in (None, {}, {"marketingUrl": self.URLS["marketingUrl"]}, {"supportUrl": ""}):
+            listing = dict(LISTING) if urls is None else {**LISTING, "urls": urls}
+            with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
+                loc.version_fields(listing)
+
+    def test_a_url_that_is_not_https_or_not_a_url_field_stops_the_run(self):
+        for urls in (
+            {"supportUrl": "http://distronode.ca/fr/support"},
+            {"supportUrl": "https://distronode.ca/fr/support\nx"},
+            {"supportUrl": self.URLS["supportUrl"], "privacyPolicyUrl": "https://distronode.ca/fr/privacy"},
+            {"supportUrl": self.URLS["supportUrl"], "marketingUrl": 7},
+        ):
+            with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
+                loc.version_fields({**LISTING, "urls": urls})
+
+    def test_the_committed_french_listing_has_its_urls(self):
+        fields = loc.version_fields(loc.load_texts("fr-CA", "3.0.0"))
+        self.assertEqual({k: fields[k] for k in self.URLS}, self.URLS)
+
+
 class Sending(unittest.TestCase):
     def test_the_created_version_fills_the_placeholder(self):
         client = FakeClient({"/apps/app/appStoreVersions": {"data": []}})

@@ -1,6 +1,10 @@
 {
   "source": "monorepo i18n/fr-CA/work/S01/final.jsonl (reviewed), verbatim",
   "locale": "fr-CA",
+  "urls": {
+    "supportUrl": "https://distronode.ca/fr/support",
+    "marketingUrl": "https://distronode.ca/fr/district-ai"
+  },
   "englishSubtitles": {
     "subtitle": "Your whole business line",
     "subtitleForLegacyEnglish": "AI receptionist for your line"
