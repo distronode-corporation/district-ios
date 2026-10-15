@@ -10,8 +10,14 @@
 #
 # Fetches the App Store Connect key for this run only with scripts/asc-key.sh (mode 0600,
 # masked, under a temporary directory removed on exit), then runs `asc_release.py
-# submit`, which waits for the build to be VALID, sets the release notes from
-# CHANGELOG.md, attaches the build and submits it, doing only what is not already done.
+# submit`, which waits for the build to be VALID, sets each localization's release notes
+# (CHANGELOG.md, release-notes/<locale>/) and its supportUrl and marketingUrl
+# (LISTING_URLS), reads them back and checks them, attaches the build and submits it,
+# doing only what is not already done.
+#
+# ⚠️ A 409 NAMES ITS REASON: App Store Connect puts it in meta.associatedErrors, which
+# asc_release.py prints with the error. ⛔ The App Review detail is never read: it holds
+# the demo account's password, and asc_release.py refuses any path to it.
 set -euo pipefail
 
 die() {

@@ -64,6 +64,29 @@ ON_SALE_STORE_STATES = {"READY_FOR_SALE", "REPLACED_WITH_NEW_VERSION"}
 
 APP_STORE_URL = "https://apps.apple.com/app/id6809297970"
 
+# ⛔ EVERY LOCALIZATION'S SUPPORT AND MARKETING URLS, BY LANGUAGE, SET AND CHECKED BEFORE A
+# SUBMISSION. A version localization without a supportUrl cannot be submitted: 3.0.0's
+# review submission answered 409 ENTITY_STATE_INVALID until fr-CA had one. English is the
+# value every version has carried (read live from 3.0.0, 2026-10-15); fr-CA is
+# store-listing/fr-CA.json's `urls`, which asc_release_test.py holds equal to this table.
+# A localization in a language with no row stops the run before any write.
+LISTING_URLS = {
+    "en": {
+        "supportUrl": "https://www.distronode.com/support",
+        "marketingUrl": "https://www.distronode.com/district-ai",
+    },
+    "fr": {
+        "supportUrl": "https://distronode.ca/fr/support",
+        "marketingUrl": "https://distronode.ca/fr/district-ai",
+    },
+}
+URL_FIELDS = ("supportUrl", "marketingUrl")
+
+# ⛔ NEVER READ. The review detail (appStoreReviewDetails) carries the demo account's
+# password in demoAccountPassword, and a response this script reads can end up in a log
+# through any error path. Nothing in the release lane needs it, so Client refuses the path.
+REVIEW_DETAIL_MARKERS = ("appstorereviewdetail", "demoaccountpassword")
+
 
 def die(msg: str) -> None:
     print(f"FATAL - {msg}", file=sys.stderr)
@@ -185,6 +208,17 @@ class ReleaseNotes:
         raise AssertionError("unreachable")  # die() exits
 
 
+def urls_for(locale: str) -> dict[str, str]:
+    """A localization's support and marketing URLs, by its language. See LISTING_URLS."""
+    urls = LISTING_URLS.get(locale.split("-")[0].lower())
+    if urls is None:
+        die(
+            f"App Store Connect has a {locale} localization and LISTING_URLS has no support and "
+            "marketing URLs for its language; App Review refuses a localization without a supportUrl."
+        )
+    return dict(urls)
+
+
 def notes_for(notes: "str | ReleaseNotes", locale: str) -> str:
     """One localization's text: a plain string is every locale's (the tests' shorthand)."""
     return notes if isinstance(notes, str) else notes.for_locale(locale)
@@ -258,6 +292,7 @@ class Client:
         return self._token
 
     def call(self, method: str, path: str, body: dict | None = None, ok=(200, 201, 204)) -> tuple[int, dict]:
+        refuse_review_detail(path)
         url = path if path.startswith("https://") else API + path
         config = f'header = "Authorization: Bearer {self.token()}"\n'
         cmd = ["curl", "-sS", "-g", "-X", method, "-K", "-", "-w", "\n%{http_code}", "--max-time", "120"]
@@ -304,6 +339,14 @@ class Client:
 
     def get(self, path: str) -> dict:
         return self.call("GET", path)[1]
+
+
+def refuse_review_detail(path: str) -> None:
+    """Stops the run before any request that could carry the review detail. See
+    REVIEW_DETAIL_MARKERS: the path is refused, so its answer is never read or printed."""
+    lowered = path.lower()
+    if any(marker in lowered for marker in REVIEW_DETAIL_MARKERS):
+        die("the release lane never reads the App Review detail (it holds the demo account's password).")
 
 
 # ── Lookups ──────────────────────────────────────────────────────────────────
@@ -431,24 +474,46 @@ def submit(client: Client, version: str, build: str, notes: "str | ReleaseNotes"
         print(f"version {version}: created record {record['id']}")
     version_id = record["id"]
 
-    # 2. Release notes on every localization the record has.
-    localizations = client.get(f"/appStoreVersions/{version_id}/appStoreVersionLocalizations")["data"]
+    # 2. Release notes, support URL and marketing URL on every localization the record has.
+    localizations_path = f"/appStoreVersions/{version_id}/appStoreVersionLocalizations"
+    localizations = client.get(localizations_path)["data"]
     if not localizations:
         die(f"version {version} has no localizations to carry the release notes.")
-    # Every locale's text is chosen before the first write, so a language with no notes
-    # stops the run with no localization half updated.
-    texts = {loc["id"]: notes_for(notes, loc["attributes"]["locale"]) for loc in localizations}
+    # Every locale's text and URLs are chosen before the first write, so a language with no
+    # notes or no URLs stops the run with no localization half updated.
+    wanted = {
+        loc["id"]: {"whatsNew": notes_for(notes, loc["attributes"]["locale"]), **urls_for(loc["attributes"]["locale"])}
+        for loc in localizations
+    }
     for loc in localizations:
-        text = texts[loc["id"]]
-        if loc["attributes"].get("whatsNew") == text:
-            print(f"whatsNew ({loc['attributes']['locale']}): already set")
+        locale = loc["attributes"]["locale"]
+        current = loc["attributes"]
+        changes = {key: value for key, value in wanted[loc["id"]].items() if current.get(key) != value}
+        for key in wanted[loc["id"]]:
+            if key in URL_FIELDS:
+                # The URLs are public; printing what was there makes a changed value visible.
+                state = f"{current.get(key)!r} -> {wanted[loc['id']][key]}" if key in changes else "already set"
+                print(f"{key} ({locale}): {state}")
+            elif key not in changes:
+                print(f"{key} ({locale}): already set")
+        if not changes:
             continue
         client.call(
             "PATCH",
             f"/appStoreVersionLocalizations/{loc['id']}",
-            {"data": {"type": "appStoreVersionLocalizations", "id": loc["id"], "attributes": {"whatsNew": text}}},
+            {"data": {"type": "appStoreVersionLocalizations", "id": loc["id"], "attributes": changes}},
         )
-        print(f"whatsNew ({loc['attributes']['locale']}): set")
+        print(f"{', '.join(sorted(changes))} ({locale}): set")
+    # ⛔ CHECKED, NOT ASSUMED: read back and compared before the build is attached, so a
+    # value App Store Connect did not keep stops the run before anything is submitted.
+    for loc in client.get(localizations_path)["data"]:
+        expected = wanted.get(loc["id"])
+        if expected is None:
+            die(f"localization {loc['id']} ({loc['attributes'].get('locale')}) appeared during the run; nothing was submitted.")
+        for key, value in expected.items():
+            if loc["attributes"].get(key) != value:
+                die(f"{key} ({loc['attributes'].get('locale')}) reads {loc['attributes'].get(key)!r} after it was set; nothing was submitted.")
+    print("localizations: release notes, supportUrl and marketingUrl checked")
 
     # 3. The build. A build attaches only to the record whose version string equals its
     # CFBundleShortVersionString, which the lookup above already guarantees.

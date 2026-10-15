@@ -130,6 +130,7 @@ jobs:
           bash scripts/asc-key.test.sh
           bash scripts/github-release.test.sh
           python3 scripts/asc_release_test.py
+          python3 scripts/asc_dev_cert_test.py
 
       # Xcode 26.3, asserted, and the pinned XcodeGen; archive-imac.sh generates the
       # project itself.
@@ -149,6 +150,37 @@ jobs:
           chmod 0755 "$RUNNER_TEMP/bin/sentry-cli"
           echo "$RUNNER_TEMP/bin" >>"$GITHUB_PATH"
           "$RUNNER_TEMP/bin/sentry-cli" --version
+
+      # ⛔ THIS RUN'S OWN APPLE DEVELOPMENT CERTIFICATE, REVOKED BY THE LAST STEPS WHATEVER
+      # HAPPENS. The archive signs with an Apple Development identity; a fresh runner has none,
+      # and `-allowProvisioningUpdates` minted a new certificate on the team for every run,
+      # which nothing revoked. scripts/asc_dev_cert.py creates one through App Store Connect
+      # and records the id it answered BEFORE anything else can fail; the identity goes into a
+      # keychain of this run's own, which Xcode finds and signs with. The revoke step deletes
+      # exactly that id: never a listing, never a match by name, never another certificate.
+      # ⚠️ Proven only on a release run (a build_only dispatch on main): nothing a pull request
+      # runs can reach the `release` environment.
+      - name: Create this run's Apple Development certificate
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/devcert"
+          python3 scripts/asc_dev_cert.py create --dir "$dir"
+          keychain="$dir/signing.keychain-db"
+          password="$(openssl rand -hex 24)"
+          echo "::add-mask::$password"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 7200 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$dir/key.pem" -k "$keychain" -t priv -T /usr/bin/codesign -T /usr/bin/security
+          security import "$dir/cert.cer" -k "$keychain" -t cert
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" >/dev/null
+          # Searched first, ahead of the user's own keychains, for this job only.
+          existing="$(security list-keychains -d user | tr -d '"' | xargs)"
+          # shellcheck disable=SC2086 # the existing list is a space-separated set of paths
+          security list-keychains -d user -s "$keychain" $existing
+          # The private key now lives only in the keychain, which the revoke step deletes.
+          rm -f "$dir/key.pem"
+          security find-identity -v -p codesigning "$keychain"
 
       # ⚠️ An `xcodebuild archive` on Xcode 26.3 has been seen to hang for good while
       # reaping the sentry-cocoa package's manifest helper (0% CPU, a defunct child). The
@@ -233,6 +265,24 @@ jobs:
               echo "**Not submitted for review.** A build of main is a TestFlight build only."
             fi
           } >>"$GITHUB_STEP_SUMMARY"
+
+      # ⛔ ALWAYS, AND BEFORE THE KEY IS REMOVED: the revoke needs the App Store Connect key.
+      # Only the id this run's create step recorded is revoked; with no id recorded nothing
+      # was created and nothing is sent. The keychain goes with it.
+      - name: Revoke this run's Apple Development certificate
+        if: always()
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/devcert"
+          if [ -f "$dir/signing.keychain-db" ]; then
+            security delete-keychain "$dir/signing.keychain-db" || true
+          fi
+          if [ ! -f "$dir/cert.id" ]; then
+            echo "No certificate was created in this run; nothing to revoke."
+            exit 0
+          fi
+          python3 scripts/asc_dev_cert.py revoke --dir "$dir"
+          rm -rf "$dir"
 
       - name: Remove the key and the build
         if: always()

@@ -135,6 +135,7 @@ jobs:
           bash scripts/github-release.test.sh
           python3 scripts/asc_release_test.py
           python3 scripts/asc_localization_test.py
+          python3 scripts/asc_dev_cert_test.py
 
   # ⛔ THE APP'S STRINGS ARE GENERATED, AND THIS IS WHAT KEEPS THE GENERATED FILE HONEST.
   # Every sentence the `*Copy` enums say lives in l10n/ios.toml; App/Sources/L10n/Generated
