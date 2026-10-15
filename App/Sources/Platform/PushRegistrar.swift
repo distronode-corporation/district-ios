@@ -87,7 +87,7 @@ enum PushRegistrationStatus: Equatable, Sendable {
 /// app. The Kotlin `PushRegistrar` makes the identical three points.
 ///
 /// ⛔ ONE PER PROCESS, BUILT IN `DistrictApp` ALONGSIDE THE ONE ``AppContainer``
-/// AND THREADED DOWN. A second one would hold a second `hasAskedThisLaunch`, so
+/// AND THREADED DOWN. A second one would hold a second `hasAskedThisSession`, so
 /// the system prompt could be raised twice in one launch, and its
 /// ``pendingTapPayload`` would be the one nothing was reading.
 @MainActor
@@ -125,12 +125,17 @@ final class PushRegistrar {
 
     private let container: AppContainer
 
-    /// ⚠️ ONCE PER LAUNCH, NOT ONCE PER SIGN-IN. The system prompt is a one-shot
-    /// per install, and `UNUserNotificationCenter` answers the stored decision
-    /// silently afterwards — but ``enableAfterSignIn()`` is attached to a view's
-    /// appearance, which can recur, and a rebuilt shell must not queue a second
-    /// authorization request behind the first.
-    private var hasAskedThisLaunch = false
+    /// ⚠️ ONCE PER SIGNED-IN SESSION. The system prompt is a one-shot per install, and
+    /// `UNUserNotificationCenter` answers the stored decision silently afterwards, but
+    /// ``enableAfterSignIn()`` is attached to a view's appearance, which can recur, and a
+    /// rebuilt shell must not queue a second authorization request behind the first.
+    ///
+    /// ⛔ ``forget()`` CLEARS IT, ON EVERY TRANSITION INTO SIGNED-OUT. It was once per LAUNCH
+    /// until 2026-10-15: a second account signed in on the same launch never called
+    /// `registerForRemoteNotifications`, so no device token arrived to register, while the
+    /// sign-out before it had deleted the installation's rows. That account had no alert row
+    /// at all (found on District AI for Mac 3.0.0, which ported this flag).
+    private var hasAskedThisSession = false
 
     /// The PushKit token, held until there is a session to register it against.
     ///
@@ -182,7 +187,7 @@ final class PushRegistrar {
         // device; see the ⛔ in `DistrictApp.body`. Adoption happens once, there,
         // through the adaptor's own instance, and BEFORE any sign-in, so there is
         // nothing left to attach at this point.
-        // ⛔ BEFORE THE `hasAskedThisLaunch` GUARD, NOT AFTER IT. A returning
+        // ⛔ BEFORE THE `hasAskedThisSession` GUARD, NOT AFTER IT. A returning
         // appearance takes the early exit below, and the VoIP token frequently
         // arrives on exactly one of those: PushKit issues its credential at launch,
         // asynchronously, so the token can land after the first sign-in and be
@@ -190,8 +195,8 @@ final class PushRegistrar {
         // registered and the phone would never ring.
         sessionIsLive = true
         registerVoipTokenIfPossible()
-        guard !hasAskedThisLaunch else { return }
-        hasAskedThisLaunch = true
+        guard !hasAskedThisSession else { return }
+        hasAskedThisSession = true
         Task { await requestAuthorizationThenRegister() }
     }
 
@@ -312,6 +317,10 @@ final class PushRegistrar {
         // arriving during the signed-out window be registered against a session
         // that no longer exists, and the 401 would look like a broken route.
         sessionIsLive = false
+        // ⛔ AND THE ASK IS RE-ARMED, so the next sign-in asks APNs for the token again and
+        // registers it: without a fresh `registerForRemoteNotifications` no token callback
+        // arrives, and the next account has no alert row. See ``hasAskedThisSession``.
+        hasAskedThisSession = false
         container.pushTokens.forgetRegistration()
         // ⛔ AND THE BADGE GOES WITH BOTH, FOR A REASON THE OTHER TWO LINES DO NOT
         // COVER. A number left on the icon is a count of the previous account's
