@@ -1,0 +1,1 @@
+Un appel entrant cesse maintenant de sonner dès qu'il est pris sur un autre appareil, que l'appelant raccroche ou que la sonnerie expire, plutôt que de sonner jusqu'à 30 secondes. Un appel pris sur un autre appareil n'apparaît plus comme manqué.

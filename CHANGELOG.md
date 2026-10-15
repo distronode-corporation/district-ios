@@ -10,6 +10,21 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Fixed
+
+- A ring stops on this device when it ends elsewhere. The server now sends a
+  `call_ring_cancelled` APNs background push (on the alert token, never VoIP) whenever a ring
+  ends: answered on any device, timed out, the caller hung up, or withdrawn. `AppDelegate`
+  reads it before the registrar guard, so it works while the session is still being checked;
+  `RingCancel` parses it and decides; `IncomingCallModel.ringCancelled(_:)` reports the
+  CallKit call ended (`.answeredElsewhere` for answered, `.remoteEnded` for call_ended,
+  `.unanswered` for timeout, withdrawn and any unknown reason) and dismisses the ringing
+  screen; `DeliveredRingAlerts` removes the call's delivered `incoming_call` alert. Matched
+  on `callId` only; a call this device answered or is answering is not touched, alert
+  included. The completion handler is called once on every path, and every other background
+  push still only refreshes the badge. The 30 s local ring timeout stays as the fallback.
+- MARKETING_VERSION 3.0.1.
+
 ### Changed
 
 - French: the call log's title is « Appels » (`calls.call_log`); « Journal des appels » was
@@ -114,6 +129,10 @@ built from history before publication, so they have no tags in this repository.
   and the `fr-CA.lproj` strings, so `FR_COMPLETE` is true. French stays switched off: the
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
+
+## [3.0.1] - 2026-10-15
+
+An incoming call now stops ringing as soon as it is answered on another device, the caller hangs up, or the ring times out, instead of ringing for up to 30 seconds. A call answered on another device is no longer listed as missed.
 
 ## [3.0.0] - 2026-10-15
 
