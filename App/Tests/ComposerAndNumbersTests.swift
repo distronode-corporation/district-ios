@@ -1,5 +1,4 @@
 @testable import DistrictAI
-import PhotosUI
 import XCTest
 
 /// The 3.0.1 visual-QA rules for the reply composer and the Numbers tabs that a unit test can
@@ -52,7 +51,7 @@ final class AttachmentFileTests: XCTestCase {
         XCTAssertEqual(AttachmentFile.mimeType(of: URL(fileURLWithPath: "/tmp/c.heic"), allowed: allowed), "image/heic")
         XCTAssertEqual(
             AttachmentFile.mimeType(of: URL(fileURLWithPath: "/tmp/noextension"), allowed: allowed),
-            PhotosPickerItem.unknownMIMEType
+            "application/octet-stream"
         )
     }
 }

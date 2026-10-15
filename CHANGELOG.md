@@ -71,6 +71,20 @@ built from history before publication, so they have no tags in this repository.
     AI draft) and Send. Command-Return sends on a hardware keyboard; Return is a new line.
   - Numbers: the four pill buttons are a segmented `Picker` (a menu at accessibility text
     sizes).
+  - AP-002: at an accessibility text size `DistrictEyebrow` drops its capitals and tracking,
+    and the Overview and Analytics metric grids go to one column (`DistrictMetricRow`); the
+    tracked capitals broke mid-word at AX5 ("TOTA / L CALL / S"). Normal sizes unchanged.
+  - AP-004: the Analytics funnel's category axis is the bars' own labels
+    (`AppWire.label(.funnelStage, _)`); it was the wire names, so French drew no bars under
+    an English axis.
+  - AP-005: a `DistrictBadge` wraps at an accessibility size; held to one line ("Managed by
+    Distronode") it made Phone numbers wider than the iPhone.
+  - AP-013: `DistrictAvatar`'s circle is a `@ScaledMetric` (36pt at the default size), so
+    the initials no longer read "…" at AX5.
+  - AP-014: on iPad in portrait a list section opens `.doubleColumn` (its list and the open
+    row) instead of an empty "Select a call" with the list hidden; landscape is unchanged.
+  - AP-019: when the Overview fails, its section rows stay under the error, gated by the
+    workspace list's role.
 - MARKETING_VERSION 3.0.1. DistrictCore pinned by revision to district-core-swift
   v3/7.0.1 (1972dc9, PR #26's head) until 7.0.1 is tagged.
 
@@ -206,6 +220,8 @@ Fixes for calls, notifications and labels.
 - Support requests show their status in your language.
 - The reply box gives your reply the full width, with the photo, file and AI draft controls in one row. On a hardware keyboard, Command-Return sends and Return starts a new line.
 - New colours from the District palette, and selected rows on iPad stay readable.
+- At the largest text sizes, labels and numbers no longer break mid-word, and every screen fits its width. On iPad in portrait, a list now opens beside the item you select.
+- The Analytics conversion funnel shows its bars in every language.
 
 ## [3.0.0] - 2026-10-15
 

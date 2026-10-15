@@ -232,6 +232,13 @@ struct DistrictAvatar: View {
     /// ⚠️ AND THE SAME SELECTED-ROW SWITCH (``SelectionInk``).
     @Environment(\.backgroundProminence) private var prominence
 
+    /// ⛔ THE CIRCLE GROWS WITH ITS INITIALS (3.0.1, AP-013). A fixed 36pt circle held the
+    /// initials at their AX5 size as "…". Anchored to `.caption`, the style
+    /// ``DistrictType/label`` scales with, so the two grow together; at an accessibility size
+    /// ``DistrictListRow`` stacks the avatar above the text, so the larger circle costs no
+    /// width.
+    @ScaledMetric(relativeTo: .caption) private var side: CGFloat = 36
+
     private var colors: DistrictColors {
         .resolve(colorScheme)
     }
@@ -249,7 +256,7 @@ struct DistrictAvatar: View {
                     Circle().strokeBorder(outline, lineWidth: 1)
                 }
             }
-            .frame(width: 36, height: 36)
+            .frame(width: side, height: side)
             .overlay {
                 Text(initials)
                     .font(DistrictType.label)

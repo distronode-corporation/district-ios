@@ -100,7 +100,17 @@ struct OverviewView: View {
         case .loading:
             LoadingView(message: OverviewCopy.loadingYourOverview)
         case let .failed(failure):
-            FailureView(failure: failure, onRetry: retry, onSignIn: onSignIn)
+            // ⛔ THE SECTIONS STAY REACHABLE WHEN THE OVERVIEW FAILS (3.0.1, AP-019). On the
+            // phone these rows are the way to the hub sections (Desk, Rooms, Workflows,
+            // Support), so a failed read took every one of them away with it. Without the
+            // Overview's EFFECTIVE role, the list's membership role gates them (see the ⚠️ on
+            // ``WorkspaceSessionModel/role``): it can only be narrower, never wider.
+            VStack(alignment: .leading, spacing: DistrictSpacing.section) {
+                FailureView(failure: failure, onRetry: retry, onSignIn: onSignIn)
+                if showsEntryPoints, let workspaceId = workspaceSession.workspaceId {
+                    entryPoints(workspaceId: workspaceId, role: workspaceSession.role)
+                }
+            }
         case let .content(response, _):
             loaded(response)
         }
@@ -179,7 +189,7 @@ struct OverviewView: View {
     private func metricTiles(_ response: OverviewResponse) -> some View {
         let metrics = response.metrics
         return VStack(spacing: DistrictSpacing.row) {
-            HStack(spacing: DistrictSpacing.row) {
+            DistrictMetricRow {
                 DistrictMetricTile(
                     label: OverviewCopy.totalCallsRouted,
                     value: AppWire.count(metrics.totalCalls),
@@ -191,7 +201,7 @@ struct OverviewView: View {
                     caption: OverviewCopy.last7Days
                 )
             }
-            HStack(spacing: DistrictSpacing.row) {
+            DistrictMetricRow {
                 DistrictMetricTile(
                     label: OverviewCopy.customerContacts,
                     value: AppWire.count(metrics.totalContacts),
@@ -277,10 +287,11 @@ struct OverviewView: View {
     /// column on ``WorkspaceSessionModel/role`` would hide the dialler from a support
     /// engineer the server would have admitted. See that property's own ⚠️.
     private func entryPoints(_ response: OverviewResponse) -> some View {
-        let entries = OverviewEntry.all(
-            workspaceId: response.workspaceId,
-            role: WorkspaceRole.fromWire(response.role)
-        )
+        entryPoints(workspaceId: response.workspaceId, role: WorkspaceRole.fromWire(response.role))
+    }
+
+    private func entryPoints(workspaceId: String, role: WorkspaceRole?) -> some View {
+        let entries = OverviewEntry.all(workspaceId: workspaceId, role: role)
         return VStack(alignment: .leading, spacing: DistrictSpacing.row) {
             // ⚠️ LABELLED, THOUGH ANDROID'S COLUMN IS NOT: its entries are visibly
             // buttons, these are list rows directly under another block of list rows.

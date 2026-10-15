@@ -50,6 +50,9 @@ struct RegularShellView: View {
     /// every column that fits in landscape, the sidebar behind its button in portrait.
     @State private var columns: NavigationSplitViewVisibility = .automatic
 
+    /// Whether the window is taller than it is wide: an iPad held upright, or a tall slide.
+    @State private var portrait = false
+
     private var role: WorkspaceRole? {
         workspaceSession.role
     }
@@ -65,29 +68,59 @@ struct RegularShellView: View {
         return entries.contains { $0.item == selected } ? selected : .overview
     }
 
+    /// The columns a section opens with.
+    ///
+    /// ⛔ A LIST SECTION IN PORTRAIT OPENS ON ITS LIST AND THE OPEN ROW, `.doubleColumn`
+    /// (3.0.1, AP-014). `.automatic` there is the detail column alone, so Calls opened on an
+    /// empty "Select a call" with the list it asks you to pick from hidden behind a button.
+    /// ⚠️ Landscape, and every other section, keep `.automatic`: every column that fits.
+    static func visibility(listSection: Bool, portrait: Bool) -> NavigationSplitViewVisibility {
+        listSection && portrait ? .doubleColumn : .automatic
+    }
+
     var body: some View {
         let item = shown
         let rows = entries
-        Group {
-            if item.isListSection {
-                NavigationSplitView(columnVisibility: $columns) {
-                    sidebar(rows, showing: item)
-                } content: {
-                    listColumn(item)
-                } detail: {
-                    listDetail(item)
-                }
-            } else {
-                NavigationSplitView(columnVisibility: $columns) {
-                    sidebar(rows, showing: item)
-                } detail: {
-                    sectionDetail(item)
+        split(item, rows)
+            // ⚠️ MEASURED BEHIND THE SPLIT VIEW, NOT AROUND IT, so the split view keeps the
+            // layout and the safe areas it had; only the window's shape is read.
+            .background {
+                GeometryReader { proxy in
+                    Color.clear
+                        .onAppear {
+                            portrait = proxy.size.height > proxy.size.width
+                            columns = Self.visibility(listSection: shown.isListSection, portrait: portrait)
+                        }
+                        .onChange(of: proxy.size.height > proxy.size.width) { _, upright in
+                            portrait = upright
+                            columns = Self.visibility(listSection: shown.isListSection, portrait: upright)
+                        }
                 }
             }
+            // ⚠️ THE SIDEBAR'S OWN SETTER RESETS FIRST, IN THE SAME UPDATE; this catches the
+            // moves that do not come from the sidebar (a push, a link, the Overview's tab rows).
+            .onChange(of: item.isListSection) { _, list in
+                columns = Self.visibility(listSection: list, portrait: portrait)
+            }
+    }
+
+    @ViewBuilder
+    private func split(_ item: SidebarItem, _ rows: [SidebarEntry]) -> some View {
+        if item.isListSection {
+            NavigationSplitView(columnVisibility: $columns) {
+                sidebar(rows, showing: item)
+            } content: {
+                listColumn(item)
+            } detail: {
+                listDetail(item)
+            }
+        } else {
+            NavigationSplitView(columnVisibility: $columns) {
+                sidebar(rows, showing: item)
+            } detail: {
+                sectionDetail(item)
+            }
         }
-        // ⚠️ THE SIDEBAR'S OWN SETTER RESETS FIRST, IN THE SAME UPDATE; this catches the
-        // moves that do not come from the sidebar (a push, a link, the Overview's tab rows).
-        .onChange(of: item.isListSection) { columns = .automatic }
     }
 
     // ── The sidebar ──────────────────────────────────────────────────────────
@@ -114,7 +147,7 @@ struct RegularShellView: View {
             set: { next in
                 guard let next else { return }
                 if next.isListSection != shown.isListSection {
-                    columns = .automatic
+                    columns = Self.visibility(listSection: next.isListSection, portrait: portrait)
                 }
                 paths.setRegularSelection(next, workspaceId: workspaceId, role: role)
             }

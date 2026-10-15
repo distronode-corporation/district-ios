@@ -6,3 +6,5 @@ Corrections pour les appels, les notifications et les libellés.
 - Les demandes de soutien affichent maintenant leur état en français.
 - La zone de réponse occupe toute la largeur, avec les commandes de photo, de fichier et de brouillon IA sur une seule ligne. Sur un clavier physique, Commande-Retour envoie le message et Retour insère une nouvelle ligne.
 - Nouvelles couleurs de la palette District, et les éléments sélectionnés restent lisibles sur iPad.
+- Aux plus grandes tailles de texte, les libellés et les nombres ne sont plus coupés au milieu d'un mot, et chaque écran tient dans sa largeur. Sur iPad en mode portrait, une liste s'ouvre maintenant à côté de l'élément sélectionné.
+- Analytique : l'entonnoir de conversion affiche maintenant ses barres en français.

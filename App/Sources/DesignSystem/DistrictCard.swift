@@ -140,3 +140,26 @@ struct DistrictMetricTile: View {
         .accessibilityLabel("\(label), \(value)")
     }
 }
+
+/// A row of metric tiles, or a column of them at an accessibility text size (3.0.1, AP-002).
+///
+/// ⛔ TWO TILES SIDE BY SIDE AT AX5 LEAVE EACH ABOUT 150 POINTS, where a label or a value breaks
+/// mid-word. One column gives every tile the screen's width, which is what Dynamic Type's
+/// largest sizes need; the Overview and Analytics grids are built from these rows.
+struct DistrictMetricRow<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    var body: some View {
+        let layout = Self.layout(accessibilitySize: dynamicTypeSize.isAccessibilitySize)
+        layout { content }
+    }
+
+    /// One column at an accessibility size, a row otherwise.
+    static func layout(accessibilitySize: Bool) -> AnyLayout {
+        accessibilitySize
+            ? AnyLayout(VStackLayout(spacing: DistrictSpacing.row))
+            : AnyLayout(HStackLayout(spacing: DistrictSpacing.row))
+    }
+}

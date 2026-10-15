@@ -155,7 +155,8 @@ extension Tone {
 /// pill makes state scannable without reading, which is the entire job of a call
 /// log.
 ///
-/// ⛔ A PILL IS AN ATOM: ITS LABEL NEVER WRAPS. A wrapped pill reads as two pills and
+/// ⛔ A PILL IS AN ATOM: ITS LABEL NEVER WRAPS, EXCEPT AT AN ACCESSIBILITY TEXT SIZE, where
+/// one line can be wider than the screen (see the body). A wrapped pill reads as two pills and
 /// a mid-word break ("Transferr/ed") reads as corruption, which is what a two-pill
 /// call log row renders without this. `lineLimit(1)` plus a horizontal
 /// `fixedSize` makes the label report one width and hold it, so an `HStack` that is
@@ -178,6 +179,7 @@ struct DistrictBadge: View {
     /// ⛔ `.increased` ON A SELECTED ROW, where the tint and the ink give way to the accent's
     /// text colour. See ``SelectionInk``.
     @Environment(\.backgroundProminence) private var prominence
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var colors: DistrictColors {
         .resolve(colorScheme)
@@ -191,11 +193,14 @@ struct DistrictBadge: View {
         Text(text)
             .font(DistrictType.label)
             .foregroundStyle(SelectionInk.chipInk(tone, colors, increasedContrast: increased, prominence: prominence))
-            .lineLimit(1)
+            // ⛔ ONE LINE AT ITS OWN WIDTH, EXCEPT AT AN ACCESSIBILITY TEXT SIZE (3.0.1, AP-005).
+            // At AX5 a pill held to its own width ("Managed by Distronode") is wider than an
+            // iPhone, and the whole Phone numbers page scrolled sideways; there it wraps.
+            .lineLimit(Self.wraps(dynamicTypeSize) ? nil : 1)
             // ⚠️ HORIZONTAL ONLY. `fixedSize()` on both axes would also pin the height
             // against Dynamic Type, which is the one direction a pill must be free to
             // grow in.
-            .fixedSize(horizontal: true, vertical: false)
+            .fixedSize(horizontal: !Self.wraps(dynamicTypeSize), vertical: false)
             .padding(.horizontal, DistrictSpacing.tight)
             .padding(.vertical, 2)
             .background(
@@ -208,6 +213,11 @@ struct DistrictBadge: View {
                         .strokeBorder(outline, lineWidth: 1)
                 }
             }
+    }
+
+    /// Whether the pill may wrap: at an accessibility text size only.
+    static func wraps(_ size: DynamicTypeSize) -> Bool {
+        size.isAccessibilitySize
     }
 }
 
