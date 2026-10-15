@@ -3278,7 +3278,7 @@ en = "Attach file"
 fr = "Joindre un fichier"
 ctx = "button"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachFile" }
 note = "3.0.1: the composer's file control, beside the photo one; opens the Files picker for an image saved as a file. The same words as District AI for Mac."
 
