@@ -22,6 +22,12 @@ English stops the run rather than guessing.
 ⚠️ EVERY LIMIT IS CHECKED BEFORE THE FIRST WRITE: name and subtitle 30 characters,
 promotional text 170, description and What's New 4000, keywords 100 BYTES.
 
+⛔ THE SUPPORT URL IS REQUIRED PER LOCALIZATION. A version localization without
+`supportUrl` cannot be submitted: 3.0.0's review submission answered 409
+ENTITY_STATE_INVALID (the reason only in meta.associatedErrors) until fr-CA had one. The
+listing's `urls` carries it and `marketingUrl`, both https, and a listing with no
+`supportUrl` stops the run before any write.
+
 Standard library only, on asc_release.py's client (the same ES256 token through openssl
 and curl, the bearer never on argv). It reads no review detail, so the demo account's
 password is never fetched.
@@ -60,6 +66,28 @@ def load_texts(locale: str, version: str, root: Path = ROOT) -> dict:
         die(f"no What's New for {locale} {version}: {notes} is missing.")
     listing["texts"]["whatsNew"] = notes.read_text(encoding="utf-8").strip()
     return listing
+
+
+VERSION_TEXTS = ("description", "keywords", "promotionalText", "whatsNew")
+URL_FIELDS = ("supportUrl", "marketingUrl")
+
+
+def version_fields(listing: dict) -> dict:
+    """The version localization's attributes: the four texts, limit-checked, and the
+    listing's URLs. supportUrl is required (App Review refuses a localization without it)."""
+    texts = listing["texts"]
+    fields = {k: texts[k] for k in VERSION_TEXTS}
+    check_limits(fields)
+    urls = listing.get("urls") or {}
+    if not urls.get("supportUrl"):
+        die("the listing has no urls.supportUrl; App Store Connect will not submit a localization without one.")
+    for key, value in urls.items():
+        if key not in URL_FIELDS:
+            die(f"urls.{key} is not a version localization URL ({', '.join(URL_FIELDS)}).")
+        if not isinstance(value, str) or not value.startswith("https://") or any(c.isspace() for c in value):
+            die(f"urls.{key} is not an https URL: {value!r}")
+        fields[key] = value
+    return fields
 
 
 def check_limits(fields: dict) -> None:
@@ -177,9 +205,7 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="read, print every write, send none")
     args = parser.parse_args()
     listing = load_texts(args.locale, args.version)
-    texts = listing["texts"]
-    fields = {k: texts[k] for k in ("description", "keywords", "promotionalText", "whatsNew")}
-    check_limits(fields)
+    fields = version_fields(listing)
     client = asc_release.Client()
     app = asc_release.app_id(client)
     print(f"read: app {app}")
