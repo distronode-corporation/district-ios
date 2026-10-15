@@ -12,6 +12,13 @@ built from history before publication, so they have no tags in this repository.
 
 ### Changed
 
+- French: the call log's title is « Appels » (`calls.call_log`); « Journal des appels » was
+  cut to « Journal des ap… » in the iPad split view's list column.
+- `scripts/asc_localization.py` adds a language's App Store listing through the App Store
+  Connect API (the version localization and the app info's name and subtitle), from
+  `store-listing/<locale>.json` (fr-CA: the reviewed store copy, verbatim) and the
+  version's What's New file. `--dry-run` prints every write and sends none; its tests run in
+  CI's release scripts job.
 - 3.0.0: Canadian French ships in every build. project.yml takes App/Localization
   (fr-CA.lproj) into the app and project.fr.yml is gone; the release workflow sets
   `DISTRICT_FRENCH=YES`, so the archive guard requires fr-CA.lproj's two tables and refuses

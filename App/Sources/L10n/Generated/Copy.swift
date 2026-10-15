@@ -467,7 +467,7 @@ extension CallsCopy {
     internal static var callCouldNotSummarised: String { AppL10n.copyLocale == .frCA ? "Cet appel n'a pas pu être résumé." : "This call could not be summarised." }
 
     /// `calls.call_log`
-    internal static var callLog: String { AppL10n.copyLocale == .frCA ? "Journal des appels" : "Call log" }
+    internal static var callLog: String { AppL10n.copyLocale == .frCA ? "Appels" : "Call log" }
 
     /// `calls.call_not_available`
     internal static var callNotAvailable: String { AppL10n.copyLocale == .frCA ? "Cet appel n'est pas disponible." : "This call is not available." }
