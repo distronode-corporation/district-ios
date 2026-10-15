@@ -21,6 +21,8 @@ built from history before publication, so they have no tags in this repository.
   `{profile:{locale:"fr"|"en"}}` (POST /api/settings) on sign-in and when the resolved
   language changes. Every request already sends `Accept-Language` (`fr-CA` or `en`).
 - The detail placeholder's symbol is hidden from VoiceOver.
+- DistrictCore 7.0.0, the release: 7.0.0-beta.3 plus the reviewed v3.0 French in its catalogs
+  (« Annulés », the member roles « Administrateur » and « Membre »). swift-asn1 stays 1.7.3.
 
 ### Added
 
