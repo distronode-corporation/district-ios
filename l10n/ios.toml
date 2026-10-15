@@ -1183,10 +1183,11 @@ id = { swift = "CallsCopy.callCouldNotSummarised" }
 
 [calls.call_log]
 en = "Call log"
-fr = "Journal des appels"
+fr = "Appels"
 ctx = "label"
 screen = "calls"
 state = "reviewed"
+fr_variant = "iPad split-view list column: « Journal des appels » truncates in the large title (W4 final walk)"
 id = { swift = "CallsCopy.callLog" }
 
 [calls.call_not_available]
