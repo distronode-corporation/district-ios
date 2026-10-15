@@ -130,22 +130,58 @@ struct MarketplaceView: View {
     /// Type, so at AX sizes four labels (« Mes numéros », « Transporteur ») would be cut to a
     /// few letters; the menu shows the current tab in full and lists the four.
     ///
+    /// ⛔ AND THE MENU'S LABEL IS OUR OWN TEXT, NOT A `.menu` PICKER'S. The system's menu
+    /// button holds its label to one line's height, so at AX5 « Mes numéros » wrapped and was
+    /// cut through both lines (3.0.1 after-shots, run 38795483764, iPhone fr-CA AX5
+    /// 16-numbers). A `Menu` around an inline `Picker` keeps the checkmarked list, and its
+    /// label wraps between words like any other text.
+    ///
     /// ⛔ THE SELECTION WRITES THROUGH ``MarketplaceModel/selectTab(_:)``, as the buttons did,
     /// in a closure literal (see the custom lint rule in `.swiftlint.yml`).
     @ViewBuilder
     private var segments: some View {
-        let picker = Picker(MarketplaceCopy.title, selection: tabSelection) {
-            Text(MarketplaceCopy.tabOwned).tag(MarketplaceTab.owned)
-            Text(MarketplaceCopy.tabSearch).tag(MarketplaceTab.search)
-            Text(MarketplaceCopy.tabRegistrations).tag(MarketplaceTab.registrations)
-            Text(MarketplaceCopy.tabCarrier).tag(MarketplaceTab.carrier)
+        if dynamicTypeSize.isAccessibilitySize {
+            Menu {
+                tabPicker.pickerStyle(.inline)
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: DistrictSpacing.tight) {
+                    Text(Self.tabTitle(model.tab))
+                        .font(DistrictType.title)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .accessibilityHidden(true)
+                }
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .accessibilityLabel(MarketplaceCopy.title)
+            .accessibilityValue(Self.tabTitle(model.tab))
+            .accessibilityIdentifier(A11yID.Marketplace.tabs)
+        } else {
+            tabPicker
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier(A11yID.Marketplace.tabs)
+        }
+    }
+
+    /// The four tabs, in the order the segmented control shows them.
+    private var tabPicker: some View {
+        Picker(MarketplaceCopy.title, selection: tabSelection) {
+            ForEach(MarketplaceTab.allCases, id: \.self) { tab in
+                Text(Self.tabTitle(tab)).tag(tab)
+            }
         }
         .labelsHidden()
-        .accessibilityIdentifier(A11yID.Marketplace.tabs)
-        if dynamicTypeSize.isAccessibilitySize {
-            picker.pickerStyle(.menu)
-        } else {
-            picker.pickerStyle(.segmented)
+    }
+
+    /// A tab's name, on its segment, in the menu and on the menu's label.
+    static func tabTitle(_ tab: MarketplaceTab) -> String {
+        switch tab {
+        case .owned: MarketplaceCopy.tabOwned
+        case .search: MarketplaceCopy.tabSearch
+        case .registrations: MarketplaceCopy.tabRegistrations
+        case .carrier: MarketplaceCopy.tabCarrier
         }
     }
 

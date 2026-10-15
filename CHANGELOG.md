@@ -70,7 +70,9 @@ built from history before publication, so they have no tags in this repository.
     row of borderless icon controls (photo, a new file control through the Files picker,
     AI draft) and Send. Command-Return sends on a hardware keyboard; Return is a new line.
   - Numbers: the four pill buttons are a segmented `Picker` (a menu at accessibility text
-    sizes).
+    sizes). The menu is a `Menu` around an inline `Picker` with its own wrapping label: a
+    `.menu` picker's button held « Mes numéros » to one line's height and cut it at AX5
+    (after-shot run 38795483764).
   - AP-002: at an accessibility text size `DistrictEyebrow` drops its capitals and tracking,
     and the Overview and Analytics metric grids go to one column (`DistrictMetricRow`); the
     tracked capitals broke mid-word at AX5 ("TOTA / L CALL / S"). Normal sizes unchanged.

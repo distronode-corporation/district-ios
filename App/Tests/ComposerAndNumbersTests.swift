@@ -1,4 +1,5 @@
 @testable import DistrictAI
+import DistrictL10n
 import XCTest
 
 /// The 3.0.1 visual-QA rules for the reply composer and the Numbers tabs that a unit test can
@@ -33,6 +34,32 @@ final class ComposerAndNumbersTests: XCTestCase {
         XCTAssertTrue(code.contains(".pickerStyle(.segmented)"))
         XCTAssertTrue(code.contains("model.selectTab($0)"))
         XCTAssertFalse(code.contains("DistrictButtonStyle(variant: model.tab"))
+    }
+
+    /// ⛔ AT AN ACCESSIBILITY SIZE THE TABS ARE A `Menu` WITH OUR OWN WRAPPING LABEL, never a
+    /// `.menu` picker: the system's menu button cut « Mes numéros » through both lines at AX5.
+    func test_VQA_04_theAccessibilitySizeMenuLabelWraps() throws {
+        let code = try source("Features/Marketplace/MarketplaceView.swift")
+        XCTAssertFalse(code.contains(".pickerStyle(.menu)"))
+        XCTAssertTrue(code.contains("tabPicker.pickerStyle(.inline)"))
+        XCTAssertTrue(code.contains("Text(Self.tabTitle(model.tab))"))
+        XCTAssertTrue(code.contains(".fixedSize(horizontal: false, vertical: true)"))
+    }
+
+    /// Every tab has its own name in both languages, and the menu's label is that name.
+    func test_VQA_05_everyTabHasItsOwnName() {
+        for locale in [L10nLocale.en, .frCA] {
+            L10nRuntime.withLocale(locale) {
+                let titles = MarketplaceTab.allCases.map { MarketplaceView.tabTitle($0) }
+                XCTAssertEqual(titles.count, 4, "\(locale)")
+                XCTAssertEqual(Set(titles).count, 4, "\(locale)")
+                XCTAssertFalse(titles.contains(""), "\(locale)")
+            }
+        }
+        L10nRuntime.withLocale(.frCA) {
+            XCTAssertEqual(MarketplaceView.tabTitle(.owned), MarketplaceCopy.tabOwned)
+            XCTAssertEqual(MarketplaceView.tabTitle(.carrier), MarketplaceCopy.tabCarrier)
+        }
     }
 }
 
