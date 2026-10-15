@@ -246,7 +246,7 @@ final class W4FrenchTourTests: XCTestCase {
         let sections = ["persona", "voiceStudio", "capabilities", "calls", "directory", "routing",
                         "knowledge", "messaging", "members", "scheduling"]
         for (index, raw) in sections.enumerated() {
-            let row = app.buttons[A11yID.Settings.row(raw)].firstMatch
+            let row = app.descendants(matching: .any)[A11yID.Settings.row(raw)].firstMatch
             bringIntoView(row)
             guard row.exists else {
                 missed.append("settings-\(raw)")
@@ -446,6 +446,13 @@ final class W4FrenchTourTests: XCTestCase {
     }
 
     private func dismissSheet() {
+        // ⚠️ ON A WIDE SCREEN A SHEET CAN BE A POPOVER, closed by its dismiss region.
+        let region = app.descendants(matching: .any)["PopoverDismissRegion"].firstMatch
+        if region.exists {
+            region.tap()
+            Thread.sleep(forTimeInterval: 0.8)
+            return
+        }
         app.swipeDown(velocity: .fast)
         Thread.sleep(forTimeInterval: 0.8)
         if app.sheets.firstMatch.exists {
