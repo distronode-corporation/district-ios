@@ -26,6 +26,9 @@ use them with, so we are asking before we build anything:
 
 SwiftUI, Swift 6 language mode, iOS 17 and later, on iPhone and iPad (one universal app).
 
+Languages: English and Canadian French (fr-CA). The app follows the device's language; any
+French reads Canadian French.
+
 ## iPad
 
 On regular width the shell is a sidebar, and the list sections (Calls, Inbox, Contacts,

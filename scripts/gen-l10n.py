@@ -20,11 +20,8 @@ monorepo's `i18n/tools/`, see `tools/l10n/SOURCE.toml`) do the writing.
   ⛔ EACH ENGLISH MUST EQUAL project.yml's Info.plist VALUE, which the OS shows when a
   language has no table; `--check` compares them.
 
-⛔ THE TWO LANGUAGES' TABLES LIVE APART. `en.lproj` sits in `App/Resources/` and ships in
-every build. `fr-CA.lproj` sits in `App/Localization/`, which only `project.fr.yml`
-(included when `DISTRICT_FRENCH` is set) adds to the app: an XcodeGen include can add a
-source but never remove an `excludes`, so French cannot sit beside English and be left
-out. Until the catalogs carry French, the fr-CA tables hold the English.
+⛔ THE TWO LANGUAGES' TABLES LIVE APART. `en.lproj` sits in `App/Resources/` and
+`fr-CA.lproj` in `App/Localization/`; project.yml takes both into every build since 3.0.
 
 ⚠️ THE OPTIONS LIVE HERE AND NOWHERE ELSE. A second spelling of them (in the workflow,
 in a README) would let the file CI checks and the file a developer writes differ.
