@@ -1,0 +1,132 @@
+name: W5 French store screenshots (QA, not a gate)
+
+# QA ONLY, on the w5/store-fr-shots branch and never merged: the App Store screenshots in
+# Canadian French over the fictional Québec sample data (qa/quebec, served by
+# qa/mock_server.py, falling back to the contract fixtures), on the same devices as the
+# live en-US set: iPhone 17 Pro Max (6.9-inch) and iPad Pro 13-inch (M5), landscape.
+on:
+  push:
+    branches: [w5/store-fr-shots]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: w5-store-fr
+  cancel-in-progress: true
+
+jobs:
+  store:
+    name: store (${{ matrix.device }})
+    runs-on: macos-26
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: iPhone
+            name: "iPhone 17 Pro Max"
+          - device: iPad
+            name: "iPad Pro 13-inch (M5)"
+    env:
+      DEVICE: ${{ matrix.device }}
+      SIM_NAME: ${{ matrix.name }}
+      NSUnbufferedIO: "YES"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: distronode-corporation/district-core-swift
+          ref: 7.0.0
+          path: core-fixtures
+          persist-credentials: false
+
+      - name: Xcode and XcodeGen
+        id: toolchain
+        uses: ./.github/actions/macos-toolchain # zizmor: ignore[self-repository]
+        with:
+          generate: "false"
+
+      - name: Allow the local mock
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          p = "project.yml"
+          s = open(p).read()
+          anchor = "      properties:\n        CFBundleDisplayName: District AI\n"
+          assert anchor in s, "Info.plist anchor moved"
+          s = s.replace(anchor, anchor + "        NSAppTransportSecurity:\n          NSAllowsLocalNetworking: true\n", 1)
+          open(p, "w").write(s)
+          PY
+          xcodegen generate --spec project.yml
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: SourcePackages
+          key: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-${{ hashFiles('project.yml') }}
+
+      - name: Choose and dress the simulator
+        run: |
+          set -euo pipefail
+          udid="$(xcrun simctl list -j devices available | SIM_NAME="$SIM_NAME" python3 -c '
+          import json, os, sys
+          data = json.load(sys.stdin)["devices"]
+          runtimes = sorted((k for k in data if "iOS" in k), reverse=True)
+          for runtime in runtimes:
+              for d in data[runtime]:
+                  if d["name"] == os.environ["SIM_NAME"]:
+                      print(d["udid"]); sys.exit(0)
+          sys.exit("no simulator named " + os.environ["SIM_NAME"])
+          ')"
+          echo "$udid" >simulator-udid.txt
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl status_bar "$udid" override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 \
+            --cellularMode active --cellularBars 4 --operatorName "" --batteryState charged --batteryLevel 100
+          echo "simulator $SIM_NAME $udid"
+
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing -project DistrictAI.xcodeproj -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages CODE_SIGNING_ALLOWED=NO 2>&1 \
+            | tee build.log | xcbeautify --renderer github-actions
+          grep -q '\*\* TEST BUILD SUCCEEDED \*\*' build.log
+
+      - name: Start the mock
+        run: |
+          nohup python3 qa/mock_server.py qa/quebec:core-fixtures/contracts/mobile 8765 >mock.log 2>&1 &
+          sleep 2
+          curl -fsS http://127.0.0.1:8765/api/district/workspace/list | head -c 200
+
+      - name: Store frames (fr-CA)
+        timeout-minutes: 30
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building -project DistrictAI.xcodeproj -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages -resultBundlePath store.xcresult \
+            -only-testing:DistrictAIUITests/W5StoreFrenchTests \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee store.log | xcbeautify --renderer github-actions || true
+
+      - name: Export the frames
+        if: always()
+        run: |
+          mkdir -p shots
+          [ -d store.xcresult ] && xcrun xcresulttool export attachments --path store.xcresult --output-path shots/store || true
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: w5-store-${{ matrix.device }}
+          path: |
+            shots
+            mock.log
+            store.log
+            simulator-udid.txt
+          if-no-files-found: warn
+          retention-days: 7
