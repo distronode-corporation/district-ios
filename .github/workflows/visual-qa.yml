@@ -36,26 +36,17 @@ jobs:
           # 38771063483 on main): the iPad selection in both themes and the portrait pass,
           # and on the iPhone the composer, Numbers and AX5 in both languages, and the
           # Overview's error state.
-          - set: after-iPad-light
-            device: iPad
-            sim: "iPad Air 11-inch (M3)|iPad Pro 11-inch (M5)|iPad Pro 11-inch (M4)|iPad (A16)"
-            appearance: light
-            runs: >-
-              fr|-|test_2_frCA_light
-          - set: after-iPad-dark
-            device: iPad
-            sim: "iPad Air 11-inch (M3)|iPad Pro 11-inch (M5)|iPad Pro 11-inch (M4)|iPad (A16)"
-            appearance: dark
-            runs: >-
-              fr|-|test_4_frCA_dark
-          - set: after-iPhone-light
+          # Second round (after 31510b1): the iPhone in French only, for the fixes the first
+          # round shot in English or not at all: colour v3, the composer, the Numbers tabs and
+          # the funnel at the default size, AX5 again for the Numbers menu label, and the
+          # Overview's error state. The iPad frames from run 38795483764 stand.
+          - set: after2-iPhone-fr
             device: iPhone
             sim: "iPhone 17 Pro|iPhone 17|iPhone 16 Pro"
             appearance: light
             runs: >-
-              en|-|test_1_enUS_light,test_5_enUS_ax5
-              fr|-|test_6_frCA_ax5
-              en|error|test_8_enUS_error
+              fr|-|test_2_frCA_light,test_6_frCA_ax5
+              fr|error|test_11_frCA_error
     env:
       SET: ${{ matrix.set }}
       DEVICE: ${{ matrix.device }}

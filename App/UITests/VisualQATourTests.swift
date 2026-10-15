@@ -96,6 +96,11 @@ final class VisualQATourTests: XCTestCase {
         states(tag: "fr-CA-light-empty", language: "fr-CA", locale: "fr_CA")
     }
 
+    /// The mock answers every data route with a 500 (QA_MODE=error), in French.
+    func test_11_frCA_error() {
+        states(tag: "fr-CA-light-error", language: "fr-CA", locale: "fr_CA")
+    }
+
     // MARK: - The walks
 
     private func configure(language: String, locale: String, style: String, tag: String, extra: [String]) {
