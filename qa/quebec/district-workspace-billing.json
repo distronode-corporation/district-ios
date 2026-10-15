@@ -1,0 +1,23 @@
+{
+ "success": true,
+ "billing": {
+  "subscriptionTier": "VoicePro",
+  "subscriptionStatus": "active",
+  "plan": "voicepro",
+  "overagePolicy": "auto_bill",
+  "overageCapExceeded": false,
+  "usage": {
+   "month": "2026-10",
+   "provider": "twilio",
+   "smsOutbound": 318,
+   "smsInbound": 241,
+   "mmsOutbound": 4,
+   "whatsappOutbound": 0,
+   "callMinutesOutbound": 212.5,
+   "callMinutesInbound": 629.25,
+   "numberCount": 2,
+   "videoMinutes": 18,
+   "lastUpdated": "2026-10-14T13:05:00.000Z"
+  }
+ }
+}

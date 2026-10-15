@@ -1,0 +1,41 @@
+{
+ "success": true,
+ "contact": {
+  "id": "contact_qc_1",
+  "workspaceId": "ws-plomberie-desrosiers",
+  "name": "Martine Gagnon",
+  "phoneNumber": "+14185550142",
+  "email": "martine@vandelac-moreau.example",
+  "socialHandles": null,
+  "company": {
+   "name": "Clinique dentaire Vandelac-Moreau",
+   "domain": null,
+   "industry": "Santé dentaire"
+  },
+  "intelligence": {
+   "executiveSummary": "Clinique dentaire de quatre fauteuils à Québec; cliente depuis 2024, contrat d'entretien annuel.",
+   "corePainPoints": "Les interruptions de service pendant les heures d'ouverture coûtent des rendez-vous."
+  },
+  "visualMemory": null,
+  "latestContextSummary": "Dégât d'eau réglé le 14 octobre; facture envoyée.",
+  "dgiStatus": "complete",
+  "dgiError": null,
+  "budget": null,
+  "timeline": null,
+  "website": null,
+  "lastUpdated": "2026-10-14T13:05:00.000Z",
+  "createdAt": "2026-09-02T14:00:00.000Z"
+ },
+ "phoneIntel": {
+  "country": "CA",
+  "countryName": "Canada",
+  "nationalFormat": "(418) 555-0142",
+  "internationalFormat": "+1 418 555 0142",
+  "region": {
+   "code": "QC",
+   "name": "Québec"
+  },
+  "lineType": null,
+  "carrier": null
+ }
+}

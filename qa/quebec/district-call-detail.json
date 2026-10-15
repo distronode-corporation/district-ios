@@ -1,0 +1,47 @@
+{
+ "success": true,
+ "call": {
+  "id": "call_qc_1",
+  "type": "inbound",
+  "number": "Martine Gagnon",
+  "status": "completed",
+  "duration": "3m 4s",
+  "time": "Oct 14",
+  "aiSummary": "Martine Gagnon, de la Clinique dentaire Vandelac-Moreau, signale un dégât d'eau sous l'évier de la salle de stérilisation. Visite d'urgence fixée aujourd'hui à 15 h; confirmation envoyée par texto.",
+  "recordingUrl": null,
+  "transcript": "",
+  "hasTranscript": true,
+  "callerName": "Martine Gagnon",
+  "from": "+14185550142",
+  "direction": "inbound",
+  "durationRaw": 184,
+  "summary": "Martine Gagnon, de la Clinique dentaire Vandelac-Moreau, signale un dégât d'eau sous l'évier de la salle de stérilisation. Visite d'urgence fixée aujourd'hui à 15 h; confirmation envoyée par texto.",
+  "createdAt": "2026-10-14T13:05:00.000Z",
+  "followUp": {
+   "email": null,
+   "sms": "Bonjour Mme Gagnon, notre plombier sera à la clinique aujourd'hui à 15 h. Plomberie Desrosiers-Lanthier",
+   "sentAt": "2026-10-14T13:09:00.000Z"
+  },
+  "sentiment": "positive",
+  "disposition": "booked",
+  "analysis": {
+   "keyPoints": [
+    "Dégât d'eau sous l'évier de la salle de stérilisation",
+    "La clinique reste ouverte : intervention souhaitée avant 16 h"
+   ],
+   "objections": [],
+   "topics": [
+    "Urgence",
+    "Plomberie commerciale"
+   ],
+   "actionItems": [
+    "Apporter un siphon de remplacement",
+    "Facturer au compte de la clinique"
+   ],
+   "followUpSuggested": false
+  },
+  "transferStatus": null,
+  "transferReason": null,
+  "phoneIntel": null
+ }
+}
