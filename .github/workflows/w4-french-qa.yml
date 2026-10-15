@@ -1,0 +1,176 @@
+name: W4 French QA (screenshots, not a gate)
+
+# QA ONLY, on the w4/french-qa-shots branch and never merged: the app walked over the
+# contract fixtures (qa/mock_server.py) in en-US, fr-CA and fr-FR, and once with the
+# pseudo-locale in the French slot, on an iPhone and an iPad simulator. The frames and
+# the accessibility trees are the artifacts.
+on:
+  push:
+    branches: [w4/french-qa-shots]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: w4-french-qa
+  cancel-in-progress: true
+
+jobs:
+  tour:
+    name: tour (${{ matrix.device }})
+    runs-on: macos-26
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: iPad
+            prefer: "iPad Air 11-inch (M3)|iPad (A16)|iPad Pro 11-inch (M5)|iPad Pro 11-inch (M4)"
+            tests: "-only-testing:DistrictAIUITests/W4FrenchTourTests/test_2_frCA"
+            pseudo: "false"
+    env:
+      DEVICE: ${{ matrix.device }}
+      PREFER: ${{ matrix.prefer }}
+      TESTS: ${{ matrix.tests }}
+      NSUnbufferedIO: "YES"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: distronode-corporation/district-core-swift
+          ref: 7.0.0
+          path: core-fixtures
+          persist-credentials: false
+
+      - name: Xcode and XcodeGen
+        id: toolchain
+        uses: ./.github/actions/macos-toolchain # zizmor: ignore[self-repository]
+        with:
+          generate: "false"
+
+      # QA build only: the simulator talks to the mock on 127.0.0.1 over http.
+      - name: Allow the local mock, French on
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          p = "project.yml"
+          s = open(p).read()
+          anchor = "      properties:\n        CFBundleDisplayName: District AI\n"
+          assert anchor in s, "Info.plist anchor moved"
+          s = s.replace(anchor, anchor + "        NSAppTransportSecurity:\n          NSAllowsLocalNetworking: true\n", 1)
+          open(p, "w").write(s)
+          PY
+          xcodegen generate --spec project.yml
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: SourcePackages
+          key: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-${{ hashFiles('project.yml') }}
+
+      - name: Resolve packages
+        run: |
+          xcodebuild -resolvePackageDependencies -project DistrictAI.xcodeproj -scheme DistrictAI \
+            -clonedSourcePackagesDirPath SourcePackages | tail -20
+
+      - name: Choose a simulator
+        run: |
+          set -euo pipefail
+          ci/sim-udid.sh "$DEVICE" >/dev/null
+          python3 - <<'PY'
+          import json, os, subprocess
+          data = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "-j", "devices", "available"]))
+          wanted = os.environ["PREFER"].split("|")
+          found = {}
+          for runtime, devices in data["devices"].items():
+              if "iOS" not in runtime:
+                  continue
+              for d in devices:
+                  found.setdefault(d["name"], (runtime, d["udid"]))
+          for name in wanted:
+              if name in found:
+                  print(f"chose {name} {found[name]}")
+                  open("simulator-udid.txt", "w").write(found[name][1])
+                  break
+          else:
+              print("no preferred device; keeping ci/sim-udid.sh's choice")
+          PY
+          cat simulator-udid.txt
+          xcrun simctl boot "$(cat simulator-udid.txt)" || true
+
+      - name: Build (French on)
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing -project DistrictAI.xcodeproj -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages CODE_SIGNING_ALLOWED=NO 2>&1 \
+            | tee build-fr.log | xcbeautify --renderer github-actions
+          grep -q '\*\* TEST BUILD SUCCEEDED \*\*' build-fr.log
+
+      - name: Start the mock
+        run: |
+          nohup python3 qa/mock_server.py core-fixtures/contracts/mobile 8765 >mock.log 2>&1 &
+          sleep 2
+          curl -fsS http://127.0.0.1:8765/api/district/workspace/list | head -c 200
+
+      - name: Tour (fr-CA)
+        timeout-minutes: 60
+        run: |
+          set -o pipefail
+          # shellcheck disable=SC2086
+          xcodebuild test-without-building -project DistrictAI.xcodeproj -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages -resultBundlePath french.xcresult \
+            $TESTS CODE_SIGNING_ALLOWED=NO 2>&1 | tee tour-fr.log | xcbeautify --renderer github-actions || true
+
+      - name: Build (pseudo-locale in the French slot)
+        if: matrix.pseudo == 'true'
+        run: |
+          set -euo pipefail
+          python3 tools/l10n/pseudo.py l10n/ios.toml --out l10n/ios.pseudo.toml
+          mv l10n/ios.pseudo.toml l10n/ios.toml
+          python3 qa/pseudo_fixed.py l10n/ios.toml
+          python3 scripts/gen-l10n.py
+          grep -c $'‹' App/Sources/L10n/Generated/Copy.swift
+          set -o pipefail
+          xcodebuild build-for-testing -project DistrictAI.xcodeproj -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages CODE_SIGNING_ALLOWED=NO 2>&1 \
+            | tee build-pseudo.log | xcbeautify --renderer github-actions
+          grep -q '\*\* TEST BUILD SUCCEEDED \*\*' build-pseudo.log
+
+      - name: Tour (pseudo)
+        if: matrix.pseudo == 'true'
+        timeout-minutes: 30
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building -project DistrictAI.xcodeproj -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages -resultBundlePath pseudo.xcresult \
+            -only-testing:DistrictAIUITests/W4FrenchTourTests/test_2_frCA \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee tour-pseudo.log | xcbeautify --renderer github-actions || true
+
+      - name: Export the frames
+        if: always()
+        run: |
+          mkdir -p shots
+          for r in french pseudo; do
+            [ -d "$r.xcresult" ] || continue
+            xcrun xcresulttool export attachments --path "$r.xcresult" --output-path "shots/$r" || true
+          done
+          ls -R shots | head -50
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: w4-shots-${{ matrix.device }}
+          path: |
+            shots
+            mock.log
+            tour-*.log
+            build-*.log
+            simulator-udid.txt
+          if-no-files-found: warn
+          retention-days: 7
