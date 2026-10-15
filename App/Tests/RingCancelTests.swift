@@ -1,11 +1,16 @@
 import CallKit
 @testable import DistrictAI
 @testable import DistrictCall
+import DistrictModel
 import UIKit
 import XCTest
 
-/// The `call_ring_cancelled` background push (3.0.1): what it parses to, which ring it
-/// may stop, what CallKit is told, and which alert it removes.
+/// The `call_ring_cancelled` background push (3.0.1): which ring it may stop, what CallKit is
+/// told, and which alert it removes.
+///
+/// ⚠️ THE PARSE IS DistrictCore's (`RingCancel.parse`, tested there). The parse cases below pin
+/// the shape this app is sent, the APNs `userInfo`, and that a ring is never read as its own
+/// cancel.
 ///
 /// ⛔ THE ONE RULE WORTH A TEST ABOVE ALL: the cancel reaches the device that ANSWERED
 /// too, so a call answered or being answered here must come out ``RingCancelOutcome/answeredHere``,
