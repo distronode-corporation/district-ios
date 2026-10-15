@@ -18,6 +18,8 @@ This is what CI runs, in order:
 ```sh
 swiftformat --lint .                          # SwiftFormat 0.63.0
 swiftlint --strict                            # SwiftLint 0.65.1
+python3 tools/l10n/frcheck.py all --termbase '' --tm '' .
+python3 scripts/check-fr-signoff.py --self-test
 xcodegen generate --spec project.yml
 # then, on an iPhone and on an iPad simulator:
 #   DistrictAITests, and DistrictAIUITests/UnauthenticatedTests + LargerTextTests
@@ -89,6 +91,22 @@ cases to the expected count.
 **UI tests find elements by accessibility identifier**, from `App/Shared`, never by
 label: labels change with copy, and an unsigned CI build shows a different screen from a
 signed-in one.
+
+## Strings and French
+
+The app's words live in the catalogs in `l10n/` (`ios.toml`, `infoplist.toml`,
+`push.toml`), in English and Canadian French; `python3 scripts/gen-l10n.py` regenerates
+the Swift and the string tables after an edit. CI runs `tools/l10n/frcheck.py all`, the
+French rules (typography, terms, one French version of an English string across
+catalogs), over every catalog; an error fails it, a warning does not.
+
+The French is signed off per release. `i18n/fr-CA/signoff.json` names who signed it off,
+the release and commit the catalogs were read at, and the SHA-256 of every catalog;
+`python3 scripts/check-fr-signoff.py` fails, naming each catalog, when one differs, is
+missing or is not listed. `release.yml` runs it on a tag, never on pull requests, because
+catalogs change between releases. A release whose catalogs changed (French, or English the
+French follows) needs the manager's review of the French and a new `signoff.json` before
+it is tagged.
 
 ## Pull requests
 

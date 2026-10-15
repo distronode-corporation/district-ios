@@ -89,6 +89,15 @@ jobs:
         id: preflight
         run: scripts/release-preflight.sh
 
+      # The French is signed off per release. On a tag, every string catalog must be the
+      # one i18n/fr-CA/signoff.json records (scripts/check-fr-signoff.py names each one
+      # that is not), before anything is built or any secret is read. A dispatch on main
+      # is a TestFlight build, never submitted, and is not checked. CONTRIBUTING.md,
+      # "Strings and French".
+      - name: The catalogs are the signed-off French
+        if: startsWith(github.ref, 'refs/tags/')
+        run: python3 scripts/check-fr-signoff.py
+
       # The provider and the service account live in the action, shared with submit.yml.
       - name: Authenticate to Google Cloud
         id: gcp
