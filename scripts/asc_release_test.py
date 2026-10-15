@@ -351,6 +351,34 @@ class CallTests(unittest.TestCase):
         out = self.answer(json.dumps({"errors": [{"code": "NOT_AUTHORIZED", "detail": "bad token"}]}), 401)
         self.assertIn("answered 401: NOT_AUTHORIZED: bad token", out)
 
+    def test_associated_errors_are_named(self) -> None:
+        body = {
+            "errors": [
+                {
+                    "code": "STATE_ERROR.ENTITY_STATE_INVALID",
+                    "detail": "This resource cannot be reviewed, please check associated errors to see why.",
+                    "meta": {
+                        "associatedErrors": {
+                            "/v1/appStoreVersionLocalizations/loc-fr": [
+                                {
+                                    "code": "ENTITY_ERROR.ATTRIBUTE.REQUIRED",
+                                    "detail": "You must provide a value for the attribute 'supportUrl' with this request",
+                                }
+                            ]
+                        }
+                    },
+                }
+            ]
+        }
+        out = self.answer(json.dumps(body), 409)
+        self.assertIn("EXIT 1", out)
+        self.assertIn("answered 409: STATE_ERROR.ENTITY_STATE_INVALID: This resource cannot be reviewed", out)
+        self.assertIn(
+            "[associated: /v1/appStoreVersionLocalizations/loc-fr: ENTITY_ERROR.ATTRIBUTE.REQUIRED: "
+            "You must provide a value for the attribute 'supportUrl' with this request]",
+            out,
+        )
+
     def test_success_is_parsed(self) -> None:
         self.assertEqual(self.answer(json.dumps({"data": []}), 200), "")
         self.assertEqual(self.result, (200, {"data": []}))

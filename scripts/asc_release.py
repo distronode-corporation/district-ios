@@ -287,6 +287,18 @@ class Client:
                 data = {}
             errors = data.get("errors", []) if isinstance(data, dict) else []
             details = "; ".join(f"{e.get('code')}: {e.get('detail') or e.get('title')}" for e in errors)
+            # ⚠️ A 409 ENTITY_STATE_INVALID only says "check associated errors": the reason
+            # (3.0.0: a localization with no supportUrl) is in meta.associatedErrors, keyed
+            # by the resource path, so it is named here or the run says nothing useful.
+            associated = [
+                f"{where}: {e.get('code')}: {e.get('detail') or e.get('title')}"
+                for err in errors
+                if isinstance(err.get("meta"), dict) and isinstance(err["meta"].get("associatedErrors"), dict)
+                for where, items in err["meta"]["associatedErrors"].items()
+                for e in items
+            ]
+            if associated:
+                details += " [associated: " + "; ".join(associated) + "]"
             die(f"{method} {path} answered {code}: {details or ' '.join(text.split())[:500]}")
         return code, json.loads(text) if text.strip() else {}
 
