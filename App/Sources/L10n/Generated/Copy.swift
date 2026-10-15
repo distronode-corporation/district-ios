@@ -2903,6 +2903,9 @@ extension SchedulingCopy {
     /// `scheduling.hand_off_failed`
     internal static var handOffFailed: String { AppL10n.copyLocale == .frCA ? "Impossible d'ouvrir la page. Réessayez." : "The website could not be opened. Try again." }
 
+    /// `scheduling.hand_off_no_callback`
+    internal static var handOffNoCallback: String { AppL10n.copyLocale == .frCA ? "L'ouverture de la page a pris trop de temps. Réessayez." : "Opening the website took too long. Try again." }
+
     /// `scheduling.host_archived`
     internal static func hostArchived(_ role: String) -> String {
         AppL10n.copyLocale == .frCA ? "\(role) · archivé" : "\(role) · archived"

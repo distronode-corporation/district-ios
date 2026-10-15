@@ -74,7 +74,7 @@ packages:
   # release builds from it.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    revision: 9d7294b35b2f36bf8b2081ba1aeea0c80e0db910
+    revision: 1972dc9bc273649bcc233fc4feb7b8cfe2c5c379
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever

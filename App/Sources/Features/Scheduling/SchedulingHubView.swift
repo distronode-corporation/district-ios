@@ -381,7 +381,15 @@ struct SchedulingHubView: View {
             let url = await model.manageScheduling { url, state in
                 handOff = SchedulingHandOff(url: url, startState: state)
             }
-            guard let url else { return }
+            guard let url else {
+                // ⛔ A HAND-OFF THAT MINTED NOTHING TAKES ITS LEG-1 SHEET AWAY when it left a
+                // notice (no callback, a refused mint), so the notice behind the sheet is
+                // what the person sees. Only a leg-1 sheet: a leg-3 page is never closed.
+                if model.notice != nil, handOff?.startState != nil {
+                    handOff = nil
+                }
+                return
+            }
             handOff = SchedulingHandOff(url: url)
         }
     }

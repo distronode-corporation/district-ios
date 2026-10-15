@@ -49,8 +49,15 @@ built from history before publication, so they have no tags in this repository.
   Received) or "Status unknown". The close confirmation names the label too.
 - The scheduling hub's footnote no longer says the sections are read-only: they write. It
   now reads "Anything these sections do not cover opens in a browser."
+- The scheduling hand-off never mints an unbound code (S33). DistrictCore 7.0.1's
+  `SchedulingHandoffFlow` no longer falls back to a mint without a nonce when leg 1 does not
+  call back within 30 s (10 s before); it ends as `.noCallback`, and the hub shows
+  `scheduling.hand_off_no_callback` ("Opening the website took too long. Try again.", the
+  Mac's words) and takes the leg-1 sheet away so the notice is seen. The flow is the only
+  minter and `ShellView.onOpenURL` routes `districtai://handoff` to it
+  (`test_IOS_SCH_29`).
 - MARKETING_VERSION 3.0.1. DistrictCore pinned by revision to district-core-swift
-  v3/7.0.1 (9d7294b, PR #26's head) until 7.0.1 is tagged.
+  v3/7.0.1 (1972dc9, PR #26's head) until 7.0.1 is tagged.
 
 ### Release lane
 
