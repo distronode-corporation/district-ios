@@ -1,0 +1,18 @@
+{
+ "success": true,
+ "workspaces": [
+  {
+   "id": "ws-plomberie-desrosiers",
+   "name": "Plomberie Desrosiers-Lanthier inc.",
+   "region": "ca",
+   "role": "agency",
+   "subscriptionTier": "VoicePro"
+  }
+ ],
+ "total": 1,
+ "limit": 100,
+ "offset": 0,
+ "degradedRegions": [],
+ "inactiveCount": 0,
+ "defaultWorkspaceId": "ws-plomberie-desrosiers"
+}
