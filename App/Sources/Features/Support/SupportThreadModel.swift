@@ -76,9 +76,14 @@ final class SupportThreadModel {
     }
 
     /// The status to show, preferring what the close told us. See
-    /// ``closedStatusName``.
+    /// ``closedStatusName``. ⛔ Through ``SupportStatusLabel``, never the desk's own word
+    /// (3.0.1); a close answers a resolved status, so its category is the resolved one.
     var statusName: String {
-        closedStatusName ?? detail?.statusName ?? SupportCopy.unfiledStatus
+        if let closedStatusName {
+            return SupportStatusLabel.label(closedStatusName, category: SupportStatusCategory.resolved)
+        }
+        guard let detail else { return SupportCopy.unfiledStatus }
+        return SupportStatusLabel.label(detail.statusName, category: detail.statusCategory)
     }
 
     /// ⛔ WHETHER THIS REQUEST IS FINISHED, ANSWERED THROUGH THE HELPER AND NEVER BY
@@ -164,7 +169,9 @@ final class SupportThreadModel {
         switch await support.close(workspaceId: workspaceId, key: key) {
         case let .success(statusName):
             closedStatusName = statusName
-            close = .done(SupportCopy.closed(statusName))
+            close = .done(SupportCopy.closed(
+                SupportStatusLabel.label(statusName, category: SupportStatusCategory.resolved)
+            ))
         case let .failure(error):
             close = .failed(FailureText.from(error), .after(error, .once))
         }
