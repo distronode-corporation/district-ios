@@ -45,7 +45,7 @@ built from history before publication, so they have no tags in this repository.
   (and the live workflow is localised, so it can be any language). `SupportStatusLabel`
   maps the workflow's names (Received, Open, Waiting for support, Waiting for customer, In
   progress, Pending, Escalated, Resolved, Done, Closed, Canceled, Declined) to catalog
-  labels; any other name reads as its category's label (Open, In progress, Closed,
+  labels (state reviewed, signed off for 3.0.1); any other name reads as its category's label (Open, In progress, Closed,
   Received) or "Status unknown". The close confirmation names the label too.
 - The scheduling hub's footnote no longer says the sections are read-only: they write. It
   now reads "Anything these sections do not cover opens in a browser."

@@ -33,7 +33,7 @@ final class SupportStatusLabelTests: XCTestCase {
             Row("In Progress", "In progress", "En cours"),
             Row("Work in progress", "In progress", "En cours"),
             Row("Pending", "Pending", "En attente"),
-            Row("Escalated", "Escalated", "Transmise à un niveau supérieur"),
+            Row("Escalated", "Escalated", "Transférée"),
             Row("Resolved", "Resolved", "Réglée"),
             Row("Done", "Done", "Terminée"),
             Row("Completed", "Done", "Terminée"),

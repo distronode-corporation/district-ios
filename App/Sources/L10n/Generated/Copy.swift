@@ -3175,7 +3175,7 @@ extension SchedulingCopy {
     internal static var sectionsEyebrow: String { AppL10n.copyLocale == .frCA ? "Gérer" : "Manage" }
 
     /// `scheduling.sections_footnote`
-    internal static var sectionsFootnote: String { AppL10n.copyLocale == .frCA ? "Ce que ces sections ne couvrent pas s'ouvre hors de l'app." : "Anything these sections do not cover opens in a browser." }
+    internal static var sectionsFootnote: String { AppL10n.copyLocale == .frCA ? "Ce que ces sections ne couvrent pas s'ouvre hors de l'application." : "Anything these sections do not cover opens in a browser." }
 
     /// `scheduling.set`
     internal static var set: String { AppL10n.copyLocale == .frCA ? "Défini" : "Set" }
@@ -5441,7 +5441,7 @@ extension SupportCopy {
     internal static var statusDone: String { AppL10n.copyLocale == .frCA ? "Terminée" : "Done" }
 
     /// `support.status_escalated`
-    internal static var statusEscalated: String { AppL10n.copyLocale == .frCA ? "Transmise à un niveau supérieur" : "Escalated" }
+    internal static var statusEscalated: String { AppL10n.copyLocale == .frCA ? "Transférée" : "Escalated" }
 
     /// `support.status_in_progress`
     internal static var statusInProgress: String { AppL10n.copyLocale == .frCA ? "En cours" : "In progress" }

@@ -8129,10 +8129,10 @@ note = "⚠️ THE EYEBROW OVER THE SECTION LIST. \"Manage\" rather than \"Secti
 
 [scheduling.sections_footnote]
 en = "Anything these sections do not cover opens in a browser."
-fr = "Ce que ces sections ne couvrent pas s'ouvre hors de l'app."
+fr = "Ce que ces sections ne couvrent pas s'ouvre hors de l'application."
 ctx = "body"
 screen = "scheduling"
-state = "draft"
+state = "reviewed"
 id = { swift = "SchedulingCopy.sectionsFootnote" }
 note = "⚠️ 3.0.1: NO LONGER \"READ-ONLY FOR NOW\". The sections write (event types, hours, bookings, calendars, team, developer keys), so only what they do not cover leaves the app. ⛔ IT SAYS WHY THERE IS STILL A BUTTON OUT OF THE APP, AND IT MUST NOT NAME THE WEBSITE. App Store Review Guideline 3.1.1 covers steering toward an external surface as well as the purchase itself, which is also why ``FailureText``'s 402 sentence names no domain. \"In a browser\" is a capability, not a destination."
 
@@ -14418,7 +14418,7 @@ en = "Canceled"
 fr = "Annulée"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 fr_variant = "a support request's status: agrees with « demande » (feminine)"
 id = { swift = "SupportCopy.statusCanceled" }
 
@@ -14427,7 +14427,7 @@ en = "Closed"
 fr = "Fermée"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 fr_variant = "a support request's status: agrees with « demande » (feminine)"
 id = { swift = "SupportCopy.statusClosed" }
 
@@ -14436,7 +14436,7 @@ en = "Declined"
 fr = "Refusée"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 id = { swift = "SupportCopy.statusDeclined" }
 
 [support.status_done]
@@ -14444,16 +14444,16 @@ en = "Done"
 fr = "Terminée"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 fr_variant = "a support request's status: agrees with « demande » (feminine)"
 id = { swift = "SupportCopy.statusDone" }
 
 [support.status_escalated]
 en = "Escalated"
-fr = "Transmise à un niveau supérieur"
+fr = "Transférée"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 id = { swift = "SupportCopy.statusEscalated" }
 
 [support.status_in_progress]
@@ -14461,7 +14461,7 @@ en = "In progress"
 fr = "En cours"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 id = { swift = "SupportCopy.statusInProgress" }
 
 [support.status_open]
@@ -14469,7 +14469,7 @@ en = "Open"
 fr = "Ouverte"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 fr_variant = "a support request's status: agrees with « demande » (feminine)"
 id = { swift = "SupportCopy.statusOpen" }
 
@@ -14478,7 +14478,7 @@ en = "Pending"
 fr = "En attente"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 id = { swift = "SupportCopy.statusPending" }
 
 [support.status_received]
@@ -14486,7 +14486,7 @@ en = "Received"
 fr = "Reçue"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 id = { swift = "SupportCopy.statusReceived" }
 
 [support.status_resolved]
@@ -14494,7 +14494,7 @@ en = "Resolved"
 fr = "Réglée"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 fr_variant = "a support request's status: agrees with « demande » (feminine)"
 id = { swift = "SupportCopy.statusResolved" }
 
@@ -14503,7 +14503,7 @@ en = "Status unknown"
 fr = "État inconnu"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 id = { swift = "SupportCopy.statusUnknown" }
 note = "⛔ THE GENERIC LABEL. A help-desk status this build does not list reads as its category's label (Open, In progress, Closed, Received), and this one when the category is unknown too. The desk's own word is never shown: the live workflow is localised (`完成` has been seen), so it can be in any language."
 
@@ -14512,7 +14512,7 @@ en = "Waiting for your reply"
 fr = "En attente de votre réponse"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 id = { swift = "SupportCopy.statusWaitingForCustomer" }
 
 [support.status_waiting_for_support]
@@ -14520,7 +14520,7 @@ en = "Waiting for support"
 fr = "En attente du soutien"
 ctx = "label"
 screen = "support"
-state = "draft"
+state = "reviewed"
 id = { swift = "SupportCopy.statusWaitingForSupport" }
 
 [support.subtitle]
