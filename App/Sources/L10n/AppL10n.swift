@@ -9,12 +9,12 @@ import Foundation
 /// through ``copyLocale``, so a screen's own words and the core's error sentence or
 /// date under them can never disagree about the language.
 ///
-/// ⛔ FRENCH ONLY WHEN THIS BUILD SHIPS IT. Until the 3.0 build that includes
-/// `project.fr.yml`, the bundle holds no French localization, and ``resolve`` answers
-/// English whatever the device is set to. The catalog's French is incomplete until
-/// then and the generated French branch carries the English, but the core's
-/// formatters are already French (« 249,00 $ »), so a French device must not reach
-/// them early.
+/// ⛔ FRENCH ONLY WHEN THE BUNDLE SHIPS IT. Since 3.0 every build carries fr-CA.lproj
+/// (project.yml), so a French device reads Canadian French; a bundle without a French
+/// localization would answer English whatever the device is set to.
+///
+/// ⚠️ THE SERVER HEARS THE SAME LANGUAGE: the core's `ApiClient` sends it as
+/// `Accept-Language` on every request, and ``LocaleSync`` stores it on the account.
 enum AppL10n {
     /// The two languages the generated accessors know.
     ///
@@ -64,11 +64,18 @@ enum AppL10n {
         return DistrictL10n.locale(fromPreferred: preferredLocalizations + preferredLanguages)
     }
 
+    /// Posted on the main queue when the resolved language changes while the app runs, so
+    /// the account's stored language can follow (``LocaleSync``).
+    static let didChange = Notification.Name("AppL10nDidChange")
+
     private static func apply(bundle: Bundle) {
-        L10nRuntime.locale = resolve(
+        let next = resolve(
             preferredLocalizations: bundle.preferredLocalizations,
             preferredLanguages: Locale.preferredLanguages,
             bundleLocalizations: bundle.localizations
         )
+        guard next != L10nRuntime.locale else { return }
+        L10nRuntime.locale = next
+        NotificationCenter.default.post(name: didChange, object: nil)
     }
 }
