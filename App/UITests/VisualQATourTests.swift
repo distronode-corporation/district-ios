@@ -381,6 +381,7 @@ final class VisualQATourTests: XCTestCase {
         app.launchEnvironment["DISTRICT_UITEST_SESSION"] = Self.session
         app.launchEnvironment["DISTRICT_UITEST_BASE_URL"] = "http://127.0.0.1:8765"
         app.launch()
+        compactCache = nil
         dismissSystemAlert()
         if !isCompact() {
             XCUIDevice.shared.orientation = landscape ? .landscapeLeft : .portrait
@@ -395,6 +396,8 @@ final class VisualQATourTests: XCTestCase {
             missed.append("shell")
             return false
         }
+        // Decided again now that the shell (and any tab bar) is on screen.
+        compactCache = nil
         if !isCompact(), landscape,
            !app.cells.containing(.any, identifier: A11yID.Sidebar.overview).firstMatch.exists {
             let toggle = app.navigationBars.buttons.element(boundBy: 0)
@@ -422,8 +425,15 @@ final class VisualQATourTests: XCTestCase {
 
     // MARK: - Navigation
 
+    /// Read once per launch: on a wide screen there is no tab bar, and waiting three
+    /// seconds for one before every navigation added minutes to the iPad walk.
+    private var compactCache: Bool?
+
     private func isCompact() -> Bool {
-        app.tabBars.firstMatch.waitForExistence(timeout: 3)
+        if let compactCache { return compactCache }
+        let compact = app.tabBars.firstMatch.waitForExistence(timeout: 3)
+        compactCache = compact
+        return compact
     }
 
     /// The tab's symbol: a tab bar button carries no identifier and its label is the
@@ -532,6 +542,14 @@ final class VisualQATourTests: XCTestCase {
     /// is the rightmost navigation bar; a back button sits at its leading edge and carries
     /// the system's identifier or none, while the app's own toolbar items carry theirs.
     private func backButton() -> XCUIElement? {
+        // ⚠️ ON iPadOS 26 THE DETAIL COLUMN'S BAR SPANS THE WHOLE WINDOW, BEHIND THE FLOATING
+        // SIDEBAR, so "leading edge of the rightmost bar" finds nothing: the system back
+        // button is found by its identifier first, the frontmost (rightmost) one winning.
+        let backs = app.navigationBars.buttons.matching(identifier: "BackButton").allElementsBoundByIndex
+            .filter { $0.exists && $0.isHittable }
+        if let back = backs.max(by: { $0.frame.minX < $1.frame.minX }) {
+            return back
+        }
         let bars = app.navigationBars.allElementsBoundByIndex.filter { $0.exists && $0.frame.width > 0 }
         guard let bar = bars.max(by: { $0.frame.minX < $1.frame.minX }) else { return nil }
         let button = bar.buttons.element(boundBy: 0)
@@ -636,12 +654,27 @@ final class VisualQATourTests: XCTestCase {
         app.swipeDown()
     }
 
+    /// ⚠️ OVER THE ELEMENT'S OWN COLUMN when it exists: on a wide screen `app.swipeUp()`
+    /// scrolls whatever column is under the middle of the window, which is often not the
+    /// one holding the element (the iPad call detail's transcript button stayed unreachable).
     private func bringIntoView(_ element: XCUIElement) {
         var swipes = 0
         while !(element.exists && element.isHittable), swipes < 7 {
-            app.swipeUp()
+            if element.exists, !isCompact(), element.frame.width > 0 {
+                dragUp(atX: element.frame.midX)
+            } else {
+                app.swipeUp()
+            }
             swipes += 1
         }
+    }
+
+    private func dragUp(atX x: CGFloat) {
+        let frame = app.windows.firstMatch.frame
+        let origin = app.coordinate(withNormalizedOffset: .zero)
+        let start = origin.withOffset(CGVector(dx: x, dy: frame.minY + frame.height * 0.75))
+        let end = origin.withOffset(CGVector(dx: x, dy: frame.minY + frame.height * 0.3))
+        start.press(forDuration: 0.05, thenDragTo: end)
     }
 
     // MARK: - Capture

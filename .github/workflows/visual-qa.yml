@@ -16,7 +16,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: visual-qa-${{ github.ref }}
+  # `-2`: this commit's run must not cancel the first one (run 38771063483) still walking.
+  group: visual-qa-2-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -31,39 +32,16 @@ jobs:
       max-parallel: 2
       matrix:
         include:
-          # Each run is `<language>|<QA_MODE or ->|<test>,<test>`.
-          - set: iPhone-light
-            device: iPhone
-            sim: "iPhone 17 Pro|iPhone 17|iPhone 16 Pro"
-            appearance: light
-            runs: >-
-              en|-|test_1_enUS_light,test_5_enUS_ax5
-              fr|-|test_2_frCA_light,test_6_frCA_ax5
-              en|empty|test_7_enUS_empty
-              en|error|test_8_enUS_error
-              en|slow|test_9_enUS_loading
-              fr|empty|test_10_frCA_empty
-          - set: iPad-light
+          # The iPhone and iPad light and dark sets ran on the previous commit (run
+          # 38771063483). This commit reruns the iPad light set with the back-button and
+          # column-scroll fixes, so the scheduling and settings sub-screens are reached.
+          - set: iPad-light-2
             device: iPad
             sim: "iPad Air 11-inch (M3)|iPad Pro 11-inch (M5)|iPad Pro 11-inch (M4)|iPad (A16)"
             appearance: light
             runs: >-
               en|-|test_1_enUS_light
               fr|-|test_2_frCA_light
-          - set: iPhone-dark
-            device: iPhone
-            sim: "iPhone 17 Pro|iPhone 17|iPhone 16 Pro"
-            appearance: dark
-            runs: >-
-              en|-|test_3_enUS_dark
-              fr|-|test_4_frCA_dark
-          - set: iPad-dark
-            device: iPad
-            sim: "iPad Air 11-inch (M3)|iPad Pro 11-inch (M5)|iPad Pro 11-inch (M4)|iPad (A16)"
-            appearance: dark
-            runs: >-
-              en|-|test_3_enUS_dark
-              fr|-|test_4_frCA_dark
     env:
       SET: ${{ matrix.set }}
       DEVICE: ${{ matrix.device }}
