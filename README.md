@@ -200,6 +200,11 @@ exactly as the store shows it) for every other language, as on district-android.
 localization in a language with no notes stops the submission; English is never sent in its
 place.
 
+A language's store listing (description, keywords, promotional text, What's New, name and
+subtitle) is added through the App Store Connect API by `scripts/asc_localization.py`, from
+`store-listing/<locale>.json` and the version's `release-notes/<locale>/` file. Its
+`--dry-run` reads App Store Connect and prints every write without sending one.
+
 Each version gets its GitHub Release, the source of that App Store release, once App
 Store Connect has it on sale: `submit.yml` checks after each submission and every six
 hours, and `scripts/github-release.sh` publishes it with the version's `CHANGELOG.md`
