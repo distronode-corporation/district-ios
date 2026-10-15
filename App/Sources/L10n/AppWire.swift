@@ -4,19 +4,22 @@ import Foundation
 /// The words a screen shows for what the API sends as data: an enumerated value (a call's
 /// status, a carrier, a role), a call length the server wrote, a count.
 ///
-/// ⛔ ENGLISH SHOWS THE VALUE AS IT ALWAYS HAS, AND ONLY FRENCH READS THE VOCABULARY. English
-/// screens have drawn these values as sent since 1.0 (`completed`, `twilio`, `1m 5s`), and
-/// 3.0 keeps English unchanged; a French screen must never show an English wire word, so it
-/// takes ``WireLabel/label(_:_:)`` (`contracts/i18n/wire-vocabulary.json`), where a value the
-/// vocabulary does not list reads as the category's fallback or « Autre ». district-android
-/// made the same call in its W4 pass.
+/// ⛔ A LABEL IS THE VOCABULARY'S, IN BOTH LANGUAGES, NEVER THE RAW WIRE VALUE (3.0.1).
+/// ``label(_:_:)`` is ``WireLabel/label(_:_:)`` (`contracts/i18n/wire-vocabulary.json`), the
+/// portal's own words: "Completed" in English, « Terminé » in French. Until 3.0.1 English drew
+/// the value as sent, so the Overview showed `completed` beside "Transferred". A value the
+/// vocabulary does not list reads as the category's fallback or the generic "Other"
+/// (« Autre »), never the value humanized.
+///
+/// ⚠️ THE OTHER THREE KEEP ENGLISH AS SENT: a placeholder the service writes in English, the
+/// server's own `duration` text and a count are already English words and digits.
 ///
 /// ⚠️ WIRE VALUES NEVER LOCALIZE: a screen keeps branching on the raw value and only shows
 /// this beside it.
 enum AppWire {
-    /// The label of `value` in `category`: as sent in English, the vocabulary's in French.
+    /// The vocabulary's label of `value` in `category`, in the app's language.
     static func label(_ category: WireCategory, _ value: String) -> String {
-        AppL10n.copyLocale == .frCA ? WireLabel.label(category, value) : value
+        WireLabel.label(category, value)
     }
 
     /// ``label(_:_:)`` of a value that may be absent: nil when there is no value or only
