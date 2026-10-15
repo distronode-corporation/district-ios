@@ -1,3 +1,4 @@
+import DistrictData
 import SwiftUI
 
 /// The session gate: the one place that decides between the app and the sign-in
@@ -29,6 +30,8 @@ struct RootView: View {
 
     @State private var session: SessionModel
 
+    @State private var localeSync: LocaleSync
+
     init(container: AppContainer, push: PushRegistrar, incoming: IncomingCallModel) {
         self.container = container
         self.push = push
@@ -38,6 +41,13 @@ struct RootView: View {
         // the lifetime of this view's identity, so the model is not rebuilt on every
         // re-render. Constructing it in the body would be a new model per frame.
         _session = State(initialValue: SessionModel(container: container, push: push))
+        let settings = AccountSettingsRepository(client: container.api)
+        _localeSync = State(initialValue: LocaleSync { locale in
+            if case .success = await settings.saveLocale(locale) {
+                return true
+            }
+            return false
+        })
     }
 
     var body: some View {
@@ -53,6 +63,19 @@ struct RootView: View {
                 // redraw. A refresh here can spend a rotation; see `refreshPhase`.
                 await session.refreshPhase()
             }
+            // ⚠️ THE ACCOUNT'S STORED LANGUAGE FOLLOWS THE APP'S: on sign-in and on a
+            // language change. See ``LocaleSync``.
+            .task(id: isSignedIn) { await localeSync.sync(signedIn: isSignedIn) }
+            .onReceive(NotificationCenter.default.publisher(for: AppL10n.didChange)) { _ in
+                Task { await localeSync.sync(signedIn: isSignedIn) }
+            }
+    }
+
+    private var isSignedIn: Bool {
+        if case .signedIn = session.phase {
+            return true
+        }
+        return false
     }
 }
 

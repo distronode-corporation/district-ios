@@ -10,6 +10,20 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Changed
+
+- 3.0.0: Canadian French ships in every build. project.yml takes App/Localization
+  (fr-CA.lproj) into the app and project.fr.yml is gone; the release workflow sets
+  `DISTRICT_FRENCH=YES`, so the archive guard requires fr-CA.lproj's two tables and refuses
+  any other French .lproj, and CI's bundle check does the same. The app follows the
+  device's language (any French is Canadian French).
+- The account's stored language follows the app's: `LocaleSync` writes
+  `{profile:{locale:"fr"|"en"}}` (POST /api/settings) on sign-in and when the resolved
+  language changes. Every request already sends `Accept-Language` (`fr-CA` or `en`).
+- The detail placeholder's symbol is hidden from VoiceOver.
+- DistrictCore 7.0.0, the release: 7.0.0-beta.3 plus the reviewed v3.0 French in its catalogs
+  (« Annulés », the member roles « Administrateur » and « Membre »). swift-asn1 stays 1.7.3.
+
 ### Added
 
 - New ticket on District Desk. A New ticket button in the Desk toolbar opens the form that
@@ -93,6 +107,14 @@ built from history before publication, so they have no tags in this repository.
   and the `fr-CA.lproj` strings, so `FR_COMPLETE` is true. French stays switched off: the
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
+
+## [3.0.0] - 2026-10-15
+
+District AI is now in Canadian French.
+
+- Raise a ticket on a customer's behalf from District Desk: the New ticket button in the Desk toolbar opens the form.
+- Knowledge: Read a text file fills a new document's title and text from a plain text file (.txt or .md, up to 1 MB). Nothing is added until you tap Add document.
+- If the receptionist is interrupted mid-call, the live transcript says Reconnecting… instead of Call ended, and goes live again when the call resumes.
 
 ## [2.2.1] - 2026-10-13
 

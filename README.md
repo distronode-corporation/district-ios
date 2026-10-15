@@ -26,6 +26,9 @@ use them with, so we are asking before we build anything:
 
 SwiftUI, Swift 6 language mode, iOS 17 and later, on iPhone and iPad (one universal app).
 
+Languages: English and Canadian French (fr-CA). The app follows the device's language; any
+French reads Canadian French.
+
 ## iPad
 
 On regular width the shell is a sidebar, and the list sections (Calls, Inbox, Contacts,
@@ -210,8 +213,8 @@ symbols to Sentry. `scripts/archive-imac.test.sh`, `scripts/release-preflight.te
 `scripts/asc_release_test.py` test the release scripts against stubs on every pull
 request.
 
-Versions up to the current store release (1.2) were built on a maintainer's machine with
-the same script, before this workflow existed.
+Versions up to and including 1.2 were built on a maintainer's machine with the same
+script, before this workflow existed.
 
 Builds from a fork report no crashes: crash reporting (Sentry) starts only when a DSN is
 supplied at build time, and `project.yml` ships it empty. Only the release workflow

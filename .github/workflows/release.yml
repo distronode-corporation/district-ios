@@ -69,6 +69,12 @@ jobs:
       SENTRY_CLI_VERSION: 3.8.0
       SENTRY_CLI_SHA256: 2c26914636c47ab9bf9e710484ad7b44d371cbec8bd29cafb36b3cf877bf4285
       SENTRY_ORG: distronode-corporation-eu
+      # ⛔ FRENCH (fr-CA) SHIPS SINCE 3.0, AND THIS LINE IS WHAT THE ARCHIVE IS HELD TO.
+      # project.yml puts App/Localization/fr-CA.lproj in every build; archive-imac.sh's
+      # French guard reads this value: with "YES" an archive LACKING fr-CA.lproj's two
+      # tables is deleted, and any other French .lproj is refused. "NO" would refuse every
+      # archive now that French is always built in.
+      DISTRICT_FRENCH: "YES"
     steps:
       # ⛔ THE WHOLE HISTORY. The build number is 4101 plus `git rev-list --count HEAD`,
       # and a shallow clone answers 1; the preflight refuses one.

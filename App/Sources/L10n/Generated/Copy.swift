@@ -51,7 +51,7 @@ extension AccountCopy {
 
 extension AnalyticsCopy {
     /// `analytics.abandoned`
-    internal static var abandoned: String { AppL10n.copyLocale == .frCA ? "Abandonné" : "Abandoned" }
+    internal static var abandoned: String { AppL10n.copyLocale == .frCA ? "Abandonnés" : "Abandoned" }
 
     /// `analytics.analytics`
     internal static var analytics: String { AppL10n.copyLocale == .frCA ? "Analytique" : "Analytics" }
@@ -389,7 +389,7 @@ extension BillingCopy {
     internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Cette app ne permet pas de changer de forfait, de gérer les moyens de paiement ni de résilier. Cet écran est en lecture seule." : "Plan changes, payment methods and cancellations are not available in this app. This screen is read-only." }
 
     /// `billing.read_only_viewer`
-    internal static var readOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Cet écran est en lecture seule. Demandez à un membre ayant le rôle Agence ou Client de cet espace de travail de changer de forfait." : "This screen is read-only. Ask an agency or client member of this workspace to change the plan." }
+    internal static var readOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Cet écran est en lecture seule. Demandez à un membre ayant le rôle Administrateur ou Membre de cet espace de travail de changer de forfait." : "This screen is read-only. Ask an agency or client member of this workspace to change the plan." }
 
     /// `billing.renews_on`
     internal static func renewsOn(_ date: String) -> String {
@@ -461,7 +461,7 @@ extension CallsCopy {
     internal static var aiSummary: String { AppL10n.copyLocale == .frCA ? "Résumé IA" : "AI summary" }
 
     /// `calls.call`
-    internal static var call: String { AppL10n.copyLocale == .frCA ? "Appeler" : "Call" }
+    internal static var call: String { AppL10n.copyLocale == .frCA ? "Appel" : "Call" }
 
     /// `calls.call_could_not_summarised`
     internal static var callCouldNotSummarised: String { AppL10n.copyLocale == .frCA ? "Cet appel n'a pas pu être résumé." : "This call could not be summarised." }
@@ -761,7 +761,7 @@ extension ContactsCopy {
     internal static var save: String { AppL10n.copyLocale == .frCA ? "Enregistrer" : "Save" }
 
     /// `contacts.timeline`
-    internal static var timeline: String { AppL10n.copyLocale == .frCA ? "Chronologie" : "Timeline" }
+    internal static var timeline: String { AppL10n.copyLocale == .frCA ? "Échéancier" : "Timeline" }
 
     /// `contacts.unnamed_contact`
     internal static var unnamedContact: String { AppL10n.copyLocale == .frCA ? "Contact sans nom" : "Unnamed contact" }
@@ -802,7 +802,7 @@ extension DeskCopy {
     internal static var composeTitle: String { AppL10n.copyLocale == .frCA ? "Nouveau billet" : "New ticket" }
 
     /// `desk.create_action`
-    internal static var createAction: String { AppL10n.copyLocale == .frCA ? "Ouvrir le billet" : "Open ticket" }
+    internal static var createAction: String { AppL10n.copyLocale == .frCA ? "Créer" : "Open ticket" }
 
     /// `desk.create_deduplicated`
     internal static var createDeduplicated: String { AppL10n.copyLocale == .frCA ? "Ce billet a déjà été créé." : "That ticket was already opened." }
@@ -889,7 +889,7 @@ extension DeskCopy {
     internal static var offTitle: String { AppL10n.copyLocale == .frCA ? "District Desk est désactivé" : "District Desk is off" }
 
     /// `desk.open`
-    internal static var `open`: String { AppL10n.copyLocale == .frCA ? "Ouverte" : "Open" }
+    internal static var `open`: String { AppL10n.copyLocale == .frCA ? "Ouvert" : "Open" }
 
     /// `desk.remove_logo`
     internal static var removeLogo: String { AppL10n.copyLocale == .frCA ? "Retirer le logo" : "Remove logo" }
@@ -913,7 +913,7 @@ extension DeskCopy {
     internal static var requesterPhoneLabel: String { AppL10n.copyLocale == .frCA ? "Téléphone" : "Phone" }
 
     /// `desk.resolved`
-    internal static var resolved: String { AppL10n.copyLocale == .frCA ? "Réglée" : "Resolved" }
+    internal static var resolved: String { AppL10n.copyLocale == .frCA ? "Réglé" : "Resolved" }
 
     /// `desk.send_reply`
     internal static var sendReply: String { AppL10n.copyLocale == .frCA ? "Envoyer la réponse" : "Send reply" }
@@ -958,7 +958,7 @@ extension DeskCopy {
     internal static var uploadingLogo: String { AppL10n.copyLocale == .frCA ? "Téléversement…" : "Uploading…" }
 
     /// `desk.viewer_note`
-    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "District Desk est accessible aux membres ayant le rôle Agence ou Client." : "Desk is available to agency and client members." }
+    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "District Desk est accessible aux membres ayant le rôle Administrateur ou Membre." : "Desk is available to agency and client members." }
 
     /// `desk.waiting_on_customer`
     internal static var waitingOnCustomer: String { AppL10n.copyLocale == .frCA ? "En attente du client" : "Waiting on customer" }
@@ -1201,7 +1201,7 @@ extension HQCopy {
     internal static var title: String { AppL10n.copyLocale == .frCA ? "District HQ" : "District HQ" }
 
     /// `hq.viewer_cannot_confirm`
-    internal static var viewerCannotConfirm: String { AppL10n.copyLocale == .frCA ? "Votre rôle dans cet espace de travail est Lecteur\u{00A0}: demandez à un membre ayant le rôle Agence ou Client de l'appliquer." : "You are in this workspace as a viewer, so ask an agency or client member to apply this." }
+    internal static var viewerCannotConfirm: String { AppL10n.copyLocale == .frCA ? "Votre rôle dans cet espace de travail est Lecteur\u{00A0}: demandez à un membre ayant le rôle Administrateur ou Membre de l'appliquer." : "You are in this workspace as a viewer, so ask an agency or client member to apply this." }
 }
 
 extension InCallCopy {
@@ -1757,7 +1757,7 @@ extension MarketplaceCopy {
     internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Tout le reste concernant vos numéros se trouve dans les autres onglets." : "Everything else about your numbers is on the other tabs." }
 
     /// `marketplace.read_only_viewer`
-    internal static var readOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Modifier un numéro exige un rôle Agence ou Client. Demandez à un membre de cet espace de travail qui en a un." : "Changing a number needs an agency or client role. Ask someone on this workspace who has one." }
+    internal static var readOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Modifier un numéro exige un rôle Administrateur ou Membre. Demandez à un membre de cet espace de travail qui en a un." : "Changing a number needs an agency or client role. Ask someone on this workspace who has one." }
 
     /// `marketplace.ready_buy_today`
     internal static var readyBuyToday: String { AppL10n.copyLocale == .frCA ? "Achat immédiat" : "Ready to buy today" }
@@ -2047,7 +2047,7 @@ extension MarketplaceCopy {
     internal static var verifyOn: String { AppL10n.copyLocale == .frCA ? "Activé" : "Enabled" }
 
     /// `marketplace.viewer_cannot_provision`
-    internal static var viewerCannotProvision: String { AppL10n.copyLocale == .frCA ? "Les inscriptions, la configuration du transporteur et la gestion des numéros exigent le rôle Agence ou Client. Demandez à un membre qui a l'un de ces rôles." : "Registrations, carrier setup and number changes need an agency or client role. Ask someone on this workspace who has one." }
+    internal static var viewerCannotProvision: String { AppL10n.copyLocale == .frCA ? "Les inscriptions, la configuration du transporteur et la gestion des numéros exigent le rôle Administrateur ou Membre. Demandez à un membre qui a l'un de ces rôles." : "Registrations, carrier setup and number changes need an agency or client role. Ask someone on this workspace who has one." }
 
     /// `marketplace.working`
     internal static var working: String { AppL10n.copyLocale == .frCA ? "En cours…" : "Working…" }
@@ -2168,10 +2168,10 @@ extension NavigationCopy {
     internal static var tabContacts: String { AppL10n.copyLocale == .frCA ? "Contacts" : "Contacts" }
 
     /// `navigation.tab_inbox`
-    internal static var tabInbox: String { AppL10n.copyLocale == .frCA ? "Boîte de réception" : "Inbox" }
+    internal static var tabInbox: String { AppL10n.copyLocale == .frCA ? "Réception" : "Inbox" }
 
     /// `navigation.tab_overview`
-    internal static var tabOverview: String { AppL10n.copyLocale == .frCA ? "Vue d'ensemble" : "Overview" }
+    internal static var tabOverview: String { AppL10n.copyLocale == .frCA ? "Aperçu" : "Overview" }
 }
 
 extension OverviewCopy {
@@ -3868,7 +3868,7 @@ extension SchedulingWriteCopy {
     internal static var notificationsEdit: String { AppL10n.copyLocale == .frCA ? "Modifier les notifications" : "Edit notifications" }
 
     /// `scheduling_write.override_add_button`
-    internal static var overrideAddButton: String { AppL10n.copyLocale == .frCA ? "Ajouter l'exception" : "Add override" }
+    internal static var overrideAddButton: String { AppL10n.copyLocale == .frCA ? "Ajouter une exception" : "Add override" }
 
     /// `scheduling_write.override_add_title`
     internal static var overrideAddTitle: String { AppL10n.copyLocale == .frCA ? "Ajouter une exception" : "Add an override" }
@@ -5522,7 +5522,7 @@ extension WorkflowsCopy {
     internal static var campaignReadOnly: String { AppL10n.copyLocale == .frCA ? "L'objectif et la taille de lot de la campagne ne se modifient pas dans cette app." : "The campaign goal and batch size cannot be changed in this app." }
 
     /// `workflows.campaign_read_only_viewer`
-    internal static var campaignReadOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Votre rôle dans cet espace de travail est Lecteur. Demandez à un membre ayant le rôle Agence ou Client de modifier la campagne." : "You are in this workspace as a viewer. Ask an agency or client member to change the campaign." }
+    internal static var campaignReadOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Votre rôle dans cet espace de travail est Lecteur. Demandez à un membre ayant le rôle Administrateur ou Membre de modifier la campagne." : "You are in this workspace as a viewer. Ask an agency or client member to change the campaign." }
 
     /// `workflows.campaign_resume`
     internal static var campaignResume: String { AppL10n.copyLocale == .frCA ? "Reprendre la campagne" : "Resume campaign" }

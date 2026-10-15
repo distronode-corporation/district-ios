@@ -14,8 +14,17 @@ struct DetailPlaceholder: View {
     let symbol: String
 
     var body: some View {
-        ContentUnavailableView(title, systemImage: symbol)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .accessibilityIdentifier(A11yID.Sidebar.detailPlaceholder)
+        // ⚠️ THE SYMBOL IS DECORATION: the title says the same thing, so VoiceOver reads it
+        // once rather than after the symbol's name.
+        ContentUnavailableView {
+            Label {
+                Text(title)
+            } icon: {
+                Image(systemName: symbol)
+                    .accessibilityHidden(true)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityIdentifier(A11yID.Sidebar.detailPlaceholder)
     }
 }

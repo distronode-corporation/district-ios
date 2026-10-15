@@ -1,0 +1,5 @@
+District AI est maintenant en français canadien.
+
+- Créez un billet au nom d'un client depuis District Desk : le bouton « Nouveau billet », dans la barre d'outils du comptoir, ouvre le formulaire.
+- Connaissances : « Importer un fichier texte » remplit le titre et le texte d'un nouveau document à partir d'un fichier texte brut (.txt ou .md, jusqu'à 1 Mo). Rien n'est ajouté avant que vous touchiez « Ajouter un document ».
+- Si la connexion de la réceptionniste est interrompue en cours d'appel, la transcription en direct indique « Reconnexion… » plutôt que « Appel terminé », puis redevient active quand l'appel reprend.
