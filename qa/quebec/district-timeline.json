@@ -1,0 +1,37 @@
+{
+ "success": true,
+ "timeline": [
+  {
+   "id": "call_qc_1",
+   "type": "call",
+   "timestamp": "2026-10-14T13:05:00.000Z",
+   "direction": "inbound",
+   "body": "Martine Gagnon, de la Clinique dentaire Vandelac-Moreau, signale un dégât d'eau sous l'évier de la salle de stérilisation. Visite d'urgence fixée aujourd'hui à 15 h; confirmation envoyée par texto.",
+   "status": "completed",
+   "duration": 184,
+   "summary": "Martine Gagnon, de la Clinique dentaire Vandelac-Moreau, signale un dégât d'eau sous l'évier de la salle de stérilisation. Visite d'urgence fixée aujourd'hui à 15 h; confirmation envoyée par texto.",
+   "hasTranscript": true
+  },
+  {
+   "id": "msg_qc_1",
+   "type": "sms",
+   "timestamp": "2026-10-14T13:09:00.000Z",
+   "direction": "outbound",
+   "body": "Bonjour Mme Gagnon, notre plombier sera à la clinique aujourd'hui à 15 h. Plomberie Desrosiers-Lanthier",
+   "status": "delivered"
+  },
+  {
+   "id": "msg_qc_2",
+   "type": "sms",
+   "timestamp": "2026-10-14T13:20:00.000Z",
+   "direction": "inbound",
+   "body": "Merci! Le plombier peut-il passer par l'entrée arrière? La salle d'attente est pleine.",
+   "status": "received"
+  }
+ ],
+ "pageInfo": {
+  "hasMore": false,
+  "oldest": "2026-10-14T13:05:00.000Z",
+  "oldestId": "call_qc_1"
+ }
+}
