@@ -23,6 +23,16 @@ built from history before publication, so they have no tags in this repository.
   on `callId` only; a call this device answered or is answering is not touched, alert
   included. The completion handler is called once on every path, and every other background
   push still only refreshes the badge. The 30 s local ring timeout stays as the fallback.
+- One microphone track per call. The engine joins with the microphone published
+  concurrently (`ConnectOptions(enableMicrophone: true)`), LiveKit reports the room connected
+  before it publishes that track, and both reducers answer `.connected` with an unmute, which
+  in that gap published a second track (found on District AI for Mac 3.0.0 on 2026-10-15,
+  the same engine and reducers). `setMuted(_:)` now asks DistrictCore 7.0.1's
+  `CallJoinGate`: an unmute while the join is out is dropped, a mute waits for the join.
+- A second account signed in on the same launch registers for push. The ask was once per
+  launch (`hasAskedThisLaunch`), so after a sign-out (which deletes the installation's rows)
+  the next account never called `registerForRemoteNotifications` and had no alert row.
+  `forget()` now re-arms it on every transition into signed-out.
 - MARKETING_VERSION 3.0.1.
 
 ### Changed

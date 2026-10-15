@@ -69,9 +69,12 @@ packages:
   # last path component of its URL (`district-core-swift`); `DistrictCore` is only
   # XcodeGen's handle for the `dependencies:` below. The products are the
   # package's five libraries, unchanged by the move.
+  # ⚠️ PRE-RELEASE: pinned by revision to district-core-swift's 7.0.1 pull request head
+  # (v3/7.0.1) until that is tagged; this goes back to `exactVersion:` (7.0.1) before any
+  # release builds from it.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    exactVersion: 7.0.0
+    revision: 41586c7ef9b8409633a34e9cf9e71c427948e3bd
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
