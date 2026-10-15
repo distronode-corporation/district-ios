@@ -7450,12 +7450,12 @@ id = { swift = "SchedulingCopy.handOffFailed" }
 note = "`invalid_nonce`: the hand-off was refused and pressing again starts a new one."
 
 [scheduling.hand_off_no_callback]
-en = "Opening the website took too long. Try again."
+en = "Opening the page took too long. Try again."
 fr = "L'ouverture de la page a pris trop de temps. Réessayez."
 ctx = "error"
 screen = "scheduling"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { swift = "SchedulingCopy.handOffNoCallback" }
 note = "3.0.1 (S33): the browser never handed back to the app within 30 s, so nothing was minted (there is no unbound fallback any more). Pressing again starts a new hand-off. The same words as District AI for Mac 3.0.1."
 

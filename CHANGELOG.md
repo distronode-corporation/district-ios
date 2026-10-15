@@ -52,7 +52,7 @@ built from history before publication, so they have no tags in this repository.
 - The scheduling hand-off never mints an unbound code (S33). DistrictCore 7.0.1's
   `SchedulingHandoffFlow` no longer falls back to a mint without a nonce when leg 1 does not
   call back within 30 s (10 s before); it ends as `.noCallback`, and the hub shows
-  `scheduling.hand_off_no_callback` ("Opening the website took too long. Try again.", the
+  `scheduling.hand_off_no_callback` ("Opening the page took too long. Try again.", the
   Mac's words) and takes the leg-1 sheet away so the notice is seen. The flow is the only
   minter and `ShellView.onOpenURL` routes `districtai://handoff` to it
   (`test_IOS_SCH_29`).
