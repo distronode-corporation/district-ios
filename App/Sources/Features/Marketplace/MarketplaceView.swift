@@ -67,6 +67,7 @@ struct MarketplaceView: View {
     @State private var openNumber: SelectedNumber?
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
         // ⚠️ `State(initialValue:)` in `init`, as every other model-owning screen
@@ -119,31 +120,40 @@ struct MarketplaceView: View {
 
     // MARK: - The four segments
 
-    /// ⚠️ BUTTONS RATHER THAN A `Picker`, matching Android for the reason its own
-    /// note gives: this design system has no tab component, and inventing one for a
-    /// single screen is how a second, drifting set of primitives starts.
-    /// Primary-versus-secondary is already the system's "this one is active".
+    /// ⚠️ THE SYSTEM'S SEGMENTED CONTROL, AS iOS SWITCHES THE VIEWS OF ONE SCREEN (3.0.1 visual
+    /// QA). The four pill buttons (one filled, three outlined, borrowed from Android, whose
+    /// design system has no tab component) read as four unrelated actions. The label is hidden
+    /// on screen, where the navigation title already names the screen, and spoken to VoiceOver.
+    /// The same control as District AI for Mac 3.0.1.
     ///
-    /// ⚠️ FOUR OF THEM NOW, SO THEY SCROLL HORIZONTALLY rather than being squeezed below the
-    /// 44pt touch target ``DistrictButtonSize`` records as the floor for a thumb.
+    /// ⚠️ A MENU AT AN ACCESSIBILITY TEXT SIZE. A segmented control does not grow with Dynamic
+    /// Type, so at AX sizes four labels (« Mes numéros », « Transporteur ») would be cut to a
+    /// few letters; the menu shows the current tab in full and lists the four.
+    ///
+    /// ⛔ THE SELECTION WRITES THROUGH ``MarketplaceModel/selectTab(_:)``, as the buttons did,
+    /// in a closure literal (see the custom lint rule in `.swiftlint.yml`).
+    @ViewBuilder
     private var segments: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: DistrictSpacing.tight) {
-                segment(MarketplaceCopy.tabOwned, tab: .owned)
-                segment(MarketplaceCopy.tabSearch, tab: .search)
-                segment(MarketplaceCopy.tabRegistrations, tab: .registrations)
-                segment(MarketplaceCopy.tabCarrier, tab: .carrier)
-            }
+        let picker = Picker(MarketplaceCopy.title, selection: tabSelection) {
+            Text(MarketplaceCopy.tabOwned).tag(MarketplaceTab.owned)
+            Text(MarketplaceCopy.tabSearch).tag(MarketplaceTab.search)
+            Text(MarketplaceCopy.tabRegistrations).tag(MarketplaceTab.registrations)
+            Text(MarketplaceCopy.tabCarrier).tag(MarketplaceTab.carrier)
+        }
+        .labelsHidden()
+        .accessibilityIdentifier(A11yID.Marketplace.tabs)
+        if dynamicTypeSize.isAccessibilitySize {
+            picker.pickerStyle(.menu)
+        } else {
+            picker.pickerStyle(.segmented)
         }
     }
 
-    /// ⚠️ `medium`, NOT `small`, WHICH IS A DELIBERATE DIVERGENCE FROM ANDROID'S
-    /// `ButtonSize.Sm`. ``DistrictButtonSize`` records that 32pt is below Apple's
-    /// 44pt touch-target guidance and that `small` is for pointer-dense surfaces
-    /// only; all four of these are primary thumb targets on the screen.
-    private func segment(_ label: String, tab: MarketplaceTab) -> some View {
-        Button(label) { model.selectTab(tab) }
-            .buttonStyle(DistrictButtonStyle(variant: model.tab == tab ? .primary : .secondary))
+    private var tabSelection: Binding<MarketplaceTab> {
+        Binding(
+            get: { model.tab },
+            set: { model.selectTab($0) }
+        )
     }
 
     @ViewBuilder

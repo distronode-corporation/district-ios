@@ -112,13 +112,14 @@ struct DistrictListRow<Leading: View, Trailing: View>: View {
                 // truncating to a line at the accessibility sizes.
                 Text(title)
                     .font(DistrictType.titleSmall)
-                    .foregroundStyle(colors.foreground)
+                    // ⛔ THE ACCENT'S TEXT COLOUR ON A SELECTED ROW (``SelectionInk``).
+                    .rowInk(colors.foreground, .primary)
                     .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                     .truncationMode(.tail)
                 if let subtitle {
                     Text(subtitle)
                         .font(DistrictType.caption)
-                        .foregroundStyle(colors.mutedForeground)
+                        .rowInk(colors.mutedForeground, .secondary)
                         .lineLimit(dynamicTypeSize.isAccessibilitySize || wrapsSubtitle ? nil : 1)
                         .truncationMode(.tail)
                         .fixedSize(horizontal: false, vertical: wrapsSubtitle)
@@ -228,6 +229,8 @@ struct DistrictAvatar: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    /// ⚠️ AND THE SAME SELECTED-ROW SWITCH (``SelectionInk``).
+    @Environment(\.backgroundProminence) private var prominence
 
     private var colors: DistrictColors {
         .resolve(colorScheme)
@@ -240,12 +243,22 @@ struct DistrictAvatar: View {
         // contrast.
         let increased = colorSchemeContrast == .increased
         return Circle()
-            .fill(tone.fill(colors, increasedContrast: increased))
+            .fill(SelectionInk.chipFill(tone, colors, increasedContrast: increased, prominence: prominence))
+            .overlay {
+                if let outline = SelectionInk.chipOutline(colors, prominence) {
+                    Circle().strokeBorder(outline, lineWidth: 1)
+                }
+            }
             .frame(width: 36, height: 36)
             .overlay {
                 Text(initials)
                     .font(DistrictType.label)
-                    .foregroundStyle(tone.ink(colors, increasedContrast: increased))
+                    .foregroundStyle(SelectionInk.chipInk(
+                        tone,
+                        colors,
+                        increasedContrast: increased,
+                        prominence: prominence
+                    ))
             }
     }
 

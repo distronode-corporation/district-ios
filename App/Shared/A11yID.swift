@@ -175,6 +175,8 @@ enum A11yID {
     enum Marketplace {
         static let root = "district-marketplace-root"
         static let owned = "district-marketplace-owned"
+        /// The segmented control that switches the four tabs (3.0.1).
+        static let tabs = "district-marketplace-tabs"
         static let rowBase = "district-marketplace-number-row"
         static func row(_ id: String) -> String {
             A11yID.row(rowBase, id)

@@ -51,17 +51,16 @@ enum Tone: String, CaseIterable {
     /// SAYS SO. A badge draws ``ink(_:)`` over ``fill(_:)``, and `fill` is the SAME
     /// colour at 12% over the surface behind it — so the two are separated only by
     /// what 12% of one colour does to another. Measured across both palettes and all
-    /// five surfaces, nineteen of the thirty combinations land between 3:1 and 4.5:1:
+    /// five surfaces, six of the fifty combinations land between 3:1 and 4.5:1:
     /// legible, and short of AA for a 12pt label. `DistrictContrastTests` pins the
     /// exact set.
     ///
     /// ⛔ SO WHEN THE SYSTEM ASKS FOR MORE CONTRAST, THE BADGE STOPS BEING A TINT AND
     /// BECOMES A SOLID. The pair it switches to is the fill-and-`on*` pair the filled
-    /// controls already use, which the same tests measure at 5.36:1 to 12.58:1 — no
+    /// controls already use, which the same tests measure at 6.20:1 to 13.98:1 — no
     /// colour is invented here, and nothing changes for a user who has not asked for
     /// it. Raising ``DistrictColors/containerAlpha`` cannot substitute: more tint
-    /// moves the background TOWARDS the ink and makes it worse, and the dark
-    /// `district` accent is 3.91:1 against `elevated` with no tint at all.
+    /// moves the background TOWARDS the ink and makes it worse.
     func fill(_ colors: DistrictColors, increasedContrast: Bool) -> Color {
         guard increasedContrast else { return fill(colors) }
         switch self {
@@ -176,6 +175,9 @@ struct DistrictBadge: View {
     /// ⚠️ THE SYSTEM'S "Increase Contrast" SWITCH, read straight from the environment.
     /// See the ⛔ on ``Tone/fill(_:increasedContrast:)``.
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    /// ⛔ `.increased` ON A SELECTED ROW, where the tint and the ink give way to the accent's
+    /// text colour. See ``SelectionInk``.
+    @Environment(\.backgroundProminence) private var prominence
 
     private var colors: DistrictColors {
         .resolve(colorScheme)
@@ -188,7 +190,7 @@ struct DistrictBadge: View {
     var body: some View {
         Text(text)
             .font(DistrictType.label)
-            .foregroundStyle(tone.ink(colors, increasedContrast: increased))
+            .foregroundStyle(SelectionInk.chipInk(tone, colors, increasedContrast: increased, prominence: prominence))
             .lineLimit(1)
             // ⚠️ HORIZONTAL ONLY. `fixedSize()` on both axes would also pin the height
             // against Dynamic Type, which is the one direction a pill must be free to
@@ -197,9 +199,15 @@ struct DistrictBadge: View {
             .padding(.horizontal, DistrictSpacing.tight)
             .padding(.vertical, 2)
             .background(
-                tone.fill(colors, increasedContrast: increased),
+                SelectionInk.chipFill(tone, colors, increasedContrast: increased, prominence: prominence),
                 in: RoundedRectangle(cornerRadius: DistrictRadius.badge)
             )
+            .overlay {
+                if let outline = SelectionInk.chipOutline(colors, prominence) {
+                    RoundedRectangle(cornerRadius: DistrictRadius.badge)
+                        .strokeBorder(outline, lineWidth: 1)
+                }
+            }
     }
 }
 

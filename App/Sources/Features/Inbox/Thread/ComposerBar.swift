@@ -5,6 +5,17 @@ import UniformTypeIdentifiers
 
 /// The reply box: text, attachments, the AI draft, and send.
 ///
+/// ⛔ THE FIELD, THEN ONE ROW OF CONTROLS (3.0.1 visual QA). The field takes the whole width;
+/// under it the photo, file and AI draft controls are borderless SF Symbol buttons that name
+/// themselves to VoiceOver (and on hover with a pointer), and Send closes the row. Before, the
+/// four sat in a column beside the field in four different styles and the field was squeezed
+/// to a few words. The same layout as District AI for Mac 3.0.1.
+///
+/// ⛔ SEND IS A PRESS, OR COMMAND-RETURN ON A HARDWARE KEYBOARD, AND NEVER RETURN. Return in
+/// the field is a new line: a reply is billed carrier segments to a customer, and a stray
+/// Return must not send half of one. So the field has no `onSubmit` and Send carries
+/// `.keyboardShortcut(.return, modifiers: .command)`, never `.defaultAction`.
+///
 /// ⛔ TWO OF THESE FOUR CONTROLS SPEND MONEY AND BOTH ARE DISABLED WHILE IN FLIGHT.
 /// A send is billable carrier segments capped at 30/min per workspace; an AI draft
 /// is a Vertex generation capped at 20/min. A double tap on either must not become
@@ -25,6 +36,9 @@ struct ComposerBar: View {
     /// `onChange` would not run a second time.
     @State private var picked: PhotosPickerItem?
 
+    /// The Files picker for an image saved as a file rather than in the photo library.
+    @State private var choosingFile = false
+
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -41,26 +55,27 @@ struct ComposerBar: View {
             failureStrip
             subjectField
             attachmentStrip
-            // ⛔ THE ACTIONS DROP BELOW THE FIELD AT AN ACCESSIBILITY TEXT SIZE.
-            // "Attach image" and "Draft reply" are the widest labels in the composer
-            // and they sit in a fixed column beside the reply box; at AX5 they take
-            // the width and the box the operator is trying to type in is squeezed to
-            // a few characters. Nothing here is truncated, so nothing looks broken —
-            // it is just unusable, which is the failure mode that survives a review.
-            let layout = dynamicTypeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: DistrictSpacing.tight))
-                : AnyLayout(HStackLayout(alignment: .bottom, spacing: DistrictSpacing.tight))
-            layout {
-                field
-                actions
+            field
+            // ⚠️ ONE ROW AT EVERY TEXT SIZE: the three controls are icons, so only Send's
+            // word grows, and the field above keeps the whole width it needs at AX5.
+            HStack(spacing: DistrictSpacing.row) {
+                attachControl
+                draftControl
+                Spacer(minLength: DistrictSpacing.tight)
+                sendControl
             }
+            .imageScale(.large)
         }
-        .padding(DistrictSpacing.gutter)
+        .padding(.horizontal, DistrictSpacing.gutter)
+        .padding(.vertical, DistrictSpacing.row)
         .background(colors.surface)
         .onChange(of: picked) { _, item in
             guard let item else { return }
             picked = nil
             Task { await read(item) }
+        }
+        .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.image]) { result in
+            Task { await readFile(result) }
         }
     }
 
@@ -291,35 +306,30 @@ struct ComposerBar: View {
     /// ⚠️ `axis: .vertical` SO THE BOX GROWS WITH THE REPLY, capped so it cannot eat
     /// the conversation it is a reply to.
     ///
-    /// ⚠️ THE WORD "Reply" APPEARS TWICE ON PURPOSE, AND THEY ARE NOT THE SAME LABEL.
-    /// The eyebrow is the visible one and stays put once there is text in the box; a
-    /// `TextField`'s title is what VoiceOver reads as the field's name, and dropping
-    /// it to avoid the visual repeat would leave the control announced as "text
-    /// field" and nothing else. Android gets one label doing both jobs because a
-    /// Material field floats it.
+    /// ⚠️ THE TITLE "Reply" IS THE PLACEHOLDER AND THE NAME VoiceOver READS, as in Mail and
+    /// Messages. An eyebrow over the box said it a second time and cost a line (3.0.1).
+    ///
+    /// ⛔ NO `onSubmit`: with `axis: .vertical`, Return is a new line. See the ⛔ on the type.
     private var field: some View {
-        VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            DistrictEyebrow(text: InboxCopy.reply)
-            TextField(InboxCopy.reply, text: text, axis: .vertical)
-                .lineLimit(1 ... 5)
-                .disabled(content.sending)
-                .districtField()
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        TextField(InboxCopy.reply, text: text, axis: .vertical)
+            .lineLimit(1 ... 5)
+            .disabled(content.sending)
+            .districtField()
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var actions: some View {
-        VStack(alignment: .trailing, spacing: DistrictSpacing.hairline) {
-            attachControl
-            // ⛔ ONE EXPLICIT TAP, BILLED, NEVER AUTOMATIC AND NEVER ON OPEN. Each
-            // press is one Vertex generation against the workspace's 20/min.
-            Button(content.draftGenerating ? InboxCopy.drafting : InboxCopy.draftReply) {
-                Task { await model.generateDraft() }
-            }
-            .buttonStyle(.districtGhost)
-            .disabled(content.draftGenerating || content.sending)
-            sendControl
+    /// ⛔ ONE EXPLICIT TAP, BILLED, NEVER AUTOMATIC AND NEVER ON OPEN. Each press is one
+    /// Vertex generation against the workspace's 20/min.
+    private var draftControl: some View {
+        let title = content.draftGenerating ? InboxCopy.drafting : InboxCopy.draftReply
+        return Button {
+            Task { await model.generateDraft() }
+        } label: {
+            ComposerIcon(title: title, systemImage: "sparkles")
         }
+        .buttonStyle(.borderless)
+        .help(title)
+        .disabled(content.draftGenerating || content.sending)
     }
 
     /// ⚠️ HIDDEN, NOT DISABLED, WHEN THE CHANNEL CANNOT CARRY AN ATTACHMENT. A
@@ -333,29 +343,33 @@ struct ComposerBar: View {
     @ViewBuilder
     private var attachControl: some View {
         if model.canAttach {
-            // ⛔ BOTH VALUES ARE READ OUT HERE, BEFORE THE CLOSURE, AND THE HOIST IS
+            // ⛔ THE LABEL IS READ OUT HERE, BEFORE THE CLOSURE, AND THE HOIST IS
             // LOAD-BEARING RATHER THAN STYLE. `PhotosPicker`'s label closure is
             // `@Sendable` and — unlike `.task`, which carries
             // `@_inheritActorContext` — it does NOT inherit this view's main-actor
-            // isolation, so anything main-actor-isolated read inside it is a Swift 6
-            // concurrency diagnostic. `colors` is a COMPUTED property, which is such
-            // a read; the compiler flags exactly that and nothing else.
-            // `Color` and `String` are both `Sendable`, so the captured values are
-            // fine. ⚠️ Do not inline either one back into the closure, and do not
-            // reach for `colorScheme` in there either.
-            let ink = colors.mutedForeground
+            // isolation, so anything main-actor-isolated read inside it (`content`,
+            // `colors`) is a Swift 6 concurrency diagnostic. `String` is `Sendable`, so
+            // the captured value is fine. ⚠️ Do not inline it back into the closure.
             let label = content.attaching ? InboxCopy.attaching : InboxCopy.attachImage
             PhotosPicker(selection: $picked, matching: .images, preferredItemEncoding: .compatible) {
-                // ⚠️ STYLED DIRECTLY RATHER THAN THROUGH `.buttonStyle`. A
-                // `PhotosPicker` is not documented to forward a custom button style
-                // to its label, and a control that silently loses its styling on one
-                // OS release is worse than one that never had it.
-                Text(label)
-                    .font(DistrictType.label)
-                    .foregroundStyle(ink)
-                    .padding(.horizontal, DistrictSpacing.row)
-                    .frame(minHeight: 44)
+                // ⚠️ THE SAME ICON VIEW AS THE OTHER TWO, so the row is one style; a
+                // `PhotosPicker` is not documented to forward a button style to its label.
+                ComposerIcon(title: label, systemImage: "photo")
             }
+            .help(label)
+            .disabled(content.attaching || content.sending)
+            // ⚠️ AN IMAGE SAVED AS A FILE (Files, iCloud Drive, a USB drive on iPad) is not in
+            // the photo library. Its bytes go through the same model call, so the type and
+            // size rules are the same; unlike the picker it is not transcoded, so a HEIC file
+            // is refused by the model with its own sentence rather than converted.
+            let fileLabel = content.attaching ? InboxCopy.attaching : InboxCopy.attachFile
+            Button {
+                choosingFile = true
+            } label: {
+                ComposerIcon(title: fileLabel, systemImage: "paperclip")
+            }
+            .buttonStyle(.borderless)
+            .help(fileLabel)
             .disabled(content.attaching || content.sending)
         }
     }
@@ -376,6 +390,8 @@ struct ComposerBar: View {
             Task { await model.send() }
         }
         .buttonStyle(.districtPrimary)
+        // ⛔ COMMAND-RETURN, NEVER RETURN. See the ⛔ on the type.
+        .keyboardShortcut(.return, modifiers: .command)
         .disabled(content.sending || !model.canSendNow)
         // ⛔ IT IS IN `UITestApp.forbiddenSurfaces`, AND THE REFUSAL IN
         // `UITestApp.tap(_:)` KEYS ON THIS IDENTIFIER. Without it that guard would
@@ -440,5 +456,43 @@ struct ComposerBar: View {
             return
         }
         await model.attach(data, mimeType: item.preferredMIMEType(allowed: MediaUploadLimits.allowedMimeTypes))
+    }
+
+    /// Read a file chosen in the Files picker and hand it to the model, as ``read(_:)`` does.
+    ///
+    /// ⛔ THE SECURITY-SCOPED ACCESS IS OPENED AND CLOSED AROUND THE ONE READ. The picker
+    /// grants this app the chosen file only, through the URL's scope; reading outside it fails
+    /// as "could not be read".
+    private func readFile(_ result: Result<URL, any Error>) async {
+        guard case let .success(url) = result else { return }
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer {
+            if scoped {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+        guard let data = try? Data(contentsOf: url) else {
+            model.refuseAttachment(ThreadModel.unreadableAttachment)
+            return
+        }
+        await model.attach(
+            data,
+            mimeType: AttachmentFile.mimeType(of: url, allowed: MediaUploadLimits.allowedMimeTypes)
+        )
+    }
+}
+
+/// One of the composer's icon controls: the symbol on screen, the title to VoiceOver.
+///
+/// ⚠️ 44 BY 44 POINTS, Apple's touch-target floor, whatever the symbol's own size.
+private struct ComposerIcon: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        Label(title, systemImage: systemImage)
+            .labelStyle(.iconOnly)
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
     }
 }

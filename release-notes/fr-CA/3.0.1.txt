@@ -4,3 +4,5 @@ Corrections pour les appels, les notifications et les libellés.
 - Corrige un problème qui pouvait couper le son d'un appel, ou y mettre fin, juste après avoir répondu.
 - Si vous vous déconnectez puis vous connectez à un autre compte sans fermer l'application, les notifications parviennent maintenant au nouveau compte.
 - Les demandes de soutien affichent maintenant leur état en français.
+- La zone de réponse occupe toute la largeur, avec les commandes de photo, de fichier et de brouillon IA sur une seule ligne. Sur un clavier physique, Commande-Retour envoie le message et Retour insère une nouvelle ligne.
+- Nouvelles couleurs de la palette District, et les éléments sélectionnés restent lisibles sur iPad.

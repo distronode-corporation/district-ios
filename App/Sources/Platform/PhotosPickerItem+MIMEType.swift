@@ -1,5 +1,6 @@
 import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 extension PhotosPickerItem {
     /// The MIME type to upload this item's bytes as.
@@ -31,4 +32,18 @@ extension PhotosPickerItem {
     }
 
     static let unknownMIMEType = "application/octet-stream"
+}
+
+/// The MIME type of a file chosen in the Files picker (the composer's file control, 3.0.1).
+///
+/// ⚠️ IT GOES THROUGH THE PICKER'S OWN RULE (``PhotosPickerItem/preferredMIMEType(declared:allowed:)``),
+/// so a file and a photo of the same type are labelled alike. The type comes from the file's
+/// extension, which is what the picker filtered on; a file with none is
+/// `application/octet-stream`, which the model refuses with its own sentence. The same type as
+/// District AI for Mac's.
+enum AttachmentFile {
+    static func mimeType(of url: URL, allowed: Set<String>) -> String {
+        let declared = UTType(filenameExtension: url.pathExtension)?.preferredMIMEType
+        return PhotosPickerItem.preferredMIMEType(declared: declared.map { [$0] } ?? [], allowed: allowed)
+    }
 }

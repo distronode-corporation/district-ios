@@ -56,6 +56,21 @@ built from history before publication, so they have no tags in this repository.
   Mac's words) and takes the leg-1 sheet away so the notice is seen. The flow is the only
   minter and `ShellView.onOpenURL` routes `districtai://handoff` to it
   (`test_IOS_SCH_29`).
+- Visual QA (3.0.1, from the iPhone and iPad capture walk and District AI for Mac #55):
+  - Colour v3: `DistrictTheme` takes `tokens.css`'s accent, success, warning, destructive
+    and info pairs in both themes (the logo's teal; text on the dark accent is `#0e1c1f`).
+    `DistrictContrastTests`: the badge combinations below AA go from nineteen to six, the
+    filled pairs measure 6.20:1 to 13.98:1.
+  - Selected rows on iPad: the split view fills a selected row with the accent, on which the
+    rows' own inks could not be read. `SelectionInk` reads `backgroundProminence` and, on a
+    selected row, draws the name, the second line, the chips and the avatar in the accent's
+    text colour (`districtForeground`, white on the light accent, `#0e1c1f` on the dark one),
+    a chip as an outline. `SelectionInkTests` measures each against the accent.
+  - The reply composer: the field takes the full width with no "Reply" eyebrow; under it one
+    row of borderless icon controls (photo, a new file control through the Files picker,
+    AI draft) and Send. Command-Return sends on a hardware keyboard; Return is a new line.
+  - Numbers: the four pill buttons are a segmented `Picker` (a menu at accessibility text
+    sizes).
 - MARKETING_VERSION 3.0.1. DistrictCore pinned by revision to district-core-swift
   v3/7.0.1 (1972dc9, PR #26's head) until 7.0.1 is tagged.
 
@@ -189,6 +204,8 @@ Fixes for calls, notifications and labels.
 - If you sign out and sign in to another account without closing the app, notifications now reach the new account.
 - Statuses of calls, messages and numbers show their names, such as Completed, instead of their codes.
 - Support requests show their status in your language.
+- The reply box gives your reply the full width, with the photo, file and AI draft controls in one row. On a hardware keyboard, Command-Return sends and Return starts a new line.
+- New colours from the District palette, and selected rows on iPad stay readable.
 
 ## [3.0.0] - 2026-10-15
 

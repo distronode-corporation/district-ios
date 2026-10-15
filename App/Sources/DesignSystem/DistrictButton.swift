@@ -3,10 +3,10 @@ import SwiftUI
 /// The button variants, ported from the web's button classes by way of
 /// Android's `DistrictButton.kt`.
 ///
-/// ⛔ `primary` PUTS DARK TEXT ON THE INDIGO IN DARK MODE, WHICH LOOKS WRONG UNTIL
-/// YOU CHECK THE CONTRAST. The dark accent is a LIGHT indigo, so white on it fails
+/// ⛔ `primary` PUTS DARK TEXT ON THE TEAL IN DARK MODE, WHICH LOOKS WRONG UNTIL
+/// YOU CHECK THE CONTRAST. The dark accent is a LIGHT teal, so white on it fails
 /// WCAG AA while `district-foreground`'s near-black passes comfortably; in light
-/// mode the accent is a DEEP indigo and the same token is white. Both come from
+/// mode the accent is a DEEP teal and the same token is white. Both come from
 /// the web's `tokens.css`; it is a contrast decision, not a style
 /// flourish. See ``DistrictColors/districtForeground``.
 ///
@@ -163,7 +163,7 @@ struct DistrictButtonStyle: ButtonStyle {
 }
 
 extension ButtonStyle where Self == DistrictButtonStyle {
-    /// The filled indigo. One per screen.
+    /// The filled accent. One per screen.
     static var districtPrimary: DistrictButtonStyle {
         DistrictButtonStyle(variant: .primary)
     }

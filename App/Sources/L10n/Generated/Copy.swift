@@ -1255,6 +1255,9 @@ extension InCallCopy {
 }
 
 extension InboxCopy {
+    /// `inbox.attach_file`
+    internal static var attachFile: String { AppL10n.copyLocale == .frCA ? "Joindre un fichier" : "Attach file" }
+
     /// `inbox.attach_image`
     internal static var attachImage: String { AppL10n.copyLocale == .frCA ? "Joindre une image" : "Attach image" }
 

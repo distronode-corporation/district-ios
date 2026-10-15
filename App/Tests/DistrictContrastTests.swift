@@ -8,7 +8,7 @@ import XCTest
 /// ⛔ THE COLOURS ARE READ BACK THROUGH `UIColor`, NEVER RE-DECLARED HERE. A table of
 /// hex literals copied into a test is a table that drifts: it would keep passing
 /// after somebody changed the palette, which is the one failure a contrast gate
-/// exists to catch. `UIColor(Color(districtHex: 0x7D84F7))` was measured returning
+/// exists to catch. `UIColor(Color(districtHex: 0x7D84F7))` (3.0.0's accent) was measured returning
 /// 125.0/132.0/247.0 — an exact round trip — so reading the token is reading what
 /// renders.
 ///
@@ -63,8 +63,8 @@ final class DistrictContrastTests: XCTestCase {
     // MARK: - Solid fills
 
     /// ⛔ THE `on*` PAIRS ARE THE BUTTON LABELS, and the palette's own comments claim
-    /// specific numbers for them — "black clears 7.6:1 on the worst of them,
-    /// `destructive`" in dark, "5.4:1 on the worst, `success`" in light. Those claims
+    /// specific numbers for them — "black clears 8.0:1 on the worst of them,
+    /// `destructive`" in dark, "6.2:1 on the worst, `success`" in light. Those claims
     /// are measured here rather than trusted.
     func testEveryFilledControlClearsAA() {
         for (palette, name) in Self.palettes {
@@ -82,10 +82,10 @@ final class DistrictContrastTests: XCTestCase {
     /// cannot leave a confident sentence describing a colour that no longer exists.
     func testThePaletteCommentsAreTellingTheTruth() {
         let darkWorst = Self.contrast(DistrictColors.dark.onDestructive, DistrictColors.dark.destructive)
-        XCTAssertEqual(darkWorst, 7.6, accuracy: 0.05, "the dark comment claims 7.6:1 on destructive")
+        XCTAssertEqual(darkWorst, 8.0, accuracy: 0.05, "the dark comment claims 8.0:1 on destructive")
 
         let lightWorst = Self.contrast(DistrictColors.light.onSuccess, DistrictColors.light.success)
-        XCTAssertEqual(lightWorst, 5.4, accuracy: 0.05, "the light comment claims 5.4:1 on success")
+        XCTAssertEqual(lightWorst, 6.2, accuracy: 0.05, "the light comment claims 6.2:1 on success")
 
         // ⚠️ AND THE REJECTED ALTERNATIVE, which is the half of the claim that
         // justifies the choice: white on the dark `destructive` fill "fails outright".
@@ -111,9 +111,9 @@ final class DistrictContrastTests: XCTestCase {
 
     /// ⛔ THE KNOWN GAP, PINNED EXACTLY SO IT CANNOT GROW QUIETLY. These badge
     /// combinations sit between 3:1 and 4.5:1, so their 12pt label does not meet AA.
-    /// Fixing them is a palette decision rather than a code one — the dark `district`
-    /// accent is 3.91:1 against `elevated` before any tint is applied at all, so no
-    /// choice of `containerAlpha` rescues it — and that decision is the owner's to make.
+    /// Fixing them is a palette decision rather than a code one (more tint moves the
+    /// background towards the ink, so no choice of `containerAlpha` rescues them), and that
+    /// decision is the owner's to make. Colour v3 (3.0.1) took the set from nineteen to six.
     ///
     /// ⚠️ THIS TEST FAILS IN BOTH DIRECTIONS ON PURPOSE. A new combination dropping
     /// below AA fails it, and so does fixing one without editing this list. Either way
@@ -138,32 +138,19 @@ final class DistrictContrastTests: XCTestCase {
     /// ⚠️ WRITTEN OUT RATHER THAN COUNTED. A count would pass while one combination
     /// was fixed and another broke on the same commit.
     private static let knownBelowAA = [
-        "dark district badge on card",
-        "dark district badge on elevated",
-        "dark district badge on muted",
-        "dark district badge on surface",
         "dark danger badge on elevated",
         "dark danger badge on muted",
-        "dark info badge on elevated",
-        "dark info badge on muted",
-        "dark success badge on elevated",
-        "light danger badge on background",
-        "light danger badge on muted",
         "light danger badge on surface",
-        "light info badge on surface",
+        "light district badge on surface",
         "light success badge on background",
-        "light success badge on elevated",
-        "light success badge on muted",
         "light success badge on surface",
-        "light warning badge on background",
-        "light warning badge on surface",
     ]
 
     // MARK: - Increase Contrast
 
     /// ⛔ THE POINT OF THE WHOLE VARIANT, AND THE ONE ASSERTION THAT MAKES IT WORTH
     /// SHIPPING. With the system's Increase Contrast on, every badge — all thirty
-    /// combinations, both palettes — clears AA outright, so the nineteen pinned above
+    /// combinations, both palettes — clears AA outright, so the six pinned above
     /// stop being a gap for anyone who has asked for more contrast.
     ///
     /// ⚠️ AND THE SURFACE BEHIND IT NO LONGER MATTERS, because the fill is solid. That

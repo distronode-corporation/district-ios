@@ -3273,6 +3273,15 @@ state = "reviewed"
 id = { swift = "InCallCopy.wordRingTimedOut" }
 note = "Follows 'Call ended · '."
 
+[inbox.attach_file]
+en = "Attach file"
+fr = "Joindre un fichier"
+ctx = "button"
+screen = "inbox"
+state = "draft"
+id = { swift = "InboxCopy.attachFile" }
+note = "3.0.1: the composer's file control, beside the photo one; opens the Files picker for an image saved as a file. The same words as District AI for Mac."
+
 [inbox.attach_image]
 en = "Attach image"
 fr = "Joindre une image"
