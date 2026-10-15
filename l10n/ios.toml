@@ -118,10 +118,11 @@ id = { swift = "AccountCopy.yourAccount" }
 
 [analytics.abandoned]
 en = "Abandoned"
-fr = "Abandonné"
+fr = "Abandonnés"
 ctx = "label"
 screen = "analytics"
 state = "reviewed"
+fr_variant = "analytics count of calls (plural), not the call status"
 id = { swift = "AnalyticsCopy.abandoned" }
 
 [analytics.analytics]
@@ -803,6 +804,7 @@ screen = "billing"
 tier = "T1"
 args = { amount = "str" }
 state = "reviewed"
+same_ok = true
 id = { swift = "BillingCopy.money(_:)" }
 note = "⚠️ THE \"$\" IS THIS CLIENT MIRRORING THE WEB CONSOLE. Nothing on `/api/billing` carries a currency, so the assumption lives here, in one place, rather than being concatenated beside every amount."
 
@@ -959,7 +961,7 @@ note = "⛔ THE CAPTION THAT MAKES THE ABSENCE OF CONTROLS DELIBERATE, and it is
 
 [billing.read_only_viewer]
 en = "This screen is read-only. Ask an agency or client member of this workspace to change the plan."
-fr = "Cet écran est en lecture seule. Demandez à un membre ayant le rôle Agence ou Client de cet espace de travail de changer de forfait."
+fr = "Cet écran est en lecture seule. Demandez à un membre ayant le rôle Administrateur ou Membre de cet espace de travail de changer de forfait."
 ctx = "body"
 screen = "billing"
 tier = "T1"
@@ -1164,10 +1166,11 @@ id = { swift = "CallsCopy.aiSummary" }
 
 [calls.call]
 en = "Call"
-fr = "Appeler"
+fr = "Appel"
 ctx = "label"
 screen = "calls"
 state = "reviewed"
+fr_variant = "navigation title of a call's detail (a noun), not the verb"
 id = { swift = "CallsCopy.call" }
 
 [calls.call_could_not_summarised]
@@ -1955,7 +1958,7 @@ id = { swift = "ContactsCopy.save" }
 
 [contacts.timeline]
 en = "Timeline"
-fr = "Chronologie"
+fr = "Échéancier"
 ctx = "label"
 screen = "contacts"
 state = "reviewed"
@@ -2063,10 +2066,11 @@ id = { swift = "DeskCopy.composeTitle" }
 
 [desk.create_action]
 en = "Open ticket"
-fr = "Ouvrir le billet"
+fr = "Créer"
 ctx = "button"
 screen = "desk"
 state = "reviewed"
+fr_variant = "New-ticket sheet confirm; « Ouvrir le billet » truncated the sheet title (W4 iOS)"
 id = { swift = "DeskCopy.createAction" }
 
 [desk.create_deduplicated]
@@ -2307,10 +2311,11 @@ note = "⛔ OFF IS NOT EMPTY, AND THIS IS THE SENTENCE THAT KEEPS THEM APART. An
 
 [desk.open]
 en = "Open"
-fr = "Ouverte"
+fr = "Ouvert"
 ctx = "label"
 screen = "desk"
 state = "reviewed"
+fr_variant = "Desk ticket status: a « billet », masculine (contract deskTicketStatus); the unit's base « Ouverte » serves invoices (« facture »)"
 id = { swift = "DeskCopy.open" }
 
 [desk.remove_logo]
@@ -2372,7 +2377,7 @@ id = { swift = "DeskCopy.requesterPhoneLabel" }
 
 [desk.resolved]
 en = "Resolved"
-fr = "Réglée"
+fr = "Réglé"
 ctx = "label"
 screen = "desk"
 state = "reviewed"
@@ -2498,7 +2503,7 @@ id = { swift = "DeskCopy.uploadingLogo" }
 
 [desk.viewer_note]
 en = "Desk is available to agency and client members."
-fr = "District Desk est accessible aux membres ayant le rôle Agence ou Client."
+fr = "District Desk est accessible aux membres ayant le rôle Administrateur ou Membre."
 ctx = "body"
 screen = "desk"
 state = "reviewed"
@@ -3133,7 +3138,7 @@ id = { swift = "HQCopy.title" }
 
 [hq.viewer_cannot_confirm]
 en = "You are in this workspace as a viewer, so ask an agency or client member to apply this."
-fr = "Votre rôle dans cet espace de travail est Lecteur\u00A0: demandez à un membre ayant le rôle Agence ou Client de l'appliquer."
+fr = "Votre rôle dans cet espace de travail est Lecteur\u00A0: demandez à un membre ayant le rôle Administrateur ou Membre de l'appliquer."
 ctx = "button"
 screen = "hq"
 state = "reviewed"
@@ -4544,7 +4549,7 @@ note = "⛔ ONLY THE PURCHASE IS OUT OF REACH. Releasing and reconfiguring are i
 
 [marketplace.read_only_viewer]
 en = "Changing a number needs an agency or client role. Ask someone on this workspace who has one."
-fr = "Modifier un numéro exige un rôle Agence ou Client. Demandez à un membre de cet espace de travail qui en a un."
+fr = "Modifier un numéro exige un rôle Administrateur ou Membre. Demandez à un membre de cet espace de travail qui en a un."
 ctx = "body"
 screen = "marketplace"
 tier = "T1"
@@ -5385,7 +5390,7 @@ id = { swift = "MarketplaceCopy.verifyOn" }
 
 [marketplace.viewer_cannot_provision]
 en = "Registrations, carrier setup and number changes need an agency or client role. Ask someone on this workspace who has one."
-fr = "Les inscriptions, la configuration du transporteur et la gestion des numéros exigent le rôle Agence ou Client. Demandez à un membre qui a l'un de ces rôles."
+fr = "Les inscriptions, la configuration du transporteur et la gestion des numéros exigent le rôle Administrateur ou Membre. Demandez à un membre qui a l'un de ces rôles."
 ctx = "body"
 screen = "marketplace.numbers"
 tier = "T1"
@@ -5720,19 +5725,21 @@ note = "A tab bar button. Short: five share the iPhone's width."
 
 [navigation.tab_inbox]
 en = "Inbox"
-fr = "Boîte de réception"
+fr = "Réception"
 ctx = "label"
 screen = "navigation"
 state = "reviewed"
+fr_variant = "iPhone tab bar label, Apple Mail's own French for Inbox; the Mac sidebar keeps « Boîte de réception »"
 id = { swift = "NavigationCopy.tabInbox" }
 note = "A tab bar button. Short: five share the iPhone's width."
 
 [navigation.tab_overview]
 en = "Overview"
-fr = "Vue d'ensemble"
+fr = "Aperçu"
 ctx = "label"
 screen = "navigation"
 state = "reviewed"
+fr_variant = "iPhone tab bar: « Vue d'ensemble » and « Boîte de réception » collide on a 6.3-inch iPhone (W4 iOS); same word as Android's bottom bar; the Mac sidebar keeps the long form"
 id = { swift = "NavigationCopy.tabOverview" }
 note = "A tab bar button. Short: five share the iPhone's width. Never « Tableau de bord » on Apple: Overview is « Aperçu »."
 
@@ -10204,7 +10211,7 @@ id = { swift = "SchedulingWriteCopy.notificationsEdit" }
 
 [scheduling_write.override_add_button]
 en = "Add override"
-fr = "Ajouter l'exception"
+fr = "Ajouter une exception"
 ctx = "button"
 screen = "scheduling.writes.availability"
 state = "reviewed"
@@ -14653,7 +14660,7 @@ note = "⛔ NAMES WHAT THIS SCREEN CANNOT DO, AND NAMES NO DESTINATION FOR IT. P
 
 [workflows.campaign_read_only_viewer]
 en = "You are in this workspace as a viewer. Ask an agency or client member to change the campaign."
-fr = "Votre rôle dans cet espace de travail est Lecteur. Demandez à un membre ayant le rôle Agence ou Client de modifier la campagne."
+fr = "Votre rôle dans cet espace de travail est Lecteur. Demandez à un membre ayant le rôle Administrateur ou Membre de modifier la campagne."
 ctx = "body"
 screen = "workflows"
 state = "reviewed"
