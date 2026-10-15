@@ -1,1 +1,6 @@
-Un appel entrant cesse maintenant de sonner dès qu'il est pris sur un autre appareil, que l'appelant raccroche ou que la sonnerie expire, plutôt que de sonner jusqu'à 30 secondes. Un appel pris sur un autre appareil n'apparaît plus comme manqué.
+Corrections pour les appels, les notifications et les libellés.
+
+- Un appel entrant cesse maintenant de sonner dès qu'il est pris sur un autre appareil, que l'appelant raccroche ou que la sonnerie expire, plutôt que de sonner jusqu'à 30 secondes. Un appel pris sur un autre appareil n'apparaît plus comme manqué.
+- Corrige un problème qui pouvait couper le son d'un appel, ou y mettre fin, juste après la réponse.
+- Si vous vous déconnectez puis vous connectez à un autre compte sans fermer l'application, les notifications parviennent maintenant au nouveau compte.
+- Les demandes de soutien affichent maintenant leur état en français.

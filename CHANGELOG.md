@@ -16,10 +16,12 @@ built from history before publication, so they have no tags in this repository.
   `call_ring_cancelled` APNs background push (on the alert token, never VoIP) whenever a ring
   ends: answered on any device, timed out, the caller hung up, or withdrawn. `AppDelegate`
   reads it before the registrar guard, so it works while the session is still being checked;
-  `RingCancel` parses it and decides; `IncomingCallModel.ringCancelled(_:)` reports the
+  `IncomingCallModel.ringCancelled(_:)` reports the
   CallKit call ended (`.answeredElsewhere` for answered, `.remoteEnded` for call_ended,
   `.unanswered` for timeout, withdrawn and any unknown reason) and dismisses the ringing
-  screen; `DeliveredRingAlerts` removes the call's delivered `incoming_call` alert. Matched
+  screen; `DeliveredRingAlerts` removes the call's delivered `incoming_call` alert. The parse
+  is DistrictCore 7.0.1's `RingCancel` (shared with the Mac); the CallKit half is the app's
+  (`RingCancel+CallKit.swift`). Matched
   on `callId` only; a call this device answered or is answering is not touched, alert
   included. The completion handler is called once on every path, and every other background
   push still only refreshes the badge. The 30 s local ring timeout stays as the fallback.
@@ -33,7 +35,37 @@ built from history before publication, so they have no tags in this repository.
   launch (`hasAskedThisLaunch`), so after a sign-out (which deletes the installation's rows)
   the next account never called `registerForRemoteNotifications` and had no alert row.
   `forget()` now re-arms it on every transition into signed-out.
-- MARKETING_VERSION 3.0.1.
+- Wire labels in English are the vocabulary's, not the raw value. `AppWire.label` returned
+  the value as sent on an English screen (the Overview showed `completed` beside
+  "Transferred"); it is now `WireLabel.label` in both languages ("Completed", « Terminé »),
+  and an unlisted value reads as the category's fallback or "Other", as French already did.
+- Support request statuses are labelled in English and fr-CA. `SupportView` and
+  `SupportThreadView` showed the help desk's `statusName` as sent, English on French screens
+  (and the live workflow is localised, so it can be any language). `SupportStatusLabel`
+  maps the workflow's names (Received, Open, Waiting for support, Waiting for customer, In
+  progress, Pending, Escalated, Resolved, Done, Closed, Canceled, Declined) to catalog
+  labels; any other name reads as its category's label (Open, In progress, Closed,
+  Received) or "Status unknown". The close confirmation names the label too.
+- The scheduling hub's footnote no longer says the sections are read-only: they write. It
+  now reads "Anything these sections do not cover opens in a browser."
+- MARKETING_VERSION 3.0.1. DistrictCore pinned by revision to district-core-swift
+  v3/7.0.1 (41586c7) until 7.0.1 is tagged.
+
+### Release lane
+
+- `asc_release.py submit` (the job of `scripts/release-submit.sh`) sets every
+  localization's `supportUrl` and `marketingUrl` with its release notes, from `LISTING_URLS`
+  by language (English as every version has carried them, fr-CA as
+  `store-listing/fr-CA.json`), prints what was there before a change, and reads them back
+  and compares before the build is attached; a language with no URLs stops the run before
+  any write. A 409 already names `meta.associatedErrors`. The client refuses any path to the
+  App Review detail, which holds the demo account's password, before a request is made.
+- The release run creates its own Apple Development certificate (`scripts/asc_dev_cert.py
+  create`, through App Store Connect, the id recorded before anything else) in a keychain
+  of the run's own, so `xcodebuild archive` stops minting one per run, and revokes exactly
+  that id in an `always()` step before the key is removed. Nothing lists certificates or
+  matches one by name. `asc_dev_cert_test.py` runs in CI's release scripts job and the
+  release job.
 
 ### Changed
 
@@ -142,7 +174,13 @@ built from history before publication, so they have no tags in this repository.
 
 ## [3.0.1] - 2026-10-15
 
-An incoming call now stops ringing as soon as it is answered on another device, the caller hangs up, or the ring times out, instead of ringing for up to 30 seconds. A call answered on another device is no longer listed as missed.
+Fixes for calls, notifications and labels.
+
+- An incoming call now stops ringing as soon as it is answered on another device, the caller hangs up, or the ring times out, instead of ringing for up to 30 seconds. A call answered on another device is no longer listed as missed.
+- Fixes a problem that could cut the sound of a call, or end it, just after it was answered.
+- If you sign out and sign in to another account without closing the app, notifications now reach the new account.
+- Statuses of calls, messages and numbers show their names, such as Completed, instead of their codes.
+- Support requests show their status in your language.
 
 ## [3.0.0] - 2026-10-15
 
