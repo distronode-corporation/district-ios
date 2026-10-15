@@ -237,11 +237,11 @@ if [ "$SEAM_HITS" != "0" ]; then
 fi
 echo "IOS-SEC-01 ok - no UI-test seam in the archived binary"
 
-# ── French stays out until it is switched on ─────────────────────────────────
+# ── French is held to the switch ──────────────────────────────────────────────
 # ⛔ THE ARCHIVE IS DISCARDED IF IT HOLDS fr-CA.lproj WHILE DISTRICT_FRENCH IS OFF,
-# OR LACKS ITS TABLES WHILE DISTRICT_FRENCH IS ON. French enters the app only through project.fr.yml, which `xcodegen generate` above
-# includes when DISTRICT_FRENCH is a true value; with it unset the bundle must hold
-# en.lproj alone. A French table in an English release would turn the push titles
+# OR LACKS ITS TABLES WHILE DISTRICT_FRENCH IS ON. Since 3.0 project.yml puts
+# App/Localization/fr-CA.lproj in every build and the release workflow sets
+# DISTRICT_FRENCH=YES; with it unset the bundle must hold en.lproj alone. A French table in an English release would turn the push titles
 # and the permission prompts French for every French device, and AppL10n would then
 # turn the whole app French (it answers French when the bundle ships French), with
 # French that has not been reviewed. Same verdict as the seam guard: deleted, not
