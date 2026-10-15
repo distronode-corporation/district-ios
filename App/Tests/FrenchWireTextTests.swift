@@ -7,7 +7,7 @@ import XCTest
 
 /// What the W4 French pass changed: a French screen shows the vocabulary's labels, the
 /// core's dates and numbers, never an English wire word or an ISO instant. Since 3.0.1 an
-/// English screen shows the vocabulary's English label too, never the raw wire value.
+/// English screen shows the vocabulary's English label for every value it lists.
 final class FrenchWireTextTests: XCTestCase {
     private static let nbsp = "\u{00A0}"
 
@@ -28,10 +28,10 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(french { AppWire.label(.numberStatus, "active") }, "Actif")
     }
 
-    /// ⛔ AN UNLISTED VALUE IS NEVER SHOWN AS ITSELF, IN EITHER LANGUAGE: it takes the
-    /// category's fallback, or "Other" (« Autre »).
-    func testAnUnlistedValueReadsAsTheFallback() {
-        XCTAssertEqual(AppWire.label(.callStatus, "machine"), "Other")
+    /// ⛔ AN UNLISTED VALUE IS NEVER SHOWN AS ITSELF IN FRENCH: it takes the category's
+    /// fallback, or « Autre ». English keeps it as sent (`WireLabel.knownLabel` is nil).
+    func testAnUnlistedValueReadsAsTheFallbackInFrench() {
+        XCTAssertEqual(AppWire.label(.callStatus, "machine"), "machine")
         XCTAssertEqual(french { AppWire.label(.callStatus, "machine") }, "Autre")
     }
 

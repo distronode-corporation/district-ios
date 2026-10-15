@@ -37,8 +37,9 @@ built from history before publication, so they have no tags in this repository.
   `forget()` now re-arms it on every transition into signed-out.
 - Wire labels in English are the vocabulary's, not the raw value. `AppWire.label` returned
   the value as sent on an English screen (the Overview showed `completed` beside
-  "Transferred"); it is now `WireLabel.label` in both languages ("Completed", « Terminé »),
-  and an unlisted value reads as the category's fallback or "Other", as French already did.
+  "Transferred"); English now takes DistrictCore 7.0.1's `WireLabel.knownLabel` ("Completed")
+  and keeps a value the vocabulary does not list as sent, as District AI for Mac 3.0.1 does;
+  French is unchanged (`WireLabel.label`, « Terminé », « Autre »).
 - Support request statuses are labelled in English and fr-CA. `SupportView` and
   `SupportThreadView` showed the help desk's `statusName` as sent, English on French screens
   (and the live workflow is localised, so it can be any language). `SupportStatusLabel`
@@ -49,7 +50,7 @@ built from history before publication, so they have no tags in this repository.
 - The scheduling hub's footnote no longer says the sections are read-only: they write. It
   now reads "Anything these sections do not cover opens in a browser."
 - MARKETING_VERSION 3.0.1. DistrictCore pinned by revision to district-core-swift
-  v3/7.0.1 (41586c7) until 7.0.1 is tagged.
+  v3/7.0.1 (9d7294b, PR #26's head) until 7.0.1 is tagged.
 
 ### Release lane
 
