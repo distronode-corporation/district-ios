@@ -1,0 +1,14 @@
+Corrections pour la réponse aux appels, et des écrans plus clairs.
+
+- Quand vous répondez à un appel, la connexion n'attend plus le démarrage du haut-parleur, qui pouvait l'empêcher d'aboutir.
+- Les pastilles de couleur sont plus lisibles, grâce à un meilleur contraste entre leur libellé et leur fond.
+- Les libellés des sections et des champs ne sont plus en majuscules ni espacés.
+- Les feuilles utilisent l'arrière-plan de l'application plutôt qu'un fond gris, et les champs de texte ont un contour net et ne répètent plus leur libellé à l'intérieur.
+- Les listes Appels, Contacts et Réception vides occupent tout l'écran.
+- Sur iPad, un long nom d'espace de travail s'affiche sur deux lignes au plus dans la barre latérale.
+- Dans District Desk, les filtres de statut passent à la ligne au lieu d'être coupés au bord de l'écran.
+- Dans Rendez-vous, une seule commande segmentée permet de changer de vue, au lieu de boutons séparés.
+- Heures de disponibilité : les deux boutons de modification disent ce qu'ils font et ne ressemblent plus à des onglets.
+- La durée d'un appel (« 1 min 5 s ») n'est plus jamais coupée sur deux lignes.
+- La boîte de réception s'intitule maintenant « Réception », comme son onglet.
+- Un numéro en service affiche « Actif », et les titres de la fiche de recherche d'un contact sont en français.
