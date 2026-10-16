@@ -39,6 +39,7 @@ struct SchedulingWebhookEditorSheet: View {
         }
         .sheet(item: mintedBinding) { secret in
             SchedulingWebhookSecretSheet(secret: secret)
+                .districtSheetBackground()
         }
     }
 

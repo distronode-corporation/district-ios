@@ -105,7 +105,7 @@ struct DetailFieldCard: View {
 
 /// One KPI tile, on the Overview and on Analytics.
 ///
-/// ⚠️ THE LABEL IS THE MONO EYEBROW, NOT A BOLD SMALL HEADING. Android's tiles used
+/// ⚠️ THE LABEL IS THE EYEBROW, NOT A BOLD SMALL HEADING. Android's tiles used
 /// `labelSmall` at Material's default weight, which read as a heading competing with
 /// the number beneath it; the eyebrow demotes it to an annotation so the value is
 /// unambiguously the subject.

@@ -42,6 +42,7 @@ struct SchedulingEventTypeQuestionsSheet: View {
         }
         .sheet(isPresented: editorPresented) {
             editor
+                .districtSheetBackground()
         }
     }
 

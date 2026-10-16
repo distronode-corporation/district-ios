@@ -12,6 +12,21 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- 3.0.2: an answered call joins before its speaker starts (port of district-macos #64). The
+  softphone joined with LiveKit's auto-subscribe, so the server's first subscriber offer
+  already carried the caller's and the agent's audio, and applying it starts the speaker
+  (WebRTC's `AVAudioEngine` playout start, up to ten attempts 100 ms apart) on the worker
+  thread before the answer the join waits for is sent. On the Mac that held the join past
+  the SDK's 10 s primary-transport wait, "the call could not be connected" on 1 answered
+  call in 5 (District AI for Mac 3.0.1 build 20062, 2026-10-16, 07:07:03Z); this engine
+  joins the same way, and on iOS the speaker starts at that subscribe too, not at CallKit's
+  activation. `LiveKitCallRoom.connect` now joins with `ConnectOptions(autoSubscribe: false,
+  enableMicrophone: false)` and then subscribes every remote audio track already in the
+  room; `RemoteAudioSubscriber` (a room delegate) subscribes each one published later. A
+  slow speaker start now delays the first sound instead of failing the call. Opt-in join
+  diagnostics: the launch argument `-diagnostics.webrtcLog YES` forwards the SDK's debug
+  lines and WebRTC's native ones to the unified log (`io.livekit.sdk`); off by default.
+  Tested by `LiveKitCallEngineJoinTests` (the join's options and the subscriber's selector).
 - An answered call joins before its microphone starts. The softphone joined with LiveKit's
   concurrent microphone mode (`ConnectOptions(enableMicrophone: true)`), which starts Core
   Audio on the SDK's one serial WebRTC queue while the join builds its peer connections on
@@ -30,6 +45,35 @@ built from history before publication, so they have no tags in this repository.
   a failed join could show the SDK's message the same way. `InCallCopy.word(for:)` now always
   says the catalog's sentence for both (`wordRemoteEnded`, `wordFailed`, English and French);
   the SDK's text goes to the log (`Logger`, category `Call`). No new strings.
+
+- 3.0.2, the Apple batch after 3.0.1 (the 3.0.1 visual QA's MEDIUM and LOW findings, the
+  queued contrast and type items, and the French notes from the 3.0.1 round):
+  - Every tinted badge clears WCAG AA. A badge's label (and an avatar's initials, and a
+    desk chip's) is drawn in a chip ink, its tone moved a fifth of the way towards
+    `foreground`, on the same 12% tint: the six pairs that sat between 3.91:1 and 4.44:1
+    now measure 4.71:1 or better, and `DistrictContrastTests` asserts all fifty instead of
+    pinning the gap. The destructive button's label and the selected Desk filter take the
+    same ink.
+  - Section and field labels (`DistrictEyebrow`) are sentence case in the system face,
+    with no capitals and no letter spacing at any text size (AP-011; AP-002 had dropped
+    them at accessibility sizes only).
+  - Sheets sit on the Ledger ground rather than the system's grey (AP-020). Text fields
+    take the site's field grammar, a `card` ground inside an `input` edge, instead of a
+    grey `input` fill on which the dark placeholder was 4.34:1, and a field whose label is
+    drawn above it no longer repeats that label as its placeholder (AP-021).
+  - An empty Calls, Contacts or Inbox list fills the screen instead of drawing a grey band
+    across it (AP-022). A workspace name that ends in a period no longer closes the
+    Account sentence twice (AP-024). The Inbox title is « Réception » in French, as the
+    tab bar and Apple Mail say it, and the iPad sidebar shows a long workspace name on up
+    to two lines (AP-026) under a solid bar (AP-033). The Desk's status filters wrap onto
+    a second line instead of scrolling off the iPad column (AP-027). Bookings switches
+    views with the system's segmented control (AP-028).
+  - Working hours: the two buttons say what they do (Edit working hours, Edit date
+    overrides) in one style, so they no longer read as tabs.
+  - French: a call length never wraps between its minutes and seconds (« 3 min 4 s »);
+    the contact dossier heads the keys the vocabulary lists in the portal's words
+    (« Enjeux CRM déduits », not « Core pain points »). A test holds every French ellipsis
+    to U+2026 attached to its word (« Sonnerie… » already was).
 
 - A ring stops on this device when it ends elsewhere. The server now sends a
   `call_ring_cancelled` APNs background push (on the alert token, never VoIP) whenever a ring
@@ -143,6 +187,14 @@ built from history before publication, so they have no tags in this repository.
   `{profile:{locale:"fr"|"en"}}` (POST /api/settings) on sign-in and when the resolved
   language changes. Every request already sends `Accept-Language` (`fr-CA` or `en`).
 - The detail placeholder's symbol is hidden from VoiceOver.
+- DistrictCore 7.0.2 (district-core-swift 5d03f80, tag 7.0.2), pinned by its tag: the i18n
+  contracts from monorepo ecf098046 (in French, the number status `in-use` reads « Actif »,
+  the research keys `estimatedValue`, `person` and `callerIntel` take the portal's headings
+  « Évaluation DGI », « Profil du contact » and « Renseignements sur l'appelant », the skip
+  reasons `email-misconfigured` and `ses-missing` have labels, and the error
+  `sending_domain_provider_changed` its sentence), and a French call length that never
+  breaks (« 1 min 5 s », every space U+00A0). swift-asn1 stays 1.7.3. district-macos
+  names the same release.
 - DistrictCore 7.0.0, the release: 7.0.0-beta.3 plus the reviewed v3.0 French in its catalogs
   (« Annulés », the member roles « Administrateur » and « Membre »). swift-asn1 stays 1.7.3.
 

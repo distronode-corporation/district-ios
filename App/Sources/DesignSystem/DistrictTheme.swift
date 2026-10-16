@@ -68,6 +68,19 @@ struct DistrictColors {
     let onDestructive: Color
     let info: Color
     let onInfo: Color
+    /// ⛔ THE INKS A TINTED CHIP DRAWS ON ITS OWN 12% FILL (a badge, an avatar, a desk chip),
+    /// one per tinted tone. The fill is the tone at ``containerAlpha`` over the surface, so
+    /// the tone itself as the label left six badge pairs between 3.91:1 and 4.44:1, short
+    /// of AA for a 12pt label (3.0.2). Each chip ink is its tone mixed ``chipInkMix`` of the
+    /// way towards ``foreground``, the highest-contrast ink in the scheme, which lifts the
+    /// worst pair to 4.71:1 and keeps the hue. Not tokens of their own in `tokens.css`:
+    /// derived from two that are, and `DistrictContrastTests` checks each literal against
+    /// that derivation, so a palette edit that forgets them fails.
+    let districtChipInk: Color
+    let successChipInk: Color
+    let warningChipInk: Color
+    let destructiveChipInk: Color
+    let infoChipInk: Color
 }
 
 extension DistrictColors {
@@ -96,7 +109,12 @@ extension DistrictColors {
         destructive: Color(districtHex: 0xFE737F),
         onDestructive: Color(districtHex: 0x000000),
         info: Color(districtHex: 0x77BAFE),
-        onInfo: Color(districtHex: 0x000000)
+        onInfo: Color(districtHex: 0x000000),
+        districtChipInk: Color(districtHex: 0x81D4EE),
+        successChipInk: Color(districtHex: 0x8BEAB8),
+        warningChipInk: Color(districtHex: 0xEAC43A),
+        destructiveChipInk: Color(districtHex: 0xFA8C96),
+        infoChipInk: Color(districtHex: 0x8EC5FB)
     )
 
     /// Parity, for a user whose device is in light mode. `:root` in `tokens.css`.
@@ -123,12 +141,21 @@ extension DistrictColors {
         destructive: Color(districtHex: 0xB4022D),
         onDestructive: Color(districtHex: 0xFFFFFF),
         info: Color(districtHex: 0x223092),
-        onInfo: Color(districtHex: 0xFFFFFF)
+        onInfo: Color(districtHex: 0xFFFFFF),
+        districtChipInk: Color(districtHex: 0x04596D),
+        successChipInk: Color(districtHex: 0x046147),
+        warningChipInk: Color(districtHex: 0x61400B),
+        destructiveChipInk: Color(districtHex: 0x930A2D),
+        infoChipInk: Color(districtHex: 0x1E2E7E)
     )
 
     /// The web's `/12` alpha, used for every tinted container: `bg-district/12`,
     /// `bg-success/12`, `bg-destructive/12`.
     static let containerAlpha: Double = 0.12
+
+    /// How far each chip ink sits from its tone towards ``foreground``: see
+    /// ``districtChipInk``.
+    static let chipInkMix: Double = 0.2
 }
 
 /// The 4pt grid the web's spacing scale is built on (`--spacing: 0.25rem`).

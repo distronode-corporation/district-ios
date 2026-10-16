@@ -165,6 +165,7 @@ private struct ContactDetailContentView: View {
         }
         .sheet(isPresented: $renaming) {
             RenameContactSheet(initial: contact.name, saving: loaded.saving, onSave: rename)
+                .districtSheetBackground()
         }
     }
 
@@ -417,7 +418,7 @@ private struct RenameContactSheet: View {
             Text(ContactsCopy.contactName)
                 .font(DistrictType.labelSmall)
                 .foregroundStyle(colors.mutedForeground)
-            TextField(ContactsCopy.contactName, text: $value)
+            TextField(ContactsCopy.contactName, text: $value, prompt: .noPlaceholder)
                 .disabled(saving)
                 .districtField()
             HStack(spacing: DistrictSpacing.tight) {

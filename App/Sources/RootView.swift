@@ -209,6 +209,7 @@ private struct SessionGate: View {
                     submit: { code in Task { await session.submitMfaCode(code) } },
                     cancel: { session.cancelMfa() }
                 )
+                .districtSheetBackground()
             }
 
         case let .unavailable(reason):

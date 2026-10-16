@@ -1,11 +1,13 @@
 @testable import DistrictAI
 import DistrictCall
 import Foundation
+import LiveKit
 import XCTest
 
 /// The order of the SDK calls a softphone call makes (3.0.1): the join publishes nothing,
 /// then exactly one microphone start, and the reducers' unmute on `.connected` never
-/// reaches the SDK while that start is on its way.
+/// reaches the SDK while that start is on its way. And (3.0.2) the join subscribes to
+/// nothing, the room's audio being subscribed after it by `RemoteAudioSubscriber`.
 ///
 /// ⛔ WHY: LiveKit's concurrent microphone mode ran the Core Audio start on the queue the
 /// join builds its peer connections on, and a slow start held the join until its transport
@@ -175,5 +177,28 @@ final class LiveKitCallEngineJoinTests: XCTestCase {
         // Nothing is left to mute after a failed join.
         await engine.setMuted(true)
         XCTAssertEqual(room.calls, ["connect"])
+    }
+
+    // ── Below the seam: what `LiveKitCallRoom` hands the SDK ─────────────────────────
+
+    /// ⛔ WHY (3.0.2): with auto-subscribe the server's first offer carries the remote audio,
+    /// applying it starts the speaker on WebRTC's worker thread, and the answer the join
+    /// waits for is sent only after that (District AI for Mac 3.0.1 build 20062,
+    /// 2026-10-16, 07:07:03Z). The subscribe itself needs a media server, so the order is
+    /// pinned here by its two halves: these options, and the subscriber's callback below.
+    func testTheSoftphoneJoinsWithNothingPublishedAndNothingSubscribed() {
+        XCTAssertFalse(LiveKitCallRoom.connectOptions.autoSubscribe)
+        XCTAssertFalse(LiveKitCallRoom.connectOptions.enableMicrophone)
+    }
+
+    /// ⛔ AN `@objc optional` SELECTOR THAT DOES NOT MATCH IS NO ERROR, the callback simply
+    /// never fires, and a track published after the join would never be heard. Both sides
+    /// are checked: the SDK still declares the selector, and the subscriber answers it.
+    func testTheAudioSubscriberAnswersTheSDKsRemotePublishCallback() {
+        let selector = NSSelectorFromString("room:remoteParticipant:didPublishTrack:")
+        let declared = protocol_getMethodDescription(RoomDelegate.self, selector, false, true)
+
+        XCTAssertEqual(declared.name, selector, "RoomDelegate no longer declares \(selector)")
+        XCTAssertTrue(RemoteAudioSubscriber().responds(to: selector))
     }
 }

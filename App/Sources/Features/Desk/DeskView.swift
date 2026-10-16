@@ -75,6 +75,7 @@ struct DeskView: View {
         .districtRefreshable { await model.load() }
         .sheet(isPresented: $composing) {
             DeskComposeSheet(model: model)
+                .districtSheetBackground()
         }
         .sheet(isPresented: $settingsOpen) {
             // ⚠️ RELOADS ON DISMISS, because the settings sheet is the only place the
@@ -87,6 +88,7 @@ struct DeskView: View {
                 role: role,
                 onDismiss: { Task { await model.load() } }
             )
+            .districtSheetBackground()
         }
     }
 
@@ -199,13 +201,15 @@ struct DeskView: View {
     /// ⚠️ THE CHIPS COUNT THE WHOLE QUEUE, WHICH IS WHY THE READ IS UNFILTERED. A
     /// server-side filter would mean one request per chip and the counts could
     /// disagree with each other between responses.
+    ///
+    /// ⚠️ THEY WRAP ONTO A SECOND LINE (``FlowLayout``), NEVER A SIDEWAYS SCROLLER, which
+    /// cut the last chip at the iPad list column's edge (3.0.2, visual QA AP-027), as the
+    /// Mac's has since 3.0.1.
     private var filters: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: DistrictSpacing.tight) {
-                chip(nil, DeskCopy.allFilter)
-                ForEach(DeskTicketStatus.allCases, id: \.rawValue) { status in
-                    chip(status, Self.label(for: status))
-                }
+        FlowLayout(spacing: DistrictSpacing.tight, lineSpacing: DistrictSpacing.tight) {
+            chip(nil, DeskCopy.allFilter)
+            ForEach(DeskTicketStatus.allCases, id: \.rawValue) { status in
+                chip(status, Self.label(for: status))
             }
         }
     }
@@ -218,7 +222,8 @@ struct DeskView: View {
             // count into one token, so the computed name reads "All3" without this.
             Text("\(label) \(AppWire.count(count))")
                 .font(DistrictType.label)
-                .foregroundStyle(active ? colors.district : colors.mutedForeground)
+                // ⚠️ The chip ink on its own tint (3.0.2): `district` there was 4.17:1 in light.
+                .foregroundStyle(active ? colors.districtChipInk : colors.mutedForeground)
                 .padding(.horizontal, DistrictSpacing.row)
                 .frame(minHeight: 44)
                 .background(

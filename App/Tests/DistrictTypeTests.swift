@@ -50,7 +50,10 @@ final class DistrictTypeTests: XCTestCase {
         XCTAssertEqual(DistrictType.body.weight, .regular)
         XCTAssertEqual(DistrictType.display.size, 36)
         XCTAssertEqual(DistrictType.display.weight, .bold)
-        XCTAssertEqual(DistrictType.eyebrow.size, 10)
-        XCTAssertEqual(DistrictType.eyebrow.design, .monospaced)
+        // ⚠️ THE ONE TOKEN THAT DID MOVE, ON PURPOSE (3.0.2, AP-011): the eyebrow left the
+        // 10pt tracked mono capitals for a sentence-case label in the system face.
+        XCTAssertEqual(DistrictType.eyebrow.size, 12)
+        XCTAssertEqual(DistrictType.eyebrow.design, .default)
+        XCTAssertEqual(DistrictType.eyebrow.style, .caption)
     }
 }

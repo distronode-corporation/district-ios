@@ -126,7 +126,7 @@ private struct InboxScreen: View {
     }
 
     var body: some View {
-        content
+        content.fillsListColumn()
             .navigationTitle(InboxCopy.inbox)
             .toolbar { toolbar }
             .sheet(isPresented: $composing) {
@@ -136,6 +136,7 @@ private struct InboxScreen: View {
                 // reabstraction, so a bare reference would compile — the literal is
                 // consistency with the house rule rather than a workaround.
                 ComposeSheet(model: compose, onSent: { landed($0) })
+                    .districtSheetBackground()
             }
             // ⛔ ON THE LIST ROOT, INSIDE ``ShellView``'s `NavigationStack` (or the split
             // view's content column, which has a bar of its own) AND NOT AROUND ONE.

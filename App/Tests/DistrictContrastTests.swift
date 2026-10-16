@@ -26,8 +26,7 @@ final class DistrictContrastTests: XCTestCase {
     /// by any reading of WCAG — 18pt, or 14pt bold, is the large-text floor — so this
     /// is the bar that applies to them.
     private static let aa: Double = 4.5
-    /// Large text and non-text UI. Also the floor everything in this palette does
-    /// currently clear, which is why the gap below is expressed against it.
+    /// Large text and non-text UI.
     private static let aaLarge: Double = 3.0
 
     // MARK: - Body text
@@ -95,63 +94,62 @@ final class DistrictContrastTests: XCTestCase {
 
     // MARK: - Tinted containers, which is where this palette is thin
 
-    /// ⚠️ EVERY BADGE CLEARS THE 3:1 FLOOR. That is the hard assertion: it is the bar
-    /// for large text and for non-text UI, and it is what the palette does hold
-    /// everywhere. It is NOT the bar a 12pt badge label is judged by.
-    func testEveryTintedBadgeClearsTheLargeTextFloor() {
+    /// ⛔ EVERY TINTED BADGE CLEARS AA, all fifty pairs, both palettes. A badge's label is
+    /// 12pt, so 4.5:1 is its bar. Until 3.0.2 six pairs sat between 3.91:1 and 4.44:1,
+    /// pinned here as a known gap, because the label was drawn in the tone itself; the
+    /// chip inks (``Tone/chipInk(_:)``) closed it, and this test is what keeps it closed.
+    func testEveryTintedBadgeClearsAA() {
         for (palette, name) in Self.palettes {
             for case let (ratio, label) in Self.badgeMatrix(of: palette, named: name) {
                 XCTAssertGreaterThanOrEqual(
-                    ratio, Self.aaLarge,
-                    "\(label) is \(Self.round(ratio)):1, below even the 3:1 floor"
+                    ratio, Self.aa,
+                    "\(label) is \(Self.round(ratio)):1, below AA"
                 )
             }
         }
     }
 
-    /// ⛔ THE KNOWN GAP, PINNED EXACTLY SO IT CANNOT GROW QUIETLY. These badge
-    /// combinations sit between 3:1 and 4.5:1, so their 12pt label does not meet AA.
-    /// Fixing them is a palette decision rather than a code one (more tint moves the
-    /// background towards the ink, so no choice of `containerAlpha` rescues them), and that
-    /// decision is the owner's to make. Colour v3 (3.0.1) took the set from nineteen to six.
-    ///
-    /// ⚠️ THIS TEST FAILS IN BOTH DIRECTIONS ON PURPOSE. A new combination dropping
-    /// below AA fails it, and so does fixing one without editing this list. Either way
-    /// somebody has to look at the number and decide, which is the whole point.
-    func testTheBadgeCombinationsBelowAAAreExactlyTheOnesWeKnowAbout() {
-        var below: [String] = []
+    /// ⛔ THE CHIP INKS ARE DERIVED, NOT CHOSEN: each is its tone moved
+    /// ``DistrictColors/chipInkMix`` of the way towards `foreground`. They are written as hex
+    /// literals like every other token, so this is what stops a palette edit from moving a
+    /// tone and leaving its chip ink behind. Half a step of 8-bit rounding is allowed.
+    func testEveryChipInkIsItsToneMovedTowardsForeground() {
         for (palette, name) in Self.palettes {
-            for case let (ratio, label) in Self.badgeMatrix(of: palette, named: name) where ratio < Self.aa {
-                below.append(label)
+            for tone in Self.tones where tone != .neutral {
+                let expected = Self.blend(
+                    palette.foreground, over: tone.ink(palette), alpha: DistrictColors.chipInkMix
+                )
+                let want = Self.components(expected)
+                let got = Self.components(tone.chipInk(palette))
+                for (wanted, actual) in [(want.red, got.red), (want.green, got.green), (want.blue, got.blue)] {
+                    XCTAssertEqual(actual, wanted, accuracy: 0.6 / 255, "\(name) \(tone) chip ink drifted")
+                }
             }
         }
-        XCTAssertEqual(
-            below.sorted(), Self.knownBelowAA.sorted(),
-            """
-            The set of badge combinations below AA has changed. If one was FIXED, \
-            remove it from `knownBelowAA` in this commit. If a new one appeared, it is \
-            a regression and the palette edit that caused it needs revisiting.
-            """
-        )
     }
 
-    /// ⚠️ WRITTEN OUT RATHER THAN COUNTED. A count would pass while one combination
-    /// was fixed and another broke on the same commit.
-    private static let knownBelowAA = [
-        "dark danger badge on elevated",
-        "dark danger badge on muted",
-        "light danger badge on surface",
-        "light district badge on surface",
-        "light success badge on background",
-        "light success badge on surface",
-    ]
+    /// ⚠️ THE DESTRUCTIVE BUTTON IS A TINTED CONTAINER TOO: `destructive` at 10% under its
+    /// label, which `DistrictButtonStyle` draws in the destructive chip ink (3.0.2). Its
+    /// label is 14pt semibold, short of large text, so the bar is AA.
+    func testTheDestructiveButtonsLabelClearsAA() {
+        for (palette, name) in Self.palettes {
+            for (surface, surfaceName) in Self.surfaces(of: palette) {
+                let fill = Self.blend(palette.destructive, over: surface, alpha: 0.10)
+                let ratio = Self.contrast(palette.destructiveChipInk, fill)
+                XCTAssertGreaterThanOrEqual(
+                    ratio, Self.aa,
+                    "\(name): the destructive button's label on \(surfaceName) is \(Self.round(ratio)):1"
+                )
+            }
+        }
+    }
 
     // MARK: - Increase Contrast
 
     /// ⛔ THE POINT OF THE WHOLE VARIANT, AND THE ONE ASSERTION THAT MAKES IT WORTH
-    /// SHIPPING. With the system's Increase Contrast on, every badge — all thirty
-    /// combinations, both palettes — clears AA outright, so the six pinned above
-    /// stop being a gap for anyone who has asked for more contrast.
+    /// SHIPPING. With the system's Increase Contrast on, every badge, all thirty
+    /// combinations, both palettes, is a solid fill with its `on*` ink and clears AA by a
+    /// wide margin, for anyone who has asked for more contrast.
     ///
     /// ⚠️ AND THE SURFACE BEHIND IT NO LONGER MATTERS, because the fill is solid. That
     /// is why this loops the tones rather than the tone-by-surface matrix: a solid fill
@@ -262,20 +260,14 @@ final class DistrictContrastTests: XCTestCase {
     }
 
     /// Every tinted tone against every surface it could sit on, as the blend actually
-    /// renders. ⚠️ `.neutral` is excluded because it is not a blend at all — it is
-    /// `mutedForeground` on the solid `muted` token, already covered above.
+    /// renders: the tone at ``DistrictColors/containerAlpha`` over the surface, with the
+    /// tone's chip ink on it. ⚠️ `.neutral` is excluded because it is not a blend at all, it
+    /// is `mutedForeground` on the solid `muted` token, already covered above.
     private static func badgeMatrix(of palette: DistrictColors, named name: String) -> [(Double, String)] {
-        let tones: [(Color, String)] = [
-            (palette.district, "district"),
-            (palette.success, "success"),
-            (palette.warning, "warning"),
-            (palette.destructive, "danger"),
-            (palette.info, "info"),
-        ]
-        return tones.flatMap { ink, toneName in
+        tones.filter { $0 != .neutral }.flatMap { tone in
             surfaces(of: palette).map { surface, surfaceName in
-                let background = blend(ink, over: surface, alpha: DistrictColors.containerAlpha)
-                return (contrast(ink, background), "\(name) \(toneName) badge on \(surfaceName)")
+                let background = blend(tone.ink(palette), over: surface, alpha: DistrictColors.containerAlpha)
+                return (contrast(tone.chipInk(palette), background), "\(name) \(tone) badge on \(surfaceName)")
             }
         }
     }

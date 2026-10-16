@@ -79,7 +79,7 @@ struct CreateContactSheet: View {
             Text(label)
                 .font(DistrictType.labelSmall)
                 .foregroundStyle(colors.mutedForeground)
-            TextField(label, text: text)
+            TextField(label, text: text, prompt: .noPlaceholder)
                 .disabled(saving)
                 .districtField()
         }

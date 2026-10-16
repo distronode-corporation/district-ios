@@ -1,3 +1,4 @@
+import DistrictL10n
 import DistrictModel
 import Foundation
 import SwiftUI
@@ -65,7 +66,7 @@ func dossierFields(_ source: WireJSON?) -> [DossierField] {
 }
 
 private func topLevelField(key: String, _ element: WireJSON) -> DossierField? {
-    let label = humanize(key)
+    let label = dossierLabel(key)
     switch element {
     case .null:
         return nil
@@ -142,6 +143,24 @@ private func scalarText(_ element: WireJSON) -> String? {
     case .array, .object, .null:
         return nil
     }
+}
+
+/// A top-level dossier key's label.
+///
+/// ⛔ IN FRENCH, THE VOCABULARY'S LABEL FOR EVERY KEY IT LISTS (3.0.2). The French dossier
+/// showed `corePainPoints` humanized into English (« Core pain points ») where the portal
+/// says « Enjeux CRM déduits »; the contract's `contactResearchKey` category holds the
+/// portal's drawer headings for the keys the server writes. A key it does not list is
+/// model-authored data and is shown humanized, as before.
+///
+/// ⚠️ ENGLISH KEEPS ``humanize(_:)``. DistrictCore 7.0.2's vocabulary has an English label
+/// for all seven keys (`estimatedValue`, `person` and `callerIntel` were missing before), but
+/// showing them would change the English headings, which 3.0.2 does not do.
+func dossierLabel(_ key: String) -> String {
+    if AppL10n.copyLocale == .frCA, let label = WireLabel.knownLabel(.contactResearchKey, key) {
+        return label
+    }
+    return humanize(key)
 }
 
 /// "executiveSummary" → "Executive summary".

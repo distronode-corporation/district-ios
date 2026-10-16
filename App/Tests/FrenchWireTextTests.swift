@@ -26,6 +26,8 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(french { AppWire.label(.callStatus, "completed") }, "Terminé")
         XCTAssertEqual(french { AppWire.label(.messageDeliveryStatus, "delivered") }, "Livré")
         XCTAssertEqual(french { AppWire.label(.numberStatus, "active") }, "Actif")
+        // DistrictCore 7.0.2: Twilio's `in-use` is labelled as an active line.
+        XCTAssertEqual(french { AppWire.label(.numberStatus, "in-use") }, "Actif")
     }
 
     /// ⛔ AN UNLISTED VALUE IS NEVER SHOWN AS ITSELF IN FRENCH: it takes the category's
@@ -44,7 +46,11 @@ final class FrenchWireTextTests: XCTestCase {
 
     func testACallLengthIsTheServersInEnglishAndWrittenFromTheSecondsInFrench() {
         XCTAssertEqual(AppWire.duration(sent: "1m 5s", seconds: 65), "1m 5s")
-        XCTAssertEqual(french { AppWire.duration(sent: "1m 5s", seconds: 65) }, "1\(Self.nbsp)min 5\(Self.nbsp)s")
+        XCTAssertEqual(
+            french { AppWire.duration(sent: "1m 5s", seconds: 65) },
+            "1\(Self.nbsp)min\(Self.nbsp)5\(Self.nbsp)s",
+            "3.0.2: no plain space, so « 3 min » never wraps away from « 4 s »"
+        )
     }
 
     func testACountIsPlainInEnglishAndGroupedInFrench() {
@@ -58,6 +64,24 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(french { AppWire.placeholder("You") }, "Vous")
         XCTAssertEqual(french { AppWire.placeholder("Distronode Support") }, "Soutien Distronode")
         XCTAssertEqual(french { AppWire.placeholder("Dana Booker") }, "Dana Booker")
+    }
+
+    /// ⛔ 3.0.2: A FRENCH DOSSIER HEADS A KEY THE VOCABULARY LISTS IN THE PORTAL'S WORDS, not
+    /// the key humanized into English (« Core pain points »). English, and a key the
+    /// vocabulary does not list, keep the humanized key.
+    func testAFrenchDossierKeyReadsAsTheVocabularysLabel() {
+        XCTAssertEqual(french { dossierLabel("corePainPoints") }, "Enjeux CRM déduits")
+        XCTAssertEqual(french { dossierLabel("executiveSummary") }, "Résumé du dossier")
+        // DistrictCore 7.0.2: the three keys the portal heads but the vocabulary did not list.
+        XCTAssertEqual(french { dossierLabel("estimatedValue") }, "Évaluation DGI")
+        XCTAssertEqual(french { dossierLabel("person") }, "Profil du contact")
+        XCTAssertEqual(french { dossierLabel("callerIntel") }, "Renseignements sur l'appelant")
+        XCTAssertEqual(dossierLabel("corePainPoints"), "Core pain points")
+        XCTAssertEqual(french { dossierLabel("budget_notes") }, "Budget notes")
+        XCTAssertEqual(
+            french { dossierFields(.object(["corePainPoints": .string("Slow quotes")])).first?.label },
+            "Enjeux CRM déduits"
+        )
     }
 
     // MARK: - Workflows
@@ -106,7 +130,7 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(AnalyticsFormat.duration(seconds: 120), "2m 0s")
         XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 120) }, "2\(Self.nbsp)min")
         XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 3600) }, "60\(Self.nbsp)min")
-        XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 65) }, "1\(Self.nbsp)min 5\(Self.nbsp)s")
+        XCTAssertEqual(french { AnalyticsFormat.duration(seconds: 65) }, "1\(Self.nbsp)min\(Self.nbsp)5\(Self.nbsp)s")
     }
 
     func testTheIncludedMinutesAreGroupedInFrench() {

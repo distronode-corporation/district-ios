@@ -40,7 +40,7 @@ enum AnalyticsFormat {
         // ⚠️ FRENCH THROUGH THE CORE, WHICH DROPS ZERO SECONDS: « 2 min », never « 2 min 0 s »
         // (`contracts/i18n/format-vectors.json`, formatMinutesSeconds). English keeps `2m 0s`.
         if AppL10n.copyLocale == .frCA {
-            return L10nFormat.minutesSeconds(safe)
+            return AppWire.minutesSeconds(safe)
         }
         let minutes = safe / 60
         let remainder = safe % 60

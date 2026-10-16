@@ -23,6 +23,7 @@ struct SchedulingTeamCreateButton: View {
             SchedulingTeamEditorSheet(model: entry.model, teamName: "") {
                 editing = nil
             }
+            .districtSheetBackground()
         }
     }
 
@@ -72,9 +73,11 @@ struct SchedulingTeamRowActions: View {
             SchedulingTeamEditorSheet(model: entry.model, teamName: team.name) {
                 editing = nil
             }
+            .districtSheetBackground()
         }
         .sheet(item: $members) { entry in
             SchedulingTeamMembersSheet(model: entry.model) { members = nil }
+                .districtSheetBackground()
         }
     }
 
@@ -127,6 +130,7 @@ struct SchedulingUserArchiveButton: View {
             SchedulingUserArchiveSheet(model: entry.model, userName: userName) {
                 archiving = nil
             }
+            .districtSheetBackground()
         }
     }
 

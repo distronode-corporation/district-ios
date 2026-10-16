@@ -42,7 +42,7 @@ final class SelectionInkTests: XCTestCase {
                 for increased in [false, true] {
                     XCTAssertEqual(
                         SelectionInk.chipInk(tone, colors, increasedContrast: increased, prominence: .standard),
-                        tone.ink(colors, increasedContrast: increased),
+                        tone.chipInk(colors, increasedContrast: increased),
                         "\(name) \(tone) \(increased)"
                     )
                     XCTAssertEqual(

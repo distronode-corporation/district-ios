@@ -45,22 +45,42 @@ enum Tone: String, CaseIterable {
         }
     }
 
+    /// ⛔ THE INK A TINTED CHIP DRAWS ON ``fill(_:)``: a badge, an avatar, a desk chip.
+    /// Not ``ink(_:)``, because `fill` is the SAME colour at 12% over the surface behind
+    /// it, so the two are separated only by what 12% of one colour does to another:
+    /// measured across both palettes and all five surfaces, six of the fifty pairs landed
+    /// between 3.91:1 and 4.44:1, short of AA for a 12pt label (the 3.0.1 queue). The chip
+    /// inks (``DistrictColors/districtChipInk`` and its siblings) are each tone moved a
+    /// fifth of the way towards `foreground`, and every pair now clears AA, 4.71:1 at the
+    /// worst. `DistrictContrastTests` measures all fifty.
+    ///
+    /// ⚠️ ``Tone/neutral`` keeps `mutedForeground`: its fill is the solid `muted`, which
+    /// already clears AA.
+    func chipInk(_ colors: DistrictColors) -> Color {
+        switch self {
+        case .neutral: colors.mutedForeground
+        case .district: colors.districtChipInk
+        case .success: colors.successChipInk
+        case .warning: colors.warningChipInk
+        case .danger: colors.destructiveChipInk
+        case .info: colors.infoChipInk
+        }
+    }
+
+    /// The chip ink, or the solid pair's ink when the system asks for more contrast (see
+    /// ``fill(_:increasedContrast:)``).
+    func chipInk(_ colors: DistrictColors, increasedContrast: Bool) -> Color {
+        increasedContrast ? ink(colors, increasedContrast: true) : chipInk(colors)
+    }
+
     // MARK: - Increase Contrast
 
-    /// ⛔ THE TINTED BADGE IS THE THINNEST THING IN THIS PALETTE, AND THE ARITHMETIC
-    /// SAYS SO. A badge draws ``ink(_:)`` over ``fill(_:)``, and `fill` is the SAME
-    /// colour at 12% over the surface behind it — so the two are separated only by
-    /// what 12% of one colour does to another. Measured across both palettes and all
-    /// five surfaces, six of the fifty combinations land between 3:1 and 4.5:1:
-    /// legible, and short of AA for a 12pt label. `DistrictContrastTests` pins the
-    /// exact set.
-    ///
-    /// ⛔ SO WHEN THE SYSTEM ASKS FOR MORE CONTRAST, THE BADGE STOPS BEING A TINT AND
+    /// ⛔ WHEN THE SYSTEM ASKS FOR MORE CONTRAST, THE BADGE STOPS BEING A TINT AND
     /// BECOMES A SOLID. The pair it switches to is the fill-and-`on*` pair the filled
-    /// controls already use, which the same tests measure at 6.20:1 to 13.98:1 — no
-    /// colour is invented here, and nothing changes for a user who has not asked for
-    /// it. Raising ``DistrictColors/containerAlpha`` cannot substitute: more tint
-    /// moves the background TOWARDS the ink and makes it worse.
+    /// controls already use, which the same tests measure at 6.20:1 to 13.98:1, well past
+    /// the chip inks' AA, and nothing changes for a user who has not asked for it.
+    /// Raising ``DistrictColors/containerAlpha`` cannot substitute: more tint moves the
+    /// background TOWARDS the ink and makes it worse.
     func fill(_ colors: DistrictColors, increasedContrast: Bool) -> Color {
         guard increasedContrast else { return fill(colors) }
         switch self {
@@ -74,9 +94,8 @@ enum Tone: String, CaseIterable {
     }
 
     /// ⚠️ ``Tone/neutral`` GOES TO FULL `foreground` RATHER THAN STAYING MUTED. Its
-    /// tinted form already clears AA, so this is the one tone the switch is not
-    /// rescuing — but a person who has asked for more contrast should not be given
-    /// the one badge that deliberately recedes.
+    /// normal form already clears AA, but a person who has asked for more contrast
+    /// should not be given the one badge that deliberately recedes.
     func ink(_ colors: DistrictColors, increasedContrast: Bool) -> Color {
         guard increasedContrast else { return ink(colors) }
         switch self {
