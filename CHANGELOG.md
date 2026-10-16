@@ -172,6 +172,7 @@ built from history before publication, so they have no tags in this repository.
 
 ### Changed
 
+- Crash reporting runs on Sentry 9.30.1 (was 9.29.2).
 - French: the call log's title is « Appels » (`calls.call_log`); « Journal des appels » was
   cut to « Journal des ap… » in the iPad split view's list column.
 - `scripts/asc_localization.py` adds a language's App Store listing through the App Store

@@ -95,14 +95,14 @@ packages:
   # ProjectSpec accepts `exactVersion` (and `version` as its alias); `exact` is
   # not a key it knows, and an unknown key under a package is a spec error
   # rather than a silently ignored line.
-  # ⚠️ 9.29.2 IS THE PRECOMPILED BINARY PATH. sentry-cocoa's own Package.swift
+  # ⚠️ 9.30.1 IS THE PRECOMPILED BINARY PATH. sentry-cocoa's own Package.swift
   # declares the `Sentry` product as a `.binaryTarget` XCFramework downloaded
   # from the GitHub release, so nothing here compiles the SDK from source. The
   # source-built product is called `SentrySPM`; `Sentry-Dynamic` and
   # `SentrySwiftUI` are different distributions again and none of them is wanted.
   Sentry:
     url: https://github.com/getsentry/sentry-cocoa
-    exactVersion: 9.29.2
+    exactVersion: 9.30.1
 
   # ⛔ `exactVersion` IS THE SAME DECISION THE CORE'S Package.swift TAKES WITH `.exact` FOR
   # swift-crypto: a floating range
