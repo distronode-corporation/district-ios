@@ -1,5 +1,6 @@
 @testable import DistrictAI
 import SwiftUI
+import UIKit
 import XCTest
 
 /// The 3.0.2 visual walk's fixes (iMac, build 723334fef): the Desk settings label printed
@@ -87,13 +88,28 @@ final class VisualWalk302Tests: XCTestCase {
     /// rows ran together into one white block on the light page; the system's grey is not a
     /// palette colour, so the separator takes the border token in both schemes, and starts
     /// at the row's text column, past the avatar.
+    ///
+    /// ⛔ AND IT FOLLOWS A LIVE LIGHT/DARK SWITCH (3.0.2 walk 3): the tint is one dynamic
+    /// colour resolved per trait collection, because a tint picked from `colorScheme` kept
+    /// the old scheme's hex on the rows until the tab was rebuilt.
     func test_VW_06_routeRowsDrawAPaletteSeparator() throws {
-        XCTAssertEqual(RouteListRowGround.separator(.light), DistrictColors.light.border)
-        XCTAssertEqual(RouteListRowGround.separator(.dark), DistrictColors.dark.border)
+        let ink = RouteListRowGround.separatorInk
+        XCTAssertEqual(Self.hex(ink.resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))), "C9D6D8")
+        XCTAssertEqual(Self.hex(ink.resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark))), "24393D")
+        XCTAssertEqual(Self.hex(ink.resolvedColor(with: UITraitCollection(userInterfaceStyle: .unspecified))), "C9D6D8")
+        XCTAssertEqual(Self.hex(UIColor(DistrictColors.light.border)), "C9D6D8", "the light border token moved")
+        XCTAssertEqual(Self.hex(UIColor(DistrictColors.dark.border)), "24393D", "the dark border token moved")
         let ground = try source("Navigation/RouteList.swift")
         XCTAssertFalse(ground.contains(".listRowSeparator(.hidden)"), "the route rows hide their separator again")
         XCTAssertTrue(ground.contains(".listRowSeparator(.visible)"))
-        XCTAssertTrue(ground.contains(".listRowSeparatorTint(Self.separator(colorScheme))"))
+        XCTAssertTrue(ground.contains(".listRowSeparatorTint(Self.separator)"))
+        let tint = try XCTUnwrap(ground.components(separatedBy: ".listRowSeparatorTint(").dropFirst().first?
+            .components(separatedBy: "\n").first)
+        XCTAssertFalse(tint.contains("colorScheme"), "the separator tint is picked from colorScheme again")
+        let provider = try XCTUnwrap(ground.components(separatedBy: "static var separatorInk").dropFirst().first?
+            .components(separatedBy: "static func ground").first)
+        XCTAssertTrue(provider.contains("UIColor { traits in"), "the separator is no longer a dynamic colour")
+        XCTAssertFalse(provider.contains("colorScheme"), "the separator ink reads colorScheme")
         let row = try source("DesignSystem/DistrictListRow.swift")
         XCTAssertTrue(row.contains(".alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }"))
     }
@@ -114,5 +130,13 @@ final class VisualWalk302Tests: XCTestCase {
         XCTAssertLessThan(reference.lowerBound, badge.lowerBound)
         XCTAssertLessThan(badge.upperBound, subject.lowerBound)
         XCTAssertFalse(row.contains("HStack(alignment: .top"), "the subject is beside the badge again")
+    }
+
+    /// A resolved colour as six upper-case sRGB hex digits, rounded to the nearest step.
+    private static func hex(_ color: UIColor) -> String {
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        let bytes = [red, green, blue].map { Int(($0 * 255).rounded()) }
+        return bytes.map { String(format: "%02X", $0) }.joined()
     }
 }
