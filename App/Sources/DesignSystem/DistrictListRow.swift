@@ -126,6 +126,11 @@ struct DistrictListRow<Leading: View, Trailing: View>: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            // ⚠️ A `List`'S SEPARATOR STARTS AT THE TEXT COLUMN, past the avatar, as an
+            // iOS list draws it (3.0.2 walk 2, ``View/routeListRow(selects:)``). Stated
+            // rather than left to the system's guess at the row's first text, and inert
+            // outside a `List`.
+            .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
             // ⛔ SIZED BEFORE THE TEXT COLUMN. See the ⛔ on the type: at equal
             // priority the pills and the subtitle both wrapped.
             // ⚠️ THE PRIORITY IS DROPPED WHEN STACKED. In a VStack it would make the

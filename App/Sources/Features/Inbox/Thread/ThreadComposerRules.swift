@@ -242,6 +242,18 @@ enum ThreadChannelName {
         if channel == MessageChannel.whatsapp {
             return InboxCopy.whatsapp
         }
+        if channel == voicemail {
+            return InboxCopy.voicemail
+        }
         return channel.uppercased()
     }
+
+    /// The wire's `voicemail` channel: the message type the voice agent writes for a
+    /// message left on a call.
+    ///
+    /// ⚠️ A LITERAL HERE BECAUSE DistrictCore's ``MessageChannel`` HAS NO CONSTANT FOR IT.
+    /// It names the three channels a reply can go out on, and nobody replies by voicemail,
+    /// but an Inbox row that mixes channels still names this one (3.0.2 walk 2, a port of
+    /// district-macos #67: French drew « VOICEMAIL »).
+    static let voicemail = "voicemail"
 }

@@ -1486,6 +1486,9 @@ extension InboxCopy {
         return "\(count) unread"
     }
 
+    /// `inbox.voicemail`
+    internal static var voicemail: String { AppL10n.copyLocale == .frCA ? "Boîte vocale" : "Voicemail" }
+
     /// `inbox.whatsapp`
     internal static var whatsapp: String { AppL10n.copyLocale == .frCA ? "WhatsApp" : "WhatsApp" }
 }

@@ -83,6 +83,21 @@ final class VisualWalk302Tests: XCTestCase {
         }
     }
 
+    /// ⛔ A ROUTE ROW DRAWS A PALETTE HAIRLINE BELOW IT (3.0.2 walk 2). Hidden, the card-ground
+    /// rows ran together into one white block on the light page; the system's grey is not a
+    /// palette colour, so the separator takes the border token in both schemes, and starts
+    /// at the row's text column, past the avatar.
+    func test_VW_06_routeRowsDrawAPaletteSeparator() throws {
+        XCTAssertEqual(RouteListRowGround.separator(.light), DistrictColors.light.border)
+        XCTAssertEqual(RouteListRowGround.separator(.dark), DistrictColors.dark.border)
+        let ground = try source("Navigation/RouteList.swift")
+        XCTAssertFalse(ground.contains(".listRowSeparator(.hidden)"), "the route rows hide their separator again")
+        XCTAssertTrue(ground.contains(".listRowSeparator(.visible)"))
+        XCTAssertTrue(ground.contains(".listRowSeparatorTint(Self.separator(colorScheme))"))
+        let row = try source("DesignSystem/DistrictListRow.swift")
+        XCTAssertTrue(row.contains(".alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }"))
+    }
+
     /// ⛔ THE DESK ROW'S BADGE SITS ON THE REFERENCE'S LINE, sized first, and the subject
     /// takes the row's whole width below them, so it breaks between words in the iPad's
     /// list column and the badge keeps its whole label.

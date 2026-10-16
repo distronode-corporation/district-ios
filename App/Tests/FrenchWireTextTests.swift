@@ -196,4 +196,37 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(french { MessagingCatalog.providerLabel("twilio") }, "Twilio")
         XCTAssertEqual(french { MessagingCatalog.providerLabel("unknown") }, "Autre")
     }
+
+    // MARK: - Inbox channels
+
+    /// ⛔ 3.0.2 WALK 2: EVERY CHANNEL THE SERVER WRITES HAS A NAME OF ITS OWN. A row's
+    /// channels are its messages' `type`: `sms`, `email`, `whatsapp`, and the `voicemail`
+    /// the voice agent writes for a message left on a call. Voicemail fell through to the
+    /// raw wire word, so a French Inbox drew « VOICEMAIL » (the Mac's #67, ported).
+    func testEveryWireChannelHasItsOwnName() {
+        let englishNames = ["sms": "SMS", "email": "Email", "whatsapp": "WhatsApp", "voicemail": "Voicemail"]
+        let frenchNames = ["sms": "SMS", "email": "Courriel", "whatsapp": "WhatsApp", "voicemail": "Boîte vocale"]
+        for (channel, name) in englishNames {
+            XCTAssertEqual(ThreadChannelName.of(channel), name, channel)
+        }
+        for (channel, name) in frenchNames {
+            XCTAssertEqual(french { ThreadChannelName.of(channel) }, name, channel)
+        }
+        XCTAssertEqual(ThreadChannelName.voicemail, "voicemail", "the wire value")
+    }
+
+    /// The chips on a mixed-channel Inbox row: English keeps the wire word in capitals,
+    /// French names each channel, voicemail included.
+    func testAMixedInboxRowNamesItsVoicemailChannel() throws {
+        let body = #"""
+        {"key":"k","threadKey":"contact:x","counterpart":"+15550101","matchKeys":["15550101"],
+         "kind":"phone","channels":["sms","voicemail"],"contactId":"x","contactName":"Casey",
+         "contactEmail":null,"contactPhone":"+15550101","canSms":true,"canEmail":false,
+         "lastMessage":{"body":"Call me back","direction":"inbound","type":"voicemail",
+         "status":"received","createdAt":"2026-10-16T14:00:00.000Z"},"unreadCount":1,"totalMessages":2}
+        """#
+        let conversation = try JSONDecoder().decode(ConversationSummary.self, from: Data(body.utf8))
+        XCTAssertEqual(ConversationDisplay(conversation).channelLabels, ["SMS", "VOICEMAIL"])
+        XCTAssertEqual(french { ConversationDisplay(conversation).channelLabels }, ["SMS", "BOÎTE VOCALE"])
+    }
 }
