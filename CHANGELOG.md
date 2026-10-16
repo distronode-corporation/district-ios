@@ -87,8 +87,8 @@ built from history before publication, so they have no tags in this repository.
     row) instead of an empty "Select a call" with the list hidden; landscape is unchanged.
   - AP-019: when the Overview fails, its section rows stay under the error, gated by the
     workspace list's role.
-- MARKETING_VERSION 3.0.1. DistrictCore pinned by revision to district-core-swift
-  v3/7.0.1 (1972dc9, PR #26's head) until 7.0.1 is tagged.
+- MARKETING_VERSION 3.0.1. DistrictCore `exactVersion` 7.0.1 (district-core-swift's 7.0.1
+  tag, main d7bf46d).
 
 ### Release lane
 
