@@ -12,7 +12,7 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
-- An answered call joins before its speaker starts (port of district-macos #64). The
+- 3.0.2: an answered call joins before its speaker starts (port of district-macos #64). The
   softphone joined with LiveKit's auto-subscribe, so the server's first subscriber offer
   already carried the caller's and the agent's audio, and applying it starts the speaker
   (WebRTC's `AVAudioEngine` playout start, up to ten attempts 100 ms apart) on the worker
