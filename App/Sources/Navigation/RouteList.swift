@@ -31,3 +31,40 @@ struct RouteList<Content: View>: View {
         }
     }
 }
+
+extension View {
+    /// A full-bleed row of a ``RouteList``: no insets, no separator, and on the phone the
+    /// card ground.
+    ///
+    /// ⚠️ THE CARD GROUND ON THE PHONE (3.0.2 visual walk). A plain `List` row is an opaque
+    /// system cell, pure white or pure black, which sat on the page's `background` in
+    /// Contacts, Inbox and Calls as a colour the palette does not have. ``DistrictColors/card``
+    /// is what every card and panel on the same page is drawn on.
+    ///
+    /// ⛔ NOT WHEN THE LIST SELECTS (regular width). A row background replaces the cell the
+    /// system draws its selection highlight on, so on the iPad the open row would stop
+    /// showing as open; the Desk and Support queues draw their own selection for exactly
+    /// that reason (``CardSlice``). A selecting list keeps the system's cell.
+    func routeListRow(selects: Bool) -> some View {
+        modifier(RouteListRowGround(selects: selects))
+    }
+}
+
+struct RouteListRowGround: ViewModifier {
+    let selects: Bool
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content
+            .listRowInsets(EdgeInsets())
+            .listRowSeparator(.hidden)
+            .listRowBackground(Self.ground(colorScheme, selects: selects))
+    }
+
+    /// The row's ground: the card on the phone, the system's own cell (nil) in a list that
+    /// selects.
+    static func ground(_ scheme: ColorScheme, selects: Bool) -> Color? {
+        selects ? nil : DistrictColors.resolve(scheme).card
+    }
+}

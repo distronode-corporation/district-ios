@@ -101,13 +101,11 @@ private struct CallLogScreen: View {
                 }
                 .accessibilityIdentifier(A11yID.Calls.row(call.id))
                 .rowContextMenu(RowContextActions.call(direction: call.direction, from: call.from))
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
+                .routeListRow(selects: selection != nil)
                 .onAppear { reachedEnd(of: rows, at: call) }
             }
             PagedFeedFooter(appending: appending, appendFailure: appendFailure, onRetry: loadMore)
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
+                .routeListRow(selects: selection != nil)
         }
         .listStyle(.plain)
         .districtRefreshable { await model.refresh() }

@@ -129,8 +129,9 @@ struct DeskSettingsView: View {
         }
     }
 
+    /// ⚠️ NO EYEBROW: the switch's own label is the card's title (see ``SettingsCard``).
     private func notifyCard(_ settings: DeskSettings) -> some View {
-        SettingsCard(eyebrow: DeskCopy.notifyLabel) {
+        SettingsCard {
             Toggle(
                 DeskCopy.notifyLabel,
                 isOn: Binding(
@@ -150,8 +151,11 @@ struct DeskSettingsView: View {
     /// ⛔ SAVED ON COMMIT RATHER THAN PER KEYSTROKE. A patch per character would write
     /// the tenant's public-facing heading dozens of times per edit and race its own
     /// responses.
+    ///
+    /// ⚠️ NO EYEBROW: the field's drawn label is the card's title and its accessibility
+    /// name (see ``SettingsCard``).
     private var brandCard: some View {
-        SettingsCard(eyebrow: DeskCopy.brandNameLabel) {
+        SettingsCard {
             SettingsField(
                 label: DeskCopy.brandNameLabel,
                 text: Binding(

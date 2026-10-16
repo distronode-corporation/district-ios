@@ -49,8 +49,11 @@ struct SchedulingAPIKeyRevokeButton: View {
     let key: SchedulingAPIKey
 
     var body: some View {
-        Button(SchedulingWriteCopyC.keyRevokeAction) { model.ask(key) }
-            .buttonStyle(.districtGhost)
+        // ⚠️ DESTRUCTIVE-STYLED, NOT GHOST TEXT (3.0.2 visual walk; the Mac's AP-023): the
+        // three row actions that remove something read as plain text beside "Edit". The
+        // press still only asks; the dialog's own button does the work.
+        Button(SchedulingWriteCopyC.keyRevokeAction, role: .destructive) { model.ask(key) }
+            .buttonStyle(.districtDestructive)
             .disabled(model.busy)
             .accessibilityIdentifier(
                 A11yID.row(A11yID.SchedulingDeveloperWrites.keyRevoke, key.id)
@@ -65,8 +68,9 @@ struct SchedulingOAuthConnectionRevokeButton: View {
     let connection: SchedulingOAuthConnection
 
     var body: some View {
-        Button(SchedulingWriteCopyC.appRevokeAction) { model.ask(connection) }
-            .buttonStyle(.districtGhost)
+        // ⚠️ Destructive-styled, see ``SchedulingAPIKeyRevokeButton``.
+        Button(SchedulingWriteCopyC.appRevokeAction, role: .destructive) { model.ask(connection) }
+            .buttonStyle(.districtDestructive)
             .disabled(model.busy)
             .accessibilityIdentifier(
                 A11yID.row(A11yID.SchedulingDeveloperWrites.appRevoke, connection.id)
@@ -126,8 +130,9 @@ struct SchedulingWebhookRowActions: View {
             }
             .buttonStyle(.districtGhost)
             .accessibilityIdentifier(A11yID.row(A11yID.SchedulingWriteEntry.webhookEdit, webhook.id))
-            Button(SchedulingWriteCopyC.webhookDeleteAction) { deleteModel.ask(webhook) }
-                .buttonStyle(.districtGhost)
+            // ⚠️ Destructive-styled, see ``SchedulingAPIKeyRevokeButton``.
+            Button(SchedulingWriteCopyC.webhookDeleteAction, role: .destructive) { deleteModel.ask(webhook) }
+                .buttonStyle(.districtDestructive)
                 .disabled(deleteModel.busy)
                 .accessibilityIdentifier(
                     A11yID.row(A11yID.SchedulingDeveloperWrites.webhookDelete, webhook.id)

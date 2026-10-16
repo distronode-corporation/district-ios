@@ -336,30 +336,38 @@ struct DeskTicketRow: View {
         .resolve(colorScheme)
     }
 
+    /// ⛔ THE BADGE SHARES THE REFERENCE'S LINE, NOT THE SUBJECT'S (3.0.2 visual walk). Beside
+    /// the subject, in the iPad's list column, the badge and the subject split about 250
+    /// points: the badge truncated (« Waiting o… ») and the subject was proposed less than
+    /// one word's width, which SwiftUI breaks mid-word with no hyphen ("Unrecognise / d
+    /// charge"). Over the full width the subject breaks between words; the reference is a
+    /// short code, so the badge beside it keeps its whole label (`layoutPriority(1)` sizes
+    /// it first, and the reference is the one that yields).
     var body: some View {
-        HStack(alignment: .top, spacing: DistrictSpacing.row) {
-            VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
+        VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
+            HStack(alignment: .firstTextBaseline, spacing: DistrictSpacing.tight) {
                 // ⛔ THE ACCENT'S TEXT COLOUR ON A SELECTED ROW (``SelectionInk``).
                 Text(ticket.displayReference)
                     .font(DistrictType.caption)
                     .rowInk(colors.mutedForeground, .secondary)
-                Text(ticket.subject)
-                    .font(DistrictType.titleSmall)
-                    .rowInk(colors.foreground, .primary)
-                    .lineLimit(2)
-                Text(DeskTicketRow.requesterLine(ticket))
+                    .lineLimit(1)
+                Spacer(minLength: DistrictSpacing.tight)
+                DeskStatusBadge(status: ticket.status)
+                    .layoutPriority(1)
+            }
+            Text(ticket.subject)
+                .font(DistrictType.titleSmall)
+                .rowInk(colors.foreground, .primary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(DeskTicketRow.requesterLine(ticket))
+                .font(DistrictType.caption)
+                .rowInk(colors.mutedForeground, .secondary)
+                .lineLimit(1)
+            if ticket.fromCall {
+                Text(DeskCopy.fromCall)
                     .font(DistrictType.caption)
                     .rowInk(colors.mutedForeground, .secondary)
-                    .lineLimit(1)
-            }
-            Spacer(minLength: DistrictSpacing.tight)
-            VStack(alignment: .trailing, spacing: DistrictSpacing.hairline) {
-                DeskStatusBadge(status: ticket.status)
-                if ticket.fromCall {
-                    Text(DeskCopy.fromCall)
-                        .font(DistrictType.caption)
-                        .rowInk(colors.mutedForeground, .secondary)
-                }
             }
         }
         .padding(DistrictSpacing.card)
