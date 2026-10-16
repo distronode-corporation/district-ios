@@ -1,6 +1,14 @@
 import DistrictCall
 import Foundation
 import LiveKit
+import OSLog
+
+/// The SDK's own words for a failed join, a dropped room or a microphone that would not start.
+///
+/// ⛔ THE LOG IS WHERE THEY GO, NEVER THE SCREEN: they are LiveKit's English error
+/// descriptions ("Room deleted"), and the end screen words every end from the catalog
+/// (`InCallCopy.word(for:endedByOperator:)`). Public, because they carry no personal data.
+private let callLog = Logger(subsystem: "com.distronode.district", category: "Call")
 
 /// The one place in this app that talks to the LiveKit SDK.
 ///
@@ -118,6 +126,7 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
         do {
             try await room.connect(url: url, token: token)
         } catch {
+            callLog.info("join failed: \(error.localizedDescription, privacy: .public)")
             await joinGate.finish(joined: false)
             continuation.yield(.failed(message: error.localizedDescription))
             throw error
@@ -139,6 +148,7 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
         do {
             try await room.setMicrophone(enabled: true)
         } catch {
+            callLog.info("microphone did not start: \(error.localizedDescription, privacy: .public)")
             await bridge.connectedReported()
             continuation.yield(.microphoneChanged(enabled: false))
         }
@@ -202,7 +212,8 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
 /// that conforms to a protocol with associated types can be picked up as the witness,
 /// and the error then surfaces somewhere else entirely — see `DistrictButtonVariant`.
 ///
-/// ⚠️ THE CALLBACKS ARE NONISOLATED AND TOUCH NOTHING BUT THE CONTINUATION.
+/// ⚠️ THE CALLBACKS ARE NONISOLATED AND TOUCH NOTHING BUT THE CONTINUATION
+/// AND THE LOG (`Logger` is thread-safe and needs no hop).
 /// `AsyncStream.Continuation` is `Sendable` and `yield` is safe from any thread, so
 /// nothing here needs an actor hop and nothing here may grow one: a hop would reorder
 /// events, and the reducers on the other side of the seam are order-sensitive by
@@ -274,6 +285,9 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
 
     @objc
     func room(_ room: Room, didFailToConnectWithError error: LiveKitError?) {
+        if let error {
+            callLog.info("join failed: \(error.localizedDescription, privacy: .public)")
+        }
         continuation.yield(.failed(message: error?.localizedDescription))
     }
 
@@ -281,6 +295,9 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
     /// read as an ordinary end rather than a fault.
     @objc
     func room(_ room: Room, didDisconnectWithError error: LiveKitError?) {
+        if let error {
+            callLog.info("room disconnected: \(error.localizedDescription, privacy: .public)")
+        }
         continuation.yield(.disconnected(reason: error?.localizedDescription))
     }
 

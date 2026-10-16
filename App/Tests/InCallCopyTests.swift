@@ -29,9 +29,9 @@ final class InCallCopyTests: XCTestCase {
         let unaffected: [(CallEndReason, String)] = [
             (.remoteHungUp, "they hung up"),
             (.remoteEnded(reason: nil), "the other end ended it"),
-            (.remoteEnded(reason: "carrier released"), "carrier released"),
+            (.remoteEnded(reason: "Room deleted"), "the other end ended it"),
             (.failed(message: nil), "the call could not be connected"),
-            (.failed(message: "no answer from the trunk"), "no answer from the trunk"),
+            (.failed(message: "Timed out"), "the call could not be connected"),
             (.declined, "declined"),
             (.ringTimedOut, "nobody answered"),
             (.callerCancelled, "the caller hung up"),

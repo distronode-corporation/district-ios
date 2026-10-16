@@ -270,8 +270,11 @@ enum InCallCopy {
         switch reason {
         case .hungUpLocally: wordHungUpLocally
         case .remoteHungUp: wordRemoteHungUp
-        case let .remoteEnded(text): text ?? wordRemoteEnded
-        case let .failed(message): message ?? wordFailed
+        // ⛔ NEVER THE SDK'S OWN TEXT. These two carry LiveKit's English error description
+        // ("Room deleted" when the caller hung up and the room went), which is no sentence
+        // for a person and never French; the engine logs it instead (`LiveKitCallEngine`).
+        case .remoteEnded: wordRemoteEnded
+        case .failed: wordFailed
         case .declined: wordDeclined
         case .ringTimedOut: wordRingTimedOut
         case .callerCancelled: wordCallerCancelled
