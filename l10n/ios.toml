@@ -3479,6 +3479,7 @@ fr = "Réception"
 ctx = "label"
 screen = "inbox"
 state = "draft"
+fr_variant = "iPad list column title: « Boîte de réception » truncates; « Réception » as the iOS tab and Apple Mail (visual QA AP-026)"
 id = { swift = "InboxCopy.inbox" }
 note = "3.0.2 (visual QA AP-026): the screen's title. « Boîte de réception » truncated to « Boîte de récep… » in the iPad list column; « Réception » is Apple Mail's own French for Inbox and the tab bar's word already."
 
@@ -10047,7 +10048,7 @@ id = { swift = "SchedulingWriteCopy.hoursCopyToWeekdays" }
 [scheduling_write.hours_edit]
 en = "Edit working hours"
 fr = "Modifier les heures"
-ctx = "label"
+ctx = "button"
 screen = "scheduling.writes.availability"
 state = "draft"
 id = { swift = "SchedulingWriteCopy.hoursEdit" }
@@ -10393,7 +10394,7 @@ id = { swift = "SchedulingWriteCopy.overrideUnavailable" }
 [scheduling_write.overrides_edit]
 en = "Edit date overrides"
 fr = "Modifier les exceptions"
-ctx = "label"
+ctx = "button"
 screen = "scheduling.writes.availability"
 state = "draft"
 id = { swift = "SchedulingWriteCopy.overridesEdit" }
