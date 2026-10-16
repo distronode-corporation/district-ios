@@ -372,13 +372,11 @@ private struct InboxScreen: View {
                 // ON. "The first row" is not an address that survives a reorder.
                 .accessibilityIdentifier(A11yID.Inbox.row(conversation.threadKey))
                 .rowContextMenu(RowContextActions.thread(counterpart: conversation.counterpart))
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
+                .routeListRow(selects: selection != nil)
             }
             if isPartial {
                 partialCaption
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
+                    .routeListRow(selects: selection != nil)
             }
         }
         .listStyle(.plain)
@@ -398,13 +396,11 @@ private struct InboxScreen: View {
                 NavigationLink(value: route(for: hit)) {
                     MessageSearchRow(hit: hit)
                 }
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
+                .routeListRow(selects: selection != nil)
             }
             if capped {
                 cappedCaption
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
+                    .routeListRow(selects: selection != nil)
             }
         }
         .listStyle(.plain)

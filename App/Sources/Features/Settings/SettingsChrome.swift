@@ -233,11 +233,16 @@ struct SettingsField: View {
 /// stays because settings and scheduling forms (through ``SchedulingCard``) space their
 /// labelled fields wider than a read-only card, and forty-odd call sites say so by
 /// naming this type rather than repeating the spacing.
+///
+/// ⚠️ NO EYEBROW WHEN THE CARD'S ONE CONTROL ALREADY DRAWS ITS LABEL (3.0.2 visual walk). A
+/// card titled with the same words as the ``SettingsField`` or `Toggle` inside it printed
+/// them twice, and VoiceOver read them twice; the control's own label is the one to keep,
+/// because it is the control's accessibility name.
 struct SettingsCard<Inner: View>: View {
-    let eyebrow: String
+    let eyebrow: String?
     private let inner: Inner
 
-    init(eyebrow: String, @ViewBuilder content: () -> Inner) {
+    init(eyebrow: String? = nil, @ViewBuilder content: () -> Inner) {
         self.eyebrow = eyebrow
         inner = content()
     }

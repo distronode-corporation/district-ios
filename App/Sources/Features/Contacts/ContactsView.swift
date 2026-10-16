@@ -160,8 +160,7 @@ private struct ContactsScreen: View {
         RouteList(selection: selection) {
             if !model.canMutate {
                 readOnlyCaption
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
+                    .routeListRow(selects: selection != nil)
             }
             ForEach(rows, id: \.id) { contact in
                 // ⛔ THE ROW IS KEYED ON THE CONTACT ID, AND THE PAGER
@@ -179,13 +178,11 @@ private struct ContactsScreen: View {
                 // must not turn into a failure somewhere unrelated.
                 .accessibilityIdentifier(A11yID.Contacts.row(contact.id))
                 .rowContextMenu(RowContextActions.contact(phone: contact.phoneNumber, email: contact.email))
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
+                .routeListRow(selects: selection != nil)
                 .onAppear { reachedEnd(of: rows, at: contact) }
             }
             PagedFeedFooter(appending: appending, appendFailure: appendFailure, onRetry: loadMore)
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
+                .routeListRow(selects: selection != nil)
         }
         .listStyle(.plain)
         // ⚠️ BOTH READS ON THE ONE PULL, SEQUENTIALLY. A second `.refreshable` on
