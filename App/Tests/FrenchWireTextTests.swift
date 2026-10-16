@@ -26,6 +26,8 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(french { AppWire.label(.callStatus, "completed") }, "Terminé")
         XCTAssertEqual(french { AppWire.label(.messageDeliveryStatus, "delivered") }, "Livré")
         XCTAssertEqual(french { AppWire.label(.numberStatus, "active") }, "Actif")
+        // DistrictCore 7.0.2: Twilio's `in-use` is labelled as an active line.
+        XCTAssertEqual(french { AppWire.label(.numberStatus, "in-use") }, "Actif")
     }
 
     /// ⛔ AN UNLISTED VALUE IS NEVER SHOWN AS ITSELF IN FRENCH: it takes the category's
@@ -70,6 +72,10 @@ final class FrenchWireTextTests: XCTestCase {
     func testAFrenchDossierKeyReadsAsTheVocabularysLabel() {
         XCTAssertEqual(french { dossierLabel("corePainPoints") }, "Enjeux CRM déduits")
         XCTAssertEqual(french { dossierLabel("executiveSummary") }, "Résumé du dossier")
+        // DistrictCore 7.0.2: the three keys the portal heads but the vocabulary did not list.
+        XCTAssertEqual(french { dossierLabel("estimatedValue") }, "Évaluation DGI")
+        XCTAssertEqual(french { dossierLabel("person") }, "Profil du contact")
+        XCTAssertEqual(french { dossierLabel("callerIntel") }, "Renseignements sur l'appelant")
         XCTAssertEqual(dossierLabel("corePainPoints"), "Core pain points")
         XCTAssertEqual(french { dossierLabel("budget_notes") }, "Budget notes")
         XCTAssertEqual(

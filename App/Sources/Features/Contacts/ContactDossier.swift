@@ -153,9 +153,9 @@ private func scalarText(_ element: WireJSON) -> String? {
 /// portal's drawer headings for the keys the server writes. A key it does not list is
 /// model-authored data and is shown humanized, as before.
 ///
-/// ⚠️ ENGLISH KEEPS ``humanize(_:)``: the vocabulary has no English label for three of its
-/// seven keys (`estimatedValue`, `person`, `callerIntel`), so its English column is not a
-/// set of headings this screen can show.
+/// ⚠️ ENGLISH KEEPS ``humanize(_:)``. DistrictCore 7.0.2's vocabulary has an English label
+/// for all seven keys (`estimatedValue`, `person` and `callerIntel` were missing before), but
+/// showing them would change the English headings, which 3.0.2 does not do.
 func dossierLabel(_ key: String) -> String {
     if AppL10n.copyLocale == .frCA, let label = WireLabel.knownLabel(.contactResearchKey, key) {
         return label
