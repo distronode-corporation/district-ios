@@ -12,6 +12,21 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- An answered call joins before its speaker starts (port of district-macos #64). The
+  softphone joined with LiveKit's auto-subscribe, so the server's first subscriber offer
+  already carried the caller's and the agent's audio, and applying it starts the speaker
+  (WebRTC's `AVAudioEngine` playout start, up to ten attempts 100 ms apart) on the worker
+  thread before the answer the join waits for is sent. On the Mac that held the join past
+  the SDK's 10 s primary-transport wait, "the call could not be connected" on 1 answered
+  call in 5 (District AI for Mac 3.0.1 build 20062, 2026-10-16, 07:07:03Z); this engine
+  joins the same way, and on iOS the speaker starts at that subscribe too, not at CallKit's
+  activation. `LiveKitCallRoom.connect` now joins with `ConnectOptions(autoSubscribe: false,
+  enableMicrophone: false)` and then subscribes every remote audio track already in the
+  room; `RemoteAudioSubscriber` (a room delegate) subscribes each one published later. A
+  slow speaker start now delays the first sound instead of failing the call. Opt-in join
+  diagnostics: the launch argument `-diagnostics.webrtcLog YES` forwards the SDK's debug
+  lines and WebRTC's native ones to the unified log (`io.livekit.sdk`); off by default.
+  Tested by `LiveKitCallEngineJoinTests` (the join's options and the subscriber's selector).
 - An answered call joins before its microphone starts. The softphone joined with LiveKit's
   concurrent microphone mode (`ConnectOptions(enableMicrophone: true)`), which starts Core
   Audio on the SDK's one serial WebRTC queue while the join builds its peer connections on

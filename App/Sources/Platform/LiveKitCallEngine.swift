@@ -64,6 +64,7 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     private let joinGate = CallJoinGate()
 
     convenience init(audio: AudioSessionCoordinator) {
+        _ = LiveKitCallEngine.diagnostics
         self.init(
             audio: audio,
             prepareAudio: { AudioManager.shared.audioSession.isAutomaticConfigurationEnabled = false },
@@ -105,13 +106,14 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     /// applied. ⛔ `customConfigureAudioSessionFunc` is deprecated (since 2.16.0) and
     /// must not be used to do this instead.
     ///
-    /// ⛔ THE JOIN FIRST, THEN THE MICROPHONE, ONCE. The join publishes nothing
-    /// (``LiveKitCallRoom``), so a slow Core Audio start can no longer hold the peer
-    /// connections back until the transport times out (District AI for Mac 3.0.1,
-    /// 2026-10-16: the session started and never became active; this engine joined the
-    /// same way). ⛔ IT IS THE CALL'S ONE MICROPHONE TRACK, and the join gate opens only
-    /// after it (``setMuted(_:)``), so the reducers' unmute on `.connected` is still
-    /// dropped rather than publishing a second one.
+    /// ⛔ THE JOIN FIRST, THEN THE MICROPHONE, ONCE. The join publishes nothing and
+    /// subscribes to nothing (``LiveKitCallRoom``, which subscribes the room's audio once it
+    /// has joined), so a slow Core Audio start, the microphone's or the speaker's, can no
+    /// longer hold the peer connections back until the transport times out (District AI
+    /// for Mac 3.0.1, 2026-10-16, 05:46:05Z and 07:07:03Z; this engine joined the same
+    /// way). ⛔ IT IS THE CALL'S ONE MICROPHONE TRACK, and the join gate opens only after it
+    /// (``setMuted(_:)``), so the reducers' unmute on `.connected` is still dropped rather
+    /// than publishing a second one.
     ///
     /// ⚠️ IT EMITS ``CallEngineEvent/failed(message:)`` AND THEN RETHROWS when the JOIN
     /// fails, which is what ``CallEngine/connect(url:token:)`` asks for: the connection
@@ -197,6 +199,26 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     func setSpeakerphone(_ enabled: Bool) async {
         audio.setSpeakerphone(enabled)
     }
+
+    /// The defaults key that turns on the join diagnostics, per device. ⚠️ AN iOS APP HAS
+    /// NO `defaults write`, so the key is passed as a launch argument, which lands in
+    /// `UserDefaults`' argument domain for that launch only: `-diagnostics.webrtcLog YES`,
+    /// from an Xcode scheme or `xcrun devicectl device process launch`.
+    static let diagnosticsKey = "diagnostics.webrtcLog"
+
+    /// ⚠️ OFF UNLESS A TESTER TURNS IT ON, AND THEN IT IS LOUD. The SDK's own lines that say
+    /// where a join stopped ("Received offer with offerId", each transport's state) are at
+    /// its `.debug` level, below the default logger's `.info`, and WebRTC's native lines
+    /// (the audio device module's "StartPlayout", "Starting AVAudioEngine...", "Failed to
+    /// start engine") are not forwarded at all by default. This forwards both to the
+    /// unified log under `io.livekit.sdk`, read in Console.app on a Mac with the device
+    /// attached (Action, Include Debug Messages; filter `subsystem:io.livekit.sdk`) while the
+    /// call joins. Evaluated once, at the first call's engine, which is before that call
+    /// logs anything.
+    private static let diagnostics: Void = {
+        guard UserDefaults.standard.bool(forKey: diagnosticsKey) else { return }
+        LiveKitSDK.setLogger(OSLogger(minLevel: .debug, rtc: true))
+    }()
 }
 
 /// Turns `RoomDelegate` callbacks into ``CallEngineEvent`` values.
