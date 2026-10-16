@@ -1,7 +1,7 @@
 {
   "signed_off_by": "v3 manager (Opus 5.5 xhigh), final French review, 2026-10-16",
   "release": "v3.0.2",
-  "commit": "6a17925b93e12a2f7867897f52537b3342920517",
+  "commit": "769413cd364820c015aa487f9faf8ee19990de99",
   "catalogs": [
     {
       "path": "l10n/infoplist.toml",
@@ -9,7 +9,7 @@
     },
     {
       "path": "l10n/ios.toml",
-      "sha256": "1b1d2f2592d232114b2c22ca41104253c1827dabbb41967f6012a7f76952e587"
+      "sha256": "766c38ca8344a4e7feabf09b08edda65965486de62fd36225a0aacd54611788b"
     },
     {
       "path": "l10n/push.toml",
