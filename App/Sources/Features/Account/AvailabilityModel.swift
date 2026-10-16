@@ -155,3 +155,18 @@ final class AvailabilityModel {
 /// being added to the workspace properly. One generic "you are not available" line would
 /// leave the second person with no idea that anything is wrong or what to ask for.
 enum AvailabilityCopy {}
+
+extension AvailabilityCopy {
+    /// ``rowSubtitle(_:)`` with one final full stop, however the workspace's name ends.
+    ///
+    /// ⚠️ A NAME CAN END WITH ITS OWN PERIOD (3.0.2, AP-024). « Plomberie Desrosiers-Lanthier
+    /// inc. » closed the sentence twice (« inc.. »), in either language. The sentence's own
+    /// stop gives way to the name's; an ellipsis at the end of a name is left alone.
+    static func rowSubtitleOnce(_ workspaceName: String) -> String {
+        let sentence = rowSubtitle(workspaceName)
+        guard workspaceName.hasSuffix("."), !workspaceName.hasSuffix(".."), sentence.hasSuffix("..") else {
+            return sentence
+        }
+        return String(sentence.dropLast())
+    }
+}

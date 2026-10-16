@@ -37,6 +37,7 @@ struct SchedulingAvailabilityOverridesSheet: View {
         }
         .sheet(isPresented: addPresented) {
             addSheet
+                .districtSheetBackground()
         }
     }
 

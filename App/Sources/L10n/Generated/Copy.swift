@@ -1353,7 +1353,7 @@ extension InboxCopy {
     internal static var imageUnavailable: String { AppL10n.copyLocale == .frCA ? "Image indisponible" : "Image unavailable" }
 
     /// `inbox.inbox`
-    internal static var inbox: String { AppL10n.copyLocale == .frCA ? "Boîte de réception" : "Inbox" }
+    internal static var inbox: String { AppL10n.copyLocale == .frCA ? "Réception" : "Inbox" }
 
     /// `inbox.keep_typing`
     internal static var keepTyping: String { AppL10n.copyLocale == .frCA ? "Continuez à taper" : "Keep typing" }
@@ -3804,6 +3804,9 @@ extension SchedulingWriteCopy {
     /// `scheduling_write.hours_copy_to_weekdays`
     internal static var hoursCopyToWeekdays: String { AppL10n.copyLocale == .frCA ? "Copier sur tous les jours de semaine" : "Copy to all weekdays" }
 
+    /// `scheduling_write.hours_edit`
+    internal static var hoursEdit: String { AppL10n.copyLocale == .frCA ? "Modifier les heures" : "Edit working hours" }
+
     /// `scheduling_write.hours_never_bookable`
     internal static var hoursNeverBookable: String { AppL10n.copyLocale == .frCA ? "Aucune journée réservable pour l'instant." : "Not bookable on any day yet." }
 
@@ -3928,6 +3931,9 @@ extension SchedulingWriteCopy {
 
     /// `scheduling_write.override_unavailable`
     internal static var overrideUnavailable: String { AppL10n.copyLocale == .frCA ? "Indisponible" : "Unavailable" }
+
+    /// `scheduling_write.overrides_edit`
+    internal static var overridesEdit: String { AppL10n.copyLocale == .frCA ? "Modifier les exceptions" : "Edit date overrides" }
 
     /// `scheduling_write.overrides_empty`
     internal static var overridesEmpty: String { AppL10n.copyLocale == .frCA ? "Aucune exception à venir. Ajoutez-en une pour un congé ou des heures différentes." : "No overrides ahead. Add one for a day off or different hours." }

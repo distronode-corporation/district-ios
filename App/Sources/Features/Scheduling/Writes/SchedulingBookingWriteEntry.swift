@@ -50,12 +50,15 @@ struct SchedulingBookingWriteBar: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(item: $cancelling) { entry in
             SchedulingBookingCancelSheet(model: entry.model) { cancelling = nil }
+                .districtSheetBackground()
         }
         .sheet(item: $rescheduling) { entry in
             SchedulingBookingRescheduleSheet(model: entry.model) { rescheduling = nil }
+                .districtSheetBackground()
         }
         .sheet(item: $reassigning) { entry in
             SchedulingBookingReassignSheet(model: entry.model) { reassigning = nil }
+                .districtSheetBackground()
         }
     }
 
@@ -126,6 +129,7 @@ struct SchedulingBookingCancelButton: View {
         .accessibilityIdentifier(A11yID.SchedulingWriteEntry.bookingCancel)
         .sheet(item: $cancelling) { entry in
             SchedulingBookingCancelSheet(model: entry.model) { cancelling = nil }
+                .districtSheetBackground()
         }
     }
 

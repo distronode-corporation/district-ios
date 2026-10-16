@@ -148,6 +148,7 @@ struct ThreadModerationModifier: ViewModifier {
                     workspaceId: context.workspaceId,
                     target: .conversation(threadKey: context.threadKey, name: context.title)
                 )
+                .districtSheetBackground()
             }
     }
 

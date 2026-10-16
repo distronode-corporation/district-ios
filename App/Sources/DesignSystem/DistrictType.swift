@@ -122,17 +122,14 @@ enum DistrictType {
 
     static let labelSmall = DistrictFont(size: 11, weight: .semibold, style: .caption2)
 
-    /// ⛔ THE SIGNATURE TYPOGRAPHIC MOVE OF THE BRAND, and the most copied string in
-    /// the web codebase: `font-mono text-[10px] uppercase tracking-[0.18em]
-    /// text-muted-foreground`. Used for every section and field label.
-    ///
-    /// ⚠️ UPPERCASING AND TRACKING ARE THE CALLER'S JOB, because neither is part of
-    /// a `Font`. Use ``DistrictEyebrow`` rather than this constant directly, or the
-    /// label renders at 10pt with none of what makes it recognisable.
-    static let eyebrow = DistrictFont(size: 10, weight: .regular, design: .monospaced, style: .caption2)
-
-    /// The web's `tracking-[0.18em]` at the eyebrow's 10pt size.
-    static let eyebrowTracking: CGFloat = 1.8
+    /// ⛔ THE SECTION AND FIELD LABEL, IN SENTENCE CASE (3.0.2). Until 3.0.2 it was the web's
+    /// old micro-label, `font-mono text-[10px] uppercase tracking-[0.18em]`. The design
+    /// system (DESIGN.md) now says never all-caps, never letterspaced, sentence case
+    /// everywhere, with labels in the interface sans; the visual QA logged the tracked mono
+    /// capitals as AP-011 (and at AX5, AP-002). So it is the system face at the caption size
+    /// and the register label's regular weight, in `mutedForeground` (see
+    /// ``DistrictEyebrow``), drawn as written: no uppercasing and no tracking.
+    static let eyebrow = DistrictFont(size: 12, weight: .regular, style: .caption)
 
     /// The large number on a metric card. Big digits need tight tracking or they
     /// look loose.
@@ -157,11 +154,13 @@ enum DistrictType {
     ]
 }
 
-/// The wide-tracked uppercase micro-label the whole product is labelled with.
+/// The section and field label: ``DistrictType/eyebrow`` in `mutedForeground`, drawn
+/// exactly as written (sentence case in both catalogs).
 ///
-/// ⚠️ A VIEW RATHER THAN A FONT CONSTANT, because the uppercasing and the tracking
-/// are two thirds of the effect and neither lives in a `Font`. See
-/// ``DistrictType/eyebrow``.
+/// ⚠️ THE NAME OUTLIVES THE LOOK. It was a wide-tracked uppercase mono label until 3.0.2
+/// (AP-011); the name stays so the call sites and their catalog keys do not move. Drawn as
+/// written, it also wraps between words at an accessibility size, which 3.0.1 (AP-002)
+/// had to special-case for the capitals.
 struct DistrictEyebrow: View {
     let text: String
 
@@ -171,35 +170,9 @@ struct DistrictEyebrow: View {
         .resolve(colorScheme)
     }
 
-    /// ⚠️ TRACKING IS POINTS, SO IT SCALES OR THE LABEL COMES APART. At AX5 the
-    /// glyphs are roughly twice the size while a fixed 1.8pt gap stays put, which
-    /// reads as letters crowding rather than as the wide-tracked label the brand is
-    /// built on. Anchored to `.caption2`, the same style the eyebrow font uses.
-    @ScaledMetric(relativeTo: .caption2) private var tracking: CGFloat = DistrictType.eyebrowTracking
-
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
     var body: some View {
-        // ⛔ AT AN ACCESSIBILITY TEXT SIZE, NO UPPERCASE AND NO TRACKING (3.0.1, AP-002). The
-        // tracked capitals are wider than the words, and at AX5 they broke mid-word in a tile
-        // ("TOTA / L CALL / S"); the text as written wraps between words. ⚠️ Normal sizes keep
-        // the brand's tracked label. See ``DistrictEyebrow/styled(_:accessibilitySize:)``.
-        let accessibility = dynamicTypeSize.isAccessibilitySize
-        Text(Self.styled(text, accessibilitySize: accessibility))
+        Text(text)
             .font(DistrictType.eyebrow)
-            .tracking(accessibility ? 0 : tracking)
             .foregroundStyle(colors.mutedForeground)
-            // ⛔ ANNOUNCED IN ITS ORIGINAL CASE, NOT THE ONE ON SCREEN. The uppercasing
-            // here is typographic — the brand's wide-tracked label — but VoiceOver
-            // treats a short all-caps string as an initialism and spells it: "Reply"
-            // rendered as REPLY is read "R, E, P, L, Y". Passing the unmodified text
-            // as the label keeps the look and the word.
-            .accessibilityLabel(text)
-    }
-
-    /// The eyebrow's text as drawn: upper case at a normal size, as written at an
-    /// accessibility size.
-    static func styled(_ text: String, accessibilitySize: Bool) -> String {
-        accessibilitySize ? text : text.uppercased()
     }
 }

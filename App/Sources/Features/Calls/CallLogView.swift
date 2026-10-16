@@ -63,6 +63,7 @@ private struct CallLogScreen: View {
                 title: CallsCopy.nothingHereYet,
                 message: CallsCopy.inboundOutboundCallsWill
             )
+            .fillsListColumn()
         case let .failed(failure):
             FailureView(failure: failure, onRetry: reload)
         }

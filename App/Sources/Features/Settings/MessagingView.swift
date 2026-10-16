@@ -55,6 +55,7 @@ struct MessagingView: View {
         }
         .sheet(isPresented: sheetPresented) {
             MessagingAccountSheet(model: model)
+                .districtSheetBackground()
         }
     }
 

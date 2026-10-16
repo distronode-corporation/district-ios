@@ -43,7 +43,16 @@ enum AppWire {
     /// A call's length: the server's own `duration` text in English (`1m 5s`), and in French
     /// written from the seconds (« 1 min 5 s »), since the server writes English only.
     static func duration(sent: String, seconds: Int?) -> String {
-        AppL10n.copyLocale == .frCA ? L10nFormat.minutesSeconds(seconds) : sent
+        AppL10n.copyLocale == .frCA ? minutesSeconds(seconds) : sent
+    }
+
+    /// The core's French call length (« 3 min 4 s ») held on one line.
+    ///
+    /// ⚠️ EVERY SPACE A NO-BREAK ONE (3.0.2). The core puts a no-break space between each
+    /// number and its unit but a plain one between the minutes and the seconds, so a narrow
+    /// cell broke « 3 min » from « 4 s ». A length is one value and never wraps.
+    static func minutesSeconds(_ seconds: Int?) -> String {
+        L10nFormat.minutesSeconds(seconds).replacingOccurrences(of: " ", with: "\u{00A0}")
     }
 
     /// A whole number shown on its own: plain digits in English, as every count has always

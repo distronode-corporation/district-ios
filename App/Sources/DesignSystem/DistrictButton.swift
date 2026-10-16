@@ -148,7 +148,10 @@ struct DistrictButtonStyle: ButtonStyle {
             case .primary: colors.districtForeground
             case .secondary: colors.foreground
             case .ghost: colors.mutedForeground
-            case .destructive: colors.destructive
+            // ⚠️ THE CHIP INK, NOT `destructive` (3.0.2): the label sits on its own 10% tint,
+            // where `destructive` itself measured 4.20:1 (dark, on `elevated`) and 4.35:1
+            // (light, on `surface`). See ``DistrictColors/destructiveChipInk``.
+            case .destructive: colors.destructiveChipInk
             }
         }
 

@@ -55,3 +55,23 @@ extension View {
         modifier(DistrictBackgroundModifier())
     }
 }
+
+extension View {
+    /// The Ledger ground under a sheet, not the system's grey.
+    ///
+    /// ⚠️ ON EVERY `.sheet` CONTENT (3.0.2, visual QA AP-020). A sheet's own background is
+    /// the system's grouped grey, which in dark mode sat as a second, unrelated dark behind
+    /// the palette's cards and fields. `presentationBackground` sets the enclosing sheet's
+    /// ground; a Safari sheet is left alone, because it paints its own.
+    func districtSheetBackground() -> some View {
+        modifier(DistrictSheetBackgroundModifier())
+    }
+}
+
+private struct DistrictSheetBackgroundModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content.presentationBackground(DistrictColors.resolve(colorScheme).background)
+    }
+}

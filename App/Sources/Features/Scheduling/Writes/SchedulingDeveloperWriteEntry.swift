@@ -30,6 +30,7 @@ struct SchedulingAPIKeyCreateButton: View {
         .accessibilityIdentifier(A11yID.SchedulingWriteEntry.keyCreate)
         .sheet(item: $creating) { entry in
             SchedulingAPIKeyCreateSheet(model: entry.model)
+                .districtSheetBackground()
         }
     }
 
@@ -90,6 +91,7 @@ struct SchedulingWebhookCreateButton: View {
         .accessibilityIdentifier(A11yID.SchedulingWriteEntry.webhookCreate)
         .sheet(item: $editing) { entry in
             SchedulingWebhookEditorSheet(model: entry.model)
+                .districtSheetBackground()
         }
     }
 
@@ -135,6 +137,7 @@ struct SchedulingWebhookRowActions: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(item: $editing) { entry in
             SchedulingWebhookEditorSheet(model: entry.model)
+                .districtSheetBackground()
         }
     }
 

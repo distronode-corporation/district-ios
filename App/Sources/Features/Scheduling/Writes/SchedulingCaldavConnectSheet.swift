@@ -91,7 +91,7 @@ struct SchedulingCaldavConnectSheet: View {
             Text(SchedulingWriteCopyC.caldavPasswordLabel)
                 .font(DistrictType.labelSmall)
                 .foregroundStyle(colors.mutedForeground)
-            SecureField(SchedulingWriteCopyC.caldavPasswordLabel, text: $model.appPassword)
+            SecureField(SchedulingWriteCopyC.caldavPasswordLabel, text: $model.appPassword, prompt: .noPlaceholder)
                 .textContentType(.password)
                 .disabled(model.busy)
                 .districtField()

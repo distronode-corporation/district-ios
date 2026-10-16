@@ -79,6 +79,7 @@ struct OverviewView: View {
         .task(id: session.epoch) { await reload() }
         .sheet(isPresented: $isPickerPresented) {
             WorkspacePickerSheet(workspaceSession: workspaceSession)
+                .districtSheetBackground()
         }
         // ⛔ A SAFARI SHEET, NOT `openURL`: the page is one this app claims. See ``FinishSetupCard``.
         .sheet(item: $setupHandOff) { handOff in

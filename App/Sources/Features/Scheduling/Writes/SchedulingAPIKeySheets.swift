@@ -48,6 +48,7 @@ struct SchedulingAPIKeyCreateSheet: View {
         }
         .sheet(item: mintedBinding) { minted in
             SchedulingAPIKeyRevealSheet(minted: minted, model: model)
+                .districtSheetBackground()
         }
     }
 

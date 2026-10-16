@@ -66,6 +66,7 @@ struct RoomsLobbyView: View {
         // ``RoomsLobbyModel/record``.
         .sheet(isPresented: recordPresented) {
             MeetingRecordSheet(state: model.record, onClose: model.closeMeeting)
+                .districtSheetBackground()
         }
     }
 

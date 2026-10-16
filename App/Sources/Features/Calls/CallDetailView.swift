@@ -53,6 +53,7 @@ struct CallDetailView: View {
             .toolbar { reportItem }
             .sheet(isPresented: $reporting) {
                 ReportSheet(container: container, workspaceId: workspaceId, target: .call(callId: callId))
+                    .districtSheetBackground()
             }
     }
 

@@ -112,9 +112,11 @@ struct MarketplaceView: View {
         // one whose write is unarmed after a failed irreversible attempt.
         .sheet(item: $openNumber) { selection in
             NumberActionsSheet(model: provisioning, number: selection.number)
+                .districtSheetBackground()
         }
         .sheet(isPresented: confirmationBinding) {
             NumberConfirmationHost(model: provisioning)
+                .districtSheetBackground()
         }
     }
 

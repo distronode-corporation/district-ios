@@ -303,22 +303,22 @@ struct SchedulingBookingsView: View {
         }
     }
 
-    /// ⚠️ BUTTONS RATHER THAN A `Picker`, matching ``MarketplaceView``: this design system
-    /// has no tab component, and inventing one for a single screen is how a second,
-    /// drifting set of primitives starts.
+    /// ⚠️ THE SYSTEM'S SEGMENTED CONTROL (3.0.2, visual QA AP-028), as the Mac's since 3.0.1
+    /// and the Numbers tabs here: filled and outlined buttons read as unrelated actions, not
+    /// as one choice of four. The four labels are short in both languages (« À venir »,
+    /// « Passés », « Annulés », « Tout »), so the control takes the screen's width. The
+    /// selection goes through ``SchedulingBookingsModel/selectView(_:)``.
     private var views: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: DistrictSpacing.tight) {
-                ForEach(SchedulingBookingView.allCases, id: \.self) { option in
-                    Button(option.label) {
-                        Task { await model.selectView(option) }
-                    }
-                    .buttonStyle(DistrictButtonStyle(
-                        variant: model.view == option ? .primary : .secondary
-                    ))
-                }
+        Picker(SchedulingCopy.sectionTitle(.bookings), selection: Binding(
+            get: { model.view },
+            set: { next in Task { await model.selectView(next) } }
+        )) {
+            ForEach(SchedulingBookingView.allCases, id: \.self) { option in
+                Text(option.label).tag(option)
             }
         }
+        .pickerStyle(.segmented)
+        .labelsHidden()
         .accessibilityIdentifier(A11yID.Scheduling.bookingsView)
     }
 

@@ -3475,11 +3475,12 @@ id = { swift = "InboxCopy.imageUnavailable" }
 
 [inbox.inbox]
 en = "Inbox"
-fr = "Boîte de réception"
+fr = "Réception"
 ctx = "label"
 screen = "inbox"
-state = "reviewed"
+state = "draft"
 id = { swift = "InboxCopy.inbox" }
+note = "3.0.2 (visual QA AP-026): the screen's title. « Boîte de réception » truncated to « Boîte de récep… » in the iPad list column; « Réception » is Apple Mail's own French for Inbox and the tab bar's word already."
 
 [inbox.keep_typing]
 en = "Keep typing"
@@ -10043,6 +10044,15 @@ screen = "scheduling.writes.availability"
 state = "reviewed"
 id = { swift = "SchedulingWriteCopy.hoursCopyToWeekdays" }
 
+[scheduling_write.hours_edit]
+en = "Edit working hours"
+fr = "Modifier les heures"
+ctx = "label"
+screen = "scheduling.writes.availability"
+state = "draft"
+id = { swift = "SchedulingWriteCopy.hoursEdit" }
+note = "3.0.2: the button that opens the working-hours editor. A verb, so it no longer reads as a tab beside the section's title."
+
 [scheduling_write.hours_never_bookable]
 en = "Not bookable on any day yet."
 fr = "Aucune journée réservable pour l'instant."
@@ -10379,6 +10389,15 @@ screen = "scheduling.writes.availability"
 tier = "T2"
 state = "reviewed"
 id = { swift = "SchedulingWriteCopy.overrideUnavailable" }
+
+[scheduling_write.overrides_edit]
+en = "Edit date overrides"
+fr = "Modifier les exceptions"
+ctx = "label"
+screen = "scheduling.writes.availability"
+state = "draft"
+id = { swift = "SchedulingWriteCopy.overridesEdit" }
+note = "3.0.2: the button that opens the date-overrides editor. A verb, so it no longer reads as a tab."
 
 [scheduling_write.overrides_empty]
 en = "No overrides ahead. Add one for a day off or different hours."

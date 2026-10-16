@@ -178,11 +178,9 @@ struct SettingsSkeleton: View {
 /// such as the Agent persona. The treatment comes from ``View/districtField()``; see the
 /// ⛔ there.
 ///
-/// ⚠️ THE `prompt:` CARRIES THE SAME STRING AS THE TITLE, DELIBERATELY. The title is
-/// what VoiceOver announces as the field's name and must not move; the prompt is the
-/// only seam that can put the placeholder on ``DistrictColors/mutedForeground``
-/// instead of the platform's grey. Both are `label`, so nothing on screen or in the
-/// accessibility tree reads differently.
+/// ⚠️ THE TITLE IS `label` AND THE PROMPT IS NONE (3.0.2, visual QA AP-021). The title is
+/// what VoiceOver announces as the field's name and must not move; the prompt used to
+/// repeat it as a placeholder, under the same words drawn just above.
 struct SettingsField: View {
     let label: String
     let text: Binding<String>
@@ -207,20 +205,15 @@ struct SettingsField: View {
         }
     }
 
-    /// ⚠️ Hoisted out of the two branches below so the placeholder is written once.
-    private var prompt: Text {
-        Text(label).foregroundStyle(colors.mutedForeground)
-    }
-
     @ViewBuilder
     private var box: some View {
         if multiline {
-            TextField(label, text: text, prompt: prompt, axis: .vertical)
+            TextField(label, text: text, prompt: .noPlaceholder, axis: .vertical)
                 .lineLimit(3 ... 8)
                 .disabled(!enabled)
                 .districtField()
         } else {
-            TextField(label, text: text, prompt: prompt)
+            TextField(label, text: text, prompt: .noPlaceholder)
                 .disabled(!enabled)
                 .districtField()
         }

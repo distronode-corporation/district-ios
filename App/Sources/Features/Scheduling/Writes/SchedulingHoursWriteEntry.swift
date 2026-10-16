@@ -25,14 +25,18 @@ struct SchedulingHoursWriteBar: View {
     @State private var rules: SchedulingWritePresentation<SchedulingAvailabilityRulesModel>?
     @State private var overrides: SchedulingWritePresentation<SchedulingAvailabilityOverridesModel>?
 
+    /// ⚠️ TWO VERBS IN ONE STYLE, NOT TWO TITLES (3.0.2). The buttons carried the sheets'
+    /// titles, « Vos heures de disponibilité » filled beside « Exceptions » outlined, which
+    /// read as a tab bar whose first tab was selected, over cards with the same two names.
+    /// Each now says what it does, and neither looks chosen.
     var body: some View {
         HStack(spacing: DistrictSpacing.tight) {
-            Button(SchedulingWriteCopy.hoursTitle) {
+            Button(SchedulingWriteCopy.hoursEdit) {
                 rules = SchedulingWritePresentation(model: rulesModel())
             }
-            .buttonStyle(.districtPrimary)
+            .buttonStyle(.districtSecondary)
             .accessibilityIdentifier(A11yID.SchedulingWriteEntry.hoursEdit)
-            Button(SchedulingWriteCopy.overridesTitle) {
+            Button(SchedulingWriteCopy.overridesEdit) {
                 overrides = SchedulingWritePresentation(model: overridesModel())
             }
             .buttonStyle(.districtSecondary)
@@ -41,9 +45,11 @@ struct SchedulingHoursWriteBar: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(item: $rules) { entry in
             SchedulingAvailabilityRulesSheet(model: entry.model)
+                .districtSheetBackground()
         }
         .sheet(item: $overrides) { entry in
             SchedulingAvailabilityOverridesSheet(model: entry.model)
+                .districtSheetBackground()
         }
     }
 

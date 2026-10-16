@@ -137,6 +137,21 @@ struct RegularShellView: View {
         // below opens this tenant's data, and on a phone the Overview's header is where the
         // name is; here the Overview is only one of the rows.
         .navigationTitle(workspaceSession.selectedEntry?.name ?? Tab.overview.label)
+        // ⚠️ UP TO TWO LINES, NOT ONE TRUNCATED (3.0.2, visual QA AP-026): « Plomberie
+        // Desrosiers-Lanthier inc. » read « Plomberie Desro… » in the sidebar's narrow bar.
+        // The title above stays the bar's name for VoiceOver; this only draws it.
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(workspaceSession.selectedEntry?.name ?? Tab.overview.label)
+                    .font(.headline)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .accessibilityHidden(true)
+            }
+        }
+        // ⚠️ A SOLID BAR (AP-033): with the default, rows scrolled up under the window's
+        // controls and showed through behind them.
+        .toolbarBackground(.visible, for: .navigationBar)
     }
 
     /// ⚠️ A nil WRITE IS IGNORED: nothing a person does deselects a sidebar row, and the

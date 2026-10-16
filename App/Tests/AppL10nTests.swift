@@ -65,6 +65,40 @@ final class AppL10nTests: XCTestCase {
         XCTAssertEqual(L10nRuntime.withLocale(.en) { AppL10n.copyLocale }, .en)
     }
 
+    // MARK: - Sentences around a name
+
+    /// ⚠️ 3.0.2, AP-024: A WORKSPACE NAME ENDING IN A PERIOD ENDS THE SENTENCE ONCE, in both
+    /// languages; any other name keeps the sentence's own full stop.
+    func testAWorkspaceNameEndingInAPeriodClosesTheSentenceOnce() {
+        let name = "Plomberie Desrosiers-Lanthier inc."
+        XCTAssertEqual(AvailabilityCopy.rowSubtitleOnce(name), "Ring my phone for calls in \(name)")
+        XCTAssertEqual(
+            L10nRuntime.withLocale(.frCA) { AvailabilityCopy.rowSubtitleOnce(name) },
+            "Faire sonner mon téléphone pour les appels de l'espace \(name)"
+        )
+        XCTAssertEqual(AvailabilityCopy.rowSubtitleOnce("Acme"), "Ring my phone for calls in Acme.")
+        XCTAssertEqual(AvailabilityCopy.rowSubtitleOnce("Acme..."), "Ring my phone for calls in Acme....")
+    }
+
+    /// ⚠️ ONE ELLIPSIS CHARACTER IN FRENCH, ATTACHED TO ITS WORD (3.0.2): « Sonnerie… », never
+    /// « Sonnerie... » and never with a space before it. This keeps every French string so.
+    func testFrenchUsesTheEllipsisCharacterAttachedToItsWord() throws {
+        let catalog = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent() // App/Tests
+            .deletingLastPathComponent() // App
+            .deletingLastPathComponent() // the checkout
+            .appendingPathComponent("l10n/ios.toml")
+        let french = try CatalogScan.entries(of: catalog).flatMap { entry in entry.french.map { (entry.key, $0) } }
+        XCTAssertTrue(french.contains { $0.1 == "Sonnerie\u{2026}" }, "the ring status is the one this guards")
+        for (key, text) in french {
+            XCTAssertFalse(text.contains("..."), "\(key): three full stops, not U+2026")
+            XCTAssertFalse(
+                text.contains(" \u{2026}") || text.contains("\u{00A0}\u{2026}"),
+                "\(key): a space before U+2026"
+            )
+        }
+    }
+
     // MARK: - The catalog reader
 
     func testTheCatalogReaderDecodesEscapes() {

@@ -13,11 +13,14 @@ final class AccessibilitySizeLayoutTests: XCTestCase {
         return try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
     }
 
-    /// ⛔ AP-002: AT AN ACCESSIBILITY SIZE THE EYEBROW IS THE TEXT AS WRITTEN, so it wraps
-    /// between words; a normal size keeps the brand's capitals.
-    func test_AX_01_theEyebrowDropsItsCapitalsAtAccessibilitySizes() {
-        XCTAssertEqual(DistrictEyebrow.styled("Total calls routed", accessibilitySize: false), "TOTAL CALLS ROUTED")
-        XCTAssertEqual(DistrictEyebrow.styled("Total calls routed", accessibilitySize: true), "Total calls routed")
+    /// ⛔ AP-002, AND SINCE 3.0.2 AT EVERY SIZE (AP-011): THE EYEBROW IS THE TEXT AS WRITTEN,
+    /// with no capitals and no tracking, so it wraps between words.
+    func test_AX_01_theEyebrowIsTheTextAsWritten() throws {
+        let code = try source("DesignSystem/DistrictType.swift")
+        let eyebrow = try XCTUnwrap(code.components(separatedBy: "struct DistrictEyebrow").last)
+        XCTAssertFalse(eyebrow.contains(".uppercased()"))
+        XCTAssertFalse(eyebrow.contains(".tracking("))
+        XCTAssertTrue(eyebrow.contains("Text(text)"))
     }
 
     /// ⛔ AP-002: THE METRIC GRIDS ARE BUILT FROM ``DistrictMetricRow``, which stacks at an

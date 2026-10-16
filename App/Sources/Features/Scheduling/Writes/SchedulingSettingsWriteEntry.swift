@@ -37,6 +37,7 @@ struct SchedulingBrandingEditButton: View {
         .accessibilityIdentifier(A11yID.SchedulingWriteEntry.brandingEdit)
         .sheet(item: $editing) { entry in
             SchedulingBrandingSheet(model: entry.model) { editing = nil }
+                .districtSheetBackground()
         }
     }
 
@@ -75,6 +76,7 @@ struct SchedulingAutomationEditButton: View {
         .accessibilityIdentifier(A11yID.SchedulingWriteEntry.automationEdit)
         .sheet(item: $editing) { entry in
             SchedulingAutomationSheet(model: entry.model) { editing = nil }
+                .districtSheetBackground()
         }
     }
 
@@ -106,6 +108,7 @@ struct SchedulingProfileEditButton: View {
         .accessibilityIdentifier(A11yID.SchedulingWriteEntry.profileEdit)
         .sheet(item: $editing) { entry in
             SchedulingProfileSheet(model: entry.model) { editing = nil }
+                .districtSheetBackground()
         }
     }
 
@@ -141,6 +144,7 @@ struct SchedulingNotificationsEditButton: View {
         .accessibilityIdentifier(A11yID.SchedulingWriteEntry.notificationsEdit)
         .sheet(item: $editing) { entry in
             SchedulingNotificationsSheet(model: entry.model) { editing = nil }
+                .districtSheetBackground()
         }
     }
 

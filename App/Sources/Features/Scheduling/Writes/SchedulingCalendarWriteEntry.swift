@@ -32,6 +32,7 @@ struct SchedulingCaldavConnectButton: View {
         .accessibilityIdentifier(A11yID.SchedulingWriteEntry.caldavConnect)
         .sheet(item: $connecting) { entry in
             SchedulingCaldavConnectSheet(model: entry.model)
+                .districtSheetBackground()
         }
     }
 
@@ -83,6 +84,7 @@ struct SchedulingCalendarRowActions: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(item: $choosing) { entry in
             SchedulingCalendarPickerSheet(model: entry.model)
+                .districtSheetBackground()
         }
     }
 

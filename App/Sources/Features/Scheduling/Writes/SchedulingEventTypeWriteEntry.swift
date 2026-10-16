@@ -25,6 +25,7 @@ struct SchedulingEventTypeCreateButton: View {
         .accessibilityIdentifier(A11yID.SchedulingWriteEntry.eventTypeCreate)
         .sheet(item: $editing) { entry in
             SchedulingEventTypeEditorSheet(model: entry.model)
+                .districtSheetBackground()
         }
     }
 
@@ -91,15 +92,19 @@ struct SchedulingEventTypeWriteBar: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(item: $editing) { entry in
             SchedulingEventTypeEditorSheet(model: entry.model)
+                .districtSheetBackground()
         }
         .sheet(item: $actions) { entry in
             SchedulingEventTypeActionsSheet(model: entry.model)
+                .districtSheetBackground()
         }
         .sheet(item: $hosts) { entry in
             SchedulingEventTypeHostsSheet(model: entry.model)
+                .districtSheetBackground()
         }
         .sheet(item: $questions) { entry in
             SchedulingEventTypeQuestionsSheet(model: entry.model)
+                .districtSheetBackground()
         }
     }
 

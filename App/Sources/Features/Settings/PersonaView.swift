@@ -68,6 +68,7 @@ struct PersonaView: View {
         }
         .sheet(isPresented: $previewing) {
             preview
+                .districtSheetBackground()
         }
     }
 

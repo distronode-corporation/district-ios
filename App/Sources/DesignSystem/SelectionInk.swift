@@ -57,7 +57,7 @@ enum SelectionInk {
         increasedContrast: Bool,
         prominence: BackgroundProminence
     ) -> Color {
-        onSelection(prominence) ? colors.districtForeground : tone.ink(colors, increasedContrast: increasedContrast)
+        onSelection(prominence) ? colors.districtForeground : tone.chipInk(colors, increasedContrast: increasedContrast)
     }
 
     /// A row's text: `color` off the selection, the accent's text colour on it.

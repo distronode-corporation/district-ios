@@ -207,7 +207,7 @@ struct ComposerBar: View {
         if model.requiresSubject {
             VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
                 DistrictEyebrow(text: InboxCopy.subject)
-                TextField(InboxCopy.subject, text: subject)
+                TextField(InboxCopy.subject, text: subject, prompt: .noPlaceholder)
                     .disabled(content.sending)
                     .districtField()
             }
