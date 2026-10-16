@@ -74,6 +74,7 @@ built from history before publication, so they have no tags in this repository.
     the contact dossier heads the keys the vocabulary lists in the portal's words
     (« Enjeux CRM déduits », not « Core pain points »). A test holds every French ellipsis
     to U+2026 attached to its word (« Sonnerie… » already was).
+- MARKETING_VERSION 3.0.2.
 
 - A ring stops on this device when it ends elsewhere. The server now sends a
   `call_ring_cancelled` APNs background push (on the alert token, never VoIP) whenever a ring
@@ -281,6 +282,21 @@ built from history before publication, so they have no tags in this repository.
   and the `fr-CA.lproj` strings, so `FR_COMPLETE` is true. French stays switched off: the
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
+
+## [3.0.2] - 2026-10-16
+
+Fixes for answered calls, and clearer screens.
+
+- Answering a call no longer waits for the speaker to start, which could stop the call from connecting.
+- Coloured badges are easier to read, with more contrast between each label and its background.
+- Section and field labels are in sentence case, without capitals or letter spacing.
+- Sheets use the app's own background instead of grey, and text fields have a clear edge and no longer repeat their label inside the box.
+- Empty Calls, Contacts and Inbox lists fill the screen.
+- On iPad, a long workspace name shows on up to two lines in the sidebar.
+- The Desk's status filters wrap onto a second line instead of being cut off at the edge of the screen.
+- Bookings switches between its views with one segmented control instead of separate buttons.
+- Working hours: the two edit buttons say what they do and no longer look like tabs.
+- In French, a call length never breaks across two lines, the Inbox is titled Réception as on its tab, a number in use reads Actif, and a contact's research headings are in French.
 
 ## [3.0.1] - 2026-10-15
 
