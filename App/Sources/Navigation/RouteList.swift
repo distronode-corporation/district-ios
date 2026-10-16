@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// A `List` whose rows push routes, and which takes a selection only when a layout gives
 /// it one.
@@ -51,6 +52,13 @@ extension View {
     /// white block on the `#e8edee` page. The system's own separator grey is not a palette
     /// colour, so it takes the tint. Its leading end is the text column's
     /// (``DistrictListRow``), past the avatar, as an iOS list draws it.
+    ///
+    /// ⛔ THE TINT IS ONE DYNAMIC COLOUR, NEVER A COLOUR PICKED FROM `colorScheme` (3.0.2
+    /// walk 3). `listRowSeparatorTint` keeps the colour it was first given across a live
+    /// light/dark switch, so a scheme-resolved tint left `#c9d6d8` on the dark rows and
+    /// `#24393d` on the light ones until the tab was rebuilt. A `UIColor` provider is
+    /// re-resolved by the system for the cell's own traits, so the hairline follows the
+    /// switch.
     func routeListRow(selects: Bool) -> some View {
         modifier(RouteListRowGround(selects: selects))
     }
@@ -65,14 +73,26 @@ struct RouteListRowGround: ViewModifier {
         content
             .listRowInsets(EdgeInsets())
             .listRowSeparator(.visible)
-            .listRowSeparatorTint(Self.separator(colorScheme))
+            .listRowSeparatorTint(Self.separator)
             .listRowBackground(Self.ground(colorScheme, selects: selects))
     }
 
     /// The hairline between rows: the palette's calm border, in both schemes and whether
-    /// the list selects or not.
-    static func separator(_ scheme: ColorScheme) -> Color {
-        DistrictColors.resolve(scheme).border
+    /// the list selects or not, resolved per trait collection (``separatorInk``).
+    nonisolated static var separator: Color {
+        Color(uiColor: separatorInk)
+    }
+
+    /// The border token for whichever interface style the cell is drawn in. An unspecified
+    /// style is light, as ``DistrictColors/resolve(_:)`` treats any scheme that is not dark.
+    ///
+    /// ⚠️ NONISOLATED SO THE PROVIDER IS. UIKit calls it whenever it resolves the colour; a
+    /// closure that inherited the modifier's main-actor isolation would carry Swift 6's
+    /// runtime isolation check into that call.
+    nonisolated static var separatorInk: UIColor {
+        UIColor { traits in
+            UIColor(DistrictColors.resolve(traits.userInterfaceStyle == .dark ? .dark : .light).border)
+        }
     }
 
     /// The row's ground: the card on the phone, the system's own cell (nil) in a list that
