@@ -27,7 +27,7 @@ import Observation
 /// nested type whose name matches an associated-type requirement of a protocol the
 /// enclosing type conforms to becomes the WITNESS for it, and the error surfaces
 /// somewhere else entirely.
-enum MarketplaceTab {
+enum MarketplaceTab: CaseIterable {
     case owned
     case search
     case registrations

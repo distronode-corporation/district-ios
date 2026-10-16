@@ -74,7 +74,7 @@ final class A11yImageTests: XCTestCase {
             count += try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
                 .components(separatedBy: Self.constructor).count - 1
         }
-        // ⚠️ TWELVE. The tenth is the chevron on
+        // ⚠️ THIRTEEN. The tenth is the chevron on
         // ``SchedulingHubView``'s section rows and the eleventh is the radio glyph on
         // ``SchedulingCalendarPickerSheet``'s destination rows; both carry
         // `.accessibilityHidden(true)`, because each sits inside a control VoiceOver
@@ -82,14 +82,15 @@ final class A11yImageTests: XCTestCase {
         // `.isSelected` for the second — and the symbol on top of that is
         // "chevron dot right" or "largecircle fill circle" read beside every row.
         // The twelfth is ``DetailPlaceholder``'s symbol, hidden because its title says the
-        // same thing (3.0).
+        // same thing (3.0). The thirteenth is the chevron on ``MarketplaceView``'s tab menu at an
+        // accessibility size, hidden because the menu itself is announced with the tab (3.0.1).
         // ⚠️ `SchedulingEmptyState`'s glyph is NOT among these — `EmptyStateView` takes a
         // symbol NAME and constructs the `Image` itself, so it is counted at that one
         // definition rather than per caller.
         // Comments do not count: both scans read comment-stripped source.
         XCTAssertEqual(
-            count, 12,
-            "the app has \(count) SF Symbols, not 12: update this number in the same "
+            count, 13,
+            "the app has \(count) SF Symbols, not 13: update this number in the same "
                 + "commit that adds or removes one, having decided how it is announced"
         )
     }

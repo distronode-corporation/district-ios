@@ -6,8 +6,8 @@ import Foundation
 import XCTest
 
 /// What the W4 French pass changed: a French screen shows the vocabulary's labels, the
-/// core's dates and numbers, never an English wire word or an ISO instant, while English
-/// shows what it always has.
+/// core's dates and numbers, never an English wire word or an ISO instant. Since 3.0.1 an
+/// English screen shows the vocabulary's English label for every value it lists.
 final class FrenchWireTextTests: XCTestCase {
     private static let nbsp = "\u{00A0}"
 
@@ -17,15 +17,19 @@ final class FrenchWireTextTests: XCTestCase {
 
     // MARK: - Wire labels
 
-    func testEnglishShowsTheWireValueAsSentAndFrenchTheVocabularysLabel() {
-        XCTAssertEqual(AppWire.label(.callStatus, "completed"), "completed")
+    /// ⛔ 3.0.1: ENGLISH IS THE VOCABULARY'S LABEL TOO. The Overview showed `completed` beside
+    /// "Transferred" while English drew the value as sent.
+    func testBothLanguagesShowTheVocabularysLabelNeverTheWireValue() {
+        XCTAssertEqual(AppWire.label(.callStatus, "completed"), "Completed")
+        XCTAssertEqual(AppWire.label(.messageDeliveryStatus, "delivered"), "Delivered")
+        XCTAssertEqual(AppWire.label(.numberStatus, "active"), "Active")
         XCTAssertEqual(french { AppWire.label(.callStatus, "completed") }, "Terminé")
         XCTAssertEqual(french { AppWire.label(.messageDeliveryStatus, "delivered") }, "Livré")
         XCTAssertEqual(french { AppWire.label(.numberStatus, "active") }, "Actif")
     }
 
     /// ⛔ AN UNLISTED VALUE IS NEVER SHOWN AS ITSELF IN FRENCH: it takes the category's
-    /// fallback, or « Autre ».
+    /// fallback, or « Autre ». English keeps it as sent (`WireLabel.knownLabel` is nil).
     func testAnUnlistedValueReadsAsTheFallbackInFrench() {
         XCTAssertEqual(AppWire.label(.callStatus, "machine"), "machine")
         XCTAssertEqual(french { AppWire.label(.callStatus, "machine") }, "Autre")
@@ -35,7 +39,7 @@ final class FrenchWireTextTests: XCTestCase {
     func testAnAbsentOrBlankValueHasNoLabel() {
         XCTAssertNil(french { AppWire.label(.sentiment, ifAny: nil) })
         XCTAssertNil(french { AppWire.label(.sentiment, ifAny: "  ") })
-        XCTAssertEqual(AppWire.label(.sentiment, ifAny: "positive"), "positive")
+        XCTAssertEqual(AppWire.label(.sentiment, ifAny: "positive"), "Positive")
     }
 
     func testACallLengthIsTheServersInEnglishAndWrittenFromTheSecondsInFrench() {

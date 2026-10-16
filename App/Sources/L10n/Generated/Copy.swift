@@ -1255,6 +1255,9 @@ extension InCallCopy {
 }
 
 extension InboxCopy {
+    /// `inbox.attach_file`
+    internal static var attachFile: String { AppL10n.copyLocale == .frCA ? "Joindre un fichier" : "Attach file" }
+
     /// `inbox.attach_image`
     internal static var attachImage: String { AppL10n.copyLocale == .frCA ? "Joindre une image" : "Attach image" }
 
@@ -2903,6 +2906,9 @@ extension SchedulingCopy {
     /// `scheduling.hand_off_failed`
     internal static var handOffFailed: String { AppL10n.copyLocale == .frCA ? "Impossible d'ouvrir la page. Réessayez." : "The website could not be opened. Try again." }
 
+    /// `scheduling.hand_off_no_callback`
+    internal static var handOffNoCallback: String { AppL10n.copyLocale == .frCA ? "L'ouverture de la page a pris trop de temps. Réessayez." : "Opening the page took too long. Try again." }
+
     /// `scheduling.host_archived`
     internal static func hostArchived(_ role: String) -> String {
         AppL10n.copyLocale == .frCA ? "\(role) · archivé" : "\(role) · archived"
@@ -3175,7 +3181,7 @@ extension SchedulingCopy {
     internal static var sectionsEyebrow: String { AppL10n.copyLocale == .frCA ? "Gérer" : "Manage" }
 
     /// `scheduling.sections_footnote`
-    internal static var sectionsFootnote: String { AppL10n.copyLocale == .frCA ? "Ces sections sont en lecture seule pour l'instant. Tout ce qui modifie une page de réservation s'ouvre hors de l'app." : "These sections are read-only for now. Anything that changes a booking page opens in a browser." }
+    internal static var sectionsFootnote: String { AppL10n.copyLocale == .frCA ? "Ce que ces sections ne couvrent pas s'ouvre hors de l'application." : "Anything these sections do not cover opens in a browser." }
 
     /// `scheduling.set`
     internal static var set: String { AppL10n.copyLocale == .frCA ? "Défini" : "Set" }
@@ -5427,6 +5433,45 @@ extension SupportCopy {
 
     /// `support.sla`
     internal static var sla: String { AppL10n.copyLocale == .frCA ? "Nous répondons dans un délai d'un jour ouvrable." : "We reply within one business day." }
+
+    /// `support.status_canceled`
+    internal static var statusCanceled: String { AppL10n.copyLocale == .frCA ? "Annulée" : "Canceled" }
+
+    /// `support.status_closed`
+    internal static var statusClosed: String { AppL10n.copyLocale == .frCA ? "Fermée" : "Closed" }
+
+    /// `support.status_declined`
+    internal static var statusDeclined: String { AppL10n.copyLocale == .frCA ? "Refusée" : "Declined" }
+
+    /// `support.status_done`
+    internal static var statusDone: String { AppL10n.copyLocale == .frCA ? "Terminée" : "Done" }
+
+    /// `support.status_escalated`
+    internal static var statusEscalated: String { AppL10n.copyLocale == .frCA ? "Transférée" : "Escalated" }
+
+    /// `support.status_in_progress`
+    internal static var statusInProgress: String { AppL10n.copyLocale == .frCA ? "En cours" : "In progress" }
+
+    /// `support.status_open`
+    internal static var statusOpen: String { AppL10n.copyLocale == .frCA ? "Ouverte" : "Open" }
+
+    /// `support.status_pending`
+    internal static var statusPending: String { AppL10n.copyLocale == .frCA ? "En attente" : "Pending" }
+
+    /// `support.status_received`
+    internal static var statusReceived: String { AppL10n.copyLocale == .frCA ? "Reçue" : "Received" }
+
+    /// `support.status_resolved`
+    internal static var statusResolved: String { AppL10n.copyLocale == .frCA ? "Réglée" : "Resolved" }
+
+    /// `support.status_unknown`
+    internal static var statusUnknown: String { AppL10n.copyLocale == .frCA ? "État inconnu" : "Status unknown" }
+
+    /// `support.status_waiting_for_customer`
+    internal static var statusWaitingForCustomer: String { AppL10n.copyLocale == .frCA ? "En attente de votre réponse" : "Waiting for your reply" }
+
+    /// `support.status_waiting_for_support`
+    internal static var statusWaitingForSupport: String { AppL10n.copyLocale == .frCA ? "En attente du soutien" : "Waiting for support" }
 
     /// `support.subtitle`
     internal static var subtitle: String { AppL10n.copyLocale == .frCA ? "Les demandes que vous avez soumises à l'équipe de Distronode." : "Requests you have raised with the Distronode team." }

@@ -334,16 +334,17 @@ struct DeskTicketRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: DistrictSpacing.row) {
             VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
+                // ⛔ THE ACCENT'S TEXT COLOUR ON A SELECTED ROW (``SelectionInk``).
                 Text(ticket.displayReference)
                     .font(DistrictType.caption)
-                    .foregroundStyle(colors.mutedForeground)
+                    .rowInk(colors.mutedForeground, .secondary)
                 Text(ticket.subject)
                     .font(DistrictType.titleSmall)
-                    .foregroundStyle(colors.foreground)
+                    .rowInk(colors.foreground, .primary)
                     .lineLimit(2)
                 Text(DeskTicketRow.requesterLine(ticket))
                     .font(DistrictType.caption)
-                    .foregroundStyle(colors.mutedForeground)
+                    .rowInk(colors.mutedForeground, .secondary)
                     .lineLimit(1)
             }
             Spacer(minLength: DistrictSpacing.tight)
@@ -352,7 +353,7 @@ struct DeskTicketRow: View {
                 if ticket.fromCall {
                     Text(DeskCopy.fromCall)
                         .font(DistrictType.caption)
-                        .foregroundStyle(colors.mutedForeground)
+                        .rowInk(colors.mutedForeground, .secondary)
                 }
             }
         }
@@ -377,6 +378,8 @@ struct DeskStatusBadge: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    /// ⛔ THE SELECTED-ROW SWITCH, as ``DistrictBadge`` takes it (``SelectionInk``).
+    @Environment(\.backgroundProminence) private var prominence
 
     private var colors: DistrictColors {
         .resolve(colorScheme)
@@ -387,12 +390,18 @@ struct DeskStatusBadge: View {
         let increased = colorSchemeContrast == .increased
         return Text(DeskView.label(forWire: status))
             .font(DistrictType.label)
-            .foregroundStyle(tone.ink(colors, increasedContrast: increased))
+            .foregroundStyle(SelectionInk.chipInk(tone, colors, increasedContrast: increased, prominence: prominence))
             .padding(.horizontal, DistrictSpacing.tight)
             .padding(.vertical, DistrictSpacing.hairline)
             .background(
-                tone.fill(colors, increasedContrast: increased),
+                SelectionInk.chipFill(tone, colors, increasedContrast: increased, prominence: prominence),
                 in: RoundedRectangle(cornerRadius: DistrictRadius.badge)
             )
+            .overlay {
+                if let outline = SelectionInk.chipOutline(colors, prominence) {
+                    RoundedRectangle(cornerRadius: DistrictRadius.badge)
+                        .strokeBorder(outline, lineWidth: 1)
+                }
+            }
     }
 }

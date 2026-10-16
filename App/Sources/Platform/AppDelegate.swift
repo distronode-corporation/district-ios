@@ -1,3 +1,4 @@
+import DistrictModel
 import Foundation
 import PushKit
 import UIKit
@@ -47,6 +48,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     private var voipRegistry: PKPushRegistry?
 
     private weak var registrar: PushRegistrar?
+
+    /// The one ``IncomingCallModel``, for a ring cancel. ⚠️ Weak for the reason
+    /// ``registrar`` is: `DistrictApp` owns it. See ``adopt(incoming:)``.
+    private weak var incoming: IncomingCallModel?
 
     /// Whether ``adopt(registrar:)`` has run and the reference is still alive.
     ///
@@ -148,19 +153,25 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     /// ONE WHERE THERE IS NOTHING TO DO. iOS measures an app that does not, and the
     /// penalty is quiet: it is woken for fewer of the pushes it is sent afterwards,
     /// so the symptom is a background refresh that gradually stops working rather
-    /// than an error anybody can see. There are exactly two exits below and each
+    /// than an error anybody can see. There are exactly three exits below and each
     /// calls it once.
     ///
-    /// ⛔ THE WORK IS ONE UNREAD-COUNT READ AND MUST STAY THAT SIZE. The budget is
+    /// ⛔ A RING CANCEL (`call_ring_cancelled`, 3.0.1) IS THE ONE PAYLOAD READ, AND IT IS
+    /// READ BEFORE THE REGISTRAR GUARD. A ring is answerable while the session is still
+    /// being checked, before any registrar exists (see ``adopt(incoming:)``), so the
+    /// cancel cannot wait for one. Its work is local and short: end the CallKit ring
+    /// and remove the ring's alert, no request. See ``RingCancel``.
+    ///
+    /// ⛔ EVERY OTHER PUSH IS ONE UNREAD-COUNT READ AND MUST STAY THAT SIZE. The budget is
     /// around thirty seconds and the app is suspended at the end of it; the ⛔ on
     /// ``PushRegistrar/handleSilentPush()`` lists what may not be added.
     ///
-    /// ⛔ `userInfo` IS DELIBERATELY NOT READ. The payload carries ids only, by the
-    /// server's own decision, and there is nothing in
-    /// it this handler needs: the answer is the same for every silent push. Leaving
-    /// it alone also keeps a non-`Sendable` `[AnyHashable: Any]` out of the closure
-    /// below, which is the shape ``NotificationPresenter`` has to flatten before it
-    /// can hop. A TAP is a different path and already lands there.
+    /// ⚠️ `userInfo` IS PARSED HERE, OUTSIDE THE `Task`. The payload carries ids only,
+    /// by the server's own decision, and ``RingCancel/parse(userInfo:)`` flattens it to
+    /// a `Sendable` value first, so the non-`Sendable` `[AnyHashable: Any]` never enters
+    /// the closures below, which is the shape ``NotificationPresenter`` keeps too. Any
+    /// other payload is still not read: the badge answer is the same for every one. A
+    /// TAP is a different path and already lands there.
     ///
     /// ⚠️ ISOLATION, WHICH IS THE LINE MOST LIKELY TO BE WRONG HERE.
     /// `UIApplicationDelegate` is `@MainActor` in the SDK, which is why every method
@@ -178,6 +189,21 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         didReceiveRemoteNotification userInfo: [AnyHashable: Any],
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) {
+        if let cancel = RingCancel.parse(userInfo: userInfo) {
+            nonisolated(unsafe) let finish = completionHandler
+            let model = incoming
+            Task { @MainActor in
+                let outcome = await model?.ringCancelled(cancel) ?? .notRingingHere
+                // ⛔ THE CALL THIS DEVICE ANSWERED IS NOT TOUCHED AT ALL, its alert included.
+                guard outcome != .answeredHere else {
+                    finish(.noData)
+                    return
+                }
+                let removed = await DeliveredRingAlerts.remove(for: cancel)
+                finish(outcome == .notRingingHere && removed == 0 ? .noData : .newData)
+            }
+            return
+        }
         // ⚠️ NO REGISTRAR MEANS NO SIGNED-IN SESSION IN THIS PROCESS. It attaches at
         // the sign-in (``PushRegistrar/enableAfterSignIn()``), so its absence is the
         // cold-launch and signed-out case: there is nothing to read and nothing to
@@ -219,6 +245,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     /// model attaches as early as there is a view, not as late as there is a
     /// session.
     func adopt(incoming: IncomingCallModel) {
+        self.incoming = incoming
         voip.adopt(incoming: incoming)
     }
 }

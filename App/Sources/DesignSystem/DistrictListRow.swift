@@ -112,13 +112,14 @@ struct DistrictListRow<Leading: View, Trailing: View>: View {
                 // truncating to a line at the accessibility sizes.
                 Text(title)
                     .font(DistrictType.titleSmall)
-                    .foregroundStyle(colors.foreground)
+                    // ⛔ THE ACCENT'S TEXT COLOUR ON A SELECTED ROW (``SelectionInk``).
+                    .rowInk(colors.foreground, .primary)
                     .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                     .truncationMode(.tail)
                 if let subtitle {
                     Text(subtitle)
                         .font(DistrictType.caption)
-                        .foregroundStyle(colors.mutedForeground)
+                        .rowInk(colors.mutedForeground, .secondary)
                         .lineLimit(dynamicTypeSize.isAccessibilitySize || wrapsSubtitle ? nil : 1)
                         .truncationMode(.tail)
                         .fixedSize(horizontal: false, vertical: wrapsSubtitle)
@@ -228,6 +229,15 @@ struct DistrictAvatar: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    /// ⚠️ AND THE SAME SELECTED-ROW SWITCH (``SelectionInk``).
+    @Environment(\.backgroundProminence) private var prominence
+
+    /// ⛔ THE CIRCLE GROWS WITH ITS INITIALS (3.0.1, AP-013). A fixed 36pt circle held the
+    /// initials at their AX5 size as "…". Anchored to `.caption`, the style
+    /// ``DistrictType/label`` scales with, so the two grow together; at an accessibility size
+    /// ``DistrictListRow`` stacks the avatar above the text, so the larger circle costs no
+    /// width.
+    @ScaledMetric(relativeTo: .caption) private var side: CGFloat = 36
 
     private var colors: DistrictColors {
         .resolve(colorScheme)
@@ -240,12 +250,22 @@ struct DistrictAvatar: View {
         // contrast.
         let increased = colorSchemeContrast == .increased
         return Circle()
-            .fill(tone.fill(colors, increasedContrast: increased))
-            .frame(width: 36, height: 36)
+            .fill(SelectionInk.chipFill(tone, colors, increasedContrast: increased, prominence: prominence))
+            .overlay {
+                if let outline = SelectionInk.chipOutline(colors, prominence) {
+                    Circle().strokeBorder(outline, lineWidth: 1)
+                }
+            }
+            .frame(width: side, height: side)
             .overlay {
                 Text(initials)
                     .font(DistrictType.label)
-                    .foregroundStyle(tone.ink(colors, increasedContrast: increased))
+                    .foregroundStyle(SelectionInk.chipInk(
+                        tone,
+                        colors,
+                        increasedContrast: increased,
+                        prominence: prominence
+                    ))
             }
     }
 

@@ -3273,6 +3273,15 @@ state = "reviewed"
 id = { swift = "InCallCopy.wordRingTimedOut" }
 note = "Follows 'Call ended · '."
 
+[inbox.attach_file]
+en = "Attach file"
+fr = "Joindre un fichier"
+ctx = "button"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.attachFile" }
+note = "3.0.1: the composer's file control, beside the photo one; opens the Files picker for an image saved as a file. The same words as District AI for Mac."
+
 [inbox.attach_image]
 en = "Attach image"
 fr = "Joindre une image"
@@ -7449,6 +7458,16 @@ state = "reviewed"
 id = { swift = "SchedulingCopy.handOffFailed" }
 note = "`invalid_nonce`: the hand-off was refused and pressing again starts a new one."
 
+[scheduling.hand_off_no_callback]
+en = "Opening the page took too long. Try again."
+fr = "L'ouverture de la page a pris trop de temps. Réessayez."
+ctx = "error"
+screen = "scheduling"
+tier = "T2"
+state = "reviewed"
+id = { swift = "SchedulingCopy.handOffNoCallback" }
+note = "3.0.1 (S33): the browser never handed back to the app within 30 s, so nothing was minted (there is no unbound fallback any more). Pressing again starts a new hand-off. The same words as District AI for Mac 3.0.1."
+
 [scheduling.host_archived]
 en = "{role} · archived"
 fr = "{role} · archivé"
@@ -8128,13 +8147,13 @@ id = { swift = "SchedulingCopy.sectionsEyebrow" }
 note = "⚠️ THE EYEBROW OVER THE SECTION LIST. \"Manage\" rather than \"Sections\", because the list is the point of the screen and its own noun would describe the furniture."
 
 [scheduling.sections_footnote]
-en = "These sections are read-only for now. Anything that changes a booking page opens in a browser."
-fr = "Ces sections sont en lecture seule pour l'instant. Tout ce qui modifie une page de réservation s'ouvre hors de l'app."
+en = "Anything these sections do not cover opens in a browser."
+fr = "Ce que ces sections ne couvrent pas s'ouvre hors de l'application."
 ctx = "body"
 screen = "scheduling"
 state = "reviewed"
 id = { swift = "SchedulingCopy.sectionsFootnote" }
-note = "⛔ IT SAYS WHY THERE IS STILL A BUTTON OUT OF THE APP, AND IT MUST NOT NAME THE WEBSITE. App Store Review Guideline 3.1.1 covers steering toward an external surface as well as the purchase itself, which is also why ``FailureText``'s 402 sentence names no domain. \"In a browser\" is a capability, not a destination."
+note = "⚠️ 3.0.1: NO LONGER \"READ-ONLY FOR NOW\". The sections write (event types, hours, bookings, calendars, team, developer keys), so only what they do not cover leaves the app. ⛔ IT SAYS WHY THERE IS STILL A BUTTON OUT OF THE APP, AND IT MUST NOT NAME THE WEBSITE. App Store Review Guideline 3.1.1 covers steering toward an external surface as well as the purchase itself, which is also why ``FailureText``'s 402 sentence names no domain. \"In a browser\" is a capability, not a destination."
 
 [scheduling.set]
 en = "Set"
@@ -14134,7 +14153,7 @@ screen = "support"
 args = { status_name = "str" }
 state = "reviewed"
 id = { swift = "SupportCopy.closed(_:)" }
-note = "⚠️ THE SERVER'S OWN `statusName` IS INTERPOLATED because the live desk workflow is localised and printing \"Closed\" would put English over a status Atlassian spells otherwise."
+note = "⚠️ {status_name} IS `SupportStatusLabel`'S LABEL OF THE STATUS THE CLOSE ANSWERED (3.0.1), never the desk's raw word: the live workflow is localised, and a status this build does not know reads as its category's label."
 
 [support.closing]
 en = "Closing…"
@@ -14412,6 +14431,116 @@ screen = "support"
 state = "reviewed"
 id = { swift = "SupportCopy.sla" }
 note = "⛔ THE ONLY RESPONSE-TIME CLAIM THIS PRODUCT MAKES, WORD FOR WORD. It is the same sentence the public `/support` pages, the reply emails and the web dashboard carry, and it is a commitment rather than a statistic: no percentile, no \"average\", no measured number. Anything more specific would need evidence we do not publish. Reuse this constant, never retype it."
+
+[support.status_canceled]
+en = "Canceled"
+fr = "Annulée"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+fr_variant = "a support request's status: agrees with « demande » (feminine)"
+id = { swift = "SupportCopy.statusCanceled" }
+
+[support.status_closed]
+en = "Closed"
+fr = "Fermée"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+fr_variant = "a support request's status: agrees with « demande » (feminine)"
+id = { swift = "SupportCopy.statusClosed" }
+
+[support.status_declined]
+en = "Declined"
+fr = "Refusée"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+id = { swift = "SupportCopy.statusDeclined" }
+
+[support.status_done]
+en = "Done"
+fr = "Terminée"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+fr_variant = "a support request's status: agrees with « demande » (feminine)"
+id = { swift = "SupportCopy.statusDone" }
+
+[support.status_escalated]
+en = "Escalated"
+fr = "Transférée"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+id = { swift = "SupportCopy.statusEscalated" }
+
+[support.status_in_progress]
+en = "In progress"
+fr = "En cours"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+id = { swift = "SupportCopy.statusInProgress" }
+
+[support.status_open]
+en = "Open"
+fr = "Ouverte"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+fr_variant = "a support request's status: agrees with « demande » (feminine)"
+id = { swift = "SupportCopy.statusOpen" }
+
+[support.status_pending]
+en = "Pending"
+fr = "En attente"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+id = { swift = "SupportCopy.statusPending" }
+
+[support.status_received]
+en = "Received"
+fr = "Reçue"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+id = { swift = "SupportCopy.statusReceived" }
+
+[support.status_resolved]
+en = "Resolved"
+fr = "Réglée"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+fr_variant = "a support request's status: agrees with « demande » (feminine)"
+id = { swift = "SupportCopy.statusResolved" }
+
+[support.status_unknown]
+en = "Status unknown"
+fr = "État inconnu"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+id = { swift = "SupportCopy.statusUnknown" }
+note = "⛔ THE GENERIC LABEL. A help-desk status this build does not list reads as its category's label (Open, In progress, Closed, Received), and this one when the category is unknown too. The desk's own word is never shown: the live workflow is localised (`完成` has been seen), so it can be in any language."
+
+[support.status_waiting_for_customer]
+en = "Waiting for your reply"
+fr = "En attente de votre réponse"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+id = { swift = "SupportCopy.statusWaitingForCustomer" }
+
+[support.status_waiting_for_support]
+en = "Waiting for support"
+fr = "En attente du soutien"
+ctx = "label"
+screen = "support"
+state = "reviewed"
+id = { swift = "SupportCopy.statusWaitingForSupport" }
 
 [support.subtitle]
 en = "Requests you have raised with the Distronode team."

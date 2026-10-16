@@ -1,4 +1,5 @@
 @testable import DistrictAI
+import DistrictL10n
 import DistrictModel
 import DistrictNetwork
 import XCTest
@@ -106,6 +107,50 @@ final class SchedulingHandOffTests: XCTestCase {
         let text = SchedulingModel.handOffNotice(for: .invalidNonce)
         XCTAssertEqual(text, SchedulingCopy.handOffFailed)
         XCTAssertFalse(text.contains("nonce"))
+    }
+
+    /// ⛔ NO CALLBACK IS A NOTICE TO PRESS AGAIN, AND NOTHING WAS MINTED (7.0.1): the
+    /// flow never falls back to an unbound mint. A second press, a closed browser and a
+    /// mint leave nothing on the screen.
+    @MainActor
+    func test_IOS_SCH_28_noCallbackAsksForAnotherPress() throws {
+        XCTAssertEqual(
+            SchedulingModel.handOffNotice(for: SchedulingHandoffOutcome.noCallback),
+            "Opening the page took too long. Try again."
+        )
+        XCTAssertEqual(
+            L10nRuntime.withLocale(.frCA) { SchedulingModel.handOffNotice(for: SchedulingHandoffOutcome.noCallback) },
+            "L'ouverture de la page a pris trop de temps. Réessayez."
+        )
+        XCTAssertEqual(
+            SchedulingModel.handOffNotice(for: SchedulingHandoffOutcome.failed(.invalidNonce)),
+            SchedulingCopy.handOffFailed
+        )
+        XCTAssertNil(SchedulingModel.handOffNotice(for: SchedulingHandoffOutcome.alreadyPending))
+        XCTAssertNil(SchedulingModel.handOffNotice(for: SchedulingHandoffOutcome.abandoned))
+        let url = try XCTUnwrap(URL(string: "https://www.distronode.com/dashboard/handoff?code=c"))
+        let minted = SchedulingHandoff(url: url, expiresIn: 60)
+        XCTAssertNil(SchedulingModel.handOffNotice(for: SchedulingHandoffOutcome.minted(minted)))
+    }
+
+    /// ⛔ THE FLOW IS THE ONLY MINTER, AND THE CALLBACK REACHES IT (S33). No app source calls
+    /// the client's mint itself (DistrictCore 7.0.1 requires a nonce there, which only the
+    /// flow holds), and the scene's `onOpenURL` hands `districtai://handoff` to the flow.
+    func test_IOS_SCH_29_onlyTheFlowMintsAndTheCallbackReachesIt() throws {
+        let root = try SourceScan.sourceRoot()
+        var minters: [String] = []
+        var routesCallback = false
+        for file in try SourceScan.swiftFiles(under: root) {
+            let code = try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
+            if code.contains(".mint(") || code.contains("mint(workspaceId") {
+                minters.append(SourceScan.relativePath(file))
+            }
+            let takesCallback = code.contains("SchedulingHandoffCallback.isCallback(url)")
+            let handsItToFlow = code.contains("schedulingHandoffFlow.receive(url)")
+            routesCallback = routesCallback || (takesCallback && handsItToFlow)
+        }
+        XCTAssertEqual(minters, [], "only SchedulingHandoffFlow may mint a hand-off")
+        XCTAssertTrue(routesCallback, "no scene hands districtai://handoff to the hand-off flow")
     }
 
     /// The pre-nonce mapping is unchanged: 409 is "not ready", the rest is `FailureText`.

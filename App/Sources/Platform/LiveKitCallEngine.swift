@@ -46,6 +46,11 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
 
     private let room: Room
 
+    /// Whether the join (and the microphone it publishes) is still on its way.
+    ///
+    /// ⛔ ONE MICROPHONE TRACK PER CALL: see ``setMuted(_:)`` and `DistrictCall.CallJoinGate`.
+    private let joinGate = CallJoinGate()
+
     init(audio: AudioSessionCoordinator) {
         let (stream, continuation) = AsyncStream<CallEngineEvent>.makeStream()
         events = stream
@@ -85,6 +90,7 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     /// costs nothing and is cheaper than trying to suppress one of them.
     func connect(url: String, token: String) async throws {
         AudioManager.shared.audioSession.isAutomaticConfigurationEnabled = false
+        await joinGate.begin()
         do {
             // ⚠️ `enableMicrophone: true` PUBLISHES THE MIC CONCURRENTLY WITH THE JOIN
             // rather than after it, which is what stops the first second of a call
@@ -96,7 +102,9 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
                 token: token,
                 connectOptions: ConnectOptions(enableMicrophone: true)
             )
+            await joinGate.finish(joined: true)
         } catch {
+            await joinGate.finish(joined: false)
             continuation.yield(.failed(message: error.localizedDescription))
             throw error
         }
@@ -119,7 +127,15 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     /// ``CallMediaState/microphoneEnabled`` saying the microphone is live, which is the
     /// truth and the one direction that matters: the alternative invites somebody to
     /// speak on a line nobody can hear.
+    ///
+    /// ⛔ NOTHING REACHES THE SDK WHILE THE JOIN IS STILL PUBLISHING THE MICROPHONE, and an
+    /// unmute in that window is dropped (`CallJoinGate.admitsMute(_:)`). The SDK reports the
+    /// room connected BEFORE it publishes the join's microphone, both reducers answer
+    /// `.connected` with an unmute, and `setMicrophone(enabled: true)` in that gap found no
+    /// publication and published a SECOND track (District AI for Mac 3.0.0, 2026-10-15, the
+    /// same engine and the same reducers as here).
     func setMuted(_ muted: Bool) async {
+        guard await joinGate.admitsMute(muted) else { return }
         let enabled = !muted
         do {
             try await room.localParticipant.setMicrophone(enabled: enabled)

@@ -18,7 +18,7 @@ struct AnalyticsMetricTiles: View {
 
     var body: some View {
         VStack(spacing: DistrictSpacing.row) {
-            HStack(spacing: DistrictSpacing.row) {
+            DistrictMetricRow {
                 DistrictMetricTile(
                     label: AnalyticsCopy.totalCalls,
                     value: AppWire.count(metrics.totalCalls),
@@ -42,7 +42,7 @@ struct AnalyticsMetricTiles: View {
                     caption: AnalyticsCopy.answeredCallsWindow
                 )
             }
-            HStack(spacing: DistrictSpacing.row) {
+            DistrictMetricRow {
                 DistrictMetricTile(
                     label: AnalyticsCopy.conversionRate,
                     // ⚠️ ALREADY A PERCENTAGE, ALREADY ROUNDED. Multiplying by 100 is
@@ -218,16 +218,29 @@ struct AnalyticsFunnelCard: View {
                 ForEach(stages, id: \.name) { stage in
                     BarMark(
                         x: .value(AnalyticsCopy.calls, stage.count),
-                        y: .value(AnalyticsCopy.stage, AppWire.label(.funnelStage, stage.name))
+                        y: .value(AnalyticsCopy.stage, Self.axisLabel(stage))
                     )
                     .foregroundStyle(colors.district)
-                    .accessibilityLabel(AppWire.label(.funnelStage, stage.name))
+                    .accessibilityLabel(Self.axisLabel(stage))
                     .accessibilityValue(AnalyticsFormat.callCount(stage.count))
                 }
             }
-            .chartYScale(domain: stages.map(\.name))
+            // ⛔ THE DOMAIN IS THE BARS' OWN LABELS, IN THE SERVER'S ORDER (3.0.1, AP-004). It was
+            // the wire names, which match no bar once the label is the vocabulary's: French drew
+            // no bars at all under an axis of English wire words.
+            .chartYScale(domain: Self.axisDomain(stages))
             .frame(height: AnalyticsChartHeight.funnel(stages.count))
         }
+    }
+
+    /// The label a stage's bar is plotted at, in the app's language.
+    static func axisLabel(_ stage: FunnelStage) -> String {
+        AppWire.label(.funnelStage, stage.name)
+    }
+
+    /// The category axis: every bar's label, in the order the server sent the stages.
+    static func axisDomain(_ stages: [FunnelStage]) -> [String] {
+        stages.map { axisLabel($0) }
     }
 }
 

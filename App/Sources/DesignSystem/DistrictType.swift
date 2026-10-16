@@ -177,10 +177,17 @@ struct DistrictEyebrow: View {
     /// built on. Anchored to `.caption2`, the same style the eyebrow font uses.
     @ScaledMetric(relativeTo: .caption2) private var tracking: CGFloat = DistrictType.eyebrowTracking
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
-        Text(text.uppercased())
+        // ⛔ AT AN ACCESSIBILITY TEXT SIZE, NO UPPERCASE AND NO TRACKING (3.0.1, AP-002). The
+        // tracked capitals are wider than the words, and at AX5 they broke mid-word in a tile
+        // ("TOTA / L CALL / S"); the text as written wraps between words. ⚠️ Normal sizes keep
+        // the brand's tracked label. See ``DistrictEyebrow/styled(_:accessibilitySize:)``.
+        let accessibility = dynamicTypeSize.isAccessibilitySize
+        Text(Self.styled(text, accessibilitySize: accessibility))
             .font(DistrictType.eyebrow)
-            .tracking(tracking)
+            .tracking(accessibility ? 0 : tracking)
             .foregroundStyle(colors.mutedForeground)
             // ⛔ ANNOUNCED IN ITS ORIGINAL CASE, NOT THE ONE ON SCREEN. The uppercasing
             // here is typographic — the brand's wide-tracked label — but VoiceOver
@@ -188,5 +195,11 @@ struct DistrictEyebrow: View {
             // rendered as REPLY is read "R, E, P, L, Y". Passing the unmodified text
             // as the label keeps the look and the word.
             .accessibilityLabel(text)
+    }
+
+    /// The eyebrow's text as drawn: upper case at a normal size, as written at an
+    /// accessibility size.
+    static func styled(_ text: String, accessibilitySize: Bool) -> String {
+        accessibilitySize ? text : text.uppercased()
     }
 }

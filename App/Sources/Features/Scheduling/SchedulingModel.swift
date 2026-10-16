@@ -244,8 +244,9 @@ final class SchedulingModel {
     ///
     /// ⛔ BOUND TO THE BROWSER FIRST (S33). `openStart` presents leg 1 in the SAME
     /// browser sheet the answered URL will open in; ``SchedulingHandoffFlow`` waits for
-    /// the `districtai://handoff` callback and falls back to the unbound mint when none
-    /// comes. ⚠️ `opening` keeps this screen to one hand-off and its label honest; the
+    /// the `districtai://handoff` callback and, when none comes, MINTS NOTHING (DistrictCore
+    /// 7.0.1, S33): the hand-off ends as `.noCallback` and the notice asks for another
+    /// press. ⚠️ `opening` keeps this screen to one hand-off and its label honest; the
     /// flow's own single-flight gate is the one that also covers the callback.
     func manageScheduling(openStart: @escaping SchedulingHandoffFlow.Open) async -> URL? {
         guard !opening else { return nil }
@@ -253,14 +254,24 @@ final class SchedulingModel {
         notice = nil
         let outcome = await handoffFlow.run(workspaceId: workspaceId, open: openStart)
         opening = false
-        switch outcome {
-        case let .minted(mint):
+        if case let .minted(mint) = outcome {
             return mint.url
-        case let .failed(failure):
-            notice = Self.handOffNotice(for: failure)
-            return nil
-        case .alreadyPending, .abandoned:
-            return nil
+        }
+        notice = Self.handOffNotice(for: outcome)
+        return nil
+    }
+
+    /// The sentence a hand-off that minted nothing leaves on the screen, or nil for one
+    /// with nothing to say (a second press, a closed browser, or a mint).
+    ///
+    /// ⛔ `.noCallback` IS A NOTICE, NEVER A SILENT RETURN: the person pressed a button and
+    /// nothing opened, and pressing again is the remedy (S33, 7.0.1: there is no unbound
+    /// mint to fall back to). The same rule as District AI for Mac 3.0.1.
+    static func handOffNotice(for outcome: SchedulingHandoffOutcome) -> String? {
+        switch outcome {
+        case let .failed(failure): handOffNotice(for: failure)
+        case .noCallback: SchedulingCopy.handOffNoCallback
+        case .minted, .alreadyPending, .abandoned: nil
         }
     }
 

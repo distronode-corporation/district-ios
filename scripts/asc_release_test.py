@@ -21,6 +21,8 @@ from unittest import mock
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import asc_release  # noqa: E402
 
+ROOT = Path(__file__).resolve().parent.parent
+
 CHANGELOG = """# Changelog
 
 ## [Unreleased]
@@ -179,12 +181,15 @@ class FakeClient:
     """Answers GETs from a table of path prefixes and records every write. A path no
     entry matches fails the test, so a request the code did not use to make shows up."""
 
-    def __init__(self, gets: dict[str, dict]) -> None:
+    def __init__(self, gets: dict[str, dict], keep_patches: bool = True) -> None:
         self.gets = gets
         self.calls: list[tuple[str, str]] = []
+        self.bodies: list[dict | None] = []
+        self.keep_patches = keep_patches
 
     def get(self, path: str) -> dict:
         self.calls.append(("GET", path))
+        self.bodies.append(None)
         for prefix, answer in self.gets.items():
             if path.startswith(prefix):
                 return answer
@@ -192,6 +197,15 @@ class FakeClient:
 
     def call(self, method: str, path: str, body: dict | None = None, ok=(200, 201, 204)) -> tuple[int, dict]:
         self.calls.append((method, path))
+        self.bodies.append(body)
+        if method == "PATCH" and path.startswith("/appStoreVersionLocalizations/") and self.keep_patches:
+            # App Store Connect keeps what it is sent, so the read-back sees it.
+            loc_id = path.rsplit("/", 1)[1]
+            for prefix, answer in self.gets.items():
+                if prefix.endswith("/appStoreVersionLocalizations"):
+                    for loc in answer["data"]:
+                        if loc["id"] == loc_id:
+                            loc["attributes"].update(body["data"]["attributes"])
         if method == "POST" and path == "/reviewSubmissions":
             return 201, {"data": {"id": "new-sub", "attributes": {"state": "READY_FOR_REVIEW"}}}
         if method == "PATCH" and path.startswith("/reviewSubmissions/"):
@@ -212,7 +226,7 @@ def _submit_gets(submissions: list[dict], items: dict[str, dict]) -> dict[str, d
             "data": [{"id": "v13", "attributes": {"versionString": "1.3", "appVersionState": "READY_FOR_REVIEW"}}]
         },
         "/appStoreVersions/v13/appStoreVersionLocalizations": {
-            "data": [{"id": "loc1", "attributes": {"locale": "en-US", "whatsNew": "notes"}}]
+            "data": [{"id": "loc1", "attributes": {"locale": "en-US", "whatsNew": "notes", **asc_release.LISTING_URLS["en"]}}]
         },
         "/appStoreVersions/v13/relationships/build": {"data": {"id": "build1"}},
         "/reviewSubmissions?": {"data": submissions},
@@ -483,8 +497,8 @@ class SubmitPerLocaleTests(unittest.TestCase):
         english = self.notes.for_locale("en-US")
         client, out = self.run_submit(
             [
-                {"id": "loc1", "attributes": {"locale": "en-US", "whatsNew": english}},
-                {"id": "loc2", "attributes": {"locale": "fr-CA", "whatsNew": english}},
+                {"id": "loc1", "attributes": {"locale": "en-US", "whatsNew": english, **asc_release.LISTING_URLS["en"]}},
+                {"id": "loc2", "attributes": {"locale": "fr-CA", "whatsNew": english, **asc_release.LISTING_URLS["fr"]}},
             ]
         )
         self.assertNotIn("EXIT", out)
@@ -501,6 +515,98 @@ class SubmitPerLocaleTests(unittest.TestCase):
         )
         self.assertIn("EXIT 1", out)
         self.assertFalse([w for w in client.writes() if w[1].startswith("/appStoreVersionLocalizations/")])
+
+
+class SubmitUrlTests(unittest.TestCase):
+    """Every localization carries its language's supportUrl and marketingUrl before the build
+    is attached, read back and checked (3.0.0 answered 409 for a localization without one)."""
+
+    def run_submit(self, localizations: list[dict], keep_patches: bool = True) -> tuple[FakeClient, str]:
+        gets = _submit_gets([{"id": "draft1", "attributes": {"state": "READY_FOR_REVIEW"}}], {"draft1": _items()})
+        gets["/appStoreVersions/v13/appStoreVersionLocalizations"] = {"data": localizations}
+        client = FakeClient(gets, keep_patches=keep_patches)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            try:
+                asc_release.submit(client, "1.3", "4110", "notes", 60)
+            except SystemExit as exit_:
+                out.write(f"\nEXIT {exit_.code}")
+        return client, out.getvalue()
+
+    def test_missing_and_wrong_urls_are_set_per_language_and_the_rest_left_alone(self) -> None:
+        client, out = self.run_submit(
+            [
+                {"id": "loc1", "attributes": {"locale": "en-US", "whatsNew": "notes", **asc_release.LISTING_URLS["en"]}},
+                {"id": "loc2", "attributes": {"locale": "fr-CA", "whatsNew": "notes", "supportUrl": None,
+                                              "marketingUrl": "https://www.distronode.com/district-ai"}},
+            ]
+        )
+        self.assertNotIn("EXIT", out)
+        patches = [(c, b) for c, b in zip(client.calls, client.bodies) if c[0] == "PATCH" and "Localizations" in c[1]]
+        self.assertEqual([c for c, _ in patches], [("PATCH", "/appStoreVersionLocalizations/loc2")])
+        self.assertEqual(patches[0][1]["data"]["attributes"], asc_release.LISTING_URLS["fr"])
+        self.assertIn("supportUrl (fr-CA): None -> https://distronode.ca/fr/support", out)
+        self.assertIn("supportUrl (en-US): already set", out)
+        self.assertIn("localizations: release notes, supportUrl and marketingUrl checked", out)
+        self.assertIn("SUBMITTED - 1.3 (4110)", out)
+
+    def test_a_value_app_store_connect_did_not_keep_stops_before_the_build_is_attached(self) -> None:
+        client, out = self.run_submit(
+            [{"id": "loc1", "attributes": {"locale": "en-US", "whatsNew": "notes"}}], keep_patches=False
+        )
+        self.assertIn("EXIT 1", out)
+        self.assertIn("after it was set; nothing was submitted", out)
+        self.assertNotIn(("PATCH", "/appStoreVersions/v13/relationships/build"), client.writes())
+        self.assertFalse([w for w in client.writes() if w[1].startswith("/reviewSubmission")])
+
+    def test_a_language_with_no_urls_stops_before_any_write(self) -> None:
+        client, out = self.run_submit(
+            [
+                {"id": "loc1", "attributes": {"locale": "en-US", "whatsNew": "old"}},
+                {"id": "loc3", "attributes": {"locale": "de-DE", "whatsNew": "notes"}},
+            ]
+        )
+        self.assertIn("EXIT 1", out)
+        self.assertIn("de-DE localization and LISTING_URLS has no support and marketing URLs", out)
+        self.assertEqual(client.writes(), [])
+
+    def test_the_french_urls_are_the_store_listings(self) -> None:
+        listing = json.loads((ROOT / "store-listing" / "fr-CA.json").read_text(encoding="utf-8"))
+        self.assertEqual(listing["urls"], asc_release.LISTING_URLS["fr"])
+
+    def test_every_url_is_https(self) -> None:
+        for language, urls in asc_release.LISTING_URLS.items():
+            self.assertEqual(set(urls), set(asc_release.URL_FIELDS), language)
+            for value in urls.values():
+                self.assertTrue(value.startswith("https://") and " " not in value, value)
+
+
+class ReviewDetailTests(unittest.TestCase):
+    """⛔ The review detail holds the demo account's password: no path to it is ever requested."""
+
+    def test_every_spelling_of_the_review_detail_is_refused_before_a_request(self) -> None:
+        for path in (
+            "/appStoreVersions/v1/appStoreReviewDetail",
+            "/appStoreReviewDetails/abc",
+            "/appStoreVersions/v1?include=appStoreReviewDetail",
+            "/appStoreReviewDetails/abc?fields[appStoreReviewDetails]=demoAccountPassword",
+        ):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+                with self.assertRaises(SystemExit):
+                    asc_release.refuse_review_detail(path)
+            self.assertIn("never reads the App Review detail", out.getvalue())
+
+    def test_the_client_refuses_it_before_curl_runs(self) -> None:
+        client = asc_release.Client.__new__(asc_release.Client)
+        with mock.patch.object(asc_release.subprocess, "run") as run:
+            with contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit):
+                    client.call("GET", "/appStoreReviewDetails/abc")
+            run.assert_not_called()
+
+    def test_an_ordinary_path_passes(self) -> None:
+        asc_release.refuse_review_detail("/appStoreVersions/v13/appStoreVersionLocalizations")
 
 
 if __name__ == "__main__":

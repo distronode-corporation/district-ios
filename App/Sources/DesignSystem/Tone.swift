@@ -51,17 +51,16 @@ enum Tone: String, CaseIterable {
     /// SAYS SO. A badge draws ``ink(_:)`` over ``fill(_:)``, and `fill` is the SAME
     /// colour at 12% over the surface behind it — so the two are separated only by
     /// what 12% of one colour does to another. Measured across both palettes and all
-    /// five surfaces, nineteen of the thirty combinations land between 3:1 and 4.5:1:
+    /// five surfaces, six of the fifty combinations land between 3:1 and 4.5:1:
     /// legible, and short of AA for a 12pt label. `DistrictContrastTests` pins the
     /// exact set.
     ///
     /// ⛔ SO WHEN THE SYSTEM ASKS FOR MORE CONTRAST, THE BADGE STOPS BEING A TINT AND
     /// BECOMES A SOLID. The pair it switches to is the fill-and-`on*` pair the filled
-    /// controls already use, which the same tests measure at 5.36:1 to 12.58:1 — no
+    /// controls already use, which the same tests measure at 6.20:1 to 13.98:1 — no
     /// colour is invented here, and nothing changes for a user who has not asked for
     /// it. Raising ``DistrictColors/containerAlpha`` cannot substitute: more tint
-    /// moves the background TOWARDS the ink and makes it worse, and the dark
-    /// `district` accent is 3.91:1 against `elevated` with no tint at all.
+    /// moves the background TOWARDS the ink and makes it worse.
     func fill(_ colors: DistrictColors, increasedContrast: Bool) -> Color {
         guard increasedContrast else { return fill(colors) }
         switch self {
@@ -156,7 +155,8 @@ extension Tone {
 /// pill makes state scannable without reading, which is the entire job of a call
 /// log.
 ///
-/// ⛔ A PILL IS AN ATOM: ITS LABEL NEVER WRAPS. A wrapped pill reads as two pills and
+/// ⛔ A PILL IS AN ATOM: ITS LABEL NEVER WRAPS, EXCEPT AT AN ACCESSIBILITY TEXT SIZE, where
+/// one line can be wider than the screen (see the body). A wrapped pill reads as two pills and
 /// a mid-word break ("Transferr/ed") reads as corruption, which is what a two-pill
 /// call log row renders without this. `lineLimit(1)` plus a horizontal
 /// `fixedSize` makes the label report one width and hold it, so an `HStack` that is
@@ -176,6 +176,10 @@ struct DistrictBadge: View {
     /// ⚠️ THE SYSTEM'S "Increase Contrast" SWITCH, read straight from the environment.
     /// See the ⛔ on ``Tone/fill(_:increasedContrast:)``.
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    /// ⛔ `.increased` ON A SELECTED ROW, where the tint and the ink give way to the accent's
+    /// text colour. See ``SelectionInk``.
+    @Environment(\.backgroundProminence) private var prominence
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var colors: DistrictColors {
         .resolve(colorScheme)
@@ -188,18 +192,32 @@ struct DistrictBadge: View {
     var body: some View {
         Text(text)
             .font(DistrictType.label)
-            .foregroundStyle(tone.ink(colors, increasedContrast: increased))
-            .lineLimit(1)
+            .foregroundStyle(SelectionInk.chipInk(tone, colors, increasedContrast: increased, prominence: prominence))
+            // ⛔ ONE LINE AT ITS OWN WIDTH, EXCEPT AT AN ACCESSIBILITY TEXT SIZE (3.0.1, AP-005).
+            // At AX5 a pill held to its own width ("Managed by Distronode") is wider than an
+            // iPhone, and the whole Phone numbers page scrolled sideways; there it wraps.
+            .lineLimit(Self.wraps(dynamicTypeSize) ? nil : 1)
             // ⚠️ HORIZONTAL ONLY. `fixedSize()` on both axes would also pin the height
             // against Dynamic Type, which is the one direction a pill must be free to
             // grow in.
-            .fixedSize(horizontal: true, vertical: false)
+            .fixedSize(horizontal: !Self.wraps(dynamicTypeSize), vertical: false)
             .padding(.horizontal, DistrictSpacing.tight)
             .padding(.vertical, 2)
             .background(
-                tone.fill(colors, increasedContrast: increased),
+                SelectionInk.chipFill(tone, colors, increasedContrast: increased, prominence: prominence),
                 in: RoundedRectangle(cornerRadius: DistrictRadius.badge)
             )
+            .overlay {
+                if let outline = SelectionInk.chipOutline(colors, prominence) {
+                    RoundedRectangle(cornerRadius: DistrictRadius.badge)
+                        .strokeBorder(outline, lineWidth: 1)
+                }
+            }
+    }
+
+    /// Whether the pill may wrap: at an accessibility text size only.
+    static func wraps(_ size: DynamicTypeSize) -> Bool {
+        size.isAccessibilitySize
     }
 }
 

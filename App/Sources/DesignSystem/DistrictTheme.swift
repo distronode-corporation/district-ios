@@ -50,14 +50,14 @@ struct DistrictColors {
     let input: Color
     /// Raised or pressed surface above ``card``.
     let elevated: Color
-    /// ⛔ The single brand accent. Indigo.
+    /// ⛔ The single brand accent: the logo's teal (colour v3).
     let district: Color
     /// Text ON ``district``.
     ///
     /// ⚠️ IT FLIPS WITH THE SCHEME, AND THE DARK SIDE LOOKS WRONG UNTIL YOU MEASURE
-    /// IT. The dark accent is a light indigo, so white on it fails WCAG AA while the
-    /// near-black `#0f1020` passes at 5.8:1; the light accent is a deep indigo and
-    /// takes white at 7.4:1. Both values are read from `tokens.css`, not derived
+    /// IT. The dark accent is a light teal, so white on it fails WCAG AA (1.8:1) while
+    /// the near-black `#0e1c1f` passes at 9.6:1; the light accent is a deep teal and
+    /// takes white at 6.6:1. Both values are read from `tokens.css`, not derived
     /// here, and matching them is a contrast decision rather than a stylistic one.
     let districtForeground: Color
     let success: Color
@@ -82,20 +82,20 @@ extension DistrictColors {
         border: Color(districtHex: 0x24393D),
         input: Color(districtHex: 0x2A4146),
         elevated: Color(districtHex: 0x1F373B),
-        district: Color(districtHex: 0x7D84F7),
-        districtForeground: Color(districtHex: 0x0F1020),
-        success: Color(districtHex: 0x3FBF7F),
+        district: Color(districtHex: 0x67CDED),
+        districtForeground: Color(districtHex: 0x0E1C1F),
+        success: Color(districtHex: 0x74E9AA),
         // ⚠️ Every semantic colour takes BLACK text in dark mode, and `tokens.css`
         // does not publish an `on*` pair to copy: these four are the convention this
         // file has always carried, kept because the measurement still holds. The
-        // dark fills are all light and saturated (black clears 7.6:1 on the worst of
-        // them, `destructive`; white manages 2.8:1 there and fails outright).
+        // dark fills are all light and saturated (black clears 8.0:1 on the worst of
+        // them, `destructive`; white manages 2.6:1 there and fails outright).
         onSuccess: Color(districtHex: 0x000000),
-        warning: Color(districtHex: 0xFBBF24),
+        warning: Color(districtHex: 0xEAB90C),
         onWarning: Color(districtHex: 0x000000),
-        destructive: Color(districtHex: 0xF87171),
+        destructive: Color(districtHex: 0xFE737F),
         onDestructive: Color(districtHex: 0x000000),
-        info: Color(districtHex: 0x60A5FA),
+        info: Color(districtHex: 0x77BAFE),
         onInfo: Color(districtHex: 0x000000)
     )
 
@@ -110,19 +110,19 @@ extension DistrictColors {
         border: Color(districtHex: 0xC9D6D8),
         input: Color(districtHex: 0xBFCED0),
         elevated: Color(districtHex: 0xF7F9F9),
-        // Not the dark accent darkened: a separate deep indigo that clears AA on
-        // both `background` and `card`.
-        district: Color(districtHex: 0x3F36E2),
+        // Not the dark accent darkened: a separate deep teal that clears AA on
+        // both `background` (5.6:1) and `card` (6.6:1).
+        district: Color(districtHex: 0x01657D),
         districtForeground: Color(districtHex: 0xFFFFFF),
-        success: Color(districtHex: 0x167A4B),
+        success: Color(districtHex: 0x016F4E),
         // ⚠️ Mirror of the dark note: the light fills are all deep, so WHITE is the
-        // readable text on every one of them (5.4:1 on the worst, `success`).
+        // readable text on every one of them (6.2:1 on the worst, `success`).
         onSuccess: Color(districtHex: 0xFFFFFF),
-        warning: Color(districtHex: 0x985305),
+        warning: Color(districtHex: 0x754603),
         onWarning: Color(districtHex: 0xFFFFFF),
-        destructive: Color(districtHex: 0xC51F1F),
+        destructive: Color(districtHex: 0xB4022D),
         onDestructive: Color(districtHex: 0xFFFFFF),
-        info: Color(districtHex: 0x1B4FCA),
+        info: Color(districtHex: 0x223092),
         onInfo: Color(districtHex: 0xFFFFFF)
     )
 

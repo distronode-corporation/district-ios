@@ -150,6 +150,24 @@ final class IncomingCallModel: LiveCallControls {
         }
     }
 
+    /// The server stopped ringing a call. ⛔ ``RingCancel/outcome(phase:ringingCallId:)``
+    /// decides; only a ring still ringing here for that call ends, never an answered one.
+    ///
+    /// ⛔ THE REPORT BELOW IS THE ONE CALLKIT HEARS, so ``endRequestedLocally`` silences the
+    /// reducer's own (`.unanswered` for every ring ending). The ended screen is dismissed at
+    /// once: nobody here pressed or missed anything to be told about.
+    func ringCancelled(_ cancel: RingCancel) async -> RingCancelOutcome {
+        let outcome = cancel.outcome(phase: state.phase, ringingCallId: state.callID?.rawValue)
+        guard case let .endRing(reason) = outcome, let uuid = callUUID else { return outcome }
+        endRequestedLocally = true
+        calls.callKit.reportCallEnded(uuid: uuid, reason: reason)
+        await apply(.ringTimedOut)
+        if state.phase.isEnded {
+            await apply(.dismissed)
+        }
+        return outcome
+    }
+
     // MARK: - What the user may do
 
     /// ⛔ IT FEEDS THE REDUCER RATHER THAN CALLING THE ROUTE. The reducer is what

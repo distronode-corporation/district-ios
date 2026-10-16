@@ -10,6 +10,102 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Fixed
+
+- A ring stops on this device when it ends elsewhere. The server now sends a
+  `call_ring_cancelled` APNs background push (on the alert token, never VoIP) whenever a ring
+  ends: answered on any device, timed out, the caller hung up, or withdrawn. `AppDelegate`
+  reads it before the registrar guard, so it works while the session is still being checked;
+  `IncomingCallModel.ringCancelled(_:)` reports the
+  CallKit call ended (`.answeredElsewhere` for answered, `.remoteEnded` for call_ended,
+  `.unanswered` for timeout, withdrawn and any unknown reason) and dismisses the ringing
+  screen; `DeliveredRingAlerts` removes the call's delivered `incoming_call` alert. The parse
+  is DistrictCore 7.0.1's `RingCancel` (shared with the Mac); the CallKit half is the app's
+  (`RingCancel+CallKit.swift`). Matched
+  on `callId` only; a call this device answered or is answering is not touched, alert
+  included. The completion handler is called once on every path, and every other background
+  push still only refreshes the badge. The 30 s local ring timeout stays as the fallback.
+- One microphone track per call. The engine joins with the microphone published
+  concurrently (`ConnectOptions(enableMicrophone: true)`), LiveKit reports the room connected
+  before it publishes that track, and both reducers answer `.connected` with an unmute, which
+  in that gap published a second track (found on District AI for Mac 3.0.0 on 2026-10-15,
+  the same engine and reducers). `setMuted(_:)` now asks DistrictCore 7.0.1's
+  `CallJoinGate`: an unmute while the join is out is dropped, a mute waits for the join.
+- A second account signed in on the same launch registers for push. The ask was once per
+  launch (`hasAskedThisLaunch`), so after a sign-out (which deletes the installation's rows)
+  the next account never called `registerForRemoteNotifications` and had no alert row.
+  `forget()` now re-arms it on every transition into signed-out.
+- Wire labels in English are the vocabulary's, not the raw value. `AppWire.label` returned
+  the value as sent on an English screen (the Overview showed `completed` beside
+  "Transferred"); English now takes DistrictCore 7.0.1's `WireLabel.knownLabel` ("Completed")
+  and keeps a value the vocabulary does not list as sent, as District AI for Mac 3.0.1 does;
+  French is unchanged (`WireLabel.label`, « Terminé », « Autre »).
+- Support request statuses are labelled in English and fr-CA. `SupportView` and
+  `SupportThreadView` showed the help desk's `statusName` as sent, English on French screens
+  (and the live workflow is localised, so it can be any language). `SupportStatusLabel`
+  maps the workflow's names (Received, Open, Waiting for support, Waiting for customer, In
+  progress, Pending, Escalated, Resolved, Done, Closed, Canceled, Declined) to catalog
+  labels (state reviewed, signed off for 3.0.1); any other name reads as its category's label (Open, In progress, Closed,
+  Received) or "Status unknown". The close confirmation names the label too.
+- The scheduling hub's footnote no longer says the sections are read-only: they write. It
+  now reads "Anything these sections do not cover opens in a browser."
+- The scheduling hand-off never mints an unbound code (S33). DistrictCore 7.0.1's
+  `SchedulingHandoffFlow` no longer falls back to a mint without a nonce when leg 1 does not
+  call back within 30 s (10 s before); it ends as `.noCallback`, and the hub shows
+  `scheduling.hand_off_no_callback` ("Opening the page took too long. Try again.", the
+  Mac's words) and takes the leg-1 sheet away so the notice is seen. The flow is the only
+  minter and `ShellView.onOpenURL` routes `districtai://handoff` to it
+  (`test_IOS_SCH_29`).
+- Visual QA (3.0.1, from the iPhone and iPad capture walk and District AI for Mac #55):
+  - Colour v3: `DistrictTheme` takes `tokens.css`'s accent, success, warning, destructive
+    and info pairs in both themes (the logo's teal; text on the dark accent is `#0e1c1f`).
+    `DistrictContrastTests`: the badge combinations below AA go from nineteen to six, the
+    filled pairs measure 6.20:1 to 13.98:1.
+  - Selected rows on iPad: the split view fills a selected row with the accent, on which the
+    rows' own inks could not be read. `SelectionInk` reads `backgroundProminence` and, on a
+    selected row, draws the name, the second line, the chips and the avatar in the accent's
+    text colour (`districtForeground`, white on the light accent, `#0e1c1f` on the dark one),
+    a chip as an outline. `SelectionInkTests` measures each against the accent.
+  - The reply composer: the field takes the full width with no "Reply" eyebrow; under it one
+    row of borderless icon controls (photo, a new file control through the Files picker,
+    AI draft) and Send. Command-Return sends on a hardware keyboard; Return is a new line.
+  - Numbers: the four pill buttons are a segmented `Picker` (a menu at accessibility text
+    sizes). The menu is a `Menu` around an inline `Picker` with its own wrapping label: a
+    `.menu` picker's button held « Mes numéros » to one line's height and cut it at AX5
+    (after-shot run 38795483764).
+  - AP-002: at an accessibility text size `DistrictEyebrow` drops its capitals and tracking,
+    and the Overview and Analytics metric grids go to one column (`DistrictMetricRow`); the
+    tracked capitals broke mid-word at AX5 ("TOTA / L CALL / S"). Normal sizes unchanged.
+  - AP-004: the Analytics funnel's category axis is the bars' own labels
+    (`AppWire.label(.funnelStage, _)`); it was the wire names, so French drew no bars under
+    an English axis.
+  - AP-005: a `DistrictBadge` wraps at an accessibility size; held to one line ("Managed by
+    Distronode") it made Phone numbers wider than the iPhone.
+  - AP-013: `DistrictAvatar`'s circle is a `@ScaledMetric` (36pt at the default size), so
+    the initials no longer read "…" at AX5.
+  - AP-014: on iPad in portrait a list section opens `.doubleColumn` (its list and the open
+    row) instead of an empty "Select a call" with the list hidden; landscape is unchanged.
+  - AP-019: when the Overview fails, its section rows stay under the error, gated by the
+    workspace list's role.
+- MARKETING_VERSION 3.0.1. DistrictCore `exactVersion` 7.0.1 (district-core-swift's 7.0.1
+  tag, main d7bf46d).
+
+### Release lane
+
+- `asc_release.py submit` (the job of `scripts/release-submit.sh`) sets every
+  localization's `supportUrl` and `marketingUrl` with its release notes, from `LISTING_URLS`
+  by language (English as every version has carried them, fr-CA as
+  `store-listing/fr-CA.json`), prints what was there before a change, and reads them back
+  and compares before the build is attached; a language with no URLs stops the run before
+  any write. A 409 already names `meta.associatedErrors`. The client refuses any path to the
+  App Review detail, which holds the demo account's password, before a request is made.
+- The release run creates its own Apple Development certificate (`scripts/asc_dev_cert.py
+  create`, through App Store Connect, the id recorded before anything else) in a keychain
+  of the run's own, so `xcodebuild archive` stops minting one per run, and revokes exactly
+  that id in an `always()` step before the key is removed. Nothing lists certificates or
+  matches one by name. `asc_dev_cert_test.py` runs in CI's release scripts job and the
+  release job.
+
 ### Changed
 
 - French: the call log's title is « Appels » (`calls.call_log`); « Journal des appels » was
@@ -114,6 +210,20 @@ built from history before publication, so they have no tags in this repository.
   and the `fr-CA.lproj` strings, so `FR_COMPLETE` is true. French stays switched off: the
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
+
+## [3.0.1] - 2026-10-15
+
+Fixes for calls, notifications and labels.
+
+- An incoming call now stops ringing as soon as it is answered on another device, the caller hangs up, or the ring times out, instead of ringing for up to 30 seconds. A call answered on another device is no longer listed as missed.
+- Fixes a problem that could cut the sound of a call, or end it, just after it was answered.
+- If you sign out and sign in to another account without closing the app, notifications now reach the new account.
+- Statuses of calls, messages and numbers show their names, such as Completed, instead of their codes.
+- Support requests show their status in your language.
+- The reply box gives your reply the full width, with the photo, file and AI draft controls in one row. On a hardware keyboard, Command-Return sends and Return starts a new line.
+- New colours from the District palette, and selected rows on iPad stay readable.
+- At the largest text sizes, labels and numbers no longer break mid-word, and every screen fits its width. On iPad in portrait, a list now opens beside the item you select.
+- The Analytics conversion funnel shows its bars in every language.
 
 ## [3.0.0] - 2026-10-15
 

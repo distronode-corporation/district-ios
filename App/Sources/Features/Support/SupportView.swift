@@ -232,7 +232,7 @@ struct SupportView: View {
                         HStack(spacing: DistrictSpacing.hairline) {
                             SupportChips(source: request.source, region: request.region)
                             DistrictBadge(
-                                text: request.statusName,
+                                text: SupportStatusLabel.label(request.statusName, category: request.statusCategory),
                                 tone: SupportChrome.tone(for: request.statusCategory)
                             )
                         }
