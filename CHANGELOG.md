@@ -12,6 +12,20 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- An answered call joins before its microphone starts. The softphone joined with LiveKit's
+  concurrent microphone mode (`ConnectOptions(enableMicrophone: true)`), which starts Core
+  Audio on the SDK's one serial WebRTC queue while the join builds its peer connections on
+  that same queue. A slow start (VoiceProcessingIO building its aggregate device, about 5 s
+  on the first answer after a launch) held the join past its 10 s transport wait: the server
+  saw the session start and never become active, and the call ended "the call could not be
+  connected" (District AI for Mac 3.0.1, 2026-10-16, 05:46:05Z; this engine joins the same way). `LiveKitCallEngine.connect` now
+  joins with nothing published (`LiveKitCallRoom`) and then calls `setMicrophone(enabled: true)`
+  once; `CallJoinGate` still holds the reducers' unmute until that publish is done, so a call
+  still has exactly one microphone track. A microphone that cannot start after the join no
+  longer ends anything: the call stays connected and shows muted, and Unmute tries again.
+  3.0.0 joined the same way. Tested at the engine seam (`CallRoom`,
+  `LiveKitCallEngineJoinTests`).
+
 - A ring stops on this device when it ends elsewhere. The server now sends a
   `call_ring_cancelled` APNs background push (on the alert token, never VoIP) whenever a ring
   ends: answered on any device, timed out, the caller hung up, or withdrawn. `AppDelegate`
