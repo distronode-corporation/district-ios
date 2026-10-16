@@ -3810,6 +3810,15 @@ state = "reviewed"
 id = { swift = "InboxCopy.unreadCount(_:)" }
 note = "Read by VoiceOver on a conversation's unread badge."
 
+[inbox.voicemail]
+en = "Voicemail"
+fr = "Boîte vocale"
+ctx = "label"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.voicemail" }
+note = "The voicemail channel's name on an Inbox row that mixes channels, drawn in capitals. The French is the glossary's term for voicemail (the portal's « Boîte vocale et messages »)."
+
 [inbox.whatsapp]
 en = "WhatsApp"
 fr = "WhatsApp"

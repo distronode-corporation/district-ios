@@ -33,8 +33,8 @@ struct RouteList<Content: View>: View {
 }
 
 extension View {
-    /// A full-bleed row of a ``RouteList``: no insets, no separator, and on the phone the
-    /// card ground.
+    /// A full-bleed row of a ``RouteList``: no insets, a palette hairline between rows, and
+    /// on the phone the card ground.
     ///
     /// ⚠️ THE CARD GROUND ON THE PHONE (3.0.2 visual walk). A plain `List` row is an opaque
     /// system cell, pure white or pure black, which sat on the page's `background` in
@@ -45,6 +45,12 @@ extension View {
     /// system draws its selection highlight on, so on the iPad the open row would stop
     /// showing as open; the Desk and Support queues draw their own selection for exactly
     /// that reason (``CardSlice``). A selecting list keeps the system's cell.
+    ///
+    /// ⛔ THE SEPARATOR IS SHOWN, IN THE PALETTE'S ``DistrictColors/border`` (3.0.2 walk 2).
+    /// Hidden, the card-ground rows ran together: in light mode the Contacts list was one
+    /// white block on the `#e8edee` page. The system's own separator grey is not a palette
+    /// colour, so it takes the tint. Its leading end is the text column's
+    /// (``DistrictListRow``), past the avatar, as an iOS list draws it.
     func routeListRow(selects: Bool) -> some View {
         modifier(RouteListRowGround(selects: selects))
     }
@@ -58,8 +64,15 @@ struct RouteListRowGround: ViewModifier {
     func body(content: Content) -> some View {
         content
             .listRowInsets(EdgeInsets())
-            .listRowSeparator(.hidden)
+            .listRowSeparator(.visible)
+            .listRowSeparatorTint(Self.separator(colorScheme))
             .listRowBackground(Self.ground(colorScheme, selects: selects))
+    }
+
+    /// The hairline between rows: the palette's calm border, in both schemes and whether
+    /// the list selects or not.
+    static func separator(_ scheme: ColorScheme) -> Color {
+        DistrictColors.resolve(scheme).border
     }
 
     /// The row's ground: the card on the phone, the system's own cell (nil) in a list that
