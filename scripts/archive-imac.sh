@@ -47,14 +47,15 @@
 #   SENTRY_DSN      the app's DSN (optional; when unset the build carries an
 #                   EMPTY value, which DISABLES Sentry entirely — no SDK is
 #                   started, so nothing is reported, symbolicated or otherwise)
-#   SENTRY_AUTH_TOKEN  Sentry org token (optional); when set, dSYMs are uploaded after the archive
+#   SENTRY_AUTH_TOKEN  Sentry org token (optional); when set, dSYMs and their sources are
+#                   uploaded after the archive, and the release is given this commit
 #   SENTRY_ORG      Sentry org slug (EU region); REQUIRED when SENTRY_AUTH_TOKEN is set
 #
 # Every credential comes from the caller's environment and the key file. The
 # script reads no secret store and has no default for any of them.
 #
 # Proven by scripts/archive-imac.test.sh, which drives it against stub uname,
-# git, xcodegen, xcodebuild and sentry-cli. There is no other way to test it:
+# git, xcodegen, xcodebuild, plutil and sentry-cli. There is no other way to test it:
 # the real thing takes a Mac, an Apple account and ten minutes.
 set -euo pipefail
 
@@ -314,7 +315,7 @@ fi
 # the ingest host out of the DSN; sentry-cli does not, and defaults to the US
 # control silo where an EU org does not exist. A mis-pointed debug-file upload
 # SILENTLY DOES NOTHING while the build stays green. Hence SENTRY_URL,
-# explicitly, on this one command.
+# explicitly, on every sentry-cli command (sentry_eu below).
 #
 # ⛔ THE TOKEN NEVER REACHES argv. sentry-cli reads SENTRY_AUTH_TOKEN from its
 # environment; --auth-token would put a live org token into `ps` output for every
@@ -323,6 +324,40 @@ fi
 # ⚠️ BOTH SKIPS SAY SO IN ONE LINE RATHER THAN PASSING QUIETLY. A missing upload
 # is invisible until somebody reads a crash report weeks later, so the absence
 # gets a sentence at the moment it happens.
+#
+# `--include-sources` uploads a source bundle beside each dSYM, so an issue shows
+# the lines around each frame and Seer can read them, not only file and line.
+#
+# ── The Sentry release, with its commits ─────────────────────────────────────
+# After the dSYMs, the release this archive reports as gets this commit, which is
+# what gives an issue its suspect commits and "fixed in release". Sentry fetches
+# the range since the previous release from GitHub through its integration.
+#
+# ⛔ THE NAME IS READ FROM THE ARCHIVED APP, NEVER REBUILT HERE. The SDK reports
+# `<CFBundleIdentifier>@<CFBundleShortVersionString>+<CFBundleVersion>` (see
+# DistrictSentry.releaseName), and a name that differs by one character creates
+# a second, empty release that no event ever lands in.
+#
+# ⚠️ NON-FATAL, UNLIKE THE dSYM UPLOAD. Without the release a crash still
+# symbolicates; it only loses its commits. A failure here is a warning on the
+# run, and the archive goes on to the export.
+sentry_eu() { SENTRY_URL="https://de.sentry.io" sentry-cli "$@"; }
+sentry_release() {
+  local plist="$ARCHIVE_PATH/Products/Applications/DistrictAI.app/Info.plist"
+  local identifier short build release sha
+  identifier="$(plutil -extract CFBundleIdentifier raw -o - "$plist")" || return 1
+  short="$(plutil -extract CFBundleShortVersionString raw -o - "$plist")" || return 1
+  build="$(plutil -extract CFBundleVersion raw -o - "$plist")" || return 1
+  [ -n "$identifier" ] && [ -n "$short" ] && [ -n "$build" ] || return 1
+  release="$identifier@$short+$build"
+  sha="$(git rev-parse HEAD)" || return 1
+  echo "Sentry release: $release (commit $sha)"
+  sentry_eu releases new --org "$SENTRY_ORG" --project district-ios "$release" &&
+    sentry_eu releases set-commits --org "$SENTRY_ORG" "$release" \
+      --commit "distronode-corporation/district-ios@$sha" --ignore-missing &&
+    sentry_eu releases finalize --org "$SENTRY_ORG" "$release"
+}
+
 if [ -z "${SENTRY_AUTH_TOKEN:-}" ]; then
   echo "SENTRY_AUTH_TOKEN is unset - skipped the dSYM upload; crashes from this build will not symbolicate."
 elif ! command -v sentry-cli >/dev/null 2>&1; then
@@ -332,10 +367,13 @@ else
   # one fails with a 404 that reads like a missing project.
   [ -n "${SENTRY_ORG:-}" ] ||
     die "SENTRY_AUTH_TOKEN is set but SENTRY_ORG is not; pass the EU org slug, there is no default."
-  SENTRY_URL="https://de.sentry.io" sentry-cli debug-files upload \
+  sentry_eu debug-files upload \
     --org "$SENTRY_ORG" \
     --project district-ios \
+    --include-sources \
     "$ARCHIVE_PATH/dSYMs"
+  sentry_release ||
+    echo "::warning::the Sentry release for this archive was not created or has no commits; crashes still symbolicate, but carry no suspect commits."
 fi
 
 if [ "${UPLOAD:-1}" = "0" ]; then
