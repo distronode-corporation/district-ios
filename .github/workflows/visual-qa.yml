@@ -1,0 +1,188 @@
+name: Visual and style QA (screenshots, not a gate)
+
+# QA ONLY, on the visual-qa/apple-capture branch and never merged: the app walked over the
+# contract fixtures (and, in French, the fictional Québec sample data in qa/quebec) by
+# App/UITests/VisualQATourTests.swift, in en-US and fr-CA, light and dark, at the largest
+# accessibility text size on the iPhone, with a portrait pass on the iPad, and the empty,
+# error and loading states (qa/mock_server.py's QA_MODE). One build per job; the walks run
+# one after another on the same simulator. The frames and accessibility trees are the
+# artifacts. No secret is read: the session is a made-up one the mock accepts.
+on:
+  push:
+    branches: [visual-qa/apple-capture]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # `-2`: this commit's run must not cancel the first one (run 38771063483) still walking.
+  group: visual-qa-2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  walk:
+    name: walk (${{ matrix.set }})
+    runs-on: macos-26
+    timeout-minutes: 170
+    strategy:
+      fail-fast: false
+      # ⚠️ TWO AT A TIME: the free plan runs five macOS jobs at once for the whole
+      # organisation, and the release pull requests need theirs.
+      max-parallel: 2
+      matrix:
+        include:
+          # The iPhone and iPad light and dark sets ran on the previous commit (run
+          # 38771063483). This commit reruns the iPad light set with the back-button and
+          # column-scroll fixes, so the scheduling and settings sub-screens are reached.
+          - set: iPad-light-2
+            device: iPad
+            sim: "iPad Air 11-inch (M3)|iPad Pro 11-inch (M5)|iPad Pro 11-inch (M4)|iPad (A16)"
+            appearance: light
+            runs: >-
+              en|-|test_1_enUS_light
+              fr|-|test_2_frCA_light
+    env:
+      SET: ${{ matrix.set }}
+      DEVICE: ${{ matrix.device }}
+      PREFER: ${{ matrix.sim }}
+      APPEARANCE: ${{ matrix.appearance }}
+      RUNS: ${{ matrix.runs }}
+      NSUnbufferedIO: "YES"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: distronode-corporation/district-core-swift
+          ref: 7.0.0
+          path: core-fixtures
+          persist-credentials: false
+
+      - name: Xcode and XcodeGen
+        id: toolchain
+        uses: ./.github/actions/macos-toolchain # zizmor: ignore[self-repository]
+        with:
+          generate: "false"
+
+      # QA build only: the simulator talks to the mock on 127.0.0.1 over http.
+      - name: Allow the local mock
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          p = "project.yml"
+          s = open(p).read()
+          anchor = "      properties:\n        CFBundleDisplayName: District AI\n"
+          assert anchor in s, "Info.plist anchor moved"
+          s = s.replace(anchor, anchor + "        NSAppTransportSecurity:\n          NSAllowsLocalNetworking: true\n", 1)
+          open(p, "w").write(s)
+          PY
+          xcodegen generate --spec project.yml
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: SourcePackages
+          key: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-${{ hashFiles('project.yml') }}
+
+      - name: Resolve packages
+        run: |
+          xcodebuild -resolvePackageDependencies -project DistrictAI.xcodeproj -scheme DistrictAI \
+            -clonedSourcePackagesDirPath SourcePackages | tail -20
+
+      - name: Choose and dress the simulator
+        run: |
+          set -euo pipefail
+          ci/sim-udid.sh "$DEVICE" >/dev/null
+          python3 - <<'PY'
+          import json, os, subprocess
+          data = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "-j", "devices", "available"]))
+          wanted = os.environ["PREFER"].split("|")
+          found = {}
+          for runtime in sorted((k for k in data["devices"] if "iOS" in k), reverse=True):
+              for d in data["devices"][runtime]:
+                  found.setdefault(d["name"], (runtime, d["udid"]))
+          for name in wanted:
+              if name in found:
+                  print(f"chose {name} {found[name]}")
+                  open("simulator-udid.txt", "w").write(found[name][1])
+                  open("simulator-name.txt", "w").write(name)
+                  break
+          else:
+              print("no preferred device; keeping ci/sim-udid.sh's choice")
+          PY
+          udid="$(cat simulator-udid.txt)"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl status_bar "$udid" override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 \
+            --cellularMode active --cellularBars 4 --operatorName "" --batteryState charged --batteryLevel 100
+          xcrun simctl ui "$udid" appearance "$APPEARANCE"
+          xcrun simctl ui "$udid" appearance
+
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing -project DistrictAI.xcodeproj -scheme DistrictAI \
+            -destination "id=$(cat simulator-udid.txt)" -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages CODE_SIGNING_ALLOWED=NO 2>&1 \
+            | tee build.log | xcbeautify --renderer github-actions
+          grep -q '\*\* TEST BUILD SUCCEEDED \*\*' build.log
+
+      # Each run restarts the mock with its language's data and mode, then walks.
+      - name: Walks
+        timeout-minutes: 140
+        run: |
+          set -uo pipefail
+          udid="$(cat simulator-udid.txt)"
+          mkdir -p results
+          index=0
+          for run in $RUNS; do
+            index=$((index + 1))
+            IFS='|' read -r lang mode tests <<<"$run"
+            dirs="core-fixtures/contracts/mobile"
+            [ "$lang" = "fr" ] && dirs="qa/quebec:core-fixtures/contracts/mobile"
+            [ "$mode" = "-" ] && mode=""
+            pkill -f qa/mock_server.py || true
+            sleep 1
+            QA_MODE="$mode" nohup python3 qa/mock_server.py "$dirs" 8765 >"results/mock-$index.log" 2>&1 &
+            sleep 2
+            curl -fsS http://127.0.0.1:8765/api/district/workspace/list | head -c 160; echo
+            only=()
+            IFS=',' read -r -a names <<<"$tests"
+            for t in "${names[@]}"; do only+=("-only-testing:DistrictAIUITests/VisualQATourTests/$t"); done
+            echo "::group::run $index: $lang mode=${mode:-none} $tests (appearance $(xcrun simctl ui "$udid" appearance))"
+            xcodebuild test-without-building -project DistrictAI.xcodeproj -scheme DistrictAI \
+              -destination "id=$udid" -derivedDataPath DerivedData \
+              -clonedSourcePackagesDirPath SourcePackages -resultBundlePath "results/run-$index.xcresult" \
+              "${only[@]}" CODE_SIGNING_ALLOWED=NO 2>&1 | tee "results/walk-$index.log" \
+              | xcbeautify --renderer github-actions || true
+            echo "::endgroup::"
+            grep -h 'VQA-TOUR' "results/walk-$index.log" | sort -u || true
+          done
+          pkill -f qa/mock_server.py || true
+
+      - name: Export the frames
+        if: always()
+        run: |
+          mkdir -p shots
+          for r in results/run-*.xcresult; do
+            [ -d "$r" ] || continue
+            name="$(basename "$r" .xcresult)"
+            xcrun xcresulttool export attachments --path "$r" --output-path "shots/$name" >/dev/null || true
+          done
+          find shots -name '*.png' | wc -l
+          grep -h 'VQA-TOUR' results/walk-*.log | sort -u >shots/tour-report.txt || true
+          cp simulator-name.txt shots/ 2>/dev/null || true
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: vqa-${{ matrix.set }}
+          path: |
+            shots
+            results/*.log
+            build.log
+            simulator-udid.txt
+          if-no-files-found: warn
+          retention-days: 14

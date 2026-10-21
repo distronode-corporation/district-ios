@@ -1,0 +1,68 @@
+{
+  "ok": true,
+  "data": {
+    "items": [
+      {
+        "id": "et-qc-1",
+        "slug": "visite-estimation",
+        "name": "Visite d'estimation",
+        "description": "Un plombier passe évaluer les travaux et vous remet une soumission.",
+        "duration_minutes": 45,
+        "slot_interval_minutes": 15,
+        "location_type": "in_person",
+        "location_value": "Laval et Rive-Nord",
+        "routing_mode": "fixed",
+        "rr_strategy": "even",
+        "buffer_before_minutes": 5,
+        "buffer_after_minutes": 10,
+        "min_notice_minutes": 120,
+        "max_future_days": 60,
+        "max_active_bookings": 3,
+        "is_active": true,
+        "show_taken_slots": true,
+        "is_public": true,
+        "created_at": "2026-09-01T10:00:00Z",
+        "msg_confirmation": "À bientôt!",
+        "msg_cancellation": "Désolés de ne pas vous voir.",
+        "msg_reschedule": "Votre nouvelle heure est confirmée.",
+        "msg_reminder": "Votre visite a lieu demain.",
+        "msg_greeting": "Merci d'avoir réservé.",
+        "subj_confirmation": "Votre visite est confirmée",
+        "subj_cancellation": "Votre visite est annulée",
+        "subj_reschedule": "Votre visite a été déplacée",
+        "subj_reminder": "Rappel : votre visite",
+        "reminders": [
+          1440,
+          60
+        ],
+        "archived": false,
+        "owned": true,
+        "owner_name": "Karine Lanthier",
+        "owner_email": "karine.lanthier@plomberie-desrosiers.example"
+      },
+      {
+        "id": "et-qc-2",
+        "slug": "appel-soumission",
+        "name": "Appel de soumission",
+        "description": null,
+        "duration_minutes": 20,
+        "location_type": "phone",
+        "location_value": null,
+        "is_active": false,
+        "is_public": false,
+        "created_at": "2026-09-02T10:00:00Z",
+        "msg_confirmation": null,
+        "msg_cancellation": null,
+        "msg_reschedule": null,
+        "msg_reminder": null,
+        "msg_greeting": null,
+        "subj_confirmation": null,
+        "subj_cancellation": null,
+        "subj_reschedule": null,
+        "subj_reminder": null,
+        "reminders": null,
+        "archived": true
+      }
+    ]
+  }
+}

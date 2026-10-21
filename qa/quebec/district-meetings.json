@@ -1,0 +1,26 @@
+[
+  {
+    "id": "meeting_qc_live",
+    "roomName": "meet_ws-plomberie-desrosiers_repartition",
+    "title": "Répartition du matin",
+    "status": "in-progress",
+    "startedAt": "2026-10-14T11:30:00.000Z",
+    "endedAt": null,
+    "createdAt": "2026-10-14T11:30:00.000Z",
+    "durationSec": 0,
+    "summaryPreview": null,
+    "participantCount": 0
+  },
+  {
+    "id": "meeting_qc_completed",
+    "roomName": "meet_ws-plomberie-desrosiers_bilan-hebdo",
+    "title": "Bilan de la semaine",
+    "status": "completed",
+    "startedAt": "2026-10-10T19:00:00.000Z",
+    "endedAt": "2026-10-10T19:38:00.000Z",
+    "createdAt": "2026-10-10T19:00:00.000Z",
+    "durationSec": 2280,
+    "summaryPreview": "L'équipe a passé en revue les urgences de la semaine et convenu d'ajouter un plombier de garde le samedi. Karine rappelle les clients en attente de soumission, Olivier commande les chauffe-eau pour le chantier de la rue des Mélèzes, et le nouveau message d'accueil entre en vigueur lundi.",
+    "participantCount": 3
+  }
+]

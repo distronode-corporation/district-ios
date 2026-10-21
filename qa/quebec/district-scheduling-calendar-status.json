@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "data": {
+    "connected": true,
+    "configured": true,
+    "providers": [
+      "google",
+      "microsoft",
+      "caldav"
+    ],
+    "connections": [
+      {
+        "id": "cal-conn-qc-1",
+        "provider": "google",
+        "account_email": "repartition@plomberie-desrosiers.example",
+        "is_destination": true,
+        "check_conflicts": true
+      },
+      {
+        "id": "cal-conn-qc-2",
+        "provider": "caldav",
+        "account_email": "chantiers@plomberie-desrosiers.example",
+        "is_destination": false,
+        "check_conflicts": false
+      }
+    ],
+    "unconfigured_providers": [
+      "microsoft"
+    ],
+    "provider": "google"
+  }
+}
