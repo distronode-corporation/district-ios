@@ -139,7 +139,7 @@ jobs:
         with:
           generate: "false"
 
-      # Pinned by version and SHA-256, for the dSYM upload.
+      # Pinned by version and SHA-256, for the dSYM upload and the Sentry release.
       - name: Install sentry-cli
         run: |
           set -euo pipefail

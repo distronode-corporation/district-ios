@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Harness for archive-imac.sh, driven against stub uname/git/xcodegen/xcodebuild/sentry-cli.
+# Harness for archive-imac.sh, driven against stub uname/git/xcodegen/xcodebuild/plutil/sentry-cli.
 #
 #   bash scripts/archive-imac.test.sh
 #
@@ -165,7 +165,7 @@ echo "uname $*" >> "$CALLS_FILE"
 echo "${STUB_UNAME:-Darwin}"
 STUB
 
-  # A dirty tree, the branch and the commit count are all this script asks git.
+  # A dirty tree, the branch, the commit count and HEAD's sha are all this script asks git.
   # Anything else is a bug in the script, so the stub says so loudly rather than
   # answering plausibly.
   cat >"$STUB_DIR/git" <<'STUB'
@@ -175,6 +175,7 @@ case "$1" in
   status)   [ -n "${STUB_GIT_DIRTY:-}" ] && echo " M project.yml"; exit 0 ;;
   branch)   echo "${STUB_GIT_BRANCH:-main}"; exit 0 ;;
   rev-list) echo "${STUB_GIT_COUNT:-4211}"; exit 0 ;;
+  rev-parse) [ "$2" = HEAD ] && echo "${STUB_GIT_SHA:-0123456789abcdef0123456789abcdef01234567}" && exit 0 ;;
 esac
 echo "stub git: unhandled invocation: $*" >&2
 exit 2
@@ -206,12 +207,23 @@ if [ "${STUB_XCODEBUILD_FAIL:-}" = "$PHASE" ]; then
 fi
 if [ "$PHASE" = archive ]; then
   archive=""
+  build=""
   while [ $# -gt 0 ]; do
     [ "$1" = "-archivePath" ] && archive="$2"
+    case "$1" in CURRENT_PROJECT_VERSION=*) build="${1#*=}" ;; esac
     shift
   done
   app="$archive/Products/Applications/DistrictAI.app"
   mkdir -p "$app" "$archive/dSYMs"
+  # The bundle's Info.plist, as the stub plutil reads it: key=value lines. The build
+  # number is the one the archive was handed, as project.yml makes it on a real one.
+  if [ -z "${STUB_ARCHIVE_NO_PLIST:-}" ]; then
+    {
+      echo "CFBundleIdentifier=com.distronode.district"
+      echo "CFBundleShortVersionString=${STUB_SHORT_VERSION:-3.0.2}"
+      echo "CFBundleVersion=$build"
+    } >"$app/Info.plist"
+  fi
   if [ -n "${STUB_ARCHIVE_NO_BINARY:-}" ]; then
     : # an archive with no app binary, for the seam check's own precondition
   elif [ -n "${STUB_ARCHIVE_SEAM:-}" ]; then
@@ -236,6 +248,24 @@ fi
 exit 0
 STUB
 
+  # Answers `plutil -extract <key> raw -o - <file>` from the stub Info.plist above, and
+  # nothing else: any other shape is a bug in the script, so it fails loudly.
+  cat >"$STUB_DIR/plutil" <<'STUB'
+#!/bin/sh
+echo "plutil $*" >> "$CALLS_FILE"
+if [ "$#" != 6 ] || [ "$1" != -extract ] || [ "$3" != raw ] || [ "$4" != -o ] || [ "$5" != - ]; then
+  echo "stub plutil: unhandled invocation: $*" >&2
+  exit 2
+fi
+[ -f "$6" ] || { echo "stub plutil: no file $6" >&2; exit 1; }
+# Shell builtins only: the stub PATH has no sed.
+while IFS='=' read -r key value; do
+  [ "$key" = "$2" ] && { echo "$value"; exit 0; }
+done <"$6"
+echo "stub plutil: no key $2" >&2
+exit 1
+STUB
+
   # ⛔ RECORDS ITS ENVIRONMENT, NOT ONLY ITS ARGV, because the two facts that
   # matter about this call are both environmental: SENTRY_URL has to say
   # de.sentry.io (a US-pointed upload succeeds and does nothing) and the token
@@ -255,9 +285,13 @@ if [ -n "${STUB_SENTRYCLI_FAIL:-}" ]; then
   echo "stub sentry-cli: upload failed" >&2
   exit 1
 fi
+if [ "$1 $2" = "releases ${STUB_SENTRYCLI_FAIL_RELEASES:-none}" ]; then
+  echo "stub sentry-cli: releases $2 failed" >&2
+  exit 1
+fi
 STUB
 
-  chmod +x "$STUB_DIR"/uname "$STUB_DIR"/git \
+  chmod +x "$STUB_DIR"/uname "$STUB_DIR"/git "$STUB_DIR"/plutil \
     "$STUB_DIR"/xcodegen "$STUB_DIR"/xcodebuild "$SENTRYCLI_DIR"/sentry-cli
 
   RUN_PATH="$STUB_DIR:$REAL_BIN"
@@ -745,6 +779,8 @@ assert_zero "$RC" "the upload run succeeds"
 EXPECTED_SENTRY="sentry-cli debug-files upload"
 EXPECTED_SENTRY="$EXPECTED_SENTRY --org $STUB_SENTRY_ORG"
 EXPECTED_SENTRY="$EXPECTED_SENTRY --project district-ios"
+# Source bundles beside the dSYMs, so an issue shows its source lines.
+EXPECTED_SENTRY="$EXPECTED_SENTRY --include-sources"
 EXPECTED_SENTRY="$EXPECTED_SENTRY $STUB_DIR/out/DistrictAI.xcarchive/dSYMs"
 assert_eq "$(line_for 'sentry-cli debug-files ')" "$EXPECTED_SENTRY" "the sentry-cli argv is exact"
 # ⛔ THE ASSERTION THIS CASE EXISTS FOR. sentry-cli defaults to the US control
@@ -778,6 +814,70 @@ run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/ou
 # TestFlight with no symbols and nothing would say so.
 assert_nonzero "$RC" "a failed upload fails the script"
 assert_not_contains "$(calls)" "-exportArchive" "a failed upload is never exported past"
+assert_not_contains "$(calls)" "sentry-cli releases" "no release is created after a failed upload"
+
+# ── 21. The Sentry release and its commit ────────────────────────────────────
+# ⛔ THE NAME IS THE SDK'S, READ FROM THE ARCHIVED APP. Bundle id, short version and
+# the build number the archive was given (777 + 4101); one character off and Sentry
+# holds a second release no event lands in.
+echo "21. creates the release the app reports as, gives it HEAD's commit, and finalizes it"
+new_case
+RUN_PATH="$STUB_DIR:$SENTRYCLI_DIR:$REAL_BIN"
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  SENTRY_AUTH_TOKEN="$FAKE_SENTRY_TOKEN" SENTRY_ORG="$STUB_SENTRY_ORG" \
+  STUB_GIT_COUNT=777 STUB_SHORT_VERSION=3.1.0 STUB_GIT_SHA=feedfacefeedfacefeedfacefeedfacefeedface
+assert_zero "$RC" "the release run succeeds"
+RELEASE="com.distronode.district@3.1.0+4878"
+assert_contains "$OUT" "Sentry release: $RELEASE (commit feedfacefeedfacefeedfacefeedfacefeedface)" \
+  "it prints the release name and the commit"
+assert_contains "$(line_for 'plutil ')" "$STUB_DIR/out/DistrictAI.xcarchive/Products/Applications/DistrictAI.app/Info.plist" \
+  "the name is read from the archived app's Info.plist"
+assert_eq "$(line_for 'sentry-cli releases new ')" \
+  "sentry-cli releases new --org $STUB_SENTRY_ORG --project district-ios $RELEASE" \
+  "releases new: the argv is exact"
+assert_eq "$(line_for 'sentry-cli releases set-commits ')" \
+  "sentry-cli releases set-commits --org $STUB_SENTRY_ORG $RELEASE --commit distronode-corporation/district-ios@feedfacefeedfacefeedfacefeedfacefeedface --ignore-missing" \
+  "releases set-commits: the argv is exact"
+assert_eq "$(line_for 'sentry-cli releases finalize ')" \
+  "sentry-cli releases finalize --org $STUB_SENTRY_ORG $RELEASE" \
+  "releases finalize: the argv is exact"
+# ⛔ Every sentry-cli call, not only the first, goes to the EU host.
+assert_eq "$(line_count "$(calls)" 'sentry-cli env SENTRY_URL=https://de.sentry.io')" "4" \
+  "all four sentry-cli calls point at the EU API host"
+assert_eq "$(line_count "$(calls)" 'sentry-cli env SENTRY_URL=')" "4" "and no call goes anywhere else"
+assert_not_contains "$(calls)" "$FAKE_SENTRY_TOKEN" "the token is never passed as an argument"
+assert_not_contains "$OUT" "::warning::" "a release that worked raises no warning"
+assert_contains "$(calls)" "xcodebuild -exportArchive " "the export follows"
+
+# ── 22. A failed release step is a warning, never a failed archive ───────────
+echo "22. a failed release step warns and the archive still goes to the export"
+for step in new set-commits finalize; do
+  new_case
+  RUN_PATH="$STUB_DIR:$SENTRYCLI_DIR:$REAL_BIN"
+  run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+    SENTRY_AUTH_TOKEN="$FAKE_SENTRY_TOKEN" SENTRY_ORG="$STUB_SENTRY_ORG" \
+    STUB_SENTRYCLI_FAIL_RELEASES="$step"
+  assert_zero "$RC" "22 ($step): a failed release step does not fail the archive"
+  assert_contains "$OUT" "::warning::the Sentry release" "22 ($step): it says so as a run warning"
+  assert_contains "$(calls)" "xcodebuild -exportArchive " "22 ($step): the export still runs"
+  assert_not_contains "$OUT" "$FAKE_SENTRY_TOKEN" "22 ($step): the warning does not print the token"
+done
+# The chain stops at the first failure: nothing is finalized after a refused new.
+new_case
+RUN_PATH="$STUB_DIR:$SENTRYCLI_DIR:$REAL_BIN"
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  SENTRY_AUTH_TOKEN="$FAKE_SENTRY_TOKEN" SENTRY_ORG="$STUB_SENTRY_ORG" STUB_SENTRYCLI_FAIL_RELEASES=new
+assert_not_contains "$(calls)" "sentry-cli releases finalize" "22: no finalize after a failed new"
+
+echo "22b. an archive with no readable Info.plist warns and creates no release"
+new_case
+RUN_PATH="$STUB_DIR:$SENTRYCLI_DIR:$REAL_BIN"
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  SENTRY_AUTH_TOKEN="$FAKE_SENTRY_TOKEN" SENTRY_ORG="$STUB_SENTRY_ORG" STUB_ARCHIVE_NO_PLIST=1
+assert_zero "$RC" "22b: no Info.plist does not fail the archive"
+assert_contains "$OUT" "::warning::the Sentry release" "22b: it warns"
+assert_not_contains "$(calls)" "sentry-cli releases" "22b: no release under a guessed name"
+assert_contains "$(calls)" "sentry-cli debug-files upload" "22b: the dSYMs were still uploaded"
 
 echo
 echo "passed $PASS, failed $FAIL"
