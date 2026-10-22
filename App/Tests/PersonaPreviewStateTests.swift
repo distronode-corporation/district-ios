@@ -157,6 +157,18 @@ final class PersonaPreviewStateTests: XCTestCase {
         XCTAssertEqual(harness.engine.disconnects, 1)
     }
 
+    /// ⛔ 3.0.3: A FAILURE NEVER SHOWS THE SDK'S OWN TEXT. LiveKit's English error
+    /// description ("Room deleted") is logged by ``RoomEngine``; the sheet says the catalog's
+    /// sentence.
+    func testAnSDKFailureShowsTheCatalogsSentenceNotTheSDKsText() async {
+        let harness = Harness()
+        await harness.model.start()
+        harness.engine.emit(.failed(message: "Room deleted"))
+        await waitUntil { harness.model.phase == .failed }
+        XCTAssertEqual(harness.model.failure?.message, SettingsCopy.previewDropped)
+        await harness.model.end()
+    }
+
     /// ⛔ A FAILED MINT IS FINAL AND BUILDS NO ENGINE. The route is not idempotent and
     /// each token starts a billed session, so nothing here retries.
     func testARefusedMintFailsWithoutBuildingAnEngine() async {

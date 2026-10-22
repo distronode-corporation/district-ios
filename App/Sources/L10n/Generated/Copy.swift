@@ -2559,11 +2559,6 @@ extension RoomsCopy {
     /// `rooms.state_dropped`
     internal static var stateDropped: String { AppL10n.copyLocale == .frCA ? "Votre connexion à cette salle a été coupée." : "You were disconnected from this room." }
 
-    /// `rooms.state_dropped_because`
-    internal static func stateDroppedBecause(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Votre connexion à cette salle a été coupée. (\(reason))" : "You were disconnected from this room. (\(reason))"
-    }
-
     /// `rooms.state_failed`
     internal static var stateFailed: String { AppL10n.copyLocale == .frCA ? "La connexion à cette salle a été perdue." : "The connection to this room was lost." }
 
@@ -5075,11 +5070,6 @@ extension SettingsCopy {
 
     /// `settings.preview_dropped`
     internal static var previewDropped: String { AppL10n.copyLocale == .frCA ? "L'aperçu a pris fin sans avoir été arrêté ici." : "The preview ended without being stopped here." }
-
-    /// `settings.preview_dropped_because`
-    internal static func previewDroppedBecause(_ reason: String) -> String {
-        AppL10n.copyLocale == .frCA ? "L'aperçu a pris fin sans avoir été arrêté ici. \(reason)" : "The preview ended without being stopped here. \(reason)"
-    }
 
     /// `settings.preview_end`
     internal static var previewEnd: String { AppL10n.copyLocale == .frCA ? "Arrêter l'aperçu" : "End preview" }

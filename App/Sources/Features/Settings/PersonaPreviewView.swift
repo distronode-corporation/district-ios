@@ -101,12 +101,13 @@ struct PersonaPreviewView: View {
     /// ⛔ THE THREE ENDINGS READ DIFFERENTLY BECAUSE THEY ARE DIFFERENT. Telling somebody
     /// they stopped a session that a call took from them, on a screen whose next button
     /// spends money, is how a second one gets started.
-    private static func endingText(_ ending: PersonaPreviewEnding) -> String {
+    static func endingText(_ ending: PersonaPreviewEnding) -> String {
         switch ending {
         case .stopped:
             SettingsCopy.previewEnded
-        case let .droppedRemotely(reason):
-            reason.map { SettingsCopy.previewDroppedBecause($0) } ?? SettingsCopy.previewDropped
+        // ⛔ NEVER THE SDK'S OWN TEXT (3.0.3): see ``RoomBanner``.
+        case .droppedRemotely:
+            SettingsCopy.previewDropped
         case let .yielded(reason):
             switch reason {
             case .telephoneCall: SettingsCopy.previewYieldedToCall

@@ -6779,16 +6779,6 @@ state = "reviewed"
 id = { swift = "RoomsCopy.stateDropped" }
 note = "⛔ IT DOES NOT GUESS WHY, AND IT DOES NOT SAY THE MEETING IS OVER. Being removed by the media server, the room being deleted, a token expiring and a duplicate identity evicting this session all arrive the same way with no reason attached, and the meeting may well still be running for everybody else — which is why Rejoin sits beside this sentence rather than a full stop."
 
-[rooms.state_dropped_because]
-en = "You were disconnected from this room. ({reason})"
-fr = "Votre connexion à cette salle a été coupée. ({reason})"
-ctx = "body"
-screen = "rooms"
-args = { reason = "str" }
-state = "reviewed"
-id = { swift = "RoomsCopy.stateDroppedBecause(_:)" }
-note = "rooms.state_dropped with the reason the server sent, in parentheses. The reason is sent in the minority case: a clean eviction carries nothing, so rooms.state_dropped alone is the usual one."
-
 [rooms.state_failed]
 en = "The connection to this room was lost."
 fr = "La connexion à cette salle a été perdue."
@@ -13486,17 +13476,7 @@ ctx = "body"
 screen = "settings.persona"
 state = "reviewed"
 id = { swift = "SettingsCopy.previewDropped" }
-note = "⚠️ A DISCONNECT NOBODY ASKED FOR IS NOT \"ended\", and the reason is shown when the server gave one."
-
-[settings.preview_dropped_because]
-en = "The preview ended without being stopped here. {reason}"
-fr = "L'aperçu a pris fin sans avoir été arrêté ici. {reason}"
-ctx = "body"
-screen = "settings.persona"
-args = { reason = "str" }
-state = "reviewed"
-id = { swift = "SettingsCopy.previewDroppedBecause(_:)" }
-note = "{reason} is the server's own reason. The first sentence is settings.preview_dropped."
+note = "⚠️ A DISCONNECT NOBODY ASKED FOR IS NOT \"ended\". The SDK's reason is logged, never shown (3.0.3): it is LiveKit's English text."
 
 [settings.preview_end]
 en = "End preview"

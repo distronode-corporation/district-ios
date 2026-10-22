@@ -1,6 +1,10 @@
 import AVFoundation
 import Foundation
 import LiveKit
+import OSLog
+
+/// ⚠️ THE SDK'S OWN TEXT GOES HERE, NEVER ON SCREEN (3.0.3): see ``RoomBanner``.
+private let roomLog = Logger(subsystem: "com.distronode.district", category: "Rooms")
 
 /// The multi-party room's own LiveKit session.
 ///
@@ -135,6 +139,7 @@ final class RoomEngine: @unchecked Sendable {
             // only when the role and the OS permission both allow it.
             try await room.connect(url: url, token: token)
         } catch {
+            roomLog.info("join failed: \(error.localizedDescription, privacy: .public)")
             continuation.yield(.failed(message: error.localizedDescription))
             throw error
         }
@@ -402,12 +407,18 @@ private final class RoomSessionBridge: NSObject, RoomDelegate, @unchecked Sendab
 
     @objc
     func room(_ room: Room, didFailToConnectWithError error: LiveKitError?) {
+        if let error {
+            roomLog.info("join failed: \(error.localizedDescription, privacy: .public)")
+        }
         continuation.yield(.failed(message: error?.localizedDescription))
     }
 
     /// ⚠️ A nil ERROR IS THE CLEAN DISCONNECT.
     @objc
     func room(_ room: Room, didDisconnectWithError error: LiveKitError?) {
+        if let error {
+            roomLog.info("room disconnected: \(error.localizedDescription, privacy: .public)")
+        }
         continuation.yield(.disconnected(reason: error?.localizedDescription))
     }
 

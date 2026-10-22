@@ -72,22 +72,19 @@ struct RoomBanner {
         // ⛔ WARNING RATHER THAN DANGER, AND THE SENTENCE DOES NOT SAY "you left". The
         // meeting is probably still running and the operator can rejoin; a red bar
         // saying they left would be wrong twice over. See the ⛔ on ``RoomPhase``.
-        case let .droppedRemotely(reason):
-            RoomBanner(text: RoomBanner.dropped(reason), tone: .warning)
+        // ⛔ NEVER THE SDK'S OWN TEXT (3.0.3). The reason is LiveKit's English error
+        // description ("Room deleted" when the room went), no sentence for a person and
+        // never French; ``RoomEngine`` logs it. The call screens follow the same rule
+        // (`InCallCopy.word(for:)`).
+        case .droppedRemotely:
+            RoomBanner(text: RoomsCopy.stateDropped, tone: .warning)
         // ⚠️ NEUTRAL, BECAUSE NOTHING WENT WRONG. Something with a stronger claim on
         // the device's audio took it, which is a fact rather than a fault.
         case let .yielded(reason):
             RoomBanner(text: RoomBanner.yielded(reason), tone: .neutral)
-        case let .failed(message):
-            RoomBanner(text: message ?? RoomsCopy.stateFailed, tone: .danger)
+        case .failed:
+            RoomBanner(text: RoomsCopy.stateFailed, tone: .danger)
         }
-    }
-
-    /// ⚠️ THE SERVER'S REASON WHEN THERE IS ONE, WHICH IS THE MINORITY CASE. A clean
-    /// eviction carries nothing at all.
-    private static func dropped(_ reason: String?) -> String {
-        guard let reason, !reason.isEmpty else { return RoomsCopy.stateDropped }
-        return RoomsCopy.stateDroppedBecause(reason)
     }
 
     /// ⛔ THE THREE REASONS GET THREE SENTENCES. Which one took the audio is the only

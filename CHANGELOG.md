@@ -12,6 +12,21 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- 3.0.3: a room or a persona preview that ends on its own no longer shows LiveKit's own
+  text (port of District AI for Mac #74). A meeting whose room was deleted read "You were
+  disconnected from this room. (Room deleted)", and the preview "The preview ended without
+  being stopped here. Room deleted": the SDK's English error description passed through as
+  the reason, English on a French screen too. A failed join showed the SDK's message the
+  same way. The banner and the preview now always say the catalog's sentence
+  (`rooms.state_dropped`, `rooms.state_failed`, `settings.preview_dropped`), and
+  `RoomEngine` logs the SDK's text (`Logger`, category `Rooms`), as the call screens have
+  done since 3.0.2. The two catalog entries that carried the reason
+  (`rooms.state_dropped_because`, `settings.preview_dropped_because`) are removed; no
+  string is added or reworded. Tested in `RoomEndWordingTests` and
+  `PersonaPreviewStateTests`.
+
+### Fixed
+
 - 3.0.2: an answered call joins before its speaker starts (port of district-macos #64). The
   softphone joined with LiveKit's auto-subscribe, so the server's first subscriber offer
   already carried the caller's and the agent's audio, and applying it starts the speaker
