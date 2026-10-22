@@ -215,7 +215,8 @@ final class PersonaPreviewModel: RoomAudio {
             // that the throw was seen. Letting it escape would crash the process over a
             // network condition.
             phase = .failed
-            failure = FailureText(message: error.localizedDescription, action: .none)
+            // ⛔ NEVER THE SDK'S OWN TEXT (3.0.3); ``RoomEngine`` logs it.
+            failure = FailureText(message: SettingsCopy.previewDropped, action: .none)
             callStack.releaseRoom(self)
             return
         }
@@ -316,9 +317,9 @@ final class PersonaPreviewModel: RoomAudio {
             // ⛔ UNREACHABLE AND HANDLED ANYWAY. This path publishes no camera and the
             // agent has none; a `default` here would swallow a future case that mattered.
             break
-        case let .failed(message):
+        case .failed:
             phase = .failed
-            failure = FailureText(message: message ?? SettingsCopy.previewDropped, action: .none)
+            failure = FailureText(message: SettingsCopy.previewDropped, action: .none)
             callStack.releaseRoom(self)
             startCooldown()
         }
