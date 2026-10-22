@@ -1,4 +1,5 @@
 Une petite mise à jour.
 
 - Les exécutions récentes d'un flux de travail indiquent maintenant en français pourquoi une étape n'a pas pu aviser votre équipe, par exemple parce qu'aucun membre de l'équipe n'a l'application sur un appareil qui peut recevoir des notifications.
+- Les salles et l'aperçu de la persona indiquent en termes simples qu'une séance a pris fin ou que la connexion a échoué, au lieu d'afficher un message technique.
 - Le signalement des plantages passe à la dernière version stable.

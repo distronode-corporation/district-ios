@@ -318,6 +318,7 @@ built from history before publication, so they have no tags in this repository.
 A small update.
 
 - In French, a workflow's Recent runs now say why a step could not notify your team, for example that no team member has the app on a device that can receive notifications.
+- Rooms and Preview persona say in plain words when a session ends or cannot connect, instead of showing a technical message.
 - Crash reporting is updated to the latest stable version.
 
 ## [3.0.2] - 2026-10-16
