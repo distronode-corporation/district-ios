@@ -71,7 +71,7 @@ packages:
   # package's five libraries, unchanged by the move.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    exactVersion: 7.0.2
+    exactVersion: 7.0.3
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
@@ -431,7 +431,7 @@ targets:
         # nothing failing to compile; a server-side test reads this line and is
         # what stops that.
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district
-        MARKETING_VERSION: "3.0.2"
+        MARKETING_VERSION: "3.0.3"
         # ⚠️ A PLACEHOLDER THAT THE RELEASE SCRIPT OVERRIDES. `scripts/archive-imac.sh`
         # passes `CURRENT_PROJECT_VERSION` (an offset plus the commit count), because
         # App Store Connect refuses a build number it has already seen. Nothing
