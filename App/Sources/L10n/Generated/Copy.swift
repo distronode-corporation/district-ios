@@ -1189,7 +1189,7 @@ extension HQCopy {
     internal static var promptLabel: String { AppL10n.copyLocale == .frCA ? "Demander" : "Ask" }
 
     /// `hq.prompt_placeholder`
-    internal static var promptPlaceholder: String { AppL10n.copyLocale == .frCA ? "Tapez votre question…" : "Type your question…" }
+    internal static var promptPlaceholder: String { AppL10n.copyLocale == .frCA ? "Posez votre question…" : "Type your question…" }
 
     /// `hq.retry`
     internal static var retry: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }

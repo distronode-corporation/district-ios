@@ -13,7 +13,7 @@ built from history before publication, so they have no tags in this repository.
 ### Fixed
 
 - District HQ's question box no longer repeats "Ask", the label printed above it: it shows
-  its own placeholder, "Type your question…" (« Tapez votre question… »,
+  its own placeholder, "Type your question…" (« Posez votre question… »,
   `hq.prompt_placeholder`). "Ask" stays the field's title, so VoiceOver still names it.
   `HQComposerCopyTests` (2) holds both.
 

@@ -12,7 +12,7 @@ final class HQComposerCopyTests: XCTestCase {
 
     func test_HQ_PROMPT_1_thePlaceholderIsNotTheLabelInEitherLanguage() {
         XCTAssertEqual(HQCopy.promptPlaceholder, "Type your question…")
-        XCTAssertEqual(french { HQCopy.promptPlaceholder }, "Tapez votre question…")
+        XCTAssertEqual(french { HQCopy.promptPlaceholder }, "Posez votre question…")
         XCTAssertNotEqual(HQCopy.promptPlaceholder, HQCopy.promptLabel)
         XCTAssertNotEqual(french { HQCopy.promptPlaceholder }, french { HQCopy.promptLabel })
     }
