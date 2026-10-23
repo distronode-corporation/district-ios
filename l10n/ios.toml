@@ -1427,6 +1427,16 @@ tier = "T0"
 state = "reviewed"
 id = { swift = "CommonCopy.markRead" }
 
+[common.mark_read_failed]
+en = "Conversation not marked read"
+fr = "Conversation non marquée comme lue"
+ctx = "notification"
+screen = "platform"
+tier = "T0"
+state = "reviewed"
+id = { swift = "CommonCopy.markReadFailed" }
+note = "Title of a local notification after Mark read, pressed on a message notification while the app was closed or in the background, did not go through. The body says why."
+
 [common.reply]
 en = "Reply"
 fr = "Répondre"

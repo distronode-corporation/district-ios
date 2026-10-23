@@ -560,6 +560,9 @@ extension CommonCopy {
     /// `common.mark_read`
     internal static var markRead: String { AppL10n.copyLocale == .frCA ? "Marquer comme lu" : "Mark read" }
 
+    /// `common.mark_read_failed`
+    internal static var markReadFailed: String { AppL10n.copyLocale == .frCA ? "Conversation non marquée comme lue" : "Conversation not marked read" }
+
     /// `common.reply`
     internal static var reply: String { AppL10n.copyLocale == .frCA ? "Répondre" : "Reply" }
 

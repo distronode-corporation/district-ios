@@ -62,6 +62,10 @@ struct DistrictApp: App {
         self.container = container
         push = PushRegistrar(container: container)
         incoming = IncomingCallModel(container: container)
+        // ⛔ HERE, NOT IN `body`. A Reply or Mark read from a locked phone or a watch
+        // launches the app in the background with no scene, so `onAppear` never runs;
+        // `init` runs on every launch. See ``NotificationActionInbox``.
+        NotificationActionInbox.process.adopt(container.notificationActions)
     }
 
     var body: some Scene {

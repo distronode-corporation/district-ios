@@ -34,7 +34,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     /// is a Swift 6 diagnostic. A `lazy` initial value is evaluated at first
     /// ACCESS, and every access below is from a main-actor delegate callback.
     private lazy var relay = PushTapRelay()
-    private lazy var presenter = NotificationPresenter(relay: relay)
+    private lazy var presenter = NotificationPresenter(relay: relay, actions: .process)
 
     /// ⛔ NOT `weak`, UNLIKE ``registrar``, BECAUSE NOTHING ELSE OWNS IT. The
     /// registrar and the incoming model belong to `DistrictApp`; this adapter is

@@ -70,8 +70,9 @@ enum MessageNotificationAction {
     /// shape anyway: the set of shade actions belongs to the type that defines them.
     ///
     /// ⛔ IT MUST STAY IN STEP WITH ``NotificationCategories``. Any action added to
-    /// the registered category needs its identifier here too, or the shell will route
-    /// its tap to the deep-link path and open the inbox instead of acting.
+    /// the registered category needs its identifier here too (and a ``MessageAction``),
+    /// or ``NotificationPresenter`` will route it to the deep-link path and open the
+    /// inbox instead of acting.
     static func isShadeAction(_ identifier: String) -> Bool {
         identifier == reply || identifier == markRead
     }
@@ -146,9 +147,8 @@ enum NotificationCategories {
     /// on screen.
     ///
     /// ⚠️ FIRE AND FORGET. `center.add` can itself fail (authorization withdrawn between
-    /// the action and now), and there is no third place to report that; the reply
-    /// failure is already recorded where it can be — see ``ShellView``'s action handler,
-    /// which does not depend on this landing.
+    /// the action and now), and there is no third place to report that. The caller is
+    /// ``NotificationFailureReporter``, for ``NotificationActionHandler``.
     static func postReplyFailure(
         text: String,
         reason: String,
@@ -163,6 +163,26 @@ enum NotificationCategories {
             identifier: "district.reply-failed.\(UUID().uuidString)",
             content: content,
             // ⚠️ nil MEANS "as soon as possible", which is what a failure report wants.
+            trigger: nil
+        )
+        center.add(request, withCompletionHandler: nil)
+    }
+
+    /// Tell the operator a Mark read from the shade did not go through.
+    ///
+    /// ⚠️ QUIETER STAKES THAN A REPLY, SAME RULE: the notification is gone, so the
+    /// unread badge staying up would be the only trace, and it reads as the app ignoring
+    /// the button. No category, so no button to press again; fire and forget, as above.
+    static func postMarkReadFailure(
+        reason: String,
+        on center: UNUserNotificationCenter = .current()
+    ) {
+        let content = UNMutableNotificationContent()
+        content.title = CommonCopy.markReadFailed
+        content.body = reason
+        let request = UNNotificationRequest(
+            identifier: "district.mark-read-failed.\(UUID().uuidString)",
+            content: content,
             trigger: nil
         )
         center.add(request, withCompletionHandler: nil)

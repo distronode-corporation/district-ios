@@ -259,7 +259,7 @@ final class SessionModel {
     /// a REASON ("signed out after 60 days", "could not be verified"), and
     /// Android's `SignInScreen` likewise shows no status on a cold start.
     /// `SignInView` renders the panel only for a non-empty reason.
-    private static func text(for reason: ReauthReason) -> String {
+    static func text(for reason: ReauthReason) -> String {
         switch reason {
         case .noSession:
             ""
@@ -275,7 +275,7 @@ final class SessionModel {
         }
     }
 
-    private static func text(for reason: RetryReason) -> String {
+    static func text(for reason: RetryReason) -> String {
         switch reason {
         case .refreshThrottled:
             SessionCopy.refreshThrottled
