@@ -150,10 +150,10 @@ struct HQView: View {
     /// send is the same silent no-op wearing a different control.
     private var composer: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
-            // ⚠️ THE WORD "Ask" APPEARS TWICE ON PURPOSE. The eyebrow is the visible
-            // label; a `TextField`'s title is what VoiceOver reads as the field's name,
-            // and dropping it to avoid the repeat leaves the control announced as "text
-            // field" and nothing else. ``ComposerBar`` makes the same call.
+            // ⚠️ "Ask" IS THE EYEBROW AND THE FIELD'S TITLE, NOT ITS PLACEHOLDER. The title
+            // is what VoiceOver reads as the field's name, so it stays; the box shows its
+            // own prompt (``HQCopy/promptPlaceholder``) instead of repeating the word printed
+            // just above it (3.0.3 visual walk, as AP-021 did for the settings fields).
             DistrictEyebrow(text: HQCopy.promptLabel)
             HStack(alignment: .bottom, spacing: DistrictSpacing.tight) {
                 field
@@ -179,7 +179,7 @@ struct HQView: View {
     }
 
     private var field: some View {
-        TextField(HQCopy.promptLabel, text: $draft, axis: .vertical)
+        TextField(HQCopy.promptLabel, text: $draft, prompt: Text(HQCopy.promptPlaceholder), axis: .vertical)
             .lineLimit(1 ... 5)
             .disabled(!model.canAsk)
             .districtField()
