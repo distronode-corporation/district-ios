@@ -6,7 +6,7 @@
                                           # a broken catalog rule or an Info.plist drift
                                           # (what CI runs)
 
-Three catalogs, three outputs. The vendored tools in `tools/l10n/` (copied from the
+Four catalogs. The first three are the iPhone app's, the fourth the Apple Watch app's. The vendored tools in `tools/l10n/` (copied from the
 monorepo's `i18n/tools/`, see `tools/l10n/SOURCE.toml`) do the writing.
 
 - `l10n/ios.toml`: every sentence the app's screens say. It becomes
@@ -19,6 +19,13 @@ monorepo's `i18n/tools/`, see `tools/l10n/SOURCE.toml`) do the writing.
 - `l10n/infoplist.toml`: the permission prompts iOS reads from `InfoPlist.strings`.
   ⛔ EACH ENGLISH MUST EQUAL project.yml's Info.plist VALUE, which the OS shows when a
   language has no table; `--check` compares them.
+- `l10n/watch.toml`: every sentence the watch app and its complication say. It becomes
+  `Watch/Sources/L10n/Generated/Copy.swift` (`extension WatchCopy`), which reads
+  `WatchL10n.copyLocale` and imports nothing: ⛔ NO DistrictCore ON THE WATCH. The same
+  catalog is also written as `Localizable.strings` into `Watch/Localization/en.lproj` and
+  `fr-CA.lproj`, which is what makes the watch bundles declare Canadian French at all
+  (`Bundle.preferredLocalizations` answers only languages a bundle ships).
+- `l10n/watch-infoplist.toml`: the watch bundles' `InfoPlist.strings` (their display name).
 
 ⛔ THE TWO LANGUAGES' TABLES LIVE APART. `en.lproj` sits in `App/Resources/` and
 `fr-CA.lproj` in `App/Localization/`; project.yml takes both into every build since 3.0.
@@ -54,6 +61,20 @@ SWIFT_OPTS = [
 # catalog -> the .strings table it becomes
 TABLES = {"l10n/push.toml": "Localizable", "l10n/infoplist.toml": "InfoPlist"}
 LPROJ = {"en.lproj": ROOT / "App/Resources/en.lproj", "fr-CA.lproj": ROOT / "App/Localization/fr-CA.lproj"}
+# The Apple Watch app (Watch/, Complications/): its own catalog, accessors and tables.
+WATCH_CATALOGS = ["l10n/watch.toml"]
+WATCH_SWIFT = "Watch/Sources/L10n/Generated/Copy.swift"
+WATCH_SWIFT_OPTS = [
+    "--opt", "extension=true",
+    "--opt", "runtime=external",
+    "--opt", "access=internal",
+    "--opt", "locale_expr=WatchL10n.copyLocale",
+]
+# ⛔ BOTH TABLES IN BOTH WATCH BUNDLES (the app and the complication share
+# Watch/Localization): scripts/archive-imac.sh refuses a release whose nested bundle lacks
+# fr-CA.lproj/Localizable.strings or fr-CA.lproj/InfoPlist.strings.
+WATCH_TABLES = {"l10n/watch.toml": "Localizable", "l10n/watch-infoplist.toml": "InfoPlist"}
+WATCH_LPROJ = {"en.lproj": ROOT / "Watch/Localization/en.lproj", "fr-CA.lproj": ROOT / "Watch/Localization/fr-CA.lproj"}
 
 
 def tool(*args: str, quiet: bool = False) -> int:
@@ -64,14 +85,15 @@ def tool(*args: str, quiet: bool = False) -> int:
 def strings_files(scratch: Path) -> dict[Path, bytes]:
     """Every .strings file the catalogs produce, keyed by where it belongs in the tree."""
     out: dict[Path, bytes] = {}
-    for catalog, table in TABLES.items():
-        target = scratch / table
-        code = tool("gen", "--backend", "apple-strings", catalog, "--out", str(target),
-                    "--opt", f"name={table}", "--opt", "_quiet=1", quiet=True)
-        if code:
-            raise SystemExit(code)
-        for folder, home in LPROJ.items():
-            out[home / f"{table}.strings"] = (target / folder / f"{table}.strings").read_bytes()
+    for tables, lproj, prefix in ((TABLES, LPROJ, "app"), (WATCH_TABLES, WATCH_LPROJ, "watch")):
+        for catalog, table in tables.items():
+            target = scratch / prefix / table
+            code = tool("gen", "--backend", "apple-strings", catalog, "--out", str(target),
+                        "--opt", f"name={table}", "--opt", "_quiet=1", quiet=True)
+            if code:
+                raise SystemExit(code)
+            for folder, home in lproj.items():
+                out[home / f"{table}.strings"] = (target / folder / f"{table}.strings").read_bytes()
     return out
 
 
@@ -99,6 +121,8 @@ def main(argv: list[str]) -> int:
     if argv == ["--check"]:
         code = tool("check", *SWIFT_CATALOGS, "--gen", f"swift:{SWIFT}", *SWIFT_OPTS)
         code |= tool("check", *TABLES)
+        code |= tool("check", "l10n/watch-infoplist.toml")
+        code |= tool("check", *WATCH_CATALOGS, "--gen", f"swift:{WATCH_SWIFT}", *WATCH_SWIFT_OPTS)
         stale = [str(p.relative_to(ROOT)) for p, data in tables.items() if not p.exists() or p.read_bytes() != data]
         for path in stale:
             print(f"{path}: stale, run python3 scripts/gen-l10n.py", file=sys.stderr)
@@ -107,6 +131,7 @@ def main(argv: list[str]) -> int:
             print(line, file=sys.stderr)
         return 1 if code or stale or drift else 0
     code = tool("gen", "--backend", "swift", *SWIFT_CATALOGS, "--out", SWIFT, *SWIFT_OPTS)
+    code |= tool("gen", "--backend", "swift", *WATCH_CATALOGS, "--out", WATCH_SWIFT, *WATCH_SWIFT_OPTS)
     for path, data in tables.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)

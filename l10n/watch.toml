@@ -1,0 +1,412 @@
+[meta]
+catalog = "watch"
+platform = "swift"
+apple = true
+
+[watch.availability]
+en = "Availability"
+fr = "Disponibilité"
+ctx = "title"
+screen = "complication"
+state = "reviewed"
+id = { swift = "WatchCopy.availability" }
+note = "The complication's name in the watch-face editor."
+
+[watch.availability_description]
+en = "Shows whether calls ring to you."
+fr = "Indique si les appels sonnent pour vous."
+ctx = "body"
+screen = "complication"
+state = "reviewed"
+id = { swift = "WatchCopy.availabilityDescription" }
+note = "The complication's description in the watch-face editor."
+
+[watch.availability_failed]
+en = "Availability not changed"
+fr = "Disponibilité non modifiée"
+ctx = "error"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.availabilityFailed" }
+note = "Title over the iPhone's reason when the watch's Available for calls switch did not go through."
+
+[watch.availability_unreadable]
+en = "Could not read whether calls ring to you."
+fr = "Impossible de savoir si les appels sonnent pour vous."
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.availabilityUnreadable" }
+note = "The iPhone could not read the availability. Same sentence as the iPhone's availability.load_failed."
+
+[watch.available]
+en = "Available"
+fr = "Disponible"
+ctx = "label"
+screen = "complication"
+state = "reviewed"
+id = { swift = "WatchCopy.available" }
+note = "Watch-face complication: calls ring to you in the workspace named beside it."
+
+[watch.available_for_calls]
+en = "Available for calls"
+fr = "Disponible pour les appels"
+ctx = "label"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.availableForCalls" }
+note = "The watch's switch. Same words as the iPhone's availability row."
+
+[watch.available_in]
+en = "Available · {workspace}"
+fr = "Disponible · {workspace}"
+ctx = "label"
+screen = "complication"
+args = { workspace = "str" }
+state = "reviewed"
+id = { swift = "WatchCopy.availableIn(_:)" }
+note = "Inline watch-face complication. {workspace} is the workspace's name."
+
+[watch.calls]
+en = "Calls"
+fr = "Appels"
+ctx = "title"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.calls" }
+
+[watch.calls_in]
+en = "Calls in {workspace}"
+fr = "Appels de l'espace {workspace}"
+ctx = "label"
+screen = "watch"
+args = { workspace = "str" }
+state = "reviewed"
+id = { swift = "WatchCopy.callsIn(_:)" }
+note = "Under the Available for calls switch: which workspace it is about. {workspace} is the workspace's name."
+
+[watch.canned_call_back]
+en = "I'll call you back shortly."
+fr = "Je vous rappelle sous peu."
+ctx = "button"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.cannedCallBack" }
+note = "A ready-made reply, sent as written to a customer by SMS or email."
+
+[watch.canned_cant_talk]
+en = "I can't talk right now. I'll reply soon."
+fr = "Je ne peux pas parler pour l'instant. Je vous réponds bientôt."
+ctx = "button"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.cannedCantTalk" }
+note = "A ready-made reply, sent as written to a customer by SMS or email."
+
+[watch.canned_on_my_way]
+en = "On my way."
+fr = "J'arrive."
+ctx = "button"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.cannedOnMyWay" }
+note = "A ready-made reply, sent as written to a customer by SMS or email."
+
+[watch.canned_thanks]
+en = "Thanks, got it."
+fr = "Merci, bien reçu."
+ctx = "button"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.cannedThanks" }
+note = "A ready-made reply, sent as written to a customer by SMS or email."
+
+[watch.cannot_reply]
+en = "This conversation has no channel to reply on."
+fr = "Cette conversation n'a aucun canal pour répondre."
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.cannotReply" }
+note = "Shown instead of the reply buttons when the server offers no SMS or email address for the thread."
+
+[watch.could_not_load]
+en = "Your iPhone could not load this. Open District AI on your iPhone."
+fr = "Votre iPhone n'a pas pu charger ceci. Ouvrez District AI sur votre iPhone."
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.couldNotLoad" }
+note = "A list the iPhone could not read. Not the same as an empty list."
+
+[watch.dictate_reply]
+en = "Write a reply"
+fr = "Écrire une réponse"
+ctx = "placeholder"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.dictateReply" }
+note = "The watch's text field for a reply: dictation, Scribble or the keyboard."
+
+[watch.duration]
+en = "Duration"
+fr = "Durée"
+ctx = "label"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.duration" }
+
+[watch.inbox]
+en = "Inbox"
+fr = "Réception"
+ctx = "title"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.inbox" }
+
+[watch.iphone_did_not_answer]
+en = "Your iPhone did not answer. Try again."
+fr = "Votre iPhone n'a pas répondu. Réessayez."
+ctx = "error"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.iphoneDidNotAnswer" }
+note = "The message reached no answer in time. The write may or may not have happened."
+
+[watch.iphone_not_reachable]
+en = "iPhone not reachable"
+fr = "iPhone injoignable"
+ctx = "error"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.iphoneNotReachable" }
+
+[watch.iphone_not_reachable_body]
+en = "Keep your iPhone nearby and try again."
+fr = "Gardez votre iPhone à proximité et réessayez."
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.iphoneNotReachableBody" }
+
+[watch.mark_read]
+en = "Mark read"
+fr = "Marquer comme lu"
+ctx = "button"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.markRead" }
+note = "Same words as the notification's Mark read button."
+
+[watch.mark_read_failed]
+en = "Conversation not marked read"
+fr = "Conversation non marquée comme lue"
+ctx = "error"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.markReadFailed" }
+note = "Title over the iPhone's reason. Same words as the iPhone's local notification."
+
+[watch.marked_read]
+en = "Conversation marked read"
+fr = "Conversation marquée comme lue"
+ctx = "toast"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.markedRead" }
+
+[watch.no_calls]
+en = "No calls yet."
+fr = "Aucun appel pour l'instant."
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.noCalls" }
+
+[watch.no_conversations]
+en = "No conversations yet"
+fr = "Aucune conversation"
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.noConversations" }
+note = "Same words as the iPhone's empty inbox."
+
+[watch.no_workspace]
+en = "Open District AI on your iPhone to choose a workspace."
+fr = "Ouvrez District AI sur votre iPhone pour choisir un espace de travail."
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.noWorkspace" }
+
+[watch.not_available]
+en = "Not available"
+fr = "Non disponible"
+ctx = "label"
+screen = "complication"
+state = "reviewed"
+id = { swift = "WatchCopy.notAvailable" }
+note = "Watch-face complication: calls do not ring to you in the workspace named beside it."
+
+[watch.not_available_in]
+en = "Not available · {workspace}"
+fr = "Non disponible · {workspace}"
+ctx = "label"
+screen = "complication"
+args = { workspace = "str" }
+state = "reviewed"
+id = { swift = "WatchCopy.notAvailableIn(_:)" }
+note = "Inline watch-face complication. {workspace} is the workspace's name."
+
+[watch.open_iphone]
+en = "Open District AI on your iPhone"
+fr = "Ouvrez District AI sur votre iPhone"
+ctx = "label"
+screen = "complication"
+state = "reviewed"
+id = { swift = "WatchCopy.openIphone" }
+note = "Complication with nothing to show yet: the watch has not heard from the iPhone, or nobody is signed in."
+
+[watch.outcome]
+en = "Outcome"
+fr = "Résultat"
+ctx = "label"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.outcome" }
+
+[watch.reply]
+en = "Reply"
+fr = "Répondre"
+ctx = "button"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.reply" }
+note = "Same words as the notification's Reply button."
+
+[watch.reply_not_sent]
+en = "Reply not sent"
+fr = "Réponse non envoyée"
+ctx = "error"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.replyNotSent" }
+note = "Title over the iPhone's reason. Same words as the iPhone's local notification."
+
+[watch.reply_sent]
+en = "Reply sent"
+fr = "Réponse envoyée"
+ctx = "toast"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.replySent" }
+
+[watch.send]
+en = "Send"
+fr = "Envoyer"
+ctx = "button"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.send" }
+
+[watch.sending]
+en = "Sending…"
+fr = "Envoi en cours…"
+ctx = "label"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.sending" }
+
+[watch.sign_in_body]
+en = "Open District AI on your iPhone and sign in. Your calls and messages appear here."
+fr = "Ouvrez District AI sur votre iPhone et connectez-vous. Vos appels et vos messages s'afficheront ici."
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.signInBody" }
+
+[watch.sign_in_on_iphone]
+en = "Sign in on your iPhone"
+fr = "Connectez-vous sur votre iPhone"
+ctx = "title"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.signInOnIphone" }
+
+[watch.signed_out]
+en = "Signed out"
+fr = "Déconnecté"
+ctx = "label"
+screen = "complication"
+state = "reviewed"
+id = { swift = "WatchCopy.signedOut" }
+
+[watch.try_again]
+en = "Try again"
+fr = "Réessayer"
+ctx = "button"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.tryAgain" }
+
+[watch.unread]
+en = "Unread"
+fr = "Non lus"
+ctx = "label"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.unread" }
+note = "Beside the number of unread messages in the workspace."
+
+[watch.unread_conversation]
+en = "Unread"
+fr = "Non lue"
+ctx = "a11y"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.unreadConversation" }
+note = "Spoken for the dot on an unread conversation (la conversation, feminine)."
+
+[watch.update_iphone]
+en = "Update District AI on your iPhone"
+fr = "Mettez à jour District AI sur votre iPhone"
+ctx = "title"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.updateIphone" }
+
+[watch.update_iphone_body]
+en = "Your watch and your iPhone have different versions of District AI."
+fr = "Votre montre et votre iPhone n'ont pas la même version de District AI."
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.updateIphoneBody" }
+
+[watch.updated]
+en = "Updated {time}"
+fr = "Mis à jour {time}"
+ctx = "label"
+screen = "watch"
+args = { time = "str" }
+state = "reviewed"
+id = { swift = "WatchCopy.updated(_:)" }
+note = "Banner when the iPhone has not sent anything for a while. {time} is relative, from the system: « il y a 20 min », \"20 min ago\"."
+
+[watch.waiting_for_iphone]
+en = "Waiting for your iPhone…"
+fr = "En attente de votre iPhone…"
+ctx = "body"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.waitingForIphone" }
+note = "First launch: the watch has not yet received anything from the iPhone."
+
+[watch.when]
+en = "When"
+fr = "Quand"
+ctx = "label"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchCopy.when" }

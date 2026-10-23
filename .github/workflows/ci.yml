@@ -357,6 +357,35 @@ jobs:
           done
           echo "en.lproj and fr-CA.lproj hold both tables; no root table and no other French"
 
+      # ⛔ THE APPLE WATCH APP SHIPS INSIDE THE iOS APP, AND ONLY THE BUNDLE SAYS SO. The
+      # `DistrictAI` scheme builds and embeds `DistrictAIWatch` (and its complication) because
+      # project.yml makes it a dependency; this step proves the embed happened, that both
+      # bundles carry their privacy manifest at the root, and that the watch declares
+      # Canadian French and no other French. ⚠️ An iOS build with an embedded watch app needs
+      # the watchOS platform on the runner; macos-26 ships the watchOS 26.2 runtime with
+      # Xcode 26.3, so nothing is downloaded here.
+      - name: The embedded watch app
+        run: |
+          set -euo pipefail
+          WATCH=DerivedData/Build/Products/Debug-iphonesimulator/DistrictAI.app/Watch/DistrictAIWatch.app
+          APPEX="$WATCH/PlugIns/DistrictAIWatchComplications.appex"
+          for bundle in "$WATCH" "$APPEX"; do
+            test -d "$bundle" || { echo "::error::$bundle is not in the iOS app"; exit 1; }
+            test -f "$bundle/PrivacyInfo.xcprivacy" || { echo "::error::no PrivacyInfo.xcprivacy at the root of $bundle"; exit 1; }
+            for table in Localizable InfoPlist; do
+              test -f "$bundle/en.lproj/$table.strings" || { echo "::error::no en.lproj/$table.strings in $bundle"; exit 1; }
+              test -f "$bundle/fr-CA.lproj/$table.strings" || { echo "::error::no fr-CA.lproj/$table.strings in $bundle"; exit 1; }
+            done
+            for lproj in "$bundle"/fr*.lproj; do
+              [ "$(basename "$lproj")" = "fr-CA.lproj" ] && continue
+              echo "::error::$(basename "$lproj") in $bundle: only Canadian French ships"
+              exit 1
+            done
+          done
+          companion="$(/usr/libexec/PlistBuddy -c 'Print :WKCompanionAppBundleIdentifier' "$WATCH/Info.plist")"
+          test "$companion" = "com.distronode.district" || { echo "::error::WKCompanionAppBundleIdentifier is '$companion'"; exit 1; }
+          echo "DistrictAIWatch.app and its complication are embedded, with manifests and both fr-CA tables"
+
       - name: DistrictAITests
         run: |
           set -o pipefail
@@ -379,13 +408,47 @@ jobs:
       # the commit that deletes tests on purpose.
       - name: DistrictAITests were discovered
         run: |
-          minimum=476
+          minimum=500
           executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-test.log | sort -n | tail -1)
           echo "app-target tests executed - ${executed:-0} (at least $minimum expected)"
           if [ -z "$executed" ] || [ "$executed" -lt "$minimum" ]; then
             echo "FATAL - expected at least $minimum DistrictAITests, saw ${executed:-0}. A"
             echo "bundle that discovers nothing, or loses files, reports success, so this is"
             echo "a silent loss of the signal, not a pass."
+            exit 1
+          fi
+
+      # ⛔ THE WATCH APP'S OWN UNIT TESTS (`DistrictAIWatchTests`, its `DistrictAIWatch`
+      # scheme), on an Apple Watch simulator. The iPhone leg only: they do not depend on the
+      # iOS device family, and on a pull request only that leg runs anyway. ⚠️ `test`, not
+      # `test-without-building`: the watch scheme builds for watchOS, which the iOS
+      # build-for-testing above did only as an embedded Debug product, not as a test host.
+      # Measured locally (iMac, HDD) at about 4 minutes; on the runner the watch simulator's
+      # first boot is most of it.
+      - name: Watch app tests
+        if: matrix.device == 'iPhone'
+        timeout-minutes: 20
+        run: |
+          set -o pipefail
+          ci/sim-udid.sh Watch
+          xcodebuild test \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAIWatch \
+            -destination "id=$(cat watch-simulator-udid.txt)" \
+            -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath SourcePackages \
+            -resultBundlePath DistrictAIWatchTests.xcresult \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-watch.log | xcbeautify --renderer github-actions
+
+      # ⛔ COUNTED, LIKE THE OTHER BUNDLES: a scheme that lost its test target reports success.
+      - name: Watch tests were discovered
+        if: matrix.device == 'iPhone'
+        run: |
+          minimum=14
+          executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-watch.log | sort -n | tail -1)
+          echo "watch tests executed - ${executed:-0} (at least $minimum expected)"
+          if [ -z "$executed" ] || [ "$executed" -lt "$minimum" ]; then
+            echo "FATAL - expected at least $minimum DistrictAIWatchTests, saw ${executed:-0}."
             exit 1
           fi
 
@@ -435,7 +498,7 @@ jobs:
       - name: Tail the logs on failure
         if: failure()
         run: |
-          for log in xcodebuild.log xcodebuild-test.log xcodebuild-uitest.log; do
+          for log in xcodebuild.log xcodebuild-test.log xcodebuild-watch.log xcodebuild-uitest.log; do
             echo "=== last 200 lines of $log ==="
             tail -n 200 "$log" 2>/dev/null || echo "(no log written)"
           done
@@ -447,6 +510,7 @@ jobs:
           path: |
             xcodebuild*.log
             simulator-udid.txt
+            watch-simulator-udid.txt
             *.xcresult
           if-no-files-found: warn
           retention-days: 7

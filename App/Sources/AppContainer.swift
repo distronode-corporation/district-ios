@@ -332,6 +332,17 @@ final class AppContainer {
     /// `function_body_length`'s 60; it is first read in `DistrictApp.init`.
     lazy var notificationActions = NotificationActionHandler(coordinator: coordinator, inbox: inbox)
 
+    /// The Apple Watch companion's iPhone half: the snapshot it shows, and its writes.
+    ///
+    /// ⚠️ BUILT FROM THIS CONTAINER'S ``notificationActions``, ``callHandling`` AND
+    /// REPOSITORIES, never its own. `lazy` for the same line budget as
+    /// ``notificationActions``; first read in `DistrictApp.init`, which activates it.
+    lazy var watchBridge = WatchBridgeService(
+        link: LiveWatchSessionLink(),
+        source: ContainerWatchSnapshotSource(container: self),
+        actions: ContainerWatchActions(notificationActions: notificationActions, callHandling: callHandling)
+    )
+
     private let store: any TokenStore
 
     /// The single sign-out orchestrator. See the ⛔ on the type: it owns the

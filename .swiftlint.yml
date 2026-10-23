@@ -24,6 +24,9 @@ included:
   # ⚠️ SwiftLint fails outright ("No lintable files found") on an `included` path
   # that does not exist.
   - App
+  # The Apple Watch app and its complication, linted to the same rules as App/.
+  - Watch
+  - Complications
 
 excluded:
   # SwiftPM and Xcode build output, and the app's remote package checkouts
@@ -36,6 +39,8 @@ excluded:
   # The Swift `l10n.py gen` writes from l10n/ios.toml: one table of a thousand strings,
   # checked against the catalog by `l10n.py check` rather than linted.
   - App/Sources/L10n/Generated
+  # The same, for the watch: written from l10n/watch.toml.
+  - Watch/Sources/L10n/Generated
 
 # ⚠️ Reported as errors, not warnings, because of --strict above: the two
 # numbers below are the same gate at two severities only when run without it.

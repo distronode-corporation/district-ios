@@ -32,6 +32,8 @@ struct RootView: View {
 
     @State private var localeSync: LocaleSync
 
+    @Environment(\.scenePhase) private var scenePhase
+
     init(container: AppContainer, push: PushRegistrar, incoming: IncomingCallModel) {
         self.container = container
         self.push = push
@@ -68,6 +70,15 @@ struct RootView: View {
             .task(id: isSignedIn) { await localeSync.sync(signedIn: isSignedIn) }
             .onReceive(NotificationCenter.default.publisher(for: AppL10n.didChange)) { _ in
                 Task { await localeSync.sync(signedIn: isSignedIn) }
+                container.watchBridge.setNeedsSnapshot()
+            }
+            // ⚠️ THE APPLE WATCH FOLLOWS A SIGN-IN, A SIGN-OUT AND THE APP COMING FORWARD.
+            // See ``WatchBridgeService``; on a phone with no watch app each call is a no-op.
+            .onChange(of: session.phase) { container.watchBridge.setNeedsSnapshot() }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    container.watchBridge.setNeedsSnapshot()
+                }
             }
     }
 

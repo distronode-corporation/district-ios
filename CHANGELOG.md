@@ -10,6 +10,29 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Added
+
+- Added: Apple Watch app: recent calls, inbox reply and mark read, and your availability for
+  calls, with a watch-face complication. A companion app (watchOS 10 or later), embedded in
+  the iPhone app: the watch holds no credential and makes no request of its own. The iPhone
+  sends it a snapshot over WatchConnectivity (`updateApplicationContext`: workspace,
+  availability, unread count, the last 10 calls and the top 10 conversations, already in the
+  phone's language) on sign-in and sign-out, a workspace switch, an availability change, an
+  inbox or call-log refresh, the app coming forward, and after every watch write. Reply, Mark
+  read and the availability switch are messages to the iPhone with a reply (`sendMessage`,
+  never `transferUserInfo`), made by `WatchBridgeService` through `NotificationActionHandler`
+  (now also addressable by thread key) and `CallHandlingRepository`, inside a background
+  task, answered only after the work. The watch shows the iPhone's own sentence on a failure,
+  "iPhone not reachable" when it is, "Updated …" on a snapshot older than 15 minutes,
+  "Sign in on your iPhone" when signed out, and "Update District AI on your iPhone" on a
+  protocol mismatch. The complication (circular, rectangular, inline) shows availability
+  only, with the workspace's name where it fits. A number with no contact shows its last four
+  digits. English and Canadian French (`l10n/watch.toml`, 47 strings, and
+  `l10n/watch-infoplist.toml` for both watch bundles' `InfoPlist.strings`, plus
+  `watch_bridge.update_both_apps` in `l10n/ios.toml`). Tests: `WatchSnapshotTests`,
+  `WatchSnapshotComposerTests`, `WatchBridgeServiceTests` (iPhone) and `WatchStoreTests`
+  (watchOS, the new `DistrictAIWatch` scheme).
+
 ### Fixed
 
 - Fixed: replying to or marking a message read from a notification while the app was

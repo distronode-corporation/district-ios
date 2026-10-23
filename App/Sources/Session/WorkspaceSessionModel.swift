@@ -123,6 +123,8 @@ final class WorkspaceSessionModel {
     func select(_ workspaceId: String) async {
         selection.setSelectedWorkspaceId(workspaceId)
         await load()
+        // ⚠️ THE WATCH SHOWS ONE WORKSPACE, AND IT IS THIS ONE NOW.
+        container.watchBridge.setNeedsSnapshot()
     }
 
     /// ⛔ THE PRECEDENCE HERE IS NOT ARBITRARY, AND EVERY STEP RESOLVES AGAINST THE
