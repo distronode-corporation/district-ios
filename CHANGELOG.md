@@ -16,6 +16,11 @@ built from history before publication, so they have no tags in this repository.
   its own placeholder, "Type your question…" (« Posez votre question… »,
   `hq.prompt_placeholder`). "Ask" stays the field's title, so VoiceOver still names it.
   `HQComposerCopyTests` (2) holds both.
+- A contact or conversation known only by phone number shows the person glyph in its
+  avatar, as District AI for Mac does. The avatar took the first character of each word,
+  so a number drew "+" and a nameless conversation a lone "·" (3.0.3 visual walk).
+  `DistrictAvatar.initials(for:)` now takes only words that start with a letter and
+  returns nil when none does; `DistrictAvatarTests` (3) pins it.
 
 ### Release lane
 
