@@ -161,8 +161,18 @@ final class MarketplaceModel {
     /// CARRIES ONE. There is nothing here to gate but there is something to word:
     /// telling a viewer to "use the web dashboard" points them at a second refusal,
     /// so they are told who to ask instead. `Route.swift` states the same rule.
-    var readOnlyCaption: String {
-        canChangeNumbers ? MarketplaceCopy.readOnly : MarketplaceCopy.readOnlyViewer
+    ///
+    /// ⚠️ NIL FOR A ROLE THAT CAN CHANGE NUMBERS (the Mac since 3.0.2, iOS after 3.0.3,
+    /// AP-031). Its line used to say "Everything else about your numbers is on the other
+    /// tabs." under ``MarketplaceCopy/purchaseElsewhere``, which already says everything else
+    /// is here: the same help twice.
+    ///
+    /// ⚠️ AND NIL ON THE REGISTRATIONS AND CARRIER TABS, which tell a viewer the same thing in
+    /// their own words (``MarketplaceCopy/viewerCannotProvision``), so a viewer read "needs an
+    /// agency or client role. Ask someone on this workspace who has one." twice on one screen.
+    var readOnlyCaption: String? {
+        guard !canChangeNumbers, !tab.statesTheViewerRefusal else { return nil }
+        return MarketplaceCopy.readOnlyViewer
     }
 
     var isSearching: Bool {
@@ -275,4 +285,13 @@ final class MarketplaceModel {
 
     /// The route's "no carrier connected yet" answer. See ``searchFailure(_:)``.
     private static let notConfiguredStatus = 400
+}
+
+extension MarketplaceTab {
+    /// ⚠️ THE TABS THAT SAY, IN THEIR OWN CONTENT, WHO CAN MAKE A CHANGE: Registrations
+    /// (its empty state) and Carrier (its caption) both show
+    /// ``MarketplaceCopy/viewerCannotProvision`` to a viewer.
+    var statesTheViewerRefusal: Bool {
+        self == .registrations || self == .carrier
+    }
 }
