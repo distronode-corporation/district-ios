@@ -211,25 +211,19 @@ struct SchedulingAvailabilityOverridesSheet: View {
     private func customHours(_ form: SchedulingOverrideForm) -> some View {
         SchedulingWriteField(label: SchedulingWriteCopy.overrideHoursLabel) {
             HStack(spacing: DistrictSpacing.tight) {
-                TextField(
-                    SchedulingWorkingHours.defaultStart,
-                    text: Binding(
-                        get: { form.start },
-                        set: { value in model.updateAdding { $0.start = value } }
-                    )
+                SchedulingTimeField(
+                    stored: form.start,
+                    placeholder: SchedulingWorkingHours.defaultStart,
+                    onChange: { value in model.updateAdding { $0.start = value } }
                 )
-                .districtField()
                 Text(SchedulingWriteCopy.rangeTo)
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
-                TextField(
-                    SchedulingWorkingHours.defaultEnd,
-                    text: Binding(
-                        get: { form.end },
-                        set: { value in model.updateAdding { $0.end = value } }
-                    )
+                SchedulingTimeField(
+                    stored: form.end,
+                    placeholder: SchedulingWorkingHours.defaultEnd,
+                    onChange: { value in model.updateAdding { $0.end = value } }
                 )
-                .districtField()
             }
         }
     }

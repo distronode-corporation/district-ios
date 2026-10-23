@@ -36,8 +36,8 @@ final class SchedulingWritesAvailabilityTests: XCTestCase {
         XCTAssertTrue(week[0].isEmpty)
     }
 
-    /// ⚠️ FORMAT ONLY, AND NOT A CLOCK CHECK: the fork is the validator. What this
-    /// catches is the shape refused for certain, a dropped leading zero.
+    /// A dropped leading zero is refused: the fork answers 400 to `9:00`. (The field itself
+    /// stores a typed `9:00` as `09:00`; see ``SchedulingTimeFieldTests``.)
     func testADroppedLeadingZeroIsRefused() {
         let errors = SchedulingWorkingHours.errors(in: [Self.range(start: "9:00", end: "17:00")])
         XCTAssertEqual(errors, ["Enter a time as HH:MM."])
@@ -181,6 +181,21 @@ final class SchedulingWritesAvailabilityTests: XCTestCase {
 
         XCTAssertEqual(SchedulingWritesFixtures.calls(transport).count, 1)
         XCTAssertEqual(model.state.notice, "Nothing to save.")
+    }
+
+    /// ⛔ WHAT A FRENCH OPERATOR TYPES IS SAVED AS THE WIRE'S `HH:MM`: the field stores
+    /// « 9 h 30 » as `09:30`, and the window is valid.
+    func testAFrenchTypedTimeIsStoredAsHHMM() async {
+        let transport = SettingsTransport([Self.rulesList])
+        let model = Self.rules(transport)
+        await model.load()
+        let id = model.week[0][0].id
+        model.setStart(SchedulingTimeFieldText.stored(fromTyped: "9 h 30"), for: id, inRow: 0)
+        model.setEnd(SchedulingTimeFieldText.stored(fromTyped: "17 h"), for: id, inRow: 0)
+
+        XCTAssertEqual(model.week[0][0].start, "09:30")
+        XCTAssertEqual(model.week[0][0].end, "17:00")
+        XCTAssertEqual(model.errors(forRow: 0), [nil])
     }
 
     /// ⛔ SAVE IS DISABLED WHILE A WINDOW IS INVALID, unlike the event-type
