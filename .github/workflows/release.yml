@@ -227,6 +227,15 @@ jobs:
           codesign --verify --deep --strict --verbose=2 "$APP"
           codesign -dvv "$APP" 2>&1 | grep -E '^(Identifier|Authority|TeamIdentifier)='
           /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' -c 'Print :CFBundleVersion' "$APP/Info.plist"
+          # Each nested bundle (the watch app, its complications, any extension), when
+          # there is one: its entitlements and its two version keys, printed for the
+          # record. Read-only; archive-imac.sh has already refused any version mismatch.
+          shopt -s nullglob
+          for bundle in "$APP"/Watch/*.app "$APP"/PlugIns/*.appex "$APP"/Watch/*.app/PlugIns/*.appex; do
+            echo "── ${bundle#"$APP"/}"
+            codesign -d --entitlements - "$bundle" 2>&1
+            /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' -c 'Print :CFBundleVersion' "$bundle/Info.plist"
+          done
 
       # Upload returns before App Store Connect has processed the build; this waits for
       # VALID, which is also when TestFlight's internal group receives it.

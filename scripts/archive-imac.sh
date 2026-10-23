@@ -209,6 +209,57 @@ xcodebuild archive \
   CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
   SENTRY_DSN="$SENTRY_DSN"
 
+# ── The archived bundles ─────────────────────────────────────────────────────
+# Every guard below DELETES the archive when it fails, rather than warning: an
+# archive that fails one is never exported, uploaded or kept for a re-run.
+APPS_DIR="$ARCHIVE_PATH/Products/Applications"
+APP_DIR="$APPS_DIR/DistrictAI.app"
+
+discard_archive() {
+  rm -rf "$ARCHIVE_PATH"
+  echo "FATAL - $1" >&2
+  echo "The archive has been DELETED. Nothing was exported or uploaded." >&2
+  exit 1
+}
+
+# A bundle's path as the messages name it, relative to Products/Applications.
+bundle_label() { echo "${1#"$APPS_DIR"/}"; }
+
+# ⛔ Products/Applications HOLDS DistrictAI.app AND NOTHING ELSE. The watch app
+# ships INSIDE the iOS app (DistrictAI.app/Watch/), never beside it; a second
+# top-level .app is a scheme or embed mistake, and App Store Connect would see an
+# archive that is not the one these guards inspected. Every entry counts, hidden
+# ones too.
+STRAY_ENTRIES=""
+shopt -s nullglob dotglob
+for entry in "$APPS_DIR"/*; do
+  [ "${entry##*/}" = "DistrictAI.app" ] || STRAY_ENTRIES="$STRAY_ENTRIES ${entry##*/}"
+done
+shopt -u nullglob dotglob
+[ -z "$STRAY_ENTRIES" ] ||
+  discard_archive "Products/Applications holds$STRAY_ENTRIES besides DistrictAI.app; it must hold DistrictAI.app alone (the watch app ships inside it, under Watch/)."
+
+# ⛔ EVERY NESTED BUNDLE, AT ANY DEPTH: the watch app under the iOS app's Watch/,
+# each extension under a PlugIns/ (the iOS app's own and the watch app's, where
+# the complications live). Each one is a shipped binary, a set of localizations
+# and a version of its own, and every guard below runs over all of them. An
+# archive with none (no watch app) is checked exactly as before.
+#
+# ⚠️ bash 3.2 (a Mac's /bin/bash) treats "${empty[@]}" as unbound under `set -u`,
+# hence the count beside the array and the ${a[@]+...} expansions.
+NESTED_BUNDLES=()
+NESTED_COUNT=0
+collect_nested() {
+  local child
+  for child in "$1"/Watch/*.app "$1"/PlugIns/*.appex; do
+    [ -d "$child" ] || continue
+    NESTED_BUNDLES+=("$child")
+    NESTED_COUNT=$((NESTED_COUNT + 1))
+    collect_nested "$child"
+  done
+}
+collect_nested "$APP_DIR"
+
 # ── IOS-SEC-01: the UI-test seam must not be in a shipped binary ─────────────
 # ⛔ THE ARCHIVE IS DISCARDED IF IT IS, RATHER THAN WARNED ABOUT. `UITestSession`
 # and `AppContainerSeam`'s injection branch are inside `#if DEBUG`, and
@@ -223,20 +274,61 @@ xcodebuild archive \
 # so a symbol search proves nothing; the launch argument and the environment
 # variable are STRING LITERALS and survive. Absence of the literal is the check
 # that can actually fail.
-APP_BINARY="$ARCHIVE_PATH/Products/Applications/DistrictAI.app/DistrictAI"
+#
+# ⛔ EVERY MAIN EXECUTABLE, NOT ONLY THE iOS APP'S: the watch app and every
+# extension link the same shared code. A nested bundle's executable is found by
+# its own Info.plist's CFBundleExecutable, never guessed from the bundle name.
+APP_BINARY="$APP_DIR/DistrictAI"
 # ⛔ THE BINARY MUST EXIST BEFORE IT IS SEARCHED. `strings` on a missing file
 # fails, the count comes out as 0, and "0 hits" would read as a clean binary;
-# an archive with nothing to inspect is refused, not passed.
+# an archive with nothing to inspect is refused, not passed. The same holds for
+# every nested bundle: no CFBundleExecutable, or no file by that name, refuses.
 [ -f "$APP_BINARY" ] ||
   die "no app binary at $APP_BINARY, so the seam check has nothing to inspect. Nothing was exported or uploaded."
-SEAM_HITS="$(strings "$APP_BINARY" | grep -c 'DISTRICT_UITEST' || true)"
-if [ "$SEAM_HITS" != "0" ]; then
-  rm -rf "$ARCHIVE_PATH"
-  echo "FATAL - the UI-test seam is present in the archived binary ($SEAM_HITS hits)." >&2
-  echo "The archive has been DELETED. Nothing was exported or uploaded." >&2
-  exit 1
+SEAM_BINARIES=("$APP_BINARY")
+for bundle in ${NESTED_BUNDLES[@]+"${NESTED_BUNDLES[@]}"}; do
+  executable="$(plutil -extract CFBundleExecutable raw -o - "$bundle/Info.plist" 2>/dev/null)" || executable=""
+  [ -n "$executable" ] ||
+    discard_archive "$(bundle_label "$bundle") has no readable CFBundleExecutable, so the seam check cannot find its binary."
+  [ -f "$bundle/$executable" ] ||
+    discard_archive "no binary at $(bundle_label "$bundle")/$executable (its CFBundleExecutable), so the seam check has nothing to inspect."
+  SEAM_BINARIES+=("$bundle/$executable")
+done
+SEAM_REPORT=""
+for binary in "${SEAM_BINARIES[@]}"; do
+  hits="$(strings "$binary" | grep -c 'DISTRICT_UITEST' || true)"
+  [ "$hits" = "0" ] || SEAM_REPORT="$SEAM_REPORT $(bundle_label "$binary") ($hits hits)"
+done
+[ -z "$SEAM_REPORT" ] ||
+  discard_archive "the UI-test seam is present in the archived binary:$SEAM_REPORT."
+echo "IOS-SEC-01 ok - no UI-test seam in the archived binary (${#SEAM_BINARIES[@]} executables checked)"
+
+# ── Every nested bundle carries the iOS app's version ────────────────────────
+# ⛔ CFBundleVersion AND CFBundleShortVersionString, BOTH, EQUAL TO THE iOS APP'S.
+# App Store Connect refuses an upload whose embedded watch app or extension
+# disagrees, and does so after the archive and the export have run; a target
+# that missed the `$(CURRENT_PROJECT_VERSION)` mapping in project.yml ships `1`
+# silently (see the build number above). Read from the BUILT bundles, never the
+# generated Info.plists. Only when there is a nested bundle: an archive without
+# one has nothing to compare, and is checked exactly as before.
+read_plist_key() { plutil -extract "$1" raw -o - "$2/Info.plist" 2>/dev/null || true; }
+if [ "$NESTED_COUNT" -gt 0 ]; then
+  APP_SHORT_VERSION="$(read_plist_key CFBundleShortVersionString "$APP_DIR")"
+  APP_BUILD_VERSION="$(read_plist_key CFBundleVersion "$APP_DIR")"
+  [ -n "$APP_SHORT_VERSION" ] && [ -n "$APP_BUILD_VERSION" ] ||
+    discard_archive "the archived app's Info.plist has no readable CFBundleShortVersionString or CFBundleVersion, so its nested bundles' versions cannot be checked."
+  VERSION_REPORT=""
+  for bundle in "${NESTED_BUNDLES[@]}"; do
+    short="$(read_plist_key CFBundleShortVersionString "$bundle")"
+    build="$(read_plist_key CFBundleVersion "$bundle")"
+    if [ "$short" != "$APP_SHORT_VERSION" ] || [ "$build" != "$APP_BUILD_VERSION" ]; then
+      VERSION_REPORT="$VERSION_REPORT $(bundle_label "$bundle") is '$short' ($build);"
+    fi
+  done
+  [ -z "$VERSION_REPORT" ] ||
+    discard_archive "every nested bundle must carry the archived app's version $APP_SHORT_VERSION ($APP_BUILD_VERSION), but$VERSION_REPORT"
+  echo "Versions ok - $NESTED_COUNT nested bundles carry the app's $APP_SHORT_VERSION ($APP_BUILD_VERSION)"
 fi
-echo "IOS-SEC-01 ok - no UI-test seam in the archived binary"
 
 # ── French is held to the switch ──────────────────────────────────────────────
 # ⛔ THE ARCHIVE IS DISCARDED IF IT HOLDS fr-CA.lproj WHILE DISTRICT_FRENCH IS OFF,
@@ -258,51 +350,56 @@ echo "IOS-SEC-01 ok - no UI-test seam in the archived binary"
 # proof French arrived: a DISTRICT_FRENCH build without them would show English
 # push titles and permission prompts on French devices.
 #
-# ⚠️ THE APP'S OWN TOP LEVEL ONLY, never Frameworks/: AppL10n reads the main
+# ⛔ EVERY BUNDLE, THE SAME THREE RULES: the iOS app and each nested bundle (the
+# watch app, its complications, any extension) is judged on its own .lproj
+# folders. A watch app with French while French is off is French on the wrist; a
+# watch app without its tables while French is on is English on the wrist.
+#
+# ⚠️ EACH BUNDLE'S OWN TOP LEVEL ONLY, never Frameworks/: AppL10n reads the main
 # bundle's localizations, and a dependency's own .lproj tables are not this app's
 # French. Bash builtins only (the glob, `[[ ]]` under nocasematch), which also run
 # on the harness's stub PATH.
-APP_DIR="$ARCHIVE_PATH/Products/Applications/DistrictAI.app"
 case "${DISTRICT_FRENCH:-}" in
   YES | yes | true | TRUE | 1) FRENCH_ON=1 ;;
   *) FRENCH_ON=0 ;;
 esac
-HAS_FR_CA=0
-OTHER_FRENCH=""
-shopt -s nocasematch
-for lproj in "$APP_DIR"/*.lproj; do
-  [ -d "$lproj" ] || continue
-  name="${lproj##*/}"
-  if [ "$name" = "fr-CA.lproj" ]; then
-    HAS_FR_CA=1
-  elif [[ "$name" == fr* ]]; then
-    OTHER_FRENCH="$OTHER_FRENCH $name"
-  fi
-done
-shopt -u nocasematch
-FRENCH_REFUSAL=""
-if [ -n "$OTHER_FRENCH" ]; then
-  FRENCH_REFUSAL="the archived app holds$OTHER_FRENCH, which is never shipped (fr-CA.lproj is the only French)."
-elif [ "$FRENCH_ON" = "0" ] && [ "$HAS_FR_CA" = "1" ]; then
-  FRENCH_REFUSAL="the archived app holds fr-CA.lproj, but DISTRICT_FRENCH is not set, so French is off."
-elif [ "$FRENCH_ON" = "1" ]; then
-  MISSING_TABLES=""
-  for table in Localizable InfoPlist; do
-    [ -f "$APP_DIR/fr-CA.lproj/$table.strings" ] || MISSING_TABLES="$MISSING_TABLES fr-CA.lproj/$table.strings"
+# Appends to FRENCH_REFUSAL the reason $1 (a bundle) breaks the rules, naming it
+# as $2. Nothing is appended for a bundle that keeps them.
+french_check() {
+  local dir="$1" label="$2" lproj name has_fr_ca=0 other_french="" missing="" table
+  shopt -s nocasematch
+  for lproj in "$dir"/*.lproj; do
+    [ -d "$lproj" ] || continue
+    name="${lproj##*/}"
+    if [ "$name" = "fr-CA.lproj" ]; then
+      has_fr_ca=1
+    elif [[ "$name" == fr* ]]; then
+      other_french="$other_french $name"
+    fi
   done
-  [ -z "$MISSING_TABLES" ] ||
-    FRENCH_REFUSAL="DISTRICT_FRENCH is on, but the archived app has no$MISSING_TABLES."
-fi
-if [ -n "$FRENCH_REFUSAL" ]; then
-  rm -rf "$ARCHIVE_PATH"
-  echo "FATAL - $FRENCH_REFUSAL" >&2
-  echo "The archive has been DELETED. Nothing was exported or uploaded." >&2
-  exit 1
-fi
+  shopt -u nocasematch
+  if [ -n "$other_french" ]; then
+    FRENCH_REFUSAL="$FRENCH_REFUSAL $label holds$other_french, which is never shipped (fr-CA.lproj is the only French)."
+  elif [ "$FRENCH_ON" = "0" ] && [ "$has_fr_ca" = "1" ]; then
+    FRENCH_REFUSAL="$FRENCH_REFUSAL $label holds fr-CA.lproj, but DISTRICT_FRENCH is not set, so French is off."
+  elif [ "$FRENCH_ON" = "1" ]; then
+    for table in Localizable InfoPlist; do
+      [ -f "$dir/fr-CA.lproj/$table.strings" ] || missing="$missing fr-CA.lproj/$table.strings"
+    done
+    [ -z "$missing" ] ||
+      FRENCH_REFUSAL="$FRENCH_REFUSAL DISTRICT_FRENCH is on, but $label has no$missing."
+  fi
+}
+FRENCH_REFUSAL=""
+french_check "$APP_DIR" "the archived app"
+for bundle in ${NESTED_BUNDLES[@]+"${NESTED_BUNDLES[@]}"}; do
+  french_check "$bundle" "the archived $(bundle_label "$bundle")"
+done
+[ -z "$FRENCH_REFUSAL" ] || discard_archive "${FRENCH_REFUSAL# }"
 if [ "$FRENCH_ON" = "1" ]; then
-  echo "French ok - DISTRICT_FRENCH is on, and fr-CA.lproj holds both tables"
+  echo "French ok - DISTRICT_FRENCH is on, and fr-CA.lproj holds both tables in the app and its $NESTED_COUNT nested bundles"
 else
-  echo "French ok - no French localization in the archived app"
+  echo "French ok - no French localization in the archived app or its $NESTED_COUNT nested bundles"
 fi
 
 # ── Debug symbols to Sentry ──────────────────────────────────────────────────
