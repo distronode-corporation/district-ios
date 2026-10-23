@@ -50,11 +50,12 @@ struct BillingPlanCard: View {
                 BillingNote(text: caption)
             }
         }
-        // ⚠️ NO `.contain` HERE, UNLIKE THE SCREEN ROOTS, AND THE DIFFERENCE IS
-        // DELIBERATE. This card holds no separately-addressed descendant, and a
-        // smoke run wants to read the TIER off it, leaving the children merged
-        // means the identifier resolves to an element whose label carries the plan
-        // name, so one query answers both "is the card there" and "which plan".
+        // ⚠️ NOT ONE ELEMENT: THE IDENTIFIER LANDS ON EACH OF THE CARD'S TEXTS. Without
+        // `.accessibilityElement(children:)` the children are not merged, so the query
+        // matches the "Plan" eyebrow, the plan's name and the status badge (measured
+        // 2026-10-23: ["Plan", "Voice Pro", "Active"]), and its first match reads "Plan".
+        // The smoke journey therefore looks for the plan's name among them
+        // (`SmokeUITests.tourBilling`), and VoiceOver reads the three texts one by one.
         .accessibilityIdentifier(A11yID.Billing.plan)
     }
 
