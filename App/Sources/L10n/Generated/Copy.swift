@@ -886,7 +886,7 @@ extension DeskCopy {
     internal static var offMessage: String { AppL10n.copyLocale == .frCA ? "Activez-le et les appels que votre agent ne peut pas régler seront consignés ici sous forme de billets; les appelants pourront aussi lui demander l'état de leurs propres demandes. Rien n'est consigné avant l'activation." : "Turn it on and calls your agent cannot resolve are filed here as tickets, and callers can ask it for the status of their own requests. Nothing is recorded until you do." }
 
     /// `desk.off_title`
-    internal static var offTitle: String { AppL10n.copyLocale == .frCA ? "District Desk est désactivé" : "District Desk is off" }
+    internal static var offTitle: String { AppL10n.copyLocale == .frCA ? "Le comptoir est désactivé" : "Desk is off" }
 
     /// `desk.open`
     internal static var `open`: String { AppL10n.copyLocale == .frCA ? "Ouvert" : "Open" }
@@ -922,7 +922,7 @@ extension DeskCopy {
     internal static var setStatus: String { AppL10n.copyLocale == .frCA ? "Définir le statut" : "Set status" }
 
     /// `desk.settings_eyebrow`
-    internal static var settingsEyebrow: String { AppL10n.copyLocale == .frCA ? "District Desk" : "District Desk" }
+    internal static var settingsEyebrow: String { AppL10n.copyLocale == .frCA ? "Comptoir" : "Desk" }
 
     /// `desk.settings_intro`
     internal static var settingsIntro: String { AppL10n.copyLocale == .frCA ? "Une file de billets pour vos propres clients, avec votre agent en première ligne. À ne pas confondre avec une demande adressée à Distronode." : "A ticket queue for your own customers, with your agent as its front line. Separate from raising a request with Distronode." }
@@ -943,7 +943,7 @@ extension DeskCopy {
     internal static var threadFallbackTitle: String { AppL10n.copyLocale == .frCA ? "Billet" : "Ticket" }
 
     /// `desk.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "District Desk" : "Desk" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Comptoir" : "Desk" }
 
     /// `desk.unknown_message`
     internal static var unknownMessage: String { AppL10n.copyLocale == .frCA ? "Cela ne veut pas dire que votre comptoir est désactivé, ni que la file est vide. Rien n'a changé; réessayez." : "This is not the same as your desk being switched off, and it is not an empty queue. Nothing has changed; try again." }
@@ -958,7 +958,7 @@ extension DeskCopy {
     internal static var uploadingLogo: String { AppL10n.copyLocale == .frCA ? "Téléversement…" : "Uploading…" }
 
     /// `desk.viewer_note`
-    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "District Desk est accessible aux membres ayant le rôle Administrateur ou Membre." : "Desk is available to agency and client members." }
+    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "Le comptoir est accessible aux membres ayant le rôle Administrateur ou Membre." : "Desk is available to agency and client members." }
 
     /// `desk.waiting_on_customer`
     internal static var waitingOnCustomer: String { AppL10n.copyLocale == .frCA ? "En attente du client" : "Waiting on customer" }
@@ -2212,7 +2212,7 @@ extension OverviewCopy {
     internal static var customerContacts: String { AppL10n.copyLocale == .frCA ? "Contacts clients" : "Customer Contacts" }
 
     /// `overview.desk`
-    internal static var desk: String { AppL10n.copyLocale == .frCA ? "Desk" : "Desk" }
+    internal static var desk: String { AppL10n.copyLocale == .frCA ? "Comptoir" : "Desk" }
 
     /// `overview.dial`
     internal static var dial: String { AppL10n.copyLocale == .frCA ? "Composer" : "Dial" }
