@@ -2302,7 +2302,7 @@ state = "reviewed"
 id = { swift = "DeskCopy.offMessage" }
 
 [desk.off_title]
-en = "Desk is off"
+en = "The Desk is off"
 fr = "Le comptoir est désactivé"
 ctx = "title"
 screen = "desk"
@@ -2503,7 +2503,7 @@ state = "reviewed"
 id = { swift = "DeskCopy.uploadingLogo" }
 
 [desk.viewer_note]
-en = "Desk is available to agency and client members."
+en = "The Desk is available to agency and client members."
 fr = "Le comptoir est accessible aux membres ayant le rôle Administrateur ou Membre."
 ctx = "body"
 screen = "desk"

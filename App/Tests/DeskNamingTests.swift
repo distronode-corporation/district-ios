@@ -18,7 +18,8 @@ final class DeskNamingTests: XCTestCase {
         english {
             XCTAssertEqual(DeskCopy.title, "Desk")
             XCTAssertEqual(DeskCopy.settingsEyebrow, "Desk")
-            XCTAssertEqual(DeskCopy.offTitle, "Desk is off")
+            XCTAssertEqual(DeskCopy.offTitle, "The Desk is off")
+            XCTAssertEqual(DeskCopy.viewerNote, "The Desk is available to agency and client members.")
             XCTAssertEqual(DeskCopy.settingsTitle, "Desk settings")
             XCTAssertEqual(DeskCopy.offAction, "Desk settings")
             XCTAssertEqual(OverviewCopy.desk, "Desk")
