@@ -10,6 +10,20 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Release lane
+
+- The simulator smoke runs again (found at the 3.0.3 gate). `scripts/smoke-simulator.sh`
+  built with `CODE_SIGNING_ALLOWED=NO`, so the app had no keychain, opened on "We could not
+  read your saved session" and every run failed at "the login page never rendered". It now
+  builds ad-hoc signed (`CODE_SIGN_IDENTITY=-`, no team) and uninstalls the app first, since
+  a signed build keeps its session between runs. The journey closes the keyboard before
+  tapping the password field and Enter platform (its accessory bar covered both), takes the
+  consent screen directly when the browser still holds a website session, reads the plan
+  card's name among the texts that share its identifier (the first match was "Plan"), and
+  now also opens Calls and Inbox. `scripts/smoke-simulator.test.sh` (13 cases, in CI's
+  release script tests) holds the signing, the uninstall and where the password goes.
+  Proven on 3.0.3 (f65026f), iPhone 17 Pro, QA account, plan "Voice Pro": 1 test, 0 failures.
+
 ### Changed
 
 - 3.0.3: DistrictCore `exactVersion` 7.0.3 (district-core-swift's 7.0.3 tag). Its catalogs

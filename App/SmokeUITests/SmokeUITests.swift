@@ -93,6 +93,7 @@ final class SmokeUITests: XCTestCase {
     func test_IOS_SMOKE_01_theDemoAccountReachesEveryReviewedScreen() throws {
         try signIn()
         try tourConsoleHome()
+        try tourCallsAndInbox()
         try tourContactsAndDossier()
         try tourBilling()
         try tourAccount()
@@ -158,15 +159,36 @@ private extension SmokeUITests {
         let safari = XCUIApplication(bundleIdentifier: "com.apple.SafariViewService")
 
         let emailField = safari.textFields["Work Email"]
-        XCTAssertTrue(emailField.waitForExistence(timeout: 45), "the login page never rendered")
+        let signedIn = safari.buttons["Continue to District AI"]
+        // A website session left by an earlier run skips the login form.
+        let deadline = Date().addingTimeInterval(45)
+        while !emailField.exists, !signedIn.exists, Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        if signedIn.exists {
+            attach(name: "IOS-SMOKE-02-consent")
+            signedIn.tap()
+            return
+        }
+        XCTAssertTrue(emailField.exists, "the login page never rendered")
         emailField.tap()
         emailField.typeText(email)
+        // The keyboard's accessory bar sits over the password field on a 6.3-inch screen, so a
+        // tap there lands on the bar and the field never takes focus. Close the keyboard first.
+        let done = safari.buttons["Done"]
+        if done.waitForExistence(timeout: 2) {
+            done.tap()
+        }
 
         let passwordField = safari.secureTextFields["Password"]
         XCTAssertTrue(passwordField.waitForExistence(timeout: 10), "no password field on the login page")
         passwordField.tap()
         passwordField.typeText(password)
 
+        let doneAgain = safari.buttons["Done"]
+        if doneAgain.waitForExistence(timeout: 2) {
+            doneAgain.tap()
+        }
         safari.buttons["Enter platform"].tap()
 
         XCTAssertFalse(
@@ -181,6 +203,18 @@ private extension SmokeUITests {
         XCTAssertTrue(consent.waitForExistence(timeout: 45), "the consent screen never appeared")
         attach(name: "IOS-SMOKE-02-consent")
         consent.tap()
+    }
+
+    /// The release gate's two screens (3.0.3): Calls and Inbox render for the signed-in account.
+    /// ⚠️ `A11yID.Nav.calls`, not `A11yID.Calls.root`: the call log screen carries the tab's
+    /// content identifier and nothing sets the latter.
+    func tourCallsAndInbox() throws {
+        navigate(to: .calls)
+        XCTAssertTrue(element(A11yID.Nav.calls).waitForExistence(timeout: 30), "the calls screen never rendered")
+        attach(name: "IOS-SMOKE-03b-calls")
+        navigate(to: .inbox)
+        XCTAssertTrue(element(A11yID.Inbox.root).waitForExistence(timeout: 30), "the inbox never rendered")
+        attach(name: "IOS-SMOKE-03c-inbox")
     }
 
     func tourConsoleHome() throws {
@@ -239,12 +273,17 @@ private extension SmokeUITests {
         // turns `VoiceStudio` into "Voice Studio" (an unknown tier is shown as sent) and a
         // null tier renders "no plan" rather than an invented "Free". The default,
         // "Studio", is in both spellings; a DISTRICT_SMOKE_PLAN must be the name.
-        let plan = element(A11yID.Billing.plan)
+        let plan = element(A11yID.Billing.plan).firstMatch
         XCTAssertTrue(plan.waitForExistence(timeout: 15), "the plan card is missing")
-        XCTAssertTrue(
-            plan.label.contains(expectedPlan),
-            "expected the \(expectedPlan) plan; the card reads '\(plan.label)'"
-        )
+        // ⚠️ THE IDENTIFIER REACHES EACH OF THE CARD'S TEXTS ("Plan", the plan's name, the
+        // status badge), so `element(_:)` alone matches several and the first is "Plan".
+        // The plan's name is one of them; the failure lists all three.
+        let named = app.descendants(matching: .any)
+            .matching(identifier: A11yID.Billing.plan)
+            .matching(NSPredicate(format: "label CONTAINS %@", expectedPlan)).firstMatch
+        let labels = app.descendants(matching: .any).matching(identifier: A11yID.Billing.plan)
+            .allElementsBoundByIndex.map(\.label)
+        XCTAssertTrue(named.exists, "expected the \(expectedPlan) plan on the card; it reads \(labels)")
         attach(name: "IOS-SMOKE-06-billing")
     }
 
@@ -343,11 +382,13 @@ private extension SmokeUITests {
 /// ⚠️ A SMALL COPY OF THE SIBLING SUITE'S `ShellSection`, BECAUSE THIS BUNDLE COMPILES ONLY
 /// `App/Shared` BESIDE ITSELF. It holds only the sections the journey visits.
 enum SmokeSection {
-    case contacts, billing, account
+    case contacts, billing, account, calls, inbox
 
     /// The tab bar label on compact width, or nil for a section that is an Overview row there.
     var tabLabel: String? {
         switch self {
+        case .calls: A11yID.NavLabel.calls
+        case .inbox: A11yID.NavLabel.inbox
         case .contacts: A11yID.NavLabel.contacts
         case .account: A11yID.NavLabel.account
         case .billing: nil
@@ -358,7 +399,7 @@ enum SmokeSection {
     var overviewRow: String? {
         switch self {
         case .billing: A11yID.Overview.row("billing")
-        case .contacts, .account: nil
+        case .contacts, .account, .calls, .inbox: nil
         }
     }
 
@@ -367,13 +408,15 @@ enum SmokeSection {
         case .contacts: A11yID.Sidebar.contacts
         case .billing: A11yID.Sidebar.billing
         case .account: A11yID.Sidebar.account
+        case .calls: A11yID.Sidebar.calls
+        case .inbox: A11yID.Sidebar.inbox
         }
     }
 
     /// Whether regular width draws the section as a list beside its open row.
     var isListSection: Bool {
         switch self {
-        case .contacts: true
+        case .contacts, .calls, .inbox: true
         case .billing, .account: false
         }
     }

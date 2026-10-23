@@ -8,9 +8,18 @@
 # Credentials come from the environment and are never written to disk:
 #   DISTRICT_SMOKE_EMAIL / DISTRICT_SMOKE_PASSWORD   the app-store demo account
 #   DISTRICT_SMOKE_CONTACT                           a seeded contact's display name
-#   DISTRICT_SMOKE_PLAN                              expected plan name, default Studio
+#   DISTRICT_SMOKE_PLAN                              expected plan name, default Studio (the
+#                                                    review demo account); the QA fixture
+#                                                    appreview@ is on "Voice Pro"
 # With the first two unset every case in the suite calls `XCTSkip`, the run is green,
 # and this script says so, a skip and a pass are not the same claim.
+#
+# ⛔ AD-HOC SIGNED (`CODE_SIGN_IDENTITY=-`), NEVER `CODE_SIGNING_ALLOWED=NO`. An unsigned
+# simulator build has no keychain entitlement, so `KeychainTokenStore` throws on its first
+# read and the app opens on "We could not read your saved session" with no way into the
+# browser sign-in: every run failed at "the login page never rendered" (3.0.3 gate,
+# 2026-10-23). Ad-hoc signing needs no team or certificate. No `DEVELOPMENT_TEAM` either:
+# project.yml's rule against one holds here too.
 #
 # ⛔ `TEST_RUNNER_`-PREFIXED, AND IN xcodebuild's ENVIRONMENT, NEVER ON ITS COMMAND LINE.
 # xcodebuild injects a variable into the UI-test RUNNER process only when the name
@@ -61,6 +70,14 @@ else
   echo "== every case will XCTSkip; the run will be GREEN and will have PROVEN NOTHING =="
 fi
 
+# ⛔ A FRESH INSTALL, OR THE JOURNEY STARTS SIGNED IN. A signed build keeps the last run's
+# session in the simulator's keychain, so the next launch skips the sign-in screen the
+# journey begins with. The website session in the browser's cookie jar may survive this;
+# the journey takes the consent screen directly when it does.
+echo "== removing any previous install from $DEVICE =="
+xcrun simctl boot "$DEVICE" >/dev/null 2>&1 || true
+xcrun simctl uninstall "$DEVICE" com.distronode.district >/dev/null 2>&1 || true
+
 set +e
 TEST_RUNNER_DISTRICT_SMOKE_EMAIL="${DISTRICT_SMOKE_EMAIL:-}" \
 TEST_RUNNER_DISTRICT_SMOKE_PASSWORD="${DISTRICT_SMOKE_PASSWORD:-}" \
@@ -73,7 +90,9 @@ xcodebuild test \
   -destination "platform=iOS Simulator,name=$DEVICE" \
   -derivedDataPath "$DERIVED" \
   -resultBundlePath "$RESULT" \
-  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGN_IDENTITY=- \
+  CODE_SIGNING_ALLOWED=YES \
+  CODE_SIGNING_REQUIRED=YES \
   2>&1 | tee "$OUT/xcodebuild-smoke.log"
 STATUS=${PIPESTATUS[0]}
 set -e

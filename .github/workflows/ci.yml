@@ -133,6 +133,7 @@ jobs:
           bash scripts/release-preflight.test.sh
           bash scripts/asc-key.test.sh
           bash scripts/github-release.test.sh
+          bash scripts/smoke-simulator.test.sh
           python3 scripts/asc_release_test.py
           python3 scripts/asc_localization_test.py
           python3 scripts/asc_dev_cert_test.py
