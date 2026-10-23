@@ -43,8 +43,21 @@ private struct DistrictFieldModifier: ViewModifier {
             .background(colors.card, in: RoundedRectangle(cornerRadius: DistrictRadius.control))
             .overlay {
                 RoundedRectangle(cornerRadius: DistrictRadius.control)
-                    .strokeBorder(colors.input, lineWidth: 1)
+                    .strokeBorder(colors.fieldEdge, lineWidth: 1)
             }
+    }
+}
+
+extension DistrictColors {
+    /// The 1px edge of a text field: ``mutedForeground``, the palette's quiet ink.
+    ///
+    /// ⛔ NOT ``input``, WHICH IS A FILL-WEIGHT TONE AND DISAPPEARS AS AN EDGE. On the card a
+    /// field sits on, `input` measured 1.40:1 in dark and 1.62:1 in light, below WCAG 1.4.11's
+    /// 3:1 for a control boundary, so an empty field read as no field at all (found on the Mac,
+    /// whose field is this one). `mutedForeground` is 6.07:1 (dark) and 7.41:1 (light) on
+    /// `card`, and clears 3:1 on every surface (`DistrictContrastTests`).
+    var fieldEdge: Color {
+        mutedForeground
     }
 }
 

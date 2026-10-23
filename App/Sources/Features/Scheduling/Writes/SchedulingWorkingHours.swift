@@ -100,15 +100,13 @@ enum SchedulingWorkingHours {
         SchedulingHoursFormat.displayDay(day)
     }
 
-    /// ⚠️ FORMAT ONLY, AND NOT A CLOCK CHECK. `25:99` passes, exactly as it does in
-    /// the browser: the fork is the validator, and a stricter client would refuse
-    /// input the server accepts. What this catches is the shape that is refused for
-    /// certain — a dropped leading zero.
+    /// ⚠️ A STORED VALUE IS WELL FORMED WHEN IT IS ITS OWN `HH:MM`: zero-padded and a
+    /// clock that exists (00:00...23:59, the bounds of the web's `hh:mm` input). The field
+    /// (``SchedulingTimeField``) stores what it can read as `HH:MM` and anything else as
+    /// typed, so this refuses a dropped leading zero, `25:00` and « 9 h 5 » alike, with
+    /// ``SchedulingWriteCopy/timeFormatError``.
     static func isWellFormedTime(_ value: String) -> Bool {
-        guard value.count == 5 else { return false }
-        let parts = value.split(separator: ":", omittingEmptySubsequences: false)
-        guard parts.count == 2, parts[0].count == 2, parts[1].count == 2 else { return false }
-        return parts.allSatisfy { $0.allSatisfy(\.isNumber) }
+        SchedulingWallClock.wireValue(value) == value
     }
 
     /// The seven rows a stored rule list opens on.
