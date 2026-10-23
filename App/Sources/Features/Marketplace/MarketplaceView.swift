@@ -31,7 +31,7 @@ import SwiftUI
 /// ⛔ SO NOTHING IS NAMED AND NOTHING IS LINKED, WHICH IS TRUE OF THE WHOLE APP.
 /// ``ShellView/lapsed(inactiveCount:)`` states the subscription is not active and stops;
 /// ``BillingCopy/readOnly`` says the change is not available in this app; ``SchedulingCopy``'s
-/// `notEligible` states the refusal and offers nothing; ``MarketplaceCopy/readOnly`` is
+/// `notEligible` states the refusal and offers nothing; ``MarketplaceCopy/purchaseElsewhere`` is
 /// this screen's sentence. ``ShellView``'s own browser hand-off is a different thing: it
 /// hands BACK a claimed URL the app cannot draw rather than pointing at a purchase.
 ///
@@ -313,7 +313,7 @@ struct MarketplaceView: View {
 
     // MARK: - The read-only boundary
 
-    /// ⛔ THE WHOLE OF THE BOUNDARY, AND IT IS TWO SENTENCES RATHER THAN A CONTROL. There is
+    /// ⛔ THE WHOLE OF THE BOUNDARY, AND IT IS SENTENCES RATHER THAN A CONTROL. There is
     /// deliberately nothing beneath it: no button, no link and no caption offering to open a
     /// browser. See the ⛔ at the top of this file. ⚠️ The second sentence narrows the
     /// first: everything about a number EXCEPT buying one is in the app, so the screen
@@ -323,7 +323,9 @@ struct MarketplaceView: View {
             Text(MarketplaceCopy.purchaseElsewhere)
             // ⚠️ THE ROLE STILL ONLY DECIDES WORDING ON THIS LINE, because the two marketplace
             // READS admit `viewer`. The provisioning tabs gate their own controls.
-            Text(model.readOnlyCaption)
+            if let caption = model.readOnlyCaption {
+                Text(caption)
+            }
         }
         .font(DistrictType.caption)
         .foregroundStyle(colors.mutedForeground)
