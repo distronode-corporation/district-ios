@@ -3103,6 +3103,15 @@ screen = "hq"
 state = "reviewed"
 id = { swift = "HQCopy.promptLabel" }
 
+[hq.prompt_placeholder]
+en = "Type your question…"
+fr = "Posez votre question…"
+ctx = "placeholder"
+screen = "hq"
+state = "reviewed"
+id = { swift = "HQCopy.promptPlaceholder" }
+note = "Inside the empty question box, under the hq.prompt_label eyebrow. Its own words so the box does not repeat the label printed above it (3.0.3 visual walk); hq.prompt_label stays the field's accessible name."
+
 [hq.retry]
 en = "Try again"
 fr = "Réessayer"
