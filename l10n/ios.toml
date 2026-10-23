@@ -2302,8 +2302,8 @@ state = "reviewed"
 id = { swift = "DeskCopy.offMessage" }
 
 [desk.off_title]
-en = "District Desk is off"
-fr = "District Desk est désactivé"
+en = "Desk is off"
+fr = "Le comptoir est désactivé"
 ctx = "title"
 screen = "desk"
 state = "reviewed"
@@ -2401,8 +2401,8 @@ state = "reviewed"
 id = { swift = "DeskCopy.setStatus" }
 
 [desk.settings_eyebrow]
-en = "District Desk"
-fr = "District Desk"
+en = "Desk"
+fr = "Comptoir"
 ctx = "label"
 screen = "desk"
 state = "reviewed"
@@ -2463,7 +2463,7 @@ id = { swift = "DeskCopy.threadFallbackTitle" }
 
 [desk.title]
 en = "Desk"
-fr = "District Desk"
+fr = "Comptoir"
 ctx = "title"
 screen = "desk"
 state = "reviewed"
@@ -2504,7 +2504,7 @@ id = { swift = "DeskCopy.uploadingLogo" }
 
 [desk.viewer_note]
 en = "Desk is available to agency and client members."
-fr = "District Desk est accessible aux membres ayant le rôle Administrateur ou Membre."
+fr = "Le comptoir est accessible aux membres ayant le rôle Administrateur ou Membre."
 ctx = "body"
 screen = "desk"
 state = "reviewed"
@@ -4567,16 +4567,6 @@ state = "reviewed"
 id = { swift = "MarketplaceCopy.purchaseElsewhere" }
 note = "⛔ PROSE, NAMING NO DESTINATION, WITH NOTHING TO TAP. See the ⛔ at the top of this file: Guideline 3.1.1 covers steering as well as the purchase itself, so the sentence states the boundary and the second half says what IS here, which is the part that stops it reading as a half-built screen."
 
-[marketplace.read_only]
-en = "Everything else about your numbers is on the other tabs."
-fr = "Tout le reste concernant vos numéros se trouve dans les autres onglets."
-ctx = "body"
-screen = "marketplace"
-tier = "T1"
-state = "reviewed"
-id = { swift = "MarketplaceCopy.readOnly" }
-note = "⛔ ONLY THE PURCHASE IS OUT OF REACH. Releasing and reconfiguring are in the app, on their own tab, behind confirmations, and ``purchaseElsewhere`` is the line that says the purchase is not.\n⛔ WHAT IT STILL DOES IS MAKE A BOUNDARY LEGIBLE WITHOUT LINKING IT OR NAMING ANY DESTINATION. App Store Review Guideline 3.1.1 covers steering as well as the purchase, and naming the place in prose IS the steering, so this sentence points inward at the other tabs — the same call ``BillingCopy/readOnly`` makes for its own guideline."
-
 [marketplace.read_only_viewer]
 en = "Changing a number needs an agency or client role. Ask someone on this workspace who has one."
 fr = "Modifier un numéro exige un rôle Administrateur ou Membre. Demandez à un membre de cet espace de travail qui en a un."
@@ -5850,7 +5840,7 @@ id = { swift = "OverviewCopy.customerContacts" }
 
 [overview.desk]
 en = "Desk"
-fr = "Desk"
+fr = "Comptoir"
 ctx = "label"
 screen = "overview"
 state = "reviewed"
