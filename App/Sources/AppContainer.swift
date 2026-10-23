@@ -325,6 +325,13 @@ final class AppContainer {
     /// tenant their desk is disabled when the read merely failed.
     let desk: DeskRepository
 
+    /// Reply and Mark read from a notification, with no view involved.
+    ///
+    /// ⚠️ BUILT FROM ``coordinator`` AND ``inbox``, never its own: one coordinator per
+    /// process (see the ⛔ on the type). `lazy` only because `init` is against
+    /// `function_body_length`'s 60; it is first read in `DistrictApp.init`.
+    lazy var notificationActions = NotificationActionHandler(coordinator: coordinator, inbox: inbox)
+
     private let store: any TokenStore
 
     /// The single sign-out orchestrator. See the ⛔ on the type: it owns the

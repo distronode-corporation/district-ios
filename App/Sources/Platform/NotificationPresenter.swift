@@ -19,9 +19,11 @@ import UserNotifications
 /// Linux tier cannot compile.
 final class NotificationPresenter: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     private let relay: PushTapRelay
+    private let actions: NotificationActionInbox
 
-    init(relay: PushTapRelay) {
+    init(relay: PushTapRelay, actions: NotificationActionInbox) {
         self.relay = relay
+        self.actions = actions
         super.init()
     }
 
@@ -64,11 +66,24 @@ final class NotificationPresenter: NSObject, UNUserNotificationCenterDelegate, @
     /// a future action added server-side would otherwise navigate instead of doing
     /// nothing.
     ///
-    /// ⚠️ THE COMPLETION HANDLER IS CALLED IMMEDIATELY, not from inside the hop, and on
-    /// this path that is a rule rather than a nicety. The system uses it to know the app
-    /// has finished handling the response; a handler awaiting a SEND — which is what a
-    /// Reply action starts — would hold a background launch open for a network round
-    /// trip, and one never called at all is a watchdog kill.
+    /// ⛔ A SHADE ACTION (Reply, Mark read) GOES TO ``NotificationActionHandler`` AND NEVER
+    /// TO THE RELAY. Those actions are non-foreground: from a locked phone or a watch they
+    /// launch the app in the background with no scene, so a path through ``PushTapRelay``
+    /// and `ShellView` waits for a view that never appears, and then for a workspace the
+    /// UI has not loaded. The handler needs neither.
+    ///
+    /// ⛔ AND FOR A SHADE ACTION THE COMPLETION HANDLER IS CALLED AFTER THE WORK, not
+    /// before it. It tells iOS the app has finished with the response; calling it first
+    /// lets a background launch be suspended mid-refresh or mid-send, which loses the
+    /// reply (and a suspension mid-refresh can cost a re-login). The handler holds a
+    /// background task for the length of the work, so the wait is bounded.
+    ///
+    /// ⚠️ A TAP STILL COMPLETES IMMEDIATELY. It only hands a payload to the relay;
+    /// navigation happens in the foreground, after this returns.
+    ///
+    /// ⚠️ THE HANDLER IS REBOUND `nonisolated(unsafe)` BEFORE THE HOP, as
+    /// ``AppDelegate``'s silent-push path rebinds its own: the SDK's closure is not
+    /// `Sendable`, and it is called exactly once, on the main actor.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
@@ -78,6 +93,12 @@ final class NotificationPresenter: NSObject, UNUserNotificationCenterDelegate, @
         payload[MessageNotificationAction.identifierKey] = response.actionIdentifier
         if let typed = response as? UNTextInputNotificationResponse {
             payload[MessageNotificationAction.replyTextKey] = typed.userText
+        }
+        if MessageNotificationAction.isShadeAction(response.actionIdentifier) {
+            nonisolated(unsafe) let finish = completionHandler
+            let inbox = actions
+            Task { @MainActor in inbox.receive(payload) { finish() } }
+            return
         }
         let tapRelay = relay
         Task { @MainActor in tapRelay.deliver(payload) }

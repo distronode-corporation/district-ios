@@ -45,19 +45,13 @@ extension ShellView {
     /// file-scoped; ``apply(_:)`` at the foot of this file is called only from here and
     /// stays private, which is the line between the two.
     ///
-    /// ⛔ A SHADE ACTION IS ANSWERED HERE AND NEVER BECOMES A DEEP LINK. Reply and Mark
-    /// read do not navigate: the operator asked for something to HAPPEN, on a phone that
-    /// may still be locked, and pulling them into the app would be the app deciding it
-    /// wanted their attention. So the payload is consumed by
-    /// ``performMessageAction(_:payload:)`` and never reaches ``PushDeepLinks``.
+    /// ⛔ A SHADE ACTION NEVER ARRIVES HERE. Reply and Mark read do not navigate, and they
+    /// must work on a background launch that has no scene and no loaded workspace, so
+    /// ``NotificationPresenter`` hands them to ``NotificationActionHandler`` and only
+    /// taps reach the relay this mailbox is fed from.
     func adoptTappedPush() {
         guard let payload = push.pendingTapPayload else { return }
         push.pendingTapPayload = nil
-        let tapped = payload[MessageNotificationAction.identifierKey]
-        if let action = tapped, MessageNotificationAction.isShadeAction(action) {
-            performMessageAction(action, payload: payload)
-            return
-        }
         guard let event = PushPayload.parse(payload) else { return }
         deepLinks.offer(event)
         resolvePendingPush()
@@ -232,128 +226,5 @@ extension ShellView {
                 ),
             ], for: .inbox)
         }
-    }
-}
-
-/// Reply and Mark read, taken from the notification shade.
-///
-/// ⛔ NEITHER ONE NAVIGATES, AND THAT IS THE WHOLE DESIGN. Both actions are registered
-/// non-foreground (see ``NotificationCategories/register(on:)``), so the operator asked
-/// for something to happen without leaving whatever the phone was doing. Pulling the app
-/// to the front would be this app deciding it wanted their attention.
-///
-/// ⛔ BOTH ARE ADDRESSED BY THREAD AND THE PUSH NAMES A MESSAGE, so both spend the
-/// resolver first — `mark-read` takes `contactId` or `counterpart`, `send` takes `to`
-/// plus a `channel`, and a `messageId` opens neither. That is the whole reason
-/// `GET /api/district/messages/{id}` exists.
-///
-/// ⛔ AND THE ACTION ACTS ON THE PUSH'S OWN WORKSPACE RATHER THAN ON THE SELECTED ONE,
-/// WHICH IS **NOT** A HOLE IN THE CROSS-TENANT `drop` RULE. That rule exists so a
-/// notification cannot silently re-point the app at another tenant mid-task, and it is
-/// about NAVIGATION — see ``PushDeepLinkDecision/drop``. Nothing here navigates or
-/// touches the selection: the request is workspace-scoped, re-authorised server-side
-/// against this operator's own membership, and its effect is a message the operator
-/// explicitly typed to a customer they were shown. Dropping it instead would discard a
-/// reply somebody wrote, which is the outcome this whole surface exists to avoid.
-extension ShellView {
-    /// Do what the pressed button says.
-    ///
-    /// ⛔ THE RESOLVE HAPPENS INSIDE THE TASK AND NOTHING WAITS FOR IT ON THE MAIN
-    /// ACTOR. ``NotificationPresenter`` has already called the system's completion
-    /// handler, which is required: an app that holds it open across a network round trip
-    /// is woken for fewer of the pushes it is sent afterwards, and the penalty is silent.
-    ///
-    /// ⚠️ AN UNPARSEABLE PAYLOAD IS DROPPED SILENTLY, exactly as ``adoptTappedPush()``
-    /// drops one for the deep-link path: a missing `workspaceId` or `messageId` is
-    /// indistinguishable from a malicious one, and there is nothing to act on either way.
-    func performMessageAction(_ action: String, payload: [String: String]) {
-        guard case let .message(workspaceId, messageId)? = PushPayload.parse(payload) else { return }
-        // ⛔ REFUSED FOR A ROLE THE SERVER WOULD REFUSE. Both `messages/send` and
-        // `messages/mark-read` exclude `viewer`, and the resolver in front of them does
-        // too, so a viewer's shade action would spend three known 403s. ⚠️ The role is
-        // the SELECTED workspace's, which is the only one this process holds — a push for
-        // another tenant is acted on with this tenant's role, and the server is what
-        // actually decides. Erring on the app's side is the safe direction: the worst
-        // case is a refusal the operator sees rather than a write nobody authorised.
-        guard WorkspaceRole.allowsMutation(workspaceSession.role) else { return }
-        let repository = container.inbox
-        let reply = payload[MessageNotificationAction.replyTextKey]
-        Task {
-            guard case let .success(resolved) = await repository.messageThread(
-                workspaceId: workspaceId,
-                messageId: messageId
-            ) else {
-                // ⛔ A FAILED RESOLVE ON THE REPLY PATH STILL HAS TO BE SAID OUT LOUD.
-                // The operator typed a message and nothing has been sent; the
-                // notification is gone and there is no screen to put a sentence on.
-                if let reply, !reply.isEmpty {
-                    NotificationCategories.postReplyFailure(text: reply, reason: Self.unresolvedThread)
-                }
-                return
-            }
-            if action == MessageNotificationAction.markRead {
-                // ⚠️ NOT AWAITED FOR ANYTHING'S BENEFIT AND ITS RESULT IS DISCARDED. Zero
-                // marked is a success — a colleague may have opened the thread first —
-                // and there is nothing on screen to update either way.
-                _ = await repository.markRead(workspaceId: workspaceId, selector: resolved.selector)
-                return
-            }
-            await send(reply, to: resolved, workspaceId: workspaceId, repository: repository)
-        }
-    }
-
-    /// Send a reply typed into the shade.
-    ///
-    /// ⛔ THE RECIPIENT IS ``ResolvedThread/replyTarget`` VERBATIM AND IS NEVER
-    /// RE-DERIVED. It is the route's UNWRAPPED address — the server ran
-    /// `normalizeAddress` precisely so a display-name-wrapped `from`
-    /// (`Paul <paul@example.com>`) cannot end up in `to` — and its channel is the
-    /// server's own answer for this thread. Reading an `@` out of it here would be a
-    /// second, disagreeing decision, which is the thing ``ReplyTarget`` exists to
-    /// prevent.
-    ///
-    /// ⛔ NO SUBJECT IS SENT, EVEN ON AN EMAIL THREAD, AND THAT IS DELIBERATE RATHER
-    /// THAN MISSING. `messages/send` substitutes "Message from District" for an absent
-    /// one, which the thread composer refuses to let happen because it can require the
-    /// field — a shade cannot, since a `UNTextInputNotificationAction` has exactly one
-    /// box. ⚠️ The alternative is worse in both directions: inventing a subject would
-    /// have this client authoring a topic nobody chose, and refusing to reply on an email
-    /// thread would silently discard what the operator typed. So the substitution is
-    /// accepted here and only here.
-    ///
-    /// ⛔ AND A FAILURE POSTS A LOCAL NOTIFICATION CARRYING THE TEXT BACK. A silently
-    /// dropped reply is the worst outcome on this surface: the notification is gone, the
-    /// app may never come forward, and the operator's only evidence would be the
-    /// customer not answering. ⛔ Nothing is retried — a send that timed out may well
-    /// have landed, and a second attempt is a second charge and a duplicate message.
-    private func send(
-        _ text: String?,
-        to resolved: ResolvedThread,
-        workspaceId: String,
-        repository: InboxRepository
-    ) async {
-        // ⚠️ AN EMPTY BOX IS NOT A FAILURE AND MUST NOT BE REPORTED AS ONE. iOS lets a
-        // reply action be confirmed with nothing typed, and `messages/send` guards on
-        // `!body` before it looks at anything else, so this would be a 400 for a message
-        // the operator did not write.
-        guard let text, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        let outcome = await repository.send(
-            workspaceId: workspaceId,
-            target: resolved.replyTarget,
-            body: text
-        )
-        guard case let .failure(error) = outcome else { return }
-        // ⚠️ THE SERVER'S OWN SENTENCE, VERBATIM. An unverified sender, an exhausted A2P
-        // registration and the per-workspace 30/min cap each need a different action from
-        // the operator, and "could not send" throws all of that away.
-        NotificationCategories.postReplyFailure(text: text, reason: FailureText.from(error).message)
-    }
-
-    /// ⛔ NOT A RETRY OFFER. The resolver answers 404 identically for "not in this
-    /// workspace" and "does not exist", and 409 for a row with no addressable
-    /// counterpart; pressing again produces the same answer. The sentence says what did
-    /// not happen and where the text is.
-    private static var unresolvedThread: String {
-        NavigationCopy.conversationCouldNotOpened
     }
 }

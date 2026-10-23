@@ -12,6 +12,18 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- Fixed: replying to or marking a message read from a notification while the app was
+  closed was silently dropped. Reply and Mark read are background actions, and from a
+  locked phone or an Apple Watch they launch the app with no screen: the action waited
+  for a view and a loaded workspace that never came, and the system's completion handler
+  was called before any work. A new `NotificationActionHandler`, owned by `AppContainer`,
+  takes the workspace from the notification, refreshes the session through the one
+  `TokenRefreshCoordinator`, sends or marks read inside a background task, and only then
+  completes. The server decides permissions (no client-side role gate), and a failure posts
+  a local notification: "Reply not sent" as before, or "Conversation not marked read"
+  (« Conversation non marquée comme lue », `common.mark_read_failed`).
+  `NotificationActionHandlerTests` (10) pin the cold path, a 403, background-task expiry
+  and one request per tap.
 - District HQ's question box no longer repeats "Ask", the label printed above it: it shows
   its own placeholder, "Type your question…" (« Posez votre question… »,
   `hq.prompt_placeholder`). "Ask" stays the field's title, so VoiceOver still names it.
