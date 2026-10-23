@@ -2302,11 +2302,11 @@ state = "reviewed"
 id = { swift = "DeskCopy.offMessage" }
 
 [desk.off_title]
-en = "District Desk is off"
-fr = "District Desk est désactivé"
+en = "Desk is off"
+fr = "Comptoir est désactivé"
 ctx = "title"
 screen = "desk"
-state = "reviewed"
+state = "draft"
 id = { swift = "DeskCopy.offTitle" }
 note = "⛔ OFF IS NOT EMPTY, AND THIS IS THE SENTENCE THAT KEEPS THEM APART. An empty queue here would be a lie: it reads as \"no customer has ever contacted you\" when the truth is that nothing is being recorded at all."
 
@@ -2401,11 +2401,11 @@ state = "reviewed"
 id = { swift = "DeskCopy.setStatus" }
 
 [desk.settings_eyebrow]
-en = "District Desk"
-fr = "District Desk"
+en = "Desk"
+fr = "Comptoir"
 ctx = "label"
 screen = "desk"
-state = "reviewed"
+state = "draft"
 same_ok = true
 id = { swift = "DeskCopy.settingsEyebrow" }
 
@@ -2463,10 +2463,10 @@ id = { swift = "DeskCopy.threadFallbackTitle" }
 
 [desk.title]
 en = "Desk"
-fr = "District Desk"
+fr = "Comptoir"
 ctx = "title"
 screen = "desk"
-state = "reviewed"
+state = "draft"
 id = { swift = "DeskCopy.title" }
 
 [desk.unknown_message]
@@ -2504,10 +2504,10 @@ id = { swift = "DeskCopy.uploadingLogo" }
 
 [desk.viewer_note]
 en = "Desk is available to agency and client members."
-fr = "District Desk est accessible aux membres ayant le rôle Administrateur ou Membre."
+fr = "Comptoir est accessible aux membres ayant le rôle Administrateur ou Membre."
 ctx = "body"
 screen = "desk"
-state = "reviewed"
+state = "draft"
 id = { swift = "DeskCopy.viewerNote" }
 
 [desk.waiting_on_customer]
@@ -5850,10 +5850,10 @@ id = { swift = "OverviewCopy.customerContacts" }
 
 [overview.desk]
 en = "Desk"
-fr = "Desk"
+fr = "Comptoir"
 ctx = "label"
 screen = "overview"
-state = "reviewed"
+state = "draft"
 same_ok = true
 id = { swift = "OverviewCopy.desk" }
 
