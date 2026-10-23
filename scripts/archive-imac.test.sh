@@ -194,6 +194,13 @@ STUB
   # The stand-in is clean by default and carries the seam's literal when
   # STUB_ARCHIVE_SEAM is set, so both verdicts of the guard are exercised
   # against the real `strings` and `grep`.
+  #
+  # ⚠️ NO WATCH APP UNLESS ASKED: today's archive. STUB_ARCHIVE_WATCH=1 adds the
+  # layout the Apple Watch companion ships as, DistrictAI.app/Watch/DistrictAIWatch.app
+  # with DistrictAIWatch.app/PlugIns/DistrictAIWatchComplications.appex, each with its
+  # own Info.plist (carrying the iOS app's versions unless overridden), main executable
+  # and localizations. STUB_ARCHIVE_IOS_APPEX=1 adds an extension to the iOS app's own
+  # PlugIns/, and STUB_ARCHIVE_EXTRA_APP a second top-level .app.
   cat >"$STUB_DIR/xcodebuild" <<'STUB'
 #!/bin/sh
 echo "xcodebuild $*" >> "$CALLS_FILE"
@@ -205,6 +212,39 @@ if [ "${STUB_XCODEBUILD_FAIL:-}" = "$PHASE" ]; then
   echo "stub xcodebuild: $PHASE failed" >&2
   exit 65
 fi
+# The localizations a bundle would hold: $2 is a space-separated list of paths inside
+# bundle $1. A path ending in .strings is a table, written with its folder
+# (fr-CA.lproj/Localizable.strings); anything else is a folder (fr.lproj,
+# Frameworks/Vendor.framework/fr.lproj).
+make_lproj() {
+  for lproj in $2; do
+    case "$lproj" in
+      *.strings)
+        mkdir -p "$1/${lproj%/*}"
+        : >"$1/$lproj"
+        ;;
+      *) mkdir -p "$1/$lproj" ;;
+    esac
+  done
+}
+# A nested bundle: $1 its folder, $2 its executable's name (empty: no
+# CFBundleExecutable key), $3 short version, $4 build, $5 non-empty for the seam.
+make_nested() {
+  mkdir -p "$1"
+  {
+    echo "CFBundleIdentifier=com.distronode.district.${1##*/}"
+    [ -n "$2" ] && echo "CFBundleExecutable=$2"
+    echo "CFBundleShortVersionString=$3"
+    echo "CFBundleVersion=$4"
+  } >"$1/Info.plist"
+  name="${2:-${1##*/}}"
+  name="${name%.*}"
+  if [ -n "$5" ]; then
+    printf 'stub nested binary\nDISTRICT_UITEST_SESSION\n' >"$1/$name"
+  else
+    printf 'stub nested binary\n' >"$1/$name"
+  fi
+}
 if [ "$PHASE" = archive ]; then
   archive=""
   build=""
@@ -213,6 +253,7 @@ if [ "$PHASE" = archive ]; then
     case "$1" in CURRENT_PROJECT_VERSION=*) build="${1#*=}" ;; esac
     shift
   done
+  short="${STUB_SHORT_VERSION:-3.0.2}"
   app="$archive/Products/Applications/DistrictAI.app"
   mkdir -p "$app" "$archive/dSYMs"
   # The bundle's Info.plist, as the stub plutil reads it: key=value lines. The build
@@ -220,7 +261,8 @@ if [ "$PHASE" = archive ]; then
   if [ -z "${STUB_ARCHIVE_NO_PLIST:-}" ]; then
     {
       echo "CFBundleIdentifier=com.distronode.district"
-      echo "CFBundleShortVersionString=${STUB_SHORT_VERSION:-3.0.2}"
+      echo "CFBundleExecutable=DistrictAI"
+      echo "CFBundleShortVersionString=$short"
       echo "CFBundleVersion=$build"
     } >"$app/Info.plist"
   fi
@@ -231,19 +273,26 @@ if [ "$PHASE" = archive ]; then
   else
     printf 'stub release binary\n' >"$app/DistrictAI"
   fi
-  # The localizations the bundle would hold: STUB_ARCHIVE_LPROJ is a space-separated
-  # list of paths inside the app for the French guard. A path ending in .strings is a
-  # table, written with its folder (fr-CA.lproj/Localizable.strings); anything else is
-  # a folder (fr.lproj, Frameworks/Vendor.framework/fr.lproj).
-  for lproj in ${STUB_ARCHIVE_LPROJ:-}; do
-    case "$lproj" in
-      *.strings)
-        mkdir -p "$app/${lproj%/*}"
-        : >"$app/$lproj"
-        ;;
-      *) mkdir -p "$app/$lproj" ;;
-    esac
-  done
+  make_lproj "$app" "${STUB_ARCHIVE_LPROJ:-}"
+  if [ -n "${STUB_ARCHIVE_WATCH:-}" ]; then
+    watch="$app/Watch/DistrictAIWatch.app"
+    make_nested "$watch" DistrictAIWatch \
+      "${STUB_WATCH_SHORT_VERSION:-$short}" "${STUB_WATCH_BUILD:-$build}" "${STUB_WATCH_SEAM:-}"
+    make_lproj "$watch" "${STUB_WATCH_LPROJ:-}"
+    appex="$watch/PlugIns/DistrictAIWatchComplications.appex"
+    appex_exe=DistrictAIWatchComplications
+    [ -n "${STUB_APPEX_NO_EXECUTABLE:-}" ] && appex_exe=""
+    make_nested "$appex" "$appex_exe" \
+      "${STUB_APPEX_SHORT_VERSION:-$short}" "${STUB_APPEX_BUILD:-$build}" "${STUB_APPEX_SEAM:-}"
+    make_lproj "$appex" "${STUB_APPEX_LPROJ:-}"
+  fi
+  if [ -n "${STUB_ARCHIVE_IOS_APPEX:-}" ]; then
+    make_nested "$app/PlugIns/DistrictAIWidgets.appex" DistrictAIWidgets \
+      "$short" "${STUB_IOS_APPEX_BUILD:-$build}" ""
+  fi
+  if [ -n "${STUB_ARCHIVE_EXTRA_APP:-}" ]; then
+    mkdir -p "$archive/Products/Applications/$STUB_ARCHIVE_EXTRA_APP"
+  fi
 fi
 exit 0
 STUB
@@ -690,6 +739,156 @@ run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/ou
   STUB_ARCHIVE_LPROJ="en.lproj"
 assert_zero "$RC" "an English-only bundle is accepted"
 assert_contains "$OUT" "French ok - no French localization" "the guard reports an English-only bundle"
+
+# ── 13c. The Apple Watch companion and every other nested bundle ─────────────
+# ⛔ THE GUARDS ABOVE, OVER EVERY BUNDLE IN THE ARCHIVE. The watch app ships inside
+# the iOS app (DistrictAI.app/Watch/DistrictAIWatch.app) with its complications in
+# its own PlugIns/; each is a binary, a set of localizations and a version of its
+# own. Each refusal is seen to fire, to name the bundle and to delete the archive;
+# the archive without a watch app is seen to pass exactly as before.
+WATCH_REL="DistrictAI.app/Watch/DistrictAIWatch.app"
+APPEX_REL="$WATCH_REL/PlugIns/DistrictAIWatchComplications.appex"
+# Asserts a refusal: non-zero, the reason printed, the archive deleted, nothing exported.
+assert_discarded() {
+  assert_nonzero "$RC" "$1: fails the script"
+  assert_contains "$OUT" "$2" "$1: the message names the reason"
+  assert_contains "$OUT" "has been DELETED" "$1: the message says the archive is gone"
+  if [ -e "$STUB_DIR/out/DistrictAI.xcarchive" ]; then
+    fail "$1: the archive is deleted"
+  else
+    ok "$1: the archive is deleted"
+  fi
+  assert_not_contains "$(calls)" "-exportArchive" "$1: nothing is exported"
+}
+echo "13c. a watch app and its complications are held to the seam, French, version and layout guards"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_GIT_COUNT=777 STUB_ARCHIVE_WATCH=1 DISTRICT_FRENCH=YES \
+  STUB_ARCHIVE_LPROJ="en.lproj $FR_CA_TABLES" STUB_WATCH_LPROJ="en.lproj $FR_CA_TABLES" \
+  STUB_APPEX_LPROJ="en.lproj $FR_CA_TABLES Frameworks/Vendor.framework/fr.lproj"
+assert_zero "$RC" "13c watch: a watch app with complications and French in every bundle is accepted"
+assert_contains "$OUT" "IOS-SEC-01 ok - no UI-test seam in the archived binary (3 executables checked)" \
+  "13c watch: the seam guard read the app, the watch app and the complications"
+assert_contains "$(calls)" "plutil -extract CFBundleExecutable raw -o - $STUB_DIR/out/DistrictAI.xcarchive/Products/Applications/$APPEX_REL/Info.plist" \
+  "13c watch: a nested executable is found by its own CFBundleExecutable"
+assert_contains "$OUT" "Versions ok - 2 nested bundles carry the app's 3.0.2 (4878)" \
+  "13c watch: both nested bundles carry the app's versions"
+assert_contains "$OUT" "French ok - DISTRICT_FRENCH is on, and fr-CA.lproj holds both tables in the app and its 2 nested bundles" \
+  "13c watch: French is complete in every bundle (a framework's own French is not the bundle's)"
+assert_contains "$(calls)" "-exportArchive" "13c watch: it is exported"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_WATCH=1 STUB_ARCHIVE_IOS_APPEX=1 \
+  STUB_ARCHIVE_LPROJ="en.lproj" STUB_WATCH_LPROJ="en.lproj" STUB_APPEX_LPROJ="en.lproj"
+assert_zero "$RC" "13c watch, English: an English-only watch app, complications and iOS extension are accepted"
+assert_contains "$OUT" "Versions ok - 3 nested bundles" "13c watch, English: the iOS app's own PlugIns/ is walked too"
+assert_contains "$OUT" "French ok - no French localization in the archived app or its 3 nested bundles" \
+  "13c watch, English: the guard reports every bundle English-only"
+
+# ⛔ TODAY'S ARCHIVE, UNCHANGED: no nested bundle, so nothing nested is read or compared.
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_LPROJ="en.lproj"
+assert_zero "$RC" "13c no watch: an archive with no watch app is accepted"
+assert_contains "$OUT" "IOS-SEC-01 ok - no UI-test seam in the archived binary (1 executables checked)" \
+  "13c no watch: the app's own binary is the one checked"
+assert_not_contains "$OUT" "Versions ok" "13c no watch: there is nothing nested to compare"
+assert_not_contains "$(calls)" "plutil" "13c no watch: no Info.plist is read for the guards"
+assert_contains "$OUT" "French ok - no French localization in the archived app or its 0 nested bundles" \
+  "13c no watch: the French guard runs as before"
+assert_contains "$(calls)" "-exportArchive" "13c no watch: it is exported"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_WATCH=1 STUB_WATCH_SEAM=1
+assert_discarded "13c seam in the watch binary" \
+  "UI-test seam is present in the archived binary: $WATCH_REL/DistrictAIWatch (1 hits)."
+assert_not_contains "$OUT" "IOS-SEC-01 ok" "13c seam in the watch binary: no success is reported"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_WATCH=1 STUB_APPEX_SEAM=1
+assert_discarded "13c seam in the complications binary" \
+  "UI-test seam is present in the archived binary: $APPEX_REL/DistrictAIWatchComplications (1 hits)."
+assert_not_contains "$OUT" "DistrictAIWatch (1 hits)" "13c seam in the complications binary: the clean watch binary is not named"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_WATCH=1 STUB_APPEX_NO_EXECUTABLE=1
+assert_discarded "13c no CFBundleExecutable" \
+  "$APPEX_REL has no readable CFBundleExecutable, so the seam check cannot find its binary."
+assert_not_contains "$OUT" "IOS-SEC-01 ok" "13c no CFBundleExecutable: no vacuous pass"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_WATCH=1 DISTRICT_FRENCH=YES \
+  STUB_ARCHIVE_LPROJ="en.lproj $FR_CA_TABLES" STUB_APPEX_LPROJ="en.lproj $FR_CA_TABLES" \
+  STUB_WATCH_LPROJ="en.lproj fr-CA.lproj/Localizable.strings"
+assert_discarded "13c French gap in the watch app" \
+  "DISTRICT_FRENCH is on, but the archived $WATCH_REL has no fr-CA.lproj/InfoPlist.strings."
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_WATCH=1 DISTRICT_FRENCH=YES \
+  STUB_ARCHIVE_LPROJ="en.lproj $FR_CA_TABLES" STUB_WATCH_LPROJ="en.lproj $FR_CA_TABLES" \
+  STUB_APPEX_LPROJ="en.lproj"
+assert_discarded "13c French missing from the complications" \
+  "DISTRICT_FRENCH is on, but the archived $APPEX_REL has no fr-CA.lproj/Localizable.strings fr-CA.lproj/InfoPlist.strings."
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_WATCH=1 STUB_ARCHIVE_LPROJ="en.lproj" STUB_WATCH_LPROJ="en.lproj $FR_CA_TABLES"
+assert_discarded "13c French in the watch app with French off" \
+  "the archived $WATCH_REL holds fr-CA.lproj, but DISTRICT_FRENCH is not set, so French is off."
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_WATCH=1 DISTRICT_FRENCH=YES \
+  STUB_ARCHIVE_LPROJ="en.lproj $FR_CA_TABLES" STUB_WATCH_LPROJ="en.lproj $FR_CA_TABLES" \
+  STUB_APPEX_LPROJ="en.lproj $FR_CA_TABLES fr.lproj"
+assert_discarded "13c fr.lproj in the complications" \
+  "the archived $APPEX_REL holds fr.lproj, which is never shipped"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_GIT_COUNT=777 STUB_ARCHIVE_WATCH=1 STUB_WATCH_SHORT_VERSION=3.0.1
+assert_discarded "13c watch short version mismatch" \
+  "must carry the archived app's version 3.0.2 (4878), but $WATCH_REL is '3.0.1' (4878);"
+assert_not_contains "$OUT" "but $APPEX_REL" "13c watch short version mismatch: the matching complications are not named"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_GIT_COUNT=777 STUB_ARCHIVE_WATCH=1 STUB_WATCH_BUILD=1
+assert_discarded "13c watch build number mismatch" "$WATCH_REL is '3.0.2' (1);"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_GIT_COUNT=777 STUB_ARCHIVE_WATCH=1 STUB_APPEX_BUILD=1
+assert_discarded "13c complications build number mismatch" "$APPEX_REL is '3.0.2' (1);"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_GIT_COUNT=777 STUB_ARCHIVE_WATCH=1 STUB_APPEX_SHORT_VERSION=3.1.0
+assert_discarded "13c complications short version mismatch" "$APPEX_REL is '3.1.0' (4878);"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_GIT_COUNT=777 STUB_ARCHIVE_IOS_APPEX=1 STUB_IOS_APPEX_BUILD=1
+assert_discarded "13c iOS extension build number mismatch" "DistrictAI.app/PlugIns/DistrictAIWidgets.appex is '3.0.2' (1);"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_WATCH=1 STUB_ARCHIVE_NO_PLIST=1
+assert_discarded "13c no app Info.plist beside a watch app" \
+  "the archived app's Info.plist has no readable CFBundleShortVersionString or CFBundleVersion"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_EXTRA_APP=DistrictAIWatch.app
+assert_discarded "13c an extra .app in Products/Applications" \
+  "Products/Applications holds DistrictAIWatch.app besides DistrictAI.app"
 
 # ── 14. The default build directory ──────────────────────────────────────────
 # ⛔ RUN FROM A COPY OF THE SCRIPT IN A THROWAWAY TREE, because the default is
