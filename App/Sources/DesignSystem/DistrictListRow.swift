@@ -263,25 +263,42 @@ struct DistrictAvatar: View {
             }
             .frame(width: side, height: side)
             .overlay {
-                Text(initials)
-                    .font(DistrictType.label)
-                    .foregroundStyle(SelectionInk.chipInk(
-                        tone,
-                        colors,
-                        increasedContrast: increased,
-                        prominence: prominence
-                    ))
+                Group {
+                    if let initials = Self.initials(for: name) {
+                        Text(initials)
+                            .font(DistrictType.label)
+                    } else {
+                        // Scaled with the circle, as the initials are.
+                        Image(systemName: "person.fill")
+                            .font(DistrictType.label)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .foregroundStyle(SelectionInk.chipInk(
+                    tone,
+                    colors,
+                    increasedContrast: increased,
+                    prominence: prominence
+                ))
             }
     }
 
-    private var initials: String {
+    /// Up to two initials, from the first two words that start with a letter, or nil when
+    /// no word does (a phone number, an empty name), which draws the person glyph.
+    ///
+    /// ⛔ A NUMBER IS NOT A NAME. The first character of each word drew "+" for a caller
+    /// known only by number and a lone "·" for a conversation with no name (3.0.3 visual
+    /// walk); District AI for Mac draws the silhouette Contacts and Messages use for someone
+    /// unnamed, and this is its ``initials(for:)``. `DistrictAvatarTests` pins it.
+    static func initials(for name: String) -> String? {
         let letters = name
-            .split(separator: " ")
-            .prefix(2)
+            .split(whereSeparator: \.isWhitespace)
             .compactMap(\.first)
+            .filter(\.isLetter)
+            .prefix(2)
             .map { String($0).uppercased() }
             .joined()
-        return letters.isEmpty ? "·" : letters
+        return letters.isEmpty ? nil : letters
     }
 }
 
