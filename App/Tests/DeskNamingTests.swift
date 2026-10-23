@@ -29,11 +29,11 @@ final class DeskNamingTests: XCTestCase {
         french {
             XCTAssertEqual(DeskCopy.title, "Comptoir")
             XCTAssertEqual(DeskCopy.settingsEyebrow, "Comptoir")
-            XCTAssertEqual(DeskCopy.offTitle, "Comptoir est désactivé")
+            XCTAssertEqual(DeskCopy.offTitle, "Le comptoir est désactivé")
             XCTAssertEqual(DeskCopy.settingsTitle, "Réglages du comptoir")
             XCTAssertEqual(DeskCopy.offAction, "Réglages du comptoir")
             XCTAssertEqual(OverviewCopy.desk, "Comptoir")
-            XCTAssertTrue(DeskCopy.viewerNote.hasPrefix("Comptoir "))
+            XCTAssertTrue(DeskCopy.viewerNote.hasPrefix("Le comptoir "))
         }
     }
 
