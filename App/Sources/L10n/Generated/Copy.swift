@@ -1762,9 +1762,6 @@ extension MarketplaceCopy {
     /// `marketplace.purchase_elsewhere`
     internal static var purchaseElsewhere: String { AppL10n.copyLocale == .frCA ? "Cette app ne permet pas d'acheter de nouveaux numéros. Tout le reste concernant un numéro, y compris ses inscriptions et sa libération, se trouve ici." : "New numbers cannot be purchased in this app. Everything else about a number, including its paperwork and releasing it, is here." }
 
-    /// `marketplace.read_only`
-    internal static var readOnly: String { AppL10n.copyLocale == .frCA ? "Tout le reste concernant vos numéros se trouve dans les autres onglets." : "Everything else about your numbers is on the other tabs." }
-
     /// `marketplace.read_only_viewer`
     internal static var readOnlyViewer: String { AppL10n.copyLocale == .frCA ? "Modifier un numéro exige un rôle Administrateur ou Membre. Demandez à un membre de cet espace de travail qui en a un." : "Changing a number needs an agency or client role. Ask someone on this workspace who has one." }
 

@@ -4567,16 +4567,6 @@ state = "reviewed"
 id = { swift = "MarketplaceCopy.purchaseElsewhere" }
 note = "⛔ PROSE, NAMING NO DESTINATION, WITH NOTHING TO TAP. See the ⛔ at the top of this file: Guideline 3.1.1 covers steering as well as the purchase itself, so the sentence states the boundary and the second half says what IS here, which is the part that stops it reading as a half-built screen."
 
-[marketplace.read_only]
-en = "Everything else about your numbers is on the other tabs."
-fr = "Tout le reste concernant vos numéros se trouve dans les autres onglets."
-ctx = "body"
-screen = "marketplace"
-tier = "T1"
-state = "reviewed"
-id = { swift = "MarketplaceCopy.readOnly" }
-note = "⛔ ONLY THE PURCHASE IS OUT OF REACH. Releasing and reconfiguring are in the app, on their own tab, behind confirmations, and ``purchaseElsewhere`` is the line that says the purchase is not.\n⛔ WHAT IT STILL DOES IS MAKE A BOUNDARY LEGIBLE WITHOUT LINKING IT OR NAMING ANY DESTINATION. App Store Review Guideline 3.1.1 covers steering as well as the purchase, and naming the place in prose IS the steering, so this sentence points inward at the other tabs — the same call ``BillingCopy/readOnly`` makes for its own guideline."
-
 [marketplace.read_only_viewer]
 en = "Changing a number needs an agency or client role. Ask someone on this workspace who has one."
 fr = "Modifier un numéro exige un rôle Administrateur ou Membre. Demandez à un membre de cet espace de travail qui en a un."
