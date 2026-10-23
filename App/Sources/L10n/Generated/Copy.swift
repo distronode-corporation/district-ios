@@ -4104,7 +4104,7 @@ extension SchedulingWriteCopy {
     }
 
     /// `scheduling_write.time_format_error`
-    internal static var timeFormatError: String { AppL10n.copyLocale == .frCA ? "Entrez une heure au format HH:MM." : "Enter a time as HH:MM." }
+    internal static var timeFormatError: String { AppL10n.copyLocale == .frCA ? "Entrez une heure, par exemple 9 h ou 13 h 30." : "Enter a time as HH:MM." }
 
     /// `scheduling_write.time_order_error`
     internal static var timeOrderError: String { AppL10n.copyLocale == .frCA ? "La fin doit être après le début." : "The end has to be after the start." }

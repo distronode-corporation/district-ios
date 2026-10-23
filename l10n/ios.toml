@@ -10872,11 +10872,12 @@ note = "⛔ \"SENT TO\", NOT \"DELIVERED TO\". ``SchedulingTestEmailResult`` is 
 
 [scheduling_write.time_format_error]
 en = "Enter a time as HH:MM."
-fr = "Entrez une heure au format HH:MM."
+fr = "Entrez une heure, par exemple 9 h ou 13 h 30."
 ctx = "error"
 screen = "scheduling.writes.availability"
 tier = "T2"
-state = "reviewed"
+state = "draft"
+fr_variant = "The French field shows and accepts « 9 h 30 » (SchedulingTimeField), so the French names that form; the English field shows HH:MM."
 id = { swift = "SchedulingWriteCopy.timeFormatError" }
 
 [scheduling_write.time_order_error]

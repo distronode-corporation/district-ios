@@ -7,7 +7,7 @@ import SwiftUI
 /// ``SchedulingWorkingHours`` and nowhere else; a row index used as a
 /// `day_of_week` publishes somebody's Monday hours on Sunday.
 ///
-/// ⚠️ THE TIMES ARE PLAIN TEXT FIELDS AND NOT A `DatePicker`. They are zero-padded
+/// ⚠️ THE TIMES ARE TEXT FIELDS (``SchedulingTimeField``) AND NOT A `DatePicker`. They are zero-padded
 /// `HH:MM` wall-clock strings in the MEMBER'S scheduler timezone — not instants,
 /// and not the device's zone — so a picker bound to a `Date` would have to invent
 /// a day and a zone to hold one, and would then render a travelling member's
@@ -78,25 +78,19 @@ struct SchedulingAvailabilityRulesSheet: View {
     private func rangeRow(_ range: SchedulingHoursDraftRange, row: Int, error: String?) -> some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
             HStack(spacing: DistrictSpacing.tight) {
-                TextField(
-                    SchedulingWorkingHours.defaultStart,
-                    text: Binding(
-                        get: { range.start },
-                        set: { value in model.setStart(value, for: range.id, inRow: row) }
-                    )
+                SchedulingTimeField(
+                    stored: range.start,
+                    placeholder: SchedulingWorkingHours.defaultStart,
+                    onChange: { value in model.setStart(value, for: range.id, inRow: row) }
                 )
-                .districtField()
                 Text(SchedulingWriteCopy.rangeTo)
                     .font(DistrictType.caption)
                     .foregroundStyle(colors.mutedForeground)
-                TextField(
-                    SchedulingWorkingHours.defaultEnd,
-                    text: Binding(
-                        get: { range.end },
-                        set: { value in model.setEnd(value, for: range.id, inRow: row) }
-                    )
+                SchedulingTimeField(
+                    stored: range.end,
+                    placeholder: SchedulingWorkingHours.defaultEnd,
+                    onChange: { value in model.setEnd(value, for: range.id, inRow: row) }
                 )
-                .districtField()
                 Button(SchedulingWriteCopy.remove) {
                     model.removeRange(range.id, fromRow: row)
                 }
