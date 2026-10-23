@@ -97,6 +97,23 @@ final class FrenchWireTextTests: XCTestCase {
         XCTAssertEqual(french { WorkflowActionReason.label("something-new") }, "Autre")
     }
 
+    /// 3.0.3 (DistrictCore 7.0.3): the team push codes read as their sentence in French,
+    /// where they fell back to « Autre ». English still shows the sentence as sent.
+    func testTheTeamPushReasonsHaveTheirOwnFrenchSentence() {
+        XCTAssertEqual(
+            french { WorkflowActionReason.label("no-devices: 0 of 3 members") },
+            "Aucun membre de l'équipe n'a l'application sur un appareil qui peut recevoir des notifications"
+        )
+        XCTAssertEqual(
+            french { WorkflowActionReason.label("push-not-delivered: apns 410") },
+            "Aucun appareil n'a accepté la notification"
+        )
+        for code in ["no-message", "push-lookup-failed", "signing-unavailable"] {
+            XCTAssertNotEqual(french { WorkflowActionReason.label("\(code): detail") }, "Autre", code)
+        }
+        XCTAssertEqual(WorkflowActionReason.label("no-devices: 0 of 3 members"), "no-devices: 0 of 3 members")
+    }
+
     // MARK: - Devices
 
     func testADevicePlatformIsTheProductName() {

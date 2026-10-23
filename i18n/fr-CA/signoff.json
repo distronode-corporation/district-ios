@@ -1,7 +1,7 @@
 {
-  "signed_off_by": "v3 manager (Opus 5.5 xhigh), final French review, 2026-10-16",
-  "release": "v3.0.2",
-  "commit": "769413cd364820c015aa487f9faf8ee19990de99",
+  "signed_off_by": "iMac manager distronode-com-bf (Opus 5.5), iOS 3.0.3: rooms.state_dropped_because and settings.preview_dropped_because removed, settings.preview_dropped NOTE reworded, no en/fr string added or changed, 2026-10-22",
+  "release": "v3.0.3",
+  "commit": "8382e3277a500b211a32a61a372fe842f629571f",
   "catalogs": [
     {
       "path": "l10n/infoplist.toml",
@@ -9,7 +9,7 @@
     },
     {
       "path": "l10n/ios.toml",
-      "sha256": "766c38ca8344a4e7feabf09b08edda65965486de62fd36225a0aacd54611788b"
+      "sha256": "ea49c5dc8fee856e1d2ea42eb629b5e38ff6a943953a7559859a77f07198e128"
     },
     {
       "path": "l10n/push.toml",

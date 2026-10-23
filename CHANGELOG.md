@@ -10,6 +10,20 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Changed
+
+- 3.0.3: DistrictCore `exactVersion` 7.0.3 (district-core-swift's 7.0.3 tag). Its catalogs
+  carry the service's error codes and vocabulary from monorepo ac4071d14. What this app
+  shows from them: five workflow action reason codes (`no-devices`, `no-message`,
+  `push-lookup-failed`, `push-not-delivered`, `signing-unavailable`) now have a French
+  label, so `WorkflowActionReason.label` on a French screen shows the reviewed sentence
+  where it fell back to « Autre ». English is unchanged (the sentence as sent). The 44 new
+  error codes (`knowledge_url_*`, `member_phone_*`, `transfer_*`, `workflow_*`) belong to
+  routes this app does not call (URL import, member phone, number transfer, workflow
+  editing), so no screen here changes for them. No app source change;
+  `FrenchWireTextTests.testTheTeamPushReasonsHaveTheirOwnFrenchSentence` holds the labels.
+- MARKETING_VERSION 3.0.3.
+
 ### Fixed
 
 - 3.0.3: a room or a persona preview that ends on its own no longer shows LiveKit's own
@@ -298,6 +312,14 @@ built from history before publication, so they have no tags in this repository.
   and the `fr-CA.lproj` strings, so `FR_COMPLETE` is true. French stays switched off: the
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
+
+## [3.0.3] - 2026-10-22
+
+A small update.
+
+- In French, a workflow's Recent runs now say why a step could not notify your team, for example that no team member has the app on a device that can receive notifications.
+- Rooms and Preview persona say in plain words when a session ends or cannot connect, instead of showing a technical message.
+- Crash reporting is updated to the latest stable version.
 
 ## [3.0.2] - 2026-10-16
 
