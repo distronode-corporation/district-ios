@@ -886,7 +886,7 @@ extension DeskCopy {
     internal static var offMessage: String { AppL10n.copyLocale == .frCA ? "Activez-le et les appels que votre agent ne peut pas régler seront consignés ici sous forme de billets; les appelants pourront aussi lui demander l'état de leurs propres demandes. Rien n'est consigné avant l'activation." : "Turn it on and calls your agent cannot resolve are filed here as tickets, and callers can ask it for the status of their own requests. Nothing is recorded until you do." }
 
     /// `desk.off_title`
-    internal static var offTitle: String { AppL10n.copyLocale == .frCA ? "Le comptoir est désactivé" : "Desk is off" }
+    internal static var offTitle: String { AppL10n.copyLocale == .frCA ? "Le comptoir est désactivé" : "The Desk is off" }
 
     /// `desk.open`
     internal static var `open`: String { AppL10n.copyLocale == .frCA ? "Ouvert" : "Open" }
@@ -958,7 +958,7 @@ extension DeskCopy {
     internal static var uploadingLogo: String { AppL10n.copyLocale == .frCA ? "Téléversement…" : "Uploading…" }
 
     /// `desk.viewer_note`
-    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "Le comptoir est accessible aux membres ayant le rôle Administrateur ou Membre." : "Desk is available to agency and client members." }
+    internal static var viewerNote: String { AppL10n.copyLocale == .frCA ? "Le comptoir est accessible aux membres ayant le rôle Administrateur ou Membre." : "The Desk is available to agency and client members." }
 
     /// `desk.waiting_on_customer`
     internal static var waitingOnCustomer: String { AppL10n.copyLocale == .frCA ? "En attente du client" : "Waiting on customer" }
