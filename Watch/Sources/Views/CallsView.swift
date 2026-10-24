@@ -58,6 +58,9 @@ struct CallDetailView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            // ⚠️ A BARE ScrollView HAS NO SIDE MARGIN ON THE WATCH: the fields started at the
+            // screen's edge, under the rounded corners, where the title and every list inset.
+            .scenePadding(.horizontal)
         }
         .navigationTitle(WatchCopy.calls)
     }
