@@ -117,7 +117,7 @@ extension WatchCopy {
     internal static var send: String { WatchL10n.copyLocale == .frCA ? "Envoyer" : "Send" }
 
     /// `watch.sending`
-    internal static var sending: String { WatchL10n.copyLocale == .frCA ? "Envoi…" : "Sending…" }
+    internal static var sending: String { WatchL10n.copyLocale == .frCA ? "Envoi en cours…" : "Sending…" }
 
     /// `watch.sign_in_body`
     internal static var signInBody: String { WatchL10n.copyLocale == .frCA ? "Ouvrez District AI sur votre iPhone et connectez-vous. Vos appels et vos messages s'afficheront ici." : "Open District AI on your iPhone and sign in. Your calls and messages appear here." }

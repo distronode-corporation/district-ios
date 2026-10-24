@@ -312,7 +312,7 @@ id = { swift = "WatchCopy.send" }
 
 [watch.sending]
 en = "Sending…"
-fr = "Envoi…"
+fr = "Envoi en cours…"
 ctx = "label"
 screen = "watch"
 state = "reviewed"

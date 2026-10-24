@@ -34,7 +34,7 @@
 "watch.reply_not_sent" = "Réponse non envoyée";
 "watch.reply_sent" = "Message envoyé";
 "watch.send" = "Envoyer";
-"watch.sending" = "Envoi…";
+"watch.sending" = "Envoi en cours…";
 "watch.sign_in_body" = "Ouvrez District AI sur votre iPhone et connectez-vous. Vos appels et vos messages s'afficheront ici.";
 "watch.sign_in_on_iphone" = "Connectez-vous sur l'iPhone";
 "watch.signed_out" = "Déconnecté";
