@@ -47,7 +47,8 @@ final class SchedulingTimeFieldTests: XCTestCase {
             L10nRuntime.withLocale(.frCA) {
                 XCTAssertEqual(
                     SchedulingWorkingHours.errors(in: [range]),
-                    ["Entrez une heure, par exemple 9 h ou 13 h 30."],
+                    // Non-breaking spaces, so « 13 h 30 » never splits across lines.
+                    ["Entrez une heure, par exemple 9\u{00A0}h ou 13\u{00A0}h\u{00A0}30."],
                     typed
                 )
             }
