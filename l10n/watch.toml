@@ -296,7 +296,7 @@ note = "Title over the iPhone's reason. Same words as the iPhone's local notific
 
 [watch.reply_sent]
 en = "Reply sent"
-fr = "Réponse envoyée"
+fr = "Message envoyé"
 ctx = "toast"
 screen = "watch"
 state = "reviewed"
@@ -312,7 +312,7 @@ id = { swift = "WatchCopy.send" }
 
 [watch.sending]
 en = "Sending…"
-fr = "Envoi en cours…"
+fr = "Envoi…"
 ctx = "label"
 screen = "watch"
 state = "reviewed"
@@ -328,7 +328,7 @@ id = { swift = "WatchCopy.signInBody" }
 
 [watch.sign_in_on_iphone]
 en = "Sign in on your iPhone"
-fr = "Connectez-vous sur votre iPhone"
+fr = "Connectez-vous sur l'iPhone"
 ctx = "title"
 screen = "watch"
 state = "reviewed"
