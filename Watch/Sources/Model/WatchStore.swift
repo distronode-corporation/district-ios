@@ -23,6 +23,16 @@ enum WatchWriteState: Equatable {
     case unreachable
 }
 
+/// A screen on the signed-in stack, above Home.
+///
+/// ⚠️ A THREAD CARRIES ITS CONVERSATION, NOT ONLY ITS KEY, so an open thread keeps
+/// drawing when a newer snapshot no longer lists it, as it did before the stack had a path.
+enum WatchDestination: Hashable {
+    case calls
+    case inbox
+    case thread(WatchSnapshot.Conversation)
+}
+
 /// The watch app's one model: the phone's latest snapshot and the writes in flight.
 ///
 /// ⛔ IT MAKES NO REQUEST OF ITS OWN. Everything it shows came from the phone, and every
@@ -36,18 +46,28 @@ final class WatchStore {
     /// their own state.
     private(set) var writes: [String: WatchWriteState] = [:]
 
+    /// The signed-in stack above Home, which the views bind. A tapped notification sets it.
+    var path: [WatchDestination] = []
+
+    /// A tapped message notification still on its way to its thread. See ``open(_:)``.
+    private var pendingRoute: PendingRoute?
+    private var resolving: Task<Void, Never>?
+
     private let link: any PhoneLinking
     private let persistence: any SnapshotPersisting
     private let complication: any ComplicationPublishing
+    private let clock: @MainActor () -> Date
 
     init(
         link: any PhoneLinking,
         persistence: any SnapshotPersisting,
-        complication: any ComplicationPublishing
+        complication: any ComplicationPublishing,
+        clock: @escaping @MainActor () -> Date = { Date() }
     ) {
         self.link = link
         self.persistence = persistence
         self.complication = complication
+        self.clock = clock
     }
 
     /// The snapshot on screen, when signed in.
@@ -61,9 +81,10 @@ final class WatchStore {
         if let data = persistence.load() {
             apply(WatchSnapshot.read(data: data), persist: false)
         }
-        link.activate { [weak self] reading in
-            self?.apply(reading)
-        }
+        link.activate(
+            onReading: { [weak self] reading in self?.apply(reading) },
+            onReachable: { [weak self] in self?.continuePendingRoute() }
+        )
         refresh()
     }
 
@@ -88,6 +109,8 @@ final class WatchStore {
             phase = .versionMismatch
             WatchL10n.phoneLanguage = nil
             complication.publish(.unknown)
+            path = []
+            pendingRoute = nil
         case let .snapshot(snapshot):
             WatchL10n.phoneLanguage = snapshot.language
             phase = snapshot.signedIn ? .ready(snapshot) : .signedOut
@@ -95,9 +118,14 @@ final class WatchStore {
                 persistence.save(data)
             }
             complication.publish(ComplicationState(snapshot))
-            if !snapshot.signedIn {
-                // ⛔ NOTHING OF THE LAST ACCOUNT SURVIVES A SIGN-OUT, a pending failure included.
+            if snapshot.signedIn {
+                continuePendingRoute()
+            } else {
+                // ⛔ NOTHING OF THE LAST ACCOUNT SURVIVES A SIGN-OUT, a pending failure, an open
+                // thread and a tapped notification included.
                 writes = [:]
+                path = []
+                pendingRoute = nil
             }
         }
     }
@@ -115,6 +143,109 @@ final class WatchStore {
     func relativeTime(of call: WatchSnapshot.Call, at now: Date) -> String {
         guard let occurredAt = call.occurredAt else { return call.relativeTime }
         return WatchL10n.relative(occurredAt, to: now)
+    }
+
+    // MARK: - A tapped notification
+
+    /// How long a tapped notification may still open its thread, once the phone has named
+    /// it or a snapshot carries it. ⚠️ After that the person has moved on, and being pushed
+    /// into a thread they did not just ask for is worse than staying on the inbox.
+    static let routeWindow: TimeInterval = 60
+
+    /// A tapped notification's flattened payload (see ``WatchNotificationDelegate``).
+    func open(_ payload: [String: String]) async {
+        guard let route = WatchNotificationRoute.parse(payload) else { return }
+        await open(route)
+    }
+
+    /// Open a tapped message notification on its thread.
+    ///
+    /// ⛔ THE INBOX FIRST, AT ONCE, AND THE THREAD ONLY WHEN IT IS REALLY THERE. The push names
+    /// a message, the watch lists threads, and only the phone can say which thread a message
+    /// is in (``WatchAction/resolveMessage(workspaceId:messageId:)``). Until it has, and
+    /// until a snapshot lists that thread, the inbox is shown: never a blank screen, never a
+    /// guess. A phone out of reach is asked again when its next snapshot arrives.
+    ///
+    /// ⛔ ANOTHER WORKSPACE OPENS HOME. The snapshot is one workspace's, and its inbox is not
+    /// the one the message arrived in; Home names the workspace that is shown.
+    ///
+    /// ⚠️ NOTHING SIGNED IN, NOTHING MOVES: the root is saying why there is nothing to open.
+    func open(_ route: WatchNotificationRoute) async {
+        guard case let .message(workspaceId, messageId) = route, let snapshot else { return }
+        guard snapshot.workspace?.id == workspaceId else {
+            pendingRoute = nil
+            path = []
+            return
+        }
+        path = [.inbox]
+        pendingRoute = PendingRoute(
+            workspaceId: workspaceId,
+            messageId: messageId,
+            expires: clock().addingTimeInterval(Self.routeWindow)
+        )
+        await resolvePendingRoute()
+    }
+
+    /// Wait for a resolve a snapshot started. For tests.
+    func settleRoute() async {
+        await resolving?.value
+    }
+
+    private func continuePendingRoute() {
+        guard let route = pendingRoute else { return }
+        if route.threadKey == nil {
+            resolving = Task { await resolvePendingRoute() }
+        } else {
+            landPendingRoute()
+        }
+    }
+
+    /// Still the person's latest wish: in time, on the inbox it opened, in its workspace.
+    private func isLive(_ route: PendingRoute) -> Bool {
+        clock() < route.expires && path == [.inbox] && snapshot?.workspace?.id == route.workspaceId
+    }
+
+    private func resolvePendingRoute() async {
+        guard let route = pendingRoute, route.threadKey == nil, !route.asking else { return }
+        guard isLive(route) else {
+            pendingRoute = nil
+            return
+        }
+        // ⚠️ OUT OF REACH IS NOT AN ANSWER: kept, and asked again on the next snapshot.
+        guard link.isReachable else { return }
+        pendingRoute?.asking = true
+        let answer = await link.send(WatchRequest(
+            action: .resolveMessage(workspaceId: route.workspaceId, messageId: route.messageId)
+        ))
+        // ⚠️ A NEWER TAP, A SIGN-OUT OR ANOTHER VERSION MAY HAVE REPLACED IT MEANWHILE.
+        guard pendingRoute?.isSameMessage(as: route) == true else { return }
+        pendingRoute?.asking = false
+        switch answer {
+        case let .reply(reply) where reply.ok && reply.threadKey?.isEmpty == false:
+            pendingRoute?.threadKey = reply.threadKey
+            landPendingRoute()
+        case .unreachable:
+            return
+        case .reply, .noAnswer:
+            // ⚠️ AN OLDER PHONE ANSWERS "update both apps", a refusal its sentence: either way
+            // there is no thread to open, and the inbox stays.
+            pendingRoute = nil
+        }
+    }
+
+    private func landPendingRoute() {
+        guard let route = pendingRoute, let threadKey = route.threadKey else { return }
+        guard isLive(route) else {
+            pendingRoute = nil
+            return
+        }
+        // ⚠️ NOT LISTED YET: the message may be newer than this snapshot. The phone sends a
+        // fresh one after answering, and that one is checked too.
+        guard let conversation = snapshot?.conversations?.first(where: {
+            $0.id == threadKey && $0.workspaceId == route.workspaceId
+        }) else { return }
+        path.append(.thread(conversation))
+        pendingRoute = nil
     }
 
     // MARK: - Writes
@@ -180,6 +311,21 @@ final class WatchStore {
         case .noAnswer:
             writes[key] = .failed(title: failureTitle, reason: WatchCopy.iphoneDidNotAnswer)
         }
+    }
+}
+
+/// A tapped message notification on its way to its thread.
+private struct PendingRoute {
+    let workspaceId: String
+    let messageId: String
+    let expires: Date
+    /// The phone's answer, once it has given one.
+    var threadKey: String?
+    /// A resolve is on its way to the phone, so a snapshot arriving meanwhile asks nothing.
+    var asking = false
+
+    func isSameMessage(as other: PendingRoute) -> Bool {
+        workspaceId == other.workspaceId && messageId == other.messageId && expires == other.expires
     }
 }
 

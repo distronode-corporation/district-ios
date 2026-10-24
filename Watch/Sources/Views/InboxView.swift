@@ -14,9 +14,7 @@ struct InboxView: View {
                         .foregroundStyle(.secondary)
                 }
                 ForEach(conversations) { conversation in
-                    NavigationLink {
-                        ThreadView(store: store, conversation: conversation)
-                    } label: {
+                    NavigationLink(value: WatchDestination.thread(conversation)) {
                         ConversationRow(conversation: conversation)
                     }
                 }

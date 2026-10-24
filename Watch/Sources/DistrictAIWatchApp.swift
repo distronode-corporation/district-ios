@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 /// The Apple Watch companion app.
 ///
@@ -12,6 +13,8 @@ import SwiftUI
 struct DistrictAIWatchApp: App {
     @State private var store: WatchStore
     private let link: LivePhoneLink
+    /// ⚠️ HELD HERE: `UNUserNotificationCenter.delegate` is weak.
+    private let notifications: WatchNotificationDelegate
 
     init() {
         let link = LivePhoneLink()
@@ -22,6 +25,11 @@ struct DistrictAIWatchApp: App {
             complication: WidgetComplicationPublisher()
         )
         _store = State(initialValue: store)
+        // ⛔ IN `init`, BEFORE LAUNCH FINISHES, or the tap that launched the app is never
+        // delivered. Called on the system's own queue: see ``WatchNotificationDelegate``.
+        let notifications = WatchNotificationDelegate.routing(to: store)
+        self.notifications = notifications
+        UNUserNotificationCenter.current().delegate = notifications
         #if DEBUG
             if WatchPreviewSeam.apply(to: store) {
                 return

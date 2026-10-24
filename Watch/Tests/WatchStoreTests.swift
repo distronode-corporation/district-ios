@@ -1,5 +1,6 @@
 @testable import DistrictAIWatch
 import Foundation
+import UserNotifications
 import XCTest
 
 /// The watch's one model, against a phone that is a fake.
@@ -179,6 +180,190 @@ final class WatchStoreTests: XCTestCase {
         XCTAssertEqual(rig.store.snapshot, Self.snapshot())
     }
 
+    // MARK: - A tapped notification
+
+    /// The thread the phone names, listed in the snapshot: Inbox, then that thread.
+    func testAMessageTapOpensItsThreadOnceThePhoneNamesIt() async throws {
+        let rig = Rig(answer: .reply(.thread("contact:c_1")))
+        rig.store.apply(.snapshot(Self.snapshot()))
+
+        await rig.store.open(Self.tap())
+
+        let conversation = try XCTUnwrap(Self.snapshot().conversations?[0])
+        XCTAssertEqual(rig.store.path, [.inbox, .thread(conversation)])
+        XCTAssertEqual(rig.link.sent, [.resolveMessage(workspaceId: "ws_1", messageId: "msg_1")])
+    }
+
+    /// ⛔ ANOTHER WORKSPACE OPENS HOME, and the phone is not asked.
+    func testAMessageFromAnotherWorkspaceOpensHome() async {
+        let rig = Rig(answer: .reply(.thread("contact:c_1")))
+        rig.store.apply(.snapshot(Self.snapshot()))
+        rig.store.path = [.calls]
+
+        await rig.store.open(Self.tap(workspaceId: "ws_2"))
+
+        XCTAssertEqual(rig.store.path, [])
+        XCTAssertTrue(rig.link.sent.isEmpty)
+    }
+
+    /// ⚠️ A THREAD THE SNAPSHOT DOES NOT LIST YET: the inbox, never a blank screen, and the
+    /// thread opens when the next snapshot carries it.
+    func testAThreadNotListedYetStaysOnTheInboxUntilASnapshotCarriesIt() async {
+        let rig = Rig(answer: .reply(.thread("contact:c_new")))
+        rig.store.apply(.snapshot(Self.snapshot()))
+
+        await rig.store.open(Self.tap())
+        XCTAssertEqual(rig.store.path, [.inbox])
+
+        var fresh = Self.snapshot()
+        let arrived = WatchSnapshot.Conversation(
+            id: "contact:c_new", workspaceId: "ws_1", title: "Luc Gagnon",
+            preview: "↓ Bonjour", unread: true, canReply: true
+        )
+        fresh.conversations?.insert(arrived, at: 0)
+        rig.store.apply(.snapshot(fresh))
+
+        XCTAssertEqual(rig.store.path, [.inbox, .thread(arrived)])
+        XCTAssertEqual(rig.link.sent.count, 1)
+    }
+
+    /// ⚠️ A WINDOW, NOT A STANDING ORDER: a thread that turns up after it closes moves nothing.
+    func testAThreadListedAfterTheWindowMovesNothing() async {
+        let clock = TestClock()
+        let rig = Rig(answer: .reply(.thread("contact:c_new")), clock: clock)
+        rig.store.apply(.snapshot(Self.snapshot()))
+        await rig.store.open(Self.tap())
+
+        clock.now += WatchStore.routeWindow + 1
+        var fresh = Self.snapshot()
+        fresh.conversations?.append(.init(
+            id: "contact:c_new", workspaceId: "ws_1", title: "Luc Gagnon",
+            preview: "↓ Bonjour", unread: true, canReply: true
+        ))
+        rig.store.apply(.snapshot(fresh))
+
+        XCTAssertEqual(rig.store.path, [.inbox])
+    }
+
+    /// ⚠️ A PERSON WHO HAS MOVED ON IS NOT PULLED BACK.
+    func testLeavingTheInboxCancelsTheRoute() async {
+        let rig = Rig(answer: .reply(.thread("contact:c_new")))
+        rig.store.apply(.snapshot(Self.snapshot()))
+        await rig.store.open(Self.tap())
+
+        rig.store.path = [.calls]
+        var fresh = Self.snapshot()
+        fresh.conversations?.append(.init(
+            id: "contact:c_new", workspaceId: "ws_1", title: "Luc Gagnon",
+            preview: "↓ Bonjour", unread: true, canReply: true
+        ))
+        rig.store.apply(.snapshot(fresh))
+
+        XCTAssertEqual(rig.store.path, [.calls])
+    }
+
+    /// ⚠️ A PHONE OUT OF REACH (a cold launch, before the session is up) is asked again when
+    /// its next snapshot arrives.
+    func testAnUnreachablePhoneIsAskedAgainOnItsNextSnapshot() async throws {
+        let rig = Rig(reachable: false, answer: .reply(.thread("contact:c_1")))
+        rig.store.apply(.snapshot(Self.snapshot()))
+
+        await rig.store.open(Self.tap())
+        XCTAssertEqual(rig.store.path, [.inbox])
+        XCTAssertTrue(rig.link.sent.isEmpty)
+
+        rig.link.isReachable = true
+        rig.store.apply(.snapshot(Self.snapshot()))
+        await rig.store.settleRoute()
+
+        let conversation = try XCTUnwrap(Self.snapshot().conversations?[0])
+        XCTAssertEqual(rig.store.path, [.inbox, .thread(conversation)])
+        XCTAssertEqual(rig.link.sent.count, 1)
+    }
+
+    /// ⚠️ A TAP THAT RESUMES THE APP lands before the phone is back in reach, and no snapshot
+    /// need follow: coming into reach is what asks (seen on the simulator pair).
+    func testThePhoneComingIntoReachAsksForTheThread() async throws {
+        let rig = Rig(reachable: false, answer: .reply(.thread("contact:c_1")))
+        rig.store.start()
+        rig.store.apply(.snapshot(Self.snapshot()))
+        await rig.store.open(Self.tap())
+        XCTAssertTrue(rig.link.sent.isEmpty)
+
+        rig.link.isReachable = true
+        rig.link.onReachable?()
+        await rig.store.settleRoute()
+
+        let conversation = try XCTUnwrap(Self.snapshot().conversations?[0])
+        XCTAssertEqual(rig.store.path, [.inbox, .thread(conversation)])
+        XCTAssertEqual(rig.link.sent, [.resolveMessage(workspaceId: "ws_1", messageId: "msg_1")])
+    }
+
+    /// ⚠️ AN OLDER PHONE ("update both apps") OR A REFUSAL: the inbox stays, and nothing is
+    /// asked again.
+    func testAPhoneThatCannotResolveLeavesTheInbox() async {
+        let rig = Rig(answer: .reply(.failure("Update District AI on both devices.")))
+        rig.store.apply(.snapshot(Self.snapshot()))
+
+        await rig.store.open(Self.tap())
+        rig.store.apply(.snapshot(Self.snapshot()))
+        await rig.store.settleRoute()
+
+        XCTAssertEqual(rig.store.path, [.inbox])
+        XCTAssertEqual(rig.link.sent.count, 1)
+    }
+
+    /// ⛔ NOT A MESSAGE, OR NOT A WHOLE ONE: nothing moves and nothing is sent.
+    func testAPayloadThatIsNotAMessageMovesNothing() async {
+        let rig = Rig(answer: .reply(.thread("contact:c_1")))
+        rig.store.apply(.snapshot(Self.snapshot()))
+        rig.store.path = [.calls]
+
+        await rig.store.open(["type": "incoming_call", "workspaceId": "ws_1", "callId": "call_1"])
+        await rig.store.open(["type": "message", "workspaceId": "ws_1"])
+
+        XCTAssertEqual(rig.store.path, [.calls])
+        XCTAssertTrue(rig.link.sent.isEmpty)
+    }
+
+    /// ⛔ SIGNED OUT, NOTHING OPENS, AND A SIGN-OUT CLEARS AN OPEN THREAD.
+    func testSignedOutOpensNothingAndASignOutClearsThePath() async {
+        let rig = Rig(answer: .reply(.thread("contact:c_1")))
+        rig.store.apply(.snapshot(Self.snapshot()))
+        await rig.store.open(Self.tap())
+
+        rig.store.apply(.snapshot(.signedOut(at: Date(), language: "en")))
+        XCTAssertEqual(rig.store.path, [])
+
+        await rig.store.open(Self.tap())
+        XCTAssertEqual(rig.store.path, [])
+        XCTAssertEqual(rig.link.sent.count, 1)
+    }
+
+    /// ⛔ THE PR #79 TRAP ON THIS PATH: the app's delegate, called off the main queue as the
+    /// system calls it, reaches the store rather than trapping. A regression is a crashed
+    /// test process, not a red assertion.
+    func testTheAppsDelegateCalledOffTheMainQueueOpensTheThread() async throws {
+        let rig = Rig(answer: .reply(.thread("contact:c_1")))
+        rig.store.apply(.snapshot(Self.snapshot()))
+        let delegate = WatchNotificationDelegate.routing(to: rig.store)
+        let userInfo: [String: String] = Self.tap()
+
+        DispatchQueue.global().async {
+            delegate.receive(actionIdentifier: UNNotificationDefaultActionIdentifier, userInfo: userInfo)
+        }
+        for _ in 0 ..< 200 where rig.store.path.count < 2 {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+
+        let conversation = try XCTUnwrap(Self.snapshot().conversations?[0])
+        XCTAssertEqual(rig.store.path, [.inbox, .thread(conversation)])
+    }
+
+    static func tap(workspaceId: String = "ws_1") -> [String: String] {
+        ["type": "message", "category": "district.message", "workspaceId": workspaceId, "messageId": "msg_1"]
+    }
+
     // MARK: - Fixtures
 
     static func snapshot(at date: Date = Date(timeIntervalSince1970: 1_800_000_000)) -> WatchSnapshot {
@@ -218,7 +403,14 @@ private final class FakePhoneLink: PhoneLinking {
         self.answer = answer
     }
 
-    func activate(onReading _: @escaping @MainActor @Sendable (WatchSnapshotReading) -> Void) {}
+    private(set) var onReachable: (@MainActor @Sendable () -> Void)?
+
+    func activate(
+        onReading _: @escaping @MainActor @Sendable (WatchSnapshotReading) -> Void,
+        onReachable: @escaping @MainActor @Sendable () -> Void
+    ) {
+        self.onReachable = onReachable
+    }
 
     func send(_ request: WatchRequest) async -> PhoneAnswer {
         sent.append(request.action)
@@ -249,14 +441,24 @@ private final class FakeComplication: ComplicationPublishing {
 }
 
 @MainActor
+private final class TestClock {
+    var now = Date(timeIntervalSince1970: 1_800_000_000)
+}
+
+@MainActor
 private struct Rig {
     let link: FakePhoneLink
     let persistence = FakePersistence()
     let complication = FakeComplication()
     let store: WatchStore
 
-    init(reachable: Bool = true, answer: PhoneAnswer = .reply(.success)) {
+    init(reachable: Bool = true, answer: PhoneAnswer = .reply(.success), clock: TestClock = TestClock()) {
         link = FakePhoneLink(reachable: reachable, answer: answer)
-        store = WatchStore(link: link, persistence: persistence, complication: complication)
+        store = WatchStore(
+            link: link,
+            persistence: persistence,
+            complication: complication,
+            clock: { clock.now }
+        )
     }
 }

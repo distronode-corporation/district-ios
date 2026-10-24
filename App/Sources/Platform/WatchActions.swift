@@ -31,9 +31,16 @@ struct ContainerWatchActions: WatchActionPerforming {
             await callHandling.saveAvailability(workspaceId: workspaceId, availableForCalls: available)
                 .map { _ in () }
                 .mapError { WatchActionFailure(sentence: FailureText.from($0).message) }
-        case .refresh:
+        case .refresh, .resolveMessage:
+            // ⚠️ NEITHER WRITES. `.resolveMessage` is answered by ``threadKey(workspaceId:messageId:)``.
             .success(())
         }
+    }
+
+    func threadKey(workspaceId: String, messageId: String) async -> Result<String, WatchActionFailure> {
+        // ⚠️ THE WATCH SHOWS NO SENTENCE FOR THIS: an unresolved message leaves it on the inbox.
+        await notificationActions.threadKey(workspaceId: workspaceId, messageId: messageId)
+            .mapError { _ in WatchActionFailure(sentence: InboxCopy.conversationCouldNotOpened) }
     }
 
     private func message(

@@ -106,6 +106,13 @@ final class WatchBridgeService {
         switch request.action {
         case .refresh:
             reply(WatchReply.success.message())
+        case let .resolveMessage(workspaceId, messageId):
+            switch await actions.threadKey(workspaceId: workspaceId, messageId: messageId) {
+            case let .success(threadKey):
+                reply(WatchReply.thread(threadKey).message())
+            case let .failure(failure):
+                reply(WatchReply.failure(failure.sentence).message())
+            }
         case .reply, .markRead, .setAvailability:
             switch await actions.perform(request.action) {
             case .success:
@@ -116,6 +123,8 @@ final class WatchBridgeService {
         }
         // ⚠️ EVEN AFTER A FAILURE: a refused write may still mean the picture moved (a
         // workspace the person was removed from), and the watch's next view should be true.
+        // ⚠️ AND AFTER A RESOLVE: the message just tapped may be in a thread the last
+        // snapshot predates, and the watch opens it when this one carries it.
         setNeedsSnapshot()
         await settle()
         lease.end()
@@ -178,6 +187,9 @@ protocol WatchSnapshotSourcing {
 @MainActor
 protocol WatchActionPerforming {
     func perform(_ action: WatchAction) async -> Result<Void, WatchActionFailure>
+
+    /// The thread key of the thread a message belongs to. See ``WatchAction/resolveMessage(workspaceId:messageId:)``.
+    func threadKey(workspaceId: String, messageId: String) async -> Result<String, WatchActionFailure>
 }
 
 /// A write that did not go through, with the sentence the watch shows.

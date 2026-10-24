@@ -17,8 +17,10 @@ struct WatchRootView: View {
         case .signedOut:
             MessageScreen(symbol: "person.crop.circle", title: WatchCopy.signInOnIphone, message: WatchCopy.signInBody)
         case let .ready(snapshot):
-            NavigationStack {
+            // ⚠️ THE PATH IS THE STORE'S, so a tapped notification can open a thread.
+            NavigationStack(path: Binding(get: { store.path }, set: { store.path = $0 })) {
                 HomeView(store: store, snapshot: snapshot)
+                    .watchDestinations(store: store, snapshot: snapshot)
             }
         }
     }
@@ -48,15 +50,11 @@ struct HomeView: View {
                     }
                     Section {
                         unreadRow
-                        NavigationLink {
-                            CallsView(store: store, calls: snapshot.calls)
-                        } label: {
+                        NavigationLink(value: WatchDestination.calls) {
                             Label(WatchCopy.calls, systemImage: "phone")
                         }
                         .accessibilityIdentifier("watch.home.calls")
-                        NavigationLink {
-                            InboxView(store: store, conversations: snapshot.conversations)
-                        } label: {
+                        NavigationLink(value: WatchDestination.inbox) {
                             Label(WatchCopy.inbox, systemImage: "tray")
                         }
                         .accessibilityIdentifier("watch.home.inbox")
@@ -77,6 +75,25 @@ struct HomeView: View {
                 Text(unread, format: .number)
                     .font(.headline)
                     .foregroundStyle(unread > 0 ? Color.accentColor : .secondary)
+            }
+        }
+    }
+}
+
+extension View {
+    /// The screens of ``WatchDestination``, drawn from the snapshot shown now.
+    ///
+    /// ⛔ ONE REGISTRATION PER STACK, at its root: a second one for the same type further up
+    /// the stack is ambiguous to SwiftUI.
+    func watchDestinations(store: WatchStore, snapshot: WatchSnapshot) -> some View {
+        navigationDestination(for: WatchDestination.self) { destination in
+            switch destination {
+            case .calls:
+                CallsView(store: store, calls: snapshot.calls)
+            case .inbox:
+                InboxView(store: store, conversations: snapshot.conversations)
+            case let .thread(conversation):
+                ThreadView(store: store, conversation: conversation)
             }
         }
     }
