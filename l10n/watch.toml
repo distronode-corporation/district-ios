@@ -3,6 +3,15 @@ catalog = "watch"
 platform = "swift"
 apple = true
 
+[watch.action_items]
+en = "Action items"
+fr = "Actions à faire"
+ctx = "label"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.actionItems" }
+note = "Label over the call's action items. Same as the iPhone's calls.action_items."
+
 [watch.availability]
 en = "Availability"
 fr = "Disponibilité"
@@ -66,6 +75,33 @@ args = { workspace = "str" }
 state = "reviewed"
 id = { swift = "WatchCopy.availableIn(_:)" }
 note = "Inline watch-face complication. {workspace} is the workspace's name."
+
+[watch.call_back]
+en = "Call back on iPhone"
+fr = "Rappeler sur l'iPhone"
+ctx = "button"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.callBack" }
+note = "Hands the call over to the iPhone (Handoff), which opens its dialler with the caller's number filled in. Nothing is dialled from the watch."
+
+[watch.call_back_hint]
+en = "On your iPhone, open the App Switcher and tap District AI."
+fr = "Sur votre iPhone, ouvrez le sélecteur d'apps et touchez District AI."
+ctx = "body"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.callBackHint" }
+note = "After Call back on iPhone: where the handed-over call appears on the iPhone (the banner at the bottom of the App Switcher)."
+
+[watch.call_title]
+en = "Call summary"
+fr = "Résumé de l'appel"
+ctx = "title"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.callTitle" }
+note = "Title of one call's card: who, how it went, the AI summary and the action items."
 
 [watch.calls]
 en = "Calls"
@@ -190,6 +226,69 @@ screen = "watch"
 state = "reviewed"
 id = { swift = "WatchCopy.iphoneNotReachableBody" }
 
+[watch.live_call]
+en = "Live call"
+fr = "Appel en direct"
+ctx = "label"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.liveCall" }
+note = "Home: a row per call in progress in the workspace, opening its live transcript."
+
+[watch.live_connecting]
+en = "Connecting…"
+fr = "Connexion…"
+ctx = "label"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.liveConnecting" }
+note = "Live transcript status: waiting for the first words. Same as the iPhone's live_transcript.connecting."
+
+[watch.live_ended]
+en = "Call ended"
+fr = "Appel terminé"
+ctx = "label"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.liveEnded" }
+note = "Live transcript status: the call is over; the card opens next. Same as the iPhone's live_transcript.ended."
+
+[watch.live_incomplete]
+en = "Earlier lines will appear in the full transcript after the call."
+fr = "Les répliques précédentes figureront dans la transcription complète après l'appel."
+ctx = "body"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.liveIncomplete" }
+note = "The server no longer holds the call's first lines. Same as the iPhone's live_transcript.incomplete."
+
+[watch.live_now]
+en = "Live"
+fr = "En direct"
+ctx = "label"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.liveNow" }
+note = "Live transcript status: lines arrive as they are spoken. Same as the iPhone's live_transcript.live."
+
+[watch.live_unavailable]
+en = "No live transcript for this call."
+fr = "Aucune transcription en direct pour cet appel."
+ctx = "body"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.liveUnavailable" }
+note = "The call is not AI-handled or the server refused the live transcript. Its summary comes after the call."
+
+[watch.live_waiting]
+en = "Nothing has been said yet."
+fr = "Rien n'a encore été dit."
+ctx = "body"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.liveWaiting" }
+note = "Live transcript before the first line. Same as the iPhone's live_transcript.waiting."
+
 [watch.mark_read]
 en = "Mark read"
 fr = "Marquer comme lu"
@@ -232,6 +331,15 @@ screen = "watch"
 state = "reviewed"
 id = { swift = "WatchCopy.noConversations" }
 note = "Same words as the iPhone's empty inbox."
+
+[watch.no_summary]
+en = "No AI summary for this call."
+fr = "Aucun résumé IA pour cet appel."
+ctx = "body"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.noSummary" }
+note = "No summary came. Same as the iPhone's calls.no_ai_summary_call."
 
 [watch.no_workspace]
 en = "Open District AI on your iPhone to choose a workspace."
@@ -352,6 +460,33 @@ screen = "complication"
 state = "reviewed"
 id = { swift = "WatchCopy.signedOut" }
 
+[watch.steer_header]
+en = "Tell the assistant"
+fr = "Consigne à l'assistant"
+ctx = "title"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.steerHeader" }
+note = "Heading over the lines that steer the AI assistant during the call. Hidden for viewers."
+
+[watch.summary]
+en = "AI summary"
+fr = "Résumé IA"
+ctx = "label"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.summary" }
+note = "Label over the call's AI summary. Same as the iPhone's calls.ai_summary."
+
+[watch.summary_on_its_way]
+en = "Summary on its way"
+fr = "Résumé en préparation"
+ctx = "label"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.summaryOnItsWay" }
+note = "The AI summary is not written yet; the watch asks again at 10, 30 and 60 s."
+
 [watch.try_again]
 en = "Try again"
 fr = "Réessayer"
@@ -420,3 +555,48 @@ ctx = "label"
 screen = "watch"
 state = "reviewed"
 id = { swift = "WatchCopy.when" }
+
+[watch.whisper_ask_what_about]
+en = "Ask what the call is about."
+fr = "Demandez l'objet de l'appel."
+ctx = "button"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.whisperAskWhatAbout" }
+note = "A ready-made instruction SENT AS WRITTEN to the AI assistant: an order to the assistant, not words for the caller."
+
+[watch.whisper_call_back_today]
+en = "The owner will call them back today."
+fr = "Le propriétaire rappellera la personne aujourd'hui."
+ctx = "button"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.whisperCallBackToday" }
+note = "A ready-made instruction SENT AS WRITTEN to the AI assistant, in the third person: it is a supervisor's note, never read to the caller as is."
+
+[watch.whisper_not_sent]
+en = "Not sent to the assistant"
+fr = "Non envoyé à l'assistant"
+ctx = "error"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.whisperNotSent" }
+note = "Title over the iPhone's reason when an instruction to the AI assistant did not go through."
+
+[watch.whisper_other]
+en = "Other instruction"
+fr = "Autre consigne"
+ctx = "placeholder"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.whisperOther" }
+note = "Field for a free instruction to the AI assistant, by dictation or Scribble."
+
+[watch.whisper_sent]
+en = "Sent to the assistant"
+fr = "Envoyé à l'assistant"
+ctx = "toast"
+screen = "watch"
+state = "draft"
+id = { swift = "WatchCopy.whisperSent" }
+note = "An instruction reached the AI assistant on the call."
