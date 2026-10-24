@@ -32,7 +32,8 @@ that version. It runs `gitleaks git .` (gitleaks 8.30.1) over the full history t
 
 ## Changing DistrictCore
 
-DistrictCore is not edited here. It lives in {CORE}, and a change to
+DistrictCore is not edited here. It lives in
+[district-core-swift](https://github.com/distronode-corporation/district-core-swift), and a change to
 it goes **upstream first**: a pull request there, which runs the package's own gates
 (its test floor, 100% line coverage, the Foundation-only import rule and the contract
 fixtures), then a tagged release, then a pull request here that moves `exactVersion` in
