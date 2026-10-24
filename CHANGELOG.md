@@ -10,6 +10,17 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Changed
+
+- 3.1.0: MARKETING_VERSION 3.1.0, the Apple Watch companion release. The version pair is
+  project-level, so the iOS app, the watch app and its complication carry the same value.
+- 3.1.0: DistrictCore `exactVersion` 7.1.0 (district-core-swift's 7.1.0 tag), for
+  `SchedulingWallClock` (#72). Package.swift is unchanged between 7.0.3 and 7.1.0, so no
+  other pin moves.
+- The product is Desk in English and « Comptoir » in French on every surface (#69, #73):
+  "District Desk" is gone from the title, eyebrow, Overview tile, viewer note and off card,
+  and English sentences take the article ("The Desk is off"). `DeskNamingTests`.
+
 ### Added
 
 - Added: Apple Watch app: recent calls, inbox reply and mark read, and your availability for
@@ -32,8 +43,20 @@ built from history before publication, so they have no tags in this repository.
   `watch_bridge.update_both_apps` in `l10n/ios.toml`). Tests: `WatchSnapshotTests`,
   `WatchSnapshotComposerTests`, `WatchBridgeServiceTests` (iPhone) and `WatchStoreTests`
   (watchOS, the new `DistrictAIWatch` scheme).
+- A tapped message notification on the watch opens its thread (#80): the watch app's
+  `WatchNotificationDelegate` routes the default action, and the phone resolves the
+  message's thread key (`WatchAction.resolveMessage`). An older phone answers "update both
+  apps" and the watch stays on the inbox.
 
 ### Fixed
+
+- Text fields have a 3:1 edge (WCAG 1.4.11), as on the Mac (#71): `fieldEdge`, 6.07:1 dark
+  and 7.41:1 light on the card, where `input` was 1.40:1 and 1.62:1. `DistrictContrastTests`.
+- Working hours: a French time field reads « 9 h », « 9 h 30 », « 17 h » (#72), and stores
+  what is typed as "HH:MM"; "25:00" and « 9 h 75 » are refused before a request.
+  `SchedulingTimeFieldTests`.
+- Phone numbers says each piece of its help once (#70); `marketplace.read_only` is removed.
+  `MarketplaceCaptionTests`.
 
 - Fixed: replying to or marking a message read from a notification while the app was
   closed was silently dropped. Reply and Mark read are background actions, and from a
@@ -374,6 +397,22 @@ built from history before publication, so they have no tags in this repository.
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
 
+## [3.1.0] - 2026-10-24
+
+District AI comes to Apple Watch.
+
+- A new Apple Watch app shows your recent calls and your inbox. Reply to a conversation with a quick reply or your own words, and mark it read.
+- Turn your availability for calls on or off from your wrist, and add a complication to a watch face to see at a glance whether calls ring to you.
+- Tapping a message notification on your watch opens that conversation.
+- The Apple Watch app works with District AI on your iPhone, so keep your iPhone nearby. It needs watchOS 10 or later.
+- Reply and Mark read on a message notification now work when the app is closed, from a locked iPhone or from your Apple Watch.
+- District Desk is now simply the Desk.
+- Text fields have a clearer edge, so an empty field is easy to see.
+- District HQ's question box shows its own hint instead of repeating its label.
+- A contact or conversation known only by its number shows a person icon instead of a stray symbol.
+- Phone numbers no longer repeats its help text.
+- In French, working hours show and accept times such as 9 h and 13 h 30.
+
 ## [3.0.3] - 2026-10-22
 
 A small update.
@@ -546,7 +585,12 @@ Voice Studio is the headline of 2.0.
 
 The first release on the App Store.
 
-[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v2.2.1...HEAD
+[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/distronode-corporation/district-ios/compare/v3.0.3...v3.1.0
+[3.0.3]: https://github.com/distronode-corporation/district-ios/compare/v3.0.2...v3.0.3
+[3.0.2]: https://github.com/distronode-corporation/district-ios/compare/v3.0.1...v3.0.2
+[3.0.1]: https://github.com/distronode-corporation/district-ios/compare/v3.0.0...v3.0.1
+[3.0.0]: https://github.com/distronode-corporation/district-ios/compare/v2.2.1...v3.0.0
 [2.2.1]: https://github.com/distronode-corporation/district-ios/releases/tag/v2.2.1
 [2.2]: https://github.com/distronode-corporation/district-ios/releases/tag/v2.2
 [2.1]: https://github.com/distronode-corporation/district-ios/compare/v2.0...v2.1
