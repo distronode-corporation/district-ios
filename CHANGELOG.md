@@ -66,7 +66,9 @@ built from history before publication, so they have no tags in this repository.
   conversation. » (`watch.cannot_reply`), « Date » (`watch.when`); `watch.inbox` keeps
   « Réception », the iPhone tab's word, now with its `fr_variant`. The French time error
   (`scheduling_write.time_format_error`) takes U+00A0 in « 9 h » and « 13 h 30 ».
-
+- The watch's call detail keeps the system's side margin (`.scenePadding(.horizontal)`):
+  its fields started about 5 px from the edge of a 46 mm screen, under the rounded corner,
+  where the title and every list inset about 30 px (3.1.0 visual QA).
 - Fixed: replying to or marking a message read from a notification while the app was
   closed was silently dropped. Reply and Mark read are background actions, and from a
   locked phone or an Apple Watch they launch the app with no screen: the action waited
