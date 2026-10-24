@@ -32,6 +32,14 @@ struct ComplicationView: View {
         return available ? WatchCopy.available : WatchCopy.notAvailable
     }
 
+    /// The rectangular family's one-line headline: ``word``, except that the full "Open
+    /// District AI on your iPhone" cannot fit one line there, so it takes the short form.
+    static func headline(for state: ComplicationState) -> String {
+        guard state.signedIn else { return WatchCopy.signedOut }
+        guard let available = state.available else { return WatchCopy.openIphoneShort }
+        return available ? WatchCopy.available : WatchCopy.notAvailable
+    }
+
     private var inline: String {
         guard state.signedIn, let available = state.available, let name = state.workspaceName else { return word }
         return available ? WatchCopy.availableIn(name) : WatchCopy.notAvailableIn(name)
@@ -53,7 +61,7 @@ struct ComplicationView: View {
                 .font(.title3)
                 .widgetAccentable()
             VStack(alignment: .leading, spacing: 0) {
-                Text(word)
+                Text(Self.headline(for: state))
                     .font(.headline)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)

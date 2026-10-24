@@ -1,7 +1,7 @@
 {
-  "signed_off_by": "iMac manager distronode-com-bf (Opus 5.5), iOS 3.0.3: rooms.state_dropped_because and settings.preview_dropped_because removed, settings.preview_dropped NOTE reworded, no en/fr string added or changed, 2026-10-22",
-  "release": "v3.0.3",
-  "commit": "8382e3277a500b211a32a61a372fe842f629571f",
+  "signed_off_by": "iMac manager distronode-com (Opus 5.5), iOS 3.1.0: the l10n/ios.toml changes since v3.0.3 and all of l10n/watch.toml and l10n/watch-infoplist.toml reviewed by an Opus 5.5 xhigh fr-CA reviewer; its one must-fix and five suggestions applied as Sean approved them (\"Must-fix + all five\", \"Shorten both\", GitLab #2 note 4082277572), 2026-10-24",
+  "release": "v3.1.0",
+  "commit": "bb39d6bf718805093baaad4cc6fa6691c05308eb",
   "catalogs": [
     {
       "path": "l10n/infoplist.toml",
@@ -9,11 +9,19 @@
     },
     {
       "path": "l10n/ios.toml",
-      "sha256": "ea49c5dc8fee856e1d2ea42eb629b5e38ff6a943953a7559859a77f07198e128"
+      "sha256": "06a63712f842c37b740d8ba9bc6c35962ce5272ba7c1130046b2e28efb4b9c9f"
     },
     {
       "path": "l10n/push.toml",
       "sha256": "a5ccae94cc1a099b2864b404b7443c9ba9d170eb0a73177aace35d634089ab04"
+    },
+    {
+      "path": "l10n/watch-infoplist.toml",
+      "sha256": "cc5d5563a72c86b1782a7151de60dd8715fb3e8bcab7bd6b291f974cf6ae1c48"
+    },
+    {
+      "path": "l10n/watch.toml",
+      "sha256": "63d42c045bc9c694ec8e34af694380bdaffa95b484517af75ba0088d27845a2f"
     }
   ]
 }

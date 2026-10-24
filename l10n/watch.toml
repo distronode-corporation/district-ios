@@ -123,7 +123,7 @@ note = "A ready-made reply, sent as written to a customer by SMS or email."
 
 [watch.cannot_reply]
 en = "This conversation has no channel to reply on."
-fr = "Cette conversation n'a aucun canal pour répondre."
+fr = "Aucun canal de réponse pour cette conversation."
 ctx = "body"
 screen = "watch"
 state = "reviewed"
@@ -132,7 +132,7 @@ note = "Shown instead of the reply buttons when the server offers no SMS or emai
 
 [watch.could_not_load]
 en = "Your iPhone could not load this. Open District AI on your iPhone."
-fr = "Votre iPhone n'a pas pu charger ceci. Ouvrez District AI sur votre iPhone."
+fr = "Votre iPhone n'a pas pu charger cette liste. Ouvrez District AI sur votre iPhone."
 ctx = "body"
 screen = "watch"
 state = "reviewed"
@@ -162,6 +162,7 @@ fr = "Réception"
 ctx = "title"
 screen = "watch"
 state = "reviewed"
+fr_variant = "Watch screen title, the same word as the iPhone tab: Apple Mail's own French for Inbox; « Boîte de réception » does not fit the watch's title"
 id = { swift = "WatchCopy.inbox" }
 
 [watch.iphone_did_not_answer]
@@ -268,6 +269,15 @@ state = "reviewed"
 id = { swift = "WatchCopy.openIphone" }
 note = "Complication with nothing to show yet: the watch has not heard from the iPhone, or nobody is signed in."
 
+[watch.open_iphone_short]
+en = "Open on iPhone"
+fr = "Ouvrir sur l'iPhone"
+ctx = "label"
+screen = "complication"
+state = "reviewed"
+id = { swift = "WatchCopy.openIphoneShort" }
+note = "The rectangular complication's headline when it has nothing to show yet (one line, lineLimit(1)). Chosen short because watch.open_iphone, the full sentence, cannot fit one line there; watch.open_iphone stays for the inline family and VoiceOver."
+
 [watch.outcome]
 en = "Outcome"
 fr = "Résultat"
@@ -279,7 +289,7 @@ id = { swift = "WatchCopy.outcome" }
 [watch.reply]
 en = "Reply"
 fr = "Répondre"
-ctx = "button"
+ctx = "title"
 screen = "watch"
 state = "reviewed"
 id = { swift = "WatchCopy.reply" }
@@ -336,7 +346,7 @@ id = { swift = "WatchCopy.signInOnIphone" }
 
 [watch.signed_out]
 en = "Signed out"
-fr = "Déconnecté"
+fr = "Session fermée"
 ctx = "label"
 screen = "complication"
 state = "reviewed"
@@ -405,7 +415,7 @@ note = "First launch: the watch has not yet received anything from the iPhone."
 
 [watch.when]
 en = "When"
-fr = "Quand"
+fr = "Date"
 ctx = "label"
 screen = "watch"
 state = "reviewed"

@@ -10872,7 +10872,7 @@ note = "⛔ \"SENT TO\", NOT \"DELIVERED TO\". ``SchedulingTestEmailResult`` is 
 
 [scheduling_write.time_format_error]
 en = "Enter a time as HH:MM."
-fr = "Entrez une heure, par exemple 9 h ou 13 h 30."
+fr = "Entrez une heure, par exemple 9\u00A0h ou 13\u00A0h\u00A030."
 ctx = "error"
 screen = "scheduling.writes.availability"
 tier = "T2"

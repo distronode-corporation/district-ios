@@ -71,7 +71,7 @@ options:
 # every target, the embedded ones included. Nothing reads this value on the simulator path.
 settings:
   base:
-    MARKETING_VERSION: "3.0.3"
+    MARKETING_VERSION: "3.1.0"
     CURRENT_PROJECT_VERSION: "1"
 
 packages:

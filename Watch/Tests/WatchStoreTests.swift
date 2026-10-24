@@ -162,6 +162,22 @@ final class WatchStoreTests: XCTestCase {
         )
     }
 
+    /// ⛔ ONE LINE ON THE RECTANGULAR FACE: the full "Open District AI on your iPhone" cannot
+    /// fit there, so the headline with nothing to show takes the short form.
+    func testTheRectangularHeadlineIsShortWhenThereIsNothingToShow() {
+        let unknown = ComplicationState(signedIn: true, workspaceName: nil, available: nil, language: "en")
+        XCTAssertEqual(ComplicationView.headline(for: unknown), WatchCopy.openIphoneShort)
+        XCTAssertNotEqual(WatchCopy.openIphoneShort, WatchCopy.openIphone)
+
+        let signedOut = ComplicationState(signedIn: false, workspaceName: nil, available: nil, language: nil)
+        XCTAssertEqual(ComplicationView.headline(for: signedOut), WatchCopy.signedOut)
+        let name = "Plomberie Desrosiers"
+        let available = ComplicationState(signedIn: true, workspaceName: name, available: true, language: "en")
+        XCTAssertEqual(ComplicationView.headline(for: available), WatchCopy.available)
+        let away = ComplicationState(signedIn: true, workspaceName: name, available: false, language: "en")
+        XCTAssertEqual(ComplicationView.headline(for: away), WatchCopy.notAvailable)
+    }
+
     func testAnUnreadableContextKeepsWhatIsShown() {
         let rig = Rig()
         rig.store.apply(.snapshot(Self.snapshot()))

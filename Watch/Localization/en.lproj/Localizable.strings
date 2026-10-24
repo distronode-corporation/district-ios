@@ -29,6 +29,7 @@
 "watch.not_available" = "Not available";
 "watch.not_available_in" = "Not available · {workspace}";
 "watch.open_iphone" = "Open District AI on your iPhone";
+"watch.open_iphone_short" = "Open on iPhone";
 "watch.outcome" = "Outcome";
 "watch.reply" = "Reply";
 "watch.reply_not_sent" = "Reply not sent";

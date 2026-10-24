@@ -1,0 +1,13 @@
+District AI arrive sur l'Apple Watch.
+
+- Une nouvelle application pour Apple Watch affiche vos appels récents et votre boîte de réception. Répondez à une conversation par une réponse rapide ou dans vos propres mots, et marquez-la comme lue.
+- Activez ou désactivez votre disponibilité pour les appels depuis votre poignet, et ajoutez une complication à un cadran pour voir d'un coup d'œil si les appels sonnent pour vous.
+- Toucher une notification de message sur votre montre ouvre la conversation.
+- L'application pour Apple Watch fonctionne avec District AI sur votre iPhone : gardez votre iPhone à proximité. Elle nécessite watchOS 10 ou une version ultérieure.
+- « Répondre » et « Marquer comme lu », dans une notification de message, fonctionnent maintenant quand l'application est fermée, depuis un iPhone verrouillé ou depuis votre Apple Watch.
+- Le comptoir porte maintenant ce seul nom partout dans l'application.
+- Les champs de texte ont un contour plus net, pour qu'un champ vide se voie facilement.
+- La zone de question de District HQ affiche sa propre indication au lieu de répéter son libellé.
+- Un contact ou une conversation connus seulement par leur numéro affichent une icône de personne au lieu d'un symbole isolé.
+- Numéros de téléphone ne répète plus son texte d'aide.
+- Heures de disponibilité : les heures s'affichent et se saisissent sous la forme 9 h ou 13 h 30.
