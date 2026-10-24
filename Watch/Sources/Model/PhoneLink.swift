@@ -35,21 +35,35 @@ final class LivePhoneLink: PhoneLinking {
     }
 
     func activate(onReading: @escaping @MainActor @Sendable (WatchSnapshotReading) -> Void) {
-        delegate.onReading = { reading in Task { @MainActor in onReading(reading) } }
+        // ⛔ `@Sendable`, so not isolated to the main actor: the delegate calls it on
+        // WatchConnectivity's queue. See ``deliver(_:)``.
+        delegate.onReading = { @Sendable reading in Task { @MainActor in onReading(reading) } }
         WCSession.default.delegate = delegate
         WCSession.default.activate()
     }
 
     func send(_ request: WatchRequest) async -> PhoneAnswer {
-        guard isReachable, let message = try? request.message() else { return .unreachable }
+        guard isReachable else { return .unreachable }
+        return await Self.deliver(request)
+    }
+
+    /// Send one request and wait for whichever handler WatchConnectivity calls.
+    ///
+    /// ⛔ NONISOLATED, AND BOTH HANDLERS `@Sendable`, BECAUSE WATCHCONNECTIVITY CALLS THEM ON
+    /// ITS OWN QUEUE. A closure written inside this `@MainActor` class is isolated to the main
+    /// actor, and Swift 6 checks that isolation when an Objective-C API calls it: off the main
+    /// thread the check traps (SIGILL in `dispatch_assert_queue`), so every answer to every
+    /// write crashed the app. The fake link never runs this; ``LivePhoneLinkTests`` does.
+    nonisolated static func deliver(_ request: WatchRequest) async -> PhoneAnswer {
+        guard let message = try? request.message() else { return .unreachable }
         return await withCheckedContinuation { continuation in
             let once = ResumeOnce(continuation)
             WCSession.default.sendMessage(
                 message,
-                replyHandler: { reply in
+                replyHandler: { @Sendable reply in
                     once.resume(WatchReply.read(reply).map(PhoneAnswer.reply) ?? .noAnswer)
                 },
-                errorHandler: { error in
+                errorHandler: { @Sendable error in
                     let code = (error as? WCError)?.code
                     once.resume(code == .notReachable ? .unreachable : .noAnswer)
                 }
