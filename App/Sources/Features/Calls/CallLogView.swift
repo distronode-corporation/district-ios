@@ -30,12 +30,15 @@ struct CallLogView: View {
 private struct CallLogScreen: View {
     let workspaceId: String
     let selection: Binding<Route?>?
+    /// ⚠️ TOLD AFTER EVERY FRESH READ, so the watch's call list follows this one.
+    let watch: WatchBridgeService
 
     @State private var model: CallLogModel
 
     init(container: AppContainer, workspaceId: String, selection: Binding<Route?>?) {
         self.workspaceId = workspaceId
         self.selection = selection
+        watch = container.watchBridge
         _model = State(initialValue: CallLogModel(container: container, workspaceId: workspaceId))
     }
 
@@ -45,6 +48,7 @@ private struct CallLogScreen: View {
             .task {
                 // ⚠️ Once per appearance of this view identity, not per redraw.
                 await model.loadFirst()
+                watch.setNeedsSnapshot()
             }
     }
 
@@ -108,7 +112,10 @@ private struct CallLogScreen: View {
                 .routeListRow(selects: selection != nil)
         }
         .listStyle(.plain)
-        .districtRefreshable { await model.refresh() }
+        .districtRefreshable {
+            await model.refresh()
+            watch.setNeedsSnapshot()
+        }
     }
 
     // MARK: - Actions

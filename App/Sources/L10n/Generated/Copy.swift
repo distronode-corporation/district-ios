@@ -5520,6 +5520,11 @@ extension VoiceStudioCopy {
     internal static var useDefault: String { AppL10n.copyLocale == .frCA ? "Par défaut" : "Use the default" }
 }
 
+extension WatchBridgeCopy {
+    /// `watch_bridge.update_both_apps`
+    internal static var updateBothApps: String { AppL10n.copyLocale == .frCA ? "Mettez à jour District AI sur votre iPhone et votre Apple Watch." : "Update District AI on your iPhone and your Apple Watch." }
+}
+
 extension WorkflowsCopy {
     /// `workflows.added_do_not_call`
     internal static var addedDoNotCall: String { AppL10n.copyLocale == .frCA ? "Ajout à la liste d'exclusion" : "Added to do-not-call" }

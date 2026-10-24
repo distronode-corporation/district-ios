@@ -79,10 +79,12 @@ final class AvailabilityModel {
 
     private let repository: CallHandlingRepository
     private let workspaces: WorkspaceSessionModel
+    private let watch: WatchBridgeService
 
     init(container: AppContainer) {
         repository = container.callHandling
         workspaces = WorkspaceSessionModel(container: container)
+        watch = container.watchBridge
     }
 
     /// Resolve the workspace, then read this person's availability in it.
@@ -135,6 +137,8 @@ final class AvailabilityModel {
                 available: response.availableForCalls,
                 reason: response.reason
             ))
+            // ⚠️ THE WATCH'S SWITCH AND ITS COMPLICATION SAY THE SAME THING AS THIS ROW.
+            watch.setNeedsSnapshot()
         case let .failure(error):
             // ⚠️ THE ROW KEEPS THE LAST CONFIRMED VALUE. Nothing was written, so flipping
             // the switch back is the honest thing to draw; the sentence goes beside it.

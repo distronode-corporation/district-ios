@@ -66,6 +66,9 @@ struct DistrictApp: App {
         // launches the app in the background with no scene, so `onAppear` never runs;
         // `init` runs on every launch. See ``NotificationActionInbox``.
         NotificationActionInbox.process.adopt(container.notificationActions)
+        // ⛔ HERE TOO, FOR THE SAME REASON: a message from the Apple Watch launches the app
+        // in the background with no scene. See ``WatchBridgeService``.
+        container.watchBridge.activate()
     }
 
     var body: some Scene {

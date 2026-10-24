@@ -14680,6 +14680,15 @@ screen = "settings.voice_studio"
 state = "reviewed"
 id = { swift = "VoiceStudioCopy.useDefault" }
 
+[watch_bridge.update_both_apps]
+en = "Update District AI on your iPhone and your Apple Watch."
+fr = "Mettez à jour District AI sur votre iPhone et votre Apple Watch."
+ctx = "error"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchBridgeCopy.updateBothApps" }
+note = "Shown on the Apple Watch when the watch asked the iPhone for something in a message format this iPhone build does not know: the two apps are on different versions."
+
 [workflows.added_do_not_call]
 en = "Added to do-not-call"
 fr = "Ajout à la liste d'exclusion"

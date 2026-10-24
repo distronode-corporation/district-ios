@@ -5,15 +5,22 @@
 #
 #   ci/sim-udid.sh iPhone
 #   ci/sim-udid.sh iPad
+#   ci/sim-udid.sh Watch    (writes watch-simulator-udid.txt instead)
 #
 # Then: xcodebuild test-without-building ... -destination "id=$(cat simulator-udid.txt)"
+#
+# ⚠️ `Watch` PICKS AN APPLE WATCH ON A watchOS RUNTIME, for the watch app's own unit tests
+# (the `DistrictAIWatch` scheme). Its runtime is capped by the active Xcode's watchOS
+# SIMULATOR SDK rather than by the Xcode version: watchOS numbers do not follow Xcode's
+# (Xcode 26.3 carries watchOS 26.2), and a newer Xcode installed beside it brings a newer
+# watchOS runtime the selected Xcode cannot run.
 #
 # ⛔ THE DESTINATION IS DISCOVERED, NOT NAMED. A device name ("name=iPhone 17") ties
 # CI to whatever the runner image ships and fails with "Unable to find a destination"
 # when the image is rotated. Each filter below exists because a real `simctl list -j`
 # needed it:
-#   * the runtime KEY must be an iOS one: images carry watchOS, tvOS and visionOS keys
-#     beside it, and JSON key order is not a promise;
+#   * the runtime KEY must be the requested platform's: images carry iOS, watchOS, tvOS
+#     and visionOS keys side by side, and JSON key order is not a promise;
 #   * the device type must be the requested family: an iPhone-only build installs and
 #     runs on an iPad, so an unfiltered pick can go green having tested the wrong form
 #     factor;
@@ -32,9 +39,20 @@ set -euo pipefail
 
 family="${1:-}"
 case "$family" in
-  iPhone | iPad) ;;
+  iPhone | iPad)
+    runtime_prefix="SimRuntime.iOS-"
+    device_prefix="SimDeviceType.$family-"
+    sdk="iphonesimulator"
+    out="simulator-udid.txt"
+    ;;
+  Watch)
+    runtime_prefix="SimRuntime.watchOS-"
+    device_prefix="SimDeviceType.Apple-Watch-"
+    sdk="watchsimulator"
+    out="watch-simulator-udid.txt"
+    ;;
   *)
-    echo "usage: ci/sim-udid.sh iPhone|iPad" >&2
+    echo "usage: ci/sim-udid.sh iPhone|iPad|Watch" >&2
     exit 64
     ;;
 esac
@@ -46,19 +64,25 @@ xcode_all="$(xcodebuild -version)"
 xcode_line="${xcode_all%%$'\n'*}"
 xcode_version="${xcode_line#Xcode }"
 echo "--- active Xcode"
-echo "$xcode_line (iphonesimulator SDK $(xcrun --sdk iphonesimulator --show-sdk-version))"
+sdk_version="$(xcrun --sdk "$sdk" --show-sdk-version)"
+echo "$xcode_line ($sdk SDK $sdk_version)"
+# iOS runtimes are capped by the Xcode version (see above); watchOS ones by the SDK.
+if [ "$family" = "Watch" ]; then
+  ceiling="$sdk_version"
+else
+  ceiling="$xcode_version"
+fi
 
 echo "--- available simulators"
 xcrun simctl list devices available
 
-udid="$(xcrun simctl list -j devices available | FAMILY="$family" XCODE_VERSION="$xcode_version" python3 -c '
+udid="$(xcrun simctl list -j devices available | RUNTIME_PREFIX="$runtime_prefix" DEVICE_PREFIX="$device_prefix" CEILING="$ceiling" python3 -c '
 import json
 import os
 import sys
 
-family = os.environ["FAMILY"]
-prefix = "SimRuntime.iOS-"
-wanted = "SimDeviceType." + family + "-"
+prefix = os.environ["RUNTIME_PREFIX"]
+wanted = os.environ["DEVICE_PREFIX"]
 
 
 def parse(text, separator):
@@ -68,9 +92,9 @@ def parse(text, separator):
         return None
 
 
-ceiling = parse(os.environ["XCODE_VERSION"], ".")
+ceiling = parse(os.environ["CEILING"], ".")
 if ceiling is None:
-    sys.exit("cannot parse the Xcode version " + repr(os.environ["XCODE_VERSION"]))
+    sys.exit("cannot parse the version ceiling " + repr(os.environ["CEILING"]))
 
 devices = json.load(sys.stdin)["devices"]
 runtimes = []
@@ -90,11 +114,11 @@ raise SystemExit(1)
 ')" || udid=""
 
 if [ -z "$udid" ]; then
-  echo "FATAL - no available $family simulator on an iOS runtime at or below the" >&2
-  echo "active Xcode ($xcode_version), so there is no destination to run an XCTest" >&2
-  echo "bundle on. See the list above." >&2
+  echo "FATAL - no available $family simulator on a runtime at or below $ceiling" >&2
+  echo "(the active Xcode is $xcode_version), so there is no destination to run an" >&2
+  echo "XCTest bundle on. See the list above." >&2
   exit 1
 fi
 
 echo "destination udid - $udid"
-echo "$udid" >simulator-udid.txt
+echo "$udid" >"$out"

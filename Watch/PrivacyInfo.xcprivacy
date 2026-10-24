@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The privacy manifest of the watch app (the last snapshot and the complication's state, both in the App Group suite `group.com.distronode.district.watch`).
+
+  ⛔ AUTHORED, NOT GENERATED, like App/PrivacyInfo.xcprivacy, and it lands at the bundle
+  root through an explicit `buildPhase: resources` in project.yml.
+
+  ⛔ IT COLLECTS NOTHING. The watch makes no network request of its own: everything it
+  shows arrives from the iPhone over WatchConnectivity, and every write is a message to
+  the iPhone. The iPhone app's manifest declares what reaches distronode.com.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<!--
+	  ⚠️ `1C8F.1`: UserDefaults read and written in an App Group shared by apps and
+	  extensions of the same developer. This bundle touches no other suite.
+	-->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>1C8F.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

@@ -243,6 +243,9 @@ final class SessionModel {
         push.forget()
         selection.setSelectedWorkspaceId(nil)
         phase = .signedOut(SessionCopy.signedOut)
+        // ⛔ THE WATCH FORGETS THE ACCOUNT NOW, with no read: there is no session left to
+        // read with. See ``WatchBridgeService/publishSignedOut()``.
+        container.watchBridge.publishSignedOut()
     }
 
     // ── Wording ──────────────────────────────────────────────────────────────

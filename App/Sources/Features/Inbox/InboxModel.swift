@@ -184,6 +184,8 @@ final class InboxModel {
             // (``PushRegistrar/handleSilentPush()``). An occasionally low badge is
             // worth more than no ambient signal at all.
             UnreadBadge.set(unreadTotal)
+            // ⚠️ THE WATCH'S INBOX FOLLOWS A FRESH READ OF THIS ONE.
+            container.watchBridge.setNeedsSnapshot()
             await loadDraftBadges()
         case let .failure(error):
             // ⛔ THE BADGE IS LEFT EXACTLY AS IT WAS, AND IS NOT ZEROED. Zero means

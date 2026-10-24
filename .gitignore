@@ -6,6 +6,8 @@
 # Xcode build output (CI and the scripts pass -derivedDataPath DerivedData).
 DerivedData/
 **/DerivedData/
+# A second tree for local simulator builds beside the CI-shaped one.
+DerivedData-sim/
 
 # Package checkouts from `xcodebuild -clonedSourcePackagesDirPath SourcePackages`.
 SourcePackages/
@@ -18,6 +20,8 @@ SourcePackages/
 
 # Written by `xcodegen generate` from project.yml's `info:` block.
 App/Info.plist
+Watch/Info.plist
+Complications/Info.plist
 
 # Output of scripts/smoke-simulator.sh.
 build/
@@ -37,6 +41,10 @@ GoogleService-Info.plist
 
 # Written by ci/sim-udid.sh.
 simulator-udid.txt
+watch-simulator-udid.txt
+
+# Local Apple Watch simulator screenshots, for review and never committed.
+scratch-shots/
 
 smoke-attachments/
 

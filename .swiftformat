@@ -41,7 +41,7 @@
 # --lint would still walk them and take minutes.
 # The Swift `l10n.py gen` writes from l10n/ios.toml is excluded too: it is checked against
 # the catalog by `l10n.py check` instead.
---exclude .build,**/.build,DerivedData,**/DerivedData,SourcePackages,*.xcodeproj,App/Sources/L10n/Generated
+--exclude .build,**/.build,DerivedData,**/DerivedData,SourcePackages,*.xcodeproj,App/Sources/L10n/Generated,Watch/Sources/L10n/Generated
 
 # ⚠️ `redundantInit` OFF. It rewrites `Foo.init(...)` to `Foo(...)`, which is
 # correct everywhere except when the initialiser is being referenced rather than

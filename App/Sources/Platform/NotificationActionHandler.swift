@@ -43,6 +43,9 @@ enum MessageActionFailure: Error, Sendable, Equatable {
     case unresolved(ApiError)
     /// The send or the mark-read itself refused or failed (a 403 or a 404 among them).
     case refused(ApiError)
+    /// A thread key that names no thread this build can read, or a thread no longer in the
+    /// list, or one with no channel to reply on. Nothing was sent.
+    case threadNotFound
 }
 
 /// Reply and Mark read from a notification, done without any SwiftUI view.
@@ -102,13 +105,37 @@ final class NotificationActionHandler {
         workspaceId: String,
         messageId: String
     ) async -> Result<Void, MessageActionFailure> {
-        let key = action.singleFlightKey(workspaceId: workspaceId, messageId: messageId)
+        await perform(action, workspaceId: workspaceId, addressee: .message(messageId))
+    }
+
+    /// Do one action on one THREAD, named by its key: what the watch has.
+    ///
+    /// ⛔ THE SAME PATH AS ``perform(_:workspaceId:messageId:)`` FROM THE TOKEN ON: the one
+    /// coordinator, the container's ``InboxRepository``, one request per action, one
+    /// background task, nothing retried. Only the resolve differs. The conversation list
+    /// the watch was shown carries no message id, so the thread comes from its key (Mark
+    /// read needs nothing more) and a reply's channel from the conversation list's own
+    /// ``ConversationSummary/replyTarget``, read fresh, never assembled here.
+    func perform(
+        _ action: MessageAction,
+        workspaceId: String,
+        threadKey: String
+    ) async -> Result<Void, MessageActionFailure> {
+        await perform(action, workspaceId: workspaceId, addressee: .thread(threadKey))
+    }
+
+    private func perform(
+        _ action: MessageAction,
+        workspaceId: String,
+        addressee: Addressee
+    ) async -> Result<Void, MessageActionFailure> {
+        let key = action.singleFlightKey(workspaceId: workspaceId, messageId: addressee.singleFlightPart)
         if let running = inFlight[key] {
             return await running.value
         }
         let task = Task { [self] in
             let lease = BackgroundTaskLease.begin("district.notification-action", on: backgroundTasks)
-            let outcome = await run(action, workspaceId: workspaceId, messageId: messageId)
+            let outcome = await run(action, workspaceId: workspaceId, addressee: addressee)
             lease.end()
             // ⚠️ CLEARED INSIDE THE TASK, SO IT IS NIL BEFORE ANY WAITER RESUMES. The slot
             // can only hold this task: a same-key caller joins it rather than replacing it.
@@ -145,7 +172,7 @@ final class NotificationActionHandler {
     private func run(
         _ action: MessageAction,
         workspaceId: String,
-        messageId: String
+        addressee: Addressee
     ) async -> Result<Void, MessageActionFailure> {
         // ⚠️ AN EMPTY BOX IS NOT A FAILURE. iOS lets a reply be confirmed with nothing
         // typed, and `messages/send` would answer 400 for a message nobody wrote.
@@ -166,12 +193,12 @@ final class NotificationActionHandler {
         // ⛔ BOTH ACTIONS ARE ADDRESSED BY THREAD AND THE PUSH NAMES A MESSAGE, so the
         // resolver comes first: `mark-read` takes a contact or counterpart, `send` takes
         // `to` plus a channel.
-        let resolved: ResolvedThread
-        switch await inbox.messageThread(workspaceId: workspaceId, messageId: messageId) {
+        let resolved: (selector: ThreadSelector, replyTarget: ReplyTarget?)
+        switch await resolve(addressee, for: action, workspaceId: workspaceId) {
         case let .success(thread):
             resolved = thread
-        case let .failure(error):
-            return .failure(.unresolved(error))
+        case let .failure(failure):
+            return .failure(failure)
         }
         switch action {
         case .markRead:
@@ -180,12 +207,59 @@ final class NotificationActionHandler {
                 .map { _ in () }
                 .mapError { .refused($0) }
         case let .reply(text):
-            // ⛔ THE RECIPIENT IS ``ResolvedThread/replyTarget`` VERBATIM, the server's
-            // unwrapped address and its channel. ⛔ No subject, even on email: a shade has
-            // one box, and `messages/send` substitutes its own.
-            return await inbox.send(workspaceId: workspaceId, target: resolved.replyTarget, body: text)
+            // ⛔ THE RECIPIENT IS THE SERVER'S OWN PAIR VERBATIM (``ResolvedThread/replyTarget``
+            // or ``ConversationSummary/replyTarget``), never re-derived. ⛔ No subject, even on
+            // email: a shade has one box, and `messages/send` substitutes its own.
+            guard let target = resolved.replyTarget else { return .failure(.threadNotFound) }
+            return await inbox.send(workspaceId: workspaceId, target: target, body: text)
                 .map { _ in () }
                 .mapError { .refused($0) }
+        }
+    }
+
+    /// The thread an action applies to, in the two vocabularies the writes speak.
+    ///
+    /// ⚠️ A THREAD KEY RESOLVES THE SELECTOR LOCALLY (``ThreadTarget/selector(threadKey:)``,
+    /// the one implementation of that rule) and reads the conversation list only for a
+    /// REPLY, whose channel must be the server's choice. A thread no longer in the list, or
+    /// one with nothing to reply on, is ``MessageActionFailure/threadNotFound``.
+    private func resolve(
+        _ addressee: Addressee,
+        for action: MessageAction,
+        workspaceId: String
+    ) async -> Result<(selector: ThreadSelector, replyTarget: ReplyTarget?), MessageActionFailure> {
+        switch addressee {
+        case let .message(messageId):
+            return await inbox.messageThread(workspaceId: workspaceId, messageId: messageId)
+                .map { ($0.selector, $0.replyTarget) }
+                .mapError { .unresolved($0) }
+        case let .thread(threadKey):
+            guard let selector = ThreadTarget.selector(threadKey: threadKey) else {
+                return .failure(.threadNotFound)
+            }
+            guard case .reply = action else { return .success((selector, nil)) }
+            switch await inbox.conversations(workspaceId: workspaceId) {
+            case let .success(list):
+                let target = list.conversations.first { $0.threadKey == threadKey }?.replyTarget
+                return .success((selector, target))
+            case let .failure(error):
+                return .failure(.unresolved(error))
+            }
+        }
+    }
+}
+
+/// What an action names: a message (a push) or a thread (the watch).
+private enum Addressee {
+    case message(String)
+    case thread(String)
+
+    /// ⚠️ PREFIXED FOR A THREAD, so a thread key can never share a single-flight slot with
+    /// a message id that happens to read the same.
+    var singleFlightPart: String {
+        switch self {
+        case let .message(id): id
+        case let .thread(key): "thread:\(key)"
         }
     }
 }
@@ -221,7 +295,7 @@ extension MessageActionFailure {
     @MainActor
     func reason(for action: MessageAction) -> String {
         switch self {
-        case .unreadablePayload:
+        case .unreadablePayload, .threadNotFound:
             return Self.unresolvedReason(for: action)
         case let .signedOut(reason):
             // ⚠️ `.noSession` HAS NO SENTENCE ON THE SIGN-IN SCREEN (nothing to explain on

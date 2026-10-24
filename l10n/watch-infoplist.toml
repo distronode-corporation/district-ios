@@ -1,0 +1,13 @@
+[meta]
+catalog = "watch_infoplist"
+platform = "swift"
+apple = true
+
+[watch_infoplist.display_name]
+en = "District AI"
+ctx = "label"
+screen = "watch"
+tier = "T0"
+fixed = true
+id = { apple = "CFBundleDisplayName" }
+note = "The watch app's and the complication's name under their icons and in the watch-face editor. The product name, not translated. Must equal project.yml's CFBundleDisplayName."

@@ -56,6 +56,23 @@ options:
   # about the package, not about this line.
   deploymentTarget:
     iOS: "17.0"
+    # The Apple Watch companion (`DistrictAIWatch`) and its complication. watchOS 10 is
+    # the floor for a single-target watch app with WidgetKit accessory complications and
+    # the `.backgroundTask(.watchConnectivity)` scene modifier.
+    watchOS: "10.0"
+
+# ⛔ THE VERSION PAIR IS PROJECT-LEVEL, SO THE iOS APP, THE WATCH APP AND THE COMPLICATION
+# SHARE ONE VALUE. App Store Connect refuses an upload whose embedded watch app or extension
+# carries a version different from the app's. ⛔ EXACTLY ONE `MARKETING_VERSION` LINE IN
+# THIS FILE: `scripts/release-preflight.sh` reads it with sed and refuses two.
+# ⚠️ `CURRENT_PROJECT_VERSION` IS A PLACEHOLDER THAT THE RELEASE SCRIPT OVERRIDES.
+# `scripts/archive-imac.sh` passes it (an offset plus the commit count), because App Store
+# Connect refuses a build number it has already seen; a command-line build setting reaches
+# every target, the embedded ones included. Nothing reads this value on the simulator path.
+settings:
+  base:
+    MARKETING_VERSION: "3.0.3"
+    CURRENT_PROJECT_VERSION: "1"
 
 packages:
   # ⛔ THE CORE IS A PUBLIC PACKAGE IN ITS OWN REPOSITORY, PINNED TO ONE RELEASE.
@@ -134,6 +151,10 @@ targets:
       # to be shared as SOURCE rather than as a module; sharing a directory costs no
       # Package.swift change and keeps exactly one definition of each string.
       - path: App/Shared
+      # ⚠️ THE WATCH BRIDGE'S MESSAGE TYPES, COMPILED INTO THIS APP AND INTO `DistrictAIWatch`,
+      # so the snapshot and the requests have one definition on both ends. Nothing in it
+      # imports DistrictCore; see `App/WatchBridge/WatchSnapshot.swift`.
+      - path: App/WatchBridge
       # ⛔ RESOURCES GO UNDER `sources:`, BECAUSE XCODEGEN HAS NO `resources:` KEY
       # AT ALL. It parses every path listed here and assigns each file to the
       # build phase its type implies — `.swift` to Sources, `.xcassets` to
@@ -192,6 +213,13 @@ targets:
       # cheap Linux runner.
       - package: LiveKit
         product: LiveKit
+      # ⛔ THE WATCH APP IS EMBEDDED BY THE iOS APP, so it ships in the same archive, the
+      # same TestFlight build and the same App Store version. `embed` defaults to true for
+      # an application dependency, which XcodeGen places in `Watch/` inside the .app.
+      # ⚠️ AND EVERY BUILD OF THIS SCHEME NOW NEEDS THE watchOS PLATFORM INSTALLED, a
+      # simulator build for iOS included: Xcode builds the embedded app for the matching
+      # watchOS SDK. GitHub's macos-26 image ships the watchOS 26.2 runtime with Xcode 26.3.
+      - target: DistrictAIWatch
     # ⚠️ GENERATED, NOT AUTHORED. xcodegen writes App/Info.plist from the
     # properties below on every `generate`, filling in CFBundleIdentifier,
     # CFBundleName and friends itself. The written file is build output: it is not
@@ -431,12 +459,8 @@ targets:
         # nothing failing to compile; a server-side test reads this line and is
         # what stops that.
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district
-        MARKETING_VERSION: "3.0.3"
-        # ⚠️ A PLACEHOLDER THAT THE RELEASE SCRIPT OVERRIDES. `scripts/archive-imac.sh`
-        # passes `CURRENT_PROJECT_VERSION` (an offset plus the commit count), because
-        # App Store Connect refuses a build number it has already seen. Nothing
-        # reads this value on the simulator path.
-        CURRENT_PROJECT_VERSION: "1"
+        # ⚠️ MARKETING_VERSION AND CURRENT_PROJECT_VERSION ARE IN THE PROJECT-LEVEL
+        # `settings:` AT THE TOP, shared with the watch app and its complication.
         # ⛔ UNIVERSAL: iPhone AND iPad, ONE BINARY UNDER ONE BUNDLE ID AND ONE
         # STORE LISTING. iPad gets a dedicated regular-width layout (a sidebar and
         # split view) rather than a scaled-up phone UI; compact width, which
@@ -514,6 +538,111 @@ targets:
   #   - NEVER TAPS A DESTRUCTIVE SURFACE. `UITestApp.ForbiddenSurfaces` holds the
   #     list and the tap helper refuses them; the simulator and the test device are
   #     signed into a real workspace.
+  # ⛔ THE APPLE WATCH COMPANION: A SINGLE-TARGET watchOS APP (NO WatchKit EXTENSION),
+  # EMBEDDED BY `DistrictAI`. It holds no credential, makes no network request and links no
+  # DistrictCore: it shows the `WatchSnapshot` the iPhone sends over WatchConnectivity and
+  # asks the iPhone to write (`App/Sources/Platform/WatchBridgeService.swift`).
+  # ⚠️ NO SIGNING HERE EITHER, same rule as every target. The two App IDs
+  # (`com.distronode.district.watchkitapp` and `...watchkitapp.complications`) and the App
+  # Group are registered on the team and assigned to both; the archive's automatic signing
+  # takes them from there.
+  DistrictAIWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: Watch/Sources
+      - path: Watch/Shared
+      # The message types, shared with the iOS app as source (see `DistrictAI`).
+      - path: App/WatchBridge
+      - path: Watch/Resources
+      # en.lproj and fr-CA.lproj, generated from l10n/watch.toml by scripts/gen-l10n.py.
+      - path: Watch/Localization
+        buildPhase: resources
+      # ⛔ AT THE BUNDLE ROOT, BY FILE, WITH THE PHASE STATED: see the iOS app's manifest.
+      - path: Watch/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    dependencies:
+      - target: DistrictAIWatchComplications
+    # ⚠️ GENERATED, LIKE App/Info.plist, AND GITIGNORED FOR THE SAME REASON.
+    info:
+      path: Watch/Info.plist
+      properties:
+        CFBundleDisplayName: District AI
+        CFBundleDevelopmentRegion: en
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        WKApplication: true
+        # ⛔ THE iOS APP'S BUNDLE ID VERBATIM. A mismatch installs nothing on the watch and
+        # fails App Store validation, not the build.
+        WKCompanionAppBundleIdentifier: com.distronode.district
+        # ⛔ FALSE: A COMPANION. It needs its iPhone for everything it shows.
+        WKRunsIndependentlyOfCompanionApp: false
+    # ⚠️ GENERATED FROM `properties`, like the iOS app's; edit the entitlement here.
+    entitlements:
+      path: Watch/DistrictAIWatch.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.distronode.district.watch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.watchkitapp
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: "NO"
+
+  # The watch-face complication: a WidgetKit extension embedded in the watch app, showing
+  # availability for calls only (no unread count, by decision). It reads what the watch
+  # app wrote into the App Group; it has no session of its own.
+  DistrictAIWatchComplications:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - path: Complications/Sources
+      - path: Watch/Shared
+      # The watch's generated copy and its language rule (no DistrictCore here either).
+      - path: Watch/Sources/L10n
+      - path: Watch/Localization
+        buildPhase: resources
+      - path: Complications/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    info:
+      path: Complications/Info.plist
+      properties:
+        CFBundleDisplayName: District AI
+        CFBundleDevelopmentRegion: en
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Complications/DistrictAIWatchComplications.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.distronode.district.watch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.watchkitapp.complications
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: "NO"
+
+  # ⚠️ THE WATCH'S OWN UNIT TESTS, HOSTED BY THE WATCH APP ON A watchOS SIMULATOR. Its own
+  # scheme (`DistrictAIWatch` below): an iOS destination cannot run them, and the
+  # `DistrictAI` scheme's lanes all narrow to iOS bundles. CI runs it on the iPhone leg.
+  DistrictAIWatchTests:
+    type: bundle.unit-test
+    platform: watchOS
+    sources:
+      - path: Watch/Tests
+    dependencies:
+      - target: DistrictAIWatch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.watchkitapp.tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/DistrictAIWatch.app/DistrictAIWatch"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: "YES"
+
   DistrictAITests:
     type: bundle.unit-test
     platform: iOS
@@ -621,6 +750,19 @@ schemes:
         - DistrictSmokeUITests
     archive:
       config: Release
+  # ⚠️ THE WATCH APP ON ITS OWN, FOR ITS UNIT TESTS AND FOR A WATCH SIMULATOR RUN. The
+  # release lane archives `DistrictAI`, which embeds the watch app; nothing archives this.
+  DistrictAIWatch:
+    build:
+      targets:
+        DistrictAIWatch: all
+        DistrictAIWatchTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - DistrictAIWatchTests
   # The App Review screen recording (App/UITests/ReviewRecordingTests.swift), run by hand.
   #
   # ⛔ ITS OWN SCHEME, NEVER A `testPlans:` ENTRY ON `DistrictAI`. A scheme that has test
