@@ -134,7 +134,8 @@
                         id: "c1", caller: "Marie Tremblay", direction: french ? "Entrant" : "Inbound",
                         time: french ? "23 oct. 2026, 14 h 05" : "Oct 23, 2026 at 2:05 PM",
                         relativeTime: relative(12), occurredAt: ago(12),
-                        outcome: french ? "Terminé" : "Completed", duration: "3m 12s"
+                        outcome: french ? "Terminé" : "Completed",
+                        duration: french ? "3\u{00A0}min\u{00A0}12\u{00A0}s" : "3m 12s"
                     ),
                     .init(
                         id: "c2", caller: "••• 0134", direction: french ? "Entrant" : "Inbound",
@@ -146,13 +147,14 @@
                         id: "c3", caller: "Jean Lavoie", direction: french ? "Sortant" : "Outbound",
                         time: french ? "23 oct. 2026, 10 h 41" : "Oct 23, 2026 at 10:41 AM",
                         relativeTime: relative(216), occurredAt: ago(216),
-                        outcome: french ? "Terminé · Transféré" : "Completed · Transferred", duration: "6m 40s"
+                        outcome: french ? "Terminé · Transféré" : "Completed · Transferred",
+                        duration: french ? "6\u{00A0}min\u{00A0}40\u{00A0}s" : "6m 40s"
                     ),
                 ],
                 conversations: [
                     .init(
                         id: "contact:c_1", workspaceId: "ws_demo", title: "Marie Tremblay",
-                        preview: french ? "↓ Pouvez-vous passer demain matin ?" : "↓ Can you come by tomorrow morning?",
+                        preview: french ? "↓ Pouvez-vous passer demain matin?" : "↓ Can you come by tomorrow morning?",
                         unread: true, canReply: true
                     ),
                     .init(
