@@ -360,10 +360,11 @@ jobs:
       # ⛔ THE APPLE WATCH APP SHIPS INSIDE THE iOS APP, AND ONLY THE BUNDLE SAYS SO. The
       # `DistrictAI` scheme builds and embeds `DistrictAIWatch` (and its complication) because
       # project.yml makes it a dependency; this step proves the embed happened, that both
-      # bundles carry their privacy manifest at the root, and that the watch declares
-      # Canadian French and no other French. ⚠️ An iOS build with an embedded watch app needs
-      # the watchOS platform on the runner; macos-26 ships the watchOS 26.2 runtime with
-      # Xcode 26.3, so nothing is downloaded here.
+      # bundles carry their privacy manifest at the root, and that each holds both tables in
+      # en.lproj and fr-CA.lproj, no table at its root (it would shadow every .lproj) and no
+      # other French. ⚠️ An iOS build with an embedded watch app needs the watchOS platform
+      # on the runner; macos-26 ships the watchOS 26.2 runtime with Xcode 26.3, so nothing
+      # is downloaded here.
       - name: The embedded watch app
         run: |
           set -euo pipefail
@@ -375,6 +376,10 @@ jobs:
             for table in Localizable InfoPlist; do
               test -f "$bundle/en.lproj/$table.strings" || { echo "::error::no en.lproj/$table.strings in $bundle"; exit 1; }
               test -f "$bundle/fr-CA.lproj/$table.strings" || { echo "::error::no fr-CA.lproj/$table.strings in $bundle"; exit 1; }
+              if [ -e "$bundle/$table.strings" ]; then
+                echo "::error::$table.strings at the root of $bundle shadows every .lproj"
+                exit 1
+              fi
             done
             for lproj in "$bundle"/fr*.lproj; do
               [ "$(basename "$lproj")" = "fr-CA.lproj" ] && continue
@@ -384,7 +389,7 @@ jobs:
           done
           companion="$(/usr/libexec/PlistBuddy -c 'Print :WKCompanionAppBundleIdentifier' "$WATCH/Info.plist")"
           test "$companion" = "com.distronode.district" || { echo "::error::WKCompanionAppBundleIdentifier is '$companion'"; exit 1; }
-          echo "DistrictAIWatch.app and its complication are embedded, with manifests and both fr-CA tables"
+          echo "DistrictAIWatch.app and its complication are embedded, with manifests, both tables per .lproj and no root table"
 
       - name: DistrictAITests
         run: |

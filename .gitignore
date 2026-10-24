@@ -6,8 +6,10 @@
 # Xcode build output (CI and the scripts pass -derivedDataPath DerivedData).
 DerivedData/
 **/DerivedData/
-# A second tree for local simulator builds beside the CI-shaped one.
-DerivedData-sim/
+# Further trees for local simulator builds beside the CI-shaped one: DerivedData-sim,
+# DerivedData-simpass, and whatever name a later pass picks.
+DerivedData-*/
+**/DerivedData-*/
 
 # Package checkouts from `xcodebuild -clonedSourcePackagesDirPath SourcePackages`.
 SourcePackages/

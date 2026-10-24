@@ -13,7 +13,8 @@ SHA-256 of every string catalog at that commit:
 
 A catalog is what `tools/l10n/frcheck.py all` lints (its find_catalogs): a .toml
 file with a `[meta] catalog` key, in a directory named l10n, catalog or i18n,
-build output pruned. The check fails, and names each catalog, when one's bytes
+build output pruned; this check also skips the local build trees (package
+checkouts, DerivedData-*) that is_build_output names. The check fails, and names each catalog, when one's bytes
 differ from the hash the sign-off records, when one the sign-off lists is gone,
 or when one exists that the sign-off does not list. A changed catalog is printed
 with its hash in the tree, which is what a renewed sign-off records.
@@ -49,9 +50,19 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def is_build_output(rel: Path) -> bool:
+    """A path inside a local build tree this repository ignores (.gitignore) and
+    find_catalogs does not prune: the package checkouts (SourcePackages/, a .build/)
+    and the extra simulator trees (DerivedData-sim/, DerivedData-simpass/, ...). Each
+    holds district-core-swift's own catalogs, signed off in that repository, which on
+    a built tree would bury the app's own unsigned catalogs."""
+    return any(part in ("SourcePackages", ".build") or part.startswith("DerivedData-") for part in rel.parts)
+
+
 def tree_catalogs(root: Path) -> dict[str, str]:
     """Each catalog under `root`, by its path relative to `root`, to its SHA-256."""
-    return {p.relative_to(root).as_posix(): sha256(p) for p in find_catalogs(root)}
+    rels = (p.relative_to(root) for p in find_catalogs(root))
+    return {rel.as_posix(): sha256(root / rel) for rel in rels if not is_build_output(rel)}
 
 
 def read_signoff(root: Path) -> tuple[dict, list[str]]:
@@ -132,6 +143,11 @@ def self_test() -> int:
         (root / "src" / "loose.toml").write_text(catalog, encoding="utf-8")
         (root / "target" / "l10n").mkdir(parents=True)
         (root / "target" / "l10n" / "built.toml").write_text(catalog, encoding="utf-8")
+        # Nor a package checkout or a local simulator tree, which hold the core's catalogs.
+        for tree in ("SourcePackages/checkouts/core", "DerivedData-simpass/SourcePackages/checkouts/core",
+                     "DerivedData-sim/x", "Packages/core/.build/checkouts/core"):
+            (root / tree / "l10n").mkdir(parents=True)
+            (root / tree / "l10n" / "core.toml").write_text(catalog, encoding="utf-8")
 
         expect("only the real catalog is found", sorted(tree_catalogs(root)), ["l10n/app.toml"])
         expect("no sign-off fails", check(root)[0], [f"{SIGNOFF} is missing"])
