@@ -12,8 +12,8 @@
 "watch.canned_cant_talk" = "Je ne peux pas parler pour l'instant. Je vous réponds bientôt.";
 "watch.canned_on_my_way" = "J'arrive.";
 "watch.canned_thanks" = "Merci, bien reçu.";
-"watch.cannot_reply" = "Cette conversation n'a aucun canal pour répondre.";
-"watch.could_not_load" = "Votre iPhone n'a pas pu charger ceci. Ouvrez District AI sur votre iPhone.";
+"watch.cannot_reply" = "Aucun canal de réponse pour cette conversation.";
+"watch.could_not_load" = "Votre iPhone n'a pas pu charger cette liste. Ouvrez District AI sur votre iPhone.";
 "watch.dictate_reply" = "Écrire une réponse";
 "watch.duration" = "Durée";
 "watch.inbox" = "Réception";
@@ -29,6 +29,7 @@
 "watch.not_available" = "Non disponible";
 "watch.not_available_in" = "Non disponible · {workspace}";
 "watch.open_iphone" = "Ouvrez District AI sur votre iPhone";
+"watch.open_iphone_short" = "Ouvrir sur l'iPhone";
 "watch.outcome" = "Résultat";
 "watch.reply" = "Répondre";
 "watch.reply_not_sent" = "Réponse non envoyée";
@@ -37,7 +38,7 @@
 "watch.sending" = "Envoi en cours…";
 "watch.sign_in_body" = "Ouvrez District AI sur votre iPhone et connectez-vous. Vos appels et vos messages s'afficheront ici.";
 "watch.sign_in_on_iphone" = "Connectez-vous sur l'iPhone";
-"watch.signed_out" = "Déconnecté";
+"watch.signed_out" = "Session fermée";
 "watch.try_again" = "Réessayer";
 "watch.unread" = "Non lus";
 "watch.unread_conversation" = "Non lue";
@@ -45,4 +46,4 @@
 "watch.update_iphone_body" = "Votre montre et votre iPhone n'ont pas la même version de District AI.";
 "watch.updated" = "Mis à jour {time}";
 "watch.waiting_for_iphone" = "En attente de votre iPhone…";
-"watch.when" = "Quand";
+"watch.when" = "Date";

@@ -38,7 +38,7 @@ built from history before publication, so they have no tags in this repository.
   "Sign in on your iPhone" when signed out, and "Update District AI on your iPhone" on a
   protocol mismatch. The complication (circular, rectangular, inline) shows availability
   only, with the workspace's name where it fits. A number with no contact shows its last four
-  digits. English and Canadian French (`l10n/watch.toml`, 47 strings, and
+  digits. English and Canadian French (`l10n/watch.toml`, 48 strings, and
   `l10n/watch-infoplist.toml` for both watch bundles' `InfoPlist.strings`, plus
   `watch_bridge.update_both_apps` in `l10n/ios.toml`). Tests: `WatchSnapshotTests`,
   `WatchSnapshotComposerTests`, `WatchBridgeServiceTests` (iPhone) and `WatchStoreTests`
@@ -57,6 +57,15 @@ built from history before publication, so they have no tags in this repository.
   `SchedulingTimeFieldTests`.
 - Phone numbers says each piece of its help once (#70); `marketplace.read_only` is removed.
   `MarketplaceCaptionTests`.
+- The rectangular complication's headline with nothing to show yet is « Open on iPhone »
+  (« Ouvrir sur l'iPhone », `watch.open_iphone_short`): the full sentence cannot fit its one
+  line. The inline family and VoiceOver keep `watch.open_iphone`. `ComplicationView.headline(for:)`,
+  `testTheRectangularHeadlineIsShortWhenThereIsNothingToShow`.
+- Watch French, Sean's choices as relayed by the manager (2026-10-24): « Session fermée » (`watch.signed_out`),
+  « … charger cette liste. » (`watch.could_not_load`), « Aucun canal de réponse pour cette
+  conversation. » (`watch.cannot_reply`), « Date » (`watch.when`); `watch.inbox` keeps
+  « Réception », the iPhone tab's word, now with its `fr_variant`. The French time error
+  (`scheduling_write.time_format_error`) takes U+00A0 in « 9 h » and « 13 h 30 ».
 
 - Fixed: replying to or marking a message read from a notification while the app was
   closed was silently dropped. Reply and Mark read are background actions, and from a

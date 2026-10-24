@@ -49,10 +49,10 @@ extension WatchCopy {
     internal static var cannedThanks: String { WatchL10n.copyLocale == .frCA ? "Merci, bien reçu." : "Thanks, got it." }
 
     /// `watch.cannot_reply`
-    internal static var cannotReply: String { WatchL10n.copyLocale == .frCA ? "Cette conversation n'a aucun canal pour répondre." : "This conversation has no channel to reply on." }
+    internal static var cannotReply: String { WatchL10n.copyLocale == .frCA ? "Aucun canal de réponse pour cette conversation." : "This conversation has no channel to reply on." }
 
     /// `watch.could_not_load`
-    internal static var couldNotLoad: String { WatchL10n.copyLocale == .frCA ? "Votre iPhone n'a pas pu charger ceci. Ouvrez District AI sur votre iPhone." : "Your iPhone could not load this. Open District AI on your iPhone." }
+    internal static var couldNotLoad: String { WatchL10n.copyLocale == .frCA ? "Votre iPhone n'a pas pu charger cette liste. Ouvrez District AI sur votre iPhone." : "Your iPhone could not load this. Open District AI on your iPhone." }
 
     /// `watch.dictate_reply`
     internal static var dictateReply: String { WatchL10n.copyLocale == .frCA ? "Écrire une réponse" : "Write a reply" }
@@ -101,6 +101,9 @@ extension WatchCopy {
     /// `watch.open_iphone`
     internal static var openIphone: String { WatchL10n.copyLocale == .frCA ? "Ouvrez District AI sur votre iPhone" : "Open District AI on your iPhone" }
 
+    /// `watch.open_iphone_short`
+    internal static var openIphoneShort: String { WatchL10n.copyLocale == .frCA ? "Ouvrir sur l'iPhone" : "Open on iPhone" }
+
     /// `watch.outcome`
     internal static var outcome: String { WatchL10n.copyLocale == .frCA ? "Résultat" : "Outcome" }
 
@@ -126,7 +129,7 @@ extension WatchCopy {
     internal static var signInOnIphone: String { WatchL10n.copyLocale == .frCA ? "Connectez-vous sur l'iPhone" : "Sign in on your iPhone" }
 
     /// `watch.signed_out`
-    internal static var signedOut: String { WatchL10n.copyLocale == .frCA ? "Déconnecté" : "Signed out" }
+    internal static var signedOut: String { WatchL10n.copyLocale == .frCA ? "Session fermée" : "Signed out" }
 
     /// `watch.try_again`
     internal static var tryAgain: String { WatchL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
@@ -152,5 +155,5 @@ extension WatchCopy {
     internal static var waitingForIphone: String { WatchL10n.copyLocale == .frCA ? "En attente de votre iPhone…" : "Waiting for your iPhone…" }
 
     /// `watch.when`
-    internal static var when: String { WatchL10n.copyLocale == .frCA ? "Quand" : "When" }
+    internal static var when: String { WatchL10n.copyLocale == .frCA ? "Date" : "When" }
 }
