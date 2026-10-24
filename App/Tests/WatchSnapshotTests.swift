@@ -23,6 +23,20 @@ final class WatchSnapshotTests: XCTestCase {
         XCTAssertEqual(WatchReply.read(WatchReply.failure("Non.").message())?.error, "Non.")
     }
 
+    /// ⚠️ THE RESOLVE IS ADDED WITHOUT A BUMP: its reply's thread key is optional, so a reply
+    /// written before it existed still reads, with no key.
+    func testAResolveAndItsThreadKeyRoundTripAndAnOlderReplyStillReads() throws {
+        let request = WatchRequest(action: .resolveMessage(workspaceId: "ws_1", messageId: "msg_1"))
+        let data = try XCTUnwrap(try WatchRequest.read(request.message()))
+        XCTAssertEqual(try WatchWire.decoder.decode(WatchRequest.self, from: data), request)
+        XCTAssertEqual(WatchReply.read(WatchReply.thread("contact:c_1").message())?.threadKey, "contact:c_1")
+
+        let older = Data(#"{"protocolVersion":1,"ok":true}"#.utf8)
+        let reply = WatchReply.read([WatchReply.messageKey: older])
+        XCTAssertEqual(reply, .success)
+        XCTAssertNil(reply?.threadKey)
+    }
+
     /// ⛔ A VERSION THIS BUILD DOES NOT SPEAK IS NEVER DECODED, IN EITHER DIRECTION, even when
     /// the rest of the bytes would decode.
     func testAnotherProtocolVersionIsAMismatchNotASnapshot() throws {

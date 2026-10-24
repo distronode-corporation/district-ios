@@ -76,7 +76,10 @@
                         }
                     }
                 case "inbox":
-                    NavigationStack { InboxView(store: store, conversations: snapshot.conversations) }
+                    NavigationStack {
+                        InboxView(store: store, conversations: snapshot.conversations)
+                            .watchDestinations(store: store, snapshot: snapshot)
+                    }
                 case "thread":
                     NavigationStack {
                         if let conversation = snapshot.conversations?.first {

@@ -100,7 +100,7 @@ struct WatchSnapshot: Codable, Equatable, Sendable {
         var duration: String?
     }
 
-    struct Conversation: Codable, Equatable, Sendable, Identifiable {
+    struct Conversation: Codable, Hashable, Sendable, Identifiable {
         /// ⛔ THE THREAD KEY (`contact:<id>` or `addr:<address>`), which is what the phone
         /// acts on. The conversation list carries no message id; see ``WatchAction``.
         var id: String

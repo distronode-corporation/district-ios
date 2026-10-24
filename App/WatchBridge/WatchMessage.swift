@@ -16,6 +16,17 @@ enum WatchAction: Codable, Equatable, Sendable {
     case setAvailability(workspaceId: String, available: Bool)
     /// Send a fresh snapshot now. Writes nothing.
     case refresh
+    /// Which thread a message belongs to, for a tapped notification. Writes nothing.
+    ///
+    /// ⛔ THE PHONE RESOLVES IT, BECAUSE ONLY THE PHONE CAN. A message push carries
+    /// `workspaceId` and `messageId` and, by decision, no thread key (see `PushEvent.message`
+    /// in DistrictModel), and the watch makes no request; the phone spends
+    /// `GET messages/{id}` under its own bearer and answers ``WatchReply/threadKey``.
+    ///
+    /// ⚠️ NO PROTOCOL BUMP, ON PURPOSE. A phone that predates this case cannot decode the
+    /// request and answers "update both apps", which the watch treats as unresolved and
+    /// stays on the inbox. Bumping would instead blank every watch until both apps update.
+    case resolveMessage(workspaceId: String, messageId: String)
 }
 
 struct WatchRequest: Codable, Equatable, Sendable {
@@ -46,6 +57,9 @@ struct WatchReply: Codable, Equatable, Sendable {
     var protocolVersion: Int
     var ok: Bool
     var error: String?
+    /// ``WatchAction/resolveMessage(workspaceId:messageId:)``'s answer; nil for every
+    /// other request. ⚠️ Optional, so a reply from an older phone still decodes.
+    var threadKey: String?
 
     static var success: WatchReply {
         WatchReply(protocolVersion: WatchSnapshot.currentProtocolVersion, ok: true, error: nil)
@@ -55,8 +69,12 @@ struct WatchReply: Codable, Equatable, Sendable {
         WatchReply(protocolVersion: WatchSnapshot.currentProtocolVersion, ok: false, error: sentence)
     }
 
+    static func thread(_ threadKey: String) -> WatchReply {
+        WatchReply(protocolVersion: WatchSnapshot.currentProtocolVersion, ok: true, error: nil, threadKey: threadKey)
+    }
+
     func message() -> [String: Any] {
-        // ⚠️ AN ENCODING FAILURE OF THREE SCALARS CANNOT HAPPEN; an empty payload reads as
+        // ⚠️ AN ENCODING FAILURE OF FOUR SCALARS CANNOT HAPPEN; an empty payload reads as
         // unreadable on the watch, which shows the generic failure rather than success.
         [Self.messageKey: (try? WatchWire.encoder.encode(self)) ?? Data()]
     }

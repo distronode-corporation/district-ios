@@ -58,6 +58,34 @@ final class WatchBridgeServiceTests: XCTestCase {
         XCTAssertEqual(reply.replies, [.success])
     }
 
+    /// A tapped notification's message, answered with its thread's key, and a snapshot after.
+    func testAResolveRepliesWithTheThreadKeyThenASnapshot() async throws {
+        let rig = ServiceRig()
+        let reply = ReplyRecorder(log: rig.log)
+
+        try await rig.service.handle(
+            requestData: Self.request(.resolveMessage(workspaceId: "ws_1", messageId: "msg_1")),
+            reply: reply.record
+        )
+
+        XCTAssertEqual(reply.replies, [.thread("contact:c_1")])
+        XCTAssertEqual(rig.actions.resolved, ["ws_1/msg_1"])
+        XCTAssertTrue(rig.actions.performed.isEmpty)
+        XCTAssertEqual(rig.log.all, ["resolve msg_1", "reply ok", "snapshot", "publish"])
+    }
+
+    func testAnUnresolvedMessageRepliesWithAFailure() async throws {
+        let rig = ServiceRig(threadKey: .failure(WatchActionFailure(sentence: "Could not open.")))
+        let reply = ReplyRecorder(log: rig.log)
+
+        try await rig.service.handle(
+            requestData: Self.request(.resolveMessage(workspaceId: "ws_1", messageId: "msg_1")),
+            reply: reply.record
+        )
+
+        XCTAssertEqual(reply.replies, [.failure("Could not open.")])
+    }
+
     /// ⛔ A REQUEST FROM ANOTHER PROTOCOL VERSION IS REFUSED UNREAD, and nothing is written.
     func testAnotherVersionIsRefusedAndNothingIsWritten() async throws {
         let rig = ServiceRig()
@@ -192,6 +220,34 @@ final class WatchBridgeServiceTests: XCTestCase {
         XCTAssertFalse(failure.sentence.isEmpty)
     }
 
+    /// ⛔ THE MESSAGE BECOMES ITS THREAD ON THE PHONE, under the one coordinator: refresh,
+    /// then `GET messages/{id}`, and the server's own thread key comes back.
+    func testResolveByMessageIdRefreshesThenReadsTheMessage() async {
+        let rig = await HandlerRig()
+        let actions = ContainerWatchActions(
+            notificationActions: rig.handler,
+            callHandling: CallHandlingRepository(client: rig.api)
+        )
+
+        let outcome = await actions.threadKey(workspaceId: "ws_1", messageId: "msg_1")
+
+        XCTAssertEqual(try? outcome.get(), "contact:c_1")
+        XCTAssertEqual(rig.log.all, ["refresh", "GET msg_1 Bearer access-fresh"])
+    }
+
+    func testAMessageTheServerRefusesIsNotResolved() async {
+        let rig = await HandlerRig(writeStatus: 404, writeBody: #"{"success":false,"error":"Not found."}"#)
+        let actions = ContainerWatchActions(
+            notificationActions: rig.handler,
+            callHandling: CallHandlingRepository(client: rig.api)
+        )
+
+        let outcome = await actions.threadKey(workspaceId: "ws_1", messageId: "msg_1")
+
+        guard case let .failure(failure) = outcome else { return XCTFail("expected a failure") }
+        XCTAssertEqual(failure.sentence, InboxCopy.conversationCouldNotOpened)
+    }
+
     // MARK: - Helpers
 
     static func request(_ action: WatchAction) throws -> Data {
@@ -249,11 +305,23 @@ private final class FakeSnapshotSource: WatchSnapshotSourcing {
 private final class FakeWatchActions: WatchActionPerforming {
     let log: ActionEventLog
     let outcome: Result<Void, WatchActionFailure>
+    let threadKey: Result<String, WatchActionFailure>
     private(set) var performed: [WatchAction] = []
+    private(set) var resolved: [String] = []
 
-    init(log: ActionEventLog, outcome: Result<Void, WatchActionFailure>) {
+    init(log: ActionEventLog, outcome: Result<Void, WatchActionFailure>, threadKey: Result<
+        String,
+        WatchActionFailure
+    >) {
         self.log = log
         self.outcome = outcome
+        self.threadKey = threadKey
+    }
+
+    func threadKey(workspaceId: String, messageId: String) async -> Result<String, WatchActionFailure> {
+        resolved.append("\(workspaceId)/\(messageId)")
+        log.append("resolve \(messageId)")
+        return threadKey
     }
 
     func perform(_ action: WatchAction) async -> Result<Void, WatchActionFailure> {
@@ -299,10 +367,11 @@ private struct ServiceRig {
     init(
         installed: Bool = true,
         snapshot: WatchSnapshot? = WatchSnapshotTests.full(rows: 2),
-        outcome: Result<Void, WatchActionFailure> = .success(())
+        outcome: Result<Void, WatchActionFailure> = .success(()),
+        threadKey: Result<String, WatchActionFailure> = .success("contact:c_1")
     ) {
         link = FakeWatchLink(installed: installed, log: log)
-        actions = FakeWatchActions(log: log, outcome: outcome)
+        actions = FakeWatchActions(log: log, outcome: outcome, threadKey: threadKey)
         source = FakeSnapshotSource(log: log, snapshot: snapshot)
         service = WatchBridgeService(
             link: link,
@@ -380,6 +449,9 @@ private final class ThreadActionTransport: HTTPTransport, @unchecked Sendable {
         switch segment {
         case "conversations":
             return Self.json(200, Self.conversations)
+        case "msg_1":
+            // ⚠️ `GET messages/{id}`, answered with the write status so a test can refuse it.
+            return Self.json(writeStatus, writeBody ?? Self.messageThread)
         case "send":
             return Self.json(writeStatus, writeBody ?? Self.sent)
         default:
@@ -401,6 +473,14 @@ private final class ThreadActionTransport: HTTPTransport, @unchecked Sendable {
        "status":"received","createdAt":"2026-08-15T13:10:00.000Z"},
       "unreadCount":1,"totalMessages":1}],
      "scanned":1,"scanLimit":500}
+    """#
+
+    /// ⚠️ THE CORE'S OWN RESOLVER FIXTURE SHAPE (`InboxThreadResolveTests.contactKeyed`).
+    private static let messageThread = #"""
+    {"success":true,
+     "message":{"id":"msg_1","direction":"inbound","type":"sms","readAt":null,
+                "createdAt":"2026-08-15T14:30:00.000Z"},
+     "thread":{"threadKey":"contact:c_1","contactId":"c_1","counterpart":"+14165550134","channel":"sms"}}
     """#
 
     private static let sent = #"""

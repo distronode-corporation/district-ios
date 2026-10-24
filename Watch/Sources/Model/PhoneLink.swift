@@ -18,8 +18,11 @@ protocol PhoneLinking: AnyObject {
     var isReachable: Bool { get }
 
     /// Start the session; `onReading` gets every application context, the one already
-    /// received included.
-    func activate(onReading: @escaping @MainActor @Sendable (WatchSnapshotReading) -> Void)
+    /// received included, and `onReachable` every time the phone comes into reach.
+    func activate(
+        onReading: @escaping @MainActor @Sendable (WatchSnapshotReading) -> Void,
+        onReachable: @escaping @MainActor @Sendable () -> Void
+    )
 
     /// ⛔ `sendMessage` WITH A REPLY HANDLER, NEVER `transferUserInfo`. See ``WatchAction``.
     func send(_ request: WatchRequest) async -> PhoneAnswer
@@ -34,10 +37,14 @@ final class LivePhoneLink: PhoneLinking {
         WCSession.default.activationState == .activated && WCSession.default.isReachable
     }
 
-    func activate(onReading: @escaping @MainActor @Sendable (WatchSnapshotReading) -> Void) {
-        // ⛔ `@Sendable`, so not isolated to the main actor: the delegate calls it on
+    func activate(
+        onReading: @escaping @MainActor @Sendable (WatchSnapshotReading) -> Void,
+        onReachable: @escaping @MainActor @Sendable () -> Void
+    ) {
+        // ⛔ `@Sendable`, so not isolated to the main actor: the delegate calls them on
         // WatchConnectivity's queue. See ``deliver(_:)``.
         delegate.onReading = { @Sendable reading in Task { @MainActor in onReading(reading) } }
+        delegate.onReachable = { @Sendable in Task { @MainActor in onReachable() } }
         WCSession.default.delegate = delegate
         WCSession.default.activate()
     }
@@ -103,8 +110,17 @@ private final class ResumeOnce: @unchecked Sendable {
 
 /// The session's delegate. Callbacks arrive on WatchConnectivity's own queue.
 final class PhoneSessionDelegate: NSObject, WCSessionDelegate, @unchecked Sendable {
-    /// ⚠️ SET ONCE, BEFORE `activate()`, which is why it needs no lock.
+    /// ⚠️ SET ONCE, BEFORE `activate()`, which is why they need no lock.
     var onReading: (@Sendable (WatchSnapshotReading) -> Void)?
+    var onReachable: (@Sendable () -> Void)?
+
+    /// ⚠️ A TAP THAT RESUMES THE APP IS HANDLED BEFORE THE PHONE IS BACK IN REACH (measured
+    /// on the simulator pair: reachable about half a second after the tap), and no new
+    /// application context need follow. This is what lets ``WatchStore/open(_:)`` ask then.
+    func sessionReachabilityDidChange(_ session: WCSession) {
+        guard session.isReachable else { return }
+        onReachable?()
+    }
 
     func session(
         _ session: WCSession,

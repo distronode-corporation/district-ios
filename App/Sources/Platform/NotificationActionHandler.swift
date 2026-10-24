@@ -124,6 +124,26 @@ final class NotificationActionHandler {
         await perform(action, workspaceId: workspaceId, addressee: .thread(threadKey))
     }
 
+    /// The thread key of the thread one message belongs to: what the watch needs to open a
+    /// tapped message notification on the thread it shows.
+    ///
+    /// ⚠️ A READ, SO NO SINGLE-FLIGHT AND NO BACKGROUND TASK OF ITS OWN: two taps may both
+    /// ask, and the caller (``WatchBridgeService``) already holds one for the request. The
+    /// token still comes first and through the one coordinator, as for a write.
+    func threadKey(workspaceId: String, messageId: String) async -> Result<String, MessageActionFailure> {
+        switch await coordinator.accessToken() {
+        case .available:
+            break
+        case let .reauthRequired(reason):
+            return .failure(.signedOut(reason))
+        case let .retryLater(reason):
+            return .failure(.sessionUnavailable(reason))
+        }
+        return await inbox.messageThread(workspaceId: workspaceId, messageId: messageId)
+            .map(\.threadKey)
+            .mapError { .unresolved($0) }
+    }
+
     private func perform(
         _ action: MessageAction,
         workspaceId: String,
