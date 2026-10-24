@@ -111,7 +111,7 @@ extension WatchCopy {
     internal static var replyNotSent: String { WatchL10n.copyLocale == .frCA ? "Réponse non envoyée" : "Reply not sent" }
 
     /// `watch.reply_sent`
-    internal static var replySent: String { WatchL10n.copyLocale == .frCA ? "Réponse envoyée" : "Reply sent" }
+    internal static var replySent: String { WatchL10n.copyLocale == .frCA ? "Message envoyé" : "Reply sent" }
 
     /// `watch.send`
     internal static var send: String { WatchL10n.copyLocale == .frCA ? "Envoyer" : "Send" }
@@ -123,7 +123,7 @@ extension WatchCopy {
     internal static var signInBody: String { WatchL10n.copyLocale == .frCA ? "Ouvrez District AI sur votre iPhone et connectez-vous. Vos appels et vos messages s'afficheront ici." : "Open District AI on your iPhone and sign in. Your calls and messages appear here." }
 
     /// `watch.sign_in_on_iphone`
-    internal static var signInOnIphone: String { WatchL10n.copyLocale == .frCA ? "Connectez-vous sur votre iPhone" : "Sign in on your iPhone" }
+    internal static var signInOnIphone: String { WatchL10n.copyLocale == .frCA ? "Connectez-vous sur l'iPhone" : "Sign in on your iPhone" }
 
     /// `watch.signed_out`
     internal static var signedOut: String { WatchL10n.copyLocale == .frCA ? "Déconnecté" : "Signed out" }
