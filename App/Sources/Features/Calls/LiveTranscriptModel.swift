@@ -43,6 +43,10 @@ final class LiveTranscriptModel {
     private(set) var complete = true
     private(set) var finalTranscript: FinalTranscriptState = .notRequested
     private(set) var connection: Connection = .idle
+    /// How many snapshots have arrived whole (their last part), counting every socket. The
+    /// watch relay's sign that a subscribe was answered (``WatchLiveRelay``); the screen reads
+    /// nothing from it.
+    private(set) var snapshotsReceived = 0
 
     /// Whether the screen should show the transcript after the call instead (the server
     /// has no live transcript for this call, or the socket cannot be had).
@@ -166,6 +170,9 @@ final class LiveTranscriptModel {
         case let .event(envelope):
             guard let event = envelope.transcriptEvent else { return }
             perform(reducer.apply(event, atMilliseconds: dependencies.clock.nowMilliseconds()))
+            if case let .snapshot(data) = event, !data.more {
+                snapshotsReceived += 1
+            }
         case .discarded:
             break
         case .reconnecting:

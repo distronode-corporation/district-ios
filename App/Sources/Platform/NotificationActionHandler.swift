@@ -380,9 +380,18 @@ final class BackgroundTaskLease {
         self.tasks = tasks
     }
 
-    static func begin(_ name: String, on tasks: any BackgroundTaskScheduling) -> BackgroundTaskLease {
+    /// - Parameter onExpire: told when the system takes the time back, before the task ends.
+    ///   The watch relay logs it (``WatchRelayDiagnostics``) and closes its socket.
+    static func begin(
+        _ name: String,
+        on tasks: any BackgroundTaskScheduling,
+        onExpire: (@MainActor @Sendable () -> Void)? = nil
+    ) -> BackgroundTaskLease {
         let lease = BackgroundTaskLease(tasks: tasks)
-        lease.identifier = tasks.begin(name) { lease.end() }
+        lease.identifier = tasks.begin(name) {
+            onExpire?()
+            lease.end()
+        }
         return lease
     }
 

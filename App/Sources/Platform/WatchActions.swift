@@ -31,8 +31,10 @@ struct ContainerWatchActions: WatchActionPerforming {
             await callHandling.saveAvailability(workspaceId: workspaceId, availableForCalls: available)
                 .map { _ in () }
                 .mapError { WatchActionFailure(sentence: FailureText.from($0).message) }
-        case .refresh, .resolveMessage:
-            // ⚠️ NEITHER WRITES. `.resolveMessage` is answered by ``threadKey(workspaceId:messageId:)``.
+        case .refresh, .resolveMessage, .liveList, .liveSubscribe, .liveKeepalive, .liveUnsubscribe, .whisper,
+             .callDetail:
+            // ⚠️ NONE WRITES HERE. `.resolveMessage` is answered by ``threadKey(workspaceId:messageId:)``,
+            // and the live requests by ``WatchLiveRelay``, which `WatchBridgeService` hands them to.
             .success(())
         }
     }

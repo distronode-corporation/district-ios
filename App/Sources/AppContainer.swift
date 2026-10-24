@@ -340,8 +340,13 @@ final class AppContainer {
     lazy var watchBridge = WatchBridgeService(
         link: LiveWatchSessionLink(),
         source: ContainerWatchSnapshotSource(container: self),
-        actions: ContainerWatchActions(notificationActions: notificationActions, callHandling: callHandling)
+        actions: ContainerWatchActions(notificationActions: notificationActions, callHandling: callHandling),
+        live: WatchLiveRelay(sources: ContainerWatchLiveSources(container: self))
     )
+
+    /// A number for the dialler to show, handed over by a Handoff from the watch's call card
+    /// (``CallBackHandoff``). ⚠️ Shown, never dialled: the person presses Call.
+    let dialerPrefill = DialerPrefill()
 
     private let store: any TokenStore
 
