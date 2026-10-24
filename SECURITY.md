@@ -24,7 +24,7 @@ being backported.
 
 | Version | Supported |
 | --- | --- |
-| 2.2.1 (current App Store release) | Yes |
+| The latest 3.x App Store release | Yes |
 | Anything older | No |
 
 ## What the app does to protect you

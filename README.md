@@ -1,6 +1,7 @@
 # District AI for iOS
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/distronode-corporation/district-ios/badge)](https://scorecard.dev/viewer/?uri=github.com/distronode-corporation/district-ios)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15870/badge)](https://www.bestpractices.dev/projects/15870)
 
 District AI for iOS is [on the App Store](https://apps.apple.com/app/id6809297970).
 
