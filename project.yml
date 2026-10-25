@@ -640,6 +640,11 @@ targets:
       - path: Watch/Sources/L10n
       - path: Watch/Localization
         buildPhase: resources
+        # ⚠️ THE WATCH APP'S INTENT TABLES (3.2) ARE NOT THE WIDGET'S: it declares no App
+        # Intents, and an AppShortcuts.strings there only earns metadata-processor warnings.
+        excludes:
+          - "**/AppIntents.strings"
+          - "**/AppShortcuts.strings"
       - path: Complications/PrivacyInfo.xcprivacy
         buildPhase: resources
     info:
