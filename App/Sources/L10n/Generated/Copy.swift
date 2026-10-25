@@ -1535,7 +1535,7 @@ extension IncomingCallCopy {
     internal static var steerAskWhatAbout: String { AppL10n.copyLocale == .frCA ? "Demandez l'objet de l'appel." : "Ask what the call is about." }
 
     /// `incoming_call.steer_body`
-    internal static var steerBody: String { AppL10n.copyLocale == .frCA ? "Vous avez refusé l'appel. Indiquer à l'assistante quoi dire\u{00A0}?" : "You declined the call. Tell the assistant what to say?" }
+    internal static var steerBody: String { AppL10n.copyLocale == .frCA ? "Vous avez refusé l'appel. Indiquer à l'assistante quoi dire?" : "You declined the call. Tell the assistant what to say?" }
 
     /// `incoming_call.steer_call_back_today`
     internal static var steerCallBackToday: String { AppL10n.copyLocale == .frCA ? "Nous rappellerons la personne aujourd'hui." : "We will call them back today." }
@@ -1549,7 +1549,7 @@ extension IncomingCallCopy {
     internal static var steerNotSent: String { AppL10n.copyLocale == .frCA ? "Consigne non envoyée" : "Not sent to the assistant" }
 
     /// `incoming_call.steer_placeholder`
-    internal static var steerPlaceholder: String { AppL10n.copyLocale == .frCA ? "Que doit dire l'assistante\u{00A0}?" : "What should the assistant say?" }
+    internal static var steerPlaceholder: String { AppL10n.copyLocale == .frCA ? "Que doit dire l'assistante?" : "What should the assistant say?" }
 
     /// `incoming_call.steer_typed`
     internal static var steerTyped: String { AppL10n.copyLocale == .frCA ? "Écrire à l'assistante" : "Tell the assistant" }
@@ -1563,7 +1563,7 @@ extension IntentCopy {
 
     /// `intent.availability_on`
     internal static func availabilityOn(_ workspace_name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Les appels de l'espace \(workspace_name) sonnent maintenant sur votre téléphone." : "Calls in \(workspace_name) now ring your phone."
+        AppL10n.copyLocale == .frCA ? "Les appels de l'espace \(workspace_name) sonnent désormais sur votre téléphone." : "Calls in \(workspace_name) now ring your phone."
     }
 
     /// `intent.latest_inbound`

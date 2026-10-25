@@ -9,7 +9,7 @@ fr = "Disponibilité"
 ctx = "label"
 screen = "intents"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { apple = "Availability" }
 note = "The App Shortcut tile's short title for « Set my availability »."
 
@@ -19,17 +19,17 @@ fr = "Disponible pour les appels"
 ctx = "label"
 screen = "intents"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { apple = "Available for calls" }
 note = "The on/off parameter of « Set my availability ». Same words as the availability switch."
 
 [appintents.available_prompt]
 en = "Should calls ring you?"
-fr = "Les appels doivent-ils sonner pour vous\u00A0?"
+fr = "Voulez-vous que les appels sonnent pour vous?"
 ctx = "body"
 screen = "intents"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { apple = "Should calls ring you?" }
 note = "What Siri asks when « Set my availability » was said without on or off."
 
@@ -39,7 +39,7 @@ fr = "Affiche la conversation la plus récente de votre boîte de réception. Ri
 ctx = "body"
 screen = "intents"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { apple = "Shows the newest conversation in your inbox. Nothing is marked read." }
 note = "That intent's description in the Shortcuts app."
 
@@ -49,7 +49,7 @@ fr = "Dernier message"
 ctx = "label"
 screen = "intents"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { apple = "Latest message" }
 note = "The App Shortcut tile's short title for « Read my latest message »."
 
@@ -59,17 +59,17 @@ fr = "Lire mon dernier message"
 ctx = "title"
 screen = "intents"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { apple = "Read my latest message" }
 note = "An App Intent's title. It shows the newest conversation in the inbox and marks nothing read."
 
 [appintents.set_availability_description]
 en = "Turn calls to you on or off in your current workspace."
-fr = "Activer ou désactiver les appels pour vous dans votre espace de travail actuel."
+fr = "Active ou désactive les appels pour vous dans votre espace de travail actuel."
 ctx = "body"
 screen = "intents"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { apple = "Turn calls to you on or off in your current workspace." }
 note = "That intent's description in the Shortcuts app."
 
@@ -79,6 +79,6 @@ fr = "Régler ma disponibilité"
 ctx = "title"
 screen = "intents"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { apple = "Set my availability" }
 note = "An App Intent's title in Shortcuts and Siri (iPhone and Apple Watch). It turns calls to the person on or off in the current workspace."

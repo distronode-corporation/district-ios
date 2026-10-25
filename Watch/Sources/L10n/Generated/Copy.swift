@@ -82,7 +82,7 @@ extension WatchCopy {
 
     /// `watch.intent_availability_on`
     internal static func intentAvailabilityOn(_ workspace: String) -> String {
-        WatchL10n.copyLocale == .frCA ? "Les appels de l'espace \(workspace) sonnent maintenant sur votre téléphone." : "Calls in \(workspace) now ring your phone."
+        WatchL10n.copyLocale == .frCA ? "Les appels de l'espace \(workspace) sonnent désormais sur votre téléphone." : "Calls in \(workspace) now ring your phone."
     }
 
     /// `watch.intent_latest_inbound`

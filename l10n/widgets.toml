@@ -8,7 +8,7 @@ en = "No caller ID"
 fr = "Aucun afficheur"
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.noCallerId" }
 note = "The call's Live Activity when the caller has no name or number yet (the look-up follows the ring). Same words as the iPhone's calls.no_caller_id."
 
@@ -17,7 +17,7 @@ en = "The assistant is answering"
 fr = "L'assistante répond"
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.phaseAiAnswering" }
 note = "Live Activity status: the AI receptionist has the call. The AI is « l'assistante » in French, as everywhere in the app."
 
@@ -26,7 +26,7 @@ en = "Declined. The assistant is taking a message."
 fr = "Appel refusé. L'assistante prend un message."
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.phaseDeclined" }
 note = "Live Activity status after a person declined the ring: the assistant takes a message instead."
 
@@ -35,7 +35,7 @@ en = "Call ended"
 fr = "Appel terminé"
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.phaseEnded" }
 note = "Live Activity status: the call is over. Same words as the iPhone's and the watch's call-ended label."
 
@@ -44,7 +44,7 @@ en = "Message taken"
 fr = "Message pris"
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.phaseMessageTaken" }
 note = "Live Activity status: the call ended with the assistant taking a message."
 
@@ -53,7 +53,7 @@ en = "Incoming call"
 fr = "Appel entrant"
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.phaseRinging" }
 note = "Live Activity status: the call is ringing this person. Same words as the ring push's title."
 
@@ -62,7 +62,7 @@ en = "Transferred"
 fr = "Transféré"
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.phaseTransferred" }
 note = "Live Activity status: the assistant transferred the call to a person."
 
@@ -71,7 +71,7 @@ en = "Assistant"
 fr = "Assistante"
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.speakerAssistant" }
 note = "Who said the latest line on the Live Activity: the AI. Same as the iPhone's live_transcript.speaker_assistant."
 
@@ -80,15 +80,15 @@ en = "Caller"
 fr = "Appelant"
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.speakerCaller" }
 note = "Who said the latest line on the Live Activity: the caller. Same as the iPhone's live_transcript.speaker_caller."
 
 [widgets.stale]
 en = "Not updated recently"
-fr = "Pas mis à jour récemment"
+fr = "Aucune mise à jour récente"
 ctx = "label"
 screen = "live_activity"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.stale" }
 note = "Shown when the Live Activity has had no update for 30 minutes (a lost push), so the status above may be out of date."

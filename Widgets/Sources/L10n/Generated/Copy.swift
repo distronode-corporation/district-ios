@@ -33,5 +33,5 @@ extension WidgetCopy {
     internal static var speakerCaller: String { WidgetL10n.copyLocale == .frCA ? "Appelant" : "Caller" }
 
     /// `widgets.stale`
-    internal static var stale: String { WidgetL10n.copyLocale == .frCA ? "Pas mis à jour récemment" : "Not updated recently" }
+    internal static var stale: String { WidgetL10n.copyLocale == .frCA ? "Aucune mise à jour récente" : "Not updated recently" }
 }
