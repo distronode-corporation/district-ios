@@ -1,0 +1,13 @@
+[meta]
+catalog = "widgets_infoplist"
+platform = "swift"
+apple = true
+
+[widgets_infoplist.display_name]
+en = "District AI"
+ctx = "label"
+screen = "live_activity"
+tier = "T0"
+fixed = true
+id = { apple = "CFBundleDisplayName" }
+note = "The widget extension's name (it draws the call's Live Activity). The product name, not translated. Must equal project.yml's CFBundleDisplayName."

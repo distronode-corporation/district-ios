@@ -48,6 +48,10 @@ final class LiveTranscriptModel {
     /// nothing from it.
     private(set) var snapshotsReceived = 0
 
+    /// Told after every change of what is published: the call's Live Activity follows the
+    /// transcript from here (``CallLiveActivities/observed(_:callId:)``). ⚠️ Never the screen.
+    var onPublish: (@MainActor (LiveTranscriptModel) -> Void)?
+
     /// Whether the screen should show the transcript after the call instead (the server
     /// has no live transcript for this call, or the socket cannot be had).
     var fallsBack: Bool {
@@ -236,6 +240,7 @@ final class LiveTranscriptModel {
         phase = reducer.phase
         complete = reducer.complete
         finalTranscript = reducer.finalTranscript
+        onPublish?(self)
     }
 
     // MARK: - Waits

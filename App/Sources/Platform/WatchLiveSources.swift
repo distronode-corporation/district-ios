@@ -80,9 +80,15 @@ final class ContainerWatchLiveSources: WatchLiveSourcing {
         await listed
         // ⛔ A ROLE THAT COULD NOT BE READ STEERS NOTHING: `allowsMutation(nil)` is false.
         let role = WorkspaceRole.fromWire(workspaces.workspaces.first { $0.id == workspaceId }?.role)
-        return page
+        let live = page
             .map { WatchLiveComposer.liveCalls($0.items, workspaceId: workspaceId, role: role) }
             .mapError { WatchActionFailure(sentence: FailureText.from($0).message) }
+        // ⚠️ THE OPEN APP SAW THESE CALLS IN PROGRESS, so each gets its Live Activity. A wake
+        // in the background may not be allowed to start one; the attempt costs nothing.
+        if case let .success(calls) = live {
+            container.liveActivities.observed(calls)
+        }
+        return live
     }
 
     func card(workspaceId: String, callId: String, now: Date) async -> Result<WatchCallCard, WatchActionFailure> {
@@ -100,7 +106,7 @@ final class ContainerWatchLiveSources: WatchLiveSourcing {
 
     func feed(workspaceId: String, callId: String) -> any WatchLiveTranscriptFeed {
         let calls = container.calls
-        return LiveTranscriptModel(
+        let model = LiveTranscriptModel(
             workspaceId: workspaceId,
             callId: callId,
             dependencies: LiveTranscriptModel.Dependencies(
@@ -111,6 +117,9 @@ final class ContainerWatchLiveSources: WatchLiveSourcing {
                 fetchTranscript: { await calls.transcript(workspaceId: workspaceId, callId: callId) }
             )
         )
+        let activities = container.liveActivities
+        model.onPublish = { activities.observed($0, callId: $0.callId) }
+        return model
     }
 
     func willActivate() async {

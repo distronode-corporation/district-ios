@@ -29,6 +29,19 @@ built from history before publication, so they have no tags in this repository.
 - 3.2.0: a ring the server ends with reason `declined` (every member rang declined) is
   recorded in CallKit's Recents as `.declinedElsewhere`, not as a missed call.
   `RingCancelTests`.
+- 3.2.0: the call's Live Activity (Sean, 2026-10-25, GitLab #2): a new widget extension,
+  `DistrictAIWidgets` (`com.distronode.district.widgets`), draws `DistrictCallActivityAttributes`
+  on the Lock Screen, in the Dynamic Island and, with watchOS 11, in the Apple
+  Watch Smart Stack (`.supplementalActivityFamilies([.small])`). The app starts it locally
+  only, when a ring wakes it (after CallKit has the call) or when the open app sees a call in
+  progress (the call screen, the watch relay's live list), never two for one call; updates it
+  from the live transcript while awake (the latest final line, at most 120 characters); ends
+  it when the call ends (gone four minutes later) and at sign-out at once. Each push token goes
+  to the server once through DistrictCore's `CallsRepository.registerLiveActivity`
+  (`pushType: .token`), so the server's `liveactivity` pushes update it while the app sleeps.
+  iOS 18 and later only: the extension targets iOS 18 for the watch family, and iOS 17
+  starts none. `NSSupportsLiveActivities` in the app; strings in `l10n/widgets.toml`.
+  `CallLiveActivitiesTests`. ⚠️ DistrictCore is pinned by `revision:` until the 8.1.0 tag.
 - 3.2.0: steering from the watch sends through the core's `CallsRepository.whisper`;
   `PendingCoreWhisper`, its failure sentence (`watch_bridge.whisper_unavailable`) and its
   code are gone, and `ContainerWatchLiveSources` takes the sender with no default.

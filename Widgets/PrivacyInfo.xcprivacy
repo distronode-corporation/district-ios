@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The privacy manifest of the widget extension (it draws the call's Live Activity on the
+  Lock Screen, in the Dynamic Island and in the Apple Watch Smart Stack).
+
+  ⛔ AUTHORED, NOT GENERATED, like App/PrivacyInfo.xcprivacy, and it lands at the bundle
+  root through an explicit `buildPhase: resources` in project.yml.
+
+  ⛔ IT COLLECTS NOTHING AND SENDS NOTHING. It makes no network request and reads no
+  Keychain item, App Group or UserDefaults suite: it draws the content state the app or an
+  APNs Live Activity push hands ActivityKit (a caller's name and the latest transcript
+  line, Sean's decision 2026-10-25), on this device only. The app's own manifest covers the
+  push token the app sends. No required-reason API.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>

@@ -88,7 +88,8 @@ packages:
   # package's five libraries, unchanged by the move.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    exactVersion: 8.0.0
+    # TEMP until the 8.1.0 tag: district-core-swift feat/live-activity (CallsRepository.registerLiveActivity)
+    revision: ea0393c402d8d35697a44e429aae2aa60d2974f4
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
@@ -159,6 +160,9 @@ targets:
       # notification service extension (`DistrictAINotificationService`): the app mints the
       # token after sign-in and at launch, and clears it at sign-out.
       - path: App/NotifyShared
+      # The call Live Activity's attributes, shared as source with `DistrictAIWidgets`, which
+      # draws what the app starts (3.2).
+      - path: App/LiveActivity
       # ⛔ RESOURCES GO UNDER `sources:`, BECAUSE XCODEGEN HAS NO `resources:` KEY
       # AT ALL. It parses every path listed here and assigns each file to the
       # build phase its type implies — `.swift` to Sources, `.xcassets` to
@@ -226,6 +230,8 @@ targets:
       - target: DistrictAIWatch
       # The notification service extension (3.2), embedded in PlugIns/. See its target.
       - target: DistrictAINotificationService
+      # The widget extension (3.2): the call's Live Activity, embedded in PlugIns/. See its target.
+      - target: DistrictAIWidgets
     # ⚠️ GENERATED, NOT AUTHORED. xcodegen writes App/Info.plist from the
     # properties below on every `generate`, filling in CFBundleIdentifier,
     # CFBundleName and friends itself. The written file is build output: it is not
@@ -311,6 +317,9 @@ targets:
         # carries a call id, never a number.
         NSUserActivityTypes:
           - com.distronode.district.call-back
+        # ⛔ WITHOUT IT `Activity.request` THROWS AND NO CALL LIVE ACTIVITY EVER STARTS (3.2);
+        # the extension that draws it is `DistrictAIWidgets`.
+        NSSupportsLiveActivities: true
         # ⚠️ ONE WINDOW ON iPad TOO. Multiple scenes would mean one shell, one
         # navigation state and one incoming-call cover per window, over a single
         # live call per process; nothing here is built for that.
@@ -730,6 +739,48 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.notificationservice
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: "NO"
+
+  # ⛔ THE WIDGET EXTENSION (3.2): THE CALL'S LIVE ACTIVITY on the Lock Screen, the Dynamic
+  # Island and, from iOS 18 with watchOS 11, the Apple Watch Smart Stack. Sean, 2026-10-25
+  # (GitLab #2): started by the app when a ring wakes it or the open app sees a live call,
+  # updated by the server's Live Activity pushes, and the one place a push carries a name and
+  # a line of the conversation. It draws ActivityKit's content state and nothing else: no
+  # network, no Keychain, no App Group, no DistrictCore.
+  # ⚠️ NO SIGNING HERE, as everywhere: the App ID `com.distronode.district.widgets` must
+  # exist on the team. ⛔ ITS VERSIONS ARE THE PROJECT-LEVEL PAIR, and it ships both French
+  # tables: the archive refuses a nested bundle without either.
+  # ⛔ iOS 18, ABOVE THE APP'S 17, ON PURPOSE: see `Widgets/Sources/DistrictAIWidgets.swift`.
+  # iOS 17 does not load the extension, and the app starts no activity there.
+  DistrictAIWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Widgets/Sources
+      # The attributes type, compiled into the app too.
+      - path: App/LiveActivity
+      # en.lproj and fr-CA.lproj, generated from l10n/widgets*.toml by scripts/gen-l10n.py.
+      - path: Widgets/Localization
+        buildPhase: resources
+      # ⛔ AT THE BUNDLE ROOT, BY FILE, WITH THE PHASE STATED: see the iOS app's manifest.
+      - path: Widgets/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    # ⚠️ GENERATED, LIKE App/Info.plist, AND GITIGNORED FOR THE SAME REASON.
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: District AI
+        CFBundleDevelopmentRegion: en
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.widgets
         TARGETED_DEVICE_FAMILY: "1,2"
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: "NO"

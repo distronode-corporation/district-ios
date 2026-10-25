@@ -74,6 +74,8 @@ final class IncomingCallModel: LiveCallControls {
     private let callLog: CallsRepository
     /// A person's decline, sent once. See ``IncomingCallDeclineSender``.
     private let declines: IncomingCallDeclineSender
+    /// The call's Live Activity: started once CallKit has the ring. See ``CallLiveActivities``.
+    private let liveActivities: CallLiveActivities
 
     private var controller = IncomingCallController()
     var callUUID: UUID?
@@ -101,6 +103,7 @@ final class IncomingCallModel: LiveCallControls {
         inbound = container.inboundCalls
         callLog = container.calls
         declines = IncomingCallDeclineSender(inbound: container.inboundCalls)
+        liveActivities = container.liveActivities
     }
 
     // MARK: - What the push handler hands over
@@ -269,6 +272,7 @@ final class IncomingCallModel: LiveCallControls {
                 system(request)
             }
         }
+        liveActivities.rang(workspaceId: workspace.rawValue, callId: call.rawValue)
         Task {
             await apply(.ringing(workspace: workspace, call: call, atMilliseconds: Self.nowMilliseconds()))
             armRingTimeout(uuid: uuid)
@@ -280,6 +284,7 @@ final class IncomingCallModel: LiveCallControls {
             let found = await IncomingCallIdentity.lookUp(callLog, workspace: workspace, call: call)
             guard let found, callUUID == uuid, !state.phase.isEnded, state.phase != .idle else { return }
             caller = found
+            liveActivities.named(callId: call.rawValue, callerName: CallLiveActivities.callerName(found))
             calls.callKit.updateCall(uuid: uuid, handle: found.handle, callerName: found.name)
         }
     }
@@ -352,10 +357,12 @@ final class IncomingCallModel: LiveCallControls {
     /// The commands are performed IN ORDER and sequentially, because the order is
     /// part of ``IncomingCallCommand``'s contract.
     func apply(_ event: IncomingCallEvent) async {
+        let before = state.phase
         let commands = controller.handle(event)
         // ⚠️ WRITTEN BACK BEFORE THE AWAIT, so an event that interleaves reads the
         // new state rather than resurrecting the old one.
         state = controller.state
+        liveActivities.ring(event, from: before, to: state)
         await perform(commands)
         await settle()
     }

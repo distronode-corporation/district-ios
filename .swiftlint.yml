@@ -29,6 +29,7 @@ included:
   - Complications
   # The notification service extension (3.2), linted to the same rules as App/.
   - NotificationService
+  - Widgets
 
 excluded:
   # SwiftPM and Xcode build output, and the app's remote package checkouts
@@ -43,6 +44,7 @@ excluded:
   - App/Sources/L10n/Generated
   # The same, for the watch: written from l10n/watch.toml.
   - Watch/Sources/L10n/Generated
+  - Widgets/Sources/L10n/Generated
 
 # ⚠️ Reported as errors, not warnings, because of --strict above: the two
 # numbers below are the same gate at two severities only when run without it.

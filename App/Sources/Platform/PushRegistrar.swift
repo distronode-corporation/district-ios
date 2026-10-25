@@ -338,6 +338,8 @@ final class PushRegistrar {
         // is gone. ``NotifyTokenRenewal/forget()`` also stops a mint still on the wire from
         // writing one back.
         container.notifyTokenRenewal.forget()
+        // ⛔ AND EVERY CALL LIVE ACTIVITY, at once: each names a caller of the leaving account.
+        container.liveActivities.endAll()
     }
 
     /// A `content-available` push woke this app. Refresh the badge, and nothing else.
