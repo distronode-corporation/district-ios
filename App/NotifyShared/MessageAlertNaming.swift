@@ -1,3 +1,5 @@
+import DistrictData
+import DistrictNetwork
 import Foundation
 
 /// The message a message alert is about, read off its payload.
@@ -15,16 +17,38 @@ protocol SenderNameFetching: Sendable {
     func senderName(of target: MessageAlertTarget, token: String) async throws -> String?
 }
 
-/// Until the request exists: no name, so every alert is shown exactly as sent.
+/// The real fetcher: `GET /api/district/messages/{id}/sender?workspaceId=`, through the core's
+/// `InboxRepository.messageSender` (district-core-swift 8.0.0), with the notify token as the
+/// bearer.
 ///
-/// ⚠️ PENDING district-core-swift 7.2.0: replace with a fetcher over the core's `messageSender`
-/// endpoint (`GET messages/{id}/sender?workspaceId=`), sent with the notify token as the
-/// bearer, a URLSession timeout inside ``MessageAlertNaming/budget``, and no refresh on 401.
-/// On a 401 the extension may clear the token (``NotifyTokenKeychain/clear()``), so the
-/// app's next launch finds it missing and mints a new one.
-struct PendingSenderNameFetcher: SenderNameFetching {
-    func senderName(of _: MessageAlertTarget, token _: String) async throws -> String? {
-        nil
+/// ⛔ THE CLIENT'S TOKEN PROVIDER ANSWERS THE NOTIFY TOKEN AND NOTHING ELSE. It never sees the
+/// session (which this process cannot read), and nothing here refreshes or mints: the app does
+/// that (`NotifyTokenRenewal`).
+///
+/// ⛔ A 401 FORGETS THE TOKEN, and only that token. ``ApiClient`` reports the bearer every 401
+/// answered to `rejectedToken`; the extension then clears the stored token if it is still the
+/// one refused (``NotifyTokenStoring/clear(ifStill:)``), so the app's next launch finds none and
+/// mints, and a token the app minted in the meantime survives.
+///
+/// ⚠️ THE FIVE-SECOND BUDGET IS ENFORCED TWICE: ``MessageAlertNaming/senderName(of:tokens:fetcher:now:budget:)``
+/// stops waiting, and the extension's transport gives up on the request at the same bound.
+struct NotifyReadSenderNameFetcher: SenderNameFetching {
+    let transport: any HTTPTransport
+    var baseURL: URL = ApiClient.productionBaseURL
+    /// Told the token a 401 answered.
+    let rejected: @Sendable (String) -> Void
+
+    func senderName(of target: MessageAlertTarget, token: String) async throws -> String? {
+        let rejected = rejected
+        let client = ApiClient(
+            baseURL: baseURL,
+            transport: transport,
+            accessToken: { token },
+            rejectedToken: { rejected($0) }
+        )
+        return try await InboxRepository(client: client)
+            .messageSender(workspaceId: target.workspaceId, messageId: target.messageId)
+            .get()
     }
 }
 

@@ -20,14 +20,17 @@ final class URLSessionHTTPTransport: NSObject, HTTPTransport, URLSessionTaskDele
     /// resource timeout would also cap a slow media upload
     /// (`messages/media` accepts up to 5MB), which is a different thing from a
     /// server that has stopped answering.
-    private static let requestTimeout: TimeInterval = 30
+    static let defaultRequestTimeout: TimeInterval = 30
 
     private let session: URLSession
 
-    /// - Parameter configuration: injectable for a future test host only.
-    ///   Production uses `.default`.
-    init(configuration: URLSessionConfiguration = .default) {
-        configuration.timeoutIntervalForRequest = Self.requestTimeout
+    /// - Parameter configuration: `.default` in the app. The notification service extension
+    ///   passes `.ephemeral`: it caches nothing to disk.
+    /// - Parameter requestTimeout: the extension passes its five-second budget
+    ///   (`MessageAlertNaming.budget`), so a slow server is given up on, not merely ignored.
+    ///   ⚠️ COMPILED INTO THE EXTENSION TOO (project.yml), so it stays free of app types.
+    init(configuration: URLSessionConfiguration = .default, requestTimeout: TimeInterval = defaultRequestTimeout) {
+        configuration.timeoutIntervalForRequest = requestTimeout
         // ⛔ NO COOKIES ON THE API PATH. Every request this transport carries is
         // authorised by a bearer token attached by `ApiClient`; a cookie jar
         // shared with the login browser would be a second, ambient credential

@@ -41,15 +41,27 @@ final class NotificationService: UNNotificationServiceExtension, @unchecked Send
             finish(named: nil)
             return
         }
+        let tokens = NotifyTokenKeychain()
         work = Task { [weak self] in
             let name = await MessageAlertNaming.senderName(
                 of: target,
-                tokens: NotifyTokenKeychain(),
-                fetcher: PendingSenderNameFetcher(),
+                tokens: tokens,
+                fetcher: Self.fetcher(tokens: tokens),
                 now: Date()
             )
             self?.finish(named: name)
         }
+    }
+
+    /// ⚠️ EPHEMERAL, AND GIVEN UP AT THE BUDGET: nothing is cached to disk, and a request still
+    /// open at five seconds is cancelled rather than left running behind a delivered alert.
+    private static func fetcher(tokens: NotifyTokenKeychain) -> NotifyReadSenderNameFetcher {
+        let budget = MessageAlertNaming.budget.components
+        let transport = URLSessionHTTPTransport(
+            configuration: .ephemeral,
+            requestTimeout: TimeInterval(budget.seconds) + TimeInterval(budget.attoseconds) / 1e18
+        )
+        return NotifyReadSenderNameFetcher(transport: transport) { tokens.clear(ifStill: $0) }
     }
 
     override func serviceExtensionTimeWillExpire() {

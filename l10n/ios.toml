@@ -14716,15 +14716,6 @@ state = "draft"
 id = { swift = "WatchBridgeCopy.whisperTooLong" }
 note = "Shown on the Apple Watch when an instruction to the AI assistant is over the server's limit."
 
-[watch_bridge.whisper_unavailable]
-en = "Instructions to the assistant need a newer version of District AI on your iPhone."
-fr = "Les consignes à l'assistant demandent une version plus récente de District AI sur votre iPhone."
-ctx = "error"
-screen = "watch"
-state = "draft"
-id = { swift = "WatchBridgeCopy.whisperUnavailable" }
-note = "Shown on the Apple Watch while this iPhone build cannot send an instruction to the AI assistant."
-
 [watch_diagnostics.clear]
 en = "Clear the log"
 fr = "Effacer le journal"

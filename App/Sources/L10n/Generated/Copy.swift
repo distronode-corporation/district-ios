@@ -5532,9 +5532,6 @@ extension WatchBridgeCopy {
 
     /// `watch_bridge.whisper_too_long`
     internal static var whisperTooLong: String { AppL10n.copyLocale == .frCA ? "Cette consigne est trop longue. Raccourcissez-la et réessayez." : "That instruction is too long. Shorten it and try again." }
-
-    /// `watch_bridge.whisper_unavailable`
-    internal static var whisperUnavailable: String { AppL10n.copyLocale == .frCA ? "Les consignes à l'assistant demandent une version plus récente de District AI sur votre iPhone." : "Instructions to the assistant need a newer version of District AI on your iPhone." }
 }
 
 extension WatchDiagnosticsCopy {

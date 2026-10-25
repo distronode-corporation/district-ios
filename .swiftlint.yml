@@ -27,6 +27,8 @@ included:
   # The Apple Watch app and its complication, linted to the same rules as App/.
   - Watch
   - Complications
+  # The notification service extension (3.2), linted to the same rules as App/.
+  - NotificationService
 
 excluded:
   # SwiftPM and Xcode build output, and the app's remote package checkouts

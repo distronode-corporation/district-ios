@@ -22,9 +22,9 @@ struct NotifyToken: Codable, Equatable, Sendable {
     /// answered 401). The token lives 30 days.
     static let renewalWindow: TimeInterval = 7 * 24 * 60 * 60
 
-    /// Whether the app should mint a fresh token now. A missing one always should.
-    /// ⚠️ PENDING district-core-swift 7.2.0: the app's launch and sign-in call this, then mint
-    /// with `notifyToken` and ``NotifyTokenKeychain/write(_:)``.
+    /// Whether the app should mint a fresh token now. A missing one always should. The app's
+    /// sign-in and every launch with a session ask this (`NotifyTokenRenewal`), then mint with
+    /// the core's `NotifyTokenRepository.mint()` and store with ``NotifyTokenKeychain/write(_:)``.
     static func needsRenewal(_ token: NotifyToken?, at now: Date) -> Bool {
         guard let token, token.isLive(at: now) else { return true }
         return token.expiresAt.timeIntervalSince(now) <= renewalWindow
@@ -38,6 +38,27 @@ protocol NotifyTokenReading: Sendable {
     func read() throws -> NotifyToken?
 }
 
+/// Where the notify token is kept: the app writes and clears it, the extension reads it and
+/// clears it after a 401. A seam so both sides' decisions are tested without a Keychain.
+protocol NotifyTokenStoring: NotifyTokenReading {
+    /// False when nothing can be kept (an unsigned build): the app then mints nothing.
+    var canStore: Bool { get }
+    func write(_ token: NotifyToken) throws
+    func clear() throws
+}
+
+extension NotifyTokenStoring {
+    /// Clear the stored token if it is still `rejected`, the one a 401 answered.
+    ///
+    /// ⛔ COMPARED, NOT CLEARED BLINDLY: the app may have minted a fresh token while the
+    /// refused request was on the wire, and that one must survive. A Keychain that cannot
+    /// answer leaves everything as it is; the server keeps refusing a dead token anyway.
+    func clear(ifStill rejected: String) {
+        guard let stored = try? read(), stored.token == rejected else { return }
+        try? clear()
+    }
+}
+
 /// The notify token's one Keychain item, in the shared group.
 ///
 /// ⛔ THE SAME TWO ATTRIBUTES AS THE SESSION, FOR THE SAME REASONS (see ``KeychainTokenStore``
@@ -48,14 +69,18 @@ protocol NotifyTokenReading: Sendable {
 /// ⛔ THE GROUP IS NAMED ON EVERY QUERY, and with no resolved group (an unsigned build)
 /// nothing is read or written: an unnamed write would land in the app's private group.
 ///
-/// ⛔ THE APP CLEARS IT ON EVERY TRANSITION INTO SIGNED-OUT (`PushRegistrar.forget()`). The
-/// server refuses it once the family is gone anyway; clearing is what stops a later account
-/// on this handset inheriting it.
-struct NotifyTokenKeychain: NotifyTokenReading {
+/// ⛔ THE APP CLEARS IT ON EVERY TRANSITION INTO SIGNED-OUT (`PushRegistrar.forget()`, through
+/// `NotifyTokenRenewal.forget()`). The server refuses it once the family is gone anyway;
+/// clearing is what stops a later account on this handset inheriting it.
+struct NotifyTokenKeychain: NotifyTokenStoring {
     static let service = "com.distronode.district.notify"
     static let account = "notify-read-token"
 
     let accessGroup: String?
+
+    var canStore: Bool {
+        query() != nil
+    }
 
     init(accessGroup: String? = KeychainAccessGroups.notifyGroup) {
         self.accessGroup = accessGroup

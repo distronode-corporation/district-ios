@@ -52,6 +52,7 @@ final class RingCancelTests: XCTestCase {
             "timeout": .timeout,
             "call_ended": .callEnded,
             "withdrawn": .withdrawn,
+            "declined": .declined,
         ]
         for (wire, reason) in expected {
             XCTAssertEqual(RingCancel.parse(Self.payload(reason: wire))?.reason, reason, wire)
@@ -121,12 +122,14 @@ final class RingCancelTests: XCTestCase {
         XCTAssertEqual(RingCancelReason.callEnded.endedReason, .remoteEnded)
         XCTAssertEqual(RingCancelReason.timeout.endedReason, .unanswered)
         XCTAssertEqual(RingCancelReason.withdrawn.endedReason, .unanswered)
+        // ⛔ NOT A MISSED CALL: every member rang declined, this device's person among them.
+        XCTAssertEqual(RingCancelReason.declined.endedReason, .declinedElsewhere)
     }
 
     // MARK: - Which ring it stops
 
     func testARingForThatCallEndsWithTheMappedReason() {
-        for reason: RingCancelReason in [.answered, .timeout, .callEnded, .withdrawn] {
+        for reason in RingCancelReason.allCases {
             let cancel = RingCancel(workspaceId: "ws_1", callId: "call_1", reason: reason)
             XCTAssertEqual(
                 cancel.outcome(phase: .ringing, ringingCallId: "call_1"),

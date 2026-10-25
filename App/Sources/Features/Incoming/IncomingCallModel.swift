@@ -72,6 +72,8 @@ final class IncomingCallModel: LiveCallControls {
     private let inbound: InboundCallRepository
     /// ⚠️ The call LOG, not ``calls``, which is the live call. See ``AppContainer/callStack``.
     private let callLog: CallsRepository
+    /// A person's decline, sent once. See ``IncomingCallDeclineSender``.
+    private let declines: IncomingCallDeclineSender
 
     private var controller = IncomingCallController()
     var callUUID: UUID?
@@ -98,6 +100,7 @@ final class IncomingCallModel: LiveCallControls {
         calls = container.callStack
         inbound = container.inboundCalls
         callLog = container.calls
+        declines = IncomingCallDeclineSender(inbound: container.inboundCalls)
     }
 
     // MARK: - What the push handler hands over
@@ -177,10 +180,10 @@ final class IncomingCallModel: LiveCallControls {
         Task { await apply(.answerPressed) }
     }
 
-    /// ⛔ NOTHING IS SENT TO THE SERVER FOR A DECLINE. See the ⛔ on
-    /// ``IncomingCallController``: a decline and a phone in a pocket must be
-    /// indistinguishable from outside, so neither transmits and the server's own
-    /// rendezvous timeout does the work.
+    /// ⛔ A PERSON'S DECLINE IS SENT (since 3.2), and this is one of the two places one
+    /// starts; the other is the OS's end action while ringing, in ``system(_:)``. The
+    /// reducer emits ``IncomingCallCommand/requestDecline(workspace:call:)`` once, and the
+    /// agent takes a message once every member rang has declined. See ``IncomingCallEnding``.
     func declinePressed() {
         Task { await endLocally(.declinePressed) }
     }
@@ -297,7 +300,9 @@ final class IncomingCallModel: LiveCallControls {
             // ⛔ THE OS ALREADY PERFORMED THE END ACTION, so nothing may report the
             // call ended a second time. Same flag, different origin.
             endRequestedLocally = true
-            Task { await apply(endEventForCurrentPhase()) }
+            // ⛔ A PERSON PRESSED IT (lock screen, watch, headset, car): while ringing, a decline
+            // that is sent. See ``IncomingCallEnding/systemEnd(in:)``.
+            Task { await apply(IncomingCallEnding.systemEnd(in: state.phase)) }
         case let .muteRequested(uuid, muted):
             guard uuid == callUUID else { return }
             Task { await mute(desiredMuted: muted) }
@@ -312,13 +317,6 @@ final class IncomingCallModel: LiveCallControls {
         }
     }
 
-    /// ⚠️ A RING IS DECLINED AND A CONVERSATION IS HUNG UP, and the reducer records
-    /// a different ``CallEndReason`` for each. They share a teardown; they are not
-    /// the same act.
-    private func endEventForCurrentPhase() -> IncomingCallEvent {
-        state.phase == .ringing ? .declinePressed : .hangUpPressed
-    }
-
     /// ⛔ THE OS IS TOLD FIRST, AND ONLY THEN THE REDUCER.
     /// ``CallKitBridge/requestEndCall(uuid:)`` disarms itself before issuing the
     /// action, so the `CXEndCallAction` it produces does NOT come back through
@@ -331,9 +329,10 @@ final class IncomingCallModel: LiveCallControls {
     }
 
     /// The gate resolved to "there is no session". End a ring that is waiting on it.
+    /// ⛔ WITHDRAWN, NEVER DECLINED: nobody saw this call, so nothing is sent.
     private func endForNoSession() {
         guard callUUID != nil, !state.phase.isEnded, state.phase != .idle else { return }
-        Task { await apply(.declinePressed) }
+        Task { await apply(IncomingCallEnding.noSession) }
     }
 
     /// ⛔ AN ABSOLUTE REQUEST MEETS A TOGGLE EVENT, so it is applied only when the
@@ -390,6 +389,9 @@ final class IncomingCallModel: LiveCallControls {
             answerTask = Task { @MainActor [weak self] in
                 await self?.requestAnswer(workspace: workspace, call: call)
             }
+        // ⛔ ONCE, NEVER RETRIED, AND SPAWNED: the ring has already ended above it in the list.
+        case let .requestDecline(workspace, call):
+            declines.decline(workspace: workspace, call: call)
         case .reportCallActive:
             // ⚠️ NO-OP ON iOS, AND NOT AN OVERSIGHT. See the ⚠️ on the type: the
             // `CXAnswerCallAction` was fulfilled at the press, which is what marks

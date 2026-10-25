@@ -1,4 +1,5 @@
 @testable import DistrictAI
+import DistrictNetwork
 import Foundation
 import Security
 import XCTest
@@ -174,10 +175,66 @@ final class NotifyAlertNamingTests: XCTestCase {
         XCTAssertEqual(MessageAlertNaming.budget, .seconds(5))
     }
 
-    /// The pending fetcher, until district-core-swift 7.2.0: never a name.
-    func testThePendingFetcherNamesNobody() async throws {
-        let name = try await PendingSenderNameFetcher().senderName(of: target, token: "notify-jws")
-        XCTAssertNil(name)
+    // MARK: - The request
+
+    /// ⛔ ONE GET, BEARING THE NOTIFY TOKEN AND NOTHING ELSE, for the alert's own ids.
+    func testTheFetcherAsksTheSenderRouteWithTheNotifyToken() async throws {
+        let transport = SenderTransport(status: 200, body: #"{"success":true,"name":"Avery Contract"}"#)
+        let rejected = RejectedLog()
+        let fetcher = NotifyReadSenderNameFetcher(transport: transport, rejected: rejected.record)
+
+        let name = try await fetcher.senderName(of: target, token: "notify-jws")
+
+        XCTAssertEqual(name, "Avery Contract")
+        let request = try XCTUnwrap(transport.requests.first)
+        XCTAssertEqual(transport.requests.count, 1)
+        XCTAssertEqual(request.method, .get)
+        XCTAssertEqual(request.url.host, "www.distronode.com")
+        XCTAssertEqual(request.url.path, "/api/district/messages/msg_1/sender")
+        XCTAssertEqual(URLComponents(url: request.url, resolvingAgainstBaseURL: false)?.query, "workspaceId=ws_1")
+        XCTAssertEqual(request.headers["Authorization"], "Bearer notify-jws")
+        XCTAssertEqual(rejected.tokens, [])
+    }
+
+    func testANullOrBlankNameIsNoName() async throws {
+        for body in [#"{"success":true,"name":null}"#, #"{"success":true,"name":"  "}"#] {
+            let fetcher = NotifyReadSenderNameFetcher(
+                transport: SenderTransport(status: 200, body: body),
+                rejected: RejectedLog().record
+            )
+            let name = try await fetcher.senderName(of: target, token: "notify-jws")
+            XCTAssertNil(name, body)
+        }
+    }
+
+    /// ⛔ A 401 IS REPORTED WITH ITS TOKEN, ONCE, AND NOT RETRIED; any other refusal forgets nothing.
+    func testA401ReportsTheTokenAndNothingElseDoes() async {
+        for (status, reported) in [(401, ["notify-jws"]), (404, []), (403, []), (500, [])] {
+            let transport = SenderTransport(status: status, body: #"{"success":false,"error":"no"}"#)
+            let rejected = RejectedLog()
+            let fetcher = NotifyReadSenderNameFetcher(transport: transport, rejected: rejected.record)
+            do {
+                _ = try await fetcher.senderName(of: target, token: "notify-jws")
+                XCTFail("\(status) must throw")
+            } catch {}
+            XCTAssertEqual(rejected.tokens, reported, "\(status)")
+            XCTAssertEqual(transport.requests.count, 1, "\(status): never retried")
+        }
+    }
+
+    /// ⛔ ONLY THE TOKEN REFUSED IS CLEARED: one the app minted meanwhile survives.
+    func testA401ClearsTheStoredTokenOnlyIfItIsStillTheOneRefused() {
+        let stale = MemoryTokens(Self.live)
+        stale.clear(ifStill: "notify-jws")
+        XCTAssertNil(stale.stored)
+
+        let renewed = MemoryTokens(NotifyToken(token: "fresh-jws", expiresAt: Self.live.expiresAt))
+        renewed.clear(ifStill: "notify-jws")
+        XCTAssertEqual(renewed.stored?.token, "fresh-jws")
+
+        let unreadable = MemoryTokens(Self.live, readFails: true)
+        unreadable.clear(ifStill: "notify-jws")
+        XCTAssertEqual(unreadable.stored, Self.live, "a Keychain that cannot answer is left alone")
     }
 
     func testTheTitleTakesTheNameOrNothing() {
@@ -252,5 +309,81 @@ private final class FakeFetcher: SenderNameFetching, @unchecked Sendable {
             try await Task.sleep(for: delay)
         }
         return try answer.get()
+    }
+}
+
+/// Answers every request with one status and body, and records each.
+private final class SenderTransport: HTTPTransport, @unchecked Sendable {
+    private let lock = NSLock()
+    private let status: Int
+    private let body: String
+    private var log: [HTTPRequest] = []
+
+    init(status: Int, body: String) {
+        self.status = status
+        self.body = body
+    }
+
+    var requests: [HTTPRequest] {
+        lock.withLock { log }
+    }
+
+    func send(_ request: HTTPRequest, followRedirects _: Bool) async throws -> HTTPResponse {
+        lock.withLock { log.append(request) }
+        return HTTPResponse(statusCode: status, headers: ["Content-Type": "application/json"], body: Data(body.utf8))
+    }
+}
+
+private final class RejectedLog: @unchecked Sendable {
+    private let lock = NSLock()
+    private var log: [String] = []
+
+    var tokens: [String] {
+        lock.withLock { log }
+    }
+
+    var record: @Sendable (String) -> Void {
+        { [self] token in lock.withLock { log.append(token) } }
+    }
+}
+
+/// A notify-token store in memory, standing in for the Keychain.
+final class MemoryTokens: NotifyTokenStoring, @unchecked Sendable {
+    private let lock = NSLock()
+    private var token: NotifyToken?
+    private let readFails: Bool
+    let canStore: Bool
+    private(set) var writes = 0
+    private(set) var clears = 0
+
+    init(_ token: NotifyToken?, readFails: Bool = false, canStore: Bool = true) {
+        self.token = token
+        self.readFails = readFails
+        self.canStore = canStore
+    }
+
+    var stored: NotifyToken? {
+        lock.withLock { token }
+    }
+
+    func read() throws -> NotifyToken? {
+        if readFails {
+            throw NotifyTokenKeychainError.status(errSecInteractionNotAllowed)
+        }
+        return stored
+    }
+
+    func write(_ token: NotifyToken) throws {
+        lock.withLock {
+            writes += 1
+            self.token = token
+        }
+    }
+
+    func clear() throws {
+        lock.withLock {
+            clears += 1
+            token = nil
+        }
     }
 }

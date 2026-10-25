@@ -95,8 +95,8 @@ final class WatchLiveComposerTests: XCTestCase {
         )
     }
 
-    /// ⛔ A WHISPER AFTER THE CALL ENDED SAYS SO, and until 7.2.0 every whisper fails, plainly.
-    func testWhisperFailuresReadAsTheyHappened() async {
+    /// ⛔ A WHISPER AFTER THE CALL ENDED SAYS SO; anything else is the shared sentence.
+    func testWhisperFailuresReadAsTheyHappened() {
         XCTAssertEqual(
             WatchLiveComposer.whisperFailure(.http(status: 404, message: nil, code: "call_not_found")).sentence,
             WatchBridgeCopy.whisperCallEnded
@@ -109,9 +109,6 @@ final class WatchLiveComposerTests: XCTestCase {
             WatchLiveComposer.whisperFailure(.transport("offline")).sentence,
             FailureText.from(.transport("offline")).message
         )
-        let stub = await PendingCoreWhisper().whisper(workspaceId: "ws_1", callId: "call_1", text: "Hi")
-        guard case let .failure(error) = stub else { return XCTFail("the stub must never succeed") }
-        XCTAssertEqual(WatchLiveComposer.whisperFailure(error).sentence, WatchBridgeCopy.whisperUnavailable)
     }
 
     func testPhasesMapFromTheFeed() {

@@ -41,24 +41,16 @@ protocol WatchLiveTranscriptFeed: AnyObject {
 
 extension LiveTranscriptModel: WatchLiveTranscriptFeed {}
 
-/// Steering: `POST /api/district/calls/whisper`.
+/// Steering: `POST /api/district/calls/whisper`, a seam so a test can stand in for the server.
 ///
-/// ⛔ OWED WITH district-core-swift 7.2.0 (SwiftLint `--strict` refuses a to-do marker, so this
-/// is the marker): conform the release's `whisper` (on `CallsRepository`, or wherever it lands)
-/// and pass it to ``ContainerWatchLiveSources`` in `AppContainer.watchBridge` in place of
-/// ``PendingCoreWhisper``. 7.1.0 has no `whisper` endpoint, and the app never builds a request
-/// by hand (the core's `EndpointID` table is the one list of what it calls).
+/// ⚠️ THE CORE'S `CallsRepository.whisper` (district-core-swift 8.0.0) IS THE ONE CONFORMANCE.
+/// The app never builds a request by hand: the core's `EndpointID` table is the one list of
+/// what it calls.
 protocol WhisperSending: Sendable {
     func whisper(workspaceId: String, callId: String, text: String) async -> Result<Void, ApiError>
 }
 
-/// ⛔ UNTIL 7.2.0, EVERY WHISPER FAILS, AND SAYS SO. A stub that answered success would tell the
-/// person the assistant heard a line nobody sent.
-struct PendingCoreWhisper: WhisperSending {
-    func whisper(workspaceId _: String, callId _: String, text _: String) async -> Result<Void, ApiError> {
-        .failure(.http(status: 501, message: nil, code: WatchLiveComposer.whisperNotBuilt))
-    }
-}
+extension CallsRepository: WhisperSending {}
 
 /// The relay's reads, from the container's repositories and session.
 ///
@@ -70,7 +62,9 @@ final class ContainerWatchLiveSources: WatchLiveSourcing {
     private let whisperSender: any WhisperSending
     private let minter: CachingTelemetryMinter
 
-    init(container: AppContainer, whisper: any WhisperSending = PendingCoreWhisper()) {
+    /// - Parameter whisper: ⛔ NO DEFAULT, so nothing can build this without a real sender;
+    ///   `AppContainer.watchBridge` passes the container's own ``AppContainer/calls``.
+    init(container: AppContainer, whisper: any WhisperSending) {
         self.container = container
         whisperSender = whisper
         minter = CachingTelemetryMinter(upstream: container.api, clock: SystemLiveClock())
@@ -173,9 +167,6 @@ actor CachingTelemetryMinter: TelemetryTokenMinter {
 /// ``WatchSnapshotComposer``), so the wrist says what the phone says about the same call.
 @MainActor
 enum WatchLiveComposer {
-    /// The code ``PendingCoreWhisper`` fails with.
-    nonisolated static let whisperNotBuilt = "whisper_not_built"
-
     /// The longest whisper the server takes, in UTF-16 units (the route counts JavaScript
     /// string length).
     nonisolated static let whisperLimit = 2000
@@ -261,9 +252,6 @@ enum WatchLiveComposer {
     /// `call_not_found` and 400 `call_not_in_progress`.
     static func whisperFailure(_ error: ApiError) -> WatchActionFailure {
         if case let .http(status, _, code) = error {
-            if code == whisperNotBuilt {
-                return WatchActionFailure(sentence: WatchBridgeCopy.whisperUnavailable)
-            }
             if status == 404 || code == "call_not_in_progress" {
                 return WatchActionFailure(sentence: WatchBridgeCopy.whisperCallEnded)
             }
