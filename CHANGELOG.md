@@ -100,6 +100,26 @@ built from history before publication, so they have no tags in this repository.
 - 3.2.0: a hidden relay diagnostics screen (seven taps on Account's version line, Debug and
   TestFlight builds only) logging the watch relay's timings, with no content, for the
   device spike that confirms the relay mode.
+- 3.2.0: steer after a decline. A person's decline (and only that: not a timeout, a
+  withdrawal or a ring with nobody signed in) posts "You declined the call. Tell the
+  assistant what to say?" (category `district.declined_steer`: the two canned lines and a
+  text box), carrying the ring's own ids, so a tap opens the call. Each action goes through
+  `NotificationActionHandler` (`DeclineSteerHandler`) to `CallsRepository.whisper` once,
+  inside a background task, never retried; a failure posts "Not sent to the assistant" with
+  the instruction carried back. `DeclineSteerTests`.
+- 3.2.0: App Intents on the iPhone and the watch, "Set my availability" (on or off) and "Read
+  my latest message" (shown only, marks nothing read), with App Shortcuts phrases. The watch
+  sets availability through its switch's own write and asks the phone for the latest message
+  (`WatchAction.latestMessage`; no protocol bump, an older phone answers "update both apps").
+  Strings in `l10n/appintents.toml` and `l10n/appshortcuts.toml`, written as the
+  `AppIntents` and `AppShortcuts` tables into both apps. `IntentRunnerTests`,
+  `WatchIntentRunnerTests`.
+- 3.2.0: on the watch, Double Tap (watchOS 11 and later) presses the Live screen's first
+  canned line and the call card's Call back; the complications tell the Smart Stack when they
+  matter (`TimelineEntryRelevance`: unread messages raise the unread one, an availability
+  change raises the availability one for 30 minutes); and long looks for a message (the
+  sender and the alert's text) and an incoming call (the call's card), with the phone's
+  category actions. `ComplicationRelevanceTests`, `NotificationLongLookTests`.
 
 - Added: Apple Watch app: recent calls, inbox reply and mark read, and your availability for
   calls, with a watch-face complication. A companion app (watchOS 10 or later), embedded in
