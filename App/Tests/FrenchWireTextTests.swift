@@ -125,12 +125,13 @@ final class FrenchWireTextTests: XCTestCase {
 
     // MARK: - Dates and numbers
 
-    /// ⛔ THE CORE'S FRENCH, WHATEVER FRENCH THE DEVICE SPEAKS: « 12 sept. 2026, 10 h 30 ».
+    /// ⛔ THE CORE'S FRENCH, WHATEVER FRENCH THE DEVICE SPEAKS: « 12 sept. 2026, 10 h 30 »,
+    /// the clock joined by no-break spaces so it never wraps around its `h`.
     func testAnInstantIsWrittenByTheCoreInFrench() {
         let toronto = TimeZone(identifier: "America/Toronto")
         XCTAssertEqual(
             french { WireDate.display("2026-09-12T14:30:00Z", in: toronto) },
-            "12 sept. 2026, 10 h 30"
+            "12 sept. 2026, 10\(Self.nbsp)h\(Self.nbsp)30"
         )
         XCTAssertEqual(french { WireDate.display("soon") }, "soon")
     }

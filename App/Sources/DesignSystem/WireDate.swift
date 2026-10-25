@@ -21,11 +21,25 @@ enum WireDate {
         // website writes it, on an fr-FR or fr-BE device too, which the system's own
         // French would write differently. English keeps the system style below.
         if AppL10n.copyLocale == .frCA {
-            return L10nFormat.dateTime(date, timezone: (zone ?? .current).identifier)
+            return unbroken(L10nFormat.dateTime(date, timezone: (zone ?? .current).identifier))
         }
         guard let zone else { return date.formatted(style) }
         var zoned = style
         zoned.timeZone = zone
         return date.formatted(zoned)
+    }
+
+    /// The French clock held on one line: `15 h 04` with no-break spaces (U+00A0), so a
+    /// narrow line never ends on `15` and starts the next on `h 04`.
+    ///
+    /// ⚠️ HERE, NOT IN THE CORE'S `L10nFormat.time`: the core's string is compared with the
+    /// website's and goes into catalog placeholders, and a change there is a core release.
+    /// Only the space either side of the `h` changes; the date's spaces still wrap
+    /// (3.2.0 visual QA: the call detail at accessibility XL broke `16` from `h 13`).
+    static func unbroken(_ text: String) -> String {
+        text.replacing(/(\d) h( \d|$)/) { match in
+            let minutes = match.output.2.isEmpty ? "" : "\u{00A0}" + match.output.2.dropFirst()
+            return "\(match.output.1)\u{00A0}h\(minutes)"
+        }
     }
 }

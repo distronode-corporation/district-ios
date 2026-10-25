@@ -11,6 +11,12 @@ struct WatchDiagnosticsView: View {
     @State private var recording: Bool
     @State private var forceSocket: Bool
     @State private var count: Int
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var colors: DistrictColors {
+        .resolve(colorScheme)
+    }
 
     init(diagnostics: WatchRelayDiagnostics = .shared) {
         self.diagnostics = diagnostics
@@ -64,8 +70,19 @@ struct WatchDiagnosticsView: View {
             }
             .navigationTitle(WatchDiagnosticsCopy.title)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(WatchDiagnosticsCopy.done) { dismiss() }
+                }
+            }
             .onAppear { count = diagnostics.entries.count }
         }
+        // ⚠️ THE SHEET INHERITS THE VERSION LINE'S MUTED INK. Account presents it from a
+        // caption block styled `colors.mutedForeground`, and a sheet takes its presenter's
+        // environment, so every label here read muted and `.secondary` on the empty line
+        // dimmed it a second time (3.2.0 visual QA, dark). Reset the primary ink here, so
+        // `.secondary` is one step down from the foreground, as on every other form.
+        .foregroundStyle(colors.foreground)
     }
 
     /// The header names the build and the switch, so a log read later says what produced it.

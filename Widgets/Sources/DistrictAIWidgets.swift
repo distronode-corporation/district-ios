@@ -56,9 +56,8 @@ enum CallActivityConfiguration {
             } compactLeading: {
                 CallActivityGlyph(phase: call.phase)
             } compactTrailing: {
-                CallActivityClock(call: call)
+                CallActivityClock(call: call, compact: true)
                     .font(.caption2.monospacedDigit())
-                    .frame(maxWidth: 44)
             } minimal: {
                 CallActivityGlyph(phase: call.phase)
             }
