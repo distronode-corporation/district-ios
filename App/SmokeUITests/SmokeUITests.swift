@@ -19,9 +19,11 @@ import XCTest
 /// DIVERGENCE FROM THE ANDROID FLOW, which does tap sign out. Android signs in from
 /// scratch on every run and has no injected session to protect; iOS does.
 ///
-/// ⛔ CREDENTIALS COME FROM `launchEnvironment` AND ARE NEVER COMMITTED. With either
-/// unset every case skips with a message naming what was missing, which is a real
-/// outcome rather than a silent pass.
+/// ⛔ CREDENTIALS COME FROM `scripts/smoke-simulator.sh` AND ARE NEVER COMMITTED. The email
+/// arrives in the runner's environment; the password NEVER reaches this process at all, the
+/// script puts it on the simulator's pasteboard and this suite pastes it (see
+/// `pastePassword(into:in:)`). With either missing every case skips with a message naming
+/// what was missing, which is a real outcome rather than a silent pass.
 final class SmokeUITests: XCTestCase {
     private var app: XCUIApplication!
 
@@ -32,7 +34,9 @@ final class SmokeUITests: XCTestCase {
     /// before the test sees it. `scripts/uitest-device-imac.sh` already does this for
     /// `DISTRICT_UITEST_SESSION`; the same rule applies to these.
     private static let emailVariable = "DISTRICT_SMOKE_EMAIL"
-    private static let passwordVariable = "DISTRICT_SMOKE_PASSWORD"
+    /// ⛔ A FLAG, NOT THE PASSWORD: "1" when the script has put the password on the
+    /// simulator's pasteboard.
+    private static let pasteboardVariable = "DISTRICT_SMOKE_PASSWORD_ON_PASTEBOARD"
     private static let contactVariable = "DISTRICT_SMOKE_CONTACT"
     private static let planVariable = "DISTRICT_SMOKE_PLAN"
 
@@ -43,8 +47,8 @@ final class SmokeUITests: XCTestCase {
         Self.environment(Self.emailVariable)
     }
 
-    private var password: String {
-        Self.environment(Self.passwordVariable)
+    private var passwordOnPasteboard: Bool {
+        Self.environment(Self.pasteboardVariable) == "1"
     }
 
     private var contactName: String {
@@ -68,13 +72,13 @@ final class SmokeUITests: XCTestCase {
         continueAfterFailure = false
 
         try XCTSkipIf(
-            email.isEmpty || password.isEmpty,
-            "\(Self.emailVariable) / \(Self.passwordVariable) unset, the smoke journey needs the demo account"
+            email.isEmpty || !passwordOnPasteboard,
+            "\(Self.emailVariable) / \(Self.pasteboardVariable) unset; run scripts/smoke-simulator.sh"
         )
 
+        // ⚠️ NOTHING IN `launchEnvironment`: the app reads none of the smoke variables, and the
+        // password was once handed to it here for no reader at all.
         app = XCUIApplication()
-        app.launchEnvironment[Self.emailVariable] = email
-        app.launchEnvironment[Self.passwordVariable] = password
         app.launch()
     }
 
@@ -124,12 +128,17 @@ private extension SmokeUITests {
         button.tap()
 
         try acceptAuthenticationConsent()
-        try completeWebLogin()
+        let safari = XCUIApplication(bundleIdentifier: "com.apple.SafariViewService")
+        let consent = safari.buttons["Continue to District AI"]
+        try completeWebLogin(in: safari, consent: consent)
 
         // Back in the app over the custom scheme. The budget covers a code exchange
         // and then the overview's own network read, not just a navigation.
         let overview = element(A11yID.Overview.root)
-        XCTAssertTrue(overview.waitForExistence(timeout: 90), "the handshake never landed on the console")
+        XCTAssertTrue(
+            awaitLanding(on: overview, consent: consent, browser: safari),
+            "the handshake never landed on the console"
+        )
     }
 
     /// ⚠️ THE SYSTEM ALERT IS NOT OPTIONAL AND NOT SUPPRESSIBLE. iOS raises it on every
@@ -151,23 +160,19 @@ private extension SmokeUITests {
     /// come from the website's English copy, and a copy change there breaks this with
     /// nothing linking the two.
     ///
-    /// ⛔ AN ACCOUNT WITH TOTP ENROLLED CANNOT COMPLETE THIS. The login page adds a
-    /// one-time-code field when the login route reports `mfaRequired`, and nothing here
-    /// can produce a code. The assertion below names that case so the run fails saying
-    /// so rather than timing out on a missing consent button.
-    func completeWebLogin() throws {
-        let safari = XCUIApplication(bundleIdentifier: "com.apple.SafariViewService")
-
+    /// ⛔ THE PASSWORD IS PASTED, NEVER TYPED, and the second factor and the system's
+    /// save-password offer are handled while waiting for consent: see `pastePassword(into:in:)`
+    /// and `awaitConsent(_:in:)`.
+    func completeWebLogin(in safari: XCUIApplication, consent: XCUIElement) throws {
         let emailField = safari.textFields["Work Email"]
-        let signedIn = safari.buttons["Continue to District AI"]
         // A website session left by an earlier run skips the login form.
         let deadline = Date().addingTimeInterval(45)
-        while !emailField.exists, !signedIn.exists, Date() < deadline {
+        while !emailField.exists, !consent.exists, Date() < deadline {
             Thread.sleep(forTimeInterval: 0.5)
         }
-        if signedIn.exists {
+        if consent.exists {
             attach(name: "IOS-SMOKE-02-consent")
-            signedIn.tap()
+            consent.tap()
             return
         }
         XCTAssertTrue(emailField.exists, "the login page never rendered")
@@ -183,7 +188,7 @@ private extension SmokeUITests {
         let passwordField = safari.secureTextFields["Password"]
         XCTAssertTrue(passwordField.waitForExistence(timeout: 10), "no password field on the login page")
         passwordField.tap()
-        passwordField.typeText(password)
+        pastePassword(into: passwordField, in: safari)
 
         let doneAgain = safari.buttons["Done"]
         if doneAgain.waitForExistence(timeout: 2) {
@@ -191,16 +196,10 @@ private extension SmokeUITests {
         }
         safari.buttons["Enter platform"].tap()
 
-        XCTAssertFalse(
-            safari.staticTexts["Two-step verification"].waitForExistence(timeout: 5),
-            "the demo account has a second factor enrolled; this suite cannot produce a code"
-        )
-
         // ⛔ CONSENT IS A PRESS, NOT A REDIRECT. The server's hand-off page mints the
         // authorization code only on an explicit tap, which is the anti-drive-by guard
         // for the native sign-in. It will not be removed.
-        let consent = safari.buttons["Continue to District AI"]
-        XCTAssertTrue(consent.waitForExistence(timeout: 45), "the consent screen never appeared")
+        awaitConsent(consent, in: safari)
         attach(name: "IOS-SMOKE-02-consent")
         consent.tap()
     }
