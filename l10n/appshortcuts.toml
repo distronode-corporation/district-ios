@@ -1,0 +1,44 @@
+[meta]
+catalog = "appshortcuts"
+platform = "swift"
+apple = true
+
+[appshortcuts.change_availability]
+en = "Change my availability in ${{applicationName}}"
+fr = "Changer ma disponibilité dans ${{applicationName}}"
+ctx = "label"
+screen = "intents"
+tier = "T2"
+state = "draft"
+id = { apple = "Change my availability in ${applicationName}" }
+note = "A second phrase for the same shortcut. ⛔ Keep ${applicationName} as written."
+
+[appshortcuts.latest_message]
+en = "Read my latest message in ${{applicationName}}"
+fr = "Lire mon dernier message dans ${{applicationName}}"
+ctx = "label"
+screen = "intents"
+tier = "T2"
+state = "draft"
+id = { apple = "Read my latest message in ${applicationName}" }
+note = "A phrase Siri listens for. ⛔ Keep ${applicationName} as written."
+
+[appshortcuts.latest_message_question]
+en = "What is my latest ${{applicationName}} message"
+fr = "Quel est mon dernier message ${{applicationName}}"
+ctx = "label"
+screen = "intents"
+tier = "T2"
+state = "draft"
+id = { apple = "What is my latest ${applicationName} message" }
+note = "A second phrase for the same shortcut, as a question. ⛔ Keep ${applicationName} as written."
+
+[appshortcuts.set_availability]
+en = "Set my availability in ${{applicationName}}"
+fr = "Régler ma disponibilité dans ${{applicationName}}"
+ctx = "label"
+screen = "intents"
+tier = "T2"
+state = "draft"
+id = { apple = "Set my availability in ${applicationName}" }
+note = "A phrase Siri listens for (App Shortcuts). ⛔ ${applicationName} must stay exactly as written: iOS puts the app's name there. The key is the English phrase as the Swift source spells it."

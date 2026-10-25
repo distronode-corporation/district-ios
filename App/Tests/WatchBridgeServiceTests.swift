@@ -417,6 +417,7 @@ private struct HandlerRig {
         handler = NotificationActionHandler(
             coordinator: coordinator,
             inbox: InboxRepository(client: api),
+            whisper: CallsRepository(client: api),
             reporter: RecordingFailureReporter(),
             backgroundTasks: FakeBackgroundTasks()
         )

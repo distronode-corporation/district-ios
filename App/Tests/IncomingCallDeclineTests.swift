@@ -54,7 +54,7 @@ final class IncomingCallDeclineTests: XCTestCase {
     func testADeclineIsSentOnceInsideABackgroundTask() async {
         let tasks = FakeBackgroundTasks()
         let route = DeclineRoute(answer: .success(()))
-        let sender = IncomingCallDeclineSender(send: route.send, backgroundTasks: tasks)
+        let sender = IncomingCallDeclineSender(send: route.send, backgroundTasks: tasks, steer: RecordingSteerPoster())
 
         let sending = sender.decline(workspace: workspace, call: call)
         XCTAssertEqual(tasks.begun.count, 1, "the lease is held before the request starts")
@@ -71,7 +71,11 @@ final class IncomingCallDeclineTests: XCTestCase {
         for failure in [ApiError.transport("offline"), .http(status: 404, message: nil, code: "call_not_found")] {
             let tasks = FakeBackgroundTasks()
             let route = DeclineRoute(answer: .failure(failure))
-            let sender = IncomingCallDeclineSender(send: route.send, backgroundTasks: tasks)
+            let sender = IncomingCallDeclineSender(
+                send: route.send,
+                backgroundTasks: tasks,
+                steer: RecordingSteerPoster()
+            )
 
             let outcome = await sender.decline(workspace: workspace, call: call).value
 
@@ -86,7 +90,7 @@ final class IncomingCallDeclineTests: XCTestCase {
     func testAnExpiredLeaseEndsOnce() async {
         let tasks = FakeBackgroundTasks()
         let route = DeclineRoute(answer: .success(()))
-        let sender = IncomingCallDeclineSender(send: route.send, backgroundTasks: tasks)
+        let sender = IncomingCallDeclineSender(send: route.send, backgroundTasks: tasks, steer: RecordingSteerPoster())
 
         let sending = sender.decline(workspace: workspace, call: call)
         tasks.expireAll()

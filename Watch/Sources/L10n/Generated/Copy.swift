@@ -75,6 +75,29 @@ extension WatchCopy {
     /// `watch.inbox`
     internal static var inbox: String { WatchL10n.copyLocale == .frCA ? "Réception" : "Inbox" }
 
+    /// `watch.intent_availability_off`
+    internal static func intentAvailabilityOff(_ workspace: String) -> String {
+        WatchL10n.copyLocale == .frCA ? "Les appels de l'espace \(workspace) ne sonnent plus sur votre téléphone." : "Calls in \(workspace) no longer ring your phone."
+    }
+
+    /// `watch.intent_availability_on`
+    internal static func intentAvailabilityOn(_ workspace: String) -> String {
+        WatchL10n.copyLocale == .frCA ? "Les appels de l'espace \(workspace) sonnent maintenant sur votre téléphone." : "Calls in \(workspace) now ring your phone."
+    }
+
+    /// `watch.intent_latest_inbound`
+    internal static func intentLatestInbound(_ name: String, text: String) -> String {
+        WatchL10n.copyLocale == .frCA ? "Dernier message · \(name)\u{00A0}: \(text)" : "Latest message · \(name): \(text)"
+    }
+
+    /// `watch.intent_latest_outbound`
+    internal static func intentLatestOutbound(_ name: String, text: String) -> String {
+        WatchL10n.copyLocale == .frCA ? "Votre dernière réponse · \(name)\u{00A0}: \(text)" : "Your latest reply · \(name): \(text)"
+    }
+
+    /// `watch.intent_no_messages`
+    internal static var intentNoMessages: String { WatchL10n.copyLocale == .frCA ? "Votre boîte de réception ne contient aucun message." : "There are no messages in your inbox." }
+
     /// `watch.iphone_did_not_answer`
     internal static var iphoneDidNotAnswer: String { WatchL10n.copyLocale == .frCA ? "Votre iPhone n'a pas répondu. Réessayez." : "Your iPhone did not answer. Try again." }
 
@@ -133,6 +156,9 @@ extension WatchCopy {
     internal static func notAvailableIn(_ workspace: String) -> String {
         WatchL10n.copyLocale == .frCA ? "Non disponible · \(workspace)" : "Not available · \(workspace)"
     }
+
+    /// `watch.notification_message`
+    internal static var notificationMessage: String { WatchL10n.copyLocale == .frCA ? "Message" : "Message" }
 
     /// `watch.open_iphone`
     internal static var openIphone: String { WatchL10n.copyLocale == .frCA ? "Ouvrez District AI sur votre iPhone" : "Open District AI on your iPhone" }

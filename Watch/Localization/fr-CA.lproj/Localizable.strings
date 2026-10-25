@@ -21,6 +21,11 @@
 "watch.dictate_reply" = "Écrire une réponse";
 "watch.duration" = "Durée";
 "watch.inbox" = "Réception";
+"watch.intent_availability_off" = "Les appels de l'espace {workspace} ne sonnent plus sur votre téléphone.";
+"watch.intent_availability_on" = "Les appels de l'espace {workspace} sonnent maintenant sur votre téléphone.";
+"watch.intent_latest_inbound" = "Dernier message · {name}\U00A0: {text}";
+"watch.intent_latest_outbound" = "Votre dernière réponse · {name}\U00A0: {text}";
+"watch.intent_no_messages" = "Votre boîte de réception ne contient aucun message.";
 "watch.iphone_did_not_answer" = "Votre iPhone n'a pas répondu. Réessayez.";
 "watch.iphone_not_reachable" = "iPhone injoignable";
 "watch.iphone_not_reachable_body" = "Gardez votre iPhone à proximité et réessayez.";
@@ -40,6 +45,7 @@
 "watch.no_workspace" = "Ouvrez District AI sur votre iPhone pour choisir un espace de travail.";
 "watch.not_available" = "Non disponible";
 "watch.not_available_in" = "Non disponible · {workspace}";
+"watch.notification_message" = "Message";
 "watch.open_iphone" = "Ouvrez District AI sur votre iPhone";
 "watch.open_iphone_short" = "Ouvrir sur l'iPhone";
 "watch.outcome" = "Résultat";

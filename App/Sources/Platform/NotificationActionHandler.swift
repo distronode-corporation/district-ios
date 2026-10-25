@@ -76,14 +76,19 @@ final class NotificationActionHandler {
     private let inbox: InboxRepository
     private let reporter: any MessageActionFailureReporting
     private let backgroundTasks: any BackgroundTaskScheduling
+    /// The declined-call notification's instructions (3.2). See ``DeclineSteerHandler``.
+    private let steering: DeclineSteerHandler
 
     /// ⛔ ONE REQUEST PER TAP. A second delivery of the same action while the first is on
     /// the wire joins it and gets its answer, rather than sending again.
     private var inFlight: [String: Task<Result<Void, MessageActionFailure>, Never>] = [:]
 
+    /// - Parameter whisper: ⛔ NO DEFAULT, as for ``ContainerWatchLiveSources``: the container
+    ///   passes its own ``AppContainer/calls``.
     init(
         coordinator: TokenRefreshCoordinator,
         inbox: InboxRepository,
+        whisper: any WhisperSending,
         reporter: any MessageActionFailureReporting = NotificationFailureReporter(),
         backgroundTasks: any BackgroundTaskScheduling = UIKitBackgroundTasks()
     ) {
@@ -91,6 +96,7 @@ final class NotificationActionHandler {
         self.inbox = inbox
         self.reporter = reporter
         self.backgroundTasks = backgroundTasks
+        steering = DeclineSteerHandler(coordinator: coordinator, whisper: whisper, backgroundTasks: backgroundTasks)
     }
 
     /// Do one action on one message, in the message's own workspace.
@@ -171,7 +177,16 @@ final class NotificationActionHandler {
     /// ⛔ A FAILURE IS POSTED AS A LOCAL NOTIFICATION, because the notification that was
     /// acted on is gone and the app may never come forward. A silently dropped reply is
     /// the worst outcome on this surface.
+    ///
+    /// ⚠️ AND THE DECLINED-CALL NOTIFICATION'S THREE ACTIONS COME THROUGH HERE TOO, for the
+    /// same cold, sceneless launch; a failure is posted the same way.
     func handleNotificationResponse(_ payload: [String: String]) async {
+        if let steer = DeclineSteerAction(payload: payload) {
+            if case let .failure(failure) = await steering.perform(steer) {
+                reporter.reportSteer(failure, text: steer.text)
+            }
+            return
+        }
         guard let action = MessageAction(payload: payload) else { return }
         let outcome = await perform(action, payload: payload)
         if case let .failure(failure) = outcome {
@@ -290,6 +305,8 @@ private enum Addressee {
 @MainActor
 protocol MessageActionFailureReporting {
     func report(_ failure: MessageActionFailure, for action: MessageAction)
+    /// An instruction from the declined-call notification that did not reach the assistant.
+    func reportSteer(_ failure: MessageActionFailure, text: String)
 }
 
 /// Posts the failure as a local notification. See ``NotificationCategories``.
@@ -302,6 +319,10 @@ struct NotificationFailureReporter: MessageActionFailureReporting {
         case .markRead:
             NotificationCategories.postMarkReadFailure(reason: reason)
         }
+    }
+
+    func reportSteer(_ failure: MessageActionFailure, text: String) {
+        NotificationCategories.postSteerFailure(text: text, reason: failure.steerReason)
     }
 }
 

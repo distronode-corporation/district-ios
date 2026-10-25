@@ -80,8 +80,11 @@ enum MessageNotificationAction {
     /// the registered category needs its identifier here too (and a ``MessageAction``),
     /// or ``NotificationPresenter`` will route it to the deep-link path and open the
     /// inbox instead of acting.
+    ///
+    /// ⚠️ THE DECLINED-CALL NOTIFICATION'S THREE ACTIONS (3.2) ARE SHADE ACTIONS TOO: they act
+    /// in the background through the same handler (``DeclineSteerNotification``).
     static func isShadeAction(_ identifier: String) -> Bool {
-        identifier == reply || identifier == markRead
+        identifier == reply || identifier == markRead || DeclineSteerNotification.isAction(identifier)
     }
 }
 
@@ -128,7 +131,8 @@ enum NotificationCategories {
             // one more payload the relay would have to discard.
             intentIdentifiers: []
         )
-        center.setNotificationCategories([message])
+        // ⚠️ THE DECLINED-CALL CATEGORY (3.2) IN THE SAME CALL: this replaces the whole set.
+        center.setNotificationCategories([message, DeclineSteerNotification.registration()])
     }
 
     /// Tell the operator their reply did not send.
@@ -170,6 +174,25 @@ enum NotificationCategories {
             identifier: "district.reply-failed.\(UUID().uuidString)",
             content: content,
             // ⚠️ nil MEANS "as soon as possible", which is what a failure report wants.
+            trigger: nil
+        )
+        center.add(request, withCompletionHandler: nil)
+    }
+
+    /// Tell the operator an instruction from the declined-call notification did not reach the
+    /// assistant. ⛔ The same rules as ``postReplyFailure(text:reason:on:)``: the text comes
+    /// back, there is no category and so no button to try again from.
+    static func postSteerFailure(
+        text: String,
+        reason: String,
+        on center: UNUserNotificationCenter = .current()
+    ) {
+        let content = UNMutableNotificationContent()
+        content.title = IncomingCallCopy.steerNotSent
+        content.body = IncomingCallCopy.steerFailureBody(reason, text)
+        let request = UNNotificationRequest(
+            identifier: "district.steer-failed.\(UUID().uuidString)",
+            content: content,
             trigger: nil
         )
         center.add(request, withCompletionHandler: nil)

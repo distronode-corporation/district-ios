@@ -54,6 +54,14 @@ enum WatchAction: Codable, Equatable, Sendable {
     case whisper(workspaceId: String, callId: String, text: String)
     /// The after-call card, answered ``WatchReply/card``. Writes nothing.
     case callDetail(workspaceId: String, callId: String)
+
+    // MARK: - App Intents (3.2)
+
+    /// The newest conversation, for "Read my latest message" on the watch, answered
+    /// ``WatchReply/latestMessage``. ⛔ DISPLAY-ONLY: it reads the phone's inbox and marks
+    /// nothing read. ⚠️ No protocol bump, for the reason on ``resolveMessage(workspaceId:messageId:)``:
+    /// an older phone answers "update both apps", which the watch says.
+    case latestMessage(workspaceId: String)
 }
 
 struct WatchRequest: Codable, Equatable, Sendable {
@@ -94,6 +102,8 @@ struct WatchReply: Codable, Equatable, Sendable {
     var live: WatchLiveUpdate?
     /// ``WatchAction/callDetail(workspaceId:callId:)``'s answer.
     var card: WatchCallCard?
+    /// ``WatchAction/latestMessage(workspaceId:)``'s answer: nil with `ok` is an empty inbox.
+    var latestMessage: WatchSnapshot.Conversation?
 
     static var success: WatchReply {
         WatchReply(protocolVersion: WatchSnapshot.currentProtocolVersion, ok: true, error: nil)
@@ -122,6 +132,12 @@ struct WatchReply: Codable, Equatable, Sendable {
     static func card(_ card: WatchCallCard) -> WatchReply {
         var reply = success
         reply.card = card.fitted()
+        return reply
+    }
+
+    static func latest(_ conversation: WatchSnapshot.Conversation?) -> WatchReply {
+        var reply = success
+        reply.latestMessage = conversation
         return reply
     }
 

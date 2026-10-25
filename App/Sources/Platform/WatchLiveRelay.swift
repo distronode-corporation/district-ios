@@ -147,7 +147,7 @@ final class WatchLiveRelay: WatchLiveHandling {
                 sources.card(workspaceId: workspaceId, callId: callId, now: Date()),
                 WatchReply.card
             )
-        case .reply, .markRead, .setAvailability, .refresh, .resolveMessage:
+        case .reply, .markRead, .setAvailability, .refresh, .resolveMessage, .latestMessage:
             // ⚠️ NOT A LIVE REQUEST: `WatchBridgeService` never routes these here.
             return .failure(WatchBridgeCopy.updateBothApps)
         }
@@ -353,6 +353,7 @@ private extension WatchAction {
         case let .liveUnsubscribe(_, callId): "liveUnsubscribe call=\(WatchRelayDiagnostics.tail(callId))"
         case .whisper: "whisper"
         case .callDetail: "callDetail"
+        case .latestMessage: "latestMessage"
         }
     }
 }

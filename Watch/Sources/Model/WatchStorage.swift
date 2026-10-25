@@ -37,11 +37,16 @@ struct GroupSnapshotStore: SnapshotPersisting {
 /// ⚠️ ONLY THE KINDS THAT CHANGED: WidgetKit budgets reloads per widget, and a snapshot that
 /// moved only the call list must not spend one. See ``ComplicationState/kindsToReload(from:to:)``.
 struct WidgetComplicationPublisher: ComplicationPublishing {
+    ///
+    /// ⚠️ STAMPED HERE, against the state the widget last read, so the Smart Stack learns when
+    /// availability switched (``ComplicationState/stamped(after:at:)``).
     func publish(_ state: ComplicationState) {
         let defaults = ComplicationState.defaults
-        let kinds = ComplicationState.kindsToReload(from: ComplicationState.load(from: defaults), to: state)
+        let old = ComplicationState.load(from: defaults)
+        let next = state.stamped(after: old, at: Date())
+        let kinds = ComplicationState.kindsToReload(from: old, to: next)
         guard !kinds.isEmpty else { return }
-        state.save(to: defaults)
+        next.save(to: defaults)
         for kind in kinds {
             WidgetCenter.shared.reloadTimelines(ofKind: kind)
         }

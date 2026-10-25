@@ -26,6 +26,11 @@ monorepo's `i18n/tools/`, see `tools/l10n/SOURCE.toml`) do the writing.
   `fr-CA.lproj`, which is what makes the watch bundles declare Canadian French at all
   (`Bundle.preferredLocalizations` answers only languages a bundle ships).
 - `l10n/watch-infoplist.toml`: the watch bundles' `InfoPlist.strings` (their display name).
+- `l10n/appintents.toml` and `l10n/appshortcuts.toml` (3.2): the App Intents' titles and
+  Siri's phrases, written as the `AppIntents` and `AppShortcuts` tables into BOTH the
+  iPhone's and the watch's lproj folders (the two apps declare the same intents). ⛔ An
+  `AppShortcuts.strings` key is the phrase exactly as the Swift source spells it, with
+  `${applicationName}` (written `${{applicationName}}` in the catalog, a literal brace).
 - `l10n/notificationservice.toml` and `l10n/notificationservice-infoplist.toml`: the
   notification service extension's two tables (`NotificationService/Localization`), the
   named message title and its display name. No Swift: the extension reads its own table.
@@ -62,7 +67,12 @@ SWIFT_OPTS = [
     "--opt", "locale_expr=AppL10n.copyLocale",
 ]
 # catalog -> the .strings table it becomes
-TABLES = {"l10n/push.toml": "Localizable", "l10n/infoplist.toml": "InfoPlist"}
+TABLES = {
+    "l10n/push.toml": "Localizable",
+    "l10n/infoplist.toml": "InfoPlist",
+    "l10n/appintents.toml": "AppIntents",
+    "l10n/appshortcuts.toml": "AppShortcuts",
+}
 LPROJ = {"en.lproj": ROOT / "App/Resources/en.lproj", "fr-CA.lproj": ROOT / "App/Localization/fr-CA.lproj"}
 # The Apple Watch app (Watch/, Complications/): its own catalog, accessors and tables.
 WATCH_CATALOGS = ["l10n/watch.toml"]
@@ -76,7 +86,12 @@ WATCH_SWIFT_OPTS = [
 # ⛔ BOTH TABLES IN BOTH WATCH BUNDLES (the app and the complication share
 # Watch/Localization): scripts/archive-imac.sh refuses a release whose nested bundle lacks
 # fr-CA.lproj/Localizable.strings or fr-CA.lproj/InfoPlist.strings.
-WATCH_TABLES = {"l10n/watch.toml": "Localizable", "l10n/watch-infoplist.toml": "InfoPlist"}
+WATCH_TABLES = {
+    "l10n/watch.toml": "Localizable",
+    "l10n/watch-infoplist.toml": "InfoPlist",
+    "l10n/appintents.toml": "AppIntents",
+    "l10n/appshortcuts.toml": "AppShortcuts",
+}
 WATCH_LPROJ = {"en.lproj": ROOT / "Watch/Localization/en.lproj", "fr-CA.lproj": ROOT / "Watch/Localization/fr-CA.lproj"}
 # The notification service extension (NotificationService/): both tables, for the same archive rule.
 NSE_TABLES = {"l10n/notificationservice.toml": "Localizable", "l10n/notificationservice-infoplist.toml": "InfoPlist"}

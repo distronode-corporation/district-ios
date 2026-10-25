@@ -97,8 +97,11 @@ struct LiveCallView: View {
         let key = WriteKey.whisper(call.id)
         let sending = store.writes[key] == .sending
         return Section(WatchCopy.steerHeader) {
+            // ⚠️ DOUBLE TAP SENDS THE FIRST LINE (watchOS 11): the one a hand that is busy
+            // reaches for, and a gesture that cannot be aimed has to mean one thing.
             Button(WatchCopy.whisperCallBackToday) { send(WatchCopy.whisperCallBackToday) }
                 .disabled(sending)
+                .primaryActionShortcut()
             Button(WatchCopy.whisperAskWhatAbout) { send(WatchCopy.whisperAskWhatAbout) }
                 .disabled(sending)
             // ⚠️ DICTATION OR SCRIBBLE: the system's text input on the watch offers both.
@@ -250,6 +253,7 @@ struct CallCardView: View {
         if card?.canCallBack == true {
             Button(WatchCopy.callBack) { handingOff = true }
                 .accessibilityIdentifier("watch.card.call-back")
+                .primaryActionShortcut()
             if handingOff {
                 Text(WatchCopy.callBackHint)
                     .font(.caption2)
@@ -267,5 +271,20 @@ struct CallCardView: View {
                 .font(.footnote)
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+extension View {
+    /// Double Tap presses this control: `handGestureShortcut(.primaryAction)`.
+    ///
+    /// ⚠️ watchOS 11 AND LATER; THE FLOOR IS 10, where this draws the control unchanged. ⛔ ONE
+    /// PER SCREEN: the system picks one primary action, and two would make it a guess.
+    @ViewBuilder
+    func primaryActionShortcut() -> some View {
+        if #available(watchOS 11, *) {
+            handGestureShortcut(.primaryAction)
+        } else {
+            self
+        }
     }
 }

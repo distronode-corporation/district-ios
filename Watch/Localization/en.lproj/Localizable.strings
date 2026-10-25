@@ -21,6 +21,11 @@
 "watch.dictate_reply" = "Write a reply";
 "watch.duration" = "Duration";
 "watch.inbox" = "Inbox";
+"watch.intent_availability_off" = "Calls in {workspace} no longer ring your phone.";
+"watch.intent_availability_on" = "Calls in {workspace} now ring your phone.";
+"watch.intent_latest_inbound" = "Latest message · {name}: {text}";
+"watch.intent_latest_outbound" = "Your latest reply · {name}: {text}";
+"watch.intent_no_messages" = "There are no messages in your inbox.";
 "watch.iphone_did_not_answer" = "Your iPhone did not answer. Try again.";
 "watch.iphone_not_reachable" = "iPhone not reachable";
 "watch.iphone_not_reachable_body" = "Keep your iPhone nearby and try again.";
@@ -40,6 +45,7 @@
 "watch.no_workspace" = "Open District AI on your iPhone to choose a workspace.";
 "watch.not_available" = "Not available";
 "watch.not_available_in" = "Not available · {workspace}";
+"watch.notification_message" = "Message";
 "watch.open_iphone" = "Open District AI on your iPhone";
 "watch.open_iphone_short" = "Open on iPhone";
 "watch.outcome" = "Outcome";

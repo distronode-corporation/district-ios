@@ -32,6 +32,10 @@ struct ComplicationState: Codable, Equatable, Sendable {
     /// ⚠️ AN OPTIONAL `var`, so a state a 3.1.0 watch app wrote (no such key) still decodes
     /// and the memberwise initialiser defaults it to nil for every caller that predates it.
     var unreadCount: Int?
+    /// When the watch app saw availability switch, for the Smart Stack (``relevance(forKind:at:)``).
+    /// ⚠️ OPTIONAL, LIKE ``unreadCount``, for a state an older watch app wrote. Set only by
+    /// ``stamped(after:at:)``, never from a snapshot.
+    var availabilityChangedAt: Date?
 
     /// Nothing heard from the phone yet.
     static let unknown = ComplicationState(signedIn: false, workspaceName: nil, available: nil, language: nil)
@@ -66,8 +70,69 @@ struct ComplicationState: Codable, Equatable, Sendable {
         return kinds
     }
 
+    /// This state with ``availabilityChangedAt`` carried over from `old`, or set to `now` when
+    /// availability switched between two KNOWN values.
+    ///
+    /// ⚠️ UNKNOWN TO KNOWN IS NOT A SWITCH: a first snapshot, or one after the phone could not
+    /// read it, would otherwise push the complication up the Smart Stack for nothing. ⛔ Signed
+    /// out keeps no stamp, as it keeps nothing else of the account.
+    func stamped(after old: ComplicationState, at now: Date) -> ComplicationState {
+        var next = self
+        guard signedIn else {
+            next.availabilityChangedAt = nil
+            return next
+        }
+        if let before = old.available, let after = available, before != after {
+            next.availabilityChangedAt = now
+        } else {
+            next.availabilityChangedAt = old.availabilityChangedAt
+        }
+        return next
+    }
+
     func save(to defaults: UserDefaults?) {
         guard let data = try? JSONEncoder().encode(self) else { return }
         defaults?.set(data, forKey: Self.defaultsKey)
+    }
+}
+
+// MARK: - The Smart Stack
+
+/// How far up the Smart Stack a complication asks to be, and for how long.
+///
+/// ⚠️ PLAIN VALUES, SO THE WATCH TESTS CAN READ THEM: the widget turns this into a
+/// `TimelineEntryRelevance` (watchOS 9 and later; RelevanceKit is newer than the floor of 10).
+/// A `duration` of 0 holds until the next entry, which is WidgetKit's own meaning.
+struct ComplicationRelevance: Equatable, Sendable {
+    let score: Float
+    let duration: TimeInterval
+
+    static let none = ComplicationRelevance(score: 0, duration: 0)
+}
+
+extension ComplicationState {
+    /// How long a switched availability stays worth surfacing.
+    static let availabilityChangeWindow: TimeInterval = 30 * 60
+
+    /// The relevance of the complication of `kind` in this state.
+    ///
+    /// ⛔ HIGHER ONLY WHEN THERE IS SOMETHING TO SEE: unread messages (more of them, higher,
+    /// capped at 10), or availability that switched in the last
+    /// ``availabilityChangeWindow``. Signed out, unknown or nothing new is ``ComplicationRelevance/none``,
+    /// and the stack keeps its own order.
+    func relevance(forKind kind: String, at now: Date) -> ComplicationRelevance {
+        guard signedIn else { return .none }
+        switch kind {
+        case Self.unreadWidgetKind:
+            guard let count = unreadCount, count > 0 else { return .none }
+            return ComplicationRelevance(score: 50 + Float(min(count, 10)) * 5, duration: 0)
+        case Self.widgetKind:
+            guard available != nil, let changed = availabilityChangedAt else { return .none }
+            let elapsed = now.timeIntervalSince(changed)
+            guard elapsed >= 0, elapsed < Self.availabilityChangeWindow else { return .none }
+            return ComplicationRelevance(score: 100, duration: Self.availabilityChangeWindow - elapsed)
+        default:
+            return .none
+        }
     }
 }
