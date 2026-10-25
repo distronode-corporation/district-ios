@@ -1,15 +1,23 @@
 {
-  "signed_off_by": "iMac manager distronode-com (Opus 5.5), iOS 3.2.0: the l10n/ios.toml and l10n/watch.toml changes since v3.1.0 and all of l10n/notificationservice.toml and l10n/notificationservice-infoplist.toml reviewed by an Opus 5.5 xhigh fr-CA reviewer; its five must-fixes and all suggestions applied as Sean approved them (\"Must-fix + all suggestions (Recommended)\", call-back line \"We will call them back today.\", GitLab #2 note 4084048854), 2026-10-25",
+  "signed_off_by": "iMac manager distronode-com (Opus 5.5), iOS 3.2.0 with the watch extras and the call's Live Activity: the l10n/ios.toml, l10n/watch.toml and l10n/push.toml changes since the v3.2.0 sign-off at 4b46d87 and all of l10n/appintents.toml, l10n/appshortcuts.toml, l10n/widgets.toml and l10n/widgets-infoplist.toml reviewed by an fr-CA reviewer; its must-fixes and all suggestions applied as Sean approved them (\"Must-fix + all suggestions\", relayed by the iMac manager session 9b), 2026-10-25",
   "release": "v3.2.0",
-  "commit": "4b46d87380db189893b9671db2dce76091a0aaeb",
+  "commit": "e376cc5aed481c4b29086c0834e5d0257de4e555",
   "catalogs": [
+    {
+      "path": "l10n/appintents.toml",
+      "sha256": "f5f56aba3de69cf140355641a77baefb42b5b0aaa1ab42edcd2b1bad955c89a6"
+    },
+    {
+      "path": "l10n/appshortcuts.toml",
+      "sha256": "10e560e5b3e3044ff86a1b9fc9d19a759e12dd658f2ebe9412c8327731ee3d2f"
+    },
     {
       "path": "l10n/infoplist.toml",
       "sha256": "e023f6a34f0f81f36efd0b60a710fa8d8f774bbf4fcc5ce9fc3b0e14703a9352"
     },
     {
       "path": "l10n/ios.toml",
-      "sha256": "ea6fdfe78f9c644122d4c234f472f602b08dce2543da2e651da97aeece60711b"
+      "sha256": "279879dcb6cab9a8682500fba6b13f1f4cc4ef4a5bb2b361f5a21d3248d3b93f"
     },
     {
       "path": "l10n/notificationservice-infoplist.toml",
@@ -21,7 +29,7 @@
     },
     {
       "path": "l10n/push.toml",
-      "sha256": "a5ccae94cc1a099b2864b404b7443c9ba9d170eb0a73177aace35d634089ab04"
+      "sha256": "476d0b142c1d831fa8c06825a5c657ca6de0b27a60469aef81ff7b55effc3dd7"
     },
     {
       "path": "l10n/watch-infoplist.toml",
@@ -29,7 +37,15 @@
     },
     {
       "path": "l10n/watch.toml",
-      "sha256": "43d2e3ec74160d309979401155fd2f1d5afe517dc7e45e5108ee05f70dda5ebe"
+      "sha256": "a5c1bda84810045c3947f2d645fd2677f957a5dfe7cb23169bade40cdddffde8"
+    },
+    {
+      "path": "l10n/widgets-infoplist.toml",
+      "sha256": "754c7e5167e0d7449eba78c00275546c86ee8b36fd2e68674afc3b0841377842"
+    },
+    {
+      "path": "l10n/widgets.toml",
+      "sha256": "cca1e398f586169c79cf259f765e2e1fcbb6a799a954c8d74606eb764cd2efa7"
     }
   ]
 }
