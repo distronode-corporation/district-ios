@@ -444,6 +444,12 @@ targets:
         # that carries the capability (`com.distronode.district`, team R935BA6767).
         com.apple.developer.applesignin:
           - Default
+        # ⛔ "NEEDS YOU" (3.2): the server marks an alert `interruption-level: time-sensitive`
+        # when the call was triaged urgent or the contact is a VIP, which iOS honours only
+        # with this entitlement; without it the alert arrives as an ordinary one, silently.
+        # The App ID needs the Time Sensitive Notifications capability. ⚠️ SIGNING-CONSUMED,
+        # like the rest.
+        com.apple.developer.usernotifications.time-sensitive: true
     settings:
       base:
         # ⛔ NOT THE SAME STRING AS THE ANDROID `applicationId`. Apple refuses to
