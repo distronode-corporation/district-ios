@@ -56,17 +56,20 @@ final class WatchStore {
     private let link: any PhoneLinking
     private let persistence: any SnapshotPersisting
     private let complication: any ComplicationPublishing
+    private let backgroundRefresh: any BackgroundRefreshScheduling
     private let clock: @MainActor () -> Date
 
     init(
         link: any PhoneLinking,
         persistence: any SnapshotPersisting,
         complication: any ComplicationPublishing,
+        backgroundRefresh: any BackgroundRefreshScheduling = NoBackgroundRefresh(),
         clock: @escaping @MainActor () -> Date = { Date() }
     ) {
         self.link = link
         self.persistence = persistence
         self.complication = complication
+        self.backgroundRefresh = backgroundRefresh
         self.clock = clock
     }
 
@@ -86,6 +89,28 @@ final class WatchStore {
             onReachable: { [weak self] in self?.continuePendingRoute() }
         )
         refresh()
+    }
+
+    /// Start the background refresh chain. ⛔ CALLED BY ``WatchAppDelegate`` ONCE LAUNCH HAS
+    /// FINISHED, NEVER FROM ``start()``: scheduling before the delegate is installed (the
+    /// app's `init` runs first) is a crash. See ``refreshInBackground()``.
+    func scheduleBackgroundRefresh() {
+        backgroundRefresh.scheduleNext()
+    }
+
+    /// A background refresh the system woke the app for (``BackgroundRefreshScheduling``).
+    ///
+    /// ⛔ THE NEXT ONE IS SCHEDULED FIRST, so a task the system cuts short still leaves the
+    /// chain running. Then the EXISTING `.refresh` request, and only while the unread
+    /// complication is on a face: message pushes do not wake the phone app, so without this
+    /// the count would wait for the next time somebody opened either app, and nothing else
+    /// on the wrist needs a phone woken four times an hour. ⚠️ NO PROTOCOL BUMP: a phone of
+    /// any version answers `.refresh`. The snapshot it sends arrives as an application
+    /// context; the caller waits for it (``LivePhoneLink/waitForPendingContent()``).
+    func refreshInBackground() async {
+        backgroundRefresh.scheduleNext()
+        guard link.isReachable, await backgroundRefresh.unreadComplicationIsOnAFace() else { return }
+        _ = await link.send(WatchRequest(action: .refresh))
     }
 
     /// Ask the phone for a fresh snapshot. Fire and forget: the snapshot arrives as an
@@ -348,7 +373,8 @@ extension ComplicationState {
             signedIn: snapshot.signedIn,
             workspaceName: snapshot.workspace?.name,
             available: snapshot.availability?.available,
-            language: snapshot.language
+            language: snapshot.language,
+            unreadCount: snapshot.unreadCount
         )
     }
 }

@@ -41,7 +41,12 @@
 "watch.signed_out" = "Signed out";
 "watch.try_again" = "Try again";
 "watch.unread" = "Unread";
+"watch.unread_complication" = "Unread messages";
+"watch.unread_complication_description" = "Shows how many messages are unread, never who sent them.";
 "watch.unread_conversation" = "Unread";
+"watch.unread_messages.one" = "{count} unread message";
+"watch.unread_messages.many" = "{count} unread messages";
+"watch.unread_messages.other" = "{count} unread messages";
 "watch.update_iphone" = "Update District AI on your iPhone";
 "watch.update_iphone_body" = "Your watch and your iPhone have different versions of District AI.";
 "watch.updated" = "Updated {time}";

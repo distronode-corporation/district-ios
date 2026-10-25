@@ -200,7 +200,9 @@ STUB
   # with DistrictAIWatch.app/PlugIns/DistrictAIWatchComplications.appex, each with its
   # own Info.plist (carrying the iOS app's versions unless overridden), main executable
   # and localizations. STUB_ARCHIVE_IOS_APPEX=1 adds an extension to the iOS app's own
-  # PlugIns/, and STUB_ARCHIVE_EXTRA_APP a second top-level .app.
+  # PlugIns/, and STUB_ARCHIVE_EXTRA_APP a second top-level .app. STUB_ARCHIVE_NSE=1 adds
+  # the notification service extension (3.2) to the iOS app's PlugIns/, with the app's
+  # versions unless STUB_NSE_BUILD says otherwise and the tables STUB_NSE_LPROJ lists.
   cat >"$STUB_DIR/xcodebuild" <<'STUB'
 #!/bin/sh
 echo "xcodebuild $*" >> "$CALLS_FILE"
@@ -290,6 +292,12 @@ if [ "$PHASE" = archive ]; then
     make_nested "$app/PlugIns/DistrictAIWidgets.appex" DistrictAIWidgets \
       "$short" "${STUB_IOS_APPEX_BUILD:-$build}" ""
   fi
+  if [ -n "${STUB_ARCHIVE_NSE:-}" ]; then
+    nse="$app/PlugIns/DistrictAINotificationService.appex"
+    make_nested "$nse" DistrictAINotificationService \
+      "$short" "${STUB_NSE_BUILD:-$build}" "${STUB_NSE_SEAM:-}"
+    make_lproj "$nse" "${STUB_NSE_LPROJ:-}"
+  fi
   if [ -n "${STUB_ARCHIVE_EXTRA_APP:-}" ]; then
     mkdir -p "$archive/Products/Applications/$STUB_ARCHIVE_EXTRA_APP"
   fi
@@ -313,6 +321,27 @@ while IFS='=' read -r key value; do
 done <"$6"
 echo "stub plutil: no key $2" >&2
 exit 1
+STUB
+
+  # Answers `codesign -d --entitlements - --xml <app>` with the signed Keychain groups, as
+  # key=value lines the stub plutil reads (keychain-access-groups.0=...). By default the
+  # private group first and the shared one second, as project.yml signs them;
+  # STUB_KEYCHAIN_GROUPS (space-separated, empty for none) replaces the list, and
+  # STUB_CODESIGN_FAIL makes the read fail. Any other shape is a bug in the script.
+  cat >"$STUB_DIR/codesign" <<'STUB'
+#!/bin/sh
+echo "codesign $*" >> "$CALLS_FILE"
+if [ "$#" != 5 ] || [ "$1 $2 $3 $4" != "-d --entitlements - --xml" ]; then
+  echo "stub codesign: unhandled invocation: $*" >&2
+  exit 2
+fi
+if [ -n "${STUB_CODESIGN_FAIL:-}" ]; then echo "stub codesign: no signature" >&2; exit 1; fi
+groups="${STUB_KEYCHAIN_GROUPS-R935BA6767.com.distronode.district R935BA6767.com.distronode.district.notify}"
+index=0
+for group in $groups; do
+  echo "keychain-access-groups.$index=$group"
+  index=$((index + 1))
+done
 STUB
 
   # ⛔ RECORDS ITS ENVIRONMENT, NOT ONLY ITS ARGV, because the two facts that
@@ -340,7 +369,7 @@ if [ "$1 $2" = "releases ${STUB_SENTRYCLI_FAIL_RELEASES:-none}" ]; then
 fi
 STUB
 
-  chmod +x "$STUB_DIR"/uname "$STUB_DIR"/git "$STUB_DIR"/plutil \
+  chmod +x "$STUB_DIR"/uname "$STUB_DIR"/git "$STUB_DIR"/plutil "$STUB_DIR"/codesign \
     "$STUB_DIR"/xcodegen "$STUB_DIR"/xcodebuild "$SENTRYCLI_DIR"/sentry-cli
 
   RUN_PATH="$STUB_DIR:$REAL_BIN"
@@ -795,7 +824,7 @@ assert_zero "$RC" "13c no watch: an archive with no watch app is accepted"
 assert_contains "$OUT" "IOS-SEC-01 ok - no UI-test seam in the archived binary (1 executables checked)" \
   "13c no watch: the app's own binary is the one checked"
 assert_not_contains "$OUT" "Versions ok" "13c no watch: there is nothing nested to compare"
-assert_not_contains "$(calls)" "plutil" "13c no watch: no Info.plist is read for the guards"
+assert_not_contains "$(calls)" "Info.plist" "13c no watch: no Info.plist is read for the guards"
 assert_contains "$OUT" "French ok - no French localization in the archived app or its 0 nested bundles" \
   "13c no watch: the French guard runs as before"
 assert_contains "$(calls)" "-exportArchive" "13c no watch: it is exported"
@@ -889,6 +918,75 @@ run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/ou
   STUB_ARCHIVE_EXTRA_APP=DistrictAIWatch.app
 assert_discarded "13c an extra .app in Products/Applications" \
   "Products/Applications holds DistrictAIWatch.app besides DistrictAI.app"
+
+# ── 13d. The notification service extension (3.2) ────────────────────────────
+# ⛔ THE SAME GUARDS, OVER THE iOS APP'S OWN PlugIns/: collect_nested walks it, so the
+# extension's binary, versions and French are held like the watch app's, with no change
+# to the script beyond the Keychain check below.
+NSE_REL="DistrictAI.app/PlugIns/DistrictAINotificationService.appex"
+echo "13d. the notification service extension is held to the seam, French and version guards"
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_GIT_COUNT=777 STUB_ARCHIVE_WATCH=1 STUB_ARCHIVE_NSE=1 DISTRICT_FRENCH=YES \
+  STUB_ARCHIVE_LPROJ="en.lproj $FR_CA_TABLES" STUB_WATCH_LPROJ="en.lproj $FR_CA_TABLES" \
+  STUB_APPEX_LPROJ="en.lproj $FR_CA_TABLES" STUB_NSE_LPROJ="en.lproj $FR_CA_TABLES"
+assert_zero "$RC" "13d: the app, the watch app, its complications and the extension are accepted"
+assert_contains "$OUT" "IOS-SEC-01 ok - no UI-test seam in the archived binary (4 executables checked)" \
+  "13d: the extension's binary is searched too"
+assert_contains "$OUT" "Versions ok - 3 nested bundles carry the app's 3.0.2 (4878)" \
+  "13d: the extension carries the app's versions"
+assert_contains "$OUT" "French ok - DISTRICT_FRENCH is on, and fr-CA.lproj holds both tables in the app and its 3 nested bundles" \
+  "13d: the extension's French tables are checked"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_NSE=1 DISTRICT_FRENCH=YES \
+  STUB_ARCHIVE_LPROJ="en.lproj $FR_CA_TABLES" STUB_NSE_LPROJ="en.lproj fr-CA.lproj/Localizable.strings"
+assert_discarded "13d French gap in the extension" \
+  "DISTRICT_FRENCH is on, but the archived $NSE_REL has no fr-CA.lproj/InfoPlist.strings."
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_GIT_COUNT=777 STUB_ARCHIVE_NSE=1 STUB_NSE_BUILD=1
+assert_discarded "13d extension build number mismatch" "$NSE_REL is '3.0.2' (1);"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_ARCHIVE_NSE=1 STUB_NSE_SEAM=1
+assert_discarded "13d seam in the extension binary" \
+  "UI-test seam is present in the archived binary: $NSE_REL/DistrictAINotificationService (1 hits)."
+
+# ── 13e. The Keychain groups' order ──────────────────────────────────────────
+# ⛔ READ FROM THE SIGNATURE: the private group first, or the archive is deleted.
+echo "13e. the signed Keychain groups list the private group first, or the archive is deleted"
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out"
+assert_zero "$RC" "13e: the private group first is accepted"
+assert_contains "$(calls)" "codesign -d --entitlements - --xml $STUB_DIR/out/DistrictAI.xcarchive/Products/Applications/DistrictAI.app" \
+  "13e: the archived app's signed entitlements are read"
+assert_contains "$OUT" "Keychain ok - the archived app lists its private group R935BA6767.com.distronode.district first" \
+  "13e: it says which group it found first"
+if [ -e "$STUB_DIR/out/DistrictAI.signed-entitlements.plist" ]; then
+  fail "13e: the entitlements read is not left beside the archive"
+else
+  ok "13e: the entitlements read is not left beside the archive"
+fi
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" \
+  STUB_KEYCHAIN_GROUPS="R935BA6767.com.distronode.district.notify R935BA6767.com.distronode.district"
+assert_discarded "13e the shared group first" \
+  "signature lists 'R935BA6767.com.distronode.district.notify' first in keychain-access-groups"
+assert_not_contains "$OUT" "Keychain ok" "13e the shared group first: no success is reported"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" STUB_KEYCHAIN_GROUPS=""
+assert_discarded "13e no Keychain groups" "signature lists '' first in keychain-access-groups (empty means none)"
+
+new_case
+run_archive ASC_KEY_ID="$KEY_ID" ASC_ISSUER_ID="$ISSUER" BUILD_DIR="$STUB_DIR/out" STUB_CODESIGN_FAIL=1
+assert_discarded "13e unreadable entitlements" \
+  "codesign could not read the archived app's entitlements, so the Keychain group order cannot be checked."
 
 # ── 14. The default build directory ──────────────────────────────────────────
 # ⛔ RUN FROM A COPY OF THE SCRIPT IN A THROWAWAY TREE, because the default is
@@ -1029,7 +1127,7 @@ assert_zero "$RC" "the release run succeeds"
 RELEASE="com.distronode.district@3.1.0+4878"
 assert_contains "$OUT" "Sentry release: $RELEASE (commit feedfacefeedfacefeedfacefeedfacefeedface)" \
   "it prints the release name and the commit"
-assert_contains "$(line_for 'plutil ')" "$STUB_DIR/out/DistrictAI.xcarchive/Products/Applications/DistrictAI.app/Info.plist" \
+assert_contains "$(line_for 'plutil -extract CFBundleIdentifier ')" "$STUB_DIR/out/DistrictAI.xcarchive/Products/Applications/DistrictAI.app/Info.plist" \
   "the name is read from the archived app's Info.plist"
 assert_eq "$(line_for 'sentry-cli releases new ')" \
   "sentry-cli releases new --org $STUB_SENTRY_ORG --project district-ios $RELEASE" \

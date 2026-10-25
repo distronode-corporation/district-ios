@@ -41,7 +41,12 @@
 "watch.signed_out" = "Session fermée";
 "watch.try_again" = "Réessayer";
 "watch.unread" = "Non lus";
+"watch.unread_complication" = "Messages non lus";
+"watch.unread_complication_description" = "Indique le nombre de messages non lus, jamais leur expéditeur.";
 "watch.unread_conversation" = "Non lue";
+"watch.unread_messages.one" = "{count} message non lu";
+"watch.unread_messages.many" = "{count} messages non lus";
+"watch.unread_messages.other" = "{count} messages non lus";
 "watch.update_iphone" = "Mettez à jour District AI sur votre iPhone";
 "watch.update_iphone_body" = "Votre montre et votre iPhone n'ont pas la même version de District AI.";
 "watch.updated" = "Mis à jour {time}";

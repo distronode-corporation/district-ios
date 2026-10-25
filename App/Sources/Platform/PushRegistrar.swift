@@ -329,6 +329,11 @@ final class PushRegistrar {
         // ⛔ above: this method runs on EVERY transition into signed-out, including
         // the one the server ends, where no local sign-out sequence runs at all.
         UnreadBadge.clear()
+        // ⛔ AND THE NOTIFICATION SERVICE EXTENSION'S TOKEN, for the same reason: it names a
+        // session family that is ending, and a later account must not inherit it. A Keychain
+        // that cannot answer now leaves it to the server, which refuses it once the family
+        // is gone. See ``NotifyTokenKeychain``.
+        try? NotifyTokenKeychain().clear()
     }
 
     /// A `content-available` push woke this app. Refresh the badge, and nothing else.

@@ -158,8 +158,20 @@ final class WatchStoreTests: XCTestCase {
 
         XCTAssertEqual(
             rig.complication.published.last,
-            ComplicationState(signedIn: true, workspaceName: "Plomberie Desrosiers", available: true, language: "en")
+            ComplicationState(
+                signedIn: true, workspaceName: "Plomberie Desrosiers", available: true, language: "en", unreadCount: 2
+            )
         )
+    }
+
+    /// ⛔ NIL STAYS NIL: a phone that could not read the inbox is not "nothing unread".
+    func testAnUnknownUnreadCountReachesTheComplicationAsUnknown() {
+        let rig = Rig()
+        var snapshot = Self.snapshot()
+        snapshot.unreadCount = nil
+        rig.store.apply(.snapshot(snapshot))
+
+        XCTAssertNil(rig.complication.published.last?.unreadCount)
     }
 
     /// ⛔ ONE LINE ON THE RECTANGULAR FACE: the full "Open District AI on your iPhone" cannot

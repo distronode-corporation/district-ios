@@ -10,7 +10,7 @@
     /// `#if DEBUG`, so no archive carries it. Armed only by launch arguments:
     ///
     ///     -WatchPreview demo|signedOut|update   which state to show (nothing is sent or kept)
-    ///     -WatchPreviewScreen home|calls|call|inbox|thread|complication
+    ///     -WatchPreviewScreen home|calls|call|inbox|thread|complication|unreadComplication
     ///     -WatchPreviewLanguage en|fr-CA        the phone's language in the made-up snapshot
     ///     -WatchPreviewStale                    a snapshot 25 minutes old
     ///     -WatchPreviewWrite unreachable|failed the thread's reply state
@@ -88,11 +88,15 @@
                     }
                 case "complication":
                     complications(ComplicationState(snapshot))
+                case "unreadComplication":
+                    unreadComplications(ComplicationState(snapshot))
                 default:
                     WatchRootView(store: store)
                 }
             } else if screen == "complication" {
                 complications(ComplicationState(signedIn: false, workspaceName: nil, available: nil, language: nil))
+            } else if screen == "unreadComplication" {
+                unreadComplications(.unknown)
             } else {
                 WatchRootView(store: store)
             }
@@ -108,6 +112,20 @@
                     .frame(height: 50)
                     .padding(.horizontal, 8)
                 ComplicationView(state: state, family: .accessoryInline)
+                    .font(.footnote)
+            }
+        }
+
+        /// The unread complication's three families, likewise. ⚠️ The count is
+        /// `.privacySensitive()`: a screenshot taken with the redaction on shows placeholders.
+        @MainActor
+        private static func unreadComplications(_ state: ComplicationState) -> some View {
+            VStack(spacing: 10) {
+                UnreadComplicationView(state: state, family: .accessoryCircular)
+                    .frame(width: 50, height: 50)
+                UnreadComplicationView(state: state, family: .accessoryCorner)
+                    .frame(width: 50, height: 50)
+                UnreadComplicationView(state: state, family: .accessoryInline)
                     .font(.footnote)
             }
         }

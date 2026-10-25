@@ -29,11 +29,18 @@ enum DistrictNotificationCategory {
 /// notification. What these buy is a reply sent from the lock screen without leaving
 /// whatever the phone was doing.
 ///
-/// ⚠️ AND BOTH RUN IN THE APP PROCESS, WHICH IS WHY NO APP GROUP AND NO NOTIFICATION
-/// SERVICE EXTENSION IS INVOLVED. `didReceive(_:withCompletionHandler:)` is delivered to
-/// this process, so the Keychain is readable, the one ``AppContainer`` is reachable, and
-/// the request carries the operator's own bearer. An extension would need the token in a
-/// shared container, which is a credential in a second place for no gain.
+/// ⚠️ AND BOTH RUN IN THE APP PROCESS, NEVER IN THE NOTIFICATION SERVICE EXTENSION.
+/// `didReceive(_:withCompletionHandler:)` is delivered to this process, so the Keychain's
+/// private group is readable, the one ``AppContainer`` is reachable, and the request
+/// carries the operator's own bearer.
+///
+/// ⛔ THE EXTENSION (3.2) ONLY NAMES THE SENDER, AND HOLDS NO SESSION. Sean, 2026-10-24
+/// (GitLab #2 note 4083623386), reversed 3.1.0's "no extension: a credential in a second
+/// place" for sender names, on these terms: the second place holds a scoped, read-only
+/// notify token (it authenticates `GET messages/{id}/sender` and nothing else, and only
+/// while this device's session family lives), in a shared Keychain group the session is
+/// never written to. A reply or a mark-read is a write and needs the session, so these
+/// actions stay here. See `NotificationService` and ``NotifyTokenKeychain``.
 enum MessageNotificationAction {
     /// ⚠️ Namespaced under the category so a second category's Reply cannot collide.
     static let reply = "district.message.reply"
