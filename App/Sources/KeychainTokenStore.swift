@@ -59,8 +59,20 @@ struct KeychainTokenStore: TokenStore {
 
     let service: String
 
-    init(service: String = KeychainTokenStore.defaultService) {
+    /// ⛔ THE APP'S PRIVATE GROUP, NAMED ON EVERY QUERY (see ``KeychainAccessGroups``). Since
+    /// 3.2 the app is entitled to a second, shared group the notification service extension
+    /// reads; an item written with no group lands in whichever the entitlement lists first,
+    /// so the session never relies on that order. ⚠️ It is the group every item this store
+    /// ever wrote already sits in, so no session moves. nil on an unsigned build: no group
+    /// is named, exactly as before.
+    let accessGroup: String?
+
+    init(
+        service: String = KeychainTokenStore.defaultService,
+        accessGroup: String? = KeychainAccessGroups.privateGroup
+    ) {
         self.service = service
+        self.accessGroup = accessGroup
     }
 
     // ── TokenStore ───────────────────────────────────────────────────────────
@@ -142,9 +154,10 @@ struct KeychainTokenStore: TokenStore {
     // ── Keychain ─────────────────────────────────────────────────────────────
 
     /// The identity of one item. ⚠️ Used for reads, writes and deletes alike, so
-    /// a value that differs between them would address a different item.
-    private func query(account: String) -> [String: Any] {
-        [
+    /// a value that differs between them would address a different item. Internal, not
+    /// private, so a test can hold the access group to it.
+    func query(account: String) -> [String: Any] {
+        var identity: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
@@ -155,6 +168,11 @@ struct KeychainTokenStore: TokenStore {
             // read and presented.
             kSecAttrSynchronizable as String: false,
         ]
+        // ⛔ See ``accessGroup``: on the lookup too, so the shared group is never searched.
+        if let accessGroup {
+            identity[kSecAttrAccessGroup as String] = accessGroup
+        }
+        return identity
     }
 
     private func load(account: String) throws -> Data? {

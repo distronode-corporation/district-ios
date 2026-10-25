@@ -155,6 +155,9 @@ targets:
       # so the snapshot and the requests have one definition on both ends. Nothing in it
       # imports DistrictCore; see `App/WatchBridge/WatchSnapshot.swift`.
       - path: App/WatchBridge
+      # The notify-token Keychain store, shared as source with the notification service
+      # extension (`DistrictAINotificationService`): the app clears it at sign-out.
+      - path: App/NotifyShared
       # ⛔ RESOURCES GO UNDER `sources:`, BECAUSE XCODEGEN HAS NO `resources:` KEY
       # AT ALL. It parses every path listed here and assigns each file to the
       # build phase its type implies — `.swift` to Sources, `.xcassets` to
@@ -220,6 +223,8 @@ targets:
       # simulator build for iOS included: Xcode builds the embedded app for the matching
       # watchOS SDK. GitHub's macos-26 image ships the watchOS 26.2 runtime with Xcode 26.3.
       - target: DistrictAIWatch
+      # The notification service extension (3.2), embedded in PlugIns/. See its target.
+      - target: DistrictAINotificationService
     # ⚠️ GENERATED, NOT AUTHORED. xcodegen writes App/Info.plist from the
     # properties below on every `generate`, filling in CFBundleIdentifier,
     # CFBundleName and friends itself. The written file is build output: it is not
@@ -369,6 +374,10 @@ targets:
         # from a TestFlight build's in the Sentry UI. A literal here would go
         # stale the first time a configuration is added.
         DistrictSentryEnvironment: "$(CONFIGURATION)"
+        # ⚠️ THE TEAM PREFIX OF THE KEYCHAIN GROUPS, resolved at build time ("R935BA6767."
+        # when signed), so `KeychainAccessGroups` can name a group explicitly. Empty on an
+        # unsigned build, where it names none and the Keychain behaves as before.
+        DistrictAppIdentifierPrefix: "$(AppIdentifierPrefix)"
     # ⛔ GENERATED FROM `properties`, EXACTLY LIKE `info` ABOVE, AND THE COMMITTED
     # FILE IS THE OUTPUT RATHER THAN THE INPUT. XcodeGen's Plist type writes the
     # file at `path` and sets `CODE_SIGN_ENTITLEMENTS` to it, so `xcodegen
@@ -450,6 +459,18 @@ targets:
         # The App ID needs the Time Sensitive Notifications capability. ⚠️ SIGNING-CONSUMED,
         # like the rest.
         com.apple.developer.usernotifications.time-sensitive: true
+        # ⛔ THE PRIVATE GROUP FIRST, AND THE ORDER IS THE RULE. A Keychain item written with
+        # no explicit group lands in the FIRST group listed, so the session's refresh token
+        # must never be one write away from the shared group. `KeychainTokenStore` also
+        # names the private group on every query; `scripts/archive-imac.sh` refuses an
+        # archive whose signature lists anything else first. The private group is the
+        # string the app's items have always lived in (its application identifier), so no
+        # item moves. The shared `.notify` group holds ONE item, the read-only notify token
+        # the notification service extension reads (`App/NotifyShared/`); the extension is
+        # entitled to that group alone. Keychain sharing needs no portal capability.
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.distronode.district
+          - $(AppIdentifierPrefix)com.distronode.district.notify
     settings:
       base:
         # ⛔ NOT THE SAME STRING AS THE ANDROID `applicationId`. Apple refuses to
@@ -631,6 +652,60 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.watchkitapp.complications
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: "NO"
+
+  # ⛔ THE NOTIFICATION SERVICE EXTENSION (3.2): A MESSAGE ALERT GETS ITS SENDER'S NAME.
+  # Sean, 2026-10-24 (GitLab #2 note 4083623386), reversing 3.1.0's "no NSE, a credential in
+  # a second place". The second place holds a SCOPED, READ-ONLY token, not the session: the
+  # server's notify-read token authenticates `GET messages/{id}/sender` and nothing else,
+  # and only while this device's session family is alive. It sits in the shared Keychain
+  # group, the only group this extension is entitled to; the session stays in the app's
+  # private group. The extension never refreshes anything, spends at most five seconds, and
+  # on any failure (before the first unlock included) shows the alert exactly as sent.
+  # ⚠️ NO DistrictCore YET: the request arrives with district-core-swift 7.2.0 (until then
+  # `PendingSenderNameFetcher` in `App/NotifyShared/` names nobody). ⚠️ NO SIGNING HERE, as
+  # everywhere: the App ID `com.distronode.district.notificationservice` must exist on the team.
+  # ⛔ ITS VERSIONS ARE THE PROJECT-LEVEL PAIR: the archive refuses a nested bundle whose
+  # versions differ from the app's.
+  DistrictAINotificationService:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: NotificationService/Sources
+      # The notify-token Keychain store, compiled into the app too (the app clears it).
+      - path: App/NotifyShared
+      # en.lproj and fr-CA.lproj, generated by scripts/gen-l10n.py: the archive refuses a
+      # nested bundle without both tables while French is on.
+      - path: NotificationService/Localization
+        buildPhase: resources
+      # ⛔ AT THE BUNDLE ROOT, BY FILE, WITH THE PHASE STATED: see the iOS app's manifest.
+      - path: NotificationService/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    # ⚠️ GENERATED, LIKE App/Info.plist, AND GITIGNORED FOR THE SAME REASON.
+    info:
+      path: NotificationService/Info.plist
+      properties:
+        CFBundleDisplayName: District AI
+        CFBundleDevelopmentRegion: en
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        DistrictAppIdentifierPrefix: "$(AppIdentifierPrefix)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).NotificationService"
+    # ⚠️ GENERATED FROM `properties`, like the iOS app's; edit the entitlement here.
+    entitlements:
+      path: NotificationService/DistrictAINotificationService.entitlements
+      properties:
+        # ⛔ THE SHARED GROUP ONLY, NEVER THE APP'S PRIVATE ONE: this process must not be
+        # able to read the session.
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.distronode.district.notify
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.notificationservice
+        TARGETED_DEVICE_FAMILY: "1,2"
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: "NO"
 

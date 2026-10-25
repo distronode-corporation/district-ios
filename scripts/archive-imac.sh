@@ -55,7 +55,7 @@
 # script reads no secret store and has no default for any of them.
 #
 # Proven by scripts/archive-imac.test.sh, which drives it against stub uname,
-# git, xcodegen, xcodebuild, plutil and sentry-cli. There is no other way to test it:
+# git, xcodegen, xcodebuild, plutil, codesign and sentry-cli. There is no other way to test it:
 # the real thing takes a Mac, an Apple account and ten minutes.
 set -euo pipefail
 
@@ -401,6 +401,27 @@ if [ "$FRENCH_ON" = "1" ]; then
 else
   echo "French ok - no French localization in the archived app or its $NESTED_COUNT nested bundles"
 fi
+
+# ── The Keychain groups' order ───────────────────────────────────────────────
+# ⛔ THE APP'S PRIVATE GROUP MUST BE THE FIRST keychain-access-groups ENTRY IN THE
+# SIGNATURE, OR THE ARCHIVE IS DISCARDED. Since 3.2 the app is entitled to a second,
+# shared group that the notification service extension reads, and a Keychain item
+# written without a group lands in the FIRST one listed: with the shared group first,
+# one unnamed write would put the session where a second process can read it.
+# KeychainTokenStore names its group on every query, and project.yml lists the private
+# group first; this reads what was actually SIGNED, from the archived app, since the
+# entitlements file is only the input (Xcode substitutes $(AppIdentifierPrefix) at
+# signing). `codesign -d --entitlements - --xml` prints the signed entitlements as a
+# property list; a signature with no readable list is refused, not passed.
+PRIVATE_KEYCHAIN_GROUP="$TEAM_ID.com.distronode.district"
+ENTITLEMENTS_FILE="$BUILD_DIR/DistrictAI.signed-entitlements.plist"
+codesign -d --entitlements - --xml "$APP_DIR" >"$ENTITLEMENTS_FILE" 2>/dev/null ||
+  discard_archive "codesign could not read the archived app's entitlements, so the Keychain group order cannot be checked."
+FIRST_KEYCHAIN_GROUP="$(plutil -extract keychain-access-groups.0 raw -o - "$ENTITLEMENTS_FILE" 2>/dev/null || true)"
+rm -f "$ENTITLEMENTS_FILE"
+[ "$FIRST_KEYCHAIN_GROUP" = "$PRIVATE_KEYCHAIN_GROUP" ] ||
+  discard_archive "the archived app's signature lists '$FIRST_KEYCHAIN_GROUP' first in keychain-access-groups (empty means none); its private group $PRIVATE_KEYCHAIN_GROUP must come first, or a session written without a group would land in the group the notification service extension reads."
+echo "Keychain ok - the archived app lists its private group $PRIVATE_KEYCHAIN_GROUP first"
 
 # ── Debug symbols to Sentry ──────────────────────────────────────────────────
 # ⛔ AFTER THE ARCHIVE AND BEFORE THE EXPORT, so a scratch build (UPLOAD=0)
