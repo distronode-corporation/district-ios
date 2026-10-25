@@ -195,6 +195,9 @@ final class PushRegistrar {
         // registered and the phone would never ring.
         sessionIsLive = true
         registerVoipTokenIfPossible()
+        // ⚠️ BEFORE THE GUARD TOO: a mint is decided by the stored token's age, not by this
+        // session's first appearance, and the check is local. See ``NotifyTokenRenewal``.
+        container.notifyTokenRenewal.renewIfNeeded()
         guard !hasAskedThisSession else { return }
         hasAskedThisSession = true
         Task { await requestAuthorizationThenRegister() }
@@ -329,6 +332,12 @@ final class PushRegistrar {
         // ⛔ above: this method runs on EVERY transition into signed-out, including
         // the one the server ends, where no local sign-out sequence runs at all.
         UnreadBadge.clear()
+        // ⛔ AND THE NOTIFICATION SERVICE EXTENSION'S TOKEN, for the same reason: it names a
+        // session family that is ending, and a later account must not inherit it. A Keychain
+        // that cannot answer now leaves it to the server, which refuses it once the family
+        // is gone. ``NotifyTokenRenewal/forget()`` also stops a mint still on the wire from
+        // writing one back.
+        container.notifyTokenRenewal.forget()
     }
 
     /// A `content-available` push woke this app. Refresh the badge, and nothing else.

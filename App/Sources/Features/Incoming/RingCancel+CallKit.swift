@@ -67,11 +67,14 @@ extension RingCancelReason {
     /// ⚠️ `.answeredElsewhere` IS WHAT KEEPS AN ANSWERED CALL OUT OF THE MISSED LIST:
     /// somebody did take it. `.unanswered` is a missed call, which is the truth for a ring
     /// nobody reached. `.remoteEnded` is a caller who hung up first, the same answer
-    /// ``IncomingCallCopy/endedReason(for:)`` gives `callerCancelled`.
+    /// ``IncomingCallCopy/endedReason(for:)`` gives `callerCancelled`. `.declinedElsewhere` is
+    /// a ring the server ended because every member it rang declined (3.2): this device was
+    /// rung, so its own person declined too, on another device, and it is not a missed call.
     var endedReason: CXCallEndedReason {
         switch self {
         case .answered: .answeredElsewhere
         case .callEnded: .remoteEnded
+        case .declined: .declinedElsewhere
         case .timeout, .withdrawn: .unanswered
         }
     }

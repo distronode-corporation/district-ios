@@ -31,6 +31,10 @@ enum WatchDestination: Hashable {
     case calls
     case inbox
     case thread(WatchSnapshot.Conversation)
+    /// A call in progress, its transcript and its steering.
+    case live(WatchLiveCall)
+    /// One call's card: Recent calls, a watched call that ended, or a tapped call notification.
+    case callCard(workspaceId: String, callId: String)
 }
 
 /// The watch app's one model: the phone's latest snapshot and the writes in flight.
@@ -53,21 +57,31 @@ final class WatchStore {
     private var pendingRoute: PendingRoute?
     private var resolving: Task<Void, Never>?
 
+    /// The live transcript, its steering and the after-call cards. ⛔ Memory only.
+    let live: WatchLiveStore
+
     private let link: any PhoneLinking
     private let persistence: any SnapshotPersisting
     private let complication: any ComplicationPublishing
+    private let backgroundRefresh: any BackgroundRefreshScheduling
     private let clock: @MainActor () -> Date
 
     init(
         link: any PhoneLinking,
         persistence: any SnapshotPersisting,
         complication: any ComplicationPublishing,
-        clock: @escaping @MainActor () -> Date = { Date() }
+        backgroundRefresh: any BackgroundRefreshScheduling = NoBackgroundRefresh(),
+        clock: @escaping @MainActor () -> Date = { Date() },
+        live: WatchLiveStore? = nil
     ) {
         self.link = link
         self.persistence = persistence
         self.complication = complication
+        self.backgroundRefresh = backgroundRefresh
         self.clock = clock
+        self.live = live ?? WatchLiveStore(link: link, now: clock)
+        // ⚠️ A WATCHED CALL THAT ENDS BECOMES ITS CARD, in place: back still leads Home.
+        self.live.onCallEnded = { [weak self] call in self?.showCard(for: call) }
     }
 
     /// The snapshot on screen, when signed in.
@@ -86,6 +100,28 @@ final class WatchStore {
             onReachable: { [weak self] in self?.continuePendingRoute() }
         )
         refresh()
+    }
+
+    /// Start the background refresh chain. ⛔ CALLED BY ``WatchAppDelegate`` ONCE LAUNCH HAS
+    /// FINISHED, NEVER FROM ``start()``: scheduling before the delegate is installed (the
+    /// app's `init` runs first) is a crash. See ``refreshInBackground()``.
+    func scheduleBackgroundRefresh() {
+        backgroundRefresh.scheduleNext()
+    }
+
+    /// A background refresh the system woke the app for (``BackgroundRefreshScheduling``).
+    ///
+    /// ⛔ THE NEXT ONE IS SCHEDULED FIRST, so a task the system cuts short still leaves the
+    /// chain running. Then the EXISTING `.refresh` request, and only while the unread
+    /// complication is on a face: message pushes do not wake the phone app, so without this
+    /// the count would wait for the next time somebody opened either app, and nothing else
+    /// on the wrist needs a phone woken four times an hour. ⚠️ NO PROTOCOL BUMP: a phone of
+    /// any version answers `.refresh`. The snapshot it sends arrives as an application
+    /// context; the caller waits for it (``LivePhoneLink/waitForPendingContent()``).
+    func refreshInBackground() async {
+        backgroundRefresh.scheduleNext()
+        guard link.isReachable, await backgroundRefresh.unreadComplicationIsOnAFace() else { return }
+        _ = await link.send(WatchRequest(action: .refresh))
     }
 
     /// Ask the phone for a fresh snapshot. Fire and forget: the snapshot arrives as an
@@ -111,6 +147,7 @@ final class WatchStore {
             complication.publish(.unknown)
             path = []
             pendingRoute = nil
+            live.reset()
         case let .snapshot(snapshot):
             WatchL10n.phoneLanguage = snapshot.language
             phase = snapshot.signedIn ? .ready(snapshot) : .signedOut
@@ -126,6 +163,7 @@ final class WatchStore {
                 writes = [:]
                 path = []
                 pendingRoute = nil
+                live.reset()
             }
         }
     }
@@ -171,6 +209,10 @@ final class WatchStore {
     ///
     /// ⚠️ NOTHING SIGNED IN, NOTHING MOVES: the root is saying why there is nothing to open.
     func open(_ route: WatchNotificationRoute) async {
+        if case let .call(workspaceId, callId) = route {
+            openCall(workspaceId: workspaceId, callId: callId)
+            return
+        }
         guard case let .message(workspaceId, messageId) = route, let snapshot else { return }
         guard snapshot.workspace?.id == workspaceId else {
             pendingRoute = nil
@@ -248,7 +290,49 @@ final class WatchStore {
         pendingRoute = nil
     }
 
+    // MARK: - Calls
+
+    /// A tapped call notification: its card, over Recent calls.
+    ///
+    /// ⛔ ANOTHER WORKSPACE OPENS HOME, as for a message: the card names a call this snapshot's
+    /// workspace does not hold. ⚠️ Nothing signed in, nothing moves.
+    private func openCall(workspaceId: String, callId: String) {
+        guard let snapshot else { return }
+        pendingRoute = nil
+        guard snapshot.workspace?.id == workspaceId else {
+            path = []
+            return
+        }
+        path = [.calls, .callCard(workspaceId: workspaceId, callId: callId)]
+    }
+
+    /// The watched call ended: its transcript screen becomes its card.
+    private func showCard(for call: WatchLiveCall) {
+        let card = WatchDestination.callCard(workspaceId: call.workspaceId, callId: call.id)
+        if let index = path.lastIndex(of: .live(call)) {
+            path[index] = card
+        }
+    }
+
     // MARK: - Writes
+
+    /// One line for the assistant on a call in progress.
+    ///
+    /// ⛔ NOTHING FOR A VIEWER, AND NOTHING EMPTY OR LONGER THAN THE SERVER TAKES: the screen
+    /// draws no buttons then, and this refuses what it would have refused.
+    func whisper(_ text: String, on call: WatchLiveCall) async {
+        let line = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard call.canWhisper, !line.isEmpty, line.utf16.count <= Self.whisperLimit else { return }
+        await perform(
+            .whisper(workspaceId: call.workspaceId, callId: call.id, text: line),
+            key: WriteKey.whisper(call.id),
+            succeeded: WatchCopy.whisperSent,
+            failureTitle: WatchCopy.whisperNotSent
+        )
+    }
+
+    /// The longest whisper, in UTF-16 units, as the server counts.
+    static let whisperLimit = 2000
 
     func setAvailable(_ available: Bool) async {
         guard let availability = snapshot?.availability, availability.canToggle else { return }
@@ -340,6 +424,10 @@ enum WriteKey {
     static func markRead(_ threadKey: String) -> String {
         "mark-read:\(threadKey)"
     }
+
+    static func whisper(_ callId: String) -> String {
+        "whisper:\(callId)"
+    }
 }
 
 extension ComplicationState {
@@ -348,7 +436,8 @@ extension ComplicationState {
             signedIn: snapshot.signedIn,
             workspaceName: snapshot.workspace?.name,
             available: snapshot.availability?.available,
-            language: snapshot.language
+            language: snapshot.language,
+            unreadCount: snapshot.unreadCount
         )
     }
 }

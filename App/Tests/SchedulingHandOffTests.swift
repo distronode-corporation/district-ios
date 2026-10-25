@@ -142,8 +142,13 @@ final class SchedulingHandOffTests: XCTestCase {
         var routesCallback = false
         for file in try SourceScan.swiftFiles(under: root) {
             let code = try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
-            if code.contains(".mint(") || code.contains("mint(workspaceId") {
-                minters.append(SourceScan.relativePath(file))
+            let path = SourceScan.relativePath(file)
+            // ⚠️ THE ONE OTHER `mint()` IS NOT A HAND-OFF: the notify-read token for the
+            // notification service extension (`NotifyTokenRepository.mint()`, 3.2). Named by
+            // file, so a hand-off mint added anywhere else still fails here.
+            let notifyToken = path == "Platform/NotifyTokenRenewal.swift"
+            if !notifyToken, code.contains(".mint(") || code.contains("mint(workspaceId") {
+                minters.append(path)
             }
             let takesCallback = code.contains("SchedulingHandoffCallback.isCallback(url)")
             let handsItToFlow = code.contains("schedulingHandoffFlow.receive(url)")

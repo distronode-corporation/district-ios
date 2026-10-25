@@ -5,6 +5,9 @@ struct CallsView: View {
     let store: WatchStore
     /// nil when the phone could not read the call log, which is not an empty one.
     let calls: [WatchSnapshot.Call]?
+    /// The snapshot's workspace: a row opens the call's card in it. nil opens the snapshot's
+    /// own fields only.
+    var workspaceId: String?
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
@@ -15,16 +18,18 @@ struct CallsView: View {
                             .foregroundStyle(.secondary)
                     }
                     ForEach(calls) { call in
-                        NavigationLink {
-                            CallDetailView(store: store, call: call)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(call.caller)
-                                    .lineLimit(1)
-                                Text("\(call.outcome) · \(store.relativeTime(of: call, at: context.date))")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
+                        if let workspaceId {
+                            NavigationLink(value: WatchDestination.callCard(
+                                workspaceId: workspaceId,
+                                callId: call.id
+                            )) {
+                                row(call, at: context.date)
+                            }
+                        } else {
+                            NavigationLink {
+                                CallDetailView(store: store, call: call)
+                            } label: {
+                                row(call, at: context.date)
                             }
                         }
                     }
@@ -36,9 +41,20 @@ struct CallsView: View {
         }
         .navigationTitle(WatchCopy.calls)
     }
+
+    private func row(_ call: WatchSnapshot.Call, at date: Date) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(call.caller)
+                .lineLimit(1)
+            Text("\(call.outcome) · \(store.relativeTime(of: call, at: date))")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+        }
+    }
 }
 
-/// One call: who, when, and how it went.
+/// One call: who, when, and how it went, from the snapshot alone.
 struct CallDetailView: View {
     let store: WatchStore
     let call: WatchSnapshot.Call

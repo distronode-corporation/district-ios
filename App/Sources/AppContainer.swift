@@ -332,6 +332,11 @@ final class AppContainer {
     /// `function_body_length`'s 60; it is first read in `DistrictApp.init`.
     lazy var notificationActions = NotificationActionHandler(coordinator: coordinator, inbox: inbox)
 
+    /// The notification service extension's token: minted after sign-in and at launch, cleared
+    /// at sign-out. ⚠️ FROM THE ONE ``api``, whose bearer is the session; `lazy` for the line
+    /// budget, like ``notificationActions``.
+    lazy var notifyTokenRenewal = NotifyTokenRenewal(repository: NotifyTokenRepository(client: api))
+
     /// The Apple Watch companion's iPhone half: the snapshot it shows, and its writes.
     ///
     /// ⚠️ BUILT FROM THIS CONTAINER'S ``notificationActions``, ``callHandling`` AND
@@ -340,8 +345,13 @@ final class AppContainer {
     lazy var watchBridge = WatchBridgeService(
         link: LiveWatchSessionLink(),
         source: ContainerWatchSnapshotSource(container: self),
-        actions: ContainerWatchActions(notificationActions: notificationActions, callHandling: callHandling)
+        actions: ContainerWatchActions(notificationActions: notificationActions, callHandling: callHandling),
+        live: WatchLiveRelay(sources: ContainerWatchLiveSources(container: self, whisper: calls))
     )
+
+    /// A number for the dialler to show, handed over by a Handoff from the watch's call card
+    /// (``CallBackHandoff``). ⚠️ Shown, never dialled: the person presses Call.
+    let dialerPrefill = DialerPrefill()
 
     private let store: any TokenStore
 

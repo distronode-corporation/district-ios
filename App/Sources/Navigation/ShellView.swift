@@ -263,6 +263,8 @@ struct ShellView: View {
             // switch; sending it on to Safari would cost another and leave the person
             // two apps away from where they started, for a page they can close with one
             // tap from here.
+            // "Call back" from the watch's call card. See ``continueCallBack(_:)``.
+            .onContinueUserActivity(CallBackHandoff.activityType) { continueCallBack($0) }
             .sheet(item: $browserHandOff) { handOff in
                 SafariView(url: handOff.url)
             }

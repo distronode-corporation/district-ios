@@ -5,27 +5,39 @@ import UserNotifications
 ///
 /// ⛔ THE SERVER'S PAYLOAD, READ BY THE PHONE'S RULES, NOT A SHAPE OF ITS OWN. The watch
 /// links no DistrictCore, so this is a copy of `PushPayload.parse` (DistrictModel) for the
-/// one case the watch acts on: the same four key names, verbatim, the type matched
-/// exactly, values trimmed and a blank treated as absent. A message push carries
+/// two cases the watch acts on: the same key names, verbatim, the type matched exactly,
+/// values trimmed and a blank treated as absent. A message push carries
 /// `workspaceId` and `messageId` and, by decision, NO thread key (see `PushEvent.message`):
 /// the phone turns the message into its thread (``WatchAction/resolveMessage(workspaceId:messageId:)``).
 ///
-/// ⚠️ ANYTHING ELSE IS NIL AND MOVES NOTHING. An `incoming_call` is CallKit's on the phone,
-/// and a type this build does not know is the server being ahead of it.
+/// ⚠️ A TAPPED `incoming_call` ALERT OPENS THE CALL'S CARD (round 2). The ring itself is
+/// CallKit's on the phone, and the watch mirrors that; what is left on the wrist afterwards
+/// is the alert, and a tap on it means "what happened on that call", which the card answers
+/// (``WatchAction/callDetail(workspaceId:callId:)``). Its keys are `PushEvent.incomingCall`'s.
+///
+/// ⚠️ ANYTHING ELSE IS NIL AND MOVES NOTHING: a type this build does not know is the server
+/// being ahead of it.
 enum WatchNotificationRoute: Equatable, Sendable {
     case message(workspaceId: String, messageId: String)
+    case call(workspaceId: String, callId: String)
 
     static let keyType = "type"
     static let keyWorkspaceId = "workspaceId"
     static let keyMessageId = "messageId"
+    static let keyCallId = "callId"
     static let typeMessage = "message"
+    static let typeIncomingCall = "incoming_call"
 
     static func parse(_ payload: [String: String]) -> WatchNotificationRoute? {
-        guard let workspaceId = value(payload, keyWorkspaceId),
-              value(payload, keyType) == typeMessage,
-              let messageId = value(payload, keyMessageId)
-        else { return nil }
-        return .message(workspaceId: workspaceId, messageId: messageId)
+        guard let workspaceId = value(payload, keyWorkspaceId) else { return nil }
+        switch value(payload, keyType) {
+        case typeMessage:
+            return value(payload, keyMessageId).map { .message(workspaceId: workspaceId, messageId: $0) }
+        case typeIncomingCall:
+            return value(payload, keyCallId).map { .call(workspaceId: workspaceId, callId: $0) }
+        default:
+            return nil
+        }
     }
 
     /// ⛔ TOP-LEVEL `String` → `String` PAIRS ONLY, as the phone's `NotificationPresenter`

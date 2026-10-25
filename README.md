@@ -26,6 +26,10 @@ use them with, so we are asking before we build anything:
 [tell us what you would connect them to](https://github.com/distronode-corporation/.github/discussions/1).
 
 SwiftUI, Swift 6 language mode, iOS 17 and later, on iPhone and iPad (one universal app).
+It embeds an Apple Watch companion (watchOS 10 or later: recent calls, the inbox, your
+availability, a call's live transcript with instructions to the agent, and a card after
+the call) and a notification service extension that puts the sender's name on a message
+alert. Neither holds the session; see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 Languages: English and Canadian French (fr-CA). The app follows the device's language; any
 French reads Canadian French.
@@ -119,6 +123,12 @@ App/                    The SwiftUI app
   SmokeUITests/         An end-to-end smoke suite; needs a demo account from the
                         environment and skips without one
   Shared/               Accessibility identifiers shared by the app and its UI tests
+  WatchBridge/          The WatchConnectivity messages, compiled into the iOS and watch apps
+  NotifyShared/         The notify token and sender lookup, shared with the extension
+Watch/                  The Apple Watch app (live transcript, call cards, inbox), and
+                        DistrictAIWatchTests
+Complications/          The watch-face complications (availability, opt-in unread count)
+NotificationService/    The notification service extension: a message alert's sender name
 ci/                     The simulator picker CI runs, and a Dockerfile for the
                         Linux lint toolchain
 scripts/                The release scripts and local test helpers
@@ -160,8 +170,8 @@ every pull request, and uses no secrets:
   ship, compared after the snapshot above has landed.
 
 A bundle that discovers nothing reports success, so CI counts what ran. **app** fails if
-`DistrictAITests` runs fewer than 460 or the signed-out UI tests fewer than 7. The first
-is a ratchet a little below the current count (about 472), so losing a handful of files fails,
+`DistrictAITests` runs fewer than 820 or the signed-out UI tests fewer than 7. The first
+is a ratchet a little below the current count (833 on 2026-10-25), so losing a handful of files fails,
 while deleting one or two tests deliberately does not; the UI count is the exact sum of
 the classes CI names. DistrictCore's own test floor and coverage gate run in its
 repository.

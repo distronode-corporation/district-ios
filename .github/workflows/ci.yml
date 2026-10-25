@@ -391,6 +391,34 @@ jobs:
           test "$companion" = "com.distronode.district" || { echo "::error::WKCompanionAppBundleIdentifier is '$companion'"; exit 1; }
           echo "DistrictAIWatch.app and its complication are embedded, with manifests, both tables per .lproj and no root table"
 
+      # ⛔ THE NOTIFICATION SERVICE EXTENSION (3.2) SHIPS IN THE iOS APP'S PlugIns/, AND ONLY
+      # THE BUNDLE SAYS SO. Same proof as the watch app's: embedded, its privacy manifest at
+      # the root, both tables in en.lproj and fr-CA.lproj, no root table, no other French, and
+      # the extension point iOS calls for a message alert. Its Keychain group (the shared one
+      # only) is a signing property, checked on the archive by scripts/archive-imac.sh.
+      - name: The embedded notification service extension
+        run: |
+          set -euo pipefail
+          NSE=DerivedData/Build/Products/Debug-iphonesimulator/DistrictAI.app/PlugIns/DistrictAINotificationService.appex
+          test -d "$NSE" || { echo "::error::$NSE is not in the iOS app"; exit 1; }
+          test -f "$NSE/PrivacyInfo.xcprivacy" || { echo "::error::no PrivacyInfo.xcprivacy at the root of $NSE"; exit 1; }
+          for table in Localizable InfoPlist; do
+            test -f "$NSE/en.lproj/$table.strings" || { echo "::error::no en.lproj/$table.strings in $NSE"; exit 1; }
+            test -f "$NSE/fr-CA.lproj/$table.strings" || { echo "::error::no fr-CA.lproj/$table.strings in $NSE"; exit 1; }
+            if [ -e "$NSE/$table.strings" ]; then
+              echo "::error::$table.strings at the root of $NSE shadows every .lproj"
+              exit 1
+            fi
+          done
+          for lproj in "$NSE"/fr*.lproj; do
+            [ "$(basename "$lproj")" = "fr-CA.lproj" ] && continue
+            echo "::error::$(basename "$lproj") in $NSE: only Canadian French ships"
+            exit 1
+          done
+          point="$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' "$NSE/Info.plist")"
+          test "$point" = "com.apple.usernotifications.service" || { echo "::error::NSExtensionPointIdentifier is '$point'"; exit 1; }
+          echo "DistrictAINotificationService.appex is embedded, with its manifest, both tables per .lproj and no root table"
+
       - name: DistrictAITests
         run: |
           set -o pipefail
@@ -409,11 +437,12 @@ jobs:
       # dropped from the target lose their tests just as quietly. The floor is a ratchet,
       # set a little below the count (486 on iPhone and iPad on 2026-10-01; about 472 after
       # the recording removal deleted 17 tests with the scheduler recordings, notes and
-      # storage screens and added 3): raise it when tests are added, and lower it only in
+      # storage screens and added 3; 833 on iPhone with 3.2.0's watch round 2, 2026-10-25):
+      # raise it when tests are added, and lower it only in
       # the commit that deletes tests on purpose.
       - name: DistrictAITests were discovered
         run: |
-          minimum=500
+          minimum=820
           executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-test.log | sort -n | tail -1)
           echo "app-target tests executed - ${executed:-0} (at least $minimum expected)"
           if [ -z "$executed" ] || [ "$executed" -lt "$minimum" ]; then
@@ -449,7 +478,7 @@ jobs:
       - name: Watch tests were discovered
         if: matrix.device == 'iPhone'
         run: |
-          minimum=31
+          minimum=65
           executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-watch.log | sort -n | tail -1)
           echo "watch tests executed - ${executed:-0} (at least $minimum expected)"
           if [ -z "$executed" ] || [ "$executed" -lt "$minimum" ]; then

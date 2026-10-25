@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The privacy manifest of the notification service extension (it puts a message sender's
+  name on a message alert).
+
+  ⛔ AUTHORED, NOT GENERATED, like App/PrivacyInfo.xcprivacy, and it lands at the bundle
+  root through an explicit `buildPhase: resources` in project.yml.
+
+  ⛔ IT COLLECTS NOTHING THE APP'S MANIFEST DOES NOT ALREADY DECLARE. It reads one Keychain
+  item (the notify-read token), sends distronode.com that token with the alert's own
+  message and workspace ids (`GET /api/district/messages/{id}/sender`), and reads back
+  the contact's name for display on this device. No new data type leaves the device, and
+  nothing is tracked. It touches no UserDefaults suite and no other required-reason API.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>

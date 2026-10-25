@@ -10,7 +10,7 @@
     /// `#if DEBUG`, so no archive carries it. Armed only by launch arguments:
     ///
     ///     -WatchPreview demo|signedOut|update   which state to show (nothing is sent or kept)
-    ///     -WatchPreviewScreen home|calls|call|inbox|thread|complication
+    ///     -WatchPreviewScreen home|calls|call|inbox|thread|live|card|complication|unreadComplication
     ///     -WatchPreviewLanguage en|fr-CA        the phone's language in the made-up snapshot
     ///     -WatchPreviewStale                    a snapshot 25 minutes old
     ///     -WatchPreviewWrite unreachable|failed the thread's reply state
@@ -59,6 +59,7 @@
                     break
                 }
                 store.preview(.snapshot(snapshot), writes: writes)
+                previewLive(store, language: language, at: now)
             }
             return true
         }
@@ -68,7 +69,20 @@
             if let snapshot = store.snapshot {
                 switch screen {
                 case "calls":
-                    NavigationStack { CallsView(store: store, calls: snapshot.calls) }
+                    NavigationStack {
+                        CallsView(store: store, calls: snapshot.calls, workspaceId: snapshot.workspace?.id)
+                            .watchDestinations(store: store, snapshot: snapshot)
+                    }
+                case "live":
+                    NavigationStack {
+                        if let call = store.live.calls.first {
+                            LiveCallView(store: store, call: call)
+                        }
+                    }
+                case "card":
+                    NavigationStack {
+                        CallCardView(store: store, workspaceId: "ws_demo", callId: "c1", seed: snapshot.calls?.first)
+                    }
                 case "call":
                     NavigationStack {
                         if let call = snapshot.calls?.first {
@@ -88,14 +102,62 @@
                     }
                 case "complication":
                     complications(ComplicationState(snapshot))
+                case "unreadComplication":
+                    unreadComplications(ComplicationState(snapshot))
                 default:
                     WatchRootView(store: store)
                 }
             } else if screen == "complication" {
                 complications(ComplicationState(signedIn: false, workspaceName: nil, available: nil, language: nil))
+            } else if screen == "unreadComplication" {
+                unreadComplications(.unknown)
             } else {
                 WatchRootView(store: store)
             }
+        }
+
+        /// A call in progress with a few lines, and the card of the first call, made up.
+        /// ⚠️ The live screen asks the (absent) phone on appear and says it is out of reach.
+        @MainActor
+        private static func previewLive(_ store: WatchStore, language: String, at date: Date) {
+            let french = language == "fr-CA"
+            let call = WatchLiveCall(
+                id: "c_live",
+                workspaceId: "ws_demo",
+                caller: "Marie Tremblay",
+                startedAt: date.addingTimeInterval(-90),
+                canWhisper: true
+            )
+            let lines = [
+                WatchLiveLine(
+                    id: "s1", epoch: 1, index: 0, speaker: "Ava", fromCaller: false,
+                    text: french ? "Bonjour, Plomberie Desrosiers." : "Good afternoon, Desrosiers Plumbing."
+                ),
+                WatchLiveLine(
+                    id: "s2", epoch: 1, index: 1, speaker: french ? "Appelant" : "Caller", fromCaller: true,
+                    text: french ? "Mon chauffe-eau fuit." : "My water heater is leaking."
+                ),
+            ]
+            let card = WatchCallCard(
+                callId: "c1",
+                workspaceId: "ws_demo",
+                caller: "Marie Tremblay",
+                outcome: french ? "Terminé" : "Completed",
+                time: french ? "23 oct. 2026, 14 h 05" : "Oct 23, 2026 at 2:05 PM",
+                summary: french
+                    ? "Fuite de chauffe-eau. Souhaite une visite demain matin."
+                    : "Leaking water heater. Wants a visit tomorrow morning.",
+                summaryPending: false,
+                summaryNote: nil,
+                actionItems: [french ? "Confirmer la visite de demain" : "Confirm tomorrow's visit"],
+                inProgress: false,
+                canCallBack: true
+            )
+            store.live.preview(
+                calls: [call],
+                transcript: WatchLiveTranscript(call: call, lines: lines, phase: .live),
+                cards: ["c1": .card(card, asking: false)]
+            )
         }
 
         /// The three families on one screen, roughly at their sizes on a face.
@@ -108,6 +170,20 @@
                     .frame(height: 50)
                     .padding(.horizontal, 8)
                 ComplicationView(state: state, family: .accessoryInline)
+                    .font(.footnote)
+            }
+        }
+
+        /// The unread complication's three families, likewise. ⚠️ The count is
+        /// `.privacySensitive()`: a screenshot taken with the redaction on shows placeholders.
+        @MainActor
+        private static func unreadComplications(_ state: ComplicationState) -> some View {
+            VStack(spacing: 10) {
+                UnreadComplicationView(state: state, family: .accessoryCircular)
+                    .frame(width: 50, height: 50)
+                UnreadComplicationView(state: state, family: .accessoryCorner)
+                    .frame(width: 50, height: 50)
+                UnreadComplicationView(state: state, family: .accessoryInline)
                     .font(.footnote)
             }
         }

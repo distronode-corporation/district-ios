@@ -126,10 +126,32 @@ and joins the room; the phase stays `ringing` until the callee answers. Inbound:
 push arrives through PushKit (`VoIPPushHandler`) and a call is reported to CallKit
 before the payload is interpreted, because iOS requires every VoIP push to report one;
 any outcome other than ringing is expressed by ending that call. Answering fetches the
-credential and joins the room.
+credential and joins the room. Declining (the app's button, or the system's end action
+while the call rings) tells the service once, so the agent can take a message as soon as
+everyone it rang has declined; a ring that times out or that the app withdraws because
+nobody is signed in sends nothing.
 
 Meeting rooms also use LiveKit but not CallKit. They share the device's one audio session
 and microphone with calls, and `CallStack` is where each side can see the other.
+
+## The Apple Watch app and the notification extension
+
+Both are embedded in the iOS app and built from `project.yml`; neither holds the session.
+
+- **The watch app** (`Watch/`, watchOS 10 or later, with its complications in
+  `Complications/`) makes no request of its own. The iPhone sends it a snapshot over
+  WatchConnectivity, and every watch action (a reply, mark read, availability, a call's
+  live transcript, a whisper to the agent, a call card) is a message the iPhone answers
+  through its own repositories (`WatchBridgeService`, `WatchLiveRelay`). The message
+  types live in `App/WatchBridge/`, compiled into both apps. The unread complication is
+  opt-in, a count only, and kept fresh by a watch background refresh that asks the
+  iPhone for a new snapshot.
+- **The notification service extension** (`NotificationService/`) puts the sender's name
+  on a message alert. It reads one item, a scoped, read-only notify token the app mints
+  after sign-in and keeps in a shared Keychain group (`App/NotifyShared/`), and asks one
+  route who sent the message, within five seconds. It never refreshes anything, and on any
+  failure the alert is shown as sent. The session stays in the app's private Keychain
+  group, which the app's entitlement lists first and the extension is not entitled to.
 
 ## The contract gate
 

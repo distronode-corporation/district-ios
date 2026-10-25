@@ -1,7 +1,7 @@
 {
-  "signed_off_by": "iMac manager distronode-com (Opus 5.5), iOS 3.1.0: the l10n/ios.toml changes since v3.0.3 and all of l10n/watch.toml and l10n/watch-infoplist.toml reviewed by an Opus 5.5 xhigh fr-CA reviewer; its one must-fix and five suggestions applied as Sean approved them (\"Must-fix + all five\", \"Shorten both\", GitLab #2 note 4082277572), 2026-10-24",
-  "release": "v3.1.0",
-  "commit": "bb39d6bf718805093baaad4cc6fa6691c05308eb",
+  "signed_off_by": "iMac manager distronode-com (Opus 5.5), iOS 3.2.0: the l10n/ios.toml and l10n/watch.toml changes since v3.1.0 and all of l10n/notificationservice.toml and l10n/notificationservice-infoplist.toml reviewed by an Opus 5.5 xhigh fr-CA reviewer; its five must-fixes and all suggestions applied as Sean approved them (\"Must-fix + all suggestions (Recommended)\", call-back line \"We will call them back today.\", GitLab #2 note 4084048854), 2026-10-25",
+  "release": "v3.2.0",
+  "commit": "4b46d87380db189893b9671db2dce76091a0aaeb",
   "catalogs": [
     {
       "path": "l10n/infoplist.toml",
@@ -9,7 +9,15 @@
     },
     {
       "path": "l10n/ios.toml",
-      "sha256": "06a63712f842c37b740d8ba9bc6c35962ce5272ba7c1130046b2e28efb4b9c9f"
+      "sha256": "ea6fdfe78f9c644122d4c234f472f602b08dce2543da2e651da97aeece60711b"
+    },
+    {
+      "path": "l10n/notificationservice-infoplist.toml",
+      "sha256": "5a9faed573d5cfa0f65e6e1d3863e6a4c13397f81f4cdffe443a1f3b99562584"
+    },
+    {
+      "path": "l10n/notificationservice.toml",
+      "sha256": "de329d5bb9ec4c375e5484c119bbb60b54f2ac078e3f3928db7cc7bb7a042a1f"
     },
     {
       "path": "l10n/push.toml",
@@ -21,7 +29,7 @@
     },
     {
       "path": "l10n/watch.toml",
-      "sha256": "63d42c045bc9c694ec8e34af694380bdaffa95b484517af75ba0088d27845a2f"
+      "sha256": "43d2e3ec74160d309979401155fd2f1d5afe517dc7e45e5108ee05f70dda5ebe"
     }
   ]
 }

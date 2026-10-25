@@ -14689,6 +14689,114 @@ state = "reviewed"
 id = { swift = "WatchBridgeCopy.updateBothApps" }
 note = "Shown on the Apple Watch when the watch asked the iPhone for something in a message format this iPhone build does not know: the two apps are on different versions."
 
+[watch_bridge.whisper_call_ended]
+en = "The call has ended."
+fr = "L'appel est terminé."
+ctx = "error"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchBridgeCopy.whisperCallEnded" }
+note = "Shown on the Apple Watch when an instruction to the AI assistant arrived after the call ended."
+
+[watch_bridge.whisper_empty]
+en = "There is nothing to send."
+fr = "Il n'y a rien à envoyer."
+ctx = "error"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchBridgeCopy.whisperEmpty" }
+note = "Shown on the Apple Watch when an instruction to the AI assistant was blank."
+
+[watch_bridge.whisper_too_long]
+en = "That instruction is too long. Shorten it and try again."
+fr = "Cette consigne est trop longue. Raccourcissez-la et réessayez."
+ctx = "error"
+screen = "watch"
+state = "reviewed"
+id = { swift = "WatchBridgeCopy.whisperTooLong" }
+note = "Shown on the Apple Watch when an instruction to the AI assistant is over the server's limit."
+
+[watch_diagnostics.clear]
+en = "Clear the log"
+fr = "Effacer le journal"
+ctx = "button"
+screen = "account"
+state = "reviewed"
+id = { swift = "WatchDiagnosticsCopy.clear" }
+note = "Deletes the diagnostics log on this iPhone."
+
+[watch_diagnostics.empty]
+en = "Nothing recorded yet."
+fr = "Rien n'a encore été consigné."
+ctx = "body"
+screen = "account"
+state = "reviewed"
+id = { swift = "WatchDiagnosticsCopy.empty" }
+note = "The diagnostics log is empty."
+
+[watch_diagnostics.entries]
+en = "Entries recorded"
+fr = "Entrées consignées"
+ctx = "label"
+screen = "account"
+state = "reviewed"
+id = { swift = "WatchDiagnosticsCopy.entries" }
+note = "How many log lines the hidden TestFlight diagnostics screen holds; the number is beside it."
+
+[watch_diagnostics.force_socket]
+en = "Keep the connection open"
+fr = "Garder la connexion ouverte"
+ctx = "label"
+screen = "account"
+state = "reviewed"
+id = { swift = "WatchDiagnosticsCopy.forceSocket" }
+note = "Test switch on the hidden TestFlight diagnostics screen: hold the live transcript connection instead of reconnecting for each update."
+
+[watch_diagnostics.force_socket_note]
+en = "For testing. Holds the live connection while the watch follows a call, instead of reconnecting for each update."
+fr = "Pour les essais. Cette option garde la connexion en direct ouverte pendant que la montre suit un appel, au lieu de la rouvrir à chaque mise à jour."
+ctx = "body"
+screen = "account"
+state = "reviewed"
+id = { swift = "WatchDiagnosticsCopy.forceSocketNote" }
+note = "Under the test switch on the hidden TestFlight diagnostics screen."
+
+[watch_diagnostics.recording]
+en = "Record relay timings"
+fr = "Consigner les temps du relais"
+ctx = "label"
+screen = "account"
+state = "reviewed"
+id = { swift = "WatchDiagnosticsCopy.recording" }
+note = "Switch on the hidden TestFlight diagnostics screen: log how the iPhone answers the Apple Watch."
+
+[watch_diagnostics.recording_note]
+en = "Records how long your iPhone takes to answer the watch, and how long a live connection stays open. No transcript, name or number is recorded."
+fr = "Cette option consigne le temps que met votre iPhone à répondre à la montre et la durée d'ouverture d'une connexion en direct. Aucune transcription, aucun nom ni aucun numéro n'est consigné."
+ctx = "body"
+screen = "account"
+state = "reviewed"
+id = { swift = "WatchDiagnosticsCopy.recordingNote" }
+note = "Under the switch on the hidden TestFlight diagnostics screen."
+
+[watch_diagnostics.share]
+en = "Share the log"
+fr = "Partager le journal"
+ctx = "button"
+screen = "account"
+state = "reviewed"
+id = { swift = "WatchDiagnosticsCopy.share" }
+note = "Opens the share sheet with the diagnostics log, for a tester to send it to us."
+
+[watch_diagnostics.title]
+en = "Apple Watch diagnostics"
+fr = "Diagnostic de l'Apple Watch"
+ctx = "title"
+screen = "account"
+state = "reviewed"
+id = { swift = "WatchDiagnosticsCopy.title" }
+note = "A hidden screen for TestFlight testers only (seven taps on the version line). Never shown in the App Store build."
+
 [workflows.added_do_not_call]
 en = "Added to do-not-call"
 fr = "Ajout à la liste d'exclusion"

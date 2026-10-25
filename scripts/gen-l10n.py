@@ -6,7 +6,7 @@
                                           # a broken catalog rule or an Info.plist drift
                                           # (what CI runs)
 
-Four catalogs. The first three are the iPhone app's, the fourth the Apple Watch app's. The vendored tools in `tools/l10n/` (copied from the
+Six catalogs: the iPhone app's three, the Apple Watch app's and the notification service extension's. The vendored tools in `tools/l10n/` (copied from the
 monorepo's `i18n/tools/`, see `tools/l10n/SOURCE.toml`) do the writing.
 
 - `l10n/ios.toml`: every sentence the app's screens say. It becomes
@@ -26,6 +26,9 @@ monorepo's `i18n/tools/`, see `tools/l10n/SOURCE.toml`) do the writing.
   `fr-CA.lproj`, which is what makes the watch bundles declare Canadian French at all
   (`Bundle.preferredLocalizations` answers only languages a bundle ships).
 - `l10n/watch-infoplist.toml`: the watch bundles' `InfoPlist.strings` (their display name).
+- `l10n/notificationservice.toml` and `l10n/notificationservice-infoplist.toml`: the
+  notification service extension's two tables (`NotificationService/Localization`), the
+  named message title and its display name. No Swift: the extension reads its own table.
 
 ⛔ THE TWO LANGUAGES' TABLES LIVE APART. `en.lproj` sits in `App/Resources/` and
 `fr-CA.lproj` in `App/Localization/`; project.yml takes both into every build since 3.0.
@@ -75,6 +78,12 @@ WATCH_SWIFT_OPTS = [
 # fr-CA.lproj/Localizable.strings or fr-CA.lproj/InfoPlist.strings.
 WATCH_TABLES = {"l10n/watch.toml": "Localizable", "l10n/watch-infoplist.toml": "InfoPlist"}
 WATCH_LPROJ = {"en.lproj": ROOT / "Watch/Localization/en.lproj", "fr-CA.lproj": ROOT / "Watch/Localization/fr-CA.lproj"}
+# The notification service extension (NotificationService/): both tables, for the same archive rule.
+NSE_TABLES = {"l10n/notificationservice.toml": "Localizable", "l10n/notificationservice-infoplist.toml": "InfoPlist"}
+NSE_LPROJ = {
+    "en.lproj": ROOT / "NotificationService/Localization/en.lproj",
+    "fr-CA.lproj": ROOT / "NotificationService/Localization/fr-CA.lproj",
+}
 
 
 def tool(*args: str, quiet: bool = False) -> int:
@@ -85,7 +94,8 @@ def tool(*args: str, quiet: bool = False) -> int:
 def strings_files(scratch: Path) -> dict[Path, bytes]:
     """Every .strings file the catalogs produce, keyed by where it belongs in the tree."""
     out: dict[Path, bytes] = {}
-    for tables, lproj, prefix in ((TABLES, LPROJ, "app"), (WATCH_TABLES, WATCH_LPROJ, "watch")):
+    groups = ((TABLES, LPROJ, "app"), (WATCH_TABLES, WATCH_LPROJ, "watch"), (NSE_TABLES, NSE_LPROJ, "nse"))
+    for tables, lproj, prefix in groups:
         for catalog, table in tables.items():
             target = scratch / prefix / table
             code = tool("gen", "--backend", "apple-strings", catalog, "--out", str(target),
@@ -122,6 +132,7 @@ def main(argv: list[str]) -> int:
         code = tool("check", *SWIFT_CATALOGS, "--gen", f"swift:{SWIFT}", *SWIFT_OPTS)
         code |= tool("check", *TABLES)
         code |= tool("check", "l10n/watch-infoplist.toml")
+        code |= tool("check", *NSE_TABLES)
         code |= tool("check", *WATCH_CATALOGS, "--gen", f"swift:{WATCH_SWIFT}", *WATCH_SWIFT_OPTS)
         stale = [str(p.relative_to(ROOT)) for p, data in tables.items() if not p.exists() or p.read_bytes() != data]
         for path in stale:

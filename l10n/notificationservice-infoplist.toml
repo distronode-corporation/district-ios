@@ -1,0 +1,13 @@
+[meta]
+catalog = "notificationservice_infoplist"
+platform = "swift"
+apple = true
+
+[notificationservice_infoplist.display_name]
+en = "District AI"
+ctx = "label"
+screen = "push"
+tier = "T0"
+fixed = true
+id = { apple = "CFBundleDisplayName" }
+note = "The notification service extension's name, which iOS shows nowhere a person reads today. The product name, not translated. Must equal project.yml's CFBundleDisplayName."
