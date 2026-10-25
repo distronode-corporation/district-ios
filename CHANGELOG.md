@@ -12,6 +12,26 @@ built from history before publication, so they have no tags in this repository.
 
 ### Changed
 
+- 3.2.0: MARKETING_VERSION 3.2.0, Apple Watch round 2. The version pair is project-level,
+  so the iOS app, the watch app, its complications and the notification service extension
+  carry the same value.
+- 3.2.0: DistrictCore `exactVersion` 8.0.0 (district-core-swift's 8.0.0 tag, #39), for the
+  decline, whisper, notify-token and message-sender endpoints and
+  `RingCancelReason.declined`.
+- 3.2.0: a person's decline is sent (`POST calls/{callId}/decline`), reversing "a decline
+  sends nothing" (Sean, 2026-10-24, GitLab #2 note 4083623386): the ringing screen's
+  Decline and the system's end action while it rings (lock screen, Apple Watch, headset,
+  car) feed `.declinePressed`, whose `.requestDecline` command `IncomingCallDeclineSender`
+  sends once, never retried, inside a background task. A ring ended because nobody is
+  signed in feeds the core's `.withdrawnLocally` and sends nothing, like a timeout.
+  `IncomingCallEnding` holds both choices; `IncomingCallDeclineTests` runs them through the
+  real reducer.
+- 3.2.0: a ring the server ends with reason `declined` (every member rang declined) is
+  recorded in CallKit's Recents as `.declinedElsewhere`, not as a missed call.
+  `RingCancelTests`.
+- 3.2.0: steering from the watch sends through the core's `CallsRepository.whisper`;
+  `PendingCoreWhisper`, its failure sentence (`watch_bridge.whisper_unavailable`) and its
+  code are gone, and `ContainerWatchLiveSources` takes the sender with no default.
 - 3.1.0: MARKETING_VERSION 3.1.0, the Apple Watch companion release. The version pair is
   project-level, so the iOS app, the watch app and its complication carry the same value.
 - 3.1.0: DistrictCore `exactVersion` 7.1.0 (district-core-swift's 7.1.0 tag), for
@@ -22,6 +42,44 @@ built from history before publication, so they have no tags in this repository.
   and English sentences take the article ("The Desk is off"). `DeskNamingTests`.
 
 ### Added
+
+- 3.2.0: message alerts name their sender, through a notification service extension
+  (`DistrictAINotificationService`, `com.distronode.district.notificationservice`) that
+  holds no session. The app mints a scoped, read-only notify token
+  (`NotifyTokenRepository.mint()`) after sign-in and at launch when it is missing, expired
+  or within 7 days of expiry, one mint at a time, and keeps it in a shared Keychain group
+  (`NotifyTokenRenewal`); a sign-out clears it and drops a mint still on the wire. The
+  extension reads it, asks `GET messages/{id}/sender` once through the core's
+  `InboxRepository.messageSender` with that token as the bearer, over an ephemeral session
+  that gives up at the 5-second budget, never refreshes anything, and shows the alert as
+  sent on any failure. A 401 clears the stored token if it is still the one refused, so
+  the next launch mints again. The app's session moves to an explicitly named private
+  Keychain group listed first; `scripts/archive-imac.sh` refuses a signature whose first
+  group is not it. `NotifyAlertNamingTests`, `NotifyTokenRenewalTests`; CI checks the
+  extension is embedded with its manifest and both tables.
+- 3.2.0: on the Apple Watch, a Live row per call in progress, its transcript (final lines,
+  the newest interim line lighter, memory only) and steering for anyone but a viewer: two
+  third-person instructions and a dictated line, sent as a whisper. The phone relays over
+  WatchConnectivity (`WatchLiveRelay`), by default a fresh snapshot per 5-second keepalive,
+  ending on the call's end, an unsubscribe or 20 s of silence. No watch protocol bump: an
+  older phone answers "update both apps" and the watch hides Live.
+  `WatchLiveRelayTests`, `WatchLiveRequestTests`, `WatchLiveComposerTests`,
+  `WatchLiveStoreTests`.
+- 3.2.0: a call card on the watch after a watched call ends, from Recent calls and from a
+  tapped call notification: caller, outcome, summary and action items, asked again at 10,
+  30 and 60 s while the summary is on its way. "Call back on iPhone" is a Handoff carrying
+  the call id, never the number; the iPhone fills the dialler and never dials.
+- 3.2.0: an opt-in unread complication (`com.distronode.district.complication.unread`:
+  circular, inline, corner), a count only and `.privacySensitive()`, on no face until
+  added. While it is on a face the watch asks the phone for a fresh snapshot about every
+  15 minutes (`WKApplicationRefreshBackgroundTask`, `WatchAppDelegate`).
+  `UnreadComplicationTests`, `WatchBackgroundRefreshTests`.
+- 3.2.0: the Time Sensitive Notifications entitlement, for the server's "needs you" alerts
+  (an urgent call or a VIP contact). The App ID needs the capability, and App Review notes
+  must justify it.
+- 3.2.0: a hidden relay diagnostics screen (seven taps on Account's version line, Debug and
+  TestFlight builds only) logging the watch relay's timings, with no content, for the
+  device spike that confirms the relay mode.
 
 - Added: Apple Watch app: recent calls, inbox reply and mark read, and your availability for
   calls, with a watch-face complication. A companion app (watchOS 10 or later), embedded in
@@ -408,6 +466,17 @@ built from history before publication, so they have no tags in this repository.
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
 
+## [3.2.0] - 2026-10-25
+
+More of District AI on your Apple Watch.
+
+- Follow a call's live transcript on your Apple Watch while the assistant takes it, and guide the assistant: tell it you will call back today, have it ask what the call is about, or dictate your own instruction.
+- When a call ends, your watch shows a summary with the outcome and the action items. Call back on iPhone opens your iPhone's keypad with the number filled in.
+- Add an optional complication that shows how many messages are unread. It is on no watch face until you add it, and it never shows who wrote.
+- Decline a call on your iPhone or your Apple Watch, and once everyone it rang has declined, the assistant takes a message right away instead of letting it ring on.
+- Message notifications now show who the message is from, when the contact has a name.
+- Notifications about an urgent call, or from a contact you marked VIP, can arrive as Time Sensitive, so they reach you during a Focus.
+
 ## [3.1.0] - 2026-10-24
 
 District AI comes to Apple Watch.
@@ -596,7 +665,8 @@ Voice Studio is the headline of 2.0.
 
 The first release on the App Store.
 
-[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/distronode-corporation/district-ios/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/distronode-corporation/district-ios/compare/v3.0.3...v3.1.0
 [3.0.3]: https://github.com/distronode-corporation/district-ios/compare/v3.0.2...v3.0.3
 [3.0.2]: https://github.com/distronode-corporation/district-ios/compare/v3.0.1...v3.0.2

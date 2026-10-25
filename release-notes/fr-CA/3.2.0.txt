@@ -1,0 +1,8 @@
+Encore plus de District AI sur votre Apple Watch.
+
+- Suivez sur votre Apple Watch la transcription en direct d'un appel que l'assistant prend, et guidez-le : dites-lui que vous rappellerez aujourd'hui, faites-lui demander l'objet de l'appel ou dictez votre propre consigne.
+- À la fin d'un appel, votre montre en affiche le résumé, avec le résultat et les actions à faire. « Rappeler sur l'iPhone » ouvre le clavier de votre iPhone avec le numéro déjà inscrit.
+- Ajoutez si vous le voulez une complication qui indique le nombre de messages non lus. Elle ne figure sur aucun cadran tant que vous ne l'ajoutez pas, et elle n'affiche jamais l'expéditeur.
+- Refusez un appel sur votre iPhone ou votre Apple Watch : dès que toutes les personnes appelées l'ont refusé, l'assistant prend un message sans attendre la fin de la sonnerie.
+- Les notifications de message indiquent maintenant l'expéditeur, quand le contact a un nom.
+- Les notifications au sujet d'un appel urgent ou d'un contact marqué VIP peuvent être signalées comme urgentes, pour vous joindre même quand un mode de concentration est actif.
