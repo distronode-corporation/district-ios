@@ -304,6 +304,12 @@ targets:
           - CFBundleURLName: com.distronode.district
             CFBundleURLSchemes:
               - districtai
+        # ⛔ THE HANDOFF THE WATCH'S CALL CARD OFFERS ("Call back on iPhone"). iOS offers an
+        # activity only to an app that lists its type here; the string is
+        # `CallBackHandoff.activityType` (App/WatchBridge/WatchLive.swift), and the activity
+        # carries a call id, never a number.
+        NSUserActivityTypes:
+          - com.distronode.district.call-back
         # ⚠️ ONE WINDOW ON iPad TOO. Multiple scenes would mean one shell, one
         # navigation state and one incoming-call cover per window, over a single
         # live call per process; nothing here is built for that.

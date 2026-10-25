@@ -19,12 +19,29 @@ final class NotificationRouteTests: XCTestCase {
         XCTAssertEqual(route, .message(workspaceId: "ws_1", messageId: "msg_1"))
     }
 
-    /// ⛔ ANOTHER TYPE, OR A TYPE MATCHED ONLY LOOSELY, IS NOT A MESSAGE.
+    /// ⛔ ANOTHER TYPE, OR A TYPE MATCHED ONLY LOOSELY, IS NOT A ROUTE.
     func testOtherTypesAreNoRoute() {
-        for type in ["incoming_call", "Message", "message_v2", ""] {
+        for type in ["Message", "message_v2", "Incoming_call", "call_ended", ""] {
             let payload = ["type": type, "workspaceId": "ws_1", "messageId": "msg_1", "callId": "call_1"]
             XCTAssertNil(WatchNotificationRoute.parse(payload), type)
         }
+    }
+
+    /// A tapped `incoming_call` alert names its call, for the card (round 2); without a call id
+    /// it names nothing.
+    func testAnIncomingCallAlertIsACallRoute() {
+        let userInfo: [AnyHashable: Any] = [
+            "aps": ["alert": ["title": "Incoming call"]],
+            "type": "incoming_call",
+            "workspaceId": "ws_1",
+            "callId": "call_1",
+        ]
+
+        let route = WatchNotificationRoute.parse(WatchNotificationRoute.flatten(userInfo))
+
+        XCTAssertEqual(route, .call(workspaceId: "ws_1", callId: "call_1"))
+        XCTAssertNil(WatchNotificationRoute.parse(["type": "incoming_call", "workspaceId": "ws_1"]))
+        XCTAssertNil(WatchNotificationRoute.parse(["type": "incoming_call", "workspaceId": "ws_1", "callId": " "]))
     }
 
     /// ⛔ A MISSING OR BLANK ID IS A DROP, NEVER A DEFAULT; values are trimmed.

@@ -5,6 +5,9 @@
 internal let FR_COMPLETE: Bool = true
 
 extension WatchCopy {
+    /// `watch.action_items`
+    internal static var actionItems: String { WatchL10n.copyLocale == .frCA ? "Actions à faire" : "Action items" }
+
     /// `watch.availability`
     internal static var availability: String { WatchL10n.copyLocale == .frCA ? "Disponibilité" : "Availability" }
 
@@ -27,6 +30,15 @@ extension WatchCopy {
     internal static func availableIn(_ workspace: String) -> String {
         WatchL10n.copyLocale == .frCA ? "Disponible · \(workspace)" : "Available · \(workspace)"
     }
+
+    /// `watch.call_back`
+    internal static var callBack: String { WatchL10n.copyLocale == .frCA ? "Rappeler sur l'iPhone" : "Call back on iPhone" }
+
+    /// `watch.call_back_hint`
+    internal static var callBackHint: String { WatchL10n.copyLocale == .frCA ? "Sur votre iPhone, ouvrez le sélecteur d'apps et touchez District AI." : "On your iPhone, open the App Switcher and tap District AI." }
+
+    /// `watch.call_title`
+    internal static var callTitle: String { WatchL10n.copyLocale == .frCA ? "Résumé de l'appel" : "Call summary" }
 
     /// `watch.calls`
     internal static var calls: String { WatchL10n.copyLocale == .frCA ? "Appels" : "Calls" }
@@ -72,6 +84,27 @@ extension WatchCopy {
     /// `watch.iphone_not_reachable_body`
     internal static var iphoneNotReachableBody: String { WatchL10n.copyLocale == .frCA ? "Gardez votre iPhone à proximité et réessayez." : "Keep your iPhone nearby and try again." }
 
+    /// `watch.live_call`
+    internal static var liveCall: String { WatchL10n.copyLocale == .frCA ? "Appel en direct" : "Live call" }
+
+    /// `watch.live_connecting`
+    internal static var liveConnecting: String { WatchL10n.copyLocale == .frCA ? "Connexion…" : "Connecting…" }
+
+    /// `watch.live_ended`
+    internal static var liveEnded: String { WatchL10n.copyLocale == .frCA ? "Appel terminé" : "Call ended" }
+
+    /// `watch.live_incomplete`
+    internal static var liveIncomplete: String { WatchL10n.copyLocale == .frCA ? "Les répliques précédentes figureront dans la transcription complète après l'appel." : "Earlier lines will appear in the full transcript after the call." }
+
+    /// `watch.live_now`
+    internal static var liveNow: String { WatchL10n.copyLocale == .frCA ? "En direct" : "Live" }
+
+    /// `watch.live_unavailable`
+    internal static var liveUnavailable: String { WatchL10n.copyLocale == .frCA ? "Aucune transcription en direct pour cet appel." : "No live transcript for this call." }
+
+    /// `watch.live_waiting`
+    internal static var liveWaiting: String { WatchL10n.copyLocale == .frCA ? "Rien n'a encore été dit." : "Nothing has been said yet." }
+
     /// `watch.mark_read`
     internal static var markRead: String { WatchL10n.copyLocale == .frCA ? "Marquer comme lu" : "Mark read" }
 
@@ -86,6 +119,9 @@ extension WatchCopy {
 
     /// `watch.no_conversations`
     internal static var noConversations: String { WatchL10n.copyLocale == .frCA ? "Aucune conversation" : "No conversations yet" }
+
+    /// `watch.no_summary`
+    internal static var noSummary: String { WatchL10n.copyLocale == .frCA ? "Aucun résumé IA pour cet appel." : "No AI summary for this call." }
 
     /// `watch.no_workspace`
     internal static var noWorkspace: String { WatchL10n.copyLocale == .frCA ? "Ouvrez District AI sur votre iPhone pour choisir un espace de travail." : "Open District AI on your iPhone to choose a workspace." }
@@ -130,6 +166,15 @@ extension WatchCopy {
 
     /// `watch.signed_out`
     internal static var signedOut: String { WatchL10n.copyLocale == .frCA ? "Session fermée" : "Signed out" }
+
+    /// `watch.steer_header`
+    internal static var steerHeader: String { WatchL10n.copyLocale == .frCA ? "Consigne à l'assistant" : "Tell the assistant" }
+
+    /// `watch.summary`
+    internal static var summary: String { WatchL10n.copyLocale == .frCA ? "Résumé IA" : "AI summary" }
+
+    /// `watch.summary_on_its_way`
+    internal static var summaryOnItsWay: String { WatchL10n.copyLocale == .frCA ? "Résumé en préparation" : "Summary on its way" }
 
     /// `watch.try_again`
     internal static var tryAgain: String { WatchL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
@@ -176,4 +221,19 @@ extension WatchCopy {
 
     /// `watch.when`
     internal static var when: String { WatchL10n.copyLocale == .frCA ? "Date" : "When" }
+
+    /// `watch.whisper_ask_what_about`
+    internal static var whisperAskWhatAbout: String { WatchL10n.copyLocale == .frCA ? "Demandez l'objet de l'appel." : "Ask what the call is about." }
+
+    /// `watch.whisper_call_back_today`
+    internal static var whisperCallBackToday: String { WatchL10n.copyLocale == .frCA ? "Le propriétaire rappellera la personne aujourd'hui." : "The owner will call them back today." }
+
+    /// `watch.whisper_not_sent`
+    internal static var whisperNotSent: String { WatchL10n.copyLocale == .frCA ? "Non envoyé à l'assistant" : "Not sent to the assistant" }
+
+    /// `watch.whisper_other`
+    internal static var whisperOther: String { WatchL10n.copyLocale == .frCA ? "Autre consigne" : "Other instruction" }
+
+    /// `watch.whisper_sent`
+    internal static var whisperSent: String { WatchL10n.copyLocale == .frCA ? "Envoyé à l'assistant" : "Sent to the assistant" }
 }

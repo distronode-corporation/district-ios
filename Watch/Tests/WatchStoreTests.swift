@@ -341,13 +341,15 @@ final class WatchStoreTests: XCTestCase {
         XCTAssertEqual(rig.link.sent.count, 1)
     }
 
-    /// ⛔ NOT A MESSAGE, OR NOT A WHOLE ONE: nothing moves and nothing is sent.
+    /// ⛔ NOT A ROUTE, OR NOT A WHOLE ONE: nothing moves and nothing is sent. (A whole
+    /// `incoming_call` opens its card since round 2; see ``WatchLiveStoreTests``.)
     func testAPayloadThatIsNotAMessageMovesNothing() async {
         let rig = Rig(answer: .reply(.thread("contact:c_1")))
         rig.store.apply(.snapshot(Self.snapshot()))
         rig.store.path = [.calls]
 
-        await rig.store.open(["type": "incoming_call", "workspaceId": "ws_1", "callId": "call_1"])
+        await rig.store.open(["type": "incoming_call", "workspaceId": "ws_1"])
+        await rig.store.open(["type": "call_ended", "workspaceId": "ws_1", "callId": "call_1"])
         await rig.store.open(["type": "message", "workspaceId": "ws_1"])
 
         XCTAssertEqual(rig.store.path, [.calls])

@@ -43,3 +43,7 @@ enum WorkspacesCopy {}
 /// What the iPhone tells the Apple Watch app in its own words (``WatchBridgeService``).
 /// The watch's screens have their own catalog, `l10n/watch.toml`.
 enum WatchBridgeCopy {}
+
+/// The hidden Apple Watch relay diagnostics screen (``WatchDiagnosticsView``), for TestFlight
+/// testers only.
+enum WatchDiagnosticsCopy {}

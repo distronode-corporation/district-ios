@@ -30,8 +30,12 @@ import SwiftUI
 /// out: a killed process holds no owner, so it still comes back to an idle keypad.
 struct DialerView: View {
     @State private var model: DialerModel
+    private let prefill: DialerPrefill
+    private let workspaceId: String
 
     init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
+        prefill = container.dialerPrefill
+        self.workspaceId = workspaceId
         let live = DialerModel.attached(to: container.callStack, workspaceId: workspaceId)
         _model = State(
             initialValue: live ?? DialerModel(container: container, workspaceId: workspaceId, role: role)
@@ -42,6 +46,12 @@ struct DialerView: View {
         content
             .navigationTitle(DialerCopy.dial)
             .navigationBarTitleDisplayMode(.inline)
+            // ⚠️ A HANDOFF'S NUMBER FILLS THE FIELD, and only while no call is on screen: the
+            // keypad is hidden then, and a number typed under a live call would be a surprise.
+            .onChange(of: prefill.pending, initial: true) {
+                guard model.call == nil, let number = prefill.take(workspaceId: workspaceId) else { return }
+                model.callBack(number)
+            }
     }
 
     @ViewBuilder

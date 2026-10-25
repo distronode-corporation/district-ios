@@ -60,6 +60,9 @@ struct AccountView: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
+    /// The hidden Apple Watch relay diagnostics (``WatchDiagnosticsView``).
+    @State private var showingWatchDiagnostics = false
+
     /// ⛔ THE SYSTEM HAND-OFF, NOT `UIApplication.shared.open`. The latter needs
     /// `import UIKit` in a view layer that depends on SwiftUI alone, and it is the
     /// wrong layer: `openURL` is the environment's own answer and is what an
@@ -322,6 +325,12 @@ struct AccountView: View {
     private var footer: some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
             Text(AccountCopy.versionLine(Self.appVersion, Self.appBuild))
+                // ⛔ SEVEN TAPS, AND ONLY IN A DEBUG OR TESTFLIGHT BUILD: the W0 spike's switch.
+                // Nothing on screen offers it. See ``WatchRelayDiagnostics/isAvailable()``.
+                .onTapGesture(count: 7) {
+                    Task { showingWatchDiagnostics = await WatchRelayDiagnostics.isAvailable() }
+                }
+                .sheet(isPresented: $showingWatchDiagnostics) { WatchDiagnosticsView() }
             Text(AccountCopy.installationId(container.deviceId))
                 .textSelection(.enabled)
             Text(AccountCopy.opaqueIdInstallCleared)

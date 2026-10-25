@@ -111,6 +111,7 @@ extension ShellView {
     /// ⚠️ INTERNAL FOR THE REASON ``adoptTappedPush()`` IS: its two callers are
     /// `onChange` modifiers in `ShellView.swift`, and `private` is file-scoped.
     func resolvePendingLink() {
+        resolvePendingCallBack()
         guard let destination = pendingLink else { return }
         let selected = workspaceSession.workspaceId
         guard !destination.requiresWorkspace || selected != nil else { return }
@@ -120,6 +121,42 @@ extension ShellView {
             selectedWorkspaceId: selected,
             role: workspaceSession.role
         ))
+    }
+
+    // ── Handoff from the watch ───────────────────────────────────────────────
+
+    /// "Call back" on the watch's call card, picked up on this phone (``CallBackHandoff``).
+    ///
+    /// ⛔ THE ACTIVITY CARRIES A CALL ID, NEVER A NUMBER: the number is read here, under this
+    /// phone's session, by the rule of the dialler's own "Call them back" list, and only fills
+    /// the field (``DialerPrefill``). ⚠️ The dialler opens even when no number can be read
+    /// (offline, an outbound or withheld call): the person asked for it.
+    func continueCallBack(_ activity: NSUserActivity) {
+        guard let target = CallBackHandoff.parse(activity.userInfo) else { return }
+        container.dialerPrefill.handoff = target
+        resolvePendingCallBack()
+    }
+
+    /// ⚠️ WAITS FOR THE WORKSPACE LIST, like ``resolvePendingLink()``, and is asked again from
+    /// it; a workspace the loaded list does not hold drops the Handoff.
+    func resolvePendingCallBack() {
+        let prefill = container.dialerPrefill
+        guard let target = prefill.handoff, !workspaceSession.workspaces.isEmpty else { return }
+        prefill.handoff = nil
+        guard let entry = workspaceSession.workspaces.first(where: { $0.id == target.workspaceId }) else { return }
+        let switching = workspaceSession.workspaceId == target.workspaceId ? nil : target.workspaceId
+        apply(PushRouteAction(
+            tab: .overview,
+            selectWorkspaceId: switching,
+            route: .dialer(workspaceId: target.workspaceId, role: WorkspaceRole.fromWire(entry.role))
+        ))
+        let calls = container.calls
+        Task {
+            guard case let .success(row) = await calls.detail(workspaceId: target.workspaceId, callId: target.callId),
+                  let number = WatchLiveComposer.callBackNumber(row)
+            else { return }
+            prefill.offer(number, workspaceId: target.workspaceId)
+        }
     }
 
     // ── Applying an action ───────────────────────────────────────────────────

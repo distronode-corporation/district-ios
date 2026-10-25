@@ -49,6 +49,7 @@ struct HomeView: View {
                             .accessibilityAddTraits(.isHeader)
                     }
                     Section {
+                        liveRows
                         unreadRow
                         NavigationLink(value: WatchDestination.calls) {
                             Label(WatchCopy.calls, systemImage: "phone")
@@ -65,6 +66,30 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("District AI")
+        }
+        // ⚠️ ASKED WHILE HOME IS SHOWN, and not otherwise: the list is a read on the phone.
+        .task(id: snapshot.workspace?.id) {
+            guard let workspaceId = snapshot.workspace?.id else { return }
+            await store.live.pollCalls(workspaceId: workspaceId)
+        }
+    }
+
+    /// A row per call in progress. ⛔ NONE FROM A PHONE THAT DOES NOT KNOW THE REQUEST.
+    @ViewBuilder
+    private var liveRows: some View {
+        if store.live.liveSupported {
+            ForEach(store.live.calls) { call in
+                NavigationLink(value: WatchDestination.live(call)) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label(WatchCopy.liveCall, systemImage: "waveform")
+                            .foregroundStyle(Color.accentColor)
+                        Text(call.caller)
+                            .font(.caption2)
+                            .lineLimit(1)
+                    }
+                }
+                .accessibilityIdentifier("watch.home.live")
+            }
         }
     }
 
@@ -89,11 +114,20 @@ extension View {
         navigationDestination(for: WatchDestination.self) { destination in
             switch destination {
             case .calls:
-                CallsView(store: store, calls: snapshot.calls)
+                CallsView(store: store, calls: snapshot.calls, workspaceId: snapshot.workspace?.id)
             case .inbox:
                 InboxView(store: store, conversations: snapshot.conversations)
             case let .thread(conversation):
                 ThreadView(store: store, conversation: conversation)
+            case let .live(call):
+                LiveCallView(store: store, call: call)
+            case let .callCard(workspaceId, callId):
+                CallCardView(
+                    store: store,
+                    workspaceId: workspaceId,
+                    callId: callId,
+                    seed: snapshot.calls?.first { $0.id == callId }
+                )
             }
         }
     }

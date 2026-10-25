@@ -21,6 +21,7 @@ final class WatchBridgeService {
     private let link: any WatchSessionLinking
     private let source: any WatchSnapshotSourcing
     private let actions: any WatchActionPerforming
+    private let live: (any WatchLiveHandling)?
     private let backgroundTasks: any BackgroundTaskScheduling
     private let clock: @MainActor () -> Date
 
@@ -34,12 +35,14 @@ final class WatchBridgeService {
         link: any WatchSessionLinking,
         source: any WatchSnapshotSourcing,
         actions: any WatchActionPerforming,
+        live: (any WatchLiveHandling)? = nil,
         backgroundTasks: any BackgroundTaskScheduling = UIKitBackgroundTasks(),
         clock: @escaping @MainActor () -> Date = { Date() }
     ) {
         self.link = link
         self.source = source
         self.actions = actions
+        self.live = live
         self.backgroundTasks = backgroundTasks
         self.clock = clock
     }
@@ -113,6 +116,14 @@ final class WatchBridgeService {
             case let .failure(failure):
                 reply(WatchReply.failure(failure.sentence).message())
             }
+        case .liveList, .liveSubscribe, .liveKeepalive, .liveUnsubscribe, .whisper, .callDetail:
+            // ⛔ NO SNAPSHOT AFTER THESE. A keepalive arrives every 5 s, and a snapshot costs
+            // four reads; none of these changes what the snapshot shows. Without a relay this
+            // phone answers as one that predates them, and the watch hides Live.
+            let answer = await live?.answer(request.action) ?? .failure(WatchBridgeCopy.updateBothApps)
+            reply(answer.message())
+            lease.end()
+            return
         case .reply, .markRead, .setAvailability:
             switch await actions.perform(request.action) {
             case .success:

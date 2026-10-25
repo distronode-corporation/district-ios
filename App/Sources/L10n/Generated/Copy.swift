@@ -5523,6 +5523,47 @@ extension VoiceStudioCopy {
 extension WatchBridgeCopy {
     /// `watch_bridge.update_both_apps`
     internal static var updateBothApps: String { AppL10n.copyLocale == .frCA ? "Mettez à jour District AI sur votre iPhone et votre Apple Watch." : "Update District AI on your iPhone and your Apple Watch." }
+
+    /// `watch_bridge.whisper_call_ended`
+    internal static var whisperCallEnded: String { AppL10n.copyLocale == .frCA ? "L'appel est terminé." : "The call has ended." }
+
+    /// `watch_bridge.whisper_empty`
+    internal static var whisperEmpty: String { AppL10n.copyLocale == .frCA ? "Il n'y a rien à envoyer." : "There is nothing to send." }
+
+    /// `watch_bridge.whisper_too_long`
+    internal static var whisperTooLong: String { AppL10n.copyLocale == .frCA ? "Cette consigne est trop longue. Raccourcissez-la et réessayez." : "That instruction is too long. Shorten it and try again." }
+
+    /// `watch_bridge.whisper_unavailable`
+    internal static var whisperUnavailable: String { AppL10n.copyLocale == .frCA ? "Les consignes à l'assistant demandent une version plus récente de District AI sur votre iPhone." : "Instructions to the assistant need a newer version of District AI on your iPhone." }
+}
+
+extension WatchDiagnosticsCopy {
+    /// `watch_diagnostics.clear`
+    internal static var clear: String { AppL10n.copyLocale == .frCA ? "Effacer le journal" : "Clear the log" }
+
+    /// `watch_diagnostics.empty`
+    internal static var empty: String { AppL10n.copyLocale == .frCA ? "Rien n'a encore été enregistré." : "Nothing recorded yet." }
+
+    /// `watch_diagnostics.entries`
+    internal static var entries: String { AppL10n.copyLocale == .frCA ? "Entrées enregistrées" : "Entries recorded" }
+
+    /// `watch_diagnostics.force_socket`
+    internal static var forceSocket: String { AppL10n.copyLocale == .frCA ? "Garder la connexion ouverte" : "Keep the connection open" }
+
+    /// `watch_diagnostics.force_socket_note`
+    internal static var forceSocketNote: String { AppL10n.copyLocale == .frCA ? "Pour les essais. Garde la connexion en direct ouverte pendant que la montre suit un appel, au lieu de se reconnecter à chaque mise à jour." : "For testing. Holds the live connection while the watch follows a call, instead of reconnecting for each update." }
+
+    /// `watch_diagnostics.recording`
+    internal static var recording: String { AppL10n.copyLocale == .frCA ? "Enregistrer les délais du relais" : "Record relay timings" }
+
+    /// `watch_diagnostics.recording_note`
+    internal static var recordingNote: String { AppL10n.copyLocale == .frCA ? "Enregistre le temps que met votre iPhone à répondre à la montre et la durée d'ouverture d'une connexion en direct. Aucune transcription, aucun nom ni aucun numéro n'est enregistré." : "Records how long your iPhone takes to answer the watch, and how long a live connection stays open. No transcript, name or number is recorded." }
+
+    /// `watch_diagnostics.share`
+    internal static var share: String { AppL10n.copyLocale == .frCA ? "Partager le journal" : "Share the log" }
+
+    /// `watch_diagnostics.title`
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Diagnostic Apple Watch" : "Apple Watch diagnostics" }
 }
 
 extension WorkflowsCopy {

@@ -27,6 +27,33 @@ enum WatchAction: Codable, Equatable, Sendable {
     /// request and answers "update both apps", which the watch treats as unresolved and
     /// stays on the inbox. Bumping would instead blank every watch until both apps update.
     case resolveMessage(workspaceId: String, messageId: String)
+
+    // MARK: - Live calls (round 2)
+
+    //
+    // ⚠️ NO PROTOCOL BUMP FOR THESE EITHER, for the reason on ``resolveMessage(workspaceId:messageId:)``.
+    // A phone that predates them answers "update both apps", and the watch hides Live, steering
+    // and the summary card rather than blanking everything else.
+
+    /// The workspace's calls in progress, answered ``WatchReply/liveCalls``. Writes nothing.
+    case liveList(workspaceId: String)
+    /// Start relaying a call's transcript; answered ``WatchReply/live`` with everything so far.
+    case liveSubscribe(workspaceId: String, callId: String)
+    /// "Still watching", about every 5 s, answered with what is new since `cursor`.
+    ///
+    /// ⛔ THE PHONE STOPS AFTER 20 s WITHOUT ONE: a watch that walked away, slept or crashed
+    /// sends no unsubscribe, and the phone must not keep a socket open for nobody.
+    /// `roundTripMilliseconds` is how long the watch waited for the previous answer, for the
+    /// phone's diagnostics log; nil when there was none.
+    case liveKeepalive(workspaceId: String, callId: String, cursor: String?, roundTripMilliseconds: Int?)
+    /// The transcript screen closed.
+    case liveUnsubscribe(workspaceId: String, callId: String)
+    /// One line for the assistant, from the Live screen (`POST calls/whisper`).
+    ///
+    /// ⛔ THIRD PERSON, BECAUSE IT ARRIVES AS A SUPERVISOR'S INSTRUCTION, never spoken as is.
+    case whisper(workspaceId: String, callId: String, text: String)
+    /// The after-call card, answered ``WatchReply/card``. Writes nothing.
+    case callDetail(workspaceId: String, callId: String)
 }
 
 struct WatchRequest: Codable, Equatable, Sendable {
@@ -60,6 +87,13 @@ struct WatchReply: Codable, Equatable, Sendable {
     /// ``WatchAction/resolveMessage(workspaceId:messageId:)``'s answer; nil for every
     /// other request. ⚠️ Optional, so a reply from an older phone still decodes.
     var threadKey: String?
+    /// ``WatchAction/liveList(workspaceId:)``'s answer. ⛔ nil FROM A PHONE THAT DOES NOT KNOW
+    /// THE REQUEST, which is how the watch learns to hide Live.
+    var liveCalls: [WatchLiveCall]?
+    /// A subscribe's or a keepalive's answer.
+    var live: WatchLiveUpdate?
+    /// ``WatchAction/callDetail(workspaceId:callId:)``'s answer.
+    var card: WatchCallCard?
 
     static var success: WatchReply {
         WatchReply(protocolVersion: WatchSnapshot.currentProtocolVersion, ok: true, error: nil)
@@ -73,8 +107,26 @@ struct WatchReply: Codable, Equatable, Sendable {
         WatchReply(protocolVersion: WatchSnapshot.currentProtocolVersion, ok: true, error: nil, threadKey: threadKey)
     }
 
+    static func liveCalls(_ calls: [WatchLiveCall]) -> WatchReply {
+        var reply = success
+        reply.liveCalls = calls
+        return reply
+    }
+
+    static func live(_ update: WatchLiveUpdate) -> WatchReply {
+        var reply = success
+        reply.live = update
+        return reply
+    }
+
+    static func card(_ card: WatchCallCard) -> WatchReply {
+        var reply = success
+        reply.card = card.fitted()
+        return reply
+    }
+
     func message() -> [String: Any] {
-        // ⚠️ AN ENCODING FAILURE OF FOUR SCALARS CANNOT HAPPEN; an empty payload reads as
+        // ⚠️ AN ENCODING FAILURE OF PLAIN STRINGS AND NUMBERS CANNOT HAPPEN; an empty payload reads as
         // unreadable on the watch, which shows the generic failure rather than success.
         [Self.messageKey: (try? WatchWire.encoder.encode(self)) ?? Data()]
     }
