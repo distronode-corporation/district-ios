@@ -10,7 +10,23 @@ extension CallLiveActivities {
     convenience init(container: AppContainer) {
         self.init(host: ActivityKitCallActivityHost(), registrar: container.calls)
     }
+}
 
+extension LiveActivityStartTokens {
+    /// The app's own: ActivityKit's push-to-start tokens, the session's call repository, and
+    /// the workspace this device is working in.
+    convenience init(container: AppContainer) {
+        let selection = WorkspaceSelectionStore()
+        self.init(
+            registrar: container.calls,
+            memory: UserDefaultsLiveActivityStartTokenMemory(),
+            workspace: { selection.selectedWorkspaceId() },
+            observe: { ActivityKitCallActivityHost.observePushToStartTokens($0) }
+        )
+    }
+}
+
+extension CallLiveActivities {
     // MARK: - Callers
 
     /// ⛔ MASKED LIKE THE WATCH, BECAUSE THE ACTIVITY IS ON THE WATCH TOO (the Smart Stack):

@@ -40,8 +40,15 @@ built from history before publication, so they have no tags in this repository.
   to the server once through DistrictCore's `CallsRepository.registerLiveActivity`
   (`pushType: .token`), so the server's `liveactivity` pushes update it while the app sleeps.
   iOS 18 and later only: the extension targets iOS 18 for the watch family, and iOS 17
-  starts none. `NSSupportsLiveActivities` in the app; strings in `l10n/widgets.toml`.
-  `CallLiveActivitiesTests`. ⚠️ DistrictCore is pinned by `revision:` until the 8.1.0 tag.
+  starts none (Sean, "iOS 18+ only"). Push-to-start (Sean, "Add push-to-start"): the device's
+  push-to-start token goes to `POST live-activity/start-token` for the current workspace
+  (`LiveActivityStartTokens`: after sign-in and at launch, on a new token, on a workspace
+  switch, again after 7 days; never retried; cleared at sign-out), so a ring starts the
+  activity with no app running; the app adopts what the server starts, registers its update
+  token, and never keeps two for one call (the local ring start stays as the fallback). The
+  start push's alert keys `live_activity.start.title` and `.body` are in `l10n/push.toml`. `NSSupportsLiveActivities` in the app; strings in `l10n/widgets.toml`.
+  `CallLiveActivitiesTests`, `CallLiveActivityPushStartTests`, `LiveActivityStartTokensTests`.
+  ⚠️ DistrictCore is pinned by `revision:` until the 8.1.0 tag.
 - 3.2.0: steering from the watch sends through the core's `CallsRepository.whisper`;
   `PendingCoreWhisper`, its failure sentence (`watch_bridge.whisper_unavailable`) and its
   code are gone, and `ContainerWatchLiveSources` takes the sender with no default.

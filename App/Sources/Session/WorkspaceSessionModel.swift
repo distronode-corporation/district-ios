@@ -125,6 +125,8 @@ final class WorkspaceSessionModel {
         await load()
         // ⚠️ THE WATCH SHOWS ONE WORKSPACE, AND IT IS THIS ONE NOW.
         container.watchBridge.setNeedsSnapshot()
+        // ⚠️ AND THE PUSH-TO-START TOKEN NOW ROUTES THROUGH THIS ONE.
+        container.liveActivityStartTokens.workspaceChanged()
     }
 
     /// ⛔ THE PRECEDENCE HERE IS NOT ARBITRARY, AND EVERY STEP RESOLVES AGAINST THE

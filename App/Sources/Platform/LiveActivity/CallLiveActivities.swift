@@ -5,6 +5,8 @@ import Foundation
 /// One running Live Activity, behind a seam so the decisions run in a test.
 @MainActor
 protocol CallActivityHandle: AnyObject {
+    /// ActivityKit's own id: two handles for one activity share it.
+    var activityId: String { get }
     var workspaceId: String { get }
     var callId: String { get }
     var state: DistrictCallActivityAttributes.ContentState { get }
@@ -28,7 +30,10 @@ protocol CallActivityHosting {
     var enabled: Bool { get }
     /// The activities running now, including those a previous process started.
     func running() -> [any CallActivityHandle]
-    /// Start one, asking for push tokens. ⛔ Local only: there is no push-to-start.
+    /// Hand each activity that starts from now on to `onNew`, the push-started ones (a ring
+    /// the server announced) and this app's own alike.
+    func observeNewActivities(_ onNew: @escaping @MainActor (any CallActivityHandle) -> Void) -> Task<Void, Never>
+    /// Start one locally, asking for push tokens.
     func start(
         _ attributes: DistrictCallActivityAttributes,
         state: DistrictCallActivityAttributes.ContentState,
@@ -60,11 +65,13 @@ enum CallActivityRingOutcome: Equatable {
 /// The call Live Activities: started, updated and ended locally, and their push tokens handed
 /// to the server so it can update them while the app sleeps.
 ///
-/// ⛔ STARTED LOCALLY AND ONLY TWO WAYS (Sean, 2026-10-25: "When you're rung, or the app is
-/// open"): a ring that wakes the app (``rang(workspaceId:callId:)``, after CallKit
+/// ⛔ STARTED THREE WAYS (Sean, 2026-10-25: "When you're rung, or the app is open", then "Add
+/// push-to-start"): the server's push-to-start on a ring (iOS 18, the token sent by
+/// ``LiveActivityStartTokens``; this object adopts what it starts), and locally, as the
+/// fallback, by a ring that wakes the app (``rang(workspaceId:callId:)``, after CallKit
 /// has the call), and the open app seeing a call in progress
 /// (``seenLive(workspaceId:callId:callerName:startedAt:)``, the call screen or the watch
-/// relay's live list). No push-to-start.
+/// relay's live list).
 ///
 /// ⛔ NEVER TWO FOR ONE CALL. Every start first looks at what ActivityKit is running, which
 /// includes an activity a previous process started, so a relaunch adopts rather than doubles.
@@ -88,6 +95,7 @@ final class CallLiveActivities {
     private var activities: [String: any CallActivityHandle] = [:]
     private var tokenTasks: [String: Task<Void, Never>] = [:]
     private var adopted = false
+    private var newActivities: Task<Void, Never>?
 
     init(host: any CallActivityHosting, registrar: any LiveActivityRegistering, now: @escaping () -> Date = Date.init) {
         self.host = host
@@ -153,18 +161,36 @@ final class CallLiveActivities {
     }
 
     /// The activities a previous process left running: tracked, and their tokens watched
-    /// again, once per process.
-    private func adoptRunning() {
+    /// again; and from then on every activity that starts, once per process.
+    func adoptRunning() {
         guard !adopted else { return }
         adopted = true
-        for activity in host.running() where activities[activity.callId] == nil {
-            track(activity)
+        for activity in host.running() {
+            adopt(activity)
         }
+        newActivities = host.observeNewActivities { [weak self] activity in self?.adopt(activity) }
     }
 
-    /// The activity for a call, looking at what a previous process left running first.
+    /// ⛔ ONE ACTIVITY PER CALL. A push-started activity whose call already has one (this app
+    /// started it first, in front) is ended at once: the older one already has its token on
+    /// the server. The app's own start, reported back, is the same activity and changes
+    /// nothing.
+    private func adopt(_ activity: any CallActivityHandle) {
+        guard let existing = activities[activity.callId] else {
+            track(activity)
+            return
+        }
+        guard existing.activityId != activity.activityId else { return }
+        activity.end(activity.state, dismissal: .immediate)
+    }
+
+    /// The activity for a call: the tracked one, else one ActivityKit runs that the server
+    /// started (a ring's push-to-start can land before its announcement reaches ``adopt(_:)``).
     private func tracked(_ callId: String) -> (any CallActivityHandle)? {
         adoptRunning()
+        if activities[callId] == nil, let running = host.running().first(where: { $0.callId == callId }) {
+            adopt(running)
+        }
         return activities[callId]
     }
 

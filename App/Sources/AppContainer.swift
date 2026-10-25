@@ -339,6 +339,8 @@ final class AppContainer {
 
     /// The call Live Activities (3.2). ⚠️ `lazy` for the line budget, like the two above.
     lazy var liveActivities = CallLiveActivities(container: self)
+    /// The device's push-to-start token for them, sent while signed in.
+    lazy var liveActivityStartTokens = LiveActivityStartTokens(container: self)
 
     /// The Apple Watch companion's iPhone half: the snapshot it shows, and its writes.
     ///

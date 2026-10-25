@@ -22,6 +22,25 @@ struct ActivityKitCallActivityHost: CallActivityHosting {
             .map(ActivityKitCallActivity.init)
     }
 
+    func observeNewActivities(_ onNew: @escaping @MainActor (any CallActivityHandle) -> Void) -> Task<Void, Never> {
+        Task { @MainActor in
+            for await activity in Activity<DistrictCallActivityAttributes>.activityUpdates {
+                onNew(ActivityKitCallActivity(activity))
+            }
+        }
+    }
+
+    /// The device's push-to-start tokens, each handed to `onToken`; nil below iOS 18, where
+    /// the extension does not run.
+    static func observePushToStartTokens(_ onToken: @escaping @MainActor (Data) -> Void) -> Task<Void, Never>? {
+        guard #available(iOS 18.0, *) else { return nil }
+        return Task { @MainActor in
+            for await token in Activity<DistrictCallActivityAttributes>.pushToStartTokenUpdates {
+                onToken(token)
+            }
+        }
+    }
+
     func start(
         _ attributes: DistrictCallActivityAttributes,
         state: DistrictCallActivityAttributes.ContentState,
@@ -48,6 +67,10 @@ final class ActivityKitCallActivity: CallActivityHandle {
     init(_ activity: Activity<DistrictCallActivityAttributes>) {
         self.activity = activity
         state = activity.content.state
+    }
+
+    var activityId: String {
+        activity.id
     }
 
     var workspaceId: String {

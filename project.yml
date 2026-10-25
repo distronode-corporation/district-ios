@@ -88,8 +88,8 @@ packages:
   # package's five libraries, unchanged by the move.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    # TEMP until the 8.1.0 tag: district-core-swift feat/live-activity (CallsRepository.registerLiveActivity)
-    revision: ea0393c402d8d35697a44e429aae2aa60d2974f4
+    # TEMP until the 8.1.0 tag: district-core-swift feat/live-activity (CallsRepository.registerLiveActivity and registerLiveActivityStartToken)
+    revision: d6889aa38e6bf6bebd774f5f4b114b825c193353
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever

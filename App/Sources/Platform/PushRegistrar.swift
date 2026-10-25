@@ -198,6 +198,11 @@ final class PushRegistrar {
         // ⚠️ BEFORE THE GUARD TOO: a mint is decided by the stored token's age, not by this
         // session's first appearance, and the check is local. See ``NotifyTokenRenewal``.
         container.notifyTokenRenewal.renewIfNeeded()
+        // ⚠️ AND THE LIVE ACTIVITIES, before the guard for the same reason: a ring's push-to-start
+        // wakes the app to hand over the new activity's update token, which only an observer
+        // set up at launch receives; and the push-to-start token goes to the server.
+        container.liveActivities.adoptRunning()
+        container.liveActivityStartTokens.begin()
         guard !hasAskedThisSession else { return }
         hasAskedThisSession = true
         Task { await requestAuthorizationThenRegister() }
@@ -340,6 +345,7 @@ final class PushRegistrar {
         container.notifyTokenRenewal.forget()
         // ⛔ AND EVERY CALL LIVE ACTIVITY, at once: each names a caller of the leaving account.
         container.liveActivities.endAll()
+        container.liveActivityStartTokens.stop()
     }
 
     /// A `content-available` push woke this app. Refresh the badge, and nothing else.
