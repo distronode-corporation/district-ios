@@ -48,7 +48,8 @@ built from history before publication, so they have no tags in this repository.
   token, and never keeps two for one call (the local ring start stays as the fallback). The
   start push's alert keys `live_activity.start.title` and `.body` are in `l10n/push.toml`. `NSSupportsLiveActivities` in the app; strings in `l10n/widgets.toml`.
   `CallLiveActivitiesTests`, `CallLiveActivityPushStartTests`, `LiveActivityStartTokensTests`.
-  ⚠️ DistrictCore is pinned by `revision:` until the 8.1.0 tag.
+- 3.2.0: DistrictCore `exactVersion` 8.1.0 (district-core-swift's 8.1.0 tag, #42), for
+  `CallsRepository.registerLiveActivity` and `registerLiveActivityStartToken`.
 - 3.2.0: steering from the watch sends through the core's `CallsRepository.whisper`;
   `PendingCoreWhisper`, its failure sentence (`watch_bridge.whisper_unavailable`) and its
   code are gone, and `ContainerWatchLiveSources` takes the sender with no default.
