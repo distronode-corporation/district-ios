@@ -14860,6 +14860,16 @@ state = "reviewed"
 id = { swift = "WatchDiagnosticsCopy.clear" }
 note = "Deletes the diagnostics log on this iPhone."
 
+[watch_diagnostics.done]
+en = "Done"
+fr = "OK"
+ctx = "button"
+screen = "account"
+state = "reviewed"
+fr_variant = "Apple OS word"
+id = { swift = "WatchDiagnosticsCopy.done" }
+note = "Closes the hidden TestFlight diagnostics screen."
+
 [watch_diagnostics.empty]
 en = "Nothing recorded yet."
 fr = "Rien n'a encore été consigné."

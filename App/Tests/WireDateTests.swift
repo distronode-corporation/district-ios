@@ -30,4 +30,14 @@ final class WireDateTests: XCTestCase {
             WireDate.display("2026-10-04T12:00:00-04:00", in: TimeZone(identifier: "America/Toronto"))
         )
     }
+
+    /// ⚠️ A FRENCH CLOCK NEVER BREAKS AROUND ITS `h` (3.2.0 visual QA: the call detail at
+    /// accessibility XL ended a line on `16` and began the next on `h 13`). The date's own
+    /// spaces still wrap.
+    func testTheFrenchClockIsHeldOnOneLine() {
+        XCTAssertEqual(WireDate.unbroken("23 sept. 2026, 16 h 13"), "23 sept. 2026, 16\u{00A0}h\u{00A0}13")
+        XCTAssertEqual(WireDate.unbroken("1er oct. 2026, 9 h"), "1er oct. 2026, 9\u{00A0}h")
+        XCTAssertEqual(WireDate.unbroken("12 sept. 2026, 0 h 05"), "12 sept. 2026, 0\u{00A0}h\u{00A0}05")
+        XCTAssertEqual(WireDate.unbroken("Sep 12, 2026 at 2:30 PM"), "Sep 12, 2026 at 2:30 PM")
+    }
 }

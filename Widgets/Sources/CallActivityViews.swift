@@ -143,18 +143,37 @@ struct CallActivityDetail: View {
 }
 
 /// The time on the call: counting up while it goes, the end time once over.
+///
+/// ⚠️ THE COMPACT ISLAND IS NARROW, AND ONLY THE RUNNING TIMER IS CAPPED. A `Text(timerInterval:)`
+/// sizes itself for the longest value it could show, so without a cap it pushes the island
+/// wide; the end time is a fixed string and is never capped, or `12:53 p.m.` truncates to
+/// `12:5…` (3.2.0 visual QA). In compact the end time drops its day period (`12:53`,
+/// `13 h 19`): the Lock Screen and the expanded island beside it carry the full time.
 struct CallActivityClock: View {
     let call: CallActivityContent
+    var compact = false
 
     var body: some View {
         if call.phase.isOver {
             if let endedAt = call.endedAt {
-                Text(endedAt.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: WidgetL10n.locale)))
+                Text(endedAt.formatted(compact ? Self.compactEnd : Self.end))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
         } else if let startedAt = call.startedAt {
             Text(timerInterval: startedAt ... Date.distantFuture, countsDown: false)
                 .multilineTextAlignment(.trailing)
+                .frame(maxWidth: compact ? 44 : nil)
         }
+    }
+
+    private static var end: Date.FormatStyle {
+        Date.FormatStyle(date: .omitted, time: .shortened, locale: WidgetL10n.locale)
+    }
+
+    /// Hour and minute, no day period: `12:53` / `13 h 19`.
+    private static var compactEnd: Date.FormatStyle {
+        Date.FormatStyle(locale: WidgetL10n.locale).hour(.defaultDigits(amPM: .omitted)).minute()
     }
 }
 
