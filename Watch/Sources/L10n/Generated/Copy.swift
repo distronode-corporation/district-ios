@@ -137,8 +137,28 @@ extension WatchCopy {
     /// `watch.unread`
     internal static var unread: String { WatchL10n.copyLocale == .frCA ? "Non lus" : "Unread" }
 
+    /// `watch.unread_complication`
+    internal static var unreadComplication: String { WatchL10n.copyLocale == .frCA ? "Messages non lus" : "Unread messages" }
+
+    /// `watch.unread_complication_description`
+    internal static var unreadComplicationDescription: String { WatchL10n.copyLocale == .frCA ? "Indique le nombre de messages non lus, jamais leur expéditeur." : "Shows how many messages are unread, never who sent them." }
+
     /// `watch.unread_conversation`
     internal static var unreadConversation: String { WatchL10n.copyLocale == .frCA ? "Non lue" : "Unread" }
+
+    /// `watch.unread_messages`
+    internal static func unreadMessages(_ count: Int) -> String {
+        if WatchL10n.copyLocale == .frCA {
+            if count == 0 || count == 1 {
+                return "\(count) message non lu"
+            }
+            return "\(count) messages non lus"
+        }
+        if count == 1 {
+            return "\(count) unread message"
+        }
+        return "\(count) unread messages"
+    }
 
     /// `watch.update_iphone`
     internal static var updateIphone: String { WatchL10n.copyLocale == .frCA ? "Mettez à jour District AI sur votre iPhone" : "Update District AI on your iPhone" }

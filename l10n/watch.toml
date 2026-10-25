@@ -369,6 +369,24 @@ state = "reviewed"
 id = { swift = "WatchCopy.unread" }
 note = "Beside the number of unread messages in the workspace."
 
+[watch.unread_complication]
+en = "Unread messages"
+fr = "Messages non lus"
+ctx = "title"
+screen = "complication"
+state = "draft"
+id = { swift = "WatchCopy.unreadComplication" }
+note = "The opt-in unread complication's name in the watch-face editor (iOS 3.2). It shows a count only."
+
+[watch.unread_complication_description]
+en = "Shows how many messages are unread, never who sent them."
+fr = "Indique le nombre de messages non lus, jamais leur expéditeur."
+ctx = "body"
+screen = "complication"
+state = "draft"
+id = { swift = "WatchCopy.unreadComplicationDescription" }
+note = "The unread complication's description in the watch-face editor. Says what a face shows to whoever is beside you: a number, no names."
+
 [watch.unread_conversation]
 en = "Unread"
 fr = "Non lue"
@@ -377,6 +395,18 @@ screen = "watch"
 state = "reviewed"
 id = { swift = "WatchCopy.unreadConversation" }
 note = "Spoken for the dot on an unread conversation (la conversation, feminine)."
+
+[watch.unread_messages]
+en.one = "{count} unread message"
+en.other = "{count} unread messages"
+fr.one = "{count} message non lu"
+fr.other = "{count} messages non lus"
+ctx = "label"
+screen = "complication"
+args = { count = "int" }
+state = "draft"
+id = { swift = "WatchCopy.unreadMessages(_:)" }
+note = "The unread complication's inline family, and what VoiceOver reads for its circular and corner families. {count} is the number of unread messages in the workspace; never a name."
 
 [watch.update_iphone]
 en = "Update District AI on your iPhone"

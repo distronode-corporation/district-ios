@@ -56,9 +56,9 @@ options:
   # about the package, not about this line.
   deploymentTarget:
     iOS: "17.0"
-    # The Apple Watch companion (`DistrictAIWatch`) and its complication. watchOS 10 is
-    # the floor for a single-target watch app with WidgetKit accessory complications and
-    # the `.backgroundTask(.watchConnectivity)` scene modifier.
+    # The Apple Watch companion (`DistrictAIWatch`) and its complications. watchOS 10 is
+    # the floor for a single-target watch app with WidgetKit accessory complications.
+    # ⚠️ An API newer than the floor needs its older form (`WatchBackgroundRefresh`).
     watchOS: "10.0"
 
 # ⛔ THE VERSION PAIR IS PROJECT-LEVEL, SO THE iOS APP, THE WATCH APP AND THE COMPLICATION
@@ -590,9 +590,12 @@ targets:
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: "NO"
 
-  # The watch-face complication: a WidgetKit extension embedded in the watch app, showing
-  # availability for calls only (no unread count, by decision). It reads what the watch
-  # app wrote into the App Group; it has no session of its own.
+  # The watch-face complications: a WidgetKit extension embedded in the watch app, holding
+  # two widgets. Availability for calls, and since 3.2 an OPT-IN unread count (Sean,
+  # 2026-10-24, GitLab #2 note 4083623386, reversing 3.1.0's "no unread count"): a second
+  # complication a person adds to a face on purpose, a count only, never a name, redacted
+  # on a lowered wrist (`.privacySensitive()`). It reads what the watch app wrote into the
+  # App Group; it has no session of its own.
   DistrictAIWatchComplications:
     type: app-extension
     platform: watchOS

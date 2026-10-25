@@ -11,6 +11,8 @@ import UserNotifications
 /// model.
 @main
 struct DistrictAIWatchApp: App {
+    /// ⛔ THE BACKGROUND TASKS. See ``WatchAppDelegate`` for why it is a delegate.
+    @WKApplicationDelegateAdaptor private var delegate: WatchAppDelegate
     @State private var store: WatchStore
     private let link: LivePhoneLink
     /// ⚠️ HELD HERE: `UNUserNotificationCenter.delegate` is weak.
@@ -22,7 +24,8 @@ struct DistrictAIWatchApp: App {
         let store = WatchStore(
             link: link,
             persistence: GroupSnapshotStore(),
-            complication: WidgetComplicationPublisher()
+            complication: WidgetComplicationPublisher(),
+            backgroundRefresh: WatchBackgroundRefresh()
         )
         _store = State(initialValue: store)
         // ⛔ IN `init`, BEFORE LAUNCH FINISHES, or the tap that launched the app is never
@@ -35,12 +38,12 @@ struct DistrictAIWatchApp: App {
                 return
             }
         #endif
+        // ⚠️ AFTER THE PREVIEW SEAM: a preview runs no background task and schedules none.
+        WatchAppDelegate.work = WatchAppDelegate.Work(store: store, link: link)
         store.start()
     }
 
     var body: some Scene {
-        // ⚠️ THE LINK, NOT `self`, GOES INTO THE BACKGROUND TASK: the closure is `@Sendable`.
-        let link = link
         WindowGroup {
             #if DEBUG
                 if let screen = WatchPreviewSeam.screen {
@@ -51,12 +54,6 @@ struct DistrictAIWatchApp: App {
             #else
                 WatchRootView(store: store)
             #endif
-        }
-        // ⚠️ A SNAPSHOT CAN ARRIVE WHILE THE APP IS NOT RUNNING. The system wakes it for
-        // this task; the session (activated in `init`) delivers the context, and the store
-        // updates the complication before the task returns.
-        .backgroundTask(.watchConnectivity) {
-            await link.waitForPendingContent()
         }
     }
 }
