@@ -10,6 +10,6 @@ ctx = "notification"
 screen = "push"
 tier = "T0"
 args = { name = "str" }
-state = "draft"
+state = "reviewed"
 id = { apple = "push.message.title.named" }
 note = "A message alert's title once the notification service extension has the sender's name (iOS 3.2). {name} is the contact's display name from the server, never translated. The middle dot keeps the name out of the sentence, so French needs no elision before a vowel. Without a name the alert keeps push.message.title."

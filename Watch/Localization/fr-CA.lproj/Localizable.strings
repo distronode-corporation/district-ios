@@ -8,7 +8,7 @@
 "watch.available_for_calls" = "Disponible pour les appels";
 "watch.available_in" = "Disponible · {workspace}";
 "watch.call_back" = "Rappeler sur l'iPhone";
-"watch.call_back_hint" = "Sur votre iPhone, ouvrez le sélecteur d'apps et touchez District AI.";
+"watch.call_back_hint" = "Sur votre iPhone, ouvrez le sélecteur d'app et touchez District AI.";
 "watch.call_title" = "Résumé de l'appel";
 "watch.calls" = "Appels";
 "watch.calls_in" = "Appels de l'espace {workspace}";
@@ -24,7 +24,7 @@
 "watch.iphone_did_not_answer" = "Votre iPhone n'a pas répondu. Réessayez.";
 "watch.iphone_not_reachable" = "iPhone injoignable";
 "watch.iphone_not_reachable_body" = "Gardez votre iPhone à proximité et réessayez.";
-"watch.live_call" = "Appel en direct";
+"watch.live_call" = "Appel en cours";
 "watch.live_connecting" = "Connexion…";
 "watch.live_ended" = "Appel terminé";
 "watch.live_incomplete" = "Les répliques précédentes figureront dans la transcription complète après l'appel.";
@@ -51,7 +51,7 @@
 "watch.sign_in_body" = "Ouvrez District AI sur votre iPhone et connectez-vous. Vos appels et vos messages s'afficheront ici.";
 "watch.sign_in_on_iphone" = "Connectez-vous sur l'iPhone";
 "watch.signed_out" = "Session fermée";
-"watch.steer_header" = "Consigne à l'assistant";
+"watch.steer_header" = "Consigne à l'assistante";
 "watch.summary" = "Résumé IA";
 "watch.summary_on_its_way" = "Résumé en préparation";
 "watch.try_again" = "Réessayer";
@@ -68,7 +68,7 @@
 "watch.waiting_for_iphone" = "En attente de votre iPhone…";
 "watch.when" = "Date";
 "watch.whisper_ask_what_about" = "Demandez l'objet de l'appel.";
-"watch.whisper_call_back_today" = "Le propriétaire rappellera la personne aujourd'hui.";
-"watch.whisper_not_sent" = "Non envoyé à l'assistant";
+"watch.whisper_call_back_today" = "Nous rappellerons la personne aujourd'hui.";
+"watch.whisper_not_sent" = "Consigne non envoyée";
 "watch.whisper_other" = "Autre consigne";
-"watch.whisper_sent" = "Envoyé à l'assistant";
+"watch.whisper_sent" = "Consigne envoyée";

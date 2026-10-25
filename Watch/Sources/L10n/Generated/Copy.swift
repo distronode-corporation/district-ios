@@ -35,7 +35,7 @@ extension WatchCopy {
     internal static var callBack: String { WatchL10n.copyLocale == .frCA ? "Rappeler sur l'iPhone" : "Call back on iPhone" }
 
     /// `watch.call_back_hint`
-    internal static var callBackHint: String { WatchL10n.copyLocale == .frCA ? "Sur votre iPhone, ouvrez le sélecteur d'apps et touchez District AI." : "On your iPhone, open the App Switcher and tap District AI." }
+    internal static var callBackHint: String { WatchL10n.copyLocale == .frCA ? "Sur votre iPhone, ouvrez le sélecteur d'app et touchez District AI." : "On your iPhone, open the App Switcher and tap District AI." }
 
     /// `watch.call_title`
     internal static var callTitle: String { WatchL10n.copyLocale == .frCA ? "Résumé de l'appel" : "Call summary" }
@@ -85,7 +85,7 @@ extension WatchCopy {
     internal static var iphoneNotReachableBody: String { WatchL10n.copyLocale == .frCA ? "Gardez votre iPhone à proximité et réessayez." : "Keep your iPhone nearby and try again." }
 
     /// `watch.live_call`
-    internal static var liveCall: String { WatchL10n.copyLocale == .frCA ? "Appel en direct" : "Live call" }
+    internal static var liveCall: String { WatchL10n.copyLocale == .frCA ? "Appel en cours" : "Live call" }
 
     /// `watch.live_connecting`
     internal static var liveConnecting: String { WatchL10n.copyLocale == .frCA ? "Connexion…" : "Connecting…" }
@@ -168,7 +168,7 @@ extension WatchCopy {
     internal static var signedOut: String { WatchL10n.copyLocale == .frCA ? "Session fermée" : "Signed out" }
 
     /// `watch.steer_header`
-    internal static var steerHeader: String { WatchL10n.copyLocale == .frCA ? "Consigne à l'assistant" : "Tell the assistant" }
+    internal static var steerHeader: String { WatchL10n.copyLocale == .frCA ? "Consigne à l'assistante" : "Tell the assistant" }
 
     /// `watch.summary`
     internal static var summary: String { WatchL10n.copyLocale == .frCA ? "Résumé IA" : "AI summary" }
@@ -226,14 +226,14 @@ extension WatchCopy {
     internal static var whisperAskWhatAbout: String { WatchL10n.copyLocale == .frCA ? "Demandez l'objet de l'appel." : "Ask what the call is about." }
 
     /// `watch.whisper_call_back_today`
-    internal static var whisperCallBackToday: String { WatchL10n.copyLocale == .frCA ? "Le propriétaire rappellera la personne aujourd'hui." : "The owner will call them back today." }
+    internal static var whisperCallBackToday: String { WatchL10n.copyLocale == .frCA ? "Nous rappellerons la personne aujourd'hui." : "We will call them back today." }
 
     /// `watch.whisper_not_sent`
-    internal static var whisperNotSent: String { WatchL10n.copyLocale == .frCA ? "Non envoyé à l'assistant" : "Not sent to the assistant" }
+    internal static var whisperNotSent: String { WatchL10n.copyLocale == .frCA ? "Consigne non envoyée" : "Not sent to the assistant" }
 
     /// `watch.whisper_other`
     internal static var whisperOther: String { WatchL10n.copyLocale == .frCA ? "Autre consigne" : "Other instruction" }
 
     /// `watch.whisper_sent`
-    internal static var whisperSent: String { WatchL10n.copyLocale == .frCA ? "Envoyé à l'assistant" : "Sent to the assistant" }
+    internal static var whisperSent: String { WatchL10n.copyLocale == .frCA ? "Consigne envoyée" : "Sent to the assistant" }
 }

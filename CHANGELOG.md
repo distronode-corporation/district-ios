@@ -470,7 +470,7 @@ built from history before publication, so they have no tags in this repository.
 
 More of District AI on your Apple Watch.
 
-- Follow a call's live transcript on your Apple Watch while the assistant takes it, and guide the assistant: tell it you will call back today, have it ask what the call is about, or dictate your own instruction.
+- Follow a call's live transcript on your Apple Watch while the assistant takes it, and guide the assistant: tell it you will call them back today, have it ask what the call is about, or dictate your own instruction.
 - When a call ends, your watch shows a summary with the outcome and the action items. Call back on iPhone opens your iPhone's keypad with the number filled in.
 - Add an optional complication that shows how many messages are unread. It is on no watch face until you add it, and it never shows who wrote.
 - Decline a call on your iPhone or your Apple Watch, and once everyone it rang has declined, the assistant takes a message right away instead of letting it ring on.

@@ -5539,28 +5539,28 @@ extension WatchDiagnosticsCopy {
     internal static var clear: String { AppL10n.copyLocale == .frCA ? "Effacer le journal" : "Clear the log" }
 
     /// `watch_diagnostics.empty`
-    internal static var empty: String { AppL10n.copyLocale == .frCA ? "Rien n'a encore été enregistré." : "Nothing recorded yet." }
+    internal static var empty: String { AppL10n.copyLocale == .frCA ? "Rien n'a encore été consigné." : "Nothing recorded yet." }
 
     /// `watch_diagnostics.entries`
-    internal static var entries: String { AppL10n.copyLocale == .frCA ? "Entrées enregistrées" : "Entries recorded" }
+    internal static var entries: String { AppL10n.copyLocale == .frCA ? "Entrées consignées" : "Entries recorded" }
 
     /// `watch_diagnostics.force_socket`
     internal static var forceSocket: String { AppL10n.copyLocale == .frCA ? "Garder la connexion ouverte" : "Keep the connection open" }
 
     /// `watch_diagnostics.force_socket_note`
-    internal static var forceSocketNote: String { AppL10n.copyLocale == .frCA ? "Pour les essais. Garde la connexion en direct ouverte pendant que la montre suit un appel, au lieu de se reconnecter à chaque mise à jour." : "For testing. Holds the live connection while the watch follows a call, instead of reconnecting for each update." }
+    internal static var forceSocketNote: String { AppL10n.copyLocale == .frCA ? "Pour les essais. Cette option garde la connexion en direct ouverte pendant que la montre suit un appel, au lieu de la rouvrir à chaque mise à jour." : "For testing. Holds the live connection while the watch follows a call, instead of reconnecting for each update." }
 
     /// `watch_diagnostics.recording`
-    internal static var recording: String { AppL10n.copyLocale == .frCA ? "Enregistrer les délais du relais" : "Record relay timings" }
+    internal static var recording: String { AppL10n.copyLocale == .frCA ? "Consigner les temps du relais" : "Record relay timings" }
 
     /// `watch_diagnostics.recording_note`
-    internal static var recordingNote: String { AppL10n.copyLocale == .frCA ? "Enregistre le temps que met votre iPhone à répondre à la montre et la durée d'ouverture d'une connexion en direct. Aucune transcription, aucun nom ni aucun numéro n'est enregistré." : "Records how long your iPhone takes to answer the watch, and how long a live connection stays open. No transcript, name or number is recorded." }
+    internal static var recordingNote: String { AppL10n.copyLocale == .frCA ? "Cette option consigne le temps que met votre iPhone à répondre à la montre et la durée d'ouverture d'une connexion en direct. Aucune transcription, aucun nom ni aucun numéro n'est consigné." : "Records how long your iPhone takes to answer the watch, and how long a live connection stays open. No transcript, name or number is recorded." }
 
     /// `watch_diagnostics.share`
     internal static var share: String { AppL10n.copyLocale == .frCA ? "Partager le journal" : "Share the log" }
 
     /// `watch_diagnostics.title`
-    internal static var title: String { AppL10n.copyLocale == .frCA ? "Diagnostic Apple Watch" : "Apple Watch diagnostics" }
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Diagnostic de l'Apple Watch" : "Apple Watch diagnostics" }
 }
 
 extension WorkflowsCopy {
