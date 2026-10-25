@@ -12,6 +12,7 @@
 #   version=<MARKETING_VERSION from project.yml>
 #   build=<BUILD_NUMBER_OFFSET (default 4101) + git rev-list --count HEAD>
 #   kind=tag|main
+#   uploaded=no|yes   with RELEASE_CHECK_UPLOADED=1 only (below)
 #
 # Refuses:
 #   - a shallow clone. `git rev-list --count` on one answers the depth (1), not the
@@ -23,9 +24,24 @@
 #   - with RELEASE_CHECK_UPLOADED=1, a build number not above the highest App Store
 #     Connect already has for this version (it refuses a number at or below that, so
 #     a tag of a commit a main dispatch already uploaded would spend a whole archive to
-#     be turned away). Needs ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_PATH. release.yml's
-#     build job runs the preflight a second time with it, once the key is fetched;
-#     submit.yml never sets it, because the build it submits is uploaded by design.
+#     be turned away), UNLESS the ref is a tag and that build is proven to be this
+#     commit's (below). Needs ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_PATH, and for a
+#     tag SENTRY_AUTH_TOKEN and SENTRY_ORG. release.yml's build job runs the preflight a
+#     second time with it, once the key is fetched; submit.yml never sets it, because
+#     the build it submits is uploaded by design. It adds one line to the output:
+#       uploaded=no    the number is unused: archive and upload
+#       uploaded=yes   App Store Connect already has this commit's build: build nothing
+#
+# ⛔ "THIS COMMIT'S BUILD" IS PROVEN, NEVER ASSUMED, and only for a tag (usually the iMac
+# uploaded it before the tag's run). Both must hold, or the run is refused:
+#   - no other commit in origin/main's history has this build number. The number is
+#     4101 plus the commit count; an ancestor of HEAD counts fewer and a descendant
+#     more, so only a commit on main that is neither (a merged side branch) could share
+#     it, and there must be none;
+#   - `asc_release.py already-uploaded`: App Store Connect has this exact version and
+#     number, VALID or PROCESSING and not expired, and the Sentry release that
+#     archive-imac.sh made for that archive records HEAD as its commit (that script's
+#     comment says what each check proves).
 set -euo pipefail
 
 die() {
@@ -72,18 +88,38 @@ case "$REF_TYPE" in
     ;;
 esac
 
+# Never taken from the environment: only the check below sets it.
+UPLOADED=""
 if [ "${RELEASE_CHECK_UPLOADED:-}" = "1" ]; then
   highest="$(python3 scripts/asc_release.py highest-build --version "$VERSION")" ||
     die "could not read the builds App Store Connect has for $VERSION."
   [[ "$highest" =~ ^[0-9]+$ ]] || die "App Store Connect's highest build for $VERSION is '$highest', not a number."
-  [ "$BUILD" -gt "$highest" ] ||
-    die "build $BUILD of $VERSION is not above $highest, the highest App Store Connect already has, so the upload would be refused. Release a newer commit. Nothing was built."
   echo "highest uploaded build of $VERSION: $highest"
+  if [ "$BUILD" -gt "$highest" ]; then
+    UPLOADED=no
+  elif [ "$KIND" = "tag" ]; then
+    # origin/main is known to exist and to contain HEAD: the tag case above checked both.
+    later="$(git rev-list --count HEAD..refs/remotes/origin/main)"
+    descendants="$(git rev-list --count --ancestry-path HEAD..refs/remotes/origin/main)"
+    [ "$later" = "$descendants" ] ||
+      die "build $BUILD of $VERSION is already in App Store Connect, and $((later - descendants)) commit(s) on main are neither before nor after this one, so one of them could share the number. It is not assumed to be this commit's. Nothing was built."
+    commit="$(git rev-parse HEAD)"
+    python3 scripts/asc_release.py already-uploaded --version "$VERSION" --build "$BUILD" --commit "$commit" ||
+      die "build $BUILD of $VERSION is already in App Store Connect and is not proven to be this commit's ($commit), so this tag cannot be released from it. Nothing was built."
+    echo "build $BUILD of $VERSION was already uploaded from $commit; nothing will be built or uploaded."
+    UPLOADED=yes
+  else
+    die "build $BUILD of $VERSION is not above $highest, the highest App Store Connect already has, so the upload would be refused. Release a newer commit. Nothing was built."
+  fi
 fi
 
 out="version=$VERSION
 build=$BUILD
 kind=$KIND"
+if [ -n "$UPLOADED" ]; then
+  out="$out
+uploaded=$UPLOADED"
+fi
 printf '%s\n' "$out"
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
   printf '%s\n' "$out" >>"$GITHUB_OUTPUT"

@@ -10,7 +10,7 @@ set -uo pipefail
 # ⛔ HERMETIC. The script falls back to GITHUB_REF_TYPE / GITHUB_REF_NAME, which are set
 # in every Actions job, so an ambient value would silently become the fixture.
 for _leaked in $(env 2>/dev/null | sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' |
-  grep -E '^(RELEASE_|GITHUB_|ASC_|HIGHEST$|BUILD_NUMBER_OFFSET$)'); do
+  grep -E '^(RELEASE_|GITHUB_|ASC_|SENTRY_|HIGHEST$|MATCH$|UPLOADED$|BUILD_NUMBER_OFFSET$)'); do
   unset "$_leaked"
 done
 
@@ -150,13 +150,19 @@ run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main
 assert_nonzero "$RC" "two MARKETING_VERSION lines are refused"
 
 echo "12. RELEASE_CHECK_UPLOADED refuses a build number App Store Connect already has"
-# A stand-in for asc_release.py that answers highest-build from HIGHEST and records its
-# arguments, so no credential or network is involved.
+# A stand-in for asc_release.py that answers highest-build from HIGHEST and
+# already-uploaded from MATCH (ok, or anything else for a refusal), and appends each
+# call's arguments as one line, so no credential or network is involved.
 stub_asc() {
   cat >"$REPO/scripts/asc_release.py" <<'STUB'
 import os, sys
-with open(os.environ["ASC_ARGS"], "w") as f:
-    f.write(" ".join(sys.argv[1:]))
+with open(os.environ["ASC_ARGS"], "a") as f:
+    f.write(" ".join(sys.argv[1:]) + "\n")
+if sys.argv[1] == "already-uploaded":
+    if os.environ.get("MATCH") == "ok":
+        print("MATCH - stub")
+        sys.exit(0)
+    sys.exit("FATAL - stub: not this commit's build")
 if os.environ.get("HIGHEST") == "fail":
     sys.exit("FATAL - stub refused")
 print(os.environ["HIGHEST"])
@@ -172,8 +178,8 @@ new_repo 1.3
 stub_asc
 (cd "$REPO" && git tag v1.3)
 run RELEASE_REF_TYPE=tag RELEASE_REF_NAME=v1.3 RELEASE_CHECK_UPLOADED=1 HIGHEST=4104 ASC_ARGS="$TMPROOT/args$N"
-assert_nonzero "$RC" "a tag of the commit main already uploaded as 4104 is refused"
-assert_contains "$OUT" "build 4104 of 1.3 is not above 4104" "the message names both numbers"
+assert_nonzero "$RC" "a tag of an uploaded number, not proven this commit's (no MATCH), is refused"
+assert_contains "$OUT" "build 4104 of 1.3 is already in App Store Connect and is not proven" "the message names the number"
 new_repo 1.3
 stub_asc
 run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main RELEASE_CHECK_UPLOADED=1 HIGHEST=fail ASC_ARGS="$TMPROOT/args$N"
@@ -187,6 +193,77 @@ stub_asc
 run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main HIGHEST=9999 ASC_ARGS="$TMPROOT/args$N"
 assert_zero "$RC" "without RELEASE_CHECK_UPLOADED nothing is asked"
 if [ -e "$TMPROOT/args$N" ]; then fail "the stub was called without RELEASE_CHECK_UPLOADED"; else ok "the stub was not called"; fi
+assert_not_contains() { case "$1" in *"$2"*) fail "$3 - did not expect: $2" ;; *) ok "$3" ;; esac }
+assert_not_contains "$OUT" "uploaded=" "without RELEASE_CHECK_UPLOADED there is no uploaded line"
+run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main UPLOADED=yes
+assert_not_contains "$OUT" "uploaded=" "an ambient UPLOADED is never taken as the answer"
+
+echo "13. an unused number is uploaded=no"
+new_repo 1.3
+stub_asc
+(cd "$REPO" && git tag v1.3)
+run RELEASE_REF_TYPE=tag RELEASE_REF_NAME=v1.3 RELEASE_CHECK_UPLOADED=1 HIGHEST=4103 MATCH=ok ASC_ARGS="$TMPROOT/args$N"
+assert_zero "$RC" "4104 above 4103 on a tag is accepted"
+assert_contains "$OUT" "uploaded=no" "it says the build is to be uploaded"
+assert_not_contains "$(cat "$TMPROOT/args$N")" "already-uploaded" "no match is asked for an unused number"
+
+echo "14. a tag whose build is proven to be this commit's is uploaded=yes"
+new_repo 1.3
+stub_asc
+(cd "$REPO" && git tag v1.3)
+SHA="$(cd "$REPO" && git rev-parse HEAD)"
+: >"$TMPROOT/out$N"
+run RELEASE_REF_TYPE=tag RELEASE_REF_NAME=v1.3 RELEASE_CHECK_UPLOADED=1 HIGHEST=4104 MATCH=ok ASC_ARGS="$TMPROOT/args$N" GITHUB_OUTPUT="$TMPROOT/out$N"
+assert_zero "$RC" "the iMac's upload of this commit is accepted"
+assert_contains "$(cat "$TMPROOT/args$N")" "already-uploaded --version 1.3 --build 4104 --commit $SHA" "it asks about this exact build and the full sha"
+assert_contains "$(cat "$TMPROOT/out$N")" "uploaded=yes" "GITHUB_OUTPUT carries uploaded=yes"
+assert_contains "$(cat "$TMPROOT/out$N")" "build=4104" "and the build number"
+assert_contains "$OUT" "nothing will be built or uploaded" "the log says so"
+
+echo "15. a higher number already taken, and the exact one proven, is uploaded=yes"
+new_repo 1.3
+stub_asc
+(cd "$REPO" && git tag v1.3 && git commit -q --allow-empty -m four && git update-ref refs/remotes/origin/main HEAD && git checkout -q v1.3)
+run RELEASE_REF_TYPE=tag RELEASE_REF_NAME=v1.3 RELEASE_CHECK_UPLOADED=1 HIGHEST=4105 MATCH=ok ASC_ARGS="$TMPROOT/args$N"
+assert_zero "$RC" "a tag behind main, its own build proven, is accepted"
+assert_contains "$OUT" "uploaded=yes" "it builds nothing"
+
+echo "16. a tag whose build is not proven is refused"
+new_repo 1.3
+stub_asc
+(cd "$REPO" && git tag v1.3)
+run RELEASE_REF_TYPE=tag RELEASE_REF_NAME=v1.3 RELEASE_CHECK_UPLOADED=1 HIGHEST=4104 MATCH=no ASC_ARGS="$TMPROOT/args$N"
+assert_nonzero "$RC" "a failed match is a refusal"
+assert_contains "$OUT" "stub: not this commit's build" "the match's own reason is shown"
+assert_contains "$OUT" "is not proven to be this commit's" "and the preflight says what it means"
+assert_not_contains "$OUT" "uploaded=" "no outputs are written"
+
+echo "17. a main dispatch of an uploaded number is refused, with no match asked"
+new_repo 1.3
+stub_asc
+run RELEASE_REF_TYPE=branch RELEASE_REF_NAME=main RELEASE_CHECK_UPLOADED=1 HIGHEST=4104 MATCH=ok ASC_ARGS="$TMPROOT/args$N"
+assert_nonzero "$RC" "main is never matched"
+assert_contains "$OUT" "is not above 4104" "the old message"
+assert_not_contains "$(cat "$TMPROOT/args$N")" "already-uploaded" "no match is asked on main"
+
+echo "18. a commit on main that could share the number refuses the match"
+# origin/main merges a side branch cut from HEAD~1: its one commit counts as many as HEAD.
+new_repo 1.3
+stub_asc
+(
+  cd "$REPO" || exit 1
+  git tag v1.3
+  git checkout -q -b side HEAD~1
+  git commit -q --allow-empty -m side
+  git checkout -q main
+  git merge -q --no-ff --no-edit side
+  git update-ref refs/remotes/origin/main HEAD
+  git checkout -q v1.3
+)
+run RELEASE_REF_TYPE=tag RELEASE_REF_NAME=v1.3 RELEASE_CHECK_UPLOADED=1 HIGHEST=4104 MATCH=ok ASC_ARGS="$TMPROOT/args$N"
+assert_nonzero "$RC" "an incomparable commit on main is a refusal"
+assert_contains "$OUT" "1 commit(s) on main are neither before nor after" "the message counts them"
+assert_not_contains "$(cat "$TMPROOT/args$N")" "already-uploaded" "App Store Connect is not asked"
 
 echo
 echo "passed $PASS, failed $FAIL"
