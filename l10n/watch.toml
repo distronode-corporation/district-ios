@@ -201,6 +201,55 @@ state = "reviewed"
 fr_variant = "Watch screen title, the same word as the iPhone tab: Apple Mail's own French for Inbox; « Boîte de réception » does not fit the watch's title"
 id = { swift = "WatchCopy.inbox" }
 
+[watch.intent_availability_off]
+en = "Calls in {workspace} no longer ring your phone."
+fr = "Les appels de l'espace {workspace} ne sonnent plus sur votre téléphone."
+ctx = "body"
+screen = "intents"
+args = { workspace = "str" }
+state = "reviewed"
+id = { swift = "WatchCopy.intentAvailabilityOff(_:)" }
+note = "Siri or Shortcuts answer on the watch after « Set my availability » turned calls off."
+
+[watch.intent_availability_on]
+en = "Calls in {workspace} now ring your phone."
+fr = "Les appels de l'espace {workspace} sonnent désormais sur votre téléphone."
+ctx = "body"
+screen = "intents"
+args = { workspace = "str" }
+state = "reviewed"
+id = { swift = "WatchCopy.intentAvailabilityOn(_:)" }
+note = "Siri or Shortcuts answer on the watch after « Set my availability » turned calls on. Same words as the iPhone's intent.availability_on."
+
+[watch.intent_latest_inbound]
+en = "Latest message · {name}: {text}"
+fr = "Dernier message · {name}\u00A0: {text}"
+ctx = "body"
+screen = "intents"
+args = { name = "str", text = "str" }
+state = "reviewed"
+id = { swift = "WatchCopy.intentLatestInbound(_:text:)" }
+note = "« Read my latest message » on the watch. Same words as the iPhone's intent.latest_inbound."
+
+[watch.intent_latest_outbound]
+en = "Your latest reply · {name}: {text}"
+fr = "Votre dernière réponse · {name}\u00A0: {text}"
+ctx = "body"
+screen = "intents"
+args = { name = "str", text = "str" }
+state = "reviewed"
+id = { swift = "WatchCopy.intentLatestOutbound(_:text:)" }
+note = "« Read my latest message » on the watch, when the newest message was sent by the business."
+
+[watch.intent_no_messages]
+en = "There are no messages in your inbox."
+fr = "Votre boîte de réception ne contient aucun message."
+ctx = "body"
+screen = "intents"
+state = "reviewed"
+id = { swift = "WatchCopy.intentNoMessages" }
+note = "« Read my latest message » on the watch with an empty inbox."
+
 [watch.iphone_did_not_answer]
 en = "Your iPhone did not answer. Try again."
 fr = "Votre iPhone n'a pas répondu. Réessayez."
@@ -367,6 +416,16 @@ args = { workspace = "str" }
 state = "reviewed"
 id = { swift = "WatchCopy.notAvailableIn(_:)" }
 note = "Inline watch-face complication. {workspace} is the workspace's name."
+
+[watch.notification_message]
+en = "Message"
+fr = "Message"
+ctx = "label"
+screen = "watch"
+state = "reviewed"
+same_ok = true
+id = { swift = "WatchCopy.notificationMessage" }
+note = "Small label above the sender's name on the watch's long-look message notification."
 
 [watch.open_iphone]
 en = "Open District AI on your iPhone"

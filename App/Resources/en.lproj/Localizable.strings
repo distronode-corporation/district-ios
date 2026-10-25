@@ -3,5 +3,7 @@
 "push.call.title" = "Incoming call";
 "push.generic.body" = "You have a new notification.";
 "push.generic.title" = "District AI";
+"live_activity.start.body" = "Someone is calling your District line.";
+"live_activity.start.title" = "Incoming call";
 "push.message.body" = "A new message arrived in your inbox.";
 "push.message.title" = "New message";

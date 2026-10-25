@@ -1530,6 +1530,57 @@ extension IncomingCallCopy {
 
     /// `incoming_call.ringing`
     internal static var ringing: String { AppL10n.copyLocale == .frCA ? "Sonnerie…" : "Ringing…" }
+
+    /// `incoming_call.steer_ask_what_about`
+    internal static var steerAskWhatAbout: String { AppL10n.copyLocale == .frCA ? "Demandez l'objet de l'appel." : "Ask what the call is about." }
+
+    /// `incoming_call.steer_body`
+    internal static var steerBody: String { AppL10n.copyLocale == .frCA ? "Vous avez refusé l'appel. Indiquer à l'assistante quoi dire?" : "You declined the call. Tell the assistant what to say?" }
+
+    /// `incoming_call.steer_call_back_today`
+    internal static var steerCallBackToday: String { AppL10n.copyLocale == .frCA ? "Nous rappellerons la personne aujourd'hui." : "We will call them back today." }
+
+    /// `incoming_call.steer_failure_body`
+    internal static func steerFailureBody(_ reason: String, _ text: String) -> String {
+        AppL10n.copyLocale == .frCA ? "\(reason)\n\nVotre consigne\u{00A0}: \(text)" : "\(reason)\n\nYour instruction: \(text)"
+    }
+
+    /// `incoming_call.steer_not_sent`
+    internal static var steerNotSent: String { AppL10n.copyLocale == .frCA ? "Consigne non envoyée" : "Not sent to the assistant" }
+
+    /// `incoming_call.steer_placeholder`
+    internal static var steerPlaceholder: String { AppL10n.copyLocale == .frCA ? "Que doit dire l'assistante?" : "What should the assistant say?" }
+
+    /// `incoming_call.steer_typed`
+    internal static var steerTyped: String { AppL10n.copyLocale == .frCA ? "Écrire à l'assistante" : "Tell the assistant" }
+}
+
+extension IntentCopy {
+    /// `intent.availability_off`
+    internal static func availabilityOff(_ workspace_name: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Les appels de l'espace \(workspace_name) ne sonnent plus sur votre téléphone." : "Calls in \(workspace_name) no longer ring your phone."
+    }
+
+    /// `intent.availability_on`
+    internal static func availabilityOn(_ workspace_name: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Les appels de l'espace \(workspace_name) sonnent désormais sur votre téléphone." : "Calls in \(workspace_name) now ring your phone."
+    }
+
+    /// `intent.latest_inbound`
+    internal static func latestInbound(_ name: String, text: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Dernier message · \(name)\u{00A0}: \(text)" : "Latest message · \(name): \(text)"
+    }
+
+    /// `intent.latest_outbound`
+    internal static func latestOutbound(_ name: String, text: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Votre dernière réponse · \(name)\u{00A0}: \(text)" : "Your latest reply · \(name): \(text)"
+    }
+
+    /// `intent.no_messages`
+    internal static var noMessages: String { AppL10n.copyLocale == .frCA ? "Votre boîte de réception ne contient aucun message." : "There are no messages in your inbox." }
+
+    /// `intent.no_workspace`
+    internal static var noWorkspace: String { AppL10n.copyLocale == .frCA ? "Ouvrez District AI et choisissez d'abord un espace de travail." : "Open District AI and choose a workspace first." }
 }
 
 extension LiveTranscriptCopy {

@@ -37,6 +37,11 @@ enum IncomingCallEnding {
 /// lock screen, a watch or a headset often reaches a suspended app, which CallKit wakes only
 /// for the end action; without the lease the request would be frozen with it.
 ///
+/// ⛔ AND IT LEAVES THE STEER NOTIFICATION BEHIND (3.2): "You declined the call. Tell the
+/// assistant what to say?" (``DeclineSteerNotification``). Posted here because this is the one
+/// place only a person's decline reaches; posted at once, not after the answer, because the
+/// assistant is taking the call now and an instruction is worth most in its first seconds.
+///
 /// ⚠️ THE RESULT IS FOR A TEST, NOT A SCREEN. The ring has already ended locally, so no answer
 /// changes what the person sees (see `InboundCallRepository.decline`).
 @MainActor
@@ -45,17 +50,24 @@ final class IncomingCallDeclineSender {
 
     private let send: Send
     private let backgroundTasks: any BackgroundTaskScheduling
+    private let steer: any DeclineSteerPosting
 
     convenience init(
         inbound: InboundCallRepository,
-        backgroundTasks: any BackgroundTaskScheduling = UIKitBackgroundTasks()
+        backgroundTasks: any BackgroundTaskScheduling = UIKitBackgroundTasks(),
+        steer: any DeclineSteerPosting = UserNotificationsDeclineSteerPoster()
     ) {
-        self.init(send: { await inbound.decline(callId: $0, workspaceId: $1) }, backgroundTasks: backgroundTasks)
+        self.init(
+            send: { await inbound.decline(callId: $0, workspaceId: $1) },
+            backgroundTasks: backgroundTasks,
+            steer: steer
+        )
     }
 
-    init(send: @escaping Send, backgroundTasks: any BackgroundTaskScheduling) {
+    init(send: @escaping Send, backgroundTasks: any BackgroundTaskScheduling, steer: any DeclineSteerPosting) {
         self.send = send
         self.backgroundTasks = backgroundTasks
+        self.steer = steer
     }
 
     /// ⚠️ SPAWNED, NOT AWAITED, as the answer is: the model's command loop must not wait on a
@@ -63,6 +75,7 @@ final class IncomingCallDeclineSender {
     @discardableResult
     func decline(workspace: WorkspaceID, call: CallID) -> Task<Result<Void, ApiError>, Never> {
         let lease = BackgroundTaskLease.begin("district.call-decline", on: backgroundTasks)
+        steer.post(workspaceId: workspace.rawValue, callId: call.rawValue)
         let send = send
         return Task { @MainActor in
             let outcome = await send(call.rawValue, workspace.rawValue)

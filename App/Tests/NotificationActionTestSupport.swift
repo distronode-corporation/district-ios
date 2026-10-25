@@ -64,8 +64,8 @@ actor LoggingRefreshClient: RefreshClient {
     }
 }
 
-/// Answers the three inbox routes the handler uses, by the path's last segment, and logs
-/// each request as `METHOD segment bearer`.
+/// Answers the three inbox routes the handler uses, and the whisper route, by the path's
+/// last segment, and logs each request as `METHOD segment bearer`.
 ///
 /// ⚠️ ITS OWN TYPE RATHER THAN ``SettingsTransport``'s QUEUE: the order of requests is
 /// what is under test, so the answer has to depend on the route, not on the position.
@@ -97,6 +97,8 @@ final class InboxActionTransport: HTTPTransport, @unchecked Sendable {
             return Self.json(writeStatus, writeBody.isEmpty ? Self.sent : writeBody)
         case "mark-read":
             return Self.json(writeStatus, writeBody.isEmpty ? #"{"success":true,"marked":1}"# : writeBody)
+        case "whisper":
+            return Self.json(writeStatus, writeBody.isEmpty ? #"{"success":true}"# : writeBody)
         default:
             await threadGate?.wait()
             return Self.json(200, Self.thread)
@@ -127,9 +129,14 @@ final class InboxActionTransport: HTTPTransport, @unchecked Sendable {
 @MainActor
 final class RecordingFailureReporter: MessageActionFailureReporting {
     private(set) var reports: [(failure: MessageActionFailure, action: MessageAction)] = []
+    private(set) var steerReports: [(failure: MessageActionFailure, text: String)] = []
 
     func report(_ failure: MessageActionFailure, for action: MessageAction) {
         reports.append((failure, action))
+    }
+
+    func reportSteer(_ failure: MessageActionFailure, text: String) {
+        steerReports.append((failure, text))
     }
 }
 

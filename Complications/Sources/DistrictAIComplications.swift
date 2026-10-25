@@ -5,6 +5,8 @@ import WidgetKit
 struct ComplicationEntry: TimelineEntry {
     let date: Date
     let state: ComplicationState
+    /// Where the Smart Stack should put it. See ``ComplicationState/relevance(forKind:at:)``.
+    var relevance: TimelineEntryRelevance?
 }
 
 /// Reads the state the watch app wrote into the App Group, for both complications.
@@ -14,7 +16,12 @@ struct ComplicationEntry: TimelineEntry {
 /// moved, and a timeline that refreshed itself on a schedule would only spend the reload
 /// budget re-reading the same value. The unread count's freshness comes from the watch app's
 /// background refresh (`WatchStore.refreshInBackground()`), not from here.
+///
+/// ⚠️ ONE PROVIDER PER KIND, because the relevance differs: unread messages lift the unread
+/// complication, a switched availability the availability one.
 struct ComplicationProvider: TimelineProvider {
+    let kind: String
+
     /// ⚠️ THE FACE EDITOR'S SAMPLE, SO IT IS MADE UP: never a real count or name.
     func placeholder(in _: Context) -> ComplicationEntry {
         ComplicationEntry(
@@ -26,19 +33,25 @@ struct ComplicationProvider: TimelineProvider {
     }
 
     func getSnapshot(in _: Context, completion: @escaping (ComplicationEntry) -> Void) {
-        completion(Self.current())
+        completion(current())
     }
 
     func getTimeline(in _: Context, completion: @escaping (Timeline<ComplicationEntry>) -> Void) {
-        completion(Timeline(entries: [Self.current()], policy: .never))
+        completion(Timeline(entries: [current()], policy: .never))
     }
 
-    private static func current() -> ComplicationEntry {
+    private func current() -> ComplicationEntry {
         let state = ComplicationState.load(from: ComplicationState.defaults)
         // ⚠️ THE PHONE'S LANGUAGE, AS THE WATCH APP LAST HEARD IT. The widget has no
         // session of its own.
         WatchL10n.phoneLanguage = state.language
-        return ComplicationEntry(date: .now, state: state)
+        let now = Date.now
+        let relevance = state.relevance(forKind: kind, at: now)
+        return ComplicationEntry(
+            date: now,
+            state: state,
+            relevance: TimelineEntryRelevance(score: relevance.score, duration: relevance.duration)
+        )
     }
 }
 
@@ -76,7 +89,10 @@ struct DistrictAIComplications: WidgetBundle {
 
 struct AvailabilityComplication: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: ComplicationState.widgetKind, provider: ComplicationProvider()) { entry in
+        StaticConfiguration(
+            kind: ComplicationState.widgetKind,
+            provider: ComplicationProvider(kind: ComplicationState.widgetKind)
+        ) { entry in
             AvailabilityEntryView(entry: entry)
         }
         .configurationDisplayName(WatchCopy.availability)
@@ -88,7 +104,10 @@ struct AvailabilityComplication: Widget {
 /// ⛔ OPT-IN AND COUNT ONLY. See ``UnreadComplicationView`` and ``ComplicationState``.
 struct UnreadComplication: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: ComplicationState.unreadWidgetKind, provider: ComplicationProvider()) { entry in
+        StaticConfiguration(
+            kind: ComplicationState.unreadWidgetKind,
+            provider: ComplicationProvider(kind: ComplicationState.unreadWidgetKind)
+        ) { entry in
             UnreadEntryView(entry: entry)
         }
         .configurationDisplayName(WatchCopy.unreadComplication)

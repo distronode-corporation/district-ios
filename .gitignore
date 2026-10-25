@@ -25,6 +25,7 @@ App/Info.plist
 Watch/Info.plist
 Complications/Info.plist
 NotificationService/Info.plist
+Widgets/Info.plist
 
 # Output of scripts/smoke-simulator.sh.
 build/

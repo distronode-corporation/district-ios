@@ -1,5 +1,6 @@
 import SwiftUI
 import UserNotifications
+import WatchKit
 
 /// The Apple Watch companion app.
 ///
@@ -40,6 +41,10 @@ struct DistrictAIWatchApp: App {
         #endif
         // ⚠️ AFTER THE PREVIEW SEAM: a preview runs no background task and schedules none.
         WatchAppDelegate.work = WatchAppDelegate.Work(store: store, link: link)
+        // ⛔ IN `init` TOO: Siri and Shortcuts run an intent in a background launch with no
+        // scene (3.2), and a long-look notification needs the store. See ``WatchProcess``.
+        WatchProcess.intents = WatchIntentRunner(store: store, link: link)
+        WatchProcess.store = store
         store.start()
     }
 
@@ -55,5 +60,10 @@ struct DistrictAIWatchApp: App {
                 WatchRootView(store: store)
             #endif
         }
+        // ⚠️ THE LONG LOOKS (3.2): a message names its sender, and a call shows its card. The
+        // buttons under each are the iPhone's own category actions (Reply, Mark read), drawn by
+        // the system; these scenes add none.
+        WKNotificationScene(controller: MessageNotificationController.self, category: MessageLongLook.category)
+        WKNotificationScene(controller: CallNotificationController.self, category: CallLongLook.category)
     }
 }

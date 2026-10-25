@@ -3935,6 +3935,141 @@ tier = "T0"
 state = "reviewed"
 id = { swift = "IncomingCallCopy.ringing" }
 
+[incoming_call.steer_ask_what_about]
+en = "Ask what the call is about."
+fr = "Demandez l'objet de l'appel."
+ctx = "button"
+screen = "incoming"
+tier = "T1"
+state = "reviewed"
+id = { swift = "IncomingCallCopy.steerAskWhatAbout" }
+note = "A ready-made instruction SENT AS WRITTEN to the AI assistant. ⛔ Same words as watch.whisper_ask_what_about (watch.toml), which is reviewed: keep the two identical."
+
+[incoming_call.steer_body]
+en = "You declined the call. Tell the assistant what to say?"
+fr = "Vous avez refusé l'appel. Indiquer à l'assistante quoi dire?"
+ctx = "notification"
+screen = "incoming"
+tier = "T1"
+state = "reviewed"
+id = { swift = "IncomingCallCopy.steerBody" }
+note = "Local notification posted after the person declines a ring (iOS 3.2). The AI assistant then takes the call; the actions below send it an instruction. The AI is « l'assistante » (feminine)."
+
+[incoming_call.steer_call_back_today]
+en = "We will call them back today."
+fr = "Nous rappellerons la personne aujourd'hui."
+ctx = "button"
+screen = "incoming"
+tier = "T1"
+state = "reviewed"
+id = { swift = "IncomingCallCopy.steerCallBackToday" }
+note = "A ready-made instruction SENT AS WRITTEN to the AI assistant. ⛔ Same words as watch.whisper_call_back_today (watch.toml), which is reviewed: keep the two identical."
+
+[incoming_call.steer_failure_body]
+en = "{reason}\n\nYour instruction: {text}"
+fr = "{reason}\n\nVotre consigne\u00A0: {text}"
+ctx = "notification"
+screen = "incoming"
+tier = "T1"
+args = { reason = "str", text = "str" }
+state = "reviewed"
+id = { swift = "IncomingCallCopy.steerFailureBody(_:_:)" }
+note = "Body of that failure notification. {reason} is a full sentence (the server's or the app's); {text} is the instruction the person chose or typed, carried back so it need not be retyped."
+
+[incoming_call.steer_not_sent]
+en = "Not sent to the assistant"
+fr = "Consigne non envoyée"
+ctx = "notification"
+screen = "incoming"
+tier = "T1"
+state = "reviewed"
+id = { swift = "IncomingCallCopy.steerNotSent" }
+note = "Title of the local notification saying an instruction from the declined-call notification did not reach the assistant. Same words as watch.whisper_not_sent."
+
+[incoming_call.steer_placeholder]
+en = "What should the assistant say?"
+fr = "Que doit dire l'assistante?"
+ctx = "placeholder"
+screen = "incoming"
+tier = "T1"
+state = "reviewed"
+id = { swift = "IncomingCallCopy.steerPlaceholder" }
+note = "Placeholder in the declined-call notification's text box."
+
+[incoming_call.steer_typed]
+en = "Tell the assistant"
+fr = "Écrire à l'assistante"
+ctx = "button"
+screen = "incoming"
+tier = "T1"
+state = "reviewed"
+id = { swift = "IncomingCallCopy.steerTyped" }
+note = "The declined-call notification's text-input action: opens a box whose text is sent to the AI assistant as an instruction."
+
+[intent.availability_off]
+en = "Calls in {workspace_name} no longer ring your phone."
+fr = "Les appels de l'espace {workspace_name} ne sonnent plus sur votre téléphone."
+ctx = "body"
+screen = "intents"
+tier = "T2"
+args = { workspace_name = "str" }
+state = "reviewed"
+id = { swift = "IntentCopy.availabilityOff(_:)" }
+note = "Siri or Shortcuts answer after « Set my availability » turned calls off."
+
+[intent.availability_on]
+en = "Calls in {workspace_name} now ring your phone."
+fr = "Les appels de l'espace {workspace_name} sonnent désormais sur votre téléphone."
+ctx = "body"
+screen = "intents"
+tier = "T2"
+args = { workspace_name = "str" }
+state = "reviewed"
+id = { swift = "IntentCopy.availabilityOn(_:)" }
+note = "Siri or Shortcuts answer after « Set my availability » turned calls on. {workspace_name} is the workspace's name."
+
+[intent.latest_inbound]
+en = "Latest message · {name}: {text}"
+fr = "Dernier message · {name}\u00A0: {text}"
+ctx = "body"
+screen = "intents"
+tier = "T2"
+args = { name = "str", text = "str" }
+state = "reviewed"
+id = { swift = "IntentCopy.latestInbound(_:text:)" }
+note = "« Read my latest message » when the newest message came in. {name} is the contact's name or a masked number, {text} one line of the message. The middle dot keeps the name out of the sentence, so French needs no elision before a vowel."
+
+[intent.latest_outbound]
+en = "Your latest reply · {name}: {text}"
+fr = "Votre dernière réponse · {name}\u00A0: {text}"
+ctx = "body"
+screen = "intents"
+tier = "T2"
+args = { name = "str", text = "str" }
+state = "reviewed"
+id = { swift = "IntentCopy.latestOutbound(_:text:)" }
+note = "« Read my latest message » when the newest message in the newest conversation was sent by the business."
+
+[intent.no_messages]
+en = "There are no messages in your inbox."
+fr = "Votre boîte de réception ne contient aucun message."
+ctx = "body"
+screen = "intents"
+tier = "T2"
+state = "reviewed"
+id = { swift = "IntentCopy.noMessages" }
+note = "« Read my latest message » with an empty inbox."
+
+[intent.no_workspace]
+en = "Open District AI and choose a workspace first."
+fr = "Ouvrez District AI et choisissez d'abord un espace de travail."
+ctx = "body"
+screen = "intents"
+tier = "T2"
+state = "reviewed"
+id = { swift = "IntentCopy.noWorkspace" }
+note = "Siri or Shortcuts answer when the account has no workspace to act in."
+
 [live_transcript.connecting]
 en = "Connecting…"
 fr = "Connexion…"

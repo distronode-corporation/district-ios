@@ -69,6 +69,13 @@ struct DistrictApp: App {
         // ⛔ HERE TOO, FOR THE SAME REASON: a message from the Apple Watch launches the app
         // in the background with no scene. See ``WatchBridgeService``.
         container.watchBridge.activate()
+        // ⛔ HERE TOO: Siri and Shortcuts run an intent in a background launch with no scene.
+        // See ``AppIntentHost``.
+        AppIntentHost.runner = container.intents
+        // ⛔ AND HERE FOR THE LIVE ACTIVITIES: a ring's push-to-start launches the app in the
+        // background with no scene to hand over the new activity's update token, which only an
+        // observer set up at launch receives. See ``CallLiveActivities/adoptRunning()``.
+        container.liveActivities.adoptRunning()
     }
 
     var body: some Scene {

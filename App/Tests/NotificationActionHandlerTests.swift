@@ -261,6 +261,7 @@ private struct Rig {
         handler = NotificationActionHandler(
             coordinator: coordinator,
             inbox: InboxRepository(client: api),
+            whisper: CallsRepository(client: api),
             reporter: reporter,
             backgroundTasks: tasks
         )

@@ -6,7 +6,8 @@
                                           # a broken catalog rule or an Info.plist drift
                                           # (what CI runs)
 
-Six catalogs: the iPhone app's three, the Apple Watch app's and the notification service extension's. The vendored tools in `tools/l10n/` (copied from the
+Eight catalogs: the iPhone app's three, the Apple Watch app's, the notification service
+extension's and the widget extension's. The vendored tools in `tools/l10n/` (copied from the
 monorepo's `i18n/tools/`, see `tools/l10n/SOURCE.toml`) do the writing.
 
 - `l10n/ios.toml`: every sentence the app's screens say. It becomes
@@ -26,9 +27,19 @@ monorepo's `i18n/tools/`, see `tools/l10n/SOURCE.toml`) do the writing.
   `fr-CA.lproj`, which is what makes the watch bundles declare Canadian French at all
   (`Bundle.preferredLocalizations` answers only languages a bundle ships).
 - `l10n/watch-infoplist.toml`: the watch bundles' `InfoPlist.strings` (their display name).
+- `l10n/appintents.toml` and `l10n/appshortcuts.toml` (3.2): the App Intents' titles and
+  Siri's phrases, written as the `AppIntents` and `AppShortcuts` tables into BOTH the
+  iPhone's and the watch's lproj folders (the two apps declare the same intents). ⛔ An
+  `AppShortcuts.strings` key is the phrase exactly as the Swift source spells it, with
+  `${applicationName}` (written `${{applicationName}}` in the catalog, a literal brace).
 - `l10n/notificationservice.toml` and `l10n/notificationservice-infoplist.toml`: the
   notification service extension's two tables (`NotificationService/Localization`), the
   named message title and its display name. No Swift: the extension reads its own table.
+- `l10n/widgets.toml` and `l10n/widgets-infoplist.toml`: the widget extension
+  (`DistrictAIWidgets`, the call's Live Activity). The first becomes
+  `Widgets/Sources/L10n/Generated/Copy.swift` (`extension WidgetCopy`, reading
+  `WidgetL10n.copyLocale`) and both become its tables in `Widgets/Localization`, for the
+  archive's French rule.
 
 ⛔ THE TWO LANGUAGES' TABLES LIVE APART. `en.lproj` sits in `App/Resources/` and
 `fr-CA.lproj` in `App/Localization/`; project.yml takes both into every build since 3.0.
@@ -62,7 +73,12 @@ SWIFT_OPTS = [
     "--opt", "locale_expr=AppL10n.copyLocale",
 ]
 # catalog -> the .strings table it becomes
-TABLES = {"l10n/push.toml": "Localizable", "l10n/infoplist.toml": "InfoPlist"}
+TABLES = {
+    "l10n/push.toml": "Localizable",
+    "l10n/infoplist.toml": "InfoPlist",
+    "l10n/appintents.toml": "AppIntents",
+    "l10n/appshortcuts.toml": "AppShortcuts",
+}
 LPROJ = {"en.lproj": ROOT / "App/Resources/en.lproj", "fr-CA.lproj": ROOT / "App/Localization/fr-CA.lproj"}
 # The Apple Watch app (Watch/, Complications/): its own catalog, accessors and tables.
 WATCH_CATALOGS = ["l10n/watch.toml"]
@@ -76,13 +92,33 @@ WATCH_SWIFT_OPTS = [
 # ⛔ BOTH TABLES IN BOTH WATCH BUNDLES (the app and the complication share
 # Watch/Localization): scripts/archive-imac.sh refuses a release whose nested bundle lacks
 # fr-CA.lproj/Localizable.strings or fr-CA.lproj/InfoPlist.strings.
-WATCH_TABLES = {"l10n/watch.toml": "Localizable", "l10n/watch-infoplist.toml": "InfoPlist"}
+WATCH_TABLES = {
+    "l10n/watch.toml": "Localizable",
+    "l10n/watch-infoplist.toml": "InfoPlist",
+    "l10n/appintents.toml": "AppIntents",
+    "l10n/appshortcuts.toml": "AppShortcuts",
+}
 WATCH_LPROJ = {"en.lproj": ROOT / "Watch/Localization/en.lproj", "fr-CA.lproj": ROOT / "Watch/Localization/fr-CA.lproj"}
 # The notification service extension (NotificationService/): both tables, for the same archive rule.
 NSE_TABLES = {"l10n/notificationservice.toml": "Localizable", "l10n/notificationservice-infoplist.toml": "InfoPlist"}
 NSE_LPROJ = {
     "en.lproj": ROOT / "NotificationService/Localization/en.lproj",
     "fr-CA.lproj": ROOT / "NotificationService/Localization/fr-CA.lproj",
+}
+
+# The widget extension (Widgets/, the call's Live Activity): accessors and both tables.
+WIDGET_CATALOGS = ["l10n/widgets.toml"]
+WIDGET_SWIFT = "Widgets/Sources/L10n/Generated/Copy.swift"
+WIDGET_SWIFT_OPTS = [
+    "--opt", "extension=true",
+    "--opt", "runtime=external",
+    "--opt", "access=internal",
+    "--opt", "locale_expr=WidgetL10n.copyLocale",
+]
+WIDGET_TABLES = {"l10n/widgets.toml": "Localizable", "l10n/widgets-infoplist.toml": "InfoPlist"}
+WIDGET_LPROJ = {
+    "en.lproj": ROOT / "Widgets/Localization/en.lproj",
+    "fr-CA.lproj": ROOT / "Widgets/Localization/fr-CA.lproj",
 }
 
 
@@ -94,7 +130,12 @@ def tool(*args: str, quiet: bool = False) -> int:
 def strings_files(scratch: Path) -> dict[Path, bytes]:
     """Every .strings file the catalogs produce, keyed by where it belongs in the tree."""
     out: dict[Path, bytes] = {}
-    groups = ((TABLES, LPROJ, "app"), (WATCH_TABLES, WATCH_LPROJ, "watch"), (NSE_TABLES, NSE_LPROJ, "nse"))
+    groups = (
+        (TABLES, LPROJ, "app"),
+        (WATCH_TABLES, WATCH_LPROJ, "watch"),
+        (NSE_TABLES, NSE_LPROJ, "nse"),
+        (WIDGET_TABLES, WIDGET_LPROJ, "widgets"),
+    )
     for tables, lproj, prefix in groups:
         for catalog, table in tables.items():
             target = scratch / prefix / table
@@ -134,6 +175,8 @@ def main(argv: list[str]) -> int:
         code |= tool("check", "l10n/watch-infoplist.toml")
         code |= tool("check", *NSE_TABLES)
         code |= tool("check", *WATCH_CATALOGS, "--gen", f"swift:{WATCH_SWIFT}", *WATCH_SWIFT_OPTS)
+        code |= tool("check", "l10n/widgets-infoplist.toml")
+        code |= tool("check", *WIDGET_CATALOGS, "--gen", f"swift:{WIDGET_SWIFT}", *WIDGET_SWIFT_OPTS)
         stale = [str(p.relative_to(ROOT)) for p, data in tables.items() if not p.exists() or p.read_bytes() != data]
         for path in stale:
             print(f"{path}: stale, run python3 scripts/gen-l10n.py", file=sys.stderr)
@@ -143,6 +186,7 @@ def main(argv: list[str]) -> int:
         return 1 if code or stale or drift else 0
     code = tool("gen", "--backend", "swift", *SWIFT_CATALOGS, "--out", SWIFT, *SWIFT_OPTS)
     code |= tool("gen", "--backend", "swift", *WATCH_CATALOGS, "--out", WATCH_SWIFT, *WATCH_SWIFT_OPTS)
+    code |= tool("gen", "--backend", "swift", *WIDGET_CATALOGS, "--out", WIDGET_SWIFT, *WIDGET_SWIFT_OPTS)
     for path, data in tables.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)

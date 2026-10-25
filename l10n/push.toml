@@ -42,6 +42,26 @@ fixed = true
 id = { apple = "push.generic.title" }
 note = "The app's name, as the generic push's title."
 
+[push.live_activity_start_body]
+en = "Someone is calling your District line."
+fr = "Quelqu'un appelle votre ligne District."
+ctx = "notification"
+screen = "push"
+tier = "T0"
+state = "reviewed"
+id = { apple = "live_activity.start.body" }
+note = "Body of the alert that comes with the server's push-to-start of a call's Live Activity. Names nobody: the activity itself shows the caller. Same words as push.call.body."
+
+[push.live_activity_start_title]
+en = "Incoming call"
+fr = "Appel entrant"
+ctx = "notification"
+screen = "push"
+tier = "T0"
+state = "reviewed"
+id = { apple = "live_activity.start.title" }
+note = "Title of the alert that comes with the server's push-to-start of a call's Live Activity (iOS 18, a ring). The server sends the KEY only. Same words as push.call.title."
+
 [push.message_body]
 en = "A new message arrived in your inbox."
 fr = "Nouveau message dans votre boîte de réception."

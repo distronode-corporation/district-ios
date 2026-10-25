@@ -31,6 +31,11 @@ enum DialerCopy {}
 /// The inbox, the compose sheet and a conversation thread.
 enum InboxCopy {}
 
+/// What the App Intents (Siri, Shortcuts) answer: "Set my availability", "Read my latest
+/// message" (3.2). Their titles and Siri's phrases are the `AppIntents` and `AppShortcuts`
+/// tables, not this enum.
+enum IntentCopy {}
+
 /// The shell: the sidebar, the menu commands and the workspace gate.
 enum NavigationCopy {}
 

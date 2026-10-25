@@ -32,9 +32,10 @@ struct ContainerWatchActions: WatchActionPerforming {
                 .map { _ in () }
                 .mapError { WatchActionFailure(sentence: FailureText.from($0).message) }
         case .refresh, .resolveMessage, .liveList, .liveSubscribe, .liveKeepalive, .liveUnsubscribe, .whisper,
-             .callDetail:
+             .callDetail, .latestMessage:
             // ⚠️ NONE WRITES HERE. `.resolveMessage` is answered by ``threadKey(workspaceId:messageId:)``,
-            // and the live requests by ``WatchLiveRelay``, which `WatchBridgeService` hands them to.
+            // the live requests by ``WatchLiveRelay`` and `.latestMessage` by ``IntentRunner``,
+            // which `WatchBridgeService` hands them to.
             .success(())
         }
     }

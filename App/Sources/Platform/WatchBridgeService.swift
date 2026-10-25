@@ -22,6 +22,7 @@ final class WatchBridgeService {
     private let source: any WatchSnapshotSourcing
     private let actions: any WatchActionPerforming
     private let live: (any WatchLiveHandling)?
+    private let latest: (any LatestMessageReading)?
     private let backgroundTasks: any BackgroundTaskScheduling
     private let clock: @MainActor () -> Date
 
@@ -36,6 +37,7 @@ final class WatchBridgeService {
         source: any WatchSnapshotSourcing,
         actions: any WatchActionPerforming,
         live: (any WatchLiveHandling)? = nil,
+        latest: (any LatestMessageReading)? = nil,
         backgroundTasks: any BackgroundTaskScheduling = UIKitBackgroundTasks(),
         clock: @escaping @MainActor () -> Date = { Date() }
     ) {
@@ -43,6 +45,7 @@ final class WatchBridgeService {
         self.source = source
         self.actions = actions
         self.live = live
+        self.latest = latest
         self.backgroundTasks = backgroundTasks
         self.clock = clock
     }
@@ -121,6 +124,18 @@ final class WatchBridgeService {
             // four reads; none of these changes what the snapshot shows. Without a relay this
             // phone answers as one that predates them, and the watch hides Live.
             let answer = await live?.answer(request.action) ?? .failure(WatchBridgeCopy.updateBothApps)
+            reply(answer.message())
+            lease.end()
+            return
+        case let .latestMessage(workspaceId):
+            // ⛔ DISPLAY-ONLY, SO NO SNAPSHOT AFTER IT: nothing was written. Without a reader
+            // this phone answers as one that predates the request.
+            let read = await latest?.latestMessage(workspaceId: workspaceId)
+            let answer: WatchReply = switch read {
+            case let .success(conversation)?: .latest(conversation)
+            case let .failure(failure)?: .failure(failure.sentence)
+            case nil: .failure(WatchBridgeCopy.updateBothApps)
+            }
             reply(answer.message())
             lease.end()
             return

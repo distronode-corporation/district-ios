@@ -419,6 +419,35 @@ jobs:
           test "$point" = "com.apple.usernotifications.service" || { echo "::error::NSExtensionPointIdentifier is '$point'"; exit 1; }
           echo "DistrictAINotificationService.appex is embedded, with its manifest, both tables per .lproj and no root table"
 
+      # ⛔ THE WIDGET EXTENSION (3.2, the call's Live Activity) SHIPS IN THE iOS APP'S PlugIns/,
+      # and the app declares Live Activities: without `NSSupportsLiveActivities` every
+      # `Activity.request` throws. Same proof as the notification service extension's.
+      - name: The embedded widget extension
+        run: |
+          set -euo pipefail
+          APP=DerivedData/Build/Products/Debug-iphonesimulator/DistrictAI.app
+          WID="$APP/PlugIns/DistrictAIWidgets.appex"
+          test -d "$WID" || { echo "::error::$WID is not in the iOS app"; exit 1; }
+          test -f "$WID/PrivacyInfo.xcprivacy" || { echo "::error::no PrivacyInfo.xcprivacy at the root of $WID"; exit 1; }
+          for table in Localizable InfoPlist; do
+            test -f "$WID/en.lproj/$table.strings" || { echo "::error::no en.lproj/$table.strings in $WID"; exit 1; }
+            test -f "$WID/fr-CA.lproj/$table.strings" || { echo "::error::no fr-CA.lproj/$table.strings in $WID"; exit 1; }
+            if [ -e "$WID/$table.strings" ]; then
+              echo "::error::$table.strings at the root of $WID shadows every .lproj"
+              exit 1
+            fi
+          done
+          for lproj in "$WID"/fr*.lproj; do
+            [ "$(basename "$lproj")" = "fr-CA.lproj" ] && continue
+            echo "::error::$(basename "$lproj") in $WID: only Canadian French ships"
+            exit 1
+          done
+          point="$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' "$WID/Info.plist")"
+          test "$point" = "com.apple.widgetkit-extension" || { echo "::error::NSExtensionPointIdentifier is '$point'"; exit 1; }
+          live="$(/usr/libexec/PlistBuddy -c 'Print :NSSupportsLiveActivities' "$APP/Info.plist")"
+          test "$live" = "true" || { echo "::error::NSSupportsLiveActivities is '$live' in the app"; exit 1; }
+          echo "DistrictAIWidgets.appex is embedded, with its manifest and both tables, and the app supports Live Activities"
+
       - name: DistrictAITests
         run: |
           set -o pipefail

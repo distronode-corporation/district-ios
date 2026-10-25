@@ -48,12 +48,15 @@ final class CallDetailModel {
     private let workspaceId: String
     private let callId: String
     private let liveDependencies: @MainActor () -> LiveTranscriptModel.Dependencies
+    /// The open app seeing a call in progress starts its Live Activity.
+    private let liveActivities: CallLiveActivities
 
     init(container: AppContainer, workspaceId: String, callId: String) {
         calls = container.calls
         self.workspaceId = workspaceId
         self.callId = callId
         liveDependencies = { .live(container: container, workspaceId: workspaceId, callId: callId) }
+        liveActivities = container.liveActivities
     }
 
     func load() async {
@@ -64,7 +67,9 @@ final class CallDetailModel {
             let display = CallDisplay(call)
             if live == nil, display.transcribesLive {
                 live = LiveTranscriptModel(workspaceId: workspaceId, callId: callId, dependencies: liveDependencies())
+                live?.onPublish = { [liveActivities] in liveActivities.observed($0, callId: $0.callId) }
             }
+            liveActivities.observed(call, workspaceId: workspaceId)
             // ⚠️ EVERY LOAD IS A CALL-STATUS SIGNAL FOR THE LIVE TRANSCRIPT, the only one this
             // screen gets (contract §4.12 Q10): in progress, it may subscribe again after
             // `not_live`; no longer live, the call has ended. Ringing says nothing yet.

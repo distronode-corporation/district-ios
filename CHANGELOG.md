@@ -29,6 +29,27 @@ built from history before publication, so they have no tags in this repository.
 - 3.2.0: a ring the server ends with reason `declined` (every member rang declined) is
   recorded in CallKit's Recents as `.declinedElsewhere`, not as a missed call.
   `RingCancelTests`.
+- 3.2.0: the call's Live Activity (Sean, 2026-10-25, GitLab #2): a new widget extension,
+  `DistrictAIWidgets` (`com.distronode.district.widgets`), draws `DistrictCallActivityAttributes`
+  on the Lock Screen, in the Dynamic Island and, with watchOS 11, in the Apple
+  Watch Smart Stack (`.supplementalActivityFamilies([.small])`). The app starts it locally
+  only, when a ring wakes it (after CallKit has the call) or when the open app sees a call in
+  progress (the call screen, the watch relay's live list), never two for one call; updates it
+  from the live transcript while awake (the latest final line, at most 120 characters); ends
+  it when the call ends (gone four minutes later) and at sign-out at once. Each push token goes
+  to the server once through DistrictCore's `CallsRepository.registerLiveActivity`
+  (`pushType: .token`), so the server's `liveactivity` pushes update it while the app sleeps.
+  iOS 18 and later only: the extension targets iOS 18 for the watch family, and iOS 17
+  starts none (Sean, "iOS 18+ only"). Push-to-start (Sean, "Add push-to-start"): the device's
+  push-to-start token goes to `POST live-activity/start-token` for the current workspace
+  (`LiveActivityStartTokens`: after sign-in and at launch, on a new token, on a workspace
+  switch, again after 7 days; never retried; cleared at sign-out), so a ring starts the
+  activity with no app running; the app adopts what the server starts, registers its update
+  token, and never keeps two for one call (the local ring start stays as the fallback). The
+  start push's alert keys `live_activity.start.title` and `.body` are in `l10n/push.toml`. `NSSupportsLiveActivities` in the app; strings in `l10n/widgets.toml`.
+  `CallLiveActivitiesTests`, `CallLiveActivityPushStartTests`, `LiveActivityStartTokensTests`.
+- 3.2.0: DistrictCore `exactVersion` 8.1.0 (district-core-swift's 8.1.0 tag, #42), for
+  `CallsRepository.registerLiveActivity` and `registerLiveActivityStartToken`.
 - 3.2.0: steering from the watch sends through the core's `CallsRepository.whisper`;
   `PendingCoreWhisper`, its failure sentence (`watch_bridge.whisper_unavailable`) and its
   code are gone, and `ContainerWatchLiveSources` takes the sender with no default.
@@ -80,6 +101,26 @@ built from history before publication, so they have no tags in this repository.
 - 3.2.0: a hidden relay diagnostics screen (seven taps on Account's version line, Debug and
   TestFlight builds only) logging the watch relay's timings, with no content, for the
   device spike that confirms the relay mode.
+- 3.2.0: steer after a decline. A person's decline (and only that: not a timeout, a
+  withdrawal or a ring with nobody signed in) posts "You declined the call. Tell the
+  assistant what to say?" (category `district.declined_steer`: the two canned lines and a
+  text box), carrying the ring's own ids, so a tap opens the call. Each action goes through
+  `NotificationActionHandler` (`DeclineSteerHandler`) to `CallsRepository.whisper` once,
+  inside a background task, never retried; a failure posts "Not sent to the assistant" with
+  the instruction carried back. `DeclineSteerTests`.
+- 3.2.0: App Intents on the iPhone and the watch, "Set my availability" (on or off) and "Read
+  my latest message" (shown only, marks nothing read), with App Shortcuts phrases. The watch
+  sets availability through its switch's own write and asks the phone for the latest message
+  (`WatchAction.latestMessage`; no protocol bump, an older phone answers "update both apps").
+  Strings in `l10n/appintents.toml` and `l10n/appshortcuts.toml`, written as the
+  `AppIntents` and `AppShortcuts` tables into both apps. `IntentRunnerTests`,
+  `WatchIntentRunnerTests`.
+- 3.2.0: on the watch, Double Tap (watchOS 11 and later) presses the Live screen's first
+  canned line and the call card's Call back; the complications tell the Smart Stack when they
+  matter (`TimelineEntryRelevance`: unread messages raise the unread one, an availability
+  change raises the availability one for 30 minutes); and long looks for a message (the
+  sender and the alert's text) and an incoming call (the call's card), with the phone's
+  category actions. `ComplicationRelevanceTests`, `NotificationLongLookTests`.
 
 - Added: Apple Watch app: recent calls, inbox reply and mark read, and your availability for
   calls, with a watch-face complication. A companion app (watchOS 10 or later), embedded in
