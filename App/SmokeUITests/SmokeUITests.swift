@@ -129,7 +129,13 @@ private extension SmokeUITests {
 
         try acceptAuthenticationConsent()
         let safari = XCUIApplication(bundleIdentifier: "com.apple.SafariViewService")
-        let consent = safari.buttons["Continue to District AI"]
+        // ⚠️ EITHER LANGUAGE. The hand-off page speaks the ACCOUNT's stored language before the
+        // device's (website `auth/native/sheet-locale.ts`), so an account last signed in from a
+        // French device gets the French page on an English simulator (PR #91 smoke). Both are the
+        // website's `nativeSignInCopy.continueCta`; a copy change there breaks this.
+        let consent = safari.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Continue to District AI", "Continuer vers District AI"])
+        ).firstMatch
         try completeWebLogin(in: safari, consent: consent)
 
         // Back in the app over the custom scheme. The budget covers a code exchange
