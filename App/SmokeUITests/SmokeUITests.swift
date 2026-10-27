@@ -20,9 +20,9 @@ import XCTest
 /// scratch on every run and has no injected session to protect; iOS does.
 ///
 /// ⛔ CREDENTIALS COME FROM `scripts/smoke-simulator.sh` AND ARE NEVER COMMITTED. The email
-/// arrives in the runner's environment; the password NEVER reaches this process at all, the
-/// script puts it on the simulator's pasteboard and this suite pastes it (see
-/// `pastePassword(into:in:)`). With either missing every case skips with a message naming
+/// arrives in the runner's environment; the password NEVER reaches this process at all: this
+/// suite focuses the password field and the script types it from outside the simulator (see
+/// `awaitScriptedPassword()`). With either missing every case skips with a message naming
 /// what was missing, which is a real outcome rather than a silent pass.
 final class SmokeUITests: XCTestCase {
     private var app: XCUIApplication!
@@ -34,9 +34,9 @@ final class SmokeUITests: XCTestCase {
     /// before the test sees it. `scripts/uitest-device-imac.sh` already does this for
     /// `DISTRICT_UITEST_SESSION`; the same rule applies to these.
     private static let emailVariable = "DISTRICT_SMOKE_EMAIL"
-    /// ⛔ A FLAG, NOT THE PASSWORD: "1" when the script has put the password on the
-    /// simulator's pasteboard.
-    private static let pasteboardVariable = "DISTRICT_SMOKE_PASSWORD_ON_PASTEBOARD"
+    /// ⛔ A FLAG, NOT THE PASSWORD: "1" when the script holds the password and will type it
+    /// into the focused password field.
+    private static let typedVariable = "DISTRICT_SMOKE_PASSWORD_BY_SCRIPT"
     private static let contactVariable = "DISTRICT_SMOKE_CONTACT"
     private static let planVariable = "DISTRICT_SMOKE_PLAN"
 
@@ -47,8 +47,8 @@ final class SmokeUITests: XCTestCase {
         Self.environment(Self.emailVariable)
     }
 
-    private var passwordOnPasteboard: Bool {
-        Self.environment(Self.pasteboardVariable) == "1"
+    private var passwordTypedByScript: Bool {
+        Self.environment(Self.typedVariable) == "1"
     }
 
     private var contactName: String {
@@ -72,8 +72,8 @@ final class SmokeUITests: XCTestCase {
         continueAfterFailure = false
 
         try XCTSkipIf(
-            email.isEmpty || !passwordOnPasteboard,
-            "\(Self.emailVariable) / \(Self.pasteboardVariable) unset; run scripts/smoke-simulator.sh"
+            email.isEmpty || !passwordTypedByScript,
+            "\(Self.emailVariable) / \(Self.typedVariable) unset; run scripts/smoke-simulator.sh"
         )
 
         // ⚠️ NOTHING IN `launchEnvironment`: the app reads none of the smoke variables, and the
@@ -160,9 +160,9 @@ private extension SmokeUITests {
     /// come from the website's English copy, and a copy change there breaks this with
     /// nothing linking the two.
     ///
-    /// ⛔ THE PASSWORD IS PASTED, NEVER TYPED, and the second factor and the system's
-    /// save-password offer are handled while waiting for consent: see `pastePassword(into:in:)`
-    /// and `awaitConsent(_:in:loginButton:)`.
+    /// ⛔ THE PASSWORD IS TYPED BY THE SCRIPT, NEVER BY THIS PROCESS, and the second factor and
+    /// the system's save-password offer are handled while waiting for consent: see
+    /// `awaitScriptedPassword()` and `awaitConsent(_:in:loginButton:)`.
     func completeWebLogin(in safari: XCUIApplication, consent: XCUIElement) throws {
         let emailField = safari.textFields["Work Email"]
         // A website session left by an earlier run skips the login form.
@@ -188,14 +188,10 @@ private extension SmokeUITests {
         let passwordField = safari.secureTextFields["Password"]
         XCTAssertTrue(passwordField.waitForExistence(timeout: 10), "no password field on the login page")
         passwordField.tap()
-        pastePassword(into: passwordField, in: safari)
-
-        let doneAgain = safari.buttons["Done"]
-        if doneAgain.waitForExistence(timeout: 2) {
-            doneAgain.tap()
-        }
+        // The script types the password and presses Return, which sends the form: the same
+        // as "Enter platform", so the button is only watched, never pressed.
+        awaitScriptedPassword()
         let enterPlatform = safari.buttons["Enter platform"]
-        enterPlatform.tap()
 
         // ⛔ CONSENT IS A PRESS, NOT A REDIRECT. The server's hand-off page mints the
         // authorization code only on an explicit tap, which is the anti-drive-by guard

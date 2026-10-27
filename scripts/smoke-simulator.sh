@@ -18,12 +18,20 @@
 # XCUITest's `typeText` writes `Type '<text>' into "Password"` into the run log, the console
 # log and the result bundle, which is how the QA fixture's password was logged on the iMac.
 # So the script copies it into a shell variable, unsets the exported one (xcodebuild imports
-# its environment as build settings, and a run-script phase can print those), writes it to
-# the simulator's pasteboard with `simctl pbcopy` FROM STDIN (printf is a builtin, so it is
-# in no argv and on no disk), and tells the runner only that it did
-# (`DISTRICT_SMOKE_PASSWORD_ON_PASTEBOARD=1`). The suite pastes it from the field's edit
-# menu. The simulator's pasteboard is cleared when this script exits, on every path, and the
-# Mac's too when Simulator.app's pasteboard sync carried the password there.
+# its environment as build settings, and a run-script phase can print those), and tells the
+# runner only that it will type it (`DISTRICT_SMOKE_PASSWORD_BY_SCRIPT=1`). The suite focuses
+# the password field and logs the step `SMOKE-TYPE-PASSWORD-NOW`; this script sees that step
+# in xcodebuild's live output and types the password, then Return, into the simulator as
+# System Events keystrokes, the password going to `osascript` FROM STDIN (printf is a
+# builtin, so it is in no argv and on no disk). XCTest never sees keystrokes it did not send.
+# (Sean, GitLab #2 note 4096242351. A paste was tried first: the sign-in page runs in
+# SafariViewService, whose paste never reads what `simctl pbcopy` writes.)
+#
+# ⛔ THE MAC NEEDS TWO ONE-TIME GRANTS for whatever runs this script (Terminal, or the agent's
+# shell): Accessibility (System Settings > Privacy & Security), so System Events may send
+# keystrokes, and Automation of "System Events", asked for on the first run. Without them
+# `osascript` fails, this script says so by name, and the suite fails at "still on the login
+# page". Simulator's I/O > Keyboard > Connect Hardware Keyboard must be on (the default).
 # ⛔ AND THE RUN IS CHECKED FOR IT AFTERWARDS: the log, the result bundle (raw, and its
 # exported activities, console log and diagnostics) and the attachments are searched for the
 # password, without printing it. A copy fails the run (exit 3) and deletes the artefacts that
@@ -100,57 +108,72 @@ fi
 # journey begins with. The website session in the browser's cookie jar may survive this;
 # the journey takes the consent screen directly when it does.
 echo "== removing any previous install from $DEVICE =="
-# ⚠️ BOOTED IS NOT READY. `simctl boot` returns while the device is still starting, and a
-# `simctl pbcopy` sent then times out (NSPOSIXErrorDomain 60) on an erased device every time.
-# `bootstatus -b` boots it if needed and returns once the boot has completed.
+# ⚠️ BOOTED IS NOT READY. `simctl boot` returns while the device is still starting (a
+# `simctl` call sent then timed out on an erased device, PR #91 smoke). `bootstatus -b`
+# boots it if needed and returns once the boot has completed.
 xcrun simctl bootstatus "$DEVICE" -b >/dev/null 2>&1 || true
 xcrun simctl uninstall "$DEVICE" com.distronode.district >/dev/null 2>&1 || true
 
-# ── The password, by pasteboard ─────────────────────────────────────────────────
-# ⚠️ SEEDED FROM HERE, NOT FROM THE TEST: a `UIPasteboard` write from the UI-test runner fails
-# on iOS 14.5 and later (`PBErrorDomain` 11, "the pasteboard name ... is not valid").
-# simctl_pbcopy TEXT: write TEXT to the simulator's pasteboard (from stdin), retried.
-# ⚠️ `simctl pbcopy` TIMES OUT INTERMITTENTLY (NSPOSIXErrorDomain 60) EVEN ON A BOOTED DEVICE:
-# every try with Simulator.app closed and 3 of 12 with it open (iMac, PR #90 smoke). So it is
-# retried, and Simulator.app is opened (in the background) after the third failure.
-# SMOKE_PBCOPY_BACKOFF is the pause between tries, in seconds.
-simctl_pbcopy() {
-  local attempt
-  for attempt in 1 2 3 4 5 6; do
-    if printf '%s' "$1" | xcrun simctl pbcopy "$DEVICE"; then
+# ── The password, typed by this script ─────────────────────────────────────────
+# ⛔ KEEP IN STEP with `passwordMarker` in App/SmokeUITests/SmokeSystemSurfaces.swift.
+PASSWORD_MARKER="SMOKE-TYPE-PASSWORD-NOW"
+
+# type_into_simulator: the password (stdin) and Return, as keystrokes into $DEVICE's window.
+# ⚠️ THE DEVICE'S OWN WINDOW IS RAISED FIRST: with an earlier device still booted, Simulator
+# has two windows and its frontmost one is whichever was used last. A window is matched by
+# its title starting with the device name; none matching is a failure, not a guess.
+type_into_simulator() {
+  SMOKE_SIM_WINDOW="$DEVICE" osascript -l JavaScript -e '
+    ObjC.import("Foundation");
+    const input = $.NSFileHandle.fileHandleWithStandardInput.readDataToEndOfFile;
+    const text = $.NSString.alloc.initWithDataEncoding(input, $.NSUTF8StringEncoding).js;
+    const device = $.NSProcessInfo.processInfo.environment.objectForKey("SMOKE_SIM_WINDOW").js;
+    Application("Simulator").activate();
+    delay(1);
+    const events = Application("System Events");
+    const window = events.processes.byName("Simulator").windows().find((w) => w.name().startsWith(device));
+    if (!window) throw new Error("no Simulator window for " + device);
+    window.actions.byName("AXRaise").perform();
+    delay(0.5);
+    events.keystroke(text);
+    events.keyCode(36);
+    "";' >/dev/null
+}
+
+# watch_and_type: wait for the suite's marker in the live log, then type once.
+# SMOKE_TYPE_TIMEOUT bounds the wait (an iPad run took 768 s end to end).
+watch_and_type() {
+  local deadline=$((SECONDS + ${SMOKE_TYPE_TIMEOUT:-1800}))
+  while [ "$SECONDS" -lt "$deadline" ]; do
+    if grep -q -F "$PASSWORD_MARKER" "$OUT/xcodebuild-smoke.log" 2>/dev/null; then
+      if printf '%s' "$SMOKE_PASSWORD" | type_into_simulator; then
+        echo "== password typed into the $DEVICE password field (not shown) =="
+      else
+        echo "FATAL: System Events could not type into $DEVICE: grant Accessibility and Automation to the app running this script (see the header)" >&2
+      fi
       return 0
     fi
-    echo "WARNING: simctl pbcopy try $attempt of 6 failed" >&2
-    if [ "$attempt" -eq 3 ] && command -v open >/dev/null 2>&1; then
-      open -g -a Simulator >/dev/null 2>&1 || true
-    fi
-    [ "$attempt" -eq 6 ] || sleep "${SMOKE_PBCOPY_BACKOFF:-5}"
+    sleep 0.5
   done
-  return 1
+  echo "WARNING: the suite never asked for the password within ${SMOKE_TYPE_TIMEOUT:-1800} s" >&2
 }
-clear_pasteboards() {
-  simctl_pbcopy '' 2>/dev/null ||
-    echo "WARNING: could not clear the $DEVICE pasteboard; it may still hold the password (erase the simulator)" >&2
-  # Simulator.app, while open, syncs the simulator's pasteboard to the Mac's. Cleared only
-  # when it holds exactly the password, so an operator's own clipboard is left alone.
-  if command -v pbpaste >/dev/null 2>&1 && [ "$(pbpaste 2>/dev/null)" = "$SMOKE_PASSWORD" ]; then
-    printf '' | pbcopy
-  fi
-}
-ON_PASTEBOARD=""
+
+BY_SCRIPT=""
+WATCH_PID=""
+: >"$OUT/xcodebuild-smoke.log"
 if [ "$CREDENTIALS" -eq 1 ]; then
-  trap clear_pasteboards EXIT
-  simctl_pbcopy "$SMOKE_PASSWORD" ||
-    { echo "FATAL: could not put the password on the $DEVICE pasteboard (xcrun simctl pbcopy)" >&2; exit 1; }
-  ON_PASTEBOARD=1
-  echo "== password on the $DEVICE pasteboard for the suite to paste; cleared on exit =="
+  command -v osascript >/dev/null 2>&1 || { echo "FATAL: osascript not found (run this on a macOS host)" >&2; exit 1; }
+  BY_SCRIPT=1
+  watch_and_type &
+  WATCH_PID=$!
+  echo "== the password will be typed into $DEVICE when the suite asks for it =="
 fi
 
-# ⚠️ `-parallel-testing-enabled NO`: a parallel run executes on CLONES of the device, and a
-# clone has its own pasteboard, empty, so the paste would find nothing.
+# ⚠️ `-parallel-testing-enabled NO`: a parallel run executes on CLONES of the device, each in
+# its own window, so the keystrokes would go to the device named here and not the clone.
 set +e
 TEST_RUNNER_DISTRICT_SMOKE_EMAIL="${DISTRICT_SMOKE_EMAIL:-}" \
-TEST_RUNNER_DISTRICT_SMOKE_PASSWORD_ON_PASTEBOARD="$ON_PASTEBOARD" \
+TEST_RUNNER_DISTRICT_SMOKE_PASSWORD_BY_SCRIPT="$BY_SCRIPT" \
 TEST_RUNNER_DISTRICT_SMOKE_CONTACT="${DISTRICT_SMOKE_CONTACT:-}" \
 TEST_RUNNER_DISTRICT_SMOKE_PLAN="${DISTRICT_SMOKE_PLAN:-Studio}" \
 xcodebuild test \
@@ -167,6 +190,10 @@ xcodebuild test \
   2>&1 | tee "$OUT/xcodebuild-smoke.log"
 STATUS=${PIPESTATUS[0]}
 set -e
+if [ -n "$WATCH_PID" ]; then
+  kill "$WATCH_PID" 2>/dev/null || true
+  wait "$WATCH_PID" 2>/dev/null || true
+fi
 
 # ── Attachments ─────────────────────────────────────────────────────────────────
 # ⚠️ THE SCREENSHOTS ARE INSIDE THE RESULT BUNDLE AND ARE NOT FILES UNTIL EXPORTED.

@@ -214,17 +214,21 @@ built from history before publication, so they have no tags in this repository.
   journey also turns down the "Save Password?" sheet that a fresh simulator raises after
   Enter platform, which had covered the page until "the consent screen never appeared".
   `scripts/smoke-simulator.test.sh` (40 cases) holds the channel and the guard. Its first
-  simulator run (iPhone 17 Pro and iPad Pro 13, erased) failed three ways, fixed here:
-  - `simctl pbcopy` timed out (NSPOSIXErrorDomain 60) on a device still booting, and now and
-    then on a booted one. The script waits for `simctl bootstatus -b`, retries the write six
-    times and opens Simulator.app in the background after the third failure.
-  - The paste was checked by reading the secure field's value, which XCUITest reported
-    unchanged on the iPhone and which hung for 30 s ("main thread busy") on the iPad. The
-    value is no longer read: a paste that never landed now shows as the login page refusing
-    the sign-in, or as the run still being on the login page, each named in its own message.
-  - A failed attachment export was followed by the all-clear. It now fails a green run with
-    exit 4 and prints no all-clear on any run.
-  The harness has 58 cases. The password was in none of the run's logs or bundles.
+  simulator runs (iPhone 17 Pro and iPad Pro 13, erased) showed the paste never lands: the
+  sign-in page runs in SafariViewService, whose paste does not read what `simctl pbcopy`
+  writes. So, fixed here:
+  - The password is typed by the script, not pasted (Sean, GitLab #2 note 4096242351). The
+    suite focuses the field and logs the step `SMOKE-TYPE-PASSWORD-NOW`; the script sees it
+    in xcodebuild's live output, raises the device's Simulator window and types the password
+    and Return as System Events keystrokes, the password going to `osascript` by stdin.
+    XCTest never sees the keystrokes. The Mac needs Accessibility and Automation granted
+    once to whatever runs the script.
+  - The secure field's value is no longer read (it hung for 30 s on the iPad). A password
+    that never landed shows as the login page refusing the sign-in, or as the run still on
+    the login page after 45 s, each with its own message.
+  - The script waits for `simctl bootstatus -b`, clears the previous run's attachments, and
+    no longer prints the all-clear after a failed attachment export (exit 4 on a green run).
+  The harness has 52 cases. The password was in none of the runs' logs or bundles.
 
 ### Changed
 
