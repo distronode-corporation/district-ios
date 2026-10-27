@@ -229,8 +229,30 @@ built from history before publication, so they have no tags in this repository.
   (a copy fails the run with exit 3, an unreadable bundle a green run with exit 4). The
   journey also turns down the "Save Password?" sheet that a fresh simulator raises after
   Enter platform, which had covered the page until "the consent screen never appeared".
-  `scripts/smoke-simulator.test.sh` (40 cases) holds the channel and the guard. Not yet run on
-  a simulator.
+  `scripts/smoke-simulator.test.sh` (40 cases) holds the channel and the guard. Its first
+  simulator runs (iPhone 17 Pro and iPad Pro 13, erased) showed the paste never lands: the
+  sign-in page runs in SafariViewService, whose paste does not read what `simctl pbcopy`
+  writes. So, fixed here:
+  - The password is typed by the script, not pasted (Sean, GitLab #2 note 4096242351). The
+    suite focuses the field and logs the step `SMOKE-TYPE-PASSWORD-NOW`; the script sees it
+    in xcodebuild's live output, raises the device's Simulator window and types the password
+    and Return as System Events keystrokes, the password going to `osascript` by stdin.
+    XCTest never sees the keystrokes. The Mac needs Accessibility and Automation granted
+    once to whatever runs the script.
+  - The secure field's value is no longer read (it hung for 30 s on the iPad). A password
+    that never landed shows as the login page refusing the sign-in, or as the run still on
+    the login page after 45 s, each with its own message.
+  - The script waits for `simctl bootstatus -b`, clears the previous run's attachments, and
+    no longer prints the all-clear after a failed attachment export (exit 4 on a green run).
+  - Consent is found in either language (the page speaks the account's stored language), a
+    page already past consent counts as success (a stray "Not Now" tap can press it), and the
+    call log screen carries `district-call-log-root` in both layouts, since the iPad's split
+    view has no tab and its tab identifier.
+  - The release gate is an iPhone run (now the script's default device, iPhone 17 Pro); an
+    iPad run is informational, since under XCUITest's load the iPad sign-in sheet paints blank
+    while a manual iPad sign-in works (Sean, 2026-10-27).
+  Proven on iPhone 17 Pro (erased, QA account): 1 test, 0 failures, the password in no log or
+  bundle. The harness has 52 cases.
 
 ### Changed
 
