@@ -203,6 +203,18 @@ built from history before publication, so they have no tags in this repository.
   now also opens Calls and Inbox. `scripts/smoke-simulator.test.sh` (13 cases, in CI's
   release script tests) holds the signing, the uninstall and where the password goes.
   Proven on 3.0.3 (f65026f), iPhone 17 Pro, QA account, plan "Voice Pro": 1 test, 0 failures.
+- The signed-in smoke no longer writes the demo account's password into its logs. XCUITest's
+  `typeText` records `Type '<text>' into "Password"` in the run log, the console log and the
+  result bundle, secure field or not. `scripts/smoke-simulator.sh` now keeps the password out
+  of every child process and puts it on the simulator's pasteboard (`simctl pbcopy`, from
+  stdin); the suite pastes it from the field's edit menu and is told only that it is there
+  (`DISTRICT_SMOKE_PASSWORD_ON_PASTEBOARD`). Both pasteboards are cleared on exit, and a guard
+  searches the log, the result bundle and its exports for the password without printing it
+  (a copy fails the run with exit 3, an unreadable bundle a green run with exit 4). The
+  journey also turns down the "Save Password?" sheet that a fresh simulator raises after
+  Enter platform, which had covered the page until "the consent screen never appeared".
+  `scripts/smoke-simulator.test.sh` (40 cases) holds the channel and the guard. Not yet run on
+  a simulator.
 
 ### Changed
 
