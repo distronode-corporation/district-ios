@@ -76,6 +76,9 @@ mkdir -p "$OUT"
 # "the file couldn't be saved because it already exists", which reads like a build error
 # rather than a stale artefact from the previous run.
 rm -rf "$RESULT"
+# ⚠️ AND NO EARLIER RUN'S ATTACHMENTS: left in place, one device's screenshots sat beside the
+# next device's run, so the leak scan and the file list mixed two runs (iMac, PR #91 smoke).
+rm -rf "$OUT/attachments"
 
 # ⛔ THE PROJECT IS GENERATED, NOT COMMITTED. `.gitignore` ignores `*.xcodeproj/` and
 # `project.yml` is the source of truth, so a run against a stale or absent project is the

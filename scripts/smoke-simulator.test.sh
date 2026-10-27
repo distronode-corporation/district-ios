@@ -181,6 +181,14 @@ grep -q '^xcrun xcresulttool get test-results activities .*--test-id SmokeUITest
 [ ! -e "$SMOKE/leak-scan" ] && ok "the readable exports are removed afterwards" || fail "leak-scan left behind"
 [ ! -e "$TMPROOT/dd" ] && ok "derived data is removed afterwards" || fail "derived data left behind"
 
+echo "== an earlier run's attachments =="
+mkdir -p "$SMOKE/attachments" && : >"$SMOKE/attachments/stale-from-another-run.png"
+OUT="$(cd "$REPO" && env PATH="$TMPROOT/bin:$PATH" STUB_LOG="$LOG" STUB_PB="$PB" STUB_MAC_PB="$MAC_PB" \
+  STUB_PB_TRIES="$TMPROOT/pb-tries" SMOKE_PBCOPY_BACKOFF=0 SMOKE_DERIVED_DATA="$TMPROOT/dd" \
+  bash scripts/smoke-simulator.sh --device "iPhone 17 Pro" 2>&1)"
+[ ! -e "$SMOKE/attachments/stale-from-another-run.png" ] && ok "an earlier run's attachments are cleared first" ||
+  fail "stale attachment kept: $OUT"
+
 echo "== the password in xcodebuild's output =="
 run DISTRICT_SMOKE_EMAIL=qa@example.invalid DISTRICT_SMOKE_PASSWORD="$SECRET" \
   STUB_XCODEBUILD_STDOUT="t = 3.10s Type '$SECRET' into \"Password\" SecureTextField"
