@@ -12,6 +12,9 @@ built from history before publication, so they have no tags in this repository.
 
 ### Changed
 
+- 3.2.1: MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
+  pair is project-level, so every target carries the same value. DistrictCore stays at
+  `exactVersion` 8.1.0.
 - 3.2.0: MARKETING_VERSION 3.2.0, Apple Watch round 2. The version pair is project-level,
   so the iOS app, the watch app, its complications and the notification service extension
   carry the same value.
@@ -149,6 +152,19 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- 3.2.1: the Dynamic Island's compact view shows a finished call's end time in full
+  (#89). Only the running timer keeps the 44 pt cap; the end time drops its day period in
+  compact ("12:53", « 13 h 19 ») and may shrink to 0.8. `CallActivityClock`.
+- 3.2.1: French times from the server no longer wrap between the hour and « h » (#89):
+  `WireDate.unbroken` joins « 16 h 13 » with U+00A0. `WireDateTests`, `FrenchWireTextTests`.
+- 3.2.1: the watch has an AccentColor (#89), the dark `district` teal #67cded, so a live
+  call, the unread count and dots, and the assistant's transcript lines are no longer grey.
+- 3.2.1: in French the Sign in with Apple button showed Apple's logo alone: its intrinsic
+  width fits "Sign in with Apple" but not « Se connecter avec Apple », and the control drops
+  its title when it does not fit. `SignInView` gives it a 240 pt minimum width (3.2.1
+  visual QA).
+- 3.2.1: the hidden Apple Watch diagnostics sheet (Debug and TestFlight) has a Done button
+  (`watch_diagnostics.done`, « OK ») and its empty line is no longer dimmed twice (#89).
 - Text fields have a 3:1 edge (WCAG 1.4.11), as on the Mac (#71): `fieldEdge`, 6.07:1 dark
   and 7.41:1 light on the card, where `input` was 1.40:1 and 1.62:1. `DistrictContrastTests`.
 - Working hours: a French time field reads « 9 h », « 9 h 30 », « 17 h » (#72), and stores
@@ -519,6 +535,14 @@ built from history before publication, so they have no tags in this repository.
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
 
+## [3.2.1] - 2026-10-27
+
+Small fixes for calls and the Apple Watch app.
+
+- A finished call's end time now shows in full in the Dynamic Island instead of being cut off.
+- In French, a time such as 16 h 13 no longer breaks across two lines at larger text sizes.
+- The Apple Watch app now shows live calls and unread messages in colour, so they stand out at a glance.
+
 ## [3.2.0] - 2026-10-25
 
 More of District AI on your Apple Watch.
@@ -718,7 +742,8 @@ Voice Studio is the headline of 2.0.
 
 The first release on the App Store.
 
-[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/distronode-corporation/district-ios/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/distronode-corporation/district-ios/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/distronode-corporation/district-ios/compare/v3.0.3...v3.1.0
 [3.0.3]: https://github.com/distronode-corporation/district-ios/compare/v3.0.2...v3.0.3
