@@ -3,7 +3,13 @@
 # which has no Linux equivalent.
 #
 # Usage, from the repository root:
-#   scripts/smoke-simulator.sh [--device "iPhone 16"] [--keep-derived]
+#   scripts/smoke-simulator.sh [--device "iPhone 17 Pro"] [--keep-derived]
+#
+# ⛔ THE RELEASE GATE IS AN iPHONE RUN (the default device). An iPad run is INFORMATIONAL:
+# report it, never block a release on it (Sean, 2026-10-27, GitLab #2). Under XCUITest's load the
+# iPad's sign-in sheet (SafariViewService) paints a blank page and the consent button never
+# appears, while a manual iPad sign-in renders it and reaches Overview in 3 s (PR #91 smoke,
+# iPad Pro 13): the failure is the harness, not the app.
 #
 # Credentials come from the environment and are never written to disk:
 #   DISTRICT_SMOKE_EMAIL / DISTRICT_SMOKE_PASSWORD   the app-store demo account
@@ -62,7 +68,7 @@ unset DISTRICT_SMOKE_PASSWORD
 cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
 
-DEVICE="${SMOKE_SIM_DEVICE:-iPhone 16}"
+DEVICE="${SMOKE_SIM_DEVICE:-iPhone 17 Pro}"
 KEEP_DERIVED=0
 while [ $# -gt 0 ]; do
   case "$1" in

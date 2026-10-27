@@ -232,7 +232,11 @@ built from history before publication, so they have no tags in this repository.
     page already past consent counts as success (a stray "Not Now" tap can press it), and the
     call log screen carries `district-call-log-root` in both layouts, since the iPad's split
     view has no tab and its tab identifier.
-  The harness has 52 cases. The password was in none of the runs' logs or bundles.
+  - The release gate is an iPhone run (now the script's default device, iPhone 17 Pro); an
+    iPad run is informational, since under XCUITest's load the iPad sign-in sheet paints blank
+    while a manual iPad sign-in works (Sean, 2026-10-27).
+  Proven on iPhone 17 Pro (erased, QA account): 1 test, 0 failures, the password in no log or
+  bundle. The harness has 52 cases.
 
 ### Changed
 
