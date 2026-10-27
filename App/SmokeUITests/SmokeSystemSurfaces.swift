@@ -1,3 +1,5 @@
+import XCTest
+
 /// The system surfaces the browser leg crosses: the password the script types, and the
 /// system's offer to save that password once the login form is sent.
 ///
@@ -52,13 +54,38 @@ extension SmokeUITests {
     func dismissSavePasswordOffer(over browser: XCUIApplication) -> Bool {
         let springboard = XCUIApplication(bundleIdentifier: Self.springboardBundle)
         for host in [browser, springboard] where host.state != .notRunning {
-            let button = host.buttons[Self.notNow]
-            if button.exists {
-                button.tap()
-                return true
-            }
+            // ⚠️ A SNAPSHOT AND A COORDINATE TAP, NEVER `exists` THEN `tap()`. The sheet can
+            // slide away between the two, and `tap()` on an element that has gone fails the test
+            // ("no matches found for ... Not Now", iPhone 17 Pro, PR #91 smoke). `snapshot()`
+            // throws instead of failing, and a tap at a point cannot fail; a sheet that went away
+            // by itself is the outcome this wanted anyway.
+            guard let sheet = try? host.buttons[Self.notNow].snapshot() else { continue }
+            host.coordinate(withNormalizedOffset: .zero)
+                .withOffset(CGVector(dx: sheet.frame.midX, dy: sheet.frame.midY))
+                .tap()
+            return true
         }
         return false
+    }
+
+    /// Tap a field until it holds keyboard focus, failing by name if it never does.
+    ///
+    /// ⚠️ ONE TAP IS NOT FOCUS ON A SLOW SIMULATOR. On an iPad Pro 13 the tap on "Work Email"
+    /// landed before the page took input, and the next `typeText` failed with "Neither element
+    /// nor any descendant has keyboard focus" (PR #91 smoke). ⛔ AND THE PASSWORD FIELD MUST HOLD
+    /// FOCUS before the script is asked to type: its keystrokes go to whatever has it.
+    func focus(_ field: XCUIElement, named name: String) {
+        for _ in 0..<4 {
+            field.tap()
+            let deadline = Date().addingTimeInterval(4)
+            repeat {
+                if (field.value(forKey: "hasKeyboardFocus") as? Bool) == true {
+                    return
+                }
+                Thread.sleep(forTimeInterval: 0.25)
+            } while Date() < deadline
+        }
+        XCTFail("the \(name) field never took keyboard focus")
     }
 
     /// Wait for the hand-off page's consent button after the login form is sent, standing

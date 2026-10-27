@@ -176,7 +176,7 @@ private extension SmokeUITests {
             return
         }
         XCTAssertTrue(emailField.exists, "the login page never rendered")
-        emailField.tap()
+        focus(emailField, named: "Work Email")
         emailField.typeText(email)
         // The keyboard's accessory bar sits over the password field on a 6.3-inch screen, so a
         // tap there lands on the bar and the field never takes focus. Close the keyboard first.
@@ -187,7 +187,7 @@ private extension SmokeUITests {
 
         let passwordField = safari.secureTextFields["Password"]
         XCTAssertTrue(passwordField.waitForExistence(timeout: 10), "no password field on the login page")
-        passwordField.tap()
+        focus(passwordField, named: "Password")
         // The script types the password and presses Return, which sends the form: the same
         // as "Enter platform", so the button is only watched, never pressed.
         awaitScriptedPassword()
