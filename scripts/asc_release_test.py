@@ -331,6 +331,197 @@ class StoreStateTests(unittest.TestCase):
         self.assertEqual(self.state({"appVersionState": "PREPARE_FOR_SUBMISSION"}, None)[0], ("PREPARE_FOR_SUBMISSION", "", False))
 
 
+SHA = "2583a7942bae8e912df6dec5f7c9f3a401f4bd5c"
+OTHER_SHA = "874c89702dbce021ac7741d84401516114ddaa0a"
+
+
+def _asc_build(**attributes: object) -> dict:
+    """The /builds answer for 3.2.0 (4186) as App Store Connect gave it on 2026-10-25."""
+    base = {"version": "4186", "processingState": "VALID", "expired": False, "uploadedDate": "2026-10-25T04:00:27-07:00"}
+    base.update(attributes)
+    return {"data": [{"id": "build1", "attributes": base}]}
+
+
+def _sentry_release(**fields: object) -> dict:
+    """The Sentry release of the same build, trimmed to the fields that are read."""
+    base: dict = {
+        "version": "com.distronode.district@3.2.0+4186",
+        "dateCreated": "2026-10-25T10:56:35.378557Z",
+        "lastCommit": {"id": SHA, "repository": {"name": "distronode-corporation/district-ios"}},
+        "projects": [{"slug": "district-ios"}],
+    }
+    base.update(fields)
+    return base
+
+
+class FakeSentry:
+    def __init__(self, release: dict | None) -> None:
+        self.answer = release
+        self.names: list[str] = []
+
+    def release(self, name: str) -> dict | None:
+        self.names.append(name)
+        return self.answer
+
+
+class AlreadyUploadedTests(unittest.TestCase):
+    def check(self, build: dict, release: dict | None, commit: str = SHA) -> tuple[str, FakeClient, FakeSentry]:
+        client = FakeClient({"/builds?": build})
+        sentry = FakeSentry(release)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            try:
+                out.write(asc_release.already_uploaded(client, sentry, "app1", "3.2.0", "4186", commit))  # type: ignore[arg-type]
+            except SystemExit as exit_:
+                out.write(f"\nEXIT {exit_.code}")
+        return out.getvalue(), client, sentry
+
+    def test_the_v3_2_0_records_match(self) -> None:
+        out, client, sentry = self.check(_asc_build(), _sentry_release())
+        self.assertNotIn("EXIT", out)
+        self.assertIn("MATCH - App Store Connect's 3.2.0 (4186) is VALID", out)
+        self.assertIn(f"records commit {SHA}", out)
+        self.assertEqual(sentry.names, ["com.distronode.district@3.2.0+4186"])
+        self.assertIn("filter[version]=4186", client.calls[0][1])
+        self.assertIn("filter[preReleaseVersion.version]=3.2.0", client.calls[0][1])
+        self.assertEqual(client.writes(), [])
+
+    def test_still_processing_is_accepted_for_wait_valid_to_wait_on(self) -> None:
+        out, _, _ = self.check(_asc_build(processingState="PROCESSING"), _sentry_release())
+        self.assertIn("is PROCESSING", out)
+        self.assertNotIn("EXIT", out)
+
+    def test_another_commit_is_refused(self) -> None:
+        out, _, _ = self.check(_asc_build(), _sentry_release(), commit=OTHER_SHA)
+        self.assertIn("EXIT 1", out)
+        self.assertIn(f"records commit {SHA}, not this one, {OTHER_SHA}", out)
+
+    def test_no_such_build_is_refused(self) -> None:
+        out, _, sentry = self.check({"data": []}, _sentry_release())
+        self.assertIn("EXIT 1", out)
+        self.assertIn("but not 4186 itself", out)
+        self.assertEqual(sentry.names, [])
+
+    def test_a_different_build_number_in_the_answer_is_refused(self) -> None:
+        out, _, _ = self.check(_asc_build(version="4185"), _sentry_release())
+        self.assertIn("EXIT 1", out)
+
+    def test_invalid_failed_and_unknown_states_are_refused(self) -> None:
+        for state in ("INVALID", "FAILED", None, "SOMETHING_NEW"):
+            out, _, sentry = self.check(_asc_build(processingState=state), _sentry_release())
+            self.assertIn("EXIT 1", out, state)
+            self.assertIn(f"it is {state}", out, state)
+            self.assertEqual(sentry.names, [], state)
+
+    def test_an_expired_build_is_refused(self) -> None:
+        out, _, _ = self.check(_asc_build(expired=True), _sentry_release())
+        self.assertIn("EXIT 1", out)
+        self.assertIn("has expired", out)
+
+    def test_no_sentry_release_is_refused_not_assumed(self) -> None:
+        out, _, _ = self.check(_asc_build(), None)
+        self.assertIn("EXIT 1", out)
+        self.assertIn("nothing ties that build to a commit", out)
+
+    def test_a_release_with_no_commit_is_refused(self) -> None:
+        # What Sentry makes of a release it first heard of from an event: no commits.
+        for last in (None, {}, "x"):
+            out, _, _ = self.check(_asc_build(), _sentry_release(lastCommit=last))
+            self.assertIn("EXIT 1", out, last)
+            self.assertIn("records commit None", out, last)
+
+    def test_another_repository_or_project_is_refused(self) -> None:
+        out, _, _ = self.check(_asc_build(), _sentry_release(lastCommit={"id": SHA, "repository": {"name": "someone/fork"}}))
+        self.assertIn("EXIT 1", out)
+        self.assertIn("'someone/fork'", out)
+        out, _, _ = self.check(_asc_build(), _sentry_release(projects=[{"slug": "district-android"}]))
+        self.assertIn("EXIT 1", out)
+        self.assertIn("not district-ios", out)
+
+    def test_a_release_created_after_the_upload_is_refused(self) -> None:
+        out, _, _ = self.check(_asc_build(), _sentry_release(dateCreated="2026-10-25T11:00:28Z"))
+        self.assertIn("EXIT 1", out)
+        self.assertIn("after App Store Connect's 3.2.0 (4186) was uploaded", out)
+        # One second before the upload (11:00:27Z) is the order archive-imac.sh writes them in.
+        out, _, _ = self.check(_asc_build(), _sentry_release(dateCreated="2026-10-25T11:00:26Z"))
+        self.assertNotIn("EXIT", out)
+
+    def test_unreadable_times_are_refused(self) -> None:
+        cases = (
+            (None, "2026-10-25T04:00:27-07:00"),
+            ("2026-10-25T10:56:35Z", "yesterday"),
+            ("2026-10-25T10:56:35", "2026-10-25T04:00:27-07:00"),  # no offset: not an instant
+        )
+        for created, uploaded in cases:
+            out, _, _ = self.check(_asc_build(uploadedDate=uploaded), _sentry_release(dateCreated=created))
+            self.assertIn("EXIT 1", out, (created, uploaded))
+            self.assertIn("has no readable time", out, (created, uploaded))
+
+
+class SentryTests(unittest.TestCase):
+    def setUp(self) -> None:
+        patcher = mock.patch.dict(os.environ, {"SENTRY_AUTH_TOKEN": "sntrys_secret", "SENTRY_ORG": "distronode-corporation-eu"})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def answer(self, body: str, code: int, returncode: int = 0) -> tuple[object, str, mock.MagicMock]:
+        done = subprocess.CompletedProcess([], returncode, stdout=f"{body}\n{code}".encode(), stderr=b"boom")
+        err = io.StringIO()
+        result: object = "not returned"
+        with mock.patch.object(asc_release.subprocess, "run", return_value=done) as run, contextlib.redirect_stderr(err):
+            try:
+                result = asc_release.Sentry().release("com.distronode.district@3.2.0+4186")
+            except SystemExit as exit_:
+                err.write(f"\nEXIT {exit_.code}")
+        return result, err.getvalue(), run
+
+    def test_the_release_url_and_the_token_on_stdin_only(self) -> None:
+        result, _, run = self.answer(json.dumps({"version": "x"}), 200)
+        self.assertEqual(result, {"version": "x"})
+        cmd = run.call_args.args[0]
+        self.assertEqual(
+            cmd[-1],
+            "https://de.sentry.io/api/0/organizations/distronode-corporation-eu/releases/com.distronode.district%403.2.0%2B4186/",
+        )
+        self.assertNotIn("sntrys_secret", " ".join(cmd))
+        self.assertIn(b"Authorization: Bearer sntrys_secret", run.call_args.kwargs["input"])
+        self.assertNotIn("-X", cmd)  # a GET, curl's default
+
+    def test_404_is_no_release(self) -> None:
+        result, err, _ = self.answer(json.dumps({"detail": "The requested resource does not exist"}), 404)
+        self.assertIsNone(result)
+        self.assertEqual(err, "")
+
+    def test_any_other_answer_stops_the_run(self) -> None:
+        for body, code in (('{"detail": "Invalid token"}', 401), ("<html>502</html>", 502)):
+            _, err, _ = self.answer(body, code)
+            self.assertIn(f"answered {code}", err)
+            self.assertIn("EXIT 1", err)
+        _, err, _ = self.answer("[]", 200)
+        self.assertIn("not a release", err)
+
+    def test_a_curl_failure_stops_the_run(self) -> None:
+        _, err, _ = self.answer("", 0, returncode=6)
+        self.assertIn("curl exited 6", err)
+
+    def test_missing_token_or_bad_org_is_refused_before_any_request(self) -> None:
+        for env in ({"SENTRY_AUTH_TOKEN": ""}, {"SENTRY_ORG": "Org With Spaces"}, {"SENTRY_ORG": ""}):
+            with mock.patch.dict(os.environ, env), mock.patch.object(asc_release.subprocess, "run") as run:
+                with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                    asc_release.Sentry()
+                run.assert_not_called()
+
+
+class AlreadyUploadedCommandTests(unittest.TestCase):
+    def test_a_short_or_odd_commit_is_refused_before_any_request(self) -> None:
+        for commit in ("2583a79", SHA.upper(), SHA + "0", "HEAD"):
+            argv = ["asc_release.py", "already-uploaded", "--version", "3.2.0", "--build", "4186", "--commit", commit]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(asc_release, "Client") as client:
+                with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                    asc_release.main()
+                client.assert_not_called()
+
+
 class CallTests(unittest.TestCase):
     def setUp(self) -> None:
         self.dir = tempfile.TemporaryDirectory()

@@ -5589,6 +5589,9 @@ extension WatchDiagnosticsCopy {
     /// `watch_diagnostics.clear`
     internal static var clear: String { AppL10n.copyLocale == .frCA ? "Effacer le journal" : "Clear the log" }
 
+    /// `watch_diagnostics.done`
+    internal static var done: String { AppL10n.copyLocale == .frCA ? "OK" : "Done" }
+
     /// `watch_diagnostics.empty`
     internal static var empty: String { AppL10n.copyLocale == .frCA ? "Rien n'a encore été consigné." : "Nothing recorded yet." }
 

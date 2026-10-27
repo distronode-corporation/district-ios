@@ -4,7 +4,11 @@ name: Release
 # internal group receives every valid build. Submission for App Review is a separate,
 # explicitly approved step.
 #
-#   - A `v*` tag push builds and uploads that version. Nothing is submitted.
+#   - A `v*` tag push builds and uploads that version. Nothing is submitted. When App
+#     Store Connect already has that commit's build (usually the iMac uploaded it
+#     first), and only when that is proven, nothing is built or uploaded: the run waits
+#     for that build to be VALID and ends green with a notice. A build that is not
+#     proven to be the tag's keeps the run red. scripts/release-preflight.sh says how.
 #   - A dispatch on `main` builds and uploads a TestFlight build of main. Nothing is
 #     submitted, whatever the approval input says.
 #   - A dispatch on a `v*` tag with the maintainers' approval input also submits the
@@ -114,12 +118,33 @@ jobs:
           cat "$RUNNER_TEMP/release/asc.env" >>"$GITHUB_ENV"
 
       # The preflight again, now with the key, adding the one check that needs App Store
-      # Connect: a build number it already has for this version (a tag of a commit a main
-      # dispatch already uploaded) would be refused at the upload, after the whole archive.
-      - name: Build number is unused
+      # Connect: a build number it already has for this version would be refused at the
+      # upload, after the whole archive. On a tag, a number it has is accepted only when
+      # that build is proven to be this commit's (scripts/release-preflight.sh, and
+      # `already-uploaded` in scripts/asc_release.py): then `uploaded` is `yes`, and the
+      # steps that make or upload a build are skipped. Every lookup is a read; the Sentry
+      # token is fetched for that read only, on a tag, and lives in this step alone.
+      - name: Build number is unused, or already uploaded from this commit
+        id: uploaded
         env:
           RELEASE_CHECK_UPLOADED: "1"
-        run: scripts/release-preflight.sh
+          GSM_ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          KIND: ${{ steps.preflight.outputs.kind }}
+          VERSION: ${{ steps.preflight.outputs.version }}
+          BUILD: ${{ steps.preflight.outputs.build }}
+        run: |
+          set -euo pipefail
+          if [ "$KIND" = "tag" ]; then
+            SENTRY_AUTH_TOKEN="$(scripts/gsm-secret.sh SENTRY_EU_AUTH_TOKEN)"
+            echo "::add-mask::$SENTRY_AUTH_TOKEN"
+            export SENTRY_AUTH_TOKEN
+          fi
+          unset GSM_ACCESS_TOKEN
+          out="$(scripts/release-preflight.sh)"
+          printf '%s\n' "$out"
+          if [ "$(printf '%s\n' "$out" | sed -n 's/^uploaded=//p')" = "yes" ]; then
+            echo "::notice title=Already uploaded from this commit::District AI $VERSION ($BUILD) is already in App Store Connect, uploaded from $(git rev-parse HEAD). This run builds and uploads nothing: it skips the toolchain, sentry-cli, the signing certificate and the archive, and waits for that build to be VALID."
+          fi
 
       # The release scripts' own tests, so a broken script fails here rather than halfway
       # through an upload.
@@ -132,15 +157,24 @@ jobs:
           python3 scripts/asc_release_test.py
           python3 scripts/asc_dev_cert_test.py
 
+      # ⛔ THE FOUR STEPS THAT MAKE A BUILD (the toolchain, sentry-cli, this run's signing
+      # certificate and the archive) are skipped when App Store Connect already has this
+      # commit's build (`uploaded` is `yes`): nothing is archived, signed or uploaded, no
+      # certificate is created, and no dSYM is sent (the uploader sent that archive's, and
+      # its Sentry release is part of the proof). A build-only run still archives, since
+      # it uploads nothing.
+      #
       # Xcode 26.3, asserted, and the pinned XcodeGen; archive-imac.sh generates the
       # project itself.
       - name: Xcode and XcodeGen
+        if: ${{ steps.uploaded.outputs.uploaded != 'yes' || inputs.build_only }}
         uses: ./.github/actions/macos-toolchain # zizmor: ignore[self-repository]
         with:
           generate: "false"
 
       # Pinned by version and SHA-256, for the dSYM upload and the Sentry release.
       - name: Install sentry-cli
+        if: ${{ steps.uploaded.outputs.uploaded != 'yes' || inputs.build_only }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/bin"
@@ -161,6 +195,7 @@ jobs:
       # ⚠️ Proven only on a release run (a build_only dispatch on main): nothing a pull request
       # runs can reach the `release` environment.
       - name: Create this run's Apple Development certificate
+        if: ${{ steps.uploaded.outputs.uploaded != 'yes' || inputs.build_only }}
         run: |
           set -euo pipefail
           dir="$RUNNER_TEMP/devcert"
@@ -186,6 +221,7 @@ jobs:
       # reaping the sentry-cocoa package's manifest helper (0% CPU, a defunct child). The
       # step timeout turns that into a red run; re-running it has always succeeded.
       - name: Archive and upload
+        if: ${{ steps.uploaded.outputs.uploaded != 'yes' || inputs.build_only }}
         timeout-minutes: 75
         env:
           GSM_ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
@@ -238,7 +274,9 @@ jobs:
           done
 
       # Upload returns before App Store Connect has processed the build; this waits for
-      # VALID, which is also when TestFlight's internal group receives it.
+      # VALID, which is also when TestFlight's internal group receives it. It runs when
+      # the build was already uploaded too (read only): it is what proves that build VALID,
+      # and it fails on INVALID or FAILED.
       - name: Wait for App Store Connect processing
         if: ${{ !inputs.build_only }}
         timeout-minutes: 45
@@ -256,6 +294,7 @@ jobs:
           APPROVAL: ${{ inputs.approval }}
           EVENT: ${{ github.event_name }}
           BUILD_ONLY: ${{ inputs.build_only }}
+          UPLOADED: ${{ steps.uploaded.outputs.uploaded }}
         run: |
           {
             echo "### District AI $VERSION ($BUILD)"
@@ -264,7 +303,11 @@ jobs:
               echo "**Build only.** Archived and signed on the runner; nothing was uploaded or submitted."
               exit 0
             fi
-            echo "Uploaded to App Store Connect and **VALID**. TestFlight internal testers receive it automatically."
+            if [ "$UPLOADED" = "yes" ]; then
+              echo "**Already uploaded from this commit** ($(git rev-parse HEAD)), before this run: this run built and uploaded nothing. App Store Connect has it and it is **VALID**; its Sentry release records this commit. TestFlight internal testers receive it automatically."
+            else
+              echo "Uploaded to App Store Connect and **VALID**. TestFlight internal testers receive it automatically."
+            fi
             echo
             if [ "$EVENT" = "workflow_dispatch" ] && [ "$KIND" = "tag" ] && [ "$APPROVAL" = "approved for release" ]; then
               echo "Approved: the **submit** job submits it for App Review."

@@ -7,10 +7,13 @@ build, submit it for review, and read whether a version is on sale.
     ... python3 scripts/asc_release.py submit --version 1.2 --build 4104
     ... python3 scripts/asc_release.py highest-build --version 1.2
     ... python3 scripts/asc_release.py store-state --version 1.2    # read only
+    ... SENTRY_AUTH_TOKEN=... SENTRY_ORG=... \\
+      python3 scripts/asc_release.py already-uploaded --version 1.2 --build 4104 --commit <sha>    # read only
     python3 scripts/asc_release.py whats-new [--locale fr-CA] --version 1.2    # no credentials needed
     python3 scripts/asc_release.py release-body --version 1.2 --build 4102    # nor here
 
-Used by scripts/release-preflight.sh (highest-build, before anything is built),
+Used by scripts/release-preflight.sh (highest-build and already-uploaded, before anything
+is built),
 .github/workflows/release.yml (wait-valid after the upload), submit.yml (submit) and
 scripts/github-release.sh (store-state and release-body).
 Standard library only: the ES256 signature is made by the `openssl` binary and every HTTP
@@ -35,6 +38,8 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.parse
+from datetime import datetime
 from pathlib import Path
 
 API = "https://api.appstoreconnect.apple.com/v1"
@@ -424,6 +429,143 @@ def store_state(client: Client, app: str, version: str) -> tuple[str, str, bool]
     return version_state or store, build, on_sale
 
 
+# ── A build already uploaded from this commit ────────────────────────────────
+#
+# A `v*` tag of a commit whose build somebody already uploaded (usually the iMac, before
+# the tag's own run) cannot be uploaded again: App Store Connect refuses a build number it
+# has. release-preflight.sh then asks `already-uploaded` whether that build is this
+# commit's, and the run ends green without building only if every check below passes.
+#
+# ⛔ APP STORE CONNECT CANNOT SAY WHICH COMMIT A BUILD CAME FROM. A build carries its
+# version, its number, its processing state and its dates, and nothing else of the
+# source. The one record of the commit is the Sentry release that archive-imac.sh creates
+# for every archive it uploads symbols for: named exactly as the SDK reports it,
+# `<bundle id>@<version>+<build>`, read from the archived app, and given `git rev-parse
+# HEAD` with set-commits, which Sentry shows as the release's lastCommit. That script
+# creates it only after the dSYM upload, which is fatal, and before the export uploads the
+# build. So the checks are:
+#   1. App Store Connect has this exact build number for this version string;
+#   2. its processing state is VALID or PROCESSING (wait-valid then waits for VALID and
+#      fails on INVALID or FAILED), and it has not expired;
+#   3. Sentry has the release `<bundle id>@<version>+<build>` for the district-ios project,
+#      and its lastCommit is this commit, in this repository;
+#   4. that release was created before the build was uploaded, as the script orders them.
+# Any of them failing, or any lookup failing, is a refusal. Nothing here writes to App
+# Store Connect or to Sentry.
+
+# The EU region's API host: sentry-cli and archive-imac.sh use the same one (sentry_eu).
+SENTRY_API = "https://de.sentry.io/api/0"
+SENTRY_PROJECT = "district-ios"
+SENTRY_REPOSITORY = "distronode-corporation/district-ios"
+# Processing states of a build that is, or may still become, VALID.
+UPLOADED_USABLE = {"VALID", "PROCESSING"}
+
+
+class Sentry:
+    """Read-only lookups in Sentry, with SENTRY_AUTH_TOKEN and SENTRY_ORG from the
+    environment. The token reaches curl on stdin (`-K -`), never on argv."""
+
+    def __init__(self) -> None:
+        self.token = os.environ.get("SENTRY_AUTH_TOKEN", "")
+        self.org = os.environ.get("SENTRY_ORG", "")
+        if not self.token:
+            die("SENTRY_AUTH_TOKEN is unset; the Sentry release is what ties an uploaded build to a commit.")
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", self.org):
+            die(f"SENTRY_ORG '{self.org}' is not an organization slug.")
+
+    def release(self, name: str) -> dict | None:
+        """The organization's release of this name, or None when Sentry has none."""
+        url = f"{SENTRY_API}/organizations/{self.org}/releases/{urllib.parse.quote(name, safe='')}/"
+        config = f'header = "Authorization: Bearer {self.token}"\n'
+        cmd = ["curl", "-sS", "-g", "-K", "-", "-w", "\n%{http_code}", "--max-time", "60", url]
+        result = subprocess.run(cmd, input=config.encode(), capture_output=True, check=False)
+        if result.returncode != 0:
+            die(f"GET Sentry release {name}: curl exited {result.returncode}: {result.stderr.decode(errors='replace').strip()}")
+        text, _, code_text = result.stdout.decode(errors="replace").rpartition("\n")
+        code = int(code_text)
+        if code == 404:
+            return None
+        if code != 200:
+            die(f"GET Sentry release {name} answered {code}: {' '.join(text.split())[:300]}")
+        data = json.loads(text)
+        if not isinstance(data, dict):
+            die(f"GET Sentry release {name} answered something that is not a release.")
+        return data
+
+
+def _instant(value: object) -> datetime | None:
+    """An ISO 8601 time with its offset (App Store Connect's -07:00, Sentry's Z)."""
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def already_uploaded(client: Client, sentry: Sentry, app: str, version: str, build: str, commit: str) -> str:
+    """Proves App Store Connect's build `build` of `version` was uploaded from `commit`, as
+    far as the records allow (see the section comment), or stops the run naming the check
+    that failed. Returns the line that says what was proved."""
+    stop = "Nothing was built."
+    found = find_build(client, app, version, build)
+    if found is None:
+        die(
+            f"App Store Connect has a build of {version} numbered {build} or higher, but not {build} itself, so this "
+            f"commit's build cannot be uploaded. Release a newer commit. {stop}"
+        )
+    attributes = found["attributes"]
+    if attributes.get("version") != build:
+        die(f"App Store Connect answered build {attributes.get('version')!r} for {version} ({build}). {stop}")
+    state = attributes.get("processingState")
+    if state not in UPLOADED_USABLE:
+        die(
+            f"App Store Connect already has {version} ({build}) and it is {state}, so it cannot ship and its number "
+            f"cannot be uploaded again. Release a newer commit. {stop}"
+        )
+    if attributes.get("expired"):
+        die(f"App Store Connect already has {version} ({build}) and it has expired. Release a newer commit. {stop}")
+
+    name = f"{BUNDLE_ID}@{version}+{build}"
+    release = sentry.release(name)
+    if release is None:
+        die(
+            f"App Store Connect already has {version} ({build}), and Sentry has no release {name}, so nothing ties that "
+            f"build to a commit. It is not assumed to be {commit}. {stop}"
+        )
+    last = release.get("lastCommit") or {}
+    recorded = last.get("id") if isinstance(last, dict) else None
+    if recorded != commit:
+        die(
+            f"App Store Connect already has {version} ({build}), and Sentry release {name} records commit {recorded}, "
+            f"not this one, {commit}. Release a newer commit. {stop}"
+        )
+    repository = (last.get("repository") or {}).get("name")
+    if repository != SENTRY_REPOSITORY:
+        die(f"Sentry release {name} records its commit in {repository!r}, not {SENTRY_REPOSITORY}. {stop}")
+    projects = [p.get("slug") for p in release.get("projects") or [] if isinstance(p, dict)]
+    if SENTRY_PROJECT not in projects:
+        die(f"Sentry release {name} belongs to {projects}, not {SENTRY_PROJECT}. {stop}")
+    created = _instant(release.get("dateCreated"))
+    uploaded = _instant(attributes.get("uploadedDate"))
+    if created is None or uploaded is None:
+        die(
+            f"Sentry release {name} (created {release.get('dateCreated')!r}) or App Store Connect's {version} ({build}) "
+            f"(uploaded {attributes.get('uploadedDate')!r}) has no readable time. {stop}"
+        )
+    if created > uploaded:
+        die(
+            f"Sentry release {name} was created at {release.get('dateCreated')}, after App Store Connect's {version} "
+            f"({build}) was uploaded at {attributes.get('uploadedDate')}, so it does not record the archive that was "
+            f"uploaded. {stop}"
+        )
+    return (
+        f"MATCH - App Store Connect's {version} ({build}) is {state}, uploaded {attributes.get('uploadedDate')}; "
+        f"Sentry release {name}, created {release.get('dateCreated')}, records commit {commit}."
+    )
+
+
 # ── Submission ───────────────────────────────────────────────────────────────
 
 
@@ -597,11 +739,13 @@ def submit(client: Client, version: str, build: str, notes: "str | ReleaseNotes"
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("wait-valid", "submit", "whats-new", "highest-build", "store-state", "release-body"):
+    for name in ("wait-valid", "submit", "whats-new", "highest-build", "store-state", "release-body", "already-uploaded"):
         p = sub.add_parser(name)
         p.add_argument("--version", required=True, help="the marketing version, e.g. 1.2")
-        if name in ("wait-valid", "submit", "release-body"):
+        if name in ("wait-valid", "submit", "release-body", "already-uploaded"):
             p.add_argument("--build", required=True, help="the build number (CFBundleVersion)")
+        if name == "already-uploaded":
+            p.add_argument("--commit", required=True, help="the full sha the build must have been archived from")
         if name in ("wait-valid", "submit"):
             p.add_argument("--timeout", type=int, default=3600, help="seconds to wait for VALID")
         p.add_argument("--changelog", default=str(Path(__file__).resolve().parent.parent / "CHANGELOG.md"))
@@ -627,6 +771,13 @@ def main() -> None:
         die(f"version '{args.version}' or build '{args.build}' is malformed.")
     if args.command == "release-body":
         sys.stdout.write(release_body(Path(args.changelog), args.version, args.build))
+        return
+    if args.command == "already-uploaded":
+        if not re.fullmatch(r"[0-9a-f]{40}", args.commit):
+            die(f"commit '{args.commit}' is not a full sha.")
+        client = Client()
+        sentry = Sentry()
+        print(already_uploaded(client, sentry, app_id(client), args.version, args.build, args.commit))
         return
     client = Client()
     if args.command == "wait-valid":
