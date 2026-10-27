@@ -1,7 +1,7 @@
 {
-  "signed_off_by": "iMac manager distronode-com (Opus 5.5), iOS 3.2.0 with the watch extras and the call's Live Activity: the l10n/ios.toml, l10n/watch.toml and l10n/push.toml changes since the v3.2.0 sign-off at 4b46d87 and all of l10n/appintents.toml, l10n/appshortcuts.toml, l10n/widgets.toml and l10n/widgets-infoplist.toml reviewed by an fr-CA reviewer; its must-fixes and all suggestions applied as Sean approved them (\"Must-fix + all suggestions\", relayed by the iMac manager session 9b), 2026-10-25",
-  "release": "v3.2.0",
-  "commit": "e376cc5aed481c4b29086c0834e5d0257de4e555",
+  "signed_off_by": "iMac release worker distronode-com (Opus 5.5) for the iMac manager, iOS 3.2.1: the one l10n/ios.toml change since the v3.2.0 sign-off, watch_diagnostics.done (en \"Done\", fr « OK », the Apple OS word, as on the catalog's five other Done buttons; #89), reviewed; no other catalog changed. #89's other French change, the no-break spaces in « 16 h 13 » (WireDate.unbroken), is code, not a catalog, and was checked on the simulator, 2026-10-27",
+  "release": "v3.2.1",
+  "commit": "ba298ede481753bfa5e2cb57197265c22b3a52d2",
   "catalogs": [
     {
       "path": "l10n/appintents.toml",
@@ -17,7 +17,7 @@
     },
     {
       "path": "l10n/ios.toml",
-      "sha256": "279879dcb6cab9a8682500fba6b13f1f4cc4ef4a5bb2b361f5a21d3248d3b93f"
+      "sha256": "a5699f69ac9121bb5f4c9ca097de6011878fe30f2fd2ed558150d93751e96028"
     },
     {
       "path": "l10n/notificationservice-infoplist.toml",

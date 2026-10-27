@@ -155,6 +155,10 @@ struct SignInView: View {
             // black slab two thirds of the screen tall. `fixedSize` keeps Apple's own
             // content width, which is what makes it read as a sibling of the
             // compact `.districtPrimary` button above it.
+            // ⚠️ BUT APPLE'S INTRINSIC WIDTH FITS ONLY THE ENGLISH TITLE: in French
+            // « Se connecter avec Apple » did not fit, and the control fell back to its
+            // logo alone (3.2.1 visual QA). The floor leaves room for the longer title.
+            .frame(minWidth: Self.appleButtonMinWidth)
             .fixedSize(horizontal: true, vertical: false)
             .frame(height: DistrictButtonSize.medium.minHeight)
             .disabled(isBusy)
@@ -252,6 +256,8 @@ struct SignInView: View {
     }
 
     private static let cardMaxWidth: CGFloat = 480
+    /// Wide enough for « Se connecter avec Apple » at the 44 pt height.
+    private static let appleButtonMinWidth: CGFloat = 240
 }
 
 /// Which ``Tone`` a sign-in reason wears. Ports Android's `LoginStatusTone.kt`.

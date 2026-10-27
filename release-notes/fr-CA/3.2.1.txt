@@ -1,0 +1,5 @@
+Petites corrections pour les appels et l'application Apple Watch.
+
+- L'heure de fin d'un appel terminé s'affiche maintenant en entier dans la Dynamic Island au lieu d'être coupée.
+- En français, une heure comme 16 h 13 ne se coupe plus sur deux lignes quand le texte est agrandi.
+- L'application Apple Watch affiche maintenant les appels en direct et les messages non lus en couleur, pour qu'on les repère d'un coup d'œil.
