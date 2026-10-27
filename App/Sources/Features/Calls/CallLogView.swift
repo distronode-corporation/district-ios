@@ -50,6 +50,12 @@ private struct CallLogScreen: View {
                 await model.loadFirst()
                 watch.setNeedsSnapshot()
             }
+            // ⚠️ THE SCREEN'S OWN IDENTIFIER, IN BOTH LAYOUTS. The tab's content identifier
+            // (`A11yID.Nav.calls`) exists only in the compact tab shell; the iPad's split view
+            // has no tab, so a UI test asserting it there never finds the call log. ⛔ `.contain`
+            // FIRST, or every row inherits this identifier (the same trap `InboxView` documents).
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(A11yID.Calls.root)
     }
 
     @ViewBuilder

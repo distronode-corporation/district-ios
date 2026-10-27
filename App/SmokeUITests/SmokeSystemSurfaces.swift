@@ -52,6 +52,10 @@ extension SmokeUITests {
     /// interaction is with the app under test, and the next one here is with the browser.
     @discardableResult
     func dismissSavePasswordOffer(over browser: XCUIApplication) -> Bool {
+        // ⚠️ A STRAY TAP CAN PRESS CONSENT. When the system dismisses the sheet first, the tap
+        // below lands on the page under it, which can be the consent button (iPhone 17 Pro,
+        // PR #91 smoke). So consent is pressed through `pressIfPresent(_:)` and the waits accept
+        // a page already past consent; a stray press is then harmless.
         let springboard = XCUIApplication(bundleIdentifier: Self.springboardBundle)
         for host in [browser, springboard] where host.state != .notRunning {
             // ⚠️ A SNAPSHOT AND A COORDINATE TAP, NEVER `exists` THEN `tap()`. The sheet can
@@ -99,14 +103,20 @@ extension SmokeUITests {
     /// the form from being sent or has the sign-in refused; both leave `loginButton` on the
     /// page, so a run that ends there says so, rather than "the consent screen never appeared".
     /// ⛔ The messages name the page's state, never a field's value.
-    func awaitConsent(_ consent: XCUIElement, in browser: XCUIApplication, loginButton: XCUIElement) {
+    ///
+    /// Returns true when the consent button is on screen, false when the sign-in sheet has already
+    /// moved past it (a stray tap pressed it, see `dismissSavePasswordOffer(over:)`).
+    @discardableResult
+    func awaitConsent(_ consent: XCUIElement, in browser: XCUIApplication, loginButton: XCUIElement) -> Bool {
         let twoStep = browser.staticTexts["Two-step verification"]
         // The website's `authErrors.CredentialsSignin` (English login copy).
         let refused = browser.staticTexts.matching(
             NSPredicate(format: "label CONTAINS %@", "Invalid credentials")
         ).firstMatch
         let deadline = Date().addingTimeInterval(45)
-        while !consent.exists, Date() < deadline {
+        // Past consent: the login form and the consent button both gone from the sheet.
+        let pastConsent = { !consent.exists && !loginButton.exists && !browser.webViews.firstMatch.exists }
+        while !consent.exists, !pastConsent(), Date() < deadline {
             XCTAssertFalse(
                 twoStep.exists,
                 "the demo account has a second factor enrolled; this suite cannot produce a code"
@@ -124,9 +134,13 @@ extension SmokeUITests {
             !consent.exists && loginButton.exists,
             "still on the login page after 45 s: the script's password never reached the field"
         )
+        if pastConsent() {
+            return false
+        }
         XCTAssertTrue(consent.exists, "the consent screen never appeared")
         // The offer can arrive with the page and sit over the button.
         dismissSavePasswordOffer(over: browser)
+        return true
     }
 
     /// Wait for the app to take back the handshake after the consent press.
@@ -138,11 +152,22 @@ extension SmokeUITests {
     func awaitLanding(on root: XCUIElement, consent: XCUIElement, browser: XCUIApplication) -> Bool {
         let deadline = Date().addingTimeInterval(90)
         while !root.exists, Date() < deadline {
-            if dismissSavePasswordOffer(over: browser), browser.state != .notRunning, consent.exists {
-                consent.tap()
+            if dismissSavePasswordOffer(over: browser), browser.state != .notRunning {
+                pressIfPresent(consent)
             }
             Thread.sleep(forTimeInterval: 0.5)
         }
         return root.exists
+    }
+
+    /// Press a web button if it is still on screen; a button already gone is skipped.
+    ///
+    /// ⚠️ NOT `exists` THEN `tap()`: the page can move on between the two (a stray press, the
+    /// sheet closing), and `tap()` on a gone element fails the test. `snapshot()` throws instead.
+    func pressIfPresent(_ button: XCUIElement) {
+        guard let shot = try? button.snapshot() else { return }
+        XCUIApplication().coordinate(withNormalizedOffset: .zero)
+            .withOffset(CGVector(dx: shot.frame.midX, dy: shot.frame.midY))
+            .tap()
     }
 }

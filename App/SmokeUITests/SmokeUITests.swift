@@ -178,7 +178,7 @@ private extension SmokeUITests {
         }
         if consent.exists {
             attach(name: "IOS-SMOKE-02-consent")
-            consent.tap()
+            pressIfPresent(consent)
             return
         }
         XCTAssertTrue(emailField.exists, "the login page never rendered")
@@ -202,17 +202,18 @@ private extension SmokeUITests {
         // ⛔ CONSENT IS A PRESS, NOT A REDIRECT. The server's hand-off page mints the
         // authorization code only on an explicit tap, which is the anti-drive-by guard
         // for the native sign-in. It will not be removed.
-        awaitConsent(consent, in: safari, loginButton: enterPlatform)
-        attach(name: "IOS-SMOKE-02-consent")
-        consent.tap()
+        if awaitConsent(consent, in: safari, loginButton: enterPlatform) {
+            attach(name: "IOS-SMOKE-02-consent")
+            pressIfPresent(consent)
+        }
     }
 
     /// The release gate's two screens (3.0.3): Calls and Inbox render for the signed-in account.
-    /// ⚠️ `A11yID.Nav.calls`, not `A11yID.Calls.root`: the call log screen carries the tab's
-    /// content identifier and nothing sets the latter.
+    /// ⚠️ `A11yID.Calls.root`, not `A11yID.Nav.calls`: the tab's content identifier exists only
+    /// in the compact tab shell, and the iPad's split view has no tab (PR #91 smoke).
     func tourCallsAndInbox() throws {
         navigate(to: .calls)
-        XCTAssertTrue(element(A11yID.Nav.calls).waitForExistence(timeout: 30), "the calls screen never rendered")
+        XCTAssertTrue(element(A11yID.Calls.root).waitForExistence(timeout: 30), "the calls screen never rendered")
         attach(name: "IOS-SMOKE-03b-calls")
         navigate(to: .inbox)
         XCTAssertTrue(element(A11yID.Inbox.root).waitForExistence(timeout: 30), "the inbox never rendered")

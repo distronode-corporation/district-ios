@@ -228,6 +228,10 @@ built from history before publication, so they have no tags in this repository.
     the login page after 45 s, each with its own message.
   - The script waits for `simctl bootstatus -b`, clears the previous run's attachments, and
     no longer prints the all-clear after a failed attachment export (exit 4 on a green run).
+  - Consent is found in either language (the page speaks the account's stored language), a
+    page already past consent counts as success (a stray "Not Now" tap can press it), and the
+    call log screen carries `district-call-log-root` in both layouts, since the iPad's split
+    view has no tab and its tab identifier.
   The harness has 52 cases. The password was in none of the runs' logs or bundles.
 
 ### Changed
