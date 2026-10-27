@@ -79,7 +79,7 @@ extension SmokeUITests {
     /// nor any descendant has keyboard focus" (PR #91 smoke). ⛔ AND THE PASSWORD FIELD MUST HOLD
     /// FOCUS before the script is asked to type: its keystrokes go to whatever has it.
     func focus(_ field: XCUIElement, named name: String) {
-        for _ in 0..<4 {
+        for _ in 0 ..< 4 {
             field.tap()
             let deadline = Date().addingTimeInterval(4)
             repeat {
