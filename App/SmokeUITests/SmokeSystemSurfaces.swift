@@ -36,7 +36,6 @@ extension SmokeUITests {
             "Paste", XCUIElement.ElementType.menuItem.rawValue, XCUIElement.ElementType.button.rawValue
         )
         let paste = process.descendants(matching: .any).matching(command).firstMatch
-        let empty = field.value as? String
         // A press opens the edit menu on an empty web field; a second tap on the focused
         // field is the other gesture that does, and is tried only when the press did not.
         field.press(forDuration: 1.0)
@@ -45,36 +44,27 @@ extension SmokeUITests {
         }
         XCTAssertTrue(paste.waitForExistence(timeout: 5), "no Paste command in the password field's edit menu")
         paste.tap()
-
-        if !valueChanged(field, from: empty, timeout: 3) {
-            let allow = "Allow Paste"
-            let springboard = XCUIApplication(bundleIdentifier: Self.springboardBundle)
-            for host in [process, springboard] where host.buttons[allow].exists {
-                host.buttons[allow].tap()
-            }
-        }
-        // ⛔ THE MESSAGE NAMES THE FIELD'S STATE, NEVER ITS VALUE.
-        XCTAssertTrue(
-            valueChanged(field, from: empty, timeout: 5),
-            "the pasted password never reached the field; smoke-simulator.sh seeds the simulator pasteboard"
-        )
+        allowPasteIfAsked(in: process)
     }
 
-    /// Whether a field's value moved off what it read while empty, within `timeout`.
+    /// Answer an "Allow Paste" prompt if one comes up within a few seconds of the paste.
     ///
-    /// ⚠️ A CHANGE, NOT A SPELLING. A secure field reports masked characters as its value
-    /// (bullets, one per character, as far as WebKit is known to publish them), and its empty
-    /// value may be "" or the placeholder; comparing against the empty reading holds for any
-    /// of those. ⛔ The value is compared and never printed.
-    func valueChanged(_ field: XCUIElement, from empty: String?, timeout: TimeInterval) -> Bool {
-        let deadline = Date().addingTimeInterval(timeout)
+    /// ⛔ THE FIELD'S VALUE IS NEVER READ TO PROVE THE PASTE. A WebKit secure field gave
+    /// XCUITest the same value before and after a paste that landed (iPhone 17 Pro), and on an
+    /// iPad Pro 13 the value query itself hung for 30 s on "main thread busy" (iMac, PR #90
+    /// smoke). Whether the password arrived is read from the page instead, after the form is
+    /// sent: see `awaitConsent(_:in:loginButton:)`.
+    func allowPasteIfAsked(in process: XCUIApplication) {
+        let allow = "Allow Paste"
+        let springboard = XCUIApplication(bundleIdentifier: Self.springboardBundle)
+        let deadline = Date().addingTimeInterval(3)
         repeat {
-            if let value = field.value as? String, !value.isEmpty, value != empty {
-                return true
+            for host in [process, springboard] where host.buttons[allow].exists {
+                host.buttons[allow].tap()
+                return
             }
-            Thread.sleep(forTimeInterval: 0.25)
+            Thread.sleep(forTimeInterval: 0.5)
         } while Date() < deadline
-        return false
     }
 
     /// Turn down the system's offer to save the password just sent, if it is on screen.
@@ -108,18 +98,36 @@ extension SmokeUITests {
     /// ⛔ AN ACCOUNT WITH TOTP ENROLLED CANNOT COMPLETE THIS. The login page adds a one-time
     /// code field when the login route reports `mfaRequired`, and nothing here can produce a
     /// code, so that page fails the run by name rather than as a timeout.
-    func awaitConsent(_ consent: XCUIElement, in browser: XCUIApplication) {
+    ///
+    /// ⚠️ THIS IS WHERE A PASTE THAT NEVER LANDED SHOWS. An empty password field either keeps
+    /// the form from being sent or has the sign-in refused; both leave `loginButton` on the
+    /// page, so a run that ends there says so, rather than "the consent screen never appeared".
+    /// ⛔ The messages name the page's state, never a field's value.
+    func awaitConsent(_ consent: XCUIElement, in browser: XCUIApplication, loginButton: XCUIElement) {
         let twoStep = browser.staticTexts["Two-step verification"]
+        // The website's `authErrors.CredentialsSignin` (English login copy).
+        let refused = browser.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS %@", "Invalid credentials")
+        ).firstMatch
         let deadline = Date().addingTimeInterval(45)
         while !consent.exists, Date() < deadline {
             XCTAssertFalse(
                 twoStep.exists,
                 "the demo account has a second factor enrolled; this suite cannot produce a code"
             )
+            XCTAssertFalse(
+                refused.exists,
+                "the login page refused the sign-in: the pasted password did not arrive, "
+                    + "or the demo account's password changed"
+            )
             if !dismissSavePasswordOffer(over: browser) {
                 Thread.sleep(forTimeInterval: 0.5)
             }
         }
+        XCTAssertFalse(
+            !consent.exists && loginButton.exists,
+            "still on the login page after 45 s: the pasted password most likely never reached the field"
+        )
         XCTAssertTrue(consent.exists, "the consent screen never appeared")
         // The offer can arrive with the page and sit over the button.
         dismissSavePasswordOffer(over: browser)

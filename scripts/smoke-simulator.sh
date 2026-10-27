@@ -27,8 +27,8 @@
 # ⛔ AND THE RUN IS CHECKED FOR IT AFTERWARDS: the log, the result bundle (raw, and its
 # exported activities, console log and diagnostics) and the attachments are searched for the
 # password, without printing it. A copy fails the run (exit 3) and deletes the artefacts that
-# held it; a result bundle that cannot be read back fails a green run (exit 4), because a
-# check that could not look is not a check that passed.
+# held it; a result bundle or attachments that cannot be read back fail a green run (exit 4),
+# because a check that could not look is not a check that passed.
 #
 # ⛔ AD-HOC SIGNED (`CODE_SIGN_IDENTITY=-`), NEVER `CODE_SIGNING_ALLOWED=NO`. An unsigned
 # simulator build has no keychain entitlement, so `KeychainTokenStore` throws on its first
@@ -97,14 +97,37 @@ fi
 # journey begins with. The website session in the browser's cookie jar may survive this;
 # the journey takes the consent screen directly when it does.
 echo "== removing any previous install from $DEVICE =="
-xcrun simctl boot "$DEVICE" >/dev/null 2>&1 || true
+# ⚠️ BOOTED IS NOT READY. `simctl boot` returns while the device is still starting, and a
+# `simctl pbcopy` sent then times out (NSPOSIXErrorDomain 60) on an erased device every time.
+# `bootstatus -b` boots it if needed and returns once the boot has completed.
+xcrun simctl bootstatus "$DEVICE" -b >/dev/null 2>&1 || true
 xcrun simctl uninstall "$DEVICE" com.distronode.district >/dev/null 2>&1 || true
 
 # ── The password, by pasteboard ─────────────────────────────────────────────────
 # ⚠️ SEEDED FROM HERE, NOT FROM THE TEST: a `UIPasteboard` write from the UI-test runner fails
 # on iOS 14.5 and later (`PBErrorDomain` 11, "the pasteboard name ... is not valid").
+# simctl_pbcopy TEXT: write TEXT to the simulator's pasteboard (from stdin), retried.
+# ⚠️ `simctl pbcopy` TIMES OUT INTERMITTENTLY (NSPOSIXErrorDomain 60) EVEN ON A BOOTED DEVICE:
+# every try with Simulator.app closed and 3 of 12 with it open (iMac, PR #90 smoke). So it is
+# retried, and Simulator.app is opened (in the background) after the third failure.
+# SMOKE_PBCOPY_BACKOFF is the pause between tries, in seconds.
+simctl_pbcopy() {
+  local attempt
+  for attempt in 1 2 3 4 5 6; do
+    if printf '%s' "$1" | xcrun simctl pbcopy "$DEVICE"; then
+      return 0
+    fi
+    echo "WARNING: simctl pbcopy try $attempt of 6 failed" >&2
+    if [ "$attempt" -eq 3 ] && command -v open >/dev/null 2>&1; then
+      open -g -a Simulator >/dev/null 2>&1 || true
+    fi
+    [ "$attempt" -eq 6 ] || sleep "${SMOKE_PBCOPY_BACKOFF:-5}"
+  done
+  return 1
+}
 clear_pasteboards() {
-  printf '' | xcrun simctl pbcopy "$DEVICE" >/dev/null 2>&1 || true
+  simctl_pbcopy '' 2>/dev/null ||
+    echo "WARNING: could not clear the $DEVICE pasteboard; it may still hold the password (erase the simulator)" >&2
   # Simulator.app, while open, syncs the simulator's pasteboard to the Mac's. Cleared only
   # when it holds exactly the password, so an operator's own clipboard is left alone.
   if command -v pbpaste >/dev/null 2>&1 && [ "$(pbpaste 2>/dev/null)" = "$SMOKE_PASSWORD" ]; then
@@ -114,7 +137,7 @@ clear_pasteboards() {
 ON_PASTEBOARD=""
 if [ "$CREDENTIALS" -eq 1 ]; then
   trap clear_pasteboards EXIT
-  printf '%s' "$SMOKE_PASSWORD" | xcrun simctl pbcopy "$DEVICE" ||
+  simctl_pbcopy "$SMOKE_PASSWORD" ||
     { echo "FATAL: could not put the password on the $DEVICE pasteboard (xcrun simctl pbcopy)" >&2; exit 1; }
   ON_PASTEBOARD=1
   echo "== password on the $DEVICE pasteboard for the suite to paste; cleared on exit =="
@@ -146,6 +169,7 @@ set -e
 # ⚠️ THE SCREENSHOTS ARE INSIDE THE RESULT BUNDLE AND ARE NOT FILES UNTIL EXPORTED.
 # `.xcresult` is an opaque directory; a CI artifact of it is openable only in Xcode, so
 # the attachments are exported next to it for anyone reading the job from a browser.
+ATTACHMENTS_EXPORTED=1
 if [ -d "$RESULT" ]; then
   echo "== exporting attachments =="
   mkdir -p "$OUT/attachments"
@@ -153,11 +177,16 @@ if [ -d "$RESULT" ]; then
   # errors with "this command is deprecated"; Apple moved the non-legacy surface to a
   # different verb set and the old one still works only behind that flag. Tolerated
   # rather than fatal: the run's verdict is xcodebuild's, not the exporter's.
-  xcrun xcresulttool export attachments \
+  # ⛔ A FAILED EXPORT IS REMEMBERED: the leak guard below must not call the attachments
+  # clean when it could not search them (iPad Pro 13, PR #90 smoke: "export failed", then
+  # "no copy of the password ... or the attachments").
+  if ! xcrun xcresulttool export attachments \
     --path "$RESULT" \
     --output-path "$OUT/attachments" \
-    --legacy 2>/dev/null \
-    || echo "WARNING: attachment export failed; the .xcresult still holds them"
+    --legacy 2>/dev/null; then
+    ATTACHMENTS_EXPORTED=0
+    echo "WARNING: attachment export failed; the .xcresult still holds them"
+  fi
   find "$OUT/attachments" -type f 2>/dev/null | sort || true
 fi
 
@@ -231,6 +260,9 @@ elif [ "$CREDENTIALS" -eq 1 ]; then
     echo "== no result bundle; the log holds no copy of the password =="
   elif [ "$READABLE" -eq 0 ]; then
     echo "FATAL: xcresulttool exported nothing readable, so the result bundle was not searched" >&2
+    [ "$STATUS" -ne 0 ] || STATUS=4
+  elif [ "$ATTACHMENTS_EXPORTED" -eq 0 ]; then
+    echo "FATAL: the attachments could not be exported, so they were not searched" >&2
     [ "$STATUS" -ne 0 ] || STATUS=4
   else
     echo "== no copy of the password in the log, the result bundle or the attachments =="

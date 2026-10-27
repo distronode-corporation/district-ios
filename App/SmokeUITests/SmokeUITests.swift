@@ -162,7 +162,7 @@ private extension SmokeUITests {
     ///
     /// ⛔ THE PASSWORD IS PASTED, NEVER TYPED, and the second factor and the system's
     /// save-password offer are handled while waiting for consent: see `pastePassword(into:in:)`
-    /// and `awaitConsent(_:in:)`.
+    /// and `awaitConsent(_:in:loginButton:)`.
     func completeWebLogin(in safari: XCUIApplication, consent: XCUIElement) throws {
         let emailField = safari.textFields["Work Email"]
         // A website session left by an earlier run skips the login form.
@@ -194,12 +194,13 @@ private extension SmokeUITests {
         if doneAgain.waitForExistence(timeout: 2) {
             doneAgain.tap()
         }
-        safari.buttons["Enter platform"].tap()
+        let enterPlatform = safari.buttons["Enter platform"]
+        enterPlatform.tap()
 
         // ⛔ CONSENT IS A PRESS, NOT A REDIRECT. The server's hand-off page mints the
         // authorization code only on an explicit tap, which is the anti-drive-by guard
         // for the native sign-in. It will not be removed.
-        awaitConsent(consent, in: safari)
+        awaitConsent(consent, in: safari, loginButton: enterPlatform)
         attach(name: "IOS-SMOKE-02-consent")
         consent.tap()
     }

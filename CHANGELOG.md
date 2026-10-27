@@ -213,8 +213,18 @@ built from history before publication, so they have no tags in this repository.
   (a copy fails the run with exit 3, an unreadable bundle a green run with exit 4). The
   journey also turns down the "Save Password?" sheet that a fresh simulator raises after
   Enter platform, which had covered the page until "the consent screen never appeared".
-  `scripts/smoke-simulator.test.sh` (40 cases) holds the channel and the guard. Not yet run on
-  a simulator.
+  `scripts/smoke-simulator.test.sh` (40 cases) holds the channel and the guard. Its first
+  simulator run (iPhone 17 Pro and iPad Pro 13, erased) failed three ways, fixed here:
+  - `simctl pbcopy` timed out (NSPOSIXErrorDomain 60) on a device still booting, and now and
+    then on a booted one. The script waits for `simctl bootstatus -b`, retries the write six
+    times and opens Simulator.app in the background after the third failure.
+  - The paste was checked by reading the secure field's value, which XCUITest reported
+    unchanged on the iPhone and which hung for 30 s ("main thread busy") on the iPad. The
+    value is no longer read: a paste that never landed now shows as the login page refusing
+    the sign-in, or as the run still being on the login page, each named in its own message.
+  - A failed attachment export was followed by the all-clear. It now fails a green run with
+    exit 4 and prints no all-clear on any run.
+  The harness has 58 cases. The password was in none of the run's logs or bundles.
 
 ### Changed
 
