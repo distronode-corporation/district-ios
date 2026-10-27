@@ -20,9 +20,9 @@ import XCTest
 /// scratch on every run and has no injected session to protect; iOS does.
 ///
 /// ⛔ CREDENTIALS COME FROM `scripts/smoke-simulator.sh` AND ARE NEVER COMMITTED. The email
-/// arrives in the runner's environment; the password NEVER reaches this process at all, the
-/// script puts it on the simulator's pasteboard and this suite pastes it (see
-/// `pastePassword(into:in:)`). With either missing every case skips with a message naming
+/// arrives in the runner's environment; the password NEVER reaches this process at all: this
+/// suite focuses the password field and the script types it from outside the simulator (see
+/// `awaitScriptedPassword()`). With either missing every case skips with a message naming
 /// what was missing, which is a real outcome rather than a silent pass.
 final class SmokeUITests: XCTestCase {
     private var app: XCUIApplication!
@@ -34,9 +34,9 @@ final class SmokeUITests: XCTestCase {
     /// before the test sees it. `scripts/uitest-device-imac.sh` already does this for
     /// `DISTRICT_UITEST_SESSION`; the same rule applies to these.
     private static let emailVariable = "DISTRICT_SMOKE_EMAIL"
-    /// ⛔ A FLAG, NOT THE PASSWORD: "1" when the script has put the password on the
-    /// simulator's pasteboard.
-    private static let pasteboardVariable = "DISTRICT_SMOKE_PASSWORD_ON_PASTEBOARD"
+    /// ⛔ A FLAG, NOT THE PASSWORD: "1" when the script holds the password and will type it
+    /// into the focused password field.
+    private static let typedVariable = "DISTRICT_SMOKE_PASSWORD_BY_SCRIPT"
     private static let contactVariable = "DISTRICT_SMOKE_CONTACT"
     private static let planVariable = "DISTRICT_SMOKE_PLAN"
 
@@ -47,8 +47,8 @@ final class SmokeUITests: XCTestCase {
         Self.environment(Self.emailVariable)
     }
 
-    private var passwordOnPasteboard: Bool {
-        Self.environment(Self.pasteboardVariable) == "1"
+    private var passwordTypedByScript: Bool {
+        Self.environment(Self.typedVariable) == "1"
     }
 
     private var contactName: String {
@@ -72,8 +72,8 @@ final class SmokeUITests: XCTestCase {
         continueAfterFailure = false
 
         try XCTSkipIf(
-            email.isEmpty || !passwordOnPasteboard,
-            "\(Self.emailVariable) / \(Self.pasteboardVariable) unset; run scripts/smoke-simulator.sh"
+            email.isEmpty || !passwordTypedByScript,
+            "\(Self.emailVariable) / \(Self.typedVariable) unset; run scripts/smoke-simulator.sh"
         )
 
         // ⚠️ NOTHING IN `launchEnvironment`: the app reads none of the smoke variables, and the
@@ -129,7 +129,13 @@ private extension SmokeUITests {
 
         try acceptAuthenticationConsent()
         let safari = XCUIApplication(bundleIdentifier: "com.apple.SafariViewService")
-        let consent = safari.buttons["Continue to District AI"]
+        // ⚠️ EITHER LANGUAGE. The hand-off page speaks the ACCOUNT's stored language before the
+        // device's (website `auth/native/sheet-locale.ts`), so an account last signed in from a
+        // French device gets the French page on an English simulator (PR #91 smoke). Both are the
+        // website's `nativeSignInCopy.continueCta`; a copy change there breaks this.
+        let consent = safari.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Continue to District AI", "Continuer vers District AI"])
+        ).firstMatch
         try completeWebLogin(in: safari, consent: consent)
 
         // Back in the app over the custom scheme. The budget covers a code exchange
@@ -160,9 +166,9 @@ private extension SmokeUITests {
     /// come from the website's English copy, and a copy change there breaks this with
     /// nothing linking the two.
     ///
-    /// ⛔ THE PASSWORD IS PASTED, NEVER TYPED, and the second factor and the system's
-    /// save-password offer are handled while waiting for consent: see `pastePassword(into:in:)`
-    /// and `awaitConsent(_:in:)`.
+    /// ⛔ THE PASSWORD IS TYPED BY THE SCRIPT, NEVER BY THIS PROCESS, and the second factor and
+    /// the system's save-password offer are handled while waiting for consent: see
+    /// `awaitScriptedPassword()` and `awaitConsent(_:in:loginButton:)`.
     func completeWebLogin(in safari: XCUIApplication, consent: XCUIElement) throws {
         let emailField = safari.textFields["Work Email"]
         // A website session left by an earlier run skips the login form.
@@ -172,11 +178,11 @@ private extension SmokeUITests {
         }
         if consent.exists {
             attach(name: "IOS-SMOKE-02-consent")
-            consent.tap()
+            pressIfPresent(consent)
             return
         }
         XCTAssertTrue(emailField.exists, "the login page never rendered")
-        emailField.tap()
+        focus(emailField, named: "Work Email")
         emailField.typeText(email)
         // The keyboard's accessory bar sits over the password field on a 6.3-inch screen, so a
         // tap there lands on the bar and the field never takes focus. Close the keyboard first.
@@ -187,29 +193,27 @@ private extension SmokeUITests {
 
         let passwordField = safari.secureTextFields["Password"]
         XCTAssertTrue(passwordField.waitForExistence(timeout: 10), "no password field on the login page")
-        passwordField.tap()
-        pastePassword(into: passwordField, in: safari)
-
-        let doneAgain = safari.buttons["Done"]
-        if doneAgain.waitForExistence(timeout: 2) {
-            doneAgain.tap()
-        }
-        safari.buttons["Enter platform"].tap()
+        focus(passwordField, named: "Password")
+        // The script types the password and presses Return, which sends the form: the same
+        // as "Enter platform", so the button is only watched, never pressed.
+        awaitScriptedPassword()
+        let enterPlatform = safari.buttons["Enter platform"]
 
         // ⛔ CONSENT IS A PRESS, NOT A REDIRECT. The server's hand-off page mints the
         // authorization code only on an explicit tap, which is the anti-drive-by guard
         // for the native sign-in. It will not be removed.
-        awaitConsent(consent, in: safari)
-        attach(name: "IOS-SMOKE-02-consent")
-        consent.tap()
+        if awaitConsent(consent, in: safari, loginButton: enterPlatform) {
+            attach(name: "IOS-SMOKE-02-consent")
+            pressIfPresent(consent)
+        }
     }
 
     /// The release gate's two screens (3.0.3): Calls and Inbox render for the signed-in account.
-    /// ⚠️ `A11yID.Nav.calls`, not `A11yID.Calls.root`: the call log screen carries the tab's
-    /// content identifier and nothing sets the latter.
+    /// ⚠️ `A11yID.Calls.root`, not `A11yID.Nav.calls`: the tab's content identifier exists only
+    /// in the compact tab shell, and the iPad's split view has no tab (PR #91 smoke).
     func tourCallsAndInbox() throws {
         navigate(to: .calls)
-        XCTAssertTrue(element(A11yID.Nav.calls).waitForExistence(timeout: 30), "the calls screen never rendered")
+        XCTAssertTrue(element(A11yID.Calls.root).waitForExistence(timeout: 30), "the calls screen never rendered")
         attach(name: "IOS-SMOKE-03b-calls")
         navigate(to: .inbox)
         XCTAssertTrue(element(A11yID.Inbox.root).waitForExistence(timeout: 30), "the inbox never rendered")
