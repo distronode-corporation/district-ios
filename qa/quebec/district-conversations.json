@@ -1,0 +1,63 @@
+{
+ "success": true,
+ "conversations": [
+  {
+   "key": "martine@vandelac-moreau.example",
+   "threadKey": "contact:contact_qc_1",
+   "counterpart": "Martine Gagnon <martine@vandelac-moreau.example>",
+   "matchKeys": [
+    "14185550142",
+    "martine@vandelac-moreau.example"
+   ],
+   "kind": "phone",
+   "channels": [
+    "sms",
+    "email"
+   ],
+   "contactId": "contact_qc_1",
+   "contactName": "Martine Gagnon",
+   "contactEmail": "martine@vandelac-moreau.example",
+   "contactPhone": "+14185550142",
+   "canSms": true,
+   "canEmail": true,
+   "lastMessage": {
+    "body": "Merci! Le plombier peut-il passer par l'entrée arrière? La salle d'attente est pleine.",
+    "direction": "inbound",
+    "type": "sms",
+    "status": "received",
+    "createdAt": "2026-10-14T13:20:00.000Z"
+   },
+   "unreadCount": 1,
+   "totalMessages": 4
+  },
+  {
+   "key": "14505550187",
+   "threadKey": "contact:contact_qc_2",
+   "counterpart": "+14505550187",
+   "matchKeys": [
+    "14505550187"
+   ],
+   "kind": "phone",
+   "channels": [
+    "sms"
+   ],
+   "contactId": "contact_qc_2",
+   "contactName": "Jean-François Tremblay",
+   "contactEmail": "jf.tremblay@example.com",
+   "contactPhone": "+14505550187",
+   "canSms": true,
+   "canEmail": true,
+   "lastMessage": {
+    "body": "Parfait, je vous reviens vendredi pour la soumission du chauffe-eau.",
+    "direction": "inbound",
+    "type": "sms",
+    "status": "received",
+    "createdAt": "2026-10-14T12:31:00.000Z"
+   },
+   "unreadCount": 0,
+   "totalMessages": 2
+  }
+ ],
+ "scanned": 12,
+ "scanLimit": 500
+}

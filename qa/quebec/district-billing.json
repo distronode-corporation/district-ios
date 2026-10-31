@@ -1,0 +1,74 @@
+{
+ "subscriptions": [
+  {
+   "id": "sub_contract_pro",
+   "status": "active",
+   "current_period_end": 1793203200,
+   "cancel_at_period_end": false,
+   "tierName": "District AI Voice Pro",
+   "amount": 34900,
+   "currency": "cad",
+   "includedMinutes": 1500,
+   "overageRate": 0.16,
+   "discount": {
+    "couponName": "Lancement Québec",
+    "percentOff": 20
+   }
+  }
+ ],
+ "invoices": [
+  {
+   "id": "in_contract_paid",
+   "amount_paid": 39436,
+   "total": 39436,
+   "tax": 4536,
+   "currency": "cad",
+   "status": "paid",
+   "created": 1790524800,
+   "hosted_invoice_url": "https://invoice.stripe.test/in_contract_paid",
+   "invoice_pdf": "https://invoice.stripe.test/in_contract_paid.pdf"
+  }
+ ],
+ "invoicesHasMore": true,
+ "paymentMethod": {
+  "brand": "visa",
+  "last4": "4242",
+  "exp_month": 11,
+  "exp_year": 2029
+ },
+ "paymentMethods": [
+  {
+   "id": "pm_contract_visa",
+   "brand": "visa",
+   "last4": "4242",
+   "exp_month": 11,
+   "exp_year": 2029,
+   "isDefault": true
+  }
+ ],
+ "businessProfile": {
+  "name": "Contract Test Ltd",
+  "email": "billing@contract.test"
+ },
+ "taxIds": [
+  {
+   "id": "txi_contract",
+   "type": "ca_bn",
+   "value": "123456789RT0001",
+   "country": "CA"
+  }
+ ],
+ "billingAddress": {
+  "line1": "1 Test Street",
+  "city": "Toronto",
+  "state": "ON",
+  "postal_code": "M5V 1A1",
+  "country": "CA"
+ },
+ "customerId": "cus_contract_1",
+ "usageWorkspaceId": "ws-contract-test",
+ "overagePolicy": "auto_bill",
+ "overageCapExceeded": false,
+ "overageSpendCapCents": 5000,
+ "overageSpendCapExceeded": false
+}

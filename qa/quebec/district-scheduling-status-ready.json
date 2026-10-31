@@ -1,0 +1,13 @@
+{
+  "eligible": true,
+  "canManage": true,
+  "tenant": {
+    "status": "ready",
+    "publicHost": "rendezvous.plomberie-desrosiers.example",
+    "region": "ca",
+    "lastReadyAt": "2026-10-06T13:20:00.000Z",
+    "lastError": null,
+    "hasCredentials": true,
+    "bookingUrl": "https://rendezvous.plomberie-desrosiers.example/book/visite-estimation"
+  }
+}
