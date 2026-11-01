@@ -1,7 +1,16 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/distronode-logo-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset=".github/assets/distronode-logo-light.png">
+  <img alt="Distronode" src=".github/assets/distronode-logo-light.png" width="220">
+</picture>
+
 # District AI for iOS
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/distronode-corporation/district-ios/badge)](https://scorecard.dev/viewer/?uri=github.com/distronode-corporation/district-ios)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15870/badge)](https://www.bestpractices.dev/projects/15870)
+[![Latest release](https://img.shields.io/github/v/release/distronode-corporation/district-ios?label=release)](https://github.com/distronode-corporation/district-ios/releases/latest)
+
+<a href="https://apps.apple.com/app/id6809297970"><img alt="Download on the App Store" src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" height="44"></a>
 
 District AI for iOS is [on the App Store](https://apps.apple.com/app/id6809297970).
 
@@ -12,6 +21,10 @@ issues and pull requests live on GitHub) · [CHANGELOG](CHANGELOG.md)
 The native iPhone and iPad client for [District AI](https://www.distronode.com/district-ai),
 the AI receptionist service by Distronode. It places and answers calls, and covers the
 inbox, contacts, meeting rooms and workspace settings of a District AI workspace.
+
+<img alt="The Overview on iPad, in a fictional review workspace" src="docs/images/ipad-overview.png" width="620">
+
+*The Overview on iPad, in a fictional review workspace.*
 
 This repository and [district-core-swift](https://github.com/distronode-corporation/district-core-swift), the Swift package that holds most of
 the app's logic, are the client's complete source, under the Apache License 2.0. The
@@ -255,3 +268,6 @@ Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 District AI, Distronode and the District AI and Distronode logos and app icons are
 trademarks of Distronode Corporation. They are not licensed under the Apache License 2.0:
 a build you distribute must use its own name, icon and bundle identifier.
+
+Apple, the Apple logo, iPhone and iPad are trademarks of Apple Inc., registered in the U.S. and
+other countries. App Store is a service mark of Apple Inc.
