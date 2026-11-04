@@ -51,6 +51,14 @@ extension DialPlan {
         "RS", "SA", "SE", "SI", "SK", "TH", "TR", "TW", "UA", "VN", "ZA",
     ]
 
+    /// Trunk prefixes that are not a single `0` (Seer on PR #95). Without them `8 495 123 4567`
+    /// typed in Russia would keep its `8` and send `+7 849…`, a wrong number that still dials.
+    static let otherTrunkPrefixes: [String: String] = ["RU": "8", "KZ": "8", "BY": "80", "HU": "06"]
+
+    /// The +1 toll-free area codes. ⚠️ They belong to the whole plan, so they never name a
+    /// country and never vote for a workspace's home country.
+    static let nanpTollFree: Set<String> = ["800", "833", "844", "855", "866", "877", "888"]
+
     /// Canadian area codes, so a +1 number reads Canada or the US by its first three digits.
     static let canadianAreaCodes: Set<String> = Set(
         """

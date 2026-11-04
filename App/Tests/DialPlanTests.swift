@@ -91,7 +91,8 @@ final class DialPlanTests: XCTestCase {
         let numbers: [(String, String)] = [
             ("CA", "4165550199"), ("GB", "02079460958"), ("FR", "0639980123"), ("DE", "030123456"),
             ("AU", "0212345678"), ("AU", "0491570156"), ("AU", "1300123456"), ("CH", "0441234567"),
-            ("SG", "61234567"), ("IT", "0612345678"), ("JP", "0312345678"),
+            ("SG", "61234567"), ("IT", "0612345678"), ("JP", "0312345678"), ("RU", "84951234567"),
+            ("HU", "0612345678"),
         ]
         for (country, digits) in numbers {
             var field = ""
@@ -104,6 +105,24 @@ final class DialPlanTests: XCTestCase {
                 XCTAssertLessThan(after.filter(\.isNumber).count, before, "\(country): backspace on \"\(field)\"")
             }
         }
+    }
+
+    /// ⛔ A TRUNK PREFIX THAT IS NOT `0` IS DROPPED TOO (Seer on PR #95): kept, `8 495…` in
+    /// Russia would send `+7 849…`, a wrong number that still dials.
+    func testTrunkPrefixesOtherThanZeroAreDropped() {
+        let moscow = DialPlan.read("8 495 123 4567", country: "RU")
+        XCTAssertEqual(moscow.e164, "+74951234567")
+        XCTAssertEqual(moscow.national, "8495 123 4567")
+        XCTAssertEqual(DialPlan.read("06 1 234 5678", country: "HU").e164, "+3612345678")
+        XCTAssertEqual(DialPlan.read("0", country: "HU").national, "0", "half of 06 is shown as typed")
+        XCTAssertEqual(DialPlan.read("8 017 123 4567", country: "BY").e164, "+375171234567")
+    }
+
+    /// ⚠️ A +1 TOLL-FREE NUMBER NAMES NO COUNTRY, so the +1 country on screen stays.
+    func testNorthAmericanTollFreeKeepsTheCountryOnScreen() {
+        XCTAssertEqual(DialPlan.read("8005550100", country: "CA").iso, "CA")
+        XCTAssertEqual(DialPlan.read("+1 888 555 0100", country: "CA").iso, "CA")
+        XCTAssertEqual(DialPlan.read("+1 888 555 0100", country: nil).iso, "US")
     }
 
     // MARK: - Numbers that name their own country
@@ -291,5 +310,11 @@ final class DialPlanTests: XCTestCase {
         )
         XCTAssertNil(DialerModel.homeCountry(fromNumbers: []))
         XCTAssertNil(DialerModel.homeCountry(fromNumbers: ["not a number"]))
+        // ⚠️ TOLL-FREE NUMBERS DO NOT VOTE (Seer on PR #95).
+        XCTAssertEqual(
+            DialerModel.homeCountry(fromNumbers: ["+18005550100", "+18885550100", "+14165550100"]),
+            "CA"
+        )
+        XCTAssertNil(DialerModel.homeCountry(fromNumbers: ["+18005550100"]))
     }
 }
