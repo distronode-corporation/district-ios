@@ -156,6 +156,13 @@ enum A11yID {
         static let root = "district-dialer-root"
         static let entry = "district-dialer-entry"
         static let refusal = "district-dialer-refusal"
+        /// The flag and calling code in front of the number; opens the country list.
+        static let country = "district-dialer-country"
+        /// One row of the country list, by ISO 3166 code.
+        static func countryOption(_ iso: String) -> String {
+            "district-dialer-country-\(iso)"
+        }
+
         /// ⛔ A FORBIDDEN SURFACE: tapping it places a real, billed call.
         static let call = "district-dialer-call"
         /// iOS-first. Android addresses `district-dialer-field` and types into it;

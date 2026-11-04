@@ -59,63 +59,56 @@ extension DialerModel {
         FailureText(message: inRoomMessage, action: .none)
     }
 
-    /// Which country the leading digits will ring, said beside the field.
+    /// The line under the field: where the call rings and the whole number that is sent.
     ///
     /// ⛔ THIS SENTENCE IS THE GUARD AGAINST A WRONG-COUNTRY DIAL (see the ⛔ at the top
-    /// of `DialerEntry.swift`). `+41…` reads "Switzerland" and the operator catches it in the
-    /// second before pressing Call; nothing else in the app or on the server ever
-    /// mentions the country.
+    /// of `DialerEntry.swift`). "Rings Switzerland · +41 65 550 12 34" is what the operator
+    /// reads in the second before pressing Call, and the number in it is exactly the one
+    /// the dial API receives.
     ///
     /// ⚠️ AN UNKNOWN CODE SAYS SO PLAINLY RATHER THAN GUESSING. Naming the wrong
     /// country is worse than naming none, because a wrong name is read as
-    /// confirmation. See ``DialRegion/unrecognised``.
+    /// confirmation. It stays dialable, as it was: see ``DialRegion/unrecognised``.
     ///
-    /// ⚠️ nil MEANS THERE IS NOTHING HONEST TO SAY YET: no `+` has been typed, so
-    /// the string names no country at all and ``entryProblem(_:)`` is the line
-    /// that speaks.
-    static func destinationLine(_ region: DialRegion) -> String? {
-        switch region {
-        case .none:
-            nil
-        case .unrecognised:
-            destinationUnrecognised
-        case let .named(name):
-            destinationNamed(name)
+    /// ⚠️ nil UNTIL THE NUMBER IS COMPLETE, when there is nothing to send yet; the flag on
+    /// the button already names the country while the digits are being typed.
+    static func destinationLine(_ reading: DialPlan.Reading) -> String? {
+        guard reading.status == .ready else {
+            // ⚠️ A `+` and three digits that name no country is already worth saying.
+            let unknown = reading.namedItsCountry && reading.iso == nil && reading.national.count > 3
+            return unknown && reading.status == .typing ? destinationUnrecognised : nil
         }
+        guard let iso = reading.iso else { return destinationUnrecognised }
+        return rings(DialPlan.name(iso), reading.international)
     }
 
-    /// Why the Call button is off, in the operator's terms.
+    /// Why the Call button is off, in the operator's terms, or nil when there is nothing
+    /// to correct.
     ///
-    /// ⛔ A DISABLED BUTTON WITH NO REASON CONFUSES PEOPLE (THE EIGHT-DIGIT FLOOR
-    /// ALONE DOES), so every refusal that is not "you have not typed
-    /// anything" gets a sentence. ⚠️ ``DialRefusal/empty`` returns nil because
-    /// ``entryHint`` already occupies that moment; two sentences saying the same
-    /// thing under an empty field is worse than one.
-    ///
-    /// ⚠️ THE COUNTRY-CODE SENTENCE NAMES AN EXAMPLE RATHER THAN ASSUMING ONE.
-    /// It is the one place a `+1` could creep into the client as a default, and
-    /// it stays an illustration in a label rather than a value in the field.
-    static func entryProblem(_ refusal: DialRefusal?) -> String? {
-        guard let refusal else { return nil }
-        switch refusal {
-        case .empty:
-            return nil
-        case .missingCountryCode:
-            return entryMissingCountryCode
-        case .strayPlus:
-            return entryStrayPlus
-        case .tooShort:
-            return entryTooShort(DialEntry.minimumDigits)
+    /// ⚠️ ``DialPlan/Status/empty`` RETURNS nil because the entry hint already occupies
+    /// that moment, and a number still being typed is not a mistake.
+    static func entryProblem(_ status: DialPlan.Status) -> String? {
+        switch status {
+        case .empty, .typing, .ready:
+            nil
+        case .needsCountry:
+            entryNeedsCountry
         case .tooLong:
-            return entryTooLong(DialEntry.maximumDigits)
+            entryTooManyDigits
         // ⛔ THE ONLY REFUSAL HERE THAT IS NOT A CORRECTION. Every other case tells the
         // operator how to fix the number; this one tells them to leave the app, because
         // District cannot place an emergency call and must not pretend it might. Naming
-        // the Phone app is the load-bearing half — a bare refusal in an emergency is
-        // barely better than the misleading "add a country code" it replaces.
-        case .emergencyNumber:
-            return entryEmergencyNumber
+        // the Phone app is the load-bearing half.
+        case .emergency:
+            entryEmergencyNumber
         }
+    }
+
+    /// What an empty field says: how to type a number in the country on the button, or
+    /// to choose one.
+    static func entryHint(country: String?) -> String {
+        guard let country else { return entryHintNone }
+        return entryHintLocal(DialPlan.name(country))
     }
 
     // MARK: - What the OS is told

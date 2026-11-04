@@ -20,10 +20,10 @@ import Observation
 ///   2. **One audio owner at a time**, and a second attempt while a call OR A MEETING
 ///      ROOM is live is refused rather than queued. Two engines would fight over the
 ///      device's audio focus. ⚠️ The room half is enforced here; see ``RoomAudio``.
-///   3. **The number travels exactly as typed.** Normalisation is the server's and it
-///      runs BEFORE the DNC lookup and before the dial, so a client-side canonicaliser
-///      that disagreed by one character would place a call the compliance check never
-///      saw.
+///   3. **The number sent is the number shown.** The entry is read in the country on
+///      the button (``DialPlan``) and the line under it states the whole international
+///      number before Call; that E.164 form is what is sent. The server still normalises
+///      its own copy before the DNC lookup and the dial, and E.164 passes it unchanged.
 ///   4. **The call outlives the screen.** See below.
 ///
 /// ⛔ THE CALL'S LIFETIME IS THE CLAIM ON ``CallStack/onSystemRequest``, AND THAT IS
@@ -62,8 +62,10 @@ import Observation
 @MainActor
 @Observable
 final class DialerModel: LiveCallControls {
-    /// What the operator typed, verbatim. ⛔ See property 3 on the type.
+    /// The field: the number in its local form. ⛔ See property 3 on the type.
     private(set) var entry: String = ""
+    /// The country the field is read in. ⚠️ Module-visible: `DialerEntry.swift` writes it.
+    var countries: DialerCountries
 
     /// The live call, or nil when the dialer is on the keypad.
     ///
@@ -110,8 +112,7 @@ final class DialerModel: LiveCallControls {
     /// applies to ``refusal``: there is no setter to hand a view.
     let dial: DialRepository
 
-    /// ⚠️ `callLog` BECAUSE `calls` ABOVE IS THE LIVE CALL, not the log of past ones.
-    private let callLog: CallsRepository
+    private let callLog: CallsRepository // ⚠️ `callLog`: `calls` above is the live call.
     let workspaceId: String
 
     /// Why the last carrier hang-up did not go through. ⛔ DIAGNOSIS ONLY, never
@@ -125,8 +126,7 @@ final class DialerModel: LiveCallControls {
     /// The number pinned at the tap. ⛔ See ``placeCall()``.
     private var pendingNumber = ""
 
-    /// True while ``CallStack/onSystemRequest`` belongs to this model. See the ⛔ on
-    /// the type.
+    /// True while ``CallStack/onSystemRequest`` belongs to this model. See the ⛔ on the type.
     private var claimed = false
 
     /// ⛔ REPORTED ONCE. `reportOutgoingCall(uuid:connectedAt:)` starts the OS's own
@@ -155,13 +155,14 @@ final class DialerModel: LiveCallControls {
         callLog = container.calls
         self.workspaceId = workspaceId
         canDial = WorkspaceRole.allowsMutation(role)
+        countries = DialerCountries(workspaceId: workspaceId, numbers: container.numbers)
     }
 
     // MARK: - What the keypad may do
 
-    /// ⚠️ CLEARS THE PREVIOUS REFUSAL, because it was about a different number.
+    /// ⚠️ CLEARS THE PREVIOUS REFUSAL, about a different number. ``absorb(_:)`` reads it.
     func onEntryChange(_ value: String) {
-        entry = value
+        entry = absorb(value)
         refusal = nil
     }
 
@@ -225,7 +226,7 @@ final class DialerModel: LiveCallControls {
         // the OS was handed — the call log, Recents and the invoice would then disagree
         // with each other about who was called. The field is disabled while `placing`
         // for the same reason; this is the half that does not depend on a view.
-        pendingNumber = entry
+        pendingNumber = destination.e164 ?? ""
         let uuid = UUID()
         callUUID = uuid
         claimed = true
@@ -334,7 +335,7 @@ final class DialerModel: LiveCallControls {
         placing = false
         call = SoftphoneSession(number: pendingNumber)
         await apply(.dialRequested)
-        // ⛔ THE NUMBER AS TYPED. See property 3 on the type.
+        // ⛔ THE E.164 NUMBER THE LINE UNDER THE FIELD STATED. See property 3 on the type.
         let outcome = await dial.dial(workspaceId: workspaceId, to: pendingNumber)
         // ⛔ THE CALL CAN END WHILE THE DIAL IS IN FLIGHT. Measured: the
         // `CXEndCallAction` arrived about a second after the start and this round trip

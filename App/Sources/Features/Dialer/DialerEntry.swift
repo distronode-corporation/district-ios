@@ -1,59 +1,145 @@
 import DistrictCall
+import DistrictData
+
+/// The country the dialler reads the field in, and where that country comes from.
+///
+/// ⚠️ ONE STORED VALUE ON ``DialerModel`` RATHER THAN FOUR, because `DialerModel.swift` sits
+/// at the 500-line `file_length` ceiling `swiftlint --strict` enforces.
+///
+/// ⛔ THE HOME COUNTRY IS THE WORKSPACE'S OWN NUMBERS' COUNTRY, read from
+/// `GET /api/district/workspace/provider/numbers`, which the app already decodes and every
+/// role may read. No response field was added for it: a new field breaks the mobile
+/// contracts. A workspace with no numbers has no home country, and the operator picks one
+/// (remembered per workspace, ``DialerCountryMemory``) or types `+`.
+struct DialerCountries {
+    /// The country on the button, or nil until one is picked or a `+` names one.
+    var current: String?
+    /// The workspace's own country, or nil.
+    var home: String?
+    var memory: DialerCountryMemory
+    let numbers: NumbersRepository?
+    let workspaceId: String
+
+    init(
+        workspaceId: String,
+        numbers: NumbersRepository?,
+        memory: DialerCountryMemory = UserDefaultsDialerCountryMemory()
+    ) {
+        self.workspaceId = workspaceId
+        self.numbers = numbers
+        self.memory = memory
+        home = memory.home(workspaceId: workspaceId)
+        current = home ?? memory.picked(workspaceId: workspaceId)
+    }
+}
 
 /// Everything about the number in the field: what it discloses, and whether the
 /// Call button may light up.
 ///
 /// ⛔ IT EXISTS BECAUSE A CALL CAN REACH THE WRONG COUNTRY AND BE BILLED FOR IT.
 /// A Canadian mobile typed as `+4165550123` instead of `+14165550123` dials `+41`,
-/// which is SWITZERLAND. A digit COUNT alone passes it (ten digits), and no layer
-/// on either side of the wire has an opinion about the country code: the server's
-/// phone normaliser strips punctuation and stops.
+/// which is SWITZERLAND. Dialler design A answers it by putting the country in front of
+/// the number: a flag and calling code the operator can see and change, a field that
+/// takes the number the local way, and a line under it naming the country and the whole
+/// international number before Call. A pasted `+41…` moves the flag to Switzerland.
 ///
-/// ⛔ AND IT DOES NOT FIX THAT BY REWRITING THE NUMBER. See property 3 on
-/// ``DialerModel`` and the matching note in the Android client's dial formatter: the server
-/// normalises its own copy and runs Do-Not-Call, the Contact lookup and the dial
-/// against THAT form, so a client that silently prepended `+1` would ship a
-/// second opinion whose disagreements are invisible until a call reaches a
-/// number the compliance screen never saw. That is a worse bug than a wrong country.
-/// What this adds is DISCLOSURE plus one unambiguous refusal.
+/// ⛔ WHAT IS SENT IS THE E.164 NUMBER THAT LINE SHOWED (``DialPlan/Reading/e164``), not
+/// the text in the field. The server normalises its own copy before Do-Not-Call and the
+/// dial, and an E.164 number passes through it unchanged, so the compliance check sees
+/// the number the operator was shown.
 ///
 /// ⚠️ ITS OWN FILE, LIKE ``DialerCopy``, AND FOR THE SAME REASON: `swiftlint
 /// --strict` promotes the `file_length` warning at 500 lines to an error, and
-/// `DialerModel.swift` is near it with the call machinery alone.
+/// `DialerModel.swift` is at it with the call machinery alone.
 extension DialerModel {
-    /// Where the entry says the call will ring, and whether it may be placed.
+    /// The field, read in the country on the button.
     ///
-    /// ⚠️ DERIVED ON READ RATHER THAN STORED. It is a pure function of ``entry``,
-    /// and a cached copy would be one more thing ``onEntryChange(_:)`` has to
-    /// remember to update.
-    var destination: DialEntryAssessment {
-        DialEntry.assess(entry)
+    /// ⚠️ DERIVED ON READ RATHER THAN STORED. It is a pure function of ``entry`` and the
+    /// country, and a cached copy would be one more thing to keep in step.
+    var destination: DialPlan.Reading {
+        DialPlan.read(entry, country: countries.current)
     }
 
-    /// ⛔ TWO GATES, AND THE DIGIT FLOOR IS STILL ONE OF THEM.
-    ///
-    /// The floor mirrors the server's own: `POST /api/district/calls/dial`
-    /// rejects anything shorter than 8 characters AFTER normalising, so a client
-    /// counting the raw string would enable the button for "(416) 5" — thirteen
-    /// characters, five digits — and the operator would meet a 400 that reads as
-    /// a server fault. The floor and the digit test are DistrictCore's
-    /// (``DialEntry/minimumDigits``, ``DialEntry/isDigit(_:)``), so the button and
-    /// the refusal sentence count the same characters against the same number.
-    ///
-    /// ``DialEntry/assess(_:)`` is the addition, and it refuses only what cannot
-    /// be E.164 at all — chiefly an entry with no `+`, which names no country and
-    /// so cannot be checked against one. ⚠️ A well-formed number for the WRONG
-    /// country still dials; the country line beside the field is what catches
-    /// that, because the client is not entitled to an opinion about which
-    /// countries an operator may ring.
-    ///
-    /// ⚠️ THE FLOOR IS REDUNDANT AGAINST THE E.164 CHECK TODAY and is kept
-    /// anyway: it is the one that mirrors the route, so if the route's floor
-    /// moves this is the line that moves with it.
+    /// ⛔ ONE GATE: A COMPLETE NUMBER IN A KNOWN SHAPE. ``DialPlan`` sets
+    /// ``DialPlan/Reading/e164`` only for a number with at least
+    /// ``DialEntry/minimumDigits`` digits, the route's own floor after normalising, so the
+    /// button cannot light for a number the server would answer with a 400.
     var canPlaceCall: Bool {
         guard canDial, call == nil, !placing else { return false }
-        guard entry.filter(DialEntry.isDigit).count >= DialEntry.minimumDigits else { return false }
-        return destination.isDialable
+        return destination.e164 != nil
+    }
+
+    /// What the field becomes for `value`, moving the button's country when the number
+    /// names its own.
+    ///
+    /// ⛔ A `+` (OR `011`, `00`) NUMBER SWITCHES THE FLAG and the field drops to the local
+    /// form, so the flag always says where the digits in the field ring. A +1 number
+    /// flips between Canada and the United States by its area code.
+    func absorb(_ value: String) -> String {
+        let reading = DialPlan.read(value, country: countries.current)
+        if let iso = reading.iso {
+            countries.current = iso
+        }
+        return reading.national
+    }
+
+    /// The operator chose a country in the list.
+    ///
+    /// ⚠️ THE DIGITS ALREADY TYPED ARE KEPT and read again in the new country. On a
+    /// workspace with no home country the pick is remembered, so it is made once.
+    func pickCountry(_ iso: String) {
+        countries.current = iso
+        if countries.home == nil {
+            countries.memory.rememberPicked(iso, workspaceId: workspaceId)
+        }
+        onEntryChange(entry.filter(DialEntry.isDigit))
+    }
+
+    /// Learn the workspace's country from its numbers.
+    ///
+    /// ⚠️ A FAILED READ CHANGES NOTHING: the cached country, a remembered pick or none stays,
+    /// and the keypad works either way. ⚠️ THE BUTTON MOVES ONLY IF THE OPERATOR HAS NOT
+    /// STARTED: an empty field still showing the country it opened on.
+    func loadHomeCountry() async {
+        guard let numbers = countries.numbers else { return }
+        // ⛔ READ BEFORE THE AWAIT. A country picked while the read is in flight is remembered,
+        // and read afterwards it would look like the country the keypad opened on, so the
+        // answer would overwrite the operator's own pick.
+        let openedOn = countries.current
+        guard case let .success(response) = await numbers.owned(workspaceId: workspaceId) else { return }
+        guard let home = Self.homeCountry(fromNumbers: response.numbers.map(\.phoneNumber)) else { return }
+        adoptHomeCountry(home, openedOn: openedOn)
+    }
+
+    /// Record the workspace's country, and move the button to it only if nothing has moved
+    /// it since the keypad opened on `openedOn` and the field is still empty.
+    func adoptHomeCountry(_ home: String, openedOn: String?) {
+        countries.memory.rememberHome(home, workspaceId: workspaceId)
+        countries.home = home
+        if entry.isEmpty, countries.current == openedOn {
+            countries.current = home
+        }
+    }
+
+    /// The country most of the workspace's numbers belong to; on a tie, the first listed.
+    /// nil when none of them reads as a known country.
+    nonisolated static func homeCountry(fromNumbers numbers: [String]) -> String? {
+        var counts: [String: Int] = [:]
+        var order: [String] = []
+        for number in numbers {
+            let reading = DialPlan.read(number, country: nil)
+            // ⚠️ A TOLL-FREE +1 NUMBER IS NOT EVIDENCE OF ANY COUNTRY (Seer on PR #95): a Canadian
+            // workspace with only 1-800 numbers would otherwise read as American.
+            guard let iso = reading.iso,
+                  !(reading.callingCode == "1" && DialPlan.isNANPTollFree(reading.nationalNumber)) else { continue }
+            if counts[iso] == nil {
+                order.append(iso)
+            }
+            counts[iso, default: 0] += 1
+        }
+        return order.max { lhs, rhs in
+            counts[lhs, default: 0] < counts[rhs, default: 0]
+        }
     }
 
     /// A call-back row was tapped.
@@ -62,9 +148,8 @@ extension DialerModel {
     /// least of all from a list where a mis-scroll lands on a row; the operator
     /// still presses Call, which is property 1 on ``DialerModel``.
     ///
-    /// ⚠️ THE ROW'S NUMBER IS THE SERVER'S OWN AND IS ALREADY E.164, so it lands
-    /// dialable — `DialNumberTests` asserts that against the committed
-    /// `district-calls.json` fixture rather than against a number typed here.
+    /// ⚠️ THE ROW'S NUMBER IS THE SERVER'S OWN AND IS ALREADY E.164, so it moves the
+    /// flag to its country and lands in the field in that country's local form.
     ///
     /// ⛔ A WITHHELD CALLER NEVER REACHES THIS. Its placeholder is the literal
     /// sentence `"Inbound SIP Caller"`, so letting the row through would type those
