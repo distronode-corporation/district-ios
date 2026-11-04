@@ -56,6 +56,68 @@ final class DialerDestinationLineTests: XCTestCase {
         }
     }
 
+    /// ⛔ A +1 TOLL-FREE NUMBER NAMES NO COUNTRY (Sean, 2026-11-04, GitLab #2): the web's
+    /// `ringsNoCountry`, word for word, for every one of the seven codes, typed locally or
+    /// with `+1`, whatever +1 country is on the button.
+    func testATollFreeNumberSaysItBelongsToNoOneCountry() {
+        for area in ["800", "833", "844", "855", "866", "877", "888"] {
+            let expected =
+                "Rings +1 \(area) 555 0100. This number does not belong to one country. Check it before you call."
+            XCTAssertEqual(DialerModel.destinationLine(DialPlan.read("\(area)5550100", country: "CA")), expected)
+            XCTAssertEqual(DialerModel.destinationLine(DialPlan.read("1 \(area) 555 0100", country: "US")), expected)
+            XCTAssertEqual(DialerModel.destinationLine(DialPlan.read("+1 \(area) 555 0100", country: nil)), expected)
+            XCTAssertEqual(DialerModel.destinationLine(DialPlan.read("+1\(area)5550100", country: "JM")), expected)
+        }
+    }
+
+    func testTheFrenchTollFreeLineIsTheWebsFrench() {
+        L10nRuntime.withLocale(.frCA) {
+            XCTAssertEqual(
+                DialerModel.destinationLine(DialPlan.read("8005550100", country: "CA")),
+                "Numéro composé\u{00A0}: +1 800 555 0100. Ce numéro n'appartient à aucun pays en particulier. "
+                    + "Vérifiez-le avant d'appeler."
+            )
+        }
+    }
+
+    /// ⛔ THE WEB'S TIMING: from 8 digits with the `1` (the web's `ready`), so a toll-free number
+    /// still short of its ten digits already says it has no country, as the bare `+1800…` the web
+    /// shows for a number that is not whole. Call stays off. Up to 15 digits; past E.164, nothing.
+    func testAPartialTollFreeNumberSaysItFromEightDigits() {
+        let partial = DialPlan.read("800 5555", country: "CA")
+        XCTAssertEqual(partial.status, .typing)
+        XCTAssertNil(partial.e164, "never callable")
+        XCTAssertEqual(
+            DialerModel.destinationLine(partial),
+            "Rings +18005555. This number does not belong to one country. Check it before you call."
+        )
+        XCTAssertNil(DialerModel.destinationLine(DialPlan.read("800 555", country: "CA")), "seven digits")
+        XCTAssertEqual(
+            DialerModel.destinationLine(DialPlan.read("+1 888 555 01001", country: nil)),
+            "Rings +188855501001. This number does not belong to one country. Check it before you call."
+        )
+        XCTAssertNil(DialerModel.destinationLine(DialPlan.read("+1 888 555 0100 12345", country: nil)), "16 digits")
+    }
+
+    /// ⚠️ ONLY THE SEVEN TOLL-FREE CODES: a geographic +1 number still names its country, and a
+    /// toll-free number below 8 digits says nothing yet.
+    func testOnlyATollFreeNumberDropsTheCountry() {
+        XCTAssertEqual(
+            DialerModel.destinationLine(DialPlan.read("+1 416 555 0100", country: nil)),
+            "Rings Canada · +1 416 555 0100"
+        )
+        XCTAssertEqual(
+            DialerModel.destinationLine(DialPlan.read("+1 876 555 0100", country: nil)),
+            "Rings Jamaica · +1 876 555 0100"
+        )
+        XCTAssertNil(DialerModel.destinationLine(DialPlan.read("800555", country: "CA")))
+        // Outside +1 an 800 is not toll-free: Switzerland's +41 80… still names Switzerland.
+        XCTAssertEqual(
+            DialerModel.destinationLine(DialPlan.read("+41 800 555 010", country: nil)),
+            "Rings Switzerland · +41 80 055 50 10"
+        )
+    }
+
     func testTheEmptyFieldSaysHowToType() {
         XCTAssertEqual(DialerModel.entryHint(country: "CA"), "Type the number as you would dial it in Canada.")
         XCTAssertEqual(DialerModel.entryHint(country: nil), "Start with + and the country code, or pick a country.")

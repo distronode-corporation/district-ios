@@ -152,6 +152,12 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- Dialler: a +1 toll-free number (800, 833, 844, 855, 866, 877, 888) no longer says "Rings
+  Canada" or "Rings United States" under the field. It says what the web dialler says, "Rings +1
+  800 555 0100. This number does not belong to one country. Check it before you call." (and the
+  web's French), new key `dialer_m.rings_no_country` (Sean, 2026-11-04, GitLab #2). As on the
+  web it is said from 8 digits with the `1` (Call still off, the number ungrouped until whole).
+  The button keeps its +1 country. The dialler's 13 French strings are marked reviewed.
 - Dialler: a number of the wrong length for its country is explained only once the operator
   stops (the field loses focus, Return, the new Done key above the number pad, or a refused
   Call), and the next keystroke clears it, as on the web (MR !102) and the Mac (district-macos#91). "That is

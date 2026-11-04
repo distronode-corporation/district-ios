@@ -72,7 +72,16 @@ extension DialerModel {
     ///
     /// ⚠️ nil UNTIL THE NUMBER IS COMPLETE, when there is nothing to send yet; the flag on
     /// the button already names the country while the digits are being typed.
+    ///
+    /// ⛔ A +1 TOLL-FREE NUMBER RINGS NO ONE COUNTRY, AND THE LINE SAYS SO, as the web
+    /// dialler does (`ringsNoCountry`; Sean, 2026-11-04, GitLab #2). ``DialPlan`` keeps the
+    /// +1 country on the button for 800, 833 … 888, because the flag is where the next digits
+    /// are read, but "Rings Canada" under a 1-800 number would claim a country it does not have.
+    /// See ``tollFreeNumber(_:)`` for when it is said.
     static func destinationLine(_ reading: DialPlan.Reading) -> String? {
+        if let number = tollFreeNumber(reading) {
+            return ringsNoCountry(number)
+        }
         guard reading.status == .ready else {
             // ⚠️ A `+` and three digits that name no country is already worth saying.
             let unknown = reading.namedItsCountry && reading.iso == nil && reading.national.count > 3
@@ -80,6 +89,20 @@ extension DialerModel {
         }
         guard let iso = reading.iso else { return destinationUnrecognised }
         return rings(DialPlan.name(iso), reading.international)
+    }
+
+    /// The number a +1 toll-free line shows, or nil when the reading is not one.
+    ///
+    /// ⚠️ THE WEB'S TIMING, NOT THE REST OF THIS LINE'S: said from 8 digits with the calling code
+    /// (``DialEntry/minimumDigits``) up to 15, where the web's `resolveDialEntry` reads a number as
+    /// `ready`, so a toll-free number still short of its ten digits already says it has no country,
+    /// beside Call being off. Grouped only once it is whole; before that the bare `+1800…`, the
+    /// web's rule that a half-grouped number reads as a real one.
+    static func tollFreeNumber(_ reading: DialPlan.Reading) -> String? {
+        guard reading.callingCode == "1", DialPlan.isNANPTollFree(reading.nationalNumber) else { return nil }
+        let total = reading.callingCode.count + reading.nationalNumber.count
+        guard total >= DialEntry.minimumDigits, total <= DialEntry.maximumDigits else { return nil }
+        return reading.status == .ready ? reading.international : "+1" + reading.nationalNumber
     }
 
     /// Why the Call button is off, in the operator's terms, or nil when there is nothing
