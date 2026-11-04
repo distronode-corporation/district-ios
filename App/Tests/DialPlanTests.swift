@@ -177,6 +177,48 @@ final class DialPlanTests: XCTestCase {
 
     /// ⚠️ AN UNKNOWN CODE IS NAMED AS UNKNOWN AND STAYS DIALABLE, the rule the core's
     /// ``DialRegion/unrecognised`` set before this design.
+    /// ⛔ TYPED ONE KEY AT A TIME, +7 701 … IS KAZAKHSTAN TOO (Seer on district-macos #91). `+7`
+    /// moves the flag to Russia and the field drops to the local form, so the rest arrives as
+    /// a national number under Russia; it must be read again by its first digit, as a paste is.
+    func test_IOS_DIALER_09_plusSevenTypedKeyByKeyReachesKazakhstan() {
+        var field = ""
+        var country: String? = "CA"
+        for key in "+77012345678" {
+            let reading = DialPlan.read(field + String(key), country: country)
+            country = reading.iso ?? country
+            field = reading.national
+        }
+        let typed = DialPlan.read(field, country: country)
+        XCTAssertEqual(typed.iso, "KZ")
+        XCTAssertEqual(typed.e164, "+77012345678")
+        let pasted = DialPlan.read("+7 701 234 5678", country: "CA")
+        XCTAssertEqual(typed.iso, pasted.iso, "typed and pasted read alike")
+        XCTAssertEqual(typed.national, pasted.national)
+        // And back: a Moscow number under the Kazakh flag rings Russia.
+        XCTAssertEqual(DialPlan.read("84951234567", country: "KZ").iso, "RU")
+        XCTAssertEqual(DialPlan.read("87012345678", country: "RU").iso, "KZ")
+        // ⚠️ Before the deciding digit, the +7 country on screen stays.
+        XCTAssertEqual(DialPlan.read("8", country: "KZ").iso, "KZ")
+        XCTAssertEqual(DialPlan.read("8", country: "RU").iso, "RU")
+        XCTAssertEqual(DialPlan.read("+7", country: "KZ").iso, "KZ")
+        XCTAssertEqual(DialPlan.read("+7", country: "CA").iso, "RU")
+    }
+
+    /// ⚠️ THE SAME FOR +1, which already re-read its area code: typed key by key from a
+    /// non-+1 flag, `+1 416 …` ends on Canada and `+1 876 …` on Jamaica.
+    func test_IOS_DIALER_10_plusOneTypedKeyByKeyFollowsTheAreaCode() {
+        for (keys, iso) in [("+14165550199", "CA"), ("+18765550199", "JM"), ("+12065550199", "US")] {
+            var field = ""
+            var country: String? = "GB"
+            for key in keys {
+                let reading = DialPlan.read(field + String(key), country: country)
+                country = reading.iso ?? country
+                field = reading.national
+            }
+            XCTAssertEqual(DialPlan.read(field, country: country).iso, iso, keys)
+        }
+    }
+
     func testAnUnknownCodeStaysDialableWithoutAName() {
         let reading = DialPlan.read("+999 1234 5678", country: "CA")
         XCTAssertNil(reading.iso)
@@ -278,6 +320,28 @@ final class DialPlanTests: XCTestCase {
     }
 
     /// ⚠️ ACCENTS ARE IGNORED, so "etats" finds the United States in French.
+    /// ⛔ RANKED, BECAUSE RETURN PICKS THE FIRST ROW (Seer on district-macos #91): `us` listed
+    /// Australia and Austria before the United States.
+    func test_IOS_DIALER_11_searchRanksCodeThenNameStartThenCallingCodeThenContains() {
+        let us = DialPlan.search("us", locale: .en)
+        XCTAssertEqual(us.first, "US")
+        XCTAssertLessThan(try XCTUnwrap(us.firstIndex(of: "US")), try XCTUnwrap(us.firstIndex(of: "AU")))
+        XCTAssertEqual(DialPlan.search("ca", locale: .en).first, "CA")
+        // A name that starts with the query beats one that only contains it.
+        let can = DialPlan.search("can", locale: .en)
+        XCTAssertEqual(can.first, "CA")
+        let ger = DialPlan.search("ger", locale: .en)
+        XCTAssertLessThan(try XCTUnwrap(ger.firstIndex(of: "DE")), try XCTUnwrap(ger.firstIndex(of: "DZ")))
+        // The countries sharing a calling code stay alphabetical among themselves.
+        let plusOne = DialPlan.search("+1", locale: .en)
+        XCTAssertTrue(plusOne.contains("CA") && plusOne.contains("US"))
+        XCTAssertEqual(plusOne, DialPlan.sortedCountries(locale: .en).filter(plusOne.contains))
+        // An exact ISO code first, then names starting with it: "de" is Germany, then Denmark.
+        let de = DialPlan.search("de", locale: .en)
+        XCTAssertEqual(de.first, "DE")
+        XCTAssertEqual(de.dropFirst().first, "DK")
+    }
+
     func testSearchIgnoresAccentsAndCase() {
         XCTAssertTrue(DialPlan.search("ETATS-UNIS", locale: .frCA).contains("US"))
     }
