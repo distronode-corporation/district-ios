@@ -367,35 +367,6 @@ enum DialPlan {
         return nanpAreaCountries[area] ?? "US"
     }
 
-    /// Whether a +1 national number is toll-free, shared by every country of the plan.
-    static func isNANPTollFree(_ nsn: String) -> Bool {
-        nanpTollFree.contains(String(nsn.prefix(3)))
-    }
-
-    /// Whether a +1 national number belongs to no one country, as the web's table has it
-    /// (``nanpNoCountry``).
-    static func isNANPNoCountry(_ nsn: String) -> Bool {
-        nanpNoCountry.contains(String(nsn.prefix(3)))
-    }
-
-    /// The trunk prefix dialled before a national number inside the country, or nil: `0` for
-    /// most, `8` in Russia, Kazakhstan, Belarus and Turkmenistan, `06` in Hungary, `1` in the
-    /// Marshall Islands.
-    static func trunkPrefix(_ iso: String) -> String? {
-        if let other = otherTrunkPrefixes[iso] {
-            return other
-        }
-        return trunkZero.contains(iso) ? "0" : nil
-    }
-
-    /// Every prefix a national number typed in `iso` may start with that is not part of the number:
-    /// the trunk prefix and ``parsingTrunkPrefixes``, longest first, so Belarus's `80` is tried
-    /// before its `8`.
-    static func nationalPrefixes(_ iso: String) -> [String] {
-        guard let trunk = trunkPrefix(iso) else { return [] }
-        return ([trunk] + (parsingTrunkPrefixes[iso] ?? [])).sorted { $0.count > $1.count }
-    }
-
     /// The flag, as the two regional-indicator letters iOS draws as one emoji.
     static func flag(_ iso: String) -> String {
         let base: UInt32 = 0x1F1E6
