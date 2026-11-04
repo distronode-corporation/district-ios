@@ -71,6 +71,41 @@ final class DialPlanTests: XCTestCase {
         XCTAssertNil(reading.e164)
     }
 
+    /// ⚠️ EVERY NUMBER A COUNTRY ISSUES MUST BE DIALABLE, not only its common shape (Seer on
+    /// PR #95): Australia's 13 and 1300/1800 numbers, Singapore's 1800 toll-free numbers and
+    /// a short UK freephone number.
+    func testNonGeographicNumbersAreDialable() {
+        let australia = DialPlan.read("1300 123 456", country: "AU")
+        XCTAssertEqual(australia.national, "1300 123 456", "no trunk 0 and no parentheses")
+        XCTAssertEqual(australia.e164, "+611300123456")
+        XCTAssertEqual(DialPlan.read("13 12 34", country: "AU").e164, "+61131234")
+        XCTAssertEqual(DialPlan.read("1800 123 4567", country: "SG").e164, "+6518001234567")
+        XCTAssertEqual(DialPlan.read("0800 1111", country: "GB").e164, "+448001111")
+        XCTAssertEqual(DialPlan.read("02 1234 5678", country: "AU").national, "(02) 1234 5678")
+    }
+
+    /// ⛔ BACKSPACE ALWAYS REMOVES A DIGIT. The field formats after every edit, so a format
+    /// that ended in punctuation (Australia's `(02)`, Seer on PR #95) would put the deleted
+    /// character straight back and the operator could never delete past it.
+    func testDeletingTheLastCharacterAlwaysRemovesADigit() {
+        let numbers: [(String, String)] = [
+            ("CA", "4165550199"), ("GB", "02079460958"), ("FR", "0639980123"), ("DE", "030123456"),
+            ("AU", "0212345678"), ("AU", "0491570156"), ("AU", "1300123456"), ("CH", "0441234567"),
+            ("SG", "61234567"), ("IT", "0612345678"), ("JP", "0312345678"),
+        ]
+        for (country, digits) in numbers {
+            var field = ""
+            for digit in digits {
+                field = DialPlan.read(field + String(digit), country: country).national
+                guard let last = field.last else { continue }
+                XCTAssertTrue(last.isNumber, "\(country): \"\(field)\" ends in punctuation")
+                let before = field.filter(\.isNumber).count
+                let after = DialPlan.read(String(field.dropLast()), country: country).national
+                XCTAssertLessThan(after.filter(\.isNumber).count, before, "\(country): backspace on \"\(field)\"")
+            }
+        }
+    }
+
     // MARK: - Numbers that name their own country
 
     func testAPastedPlusFortyFourNumberMovesToTheUnitedKingdom() {

@@ -108,6 +108,31 @@ final class DialerCountryTests: XCTestCase {
         XCTAssertEqual(countries.home, "FR")
     }
 
+    /// ⛔ A PICK MADE WHILE THE NUMBERS ARE LOADING IS KEPT (Seer on PR #95): the home
+    /// country arrives, is recorded, and does not move the button the operator just set.
+    func testAPickDuringTheHomeCountryReadIsNotOverwritten() {
+        let (model, memory) = model()
+        let openedOn = model.countries.current
+        model.pickCountry("GB")
+        model.adoptHomeCountry("CA", openedOn: openedOn)
+        XCTAssertEqual(model.countries.current, "GB")
+        XCTAssertEqual(model.countries.home, "CA")
+        XCTAssertEqual(memory.home(workspaceId: "ws_1"), "CA")
+    }
+
+    func testTheHomeCountryMovesAnUntouchedKeypad() {
+        let (model, _) = model()
+        model.adoptHomeCountry("CA", openedOn: model.countries.current)
+        XCTAssertEqual(model.countries.current, "CA")
+    }
+
+    func testTheHomeCountryLeavesANumberAlreadyTyped() {
+        let (model, _) = model(picked: "GB")
+        model.onEntryChange("020")
+        model.adoptHomeCountry("CA", openedOn: "GB")
+        XCTAssertEqual(model.countries.current, "GB")
+    }
+
     // MARK: - UserDefaults
 
     func testTheDefaultsMemoryIsPerWorkspaceAndRefusesUnknownCodes() throws {

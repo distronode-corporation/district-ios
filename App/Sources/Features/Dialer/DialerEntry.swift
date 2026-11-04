@@ -102,9 +102,18 @@ extension DialerModel {
     /// STARTED: an empty field still showing the country it opened on.
     func loadHomeCountry() async {
         guard let numbers = countries.numbers else { return }
+        // ⛔ READ BEFORE THE AWAIT. A country picked while the read is in flight is remembered,
+        // and read afterwards it would look like the country the keypad opened on, so the
+        // answer would overwrite the operator's own pick.
+        let openedOn = countries.current
         guard case let .success(response) = await numbers.owned(workspaceId: workspaceId) else { return }
         guard let home = Self.homeCountry(fromNumbers: response.numbers.map(\.phoneNumber)) else { return }
-        let openedOn = countries.home ?? countries.memory.picked(workspaceId: workspaceId)
+        adoptHomeCountry(home, openedOn: openedOn)
+    }
+
+    /// Record the workspace's country, and move the button to it only if nothing has moved
+    /// it since the keypad opened on `openedOn` and the field is still empty.
+    func adoptHomeCountry(_ home: String, openedOn: String?) {
         countries.memory.rememberHome(home, workspaceId: workspaceId)
         countries.home = home
         if entry.isEmpty, countries.current == openedOn {

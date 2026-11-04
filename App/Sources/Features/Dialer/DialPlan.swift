@@ -195,9 +195,15 @@ enum DialPlan {
             }
         }
         var parts = chunk(nsn, groups(iso: iso, nsn: nsn))
-        if iso == "AU", !nsn.hasPrefix("4") {
-            let rest = parts.dropFirst().joined(separator: " ")
-            return "(0" + parts[0] + ")" + (rest.isEmpty ? "" : " " + rest)
+        // ⚠️ AN AUSTRALIAN 13, 1300 OR 1800 NUMBER IS DIALLED AS IT STANDS, WITH NO TRUNK 0.
+        if iso == "AU", isAustralianNonGeographic(nsn) {
+            return parts.joined(separator: " ")
+        }
+        // ⚠️ THE PARENTHESES CLOSE ONLY ONCE A DIGIT FOLLOWS THE AREA CODE. A `)` written after
+        // `(02` alone would be the last character, and deleting it would put it straight back,
+        // so backspace could never get past the area code.
+        if iso == "AU", !nsn.hasPrefix("4"), parts.count > 1 {
+            return "(0" + parts[0] + ") " + parts.dropFirst().joined(separator: " ")
         }
         if trunkZero.contains(iso) {
             parts[0] = "0" + parts[0]
@@ -217,7 +223,7 @@ enum DialPlan {
             nsn.hasPrefix("15") || nsn.hasPrefix("16") || nsn.hasPrefix("17") ? [3, 8]
                 : ["30", "40", "69", "89"].contains(where: nsn.hasPrefix) ? [2, 9] : [4, 8]
         case "AU":
-            nsn.hasPrefix("4") ? [3, 3, 3] : [1, 4, 4]
+            isAustralianNonGeographic(nsn) ? [4, 3, 3] : nsn.hasPrefix("4") ? [3, 3, 3] : [1, 4, 4]
         case "CH":
             [2, 3, 2, 2]
         case "SG":
@@ -234,12 +240,24 @@ enum DialPlan {
             return 10 ... 10
         }
         switch iso {
-        case "GB": return 9 ... 10
-        case "FR", "AU", "CH": return 9 ... 9
+        // ⚠️ WIDE ENOUGH FOR EVERY NUMBER THE COUNTRY ISSUES, not just the common shape: a
+        // range that misses one blocks a real call. Australia's 13 xx xx is 6 digits and its
+        // 1300/1800 numbers 10; Singapore's 1800 toll-free numbers are 11; a UK 0800 number
+        // can be 7. Switzerland and France issue nothing but 9.
+        case "GB": return 7 ... 10
+        case "FR", "CH": return 9 ... 9
+        case "AU": return 6 ... 10
         case "DE": return 6 ... 13
-        case "SG": return 8 ... 8
+        case "SG": return 8 ... 11
         default: return 4 ... (DialEntry.maximumDigits - code.count)
         }
+    }
+
+    /// Australia's 13, 1300 and 1800 numbers: no area code and no trunk 0. ⚠️ THE WHOLE `1`
+    /// RANGE, so a lone typed `1` is not shown as `01` (geographic area codes are 2, 3, 7 and
+    /// 8, mobiles 4).
+    private static func isAustralianNonGeographic(_ nsn: String) -> Bool {
+        nsn.hasPrefix("1")
     }
 
     /// `sizes`, with the last group taking whatever is left.
