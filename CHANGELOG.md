@@ -152,6 +152,15 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- Dialler: three cases Seer found in district-core-rust #63's port of `DialPlan`, which
+  this copy had too (and district-macos, fixed the same way). `+7` then `812` typed one key at a
+  time kept its 8: a `+` and a calling code with no digit after it now stay in the field, so
+  the 8 is read after the code instead of as Russia's trunk prefix; a country picked over
+  such a field clears it (`DialPlan.entryForPick`). A Russian number typed with its `7` and
+  no `+` (`79161234567`) is too long rather than offered as an eleven-digit Kazakh number:
+  every +7 number now needs exactly ten digits after the code. And `+911` is still refused
+  but keeps its plus, so the next digit reaches India (`+91 1…`) instead of reading `91…` as
+  a local number.
 - Dialler: a number of the wrong length for its country is explained only once the operator
   stops (the field loses focus, Return, the new Done key above the number pad, or a refused
   Call), and the next keystroke clears it, as on the web (MR !102) and the Mac (district-macos#91). "That is
