@@ -178,6 +178,18 @@ final class DialerCountryTests: XCTestCase {
         XCTAssertFalse(model.lengthChecked)
     }
 
+    /// ⛔ A PICK OVER `+44` ALONE SHOWS THE PICK: the plus and its code are given up, so the
+    /// button cannot say France while the field says the UK.
+    func test_IOS_DIALER_16_aPickOverACodeAloneClearsIt() {
+        let (model, _) = model(home: "CA")
+        model.onEntryChange("+44")
+        XCTAssertEqual(model.entry, "+44")
+        XCTAssertEqual(model.countries.current, "GB")
+        model.pickCountry("FR")
+        XCTAssertEqual(model.entry, "")
+        XCTAssertEqual(model.countries.current, "FR")
+    }
+
     // MARK: - UserDefaults
 
     func testTheDefaultsMemoryIsPerWorkspaceAndRefusesUnknownCodes() throws {

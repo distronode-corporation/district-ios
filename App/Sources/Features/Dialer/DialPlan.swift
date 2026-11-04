@@ -71,8 +71,12 @@ enum DialPlan {
         let compact = raw.filter { $0 == "+" || DialEntry.isDigit($0) }
         var plus = compact.hasPrefix("+")
         var digits = compact.filter(DialEntry.isDigit)
+        // ⚠️ AN EMERGENCY CODE IS SHOWN AS TYPED, ITS `+` KEPT: `+911` is refused, but it is also
+        // the start of every Indian number beginning +91 1, and the next digit must still be read
+        // after the code rather than as a local number (Seer on district-core-rust #63).
         if DialEntry.assess(compact).refusal == .emergencyNumber {
-            return Reading(status: .emergency, iso: country, national: digits, international: digits)
+            let shown = plus ? "+" + digits : digits
+            return Reading(status: .emergency, iso: country, national: shown, international: shown)
         }
         if !plus, let rest = dropExitCode(digits, country: country) {
             digits = rest
@@ -86,6 +90,21 @@ enum DialPlan {
             )
         }
         return plus ? readInternational(digits, country: country) : readNational(digits, country: country)
+    }
+
+    /// What the field keeps when a country is picked over it, read in `country`, the one on the
+    /// button before the pick.
+    ///
+    /// ⚠️ A `+` ENTRY GIVES UP THE PLUS AND ITS CODE and keeps the digits after a known one, so
+    /// picking a country means "this number is in that country"; a `+` with no known code
+    /// (`+7` alone, `+999…`) is cleared, or it would ring nowhere beside the country picked.
+    /// Anything else keeps its digits.
+    static func entryForPick(_ entry: String, country: String?) -> String {
+        guard entry.filter({ $0 == "+" || DialEntry.isDigit($0) }).hasPrefix("+") else {
+            return entry.filter(DialEntry.isDigit)
+        }
+        let reading = read(entry, country: country)
+        return reading.iso == nil ? "" : reading.nationalNumber
     }
 
     /// `011` from a North American country, `00` from anywhere else, is the exit code
@@ -197,9 +216,14 @@ enum DialPlan {
 
     // MARK: - Formatting
 
+    /// ⚠️ A `+` AND A CALLING CODE WITH NO DIGIT AFTER IT YET STAY AS THEY ARE, so the next
+    /// digit is still read after the code. Shown as an empty national number instead, the next
+    /// digit was read as a local one and a trunk prefix swallowed it: Saint Petersburg's 812
+    /// typed after `+7` lost its 8 to Russia's trunk 8 (Seer on district-core-rust #63). A
+    /// national number is otherwise empty only after a trunk prefix, which is shown as typed.
     private static func formatNational(iso: String, code: String, nsn: String, typedTrunk: Bool) -> String {
         if nsn.isEmpty {
-            guard typedTrunk else { return "" }
+            guard typedTrunk else { return "+" + code }
             return code == "1" ? "1" : trunkPrefix(iso) ?? "0"
         }
         if code == "1" {
@@ -256,6 +280,12 @@ enum DialPlan {
     /// certain; anywhere else the E.164 floor and ceiling decide.
     private static func lengths(iso: String, code: String) -> ClosedRange<Int> {
         if code == "1" {
+            return 10 ... 10
+        }
+        // ⛔ RUSSIA AND KAZAKHSTAN: TEN DIGITS AFTER +7, ALWAYS. Without this an eleven-digit
+        // Russian number typed with its 7 and no `+` read as an eleven-digit Kazakh number and
+        // was offered for dialling (Seer on district-core-rust #63).
+        if code == "7" {
             return 10 ... 10
         }
         switch iso {
