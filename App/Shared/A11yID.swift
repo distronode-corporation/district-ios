@@ -156,6 +156,8 @@ enum A11yID {
         static let root = "district-dialer-root"
         static let entry = "district-dialer-entry"
         static let refusal = "district-dialer-refusal"
+        /// The Done key above the number pad: ends the edit, which says a wrong length.
+        static let entryDone = "district-dialer-entry-done"
         /// The flag and calling code in front of the number; opens the country list.
         static let country = "district-dialer-country"
         /// One row of the country list, by ISO 3166 code.

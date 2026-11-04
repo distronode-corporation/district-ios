@@ -133,6 +133,51 @@ final class DialerCountryTests: XCTestCase {
         XCTAssertEqual(model.countries.current, "GB")
     }
 
+    // MARK: - A wrong length waits until the operator stops (the web dialler's rule)
+
+    /// ⛔ NOTHING IS SAID WHILE TYPING; leaving the field, Return or Done says it, and the next
+    /// keystroke takes it away.
+    func test_IOS_DIALER_06_aWrongLengthIsSaidOnlyAfterTheOperatorStops() {
+        let (model, _) = model(home: "CA")
+        model.onEntryChange("416555019")
+        XCTAssertFalse(model.canPlaceCall)
+        XCTAssertFalse(model.lengthChecked)
+        XCTAssertNil(DialerModel.entryProblem(model.destination, lengthChecked: model.lengthChecked))
+        model.checkLength()
+        XCTAssertNotNil(DialerModel.entryProblem(model.destination, lengthChecked: model.lengthChecked))
+        model.onEntryChange("4165550199")
+        XCTAssertFalse(model.lengthChecked, "the next keystroke clears it")
+        XCTAssertTrue(model.canPlaceCall)
+    }
+
+    /// ⛔ THE SWITZERLAND NUMBER CAN NEVER BE CALLED, and a refused Call says why while placing
+    /// nothing.
+    func test_IOS_DIALER_07_theSwissNumberIsNeverCalledAndARefusedCallSaysWhy() {
+        let (model, _) = model(home: "CA")
+        model.onEntryChange("+4165550123")
+        XCTAssertEqual(model.countries.current, "CH")
+        XCTAssertNil(model.destination.e164)
+        XCTAssertFalse(model.canPlaceCall)
+        XCTAssertNil(DialerModel.entryProblem(model.destination, lengthChecked: model.lengthChecked))
+        model.placeCall()
+        XCTAssertTrue(model.lengthChecked)
+        XCTAssertFalse(model.placing)
+        XCTAssertNil(model.call)
+        XCTAssertEqual(
+            DialerModel.entryProblem(model.destination, lengthChecked: model.lengthChecked),
+            "That is the wrong number of digits for a number in the country it rings. Check it before you call."
+        )
+    }
+
+    /// ⛔ A PICK RE-READS THE DIGITS, SO IT IS AN EDIT: a sentence about the old country goes.
+    func test_IOS_DIALER_08_aPickClearsTheLengthSentence() {
+        let (model, _) = model(home: "CA")
+        model.onEntryChange("020794609")
+        model.checkLength()
+        model.pickCountry("GB")
+        XCTAssertFalse(model.lengthChecked)
+    }
+
     // MARK: - UserDefaults
 
     func testTheDefaultsMemoryIsPerWorkspaceAndRefusesUnknownCodes() throws {

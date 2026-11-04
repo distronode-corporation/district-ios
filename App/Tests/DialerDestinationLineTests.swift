@@ -61,14 +61,62 @@ final class DialerDestinationLineTests: XCTestCase {
         XCTAssertEqual(DialerModel.entryHint(country: nil), "Start with + and the country code, or pick a country.")
     }
 
-    func testDigitsWithNoCountryAskForOne() {
+    func testDigitsWithNoCountryAskForOneAtOnce() {
         XCTAssertEqual(
-            DialerModel.entryProblem(.needsCountry),
+            DialerModel.entryProblem(DialPlan.read("4165550199", country: nil), lengthChecked: false),
             "Pick a country, or start with + and the country code."
         )
-        XCTAssertNotNil(DialerModel.entryProblem(.tooLong))
-        for quiet: DialPlan.Status in [.empty, .typing, .ready] {
-            XCTAssertNil(DialerModel.entryProblem(quiet))
+        XCTAssertNil(DialerModel.entryProblem(DialPlan.read("", country: "CA"), lengthChecked: true))
+        XCTAssertNil(DialerModel.entryProblem(DialPlan.read("4165550199", country: "CA"), lengthChecked: true))
+    }
+
+    // MARK: - A wrong length waits until the operator stops
+
+    private let wrongLength =
+        "That is the wrong number of digits for a number in the country it rings. Check it before you call."
+
+    /// ⛔ NOTHING WHILE TYPING (the web dialler's rule, MR !102). Every ten-digit number
+    /// passes through lengths no number has; Call is simply off until it is whole. The old
+    /// "too many digits" sentence flashed mid-typing; nothing does now.
+    func test_IOS_DIALER_01_aWrongLengthIsNotSaidWhileTyping() {
+        for partial in ["4", "41655", "416555019", "+4165550123", "41655501999"] {
+            let reading = DialPlan.read(partial, country: "CA")
+            XCTAssertNil(reading.e164, partial)
+            XCTAssertNil(DialerModel.entryProblem(reading, lengthChecked: false), partial)
+        }
+    }
+
+    /// ⛔ THE SWITZERLAND CASE, SAID ONCE THE OPERATOR STOPS: eight digits after `+41`, and
+    /// every Swiss number has nine. Too many digits reads the same sentence.
+    func test_IOS_DIALER_02_aWrongLengthIsSaidOnceChecked() {
+        let swiss = DialPlan.read("+4165550123", country: "CA")
+        XCTAssertEqual(swiss.iso, "CH")
+        XCTAssertNil(swiss.e164, "never callable")
+        XCTAssertEqual(DialerModel.entryProblem(swiss, lengthChecked: true), wrongLength)
+        XCTAssertEqual(
+            DialerModel.entryProblem(DialPlan.read("416555019", country: "CA"), lengthChecked: true),
+            wrongLength
+        )
+        let tooLong = DialPlan.read("41655501999", country: "CA")
+        XCTAssertEqual(tooLong.status, .tooLong)
+        XCTAssertEqual(DialerModel.entryProblem(tooLong, lengthChecked: true), wrongLength)
+    }
+
+    /// ⚠️ NOTHING TO MEASURE IS NOT A WRONG LENGTH: a lone `+`, a lone trunk `0`, or a code no
+    /// country uses (which the line above the field already says).
+    func test_IOS_DIALER_03_nothingToMeasureIsNotAWrongLength() {
+        for entry in ["+", "0", "+99912"] {
+            let country: String? = entry == "0" ? "GB" : "CA"
+            XCTAssertNil(DialerModel.entryProblem(DialPlan.read(entry, country: country), lengthChecked: true), entry)
+        }
+    }
+
+    func test_IOS_DIALER_04_theFrenchWrongLength() {
+        L10nRuntime.withLocale(.frCA) {
+            XCTAssertEqual(
+                DialerModel.entryProblem(DialPlan.read("+4165550123", country: "CA"), lengthChecked: true),
+                "Ce numéro n'a pas le bon nombre de chiffres pour le pays de destination. Vérifiez-le avant d'appeler."
+            )
         }
     }
 }
@@ -81,8 +129,12 @@ final class DialerDestinationLineTests: XCTestCase {
 /// hand-off rather than a refusal.
 @MainActor
 final class EmergencyCopyTests: XCTestCase {
+    private func problem(_ entry: String, checked: Bool = false) -> String? {
+        DialerModel.entryProblem(DialPlan.read(entry, country: "CA"), lengthChecked: checked)
+    }
+
     func testTheEmergencyLineNamesThePhoneApp() {
-        let line = DialerModel.entryProblem(.emergency)
+        let line = problem("911")
         XCTAssertNotNil(line)
         XCTAssertTrue(line?.contains("Phone app") == true, "a bare refusal strands the caller")
     }
@@ -90,15 +142,20 @@ final class EmergencyCopyTests: XCTestCase {
     /// ⛔ IT MUST NOT READ AS A CORRECTABLE MISTAKE. Telling somebody dialling an
     /// emergency number to add a country code is the failure this pins.
     func testTheEmergencyLineNeverAsksForACountryCode() {
-        let line = DialerModel.entryProblem(.emergency) ?? ""
+        let line = problem("911") ?? ""
         XCTAssertFalse(line.lowercased().contains("country code"))
-        XCTAssertFalse(line.lowercased().contains("too short"))
+        XCTAssertFalse(line.lowercased().contains("digits"))
     }
 
-    func testItIsDistinctFromEveryOtherRefusal() {
-        let emergency = DialerModel.entryProblem(.emergency)
-        for other: DialPlan.Status in [.needsCountry, .tooLong] {
-            XCTAssertNotEqual(DialerModel.entryProblem(other), emergency)
-        }
+    /// ⚠️ SAID AT ONCE, NOT HELD FOR THE LENGTH CHECK: it is not a length.
+    func test_IOS_DIALER_05_itIsSaidWhileTypingAndDistinctFromEveryOtherRefusal() {
+        let emergency = problem("911")
+        XCTAssertNotNil(emergency)
+        XCTAssertEqual(problem("911", checked: true), emergency)
+        XCTAssertNotEqual(
+            DialerModel.entryProblem(DialPlan.read("4165550199", country: nil), lengthChecked: true),
+            emergency
+        )
+        XCTAssertNotEqual(problem("+4165550123", checked: true), emergency)
     }
 }

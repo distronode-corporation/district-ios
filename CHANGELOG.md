@@ -152,6 +152,12 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- Dialler: a number of the wrong length for its country is explained only once the operator
+  stops (the field loses focus, Return, the new Done key above the number pad, or a refused
+  Call), and the next keystroke clears it, as on the web (MR !102) and the Mac (district-macos#91). "That is
+  too many digits for a phone number." no longer appears mid-typing, and `+4165550123` (eight
+  digits after Switzerland's `+41`) now says why Call is off instead of saying nothing. It
+  still cannot be called.
 - 3.2.1: the Dynamic Island's compact view shows a finished call's end time in full
   (#89). Only the running timer keeps the 44 pt cap; the end time drops its day period in
   compact ("12:53", « 13 h 19 ») and may shrink to 0.8. `CallActivityClock`.

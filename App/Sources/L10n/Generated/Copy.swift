@@ -1143,8 +1143,8 @@ extension DialerModel {
     /// `dialer_m.entry_needs_country`
     internal static var entryNeedsCountry: String { AppL10n.copyLocale == .frCA ? "Choisissez un pays, ou commencez par + et l'indicatif du pays." : "Pick a country, or start with + and the country code." }
 
-    /// `dialer_m.entry_too_many_digits`
-    internal static var entryTooManyDigits: String { AppL10n.copyLocale == .frCA ? "Ce numéro a trop de chiffres." : "That is too many digits for a phone number." }
+    /// `dialer_m.entry_wrong_length`
+    internal static var entryWrongLength: String { AppL10n.copyLocale == .frCA ? "Ce numéro n'a pas le bon nombre de chiffres pour le pays de destination. Vérifiez-le avant d'appeler." : "That is the wrong number of digits for a number in the country it rings. Check it before you call." }
 
     /// `dialer_m.in_room_message`
     internal static var inRoomMessage: String { AppL10n.copyLocale == .frCA ? "Vous êtes dans une salle de réunion sur cet appareil. Quittez-la avant de passer un appel." : "You are in a room on this device. Leave it before placing a call." }

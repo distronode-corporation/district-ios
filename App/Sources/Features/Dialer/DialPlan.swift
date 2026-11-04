@@ -127,8 +127,12 @@ enum DialPlan {
                 typedTrunk = true
             }
         }
-        // ⚠️ A +1 NUMBER IS READ BY ITS AREA CODE: 416 is Canada, 206 the US, 876 Jamaica.
-        let iso = code == "1" ? nanpCountry(nsn, fallback: country) : country
+        // ⚠️ A CODE SHARED BY SEVERAL COUNTRIES IS READ AGAIN AS EACH DIGIT ARRIVES, exactly as a
+        // pasted `+` number is: +1 by its area code (416 is Canada, 206 the US, 876 Jamaica), +7 by
+        // its first digit. Typed one key at a time, `+7` moves the flag to Russia and the rest
+        // arrives here as a national number; read only in the country on the button, `701…`
+        // would stay "Rings Russia" for a Kazakh number (Seer on district-macos #91).
+        let iso = countryForCode(code, nsn: nsn, first: country, current: country)
         return finish(iso: iso, code: code, nsn: nsn, typedTrunk: typedTrunk, plus: false)
     }
 
@@ -159,13 +163,16 @@ enum DialPlan {
         return reading
     }
 
+    /// Which country a calling code rings for `nsn`: the code's `first` country, except for a
+    /// code several countries share, which is decided by the digits after it.
     private static func countryForCode(_ code: String, nsn: String, first: String, current: String?) -> String {
         switch code {
         case "1":
             nanpCountry(nsn, fallback: current)
-        // ⚠️ +7 IS RUSSIA AND KAZAKHSTAN; Kazakh numbers start 6 or 7.
+        // ⚠️ +7 IS RUSSIA AND KAZAKHSTAN; Kazakh numbers start 6 or 7. Before that digit the
+        // +7 country on screen stays, as a +1 one does before its area code.
         case "7":
-            nsn.hasPrefix("6") || nsn.hasPrefix("7") ? "KZ" : "RU"
+            nsn.isEmpty ? (current == "KZ" ? "KZ" : "RU") : nsn.hasPrefix("6") || nsn.hasPrefix("7") ? "KZ" : "RU"
         default:
             first
         }
@@ -340,18 +347,31 @@ enum DialPlan {
 
     /// The countries a search matches: by name (accents and case ignored), by ISO code,
     /// or by calling code, with or without the `+`.
+    ///
+    /// ⚠️ RANKED, THEN ALPHABETICAL WITHIN A RANK: the ISO code exactly, a name that starts
+    /// with the query, a calling code, then a name that merely contains it. Return picks the
+    /// first row, so alphabetical alone made `us` pick Australia, ahead of Austria and the
+    /// United States (Seer on district-macos #91).
     static func search(_ query: String, locale: L10nLocale = L10nRuntime.locale) -> [String] {
         let all = sortedCountries(locale: locale)
         let needle = fold(query.trimmingCharacters(in: .whitespaces))
         guard !needle.isEmpty else { return all }
         let digits = needle.hasPrefix("+") ? String(needle.dropFirst()) : needle
-        return all.filter { iso in
-            fold(name(iso, locale: locale)).contains(needle)
-                || iso.lowercased() == needle
-                ||
-                (!digits.isEmpty && digits.allSatisfy(DialEntry.isDigit) && codesByCountry[iso]?
-                    .hasPrefix(digits) == true)
+        let byCode = !digits.isEmpty && digits.allSatisfy(DialEntry.isDigit)
+        var ranks: [[String]] = Array(repeating: [], count: 4)
+        for iso in all {
+            let folded = fold(name(iso, locale: locale))
+            if iso.lowercased() == needle {
+                ranks[0].append(iso)
+            } else if folded.hasPrefix(needle) {
+                ranks[1].append(iso)
+            } else if byCode, codesByCountry[iso]?.hasPrefix(digits) == true {
+                ranks[2].append(iso)
+            } else if folded.contains(needle) {
+                ranks[3].append(iso)
+            }
         }
+        return ranks.flatMap(\.self)
     }
 
     /// Every country, alphabetical in the app's language.

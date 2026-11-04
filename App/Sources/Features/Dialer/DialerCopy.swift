@@ -87,14 +87,26 @@ extension DialerModel {
     ///
     /// ⚠️ ``DialPlan/Status/empty`` RETURNS nil because the entry hint already occupies
     /// that moment, and a number still being typed is not a mistake.
-    static func entryProblem(_ status: DialPlan.Status) -> String? {
-        switch status {
-        case .empty, .typing, .ready:
+    ///
+    /// ⛔ A WRONG LENGTH IS SAID ONLY ONCE THE OPERATOR STOPS (`lengthChecked`: the field
+    /// lost focus, or Return or Done was pressed, or a Call was refused), as the web dialler
+    /// (MR !102) and the Mac app do. Every ten-digit number passes through eight and nine
+    /// digits on the way, so a sentence said while typing would flash on every number; until
+    /// then Call is simply off. The next keystroke clears it (``DialerModel/onEntryChange(_:)``).
+    /// `+4165550123` (eight digits after `+41`, and every Swiss number has nine) is the case
+    /// it explains.
+    static func entryProblem(_ reading: DialPlan.Reading, lengthChecked: Bool) -> String? {
+        switch reading.status {
+        case .empty, .ready:
             nil
         case .needsCountry:
             entryNeedsCountry
+        // ⚠️ AN INCOMPLETE NUMBER IS A WRONG LENGTH ONLY WITH A COUNTRY AND DIGITS TO MEASURE:
+        // a lone `+`, a trunk `0` or an unknown code (said by the line above) is not.
+        case .typing:
+            lengthChecked && reading.iso != nil && !reading.nationalNumber.isEmpty ? entryWrongLength : nil
         case .tooLong:
-            entryTooManyDigits
+            lengthChecked ? entryWrongLength : nil
         // ⛔ THE ONLY REFUSAL HERE THAT IS NOT A CORRECTION. Every other case tells the
         // operator how to fix the number; this one tells them to leave the app, because
         // District cannot place an emergency call and must not pretend it might. Naming
