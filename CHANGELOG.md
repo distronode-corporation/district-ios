@@ -152,6 +152,14 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- Dialler: a pasted `+1 1 416 555 0199` no longer turns into a callable Canadian number. The
+  field showed `(141) 655-50199`, and reading that again took its leading `1` as the trunk
+  prefix, `416 555 0199` with Call on. What the field shows now always reads back to the same
+  number; one that would not is shown as `+114165550199` (Seer on district-core-rust #63).
+- Dialler: every country whose national prefix is `0` in libphonenumber drops its trunk `0`, 103
+  countries where 45 were listed: `0412 123 4567` typed in Venezuela sent `+58 0412…` (also
+  Ecuador, Uruguay and 55 more; Seer on district-core-rust #63). The list is the same in the
+  iOS, Mac and Android apps and district-core-rust.
 - Dialler: a +1 toll-free number (800, 833, 844, 855, 866, 877, 888) no longer says "Rings
   Canada" or "Rings United States" under the field. It says what the web dialler says, "Rings +1
   800 555 0100. This number does not belong to one country. Check it before you call." (and the

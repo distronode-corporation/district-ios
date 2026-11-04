@@ -67,7 +67,26 @@ enum DialPlan {
     /// ⚠️ THE EMERGENCY TEST COMES FIRST, BEFORE ANY COUNTRY, which is the order the core's
     /// ``DialRefusal/emergencyNumber`` documents: `911` must reach the hand-off sentence,
     /// never "pick a country".
+    ///
+    /// ⛔ WHAT THE FIELD SHOWS (``Reading/national``) IS READ AGAIN ON THE NEXT EDIT, SO IT MUST READ
+    /// BACK TO THE SAME NUMBER (Seer on district-core-rust #63). `+1 1 416 555 0199` pasted was shown
+    /// as `(141) 655-50199`, and reading that took its leading `1` as the trunk prefix: `416 555 0199`,
+    /// a whole Canadian number with Call on. A local form that would not read back is shown in its
+    /// international form, `+114165550199`, which does.
     static func read(_ raw: String, country: String?) -> Reading {
+        var reading = readEntry(raw, country: country)
+        // ⚠️ NOT WHILE THE NATIONAL NUMBER IS EMPTY: `+44` alone shows an empty field under the flag,
+        // and there is no number yet to read back.
+        guard reading.status != .emergency, !reading.callingCode.isEmpty, !reading.nationalNumber.isEmpty,
+              !reading.national.hasPrefix("+") else { return reading }
+        let again = readEntry(reading.national, country: reading.iso)
+        if again.callingCode != reading.callingCode || again.nationalNumber != reading.nationalNumber {
+            reading.national = "+" + reading.callingCode + reading.nationalNumber
+        }
+        return reading
+    }
+
+    private static func readEntry(_ raw: String, country: String?) -> Reading {
         let compact = raw.filter { $0 == "+" || DialEntry.isDigit($0) }
         var plus = compact.hasPrefix("+")
         var digits = compact.filter(DialEntry.isDigit)

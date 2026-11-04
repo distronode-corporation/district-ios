@@ -42,13 +42,18 @@ extension DialPlan {
     /// Countries whose national numbers carry a trunk `0` that is dropped after the
     /// calling code: `020 7946 0958` in London is `+44 20 7946 0958`.
     ///
-    /// ⚠️ ONLY THE ONES THIS FILE IS SURE OF. A country missing here keeps a typed leading
-    /// `0` in the number, and the international form under the field shows it, so the
-    /// operator sees `+40 0721…` before pressing Call rather than a silent rewrite.
+    /// ⚠️ EVERY COUNTRY HERE WHOSE NATIONAL PREFIX IS `0` IN libphonenumber (libphonenumber-js
+    /// 1.13.14; Seer on district-core-rust #63 found Venezuela, Ecuador and Uruguay missing). One
+    /// missing would keep a typed leading `0` in the number: `0412 123 4567` in Venezuela sent
+    /// `+58 0412…`. The same list is in district-macos, district-android and district-core-rust.
     static let trunkZero: Set<String> = [
-        "AE", "AR", "AT", "AU", "BA", "BD", "BE", "BG", "BR", "CH", "CN", "DE", "EG", "FI", "FR", "GB", "GH",
-        "HR", "ID", "IE", "IL", "IN", "JP", "KE", "KR", "LK", "MA", "MY", "NG", "NL", "NZ", "PH", "PK", "RO",
-        "RS", "SA", "SE", "SI", "SK", "TH", "TR", "TW", "UA", "VN", "ZA",
+        "AE", "AF", "AL", "AM", "AR", "AT", "AU", "AZ", "BA", "BD", "BE", "BG", "BO", "BR", "CD", "CH", "CN",
+        "CO", "CU", "DE", "DZ", "EC", "EG", "ER", "ET", "FI", "FR", "GB", "GE", "GF", "GH", "GP", "HR", "ID",
+        "IE", "IL", "IN", "IQ", "IR", "JO", "JP", "KE", "KG", "KH", "KI", "KP", "KR", "LA", "LB", "LI", "LK",
+        "LR", "LT", "LY", "MA", "MC", "MD", "ME", "MG", "MK", "MM", "MN", "MQ", "MW", "MY", "NA", "NG", "NL",
+        "NP", "NZ", "PE", "PH", "PK", "PM", "PS", "PY", "RE", "RO", "RS", "RW", "SA", "SD", "SE", "SI", "SK",
+        "SL", "SO", "SS", "SY", "TH", "TR", "TW", "TZ", "UA", "UG", "UY", "VE", "VN", "XK", "YE", "ZA", "ZM",
+        "ZW",
     ]
 
     /// Trunk prefixes that are not a single `0` (Seer on PR #95). Without them `8 495 123 4567`
