@@ -1035,6 +1035,27 @@ extension DialerCopy {
     /// `dialer.calling`
     internal static var calling: String { AppL10n.copyLocale == .frCA ? "Appel…" : "Calling…" }
 
+    /// `dialer.cancel`
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
+
+    /// `dialer.countries_all`
+    internal static var countriesAll: String { AppL10n.copyLocale == .frCA ? "Tous les pays" : "All countries" }
+
+    /// `dialer.countries_no_match`
+    internal static var countriesNoMatch: String { AppL10n.copyLocale == .frCA ? "Aucun pays ne correspond." : "No country matches." }
+
+    /// `dialer.countries_suggested`
+    internal static var countriesSuggested: String { AppL10n.copyLocale == .frCA ? "Suggestions" : "Suggested" }
+
+    /// `dialer.country`
+    internal static var country: String { AppL10n.copyLocale == .frCA ? "Pays" : "Country" }
+
+    /// `dialer.country_list_hint`
+    internal static var countryListHint: String { AppL10n.copyLocale == .frCA ? "Ouvre la liste des pays." : "Opens the list of countries." }
+
+    /// `dialer.country_search`
+    internal static var countrySearch: String { AppL10n.copyLocale == .frCA ? "Nom du pays ou indicatif" : "Country name or code" }
+
     /// `dialer.dial`
     internal static var dial: String { AppL10n.copyLocale == .frCA ? "Composer" : "Dial" }
 
@@ -1088,9 +1109,6 @@ extension DialerModel {
     /// `dialer.dormant_fallback`
     internal static var dormantFallback: String { AppL10n.copyLocale == .frCA ? "Cet espace de travail est en pause pour inactivité\u{00A0}: les appels sont suspendus. Demandez-nous de le réactiver." : "This workspace is paused for inactivity, so calls are on hold. Ask us to reactivate it." }
 
-    /// `dialer.entry_hint`
-    internal static var entryHint: String { AppL10n.copyLocale == .frCA ? "Indiquez un numéro avec l'indicatif du pays, par exemple +1 416 555 0100." : "Enter a number with its country code, for example +1 416 555 0100." }
-
     /// `dialer.microphone_notice`
     internal static var microphoneNotice: String { AppL10n.copyLocale == .frCA ? "Passer un appel active votre microphone." : "Placing a call turns on your microphone." }
 
@@ -1103,9 +1121,9 @@ extension DialerModel {
     /// `dialer_m.busy_message`
     internal static var busyMessage: String { AppL10n.copyLocale == .frCA ? "Un appel est déjà en cours sur cet appareil. Terminez-le avant d'en passer un autre." : "There is already a call on this device. End it before placing another." }
 
-    /// `dialer_m.destination_named`
-    internal static func destinationNamed(_ name: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Pays du numéro\u{00A0}: \(name)." : "This number rings \(name)."
+    /// `dialer_m.country_button`
+    internal static func countryButton(_ name: String, _ code: String) -> String {
+        AppL10n.copyLocale == .frCA ? "\(name), indicatif +\(code)" : "\(name), calling code +\(code)"
     }
 
     /// `dialer_m.destination_unrecognised`
@@ -1114,21 +1132,19 @@ extension DialerModel {
     /// `dialer_m.entry_emergency_number`
     internal static var entryEmergencyNumber: String { AppL10n.copyLocale == .frCA ? "District ne peut pas appeler les urgences. Utilisez l'app Téléphone pour obtenir de l'aide." : "District cannot place emergency calls. Use the Phone app to call for help." }
 
-    /// `dialer_m.entry_missing_country_code`
-    internal static var entryMissingCountryCode: String { AppL10n.copyLocale == .frCA ? "Commencez par l'indicatif du pays, par exemple +1 pour le Canada et les États-Unis." : "Start with a country code, for example +1 for Canada and the United States." }
-
-    /// `dialer_m.entry_stray_plus`
-    internal static var entryStrayPlus: String { AppL10n.copyLocale == .frCA ? "Un numéro ne peut contenir que des chiffres après le +." : "A number may contain only digits after the +." }
-
-    /// `dialer_m.entry_too_long`
-    internal static func entryTooLong(_ maximum: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "Ce numéro est trop long. Un numéro compte au plus \(maximum) chiffres après le +." : "That is too long. A number has at most \(maximum) digits after the +."
+    /// `dialer_m.entry_hint_local`
+    internal static func entryHintLocal(_ country: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Saisissez le numéro comme vous le composeriez sur place (\(country))." : "Type the number as you would dial it in \(country)."
     }
 
-    /// `dialer_m.entry_too_short`
-    internal static func entryTooShort(_ minimum: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "Ce numéro est trop court. Un numéro compte au moins \(minimum) chiffres après le +." : "That is too short. A number has at least \(minimum) digits after the +."
-    }
+    /// `dialer_m.entry_hint_none`
+    internal static var entryHintNone: String { AppL10n.copyLocale == .frCA ? "Commencez par + et l'indicatif du pays, ou choisissez un pays." : "Start with + and the country code, or pick a country." }
+
+    /// `dialer_m.entry_needs_country`
+    internal static var entryNeedsCountry: String { AppL10n.copyLocale == .frCA ? "Choisissez un pays, ou commencez par + et l'indicatif du pays." : "Pick a country, or start with + and the country code." }
+
+    /// `dialer_m.entry_too_many_digits`
+    internal static var entryTooManyDigits: String { AppL10n.copyLocale == .frCA ? "Ce numéro a trop de chiffres." : "That is too many digits for a phone number." }
 
     /// `dialer_m.in_room_message`
     internal static var inRoomMessage: String { AppL10n.copyLocale == .frCA ? "Vous êtes dans une salle de réunion sur cet appareil. Quittez-la avant de passer un appel." : "You are in a room on this device. Leave it before placing a call." }
@@ -1138,6 +1154,11 @@ extension DialerModel {
 
     /// `dialer_m.not_started_message`
     internal static var notStartedMessage: String { AppL10n.copyLocale == .frCA ? "iOS n'a pas lancé l'appel, donc aucun numéro n'a été composé. Un autre appel est peut-être déjà en cours." : "iOS did not start the call, so nothing was dialled. Another call may already be in progress." }
+
+    /// `dialer_m.rings`
+    internal static func rings(_ country: String, _ number: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Pays de destination\u{00A0}: \(country) · \(number)" : "Rings \(country) · \(number)"
+    }
 }
 
 extension FinishSetupCopy {

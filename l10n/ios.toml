@@ -2751,6 +2751,64 @@ screen = "dialer"
 state = "reviewed"
 id = { swift = "DialerCopy.calling" }
 
+[dialer.cancel]
+en = "Cancel"
+fr = "Annuler"
+ctx = "button"
+screen = "dialer"
+state = "draft"
+id = { swift = "DialerCopy.cancel" }
+
+[dialer.countries_all]
+en = "All countries"
+fr = "Tous les pays"
+ctx = "title"
+screen = "dialer"
+state = "draft"
+id = { swift = "DialerCopy.countriesAll" }
+
+[dialer.countries_no_match]
+en = "No country matches."
+fr = "Aucun pays ne correspond."
+ctx = "body"
+screen = "dialer"
+state = "draft"
+id = { swift = "DialerCopy.countriesNoMatch" }
+
+[dialer.countries_suggested]
+en = "Suggested"
+fr = "Suggestions"
+ctx = "title"
+screen = "dialer"
+state = "draft"
+id = { swift = "DialerCopy.countriesSuggested" }
+
+[dialer.country]
+en = "Country"
+fr = "Pays"
+ctx = "label"
+screen = "dialer"
+state = "draft"
+id = { swift = "DialerCopy.country" }
+note = "On the button in front of the number when no country is chosen yet, and the title of the country list."
+
+[dialer.country_list_hint]
+en = "Opens the list of countries."
+fr = "Ouvre la liste des pays."
+ctx = "a11y"
+screen = "dialer"
+state = "draft"
+id = { swift = "DialerCopy.countryListHint" }
+
+[dialer.country_search]
+en = "Country name or code"
+fr = "Nom du pays ou indicatif"
+ctx = "placeholder"
+screen = "dialer"
+state = "draft"
+id = { swift = "DialerCopy.countrySearch" }
+note = "Search prompt: a country is found by its name, its two-letter code or its calling code."
+
 [dialer.dial]
 en = "Dial"
 fr = "Composer"
@@ -2784,14 +2842,6 @@ screen = "dialer"
 state = "reviewed"
 id = { swift = "DialerModel.dormantFallback" }
 note = "⛔ NOT A BILLING FAILURE AND NOT A PERMISSION FAILURE. \"Pay and it resumes\" is the case next door; this one is \"ask us and we turn it back on\"."
-
-[dialer.entry_hint]
-en = "Enter a number with its country code, for example +1 416 555 0100."
-fr = "Indiquez un numéro avec l'indicatif du pays, par exemple +1 416 555 0100."
-ctx = "a11y"
-screen = "dialer"
-state = "reviewed"
-id = { swift = "DialerModel.entryHint" }
 
 [dialer.hang_up]
 en = "Hang up"
@@ -2884,15 +2934,15 @@ tier = "T2"
 state = "reviewed"
 id = { swift = "DialerModel.busyMessage" }
 
-[dialer_m.destination_named]
-en = "This number rings {name}."
-fr = "Pays du numéro\u00A0: {name}."
-ctx = "body"
+[dialer_m.country_button]
+en = "{name}, calling code +{code}"
+fr = "{name}, indicatif +{code}"
+ctx = "a11y"
 screen = "dialer"
-args = { name = "str" }
-state = "reviewed"
-id = { swift = "DialerModel.destinationNamed(_:)" }
-note = "{name} is the country or region the dialled code belongs to."
+args = { name = "str", code = "str" }
+state = "draft"
+id = { swift = "DialerModel.countryButton(_:_:)" }
+note = "VoiceOver label of the flag button in front of the number. {name} is a country, {code} its calling code digits."
 
 [dialer_m.destination_unrecognised]
 en = "Unrecognised country code. Check the number before calling."
@@ -2912,45 +2962,41 @@ state = "reviewed"
 id = { swift = "DialerModel.entryEmergencyNumber" }
 note = "Must send the caller to the Phone app: District cannot place an emergency call and must not pretend it might. 'Phone' is the iOS app's name."
 
-[dialer_m.entry_missing_country_code]
-en = "Start with a country code, for example +1 for Canada and the United States."
-fr = "Commencez par l'indicatif du pays, par exemple +1 pour le Canada et les États-Unis."
-ctx = "error"
+[dialer_m.entry_hint_local]
+en = "Type the number as you would dial it in {country}."
+fr = "Saisissez le numéro comme vous le composeriez sur place ({country})."
+ctx = "body"
 screen = "dialer"
-tier = "T2"
-state = "reviewed"
-id = { swift = "DialerModel.entryMissingCountryCode" }
+args = { country = "str" }
+state = "draft"
+id = { swift = "DialerModel.entryHintLocal(_:)" }
+note = "{country} is a country name."
 
-[dialer_m.entry_stray_plus]
-en = "A number may contain only digits after the +."
-fr = "Un numéro ne peut contenir que des chiffres après le +."
-ctx = "error"
+[dialer_m.entry_hint_none]
+en = "Start with + and the country code, or pick a country."
+fr = "Commencez par + et l'indicatif du pays, ou choisissez un pays."
+ctx = "body"
 screen = "dialer"
-tier = "T2"
-state = "reviewed"
-id = { swift = "DialerModel.entryStrayPlus" }
+state = "draft"
+id = { swift = "DialerModel.entryHintNone" }
 
-[dialer_m.entry_too_long]
-en = "That is too long. A number has at most {maximum} digits after the +."
-fr = "Ce numéro est trop long. Un numéro compte au plus {maximum} chiffres après le +."
+[dialer_m.entry_needs_country]
+en = "Pick a country, or start with + and the country code."
+fr = "Choisissez un pays, ou commencez par + et l'indicatif du pays."
 ctx = "error"
 screen = "dialer"
 tier = "T2"
-args = { maximum = "int" }
-state = "reviewed"
-id = { swift = "DialerModel.entryTooLong(_:)" }
-note = "{maximum} is always more than one."
+state = "draft"
+id = { swift = "DialerModel.entryNeedsCountry" }
 
-[dialer_m.entry_too_short]
-en = "That is too short. A number has at least {minimum} digits after the +."
-fr = "Ce numéro est trop court. Un numéro compte au moins {minimum} chiffres après le +."
+[dialer_m.entry_too_many_digits]
+en = "That is too many digits for a phone number."
+fr = "Ce numéro a trop de chiffres."
 ctx = "error"
 screen = "dialer"
 tier = "T2"
-args = { minimum = "int" }
-state = "reviewed"
-id = { swift = "DialerModel.entryTooShort(_:)" }
-note = "{minimum} is always more than one."
+state = "draft"
+id = { swift = "DialerModel.entryTooManyDigits" }
 
 [dialer_m.in_room_message]
 en = "You are in a room on this device. Leave it before placing a call."
@@ -2979,6 +3025,16 @@ screen = "dialer"
 tier = "T2"
 state = "reviewed"
 id = { swift = "DialerModel.notStartedMessage" }
+
+[dialer_m.rings]
+en = "Rings {country} · {number}"
+fr = "Pays de destination\u00A0: {country} · {number}"
+ctx = "body"
+screen = "dialer"
+args = { country = "str", number = "str" }
+state = "draft"
+id = { swift = "DialerModel.rings(_:_:)" }
+note = "Shown under the number before Call. {country} is a country name, {number} the full international number, e.g. +1 416 555 0199."
 
 [finish_setup.action]
 en = "Open setup"

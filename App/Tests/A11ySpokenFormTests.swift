@@ -43,10 +43,10 @@ final class A11ySpokenFormTests: XCTestCase {
     /// ⛔ THE LINE THAT WOULD HAVE CAUGHT THE CALL TO THE WRONG COUNTRY. It is the
     /// Call button's accessibility hint, which is the last thing VoiceOver says
     /// before a person presses a control that spends money.
-    func testANamedRegionIsSaid() {
+    func testANamedCountryIsSaidWithTheWholeNumber() {
         XCTAssertEqual(
-            DialerModel.destinationLine(.named("Switzerland")),
-            "This number rings Switzerland."
+            DialerModel.destinationLine(DialPlan.read("+41 65 550 12 34", country: nil)),
+            "Rings Switzerland · +41 65 550 12 34"
         )
     }
 
@@ -54,14 +54,22 @@ final class A11ySpokenFormTests: XCTestCase {
     /// refuses — the app knows that it does not know, which is a different fact from
     /// the number being wrong.
     func testAnUnrecognisedCodeWarnsWithoutRefusing() {
-        let line = DialerModel.destinationLine(.unrecognised)
-        XCTAssertEqual(line, "Unrecognised country code. Check the number before calling.")
+        let reading = DialPlan.read("+999 1234 5678", country: nil)
+        XCTAssertNotNil(reading.e164)
+        XCTAssertEqual(
+            DialerModel.destinationLine(reading),
+            "Unrecognised country code. Check the number before calling."
+        )
     }
 
-    /// ⛔ nil, NOT AN EMPTY SENTENCE. With no country code typed there is nothing
-    /// true to say about where the call goes, and `DialerView` turns this into an
-    /// absent hint rather than a pause before the button's label.
-    func testNoCountryCodeSaysNothingAtAll() {
-        XCTAssertNil(DialerModel.destinationLine(.none))
+    /// ⛔ nil, NOT AN EMPTY SENTENCE. With no complete number there is nothing to send, and
+    /// `DialerView` turns this into an absent hint rather than a pause before the label.
+    func testAnIncompleteNumberSaysNothingAtAll() {
+        XCTAssertNil(DialerModel.destinationLine(DialPlan.read("", country: nil)))
+    }
+
+    /// ⚠️ THE FLAG BUTTON IS READ AS A COUNTRY AND A CODE, never as the emoji's two letters.
+    func testTheCountryButtonIsSaidAsANameAndACode() {
+        XCTAssertEqual(DialerModel.countryButton("Canada", "1"), "Canada, calling code +1")
     }
 }
