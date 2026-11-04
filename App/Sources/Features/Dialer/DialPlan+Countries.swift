@@ -85,7 +85,7 @@ extension DialPlan {
     static let canadianAreaCodes: Set<String> = Set(
         """
         204 226 236 249 250 257 263 289 306 343 354 365 367 368 382 387 403 416 418 428 431 437 438 450 \
-        460 468 474 506 514 519 548 579 581 584 587 600 604 613 639 647 672 683 705 709 742 753 778 780 \
+        460 468 474 506 514 519 548 579 581 584 587 604 613 639 647 672 683 705 709 742 753 778 780 \
         782 807 819 825 867 873 879 902 905 942
         """.split(separator: " ").map(String.init)
     )
@@ -105,11 +105,6 @@ extension DialPlan {
 
     // ⚠️ HERE RATHER THAN IN `DialPlan.swift`, AND THAT IS A LINT CEILING: `type_body_length` caps the
     // enum's body at 300 lines.
-
-    /// Whether a +1 national number is toll-free, shared by every country of the plan.
-    static func isNANPTollFree(_ nsn: String) -> Bool {
-        nanpTollFree.contains(String(nsn.prefix(3)))
-    }
 
     /// Whether a +1 national number belongs to no one country, as the web's table has it
     /// (``nanpNoCountry``).

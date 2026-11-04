@@ -137,10 +137,11 @@ extension DialerModel {
         var order: [String] = []
         for number in numbers {
             let reading = DialPlan.read(number, country: nil)
-            // ⚠️ A TOLL-FREE +1 NUMBER IS NOT EVIDENCE OF ANY COUNTRY (Seer on PR #95): a Canadian
-            // workspace with only 1-800 numbers would otherwise read as American.
+            // ⚠️ A NO-COUNTRY +1 NUMBER (toll-free, or 500, 600, 700, 710, 900) IS NOT EVIDENCE OF ANY
+            // COUNTRY (Seer on PR #95 and #98): a Canadian workspace with only 1-800 numbers would
+            // otherwise read as American.
             guard let iso = reading.iso,
-                  !(reading.callingCode == "1" && DialPlan.isNANPTollFree(reading.nationalNumber)) else { continue }
+                  !(reading.callingCode == "1" && DialPlan.isNANPNoCountry(reading.nationalNumber)) else { continue }
             if counts[iso] == nil {
                 order.append(iso)
             }

@@ -84,4 +84,17 @@ final class DialPlanReadBackTests: XCTestCase {
             XCTAssertEqual(DialPlan.read(first.national, country: country).e164, first.e164, raw)
         }
     }
+
+    /// ⛔ THE FLAG AND THE HOME-COUNTRY VOTE TREAT THE WEB'S OTHER NO-COUNTRY CODES AS THE TOLL-FREE
+    /// ONES (Seer on district-ios #98): `+1 600…` moved the flag to Canada, and 500, 700, 710 and 900 to
+    /// the United States, beside a line saying the number belongs to no one country.
+    @MainActor
+    func testTheOtherNoCountryCodesKeepTheFlagAndDoNotVote() {
+        for area in ["500", "600", "700", "710", "900"] {
+            XCTAssertEqual(DialPlan.read("+1 \(area) 555 0100", country: "US").iso, "US", area)
+            XCTAssertEqual(DialPlan.read("\(area)5550100", country: "JM").iso, "JM", area)
+        }
+        XCTAssertNil(DialerModel.homeCountry(fromNumbers: ["+16005550100", "+19005550100"]))
+        XCTAssertEqual(DialerModel.homeCountry(fromNumbers: ["+16005550100", "+12065550100"]), "US")
+    }
 }

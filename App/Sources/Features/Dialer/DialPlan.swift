@@ -357,9 +357,10 @@ enum DialPlan {
     /// +1 country, else the US.
     static func nanpCountry(_ nsn: String, fallback: String?) -> String {
         let plusOne = fallback.flatMap { isNANP($0) ? $0 : nil } ?? "US"
-        // ⚠️ A TOLL-FREE CODE (800, 888 …) BELONGS TO NO ONE COUNTRY, so it keeps the +1 country
-        // already on screen rather than claiming the United States.
-        guard nsn.count >= 3, !isNANPTollFree(nsn) else { return plusOne }
+        // ⚠️ A NO-COUNTRY CODE (toll-free 800, 888 …, and the web's 500, 600, 700, 710, 900) BELONGS
+        // TO NO ONE COUNTRY, so it keeps the +1 country already on screen rather than claiming one
+        // (Seer on district-ios #98: 600 claimed Canada beside a line saying it had no country).
+        guard nsn.count >= 3, !isNANPNoCountry(nsn) else { return plusOne }
         let area = String(nsn.prefix(3))
         if canadianAreaCodes.contains(area) {
             return "CA"
