@@ -23,6 +23,13 @@ import Foundation
 /// billing. Measured: two calls the operator ended in under a second each billed
 /// roughly 90 seconds at Twilio, with nothing failing and nothing logged.
 extension DialerModel {
+    /// ⚠️ NOT THROUGH CALLKIT: there is no system action for the audio route, so this
+    /// is the app's own ask and ``CallMediaState/speakerRequested`` records it as one.
+    /// Here rather than in `DialerModel.swift` for the same ceiling; it widens nothing.
+    func toggleSpeaker() async {
+        await apply(.speakerToggled)
+    }
+
     /// ⛔ IN ORDER AND SEQUENTIALLY, because the order is part of
     /// ``SoftphoneCommand``'s contract: the report goes before the disconnect, and
     /// the carrier request goes last so that nothing local can ever wait on a

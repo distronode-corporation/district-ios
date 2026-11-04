@@ -2989,14 +2989,15 @@ tier = "T2"
 state = "draft"
 id = { swift = "DialerModel.entryNeedsCountry" }
 
-[dialer_m.entry_too_many_digits]
-en = "That is too many digits for a phone number."
-fr = "Ce numéro a trop de chiffres."
+[dialer_m.entry_wrong_length]
+en = "That is the wrong number of digits for a number in the country it rings. Check it before you call."
+fr = "Ce numéro n'a pas le bon nombre de chiffres pour le pays de destination. Vérifiez-le avant d'appeler."
 ctx = "error"
 screen = "dialer"
 tier = "T2"
 state = "draft"
-id = { swift = "DialerModel.entryTooManyDigits" }
+id = { swift = "DialerModel.entryWrongLength" }
+note = "Said only once the person stops typing (the field loses focus, Return or Done, or a refused Call), never while digits are still arriving. The web dialler's sentence, word for word."
 
 [dialer_m.in_room_message]
 en = "You are in a room on this device. Leave it before placing a call."

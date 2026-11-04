@@ -66,6 +66,8 @@ final class DialerModel: LiveCallControls {
     private(set) var entry: String = ""
     /// The country the field is read in. ⚠️ Module-visible: `DialerEntry.swift` writes it.
     var countries: DialerCountries
+    /// Whether a wrong length may be said yet (``checkLength()``). ⚠️ `DialerEntry.swift` writes it.
+    var lengthChecked = false
 
     /// The live call, or nil when the dialer is on the keypad.
     ///
@@ -160,10 +162,11 @@ final class DialerModel: LiveCallControls {
 
     // MARK: - What the keypad may do
 
-    /// ⚠️ CLEARS THE PREVIOUS REFUSAL, about a different number. ``absorb(_:)`` reads it.
+    /// ⚠️ CLEARS THE PREVIOUS REFUSAL AND THE LENGTH CHECK, about a different number. ``absorb(_:)`` reads it.
     func onEntryChange(_ value: String) {
         entry = absorb(value)
         refusal = nil
+        lengthChecked = false
     }
 
     /// Read the recent inbound calls the operator might return. ⚠️ IDEMPOTENT AND
@@ -194,7 +197,8 @@ final class DialerModel: LiveCallControls {
     /// ⚠️ A REFUSED START ENDS THE ATTEMPT AS SOON AS iOS SAYS SO, and a watchdog covers one it never
     /// answers. See ``abandonStart(uuid:because:)`` and ``startAfterMicrophone(uuid:handle:)``.
     func placeCall() {
-        guard canPlaceCall else { return }
+        // ⚠️ A REFUSED ATTEMPT SAYS A WRONG LENGTH TOO, as leaving the field does.
+        guard canPlaceCall else { return checkLength() }
         // ⛔ THE PROCESS HOLDS ONE CALL. See property 2 on the type. This also covers
         // an inbound call already owning the bridge.
         guard !calls.hasLiveCall else {
@@ -281,12 +285,6 @@ final class DialerModel: LiveCallControls {
     func toggleMute() {
         guard let uuid = callUUID, let session = call else { return }
         calls.callKit.requestMuted(uuid: uuid, muted: session.state.media.microphoneEnabled)
-    }
-
-    /// ⚠️ NOT THROUGH CALLKIT: there is no system action for the audio route, so this
-    /// is the app's own ask and ``CallMediaState/speakerRequested`` records it as one.
-    func toggleSpeaker() async {
-        await apply(.speakerToggled)
     }
 
     /// Dismiss the ended-call summary and return to the keypad.

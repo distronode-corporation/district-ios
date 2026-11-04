@@ -83,6 +83,13 @@ extension DialerModel {
         return reading.national
     }
 
+    /// The operator stopped typing: the field lost focus, or Return or Done was pressed, or a
+    /// Call was refused. A number of a length its country never issues is said from now until
+    /// the next edit (``onEntryChange(_:)`` clears it). See ``entryProblem(_:lengthChecked:)``.
+    func checkLength() {
+        lengthChecked = true
+    }
+
     /// The operator chose a country in the list.
     ///
     /// ⚠️ THE DIGITS ALREADY TYPED ARE KEPT and read again in the new country. On a

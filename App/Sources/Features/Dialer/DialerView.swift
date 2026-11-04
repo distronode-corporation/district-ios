@@ -200,11 +200,13 @@ private struct DialerKeypadView: View {
             text: model.entry,
             isEnabled: model.canDial && !model.placing,
             ink: colors.foreground,
-            placeholderInk: colors.mutedForeground
-        ) { typed in
-            model.onEntryChange(typed)
-            return model.entry
-        }
+            placeholderInk: colors.mutedForeground,
+            onEdit: { typed in
+                model.onEntryChange(typed)
+                return model.entry
+            },
+            onCommit: { model.checkLength() }
+        )
         .districtField()
     }
 
@@ -244,16 +246,21 @@ private struct DialerKeypadView: View {
     /// Why the Call button is off.
     ///
     /// ⛔ A DISABLED BUTTON WITH NO REASON CONFUSES PEOPLE. The case that needs it most is
-    /// a workspace with no home country, where digits alone name no country.
+    /// a workspace with no home country, where digits alone name no country. ⚠️ A wrong
+    /// length waits until the operator stops typing (``DialerModel/lengthChecked``).
     @ViewBuilder
     private var problem: some View {
-        if model.canDial, let line = DialerModel.entryProblem(model.destination.status) {
+        if model.canDial, let line = problemLine {
             Text(line)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier(A11yID.Dialer.refusal)
         }
+    }
+
+    private var problemLine: String? {
+        DialerModel.entryProblem(model.destination, lengthChecked: model.lengthChecked)
     }
 
     /// ⛔ BESIDE THE FIELD, NEVER IN IT. See ``destination``.
