@@ -10,6 +10,13 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Known limits
+
+- Dialler: a whole number typed without its trunk prefix may lose a leading digit when that
+  digit equals the trunk prefix (Russia's `800 555 35 35` typed without its `8`). Only Belarus,
+  the UK and Lithuania check a prefix against libphonenumber's number patterns; modelling every
+  country's pattern is left out. The line under the field shows the whole number before Call.
+
 ### Changed
 
 - 3.2.1: MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
