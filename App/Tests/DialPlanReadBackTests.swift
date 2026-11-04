@@ -97,4 +97,19 @@ final class DialPlanReadBackTests: XCTestCase {
         XCTAssertNil(DialerModel.homeCountry(fromNumbers: ["+16005550100", "+19005550100"]))
         XCTAssertEqual(DialerModel.homeCountry(fromNumbers: ["+16005550100", "+12065550100"]), "US")
     }
+
+    /// ⛔ A PREFIX IS READ OFF ONLY WHERE libphonenumber WOULD READ IT OFF (Seer on district-ios #98): a
+    /// typed number it already takes as whole is not cut into a shorter one. `800 12345` is a whole
+    /// Lithuanian toll-free number, not the old trunk `8` and `0012345`; Belarus's `800 123 45 67`
+    /// likewise. Its national number patterns decide, for the countries with ``DialPlan/parsingTrunkPrefixes``.
+    func testAWholeNumberIsNotCutByAPrefix() {
+        XCTAssertEqual(DialPlan.read("800 12345", country: "LT").e164, "+37080012345")
+        XCTAssertEqual(DialPlan.read("8 800 12345", country: "LT").e164, "+37080012345")
+        XCTAssertEqual(DialPlan.read("800 123 45 67", country: "BY").e164, "+3758001234567")
+        XCTAssertEqual(DialPlan.read("8 029 123 45 67", country: "BY").e164, "+375291234567")
+        XCTAssertEqual(DialPlan.read("8 612 34567", country: "LT").e164, "+37061234567")
+        XCTAssertEqual(Set(DialPlan.nationalNumberPatterns.keys), Set(DialPlan.parsingTrunkPrefixes.keys))
+        let first = DialPlan.read("800 12345", country: "LT")
+        XCTAssertEqual(DialPlan.read(first.national, country: "LT").e164, first.e164)
+    }
 }

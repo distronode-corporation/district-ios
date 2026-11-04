@@ -101,6 +101,18 @@ extension DialPlan {
         "829": "DO", "849": "DO", "868": "TT", "869": "KN", "876": "JM", "939": "PR",
     ]
 
+    /// libphonenumber's national number pattern (libphonenumber-js 1.13.14) for each country with
+    /// ``parsingTrunkPrefixes``, so a prefix is read off only where libphonenumber would read it off:
+    /// not when the digits typed already make a whole number there and would not without it
+    /// (``stripsPrefix(_:from:in:)``). `800 12345` is a whole Lithuanian toll-free number, not the old
+    /// trunk `8` and `0012345` (Seer on district-ios #98). The same table is in the other app repos.
+    static let nationalNumberPatterns: [String: String] = [
+        "BY": #"(?:[12]\d|33|44|902)\d{7}|8(?:0[0-79]\d{5,7}|[1-7]\d{9})"#
+            + #"|8(?:1[0-489]|[5-79]\d)\d{7}|8[1-79]\d{6,7}|8[0-79]\d{5}|8\d{5}"#,
+        "GB": #"[1-357-9]\d{9}|[18]\d{8}|8\d{6}"#,
+        "LT": #"(?:[3469]\d|52|[78]0)\d{6}"#,
+    ]
+
     // MARK: - Lookups in these tables
 
     // ⚠️ HERE RATHER THAN IN `DialPlan.swift`, AND THAT IS A LINT CEILING: `type_body_length` caps the
@@ -128,5 +140,18 @@ extension DialPlan {
     static func nationalPrefixes(_ iso: String) -> [String] {
         guard let trunk = trunkPrefix(iso) else { return [] }
         return ([trunk] + (parsingTrunkPrefixes[iso] ?? [])).sorted { $0.count > $1.count }
+    }
+
+    /// Whether `prefix`, which `digits` starts with, is read off as a prefix in `iso`: libphonenumber's
+    /// test, for the countries in ``nationalNumberPatterns``. Not when `digits` already match the
+    /// country's national number pattern and what is left would not.
+    static func stripsPrefix(_ prefix: String, from digits: String, in iso: String) -> Bool {
+        guard let pattern = nationalNumberPatterns[iso] else { return true }
+        let rest = String(digits.dropFirst(prefix.count))
+        return !(matches(digits, pattern) && !matches(rest, pattern))
+    }
+
+    private static func matches(_ digits: String, _ pattern: String) -> Bool {
+        digits.range(of: "^(?:" + pattern + ")$", options: .regularExpression) != nil
     }
 }

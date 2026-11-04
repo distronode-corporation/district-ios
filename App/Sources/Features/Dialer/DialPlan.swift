@@ -162,7 +162,9 @@ enum DialPlan {
             }
             // ⚠️ AND THE OTHER PREFIXES libphonenumber STRIPS, longest first (``nationalPrefixes(_:)``):
             // Lithuania's old `8`, Belarus's `80`.
-            if let typed = nationalPrefixes(country).first(where: { nsn.hasPrefix($0) }) {
+            if let typed = nationalPrefixes(country).first(where: {
+                nsn.hasPrefix($0) && stripsPrefix($0, from: nsn, in: country)
+            }) {
                 nsn.removeFirst(typed.count)
                 typedTrunk = true
             }
