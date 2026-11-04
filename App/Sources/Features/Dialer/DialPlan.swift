@@ -141,8 +141,10 @@ enum DialPlan {
                     international: "+" + code
                 )
             }
-            if nsn.hasPrefix(trunk) {
-                nsn.removeFirst(trunk.count)
+            // ⚠️ AND THE OTHER PREFIXES libphonenumber STRIPS, longest first (``nationalPrefixes(_:)``):
+            // Lithuania's old `8`, Belarus's `80`.
+            if let typed = nationalPrefixes(country).first(where: { nsn.hasPrefix($0) }) {
+                nsn.removeFirst(typed.count)
                 typedTrunk = true
             }
         }
@@ -340,13 +342,28 @@ enum DialPlan {
         nanpTollFree.contains(String(nsn.prefix(3)))
     }
 
-    /// The trunk prefix dialled before a national number inside the country, or nil:
-    /// `0` for most, `8` in Russia and Kazakhstan, `80` in Belarus, `06` in Hungary.
+    /// Whether a +1 national number belongs to no one country, as the web's table has it
+    /// (``nanpNoCountry``).
+    static func isNANPNoCountry(_ nsn: String) -> Bool {
+        nanpNoCountry.contains(String(nsn.prefix(3)))
+    }
+
+    /// The trunk prefix dialled before a national number inside the country, or nil: `0` for
+    /// most, `8` in Russia, Kazakhstan, Belarus and Turkmenistan, `06` in Hungary, `1` in the
+    /// Marshall Islands.
     static func trunkPrefix(_ iso: String) -> String? {
         if let other = otherTrunkPrefixes[iso] {
             return other
         }
         return trunkZero.contains(iso) ? "0" : nil
+    }
+
+    /// Every prefix a national number typed in `iso` may start with that is not part of the number:
+    /// the trunk prefix and ``parsingTrunkPrefixes``, longest first, so Belarus's `80` is tried
+    /// before its `8`.
+    static func nationalPrefixes(_ iso: String) -> [String] {
+        guard let trunk = trunkPrefix(iso) else { return [] }
+        return ([trunk] + (parsingTrunkPrefixes[iso] ?? [])).sorted { $0.count > $1.count }
     }
 
     /// The flag, as the two regional-indicator letters iOS draws as one emoji.

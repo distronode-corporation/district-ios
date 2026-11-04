@@ -160,6 +160,13 @@ built from history before publication, so they have no tags in this repository.
   countries where 45 were listed: `0412 123 4567` typed in Venezuela sent `+58 0412…` (also
   Ecuador, Uruguay and 55 more; Seer on district-core-rust #63). The list is the same in the
   iOS, Mac and Android apps and district-core-rust.
+- Dialler: the web's other no-country +1 codes, 500, 600, 700, 710 and 900, get the same "does
+  not belong to one country" line as the toll-free ones, as the web's area-code table has it;
+  600 said "Rings Canada" and the others "Rings United States".
+- Dialler: every trunk prefix follows libphonenumber-js 1.13.14. Belarus is `8` (it was `80`,
+  which is still read, as is `0`), Turkmenistan `8` and the Marshall Islands `1` are added, and
+  the prefixes libphonenumber also strips are read: Lithuania's old `8` (`8 612 34567` sent
+  `+370 8612 34567`) and the UK's `180020`.
 - Dialler: a +1 toll-free number (800, 833, 844, 855, 866, 877, 888) no longer says "Rings
   Canada" or "Rings United States" under the field. It says what the web dialler says, "Rings +1
   800 555 0100. This number does not belong to one country. Check it before you call." (and the

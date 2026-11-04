@@ -57,4 +57,31 @@ final class DialPlanReadBackTests: XCTestCase {
         XCTAssertEqual(DialPlan.read("099 123 456", country: "UY").e164, "+59899123456")
         XCTAssertEqual(DialPlan.read("0412 123 4567", country: "VE").national, "0412 123 4567")
     }
+
+    /// ⛔ EVERY TRUNK PREFIX IS libphonenumber's NATIONAL PREFIX (libphonenumber-js 1.13.14), outside
+    /// +1, whose `1` the reader handles itself. The non-zero ones are pinned by name; the rest are
+    /// ``DialPlan/trunkZero`` or none. The same table is in the other app repos and district-core-rust.
+    func testEveryTrunkPrefixIsLibphonenumbersNationalPrefix() {
+        let nonZero = ["BY": "8", "HU": "06", "KZ": "8", "MH": "1", "RU": "8", "TM": "8"]
+        for country in DialPlan.countries where country.code != "1" {
+            let expected = nonZero[country.iso] ?? (DialPlan.trunkZero.contains(country.iso) ? "0" : nil)
+            XCTAssertEqual(DialPlan.trunkPrefix(country.iso), expected, country.iso)
+        }
+        // Its `national_prefix_for_parsing` where that is a plain list of prefixes.
+        XCTAssertEqual(DialPlan.parsingTrunkPrefixes, ["BY": ["80", "0"], "GB": ["180020"], "LT": ["8"]])
+    }
+
+    func testTheOtherPrefixesLibphonenumberStripsAreStripped() {
+        XCTAssertEqual(DialPlan.read("8 612 34567", country: "LT").e164, "+37061234567", "Lithuania's legacy 8")
+        XCTAssertEqual(DialPlan.read("0 612 34567", country: "LT").e164, "+37061234567")
+        XCTAssertEqual(DialPlan.read("8 029 123 45 67", country: "BY").e164, "+375291234567")
+        XCTAssertEqual(DialPlan.read("029 123 45 67", country: "BY").e164, "+375291234567")
+        XCTAssertEqual(DialPlan.read("8 12 345678", country: "TM").e164, "+99312345678")
+        XCTAssertEqual(DialPlan.read("1 625 1234", country: "MH").e164, "+6926251234")
+        XCTAssertEqual(DialPlan.read("180020 20 7946 0958", country: "GB").e164, "+442079460958")
+        for (raw, country) in [("8 612 34567", "LT"), ("8 029 123 45 67", "BY"), ("8 12 345678", "TM")] {
+            let first = DialPlan.read(raw, country: country)
+            XCTAssertEqual(DialPlan.read(first.national, country: country).e164, first.e164, raw)
+        }
+    }
 }

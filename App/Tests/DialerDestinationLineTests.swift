@@ -118,6 +118,21 @@ final class DialerDestinationLineTests: XCTestCase {
         )
     }
 
+    /// ⛔ THE WEB'S OTHER NO-COUNTRY +1 CODES SAY IT TOO: its area-code table gives 500, 600, 700, 710
+    /// and 900 no country, as it does the toll-free ones, so its line is the same.
+    func testTheWebsOtherNoCountryCodesSayItToo() {
+        for area in ["500", "600", "700", "710", "900"] {
+            XCTAssertEqual(
+                DialerModel.destinationLine(DialPlan.read("+1 \(area) 555 0100", country: nil)),
+                "Rings +1 \(area) 555 0100. This number does not belong to one country. Check it before you call."
+            )
+            XCTAssertEqual(
+                DialerModel.destinationLine(DialPlan.read("\(area) 5555", country: "CA")),
+                "Rings +1\(area)5555. This number does not belong to one country. Check it before you call."
+            )
+        }
+    }
+
     func testTheEmptyFieldSaysHowToType() {
         XCTAssertEqual(DialerModel.entryHint(country: "CA"), "Type the number as you would dial it in Canada.")
         XCTAssertEqual(DialerModel.entryHint(country: nil), "Start with + and the country code, or pick a country.")

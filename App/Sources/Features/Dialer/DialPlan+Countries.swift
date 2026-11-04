@@ -56,13 +56,30 @@ extension DialPlan {
         "ZW",
     ]
 
-    /// Trunk prefixes that are not a single `0` (Seer on PR #95). Without them `8 495 123 4567`
-    /// typed in Russia would keep its `8` and send `+7 849…`, a wrong number that still dials.
-    static let otherTrunkPrefixes: [String: String] = ["RU": "8", "KZ": "8", "BY": "80", "HU": "06"]
+    /// Trunk prefixes that are not a single `0`: libphonenumber's national prefix for every country
+    /// outside +1 that has one and it is not `0` (libphonenumber-js 1.13.14). Without them
+    /// `8 495 123 4567` typed in Russia would keep its `8` and send `+7 849…`, a wrong number that
+    /// still dials (Seer on PR #95). Belarus is `8`, not `80`: `80` is one of the prefixes below.
+    static let otherTrunkPrefixes: [String: String] = [
+        "BY": "8", "HU": "06", "KZ": "8", "MH": "1", "RU": "8", "TM": "8",
+    ]
+
+    /// The other prefixes libphonenumber strips when it reads a national number, where its
+    /// `national_prefix_for_parsing` is a plain list of them: Belarus `0|80?`, Lithuania `[08]` (its
+    /// trunk prefix became `0` in 2025, and the old `8` is still dialled) and the UK's `180020`. They
+    /// are read, never shown: the local form keeps ``trunkPrefix(_:)``. ⚠️ The rules that are not a
+    /// plain list (carrier codes and area-code rewrites: AR, AU, BO, BR, CN, CO, JP, KR, LI, MG) are
+    /// not modelled. The same table is in the other app repos and district-core-rust.
+    static let parsingTrunkPrefixes: [String: [String]] = ["BY": ["80", "0"], "GB": ["180020"], "LT": ["8"]]
 
     /// The +1 toll-free area codes. ⚠️ They belong to the whole plan, so they never name a
     /// country and never vote for a workspace's home country.
     static let nanpTollFree: Set<String> = ["800", "833", "844", "855", "866", "877", "888"]
+
+    /// The +1 area codes the web's table gives no country (`nanp-area-codes.ts`, `country: null`):
+    /// the toll-free ones and the non-geographic 500, 600, 700, 710 and 900. The line under the
+    /// field names no country for them (``DialerModel/noCountryNumber(_:)``).
+    static let nanpNoCountry: Set<String> = nanpTollFree.union(["500", "600", "700", "710", "900"])
 
     /// Canadian area codes, so a +1 number reads Canada or the US by its first three digits.
     static let canadianAreaCodes: Set<String> = Set(
