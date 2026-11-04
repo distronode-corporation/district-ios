@@ -95,11 +95,13 @@ extension DialerModel {
     /// ⚠️ THE DIGITS ALREADY TYPED ARE KEPT and read again in the new country. On a
     /// workspace with no home country the pick is remembered, so it is made once.
     func pickCountry(_ iso: String) {
+        // ⚠️ A `+` IN THE FIELD IS GIVEN UP: see ``DialPlan/entryForPick(_:country:)``.
+        let kept = DialPlan.entryForPick(entry, country: countries.current)
         countries.current = iso
         if countries.home == nil {
             countries.memory.rememberPicked(iso, workspaceId: workspaceId)
         }
-        onEntryChange(entry.filter(DialEntry.isDigit))
+        onEntryChange(kept)
     }
 
     /// Learn the workspace's country from its numbers.
