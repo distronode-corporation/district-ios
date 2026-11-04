@@ -112,4 +112,23 @@ final class DialPlanReadBackTests: XCTestCase {
         let first = DialPlan.read("800 12345", country: "LT")
         XCTAssertEqual(DialPlan.read(first.national, country: "LT").e164, first.e164)
     }
+
+    /// ⛔ TYPED ONE KEY AT A TIME, THE FIELD KEEPS THE PREFIX THAT WAS TYPED (Seer on district-ios #98).
+    /// Lithuania's old `8` was shown as its trunk `0`, so the next `0` made `00`, the exit code, and the
+    /// digits became `+…`; Belarus's `8` then `0` showed `8`. Each key is read on the field as it stands.
+    func testKeyByKeyTheFieldKeepsTheTypedPrefix() {
+        for (keys, country, e164) in [
+            ("80012345", "LT", "+37080012345"), ("861234567", "LT", "+37061234567"),
+            ("80291234567", "BY", "+375291234567"), ("8001234567", "BY", "+3758001234567"),
+        ] {
+            var field = ""
+            for key in keys {
+                field = DialPlan.read(field + String(key), country: country).national
+                XCTAssertFalse(field.hasPrefix("+"), "\(keys) in \(country): \(field)")
+            }
+            XCTAssertEqual(DialPlan.read(field, country: country).e164, e164, "\(keys) in \(country)")
+        }
+        XCTAssertEqual(DialPlan.read("8", country: "LT").national, "8")
+        XCTAssertEqual(DialPlan.read("80", country: "BY").national, "80")
+    }
 }

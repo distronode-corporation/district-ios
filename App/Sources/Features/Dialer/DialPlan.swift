@@ -146,6 +146,7 @@ enum DialPlan {
         }
         var nsn = digits
         var typedTrunk = false
+        var shownPrefix: String?
         if code == "1", nsn.hasPrefix("1") {
             nsn.removeFirst()
             typedTrunk = true
@@ -167,6 +168,15 @@ enum DialPlan {
             }) {
                 nsn.removeFirst(typed.count)
                 typedTrunk = true
+                // ⚠️ THE PREFIX TYPED IS THE ONE SHOWN (Seer on district-ios #98): Lithuania's old `8`
+                // shown as its trunk `0` made the next `0` read `00`, the exit code.
+                if typed != trunk {
+                    shownPrefix = typed
+                }
+            } else if nationalNumberPatterns[country] != nil {
+                // ⚠️ AND NONE WHEN NONE WAS READ OFF, there: a whole number keeps its own first digits,
+                // or Belarus's `8029123` would show `88029123` and the next key read it differently.
+                shownPrefix = ""
             }
         }
         // ⚠️ A CODE SHARED BY SEVERAL COUNTRIES IS READ AGAIN AS EACH DIGIT ARRIVES, exactly as a
@@ -175,7 +185,7 @@ enum DialPlan {
         // arrives here as a national number; read only in the country on the button, `701…`
         // would stay "Rings Russia" for a Kazakh number (Seer on district-macos #91).
         let iso = countryForCode(code, nsn: nsn, first: country, current: country)
-        return finish(iso: iso, code: code, nsn: nsn, typedTrunk: typedTrunk, plus: false)
+        return finish(iso: iso, code: code, nsn: nsn, typedTrunk: typedTrunk, plus: false, shownPrefix: shownPrefix)
     }
 
     private static func readInternational(_ digits: String, country: String?) -> Reading {
@@ -220,10 +230,18 @@ enum DialPlan {
         }
     }
 
-    private static func finish(iso: String, code: String, nsn: String, typedTrunk: Bool, plus: Bool) -> Reading {
+    private static func finish(
+        iso: String, code: String, nsn: String, typedTrunk: Bool, plus: Bool, shownPrefix: String? = nil
+    ) -> Reading {
         var reading = Reading(status: .typing, iso: iso, callingCode: code, nationalNumber: nsn)
         reading.namedItsCountry = plus
-        reading.national = formatNational(iso: iso, code: code, nsn: nsn, typedTrunk: typedTrunk)
+        reading.national = formatNational(
+            iso: iso,
+            code: code,
+            nsn: nsn,
+            typedTrunk: typedTrunk,
+            shownPrefix: shownPrefix
+        )
         reading.international = nsn.isEmpty ? "+" + code : "+" + code + " " + chunk(nsn, groups(iso: iso, nsn: nsn))
             .joined(separator: " ")
         let range = lengths(iso: iso, code: code)
@@ -244,10 +262,13 @@ enum DialPlan {
     /// digit was read as a local one and a trunk prefix swallowed it: Saint Petersburg's 812
     /// typed after `+7` lost its 8 to Russia's trunk 8 (Seer on district-core-rust #63). A
     /// national number is otherwise empty only after a trunk prefix, which is shown as typed.
-    private static func formatNational(iso: String, code: String, nsn: String, typedTrunk: Bool) -> String {
+    /// `shownPrefix`: the prefix typed where it is not the trunk prefix, or empty for none.
+    private static func formatNational(
+        iso: String, code: String, nsn: String, typedTrunk: Bool, shownPrefix: String? = nil
+    ) -> String {
         if nsn.isEmpty {
             guard typedTrunk else { return "+" + code }
-            return code == "1" ? "1" : trunkPrefix(iso) ?? "0"
+            return code == "1" ? "1" : shownPrefix ?? trunkPrefix(iso) ?? "0"
         }
         if code == "1" {
             let digits = Array(nsn)
@@ -271,7 +292,7 @@ enum DialPlan {
         if iso == "AU", !nsn.hasPrefix("4"), parts.count > 1 {
             return "(0" + parts[0] + ") " + parts.dropFirst().joined(separator: " ")
         }
-        if let trunk = trunkPrefix(iso) {
+        if let trunk = shownPrefix ?? trunkPrefix(iso) {
             parts[0] = trunk + parts[0]
         }
         return parts.joined(separator: " ")
@@ -352,22 +373,6 @@ enum DialPlan {
 
     static func isNANP(_ iso: String) -> Bool {
         codesByCountry[iso] == "1"
-    }
-
-    /// Which +1 country an area code belongs to: Canada, a Caribbean or Pacific member of
-    /// the plan, or else the United States. Before three digits, `fallback` when it is a
-    /// +1 country, else the US.
-    static func nanpCountry(_ nsn: String, fallback: String?) -> String {
-        let plusOne = fallback.flatMap { isNANP($0) ? $0 : nil } ?? "US"
-        // ⚠️ A NO-COUNTRY CODE (toll-free 800, 888 …, and the web's 500, 600, 700, 710, 900) BELONGS
-        // TO NO ONE COUNTRY, so it keeps the +1 country already on screen rather than claiming one
-        // (Seer on district-ios #98: 600 claimed Canada beside a line saying it had no country).
-        guard nsn.count >= 3, !isNANPNoCountry(nsn) else { return plusOne }
-        let area = String(nsn.prefix(3))
-        if canadianAreaCodes.contains(area) {
-            return "CA"
-        }
-        return nanpAreaCountries[area] ?? "US"
     }
 
     /// The flag, as the two regional-indicator letters iOS draws as one emoji.
