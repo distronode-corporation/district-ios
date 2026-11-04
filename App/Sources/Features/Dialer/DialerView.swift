@@ -282,6 +282,15 @@ private struct DialerKeypadView: View {
             Button(model.placing ? DialerCopy.calling : DialerCopy.call) { model.placeCall() }
                 .buttonStyle(.districtPrimary)
                 .disabled(!model.canPlaceCall)
+                // ⚠️ A TAP ON THE DISABLED BUTTON STILL SAYS A WRONG LENGTH (Seer on #96): a disabled
+                // Button never runs its action, so ``DialerModel/placeCall()``'s refusal branch cannot
+                // be reached from here. Simultaneous, and outside `.disabled`, so it fires while Call is
+                // off and never competes with the button's own tap once Call is on.
+                .simultaneousGesture(TapGesture().onEnded {
+                    if !model.canPlaceCall {
+                        model.checkLength()
+                    }
+                })
                 // ⚠️ IDENTITY, NOT THE LABEL: it reads "Calling…" while placing.
                 .accessibilityIdentifier(A11yID.Dialer.call)
                 // ⛔ THE DESTINATION IS ATTACHED TO THE BUTTON, NOT LEFT BESIDE THE
