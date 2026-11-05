@@ -15,8 +15,9 @@
 #   DISTRICT_SMOKE_EMAIL / DISTRICT_SMOKE_PASSWORD   the app-store demo account
 #   DISTRICT_SMOKE_CONTACT                           a seeded contact's display name
 #   DISTRICT_SMOKE_PLAN                              expected plan name, default Studio (the
-#                                                    review demo account); the QA fixture
-#                                                    appreview@ is on "Voice Pro"
+#                                                    review demo account); the seeded review
+#                                                    fixture account (see internal docs) is on
+#                                                    another plan
 # With the first two unset every case in the suite calls `XCTSkip`, the run is green,
 # and this script says so, a skip and a pass are not the same claim.
 #
