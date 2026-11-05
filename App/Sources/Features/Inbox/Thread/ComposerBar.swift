@@ -53,19 +53,27 @@ struct ComposerBar: View {
             draftStrip
             draftNoticeStrip
             failureStrip
-            subjectField
-            attachmentStrip
-            field
-            // ⚠️ ONE ROW AT EVERY TEXT SIZE: the three controls are icons, so only Send's
-            // word grows, and the field above keeps the whole width it needs at AX5.
-            HStack(spacing: DistrictSpacing.row) {
-                attachControl
-                draftControl
-                Spacer(minLength: DistrictSpacing.tight)
-                sendControl
+            // ⛔ A CLOSED WHATSAPP WINDOW TAKES ONLY A TEMPLATE: free text there is refused
+            // by the server, so the box is replaced rather than left to fail (8.2.0).
+            if model.whatsAppWindowClosed {
+                WhatsAppClosedWindow(model: model)
+            } else {
+                subjectField
+                attachmentStrip
+                field
+                // ⚠️ ONE ROW AT EVERY TEXT SIZE: the three controls are icons, so only Send's
+                // word grows, and the field above keeps the whole width it needs at AX5.
+                HStack(spacing: DistrictSpacing.row) {
+                    attachControl
+                    draftControl
+                    Spacer(minLength: DistrictSpacing.tight)
+                    sendControl
+                }
+                .imageScale(.large)
             }
-            .imageScale(.large)
         }
+        // ⚠️ RE-READ ON EVERY CHANNEL SWITCH: the window belongs to the WhatsApp reply only.
+        .task(id: model.selectedReplyIndex) { await model.refreshWhatsAppWindow() }
         .padding(.horizontal, DistrictSpacing.gutter)
         .padding(.vertical, DistrictSpacing.row)
         .background(colors.surface)
@@ -438,46 +446,6 @@ struct ComposerBar: View {
         Binding(
             get: { model.selectedReplyIndex },
             set: { model.selectReplyTarget($0) }
-        )
-    }
-
-    /// Read the picked item's bytes and hand them to the model.
-    ///
-    /// ⛔ THE BYTES CROSS INTO THE MODEL THROUGH ONE `@MainActor` CALL and nothing
-    /// else is carried across: `Data` is a value, the model owns every decision about
-    /// it, and the type and size are refused there before a byte is uploaded.
-    ///
-    /// ⚠️ A NIL OR THROWING LOAD IS "COULD NOT BE READ", WHICH IS NOT THE SAME AS A
-    /// REJECTED TYPE OR SIZE. Those three call for three different next actions from
-    /// the operator, and collapsing them would leave them re-picking the same file.
-    private func read(_ item: PhotosPickerItem) async {
-        guard let data = try? await item.loadTransferable(type: Data.self) else {
-            model.refuseAttachment(ThreadModel.unreadableAttachment)
-            return
-        }
-        await model.attach(data, mimeType: item.preferredMIMEType(allowed: MediaUploadLimits.allowedMimeTypes))
-    }
-
-    /// Read a file chosen in the Files picker and hand it to the model, as ``read(_:)`` does.
-    ///
-    /// ⛔ THE SECURITY-SCOPED ACCESS IS OPENED AND CLOSED AROUND THE ONE READ. The picker
-    /// grants this app the chosen file only, through the URL's scope; reading outside it fails
-    /// as "could not be read".
-    private func readFile(_ result: Result<URL, any Error>) async {
-        guard case let .success(url) = result else { return }
-        let scoped = url.startAccessingSecurityScopedResource()
-        defer {
-            if scoped {
-                url.stopAccessingSecurityScopedResource()
-            }
-        }
-        guard let data = try? Data(contentsOf: url) else {
-            model.refuseAttachment(ThreadModel.unreadableAttachment)
-            return
-        }
-        await model.attach(
-            data,
-            mimeType: AttachmentFile.mimeType(of: url, allowed: MediaUploadLimits.allowedMimeTypes)
         )
     }
 }

@@ -75,6 +75,7 @@ final class UnauthenticatedTests: UITestApp {
         for id in [
             A11yID.Contacts.add, A11yID.Account.signOut, A11yID.Account.delete,
             A11yID.Marketplace.release, A11yID.Inbox.send, A11yID.Dialer.call,
+            A11yID.Inbox.whatsAppTemplateSend,
         ] {
             XCTAssertTrue(UITestApp.forbiddenSurfaces.contains(id), "\(id) dropped out of the forbidden set")
         }

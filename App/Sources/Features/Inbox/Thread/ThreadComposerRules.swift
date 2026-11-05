@@ -100,7 +100,7 @@ extension ThreadModel {
         }
         let count = content.attachments.count
         content.attachments = []
-        content.channelNote = Self.attachmentsDropped(count: count)
+        content.channelNote = Self.attachmentsDropped(count: count, channel: target.replyTarget?.channel)
         setContent(content)
     }
 
@@ -110,8 +110,18 @@ extension ThreadModel {
     /// ⚠️ IT NAMES THE CHANNEL AS THE REASON rather than saying "not supported". The
     /// operator's next action is either to switch back or to send without them, and
     /// only the first sentence tells them which is available.
-    private static func attachmentsDropped(count: Int) -> String {
-        InboxCopy.attachmentsDropped(count)
+    ///
+    /// ⛔ AND THE CHANNEL IT NAMES IS THE ONE SWITCHED TO. WhatsApp, Messenger and
+    /// Instagram are text-only too, and the email sentence on a WhatsApp switch told the
+    /// operator something false; those take the website's sentences.
+    static func attachmentsDropped(count: Int, channel: String?) -> String {
+        if channel == MessageChannel.whatsapp {
+            return InboxCopy.attachmentsRemovedWhatsapp
+        }
+        if channel == MessageChannel.messenger || channel == MessageChannel.instagram {
+            return InboxCopy.attachmentsRemovedMeta
+        }
+        return InboxCopy.attachmentsDropped(count)
     }
 
     // MARK: - The channel, said out loud
@@ -242,6 +252,12 @@ enum ThreadChannelName {
         if channel == MessageChannel.whatsapp {
             return InboxCopy.whatsapp
         }
+        if channel == MessageChannel.messenger {
+            return InboxCopy.messenger
+        }
+        if channel == MessageChannel.instagram {
+            return InboxCopy.instagram
+        }
         if channel == voicemail {
             return InboxCopy.voicemail
         }
@@ -252,7 +268,7 @@ enum ThreadChannelName {
     /// message left on a call.
     ///
     /// ⚠️ A LITERAL HERE BECAUSE DistrictCore's ``MessageChannel`` HAS NO CONSTANT FOR IT.
-    /// It names the three channels a reply can go out on, and nobody replies by voicemail,
+    /// It names the channels a reply can go out on, and nobody replies by voicemail,
     /// but an Inbox row that mixes channels still names this one (3.0.2 walk 2, a port of
     /// district-macos #67: French drew « VOICEMAIL »).
     static let voicemail = "voicemail"

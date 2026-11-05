@@ -266,7 +266,7 @@ final class NotificationActionHandler {
         switch addressee {
         case let .message(messageId):
             return await inbox.messageThread(workspaceId: workspaceId, messageId: messageId)
-                .map { ($0.selector, $0.replyTarget) }
+                .map { ($0.selector, InboxParity.replyable($0.replyTarget)) }
                 .mapError { .unresolved($0) }
         case let .thread(threadKey):
             guard let selector = ThreadTarget.selector(threadKey: threadKey) else {

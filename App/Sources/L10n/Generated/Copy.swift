@@ -1287,6 +1287,26 @@ extension InCallCopy {
 }
 
 extension InboxCopy {
+    /// `inbox.all_conversations`
+    internal static var allConversations: String { AppL10n.copyLocale == .frCA ? "Toutes les conversations" : "All conversations" }
+
+    /// `inbox.assign`
+    internal static var assign: String { AppL10n.copyLocale == .frCA ? "Assigner" : "Assign" }
+
+    /// `inbox.assign_label`
+    internal static var assignLabel: String { AppL10n.copyLocale == .frCA ? "Assignée à" : "Assigned to" }
+
+    /// `inbox.assigned_to`
+    internal static func assignedTo(_ email: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Assignée à \(email)" : "Assigned to \(email)"
+    }
+
+    /// `inbox.assigned_to_me`
+    internal static var assignedToMe: String { AppL10n.copyLocale == .frCA ? "Qui me sont assignées" : "Assigned to me" }
+
+    /// `inbox.assignee_you`
+    internal static var assigneeYou: String { AppL10n.copyLocale == .frCA ? "Vous" : "You" }
+
     /// `inbox.attach_file`
     internal static var attachFile: String { AppL10n.copyLocale == .frCA ? "Joindre un fichier" : "Attach file" }
 
@@ -1323,6 +1343,12 @@ extension InboxCopy {
         }
         return "\(count) images were removed: email replies cannot carry attachments. Switch back to SMS to send them."
     }
+
+    /// `inbox.attachments_removed_meta`
+    internal static var attachmentsRemovedMeta: String { AppL10n.copyLocale == .frCA ? "Pièces jointes retirées\u{00A0}: les réponses Messenger et Instagram sont pour l'instant en texte seulement" : "Attachments removed: Messenger and Instagram replies are text-only for now" }
+
+    /// `inbox.attachments_removed_whatsapp`
+    internal static var attachmentsRemovedWhatsapp: String { AppL10n.copyLocale == .frCA ? "Pièces jointes retirées\u{00A0}: les envois WhatsApp sont pour l'instant en texte seulement" : "Attachments removed: WhatsApp sends are text-only for now" }
 
     /// `inbox.call`
     internal static var call: String { AppL10n.copyLocale == .frCA ? "Appeler" : "Call" }
@@ -1378,6 +1404,9 @@ extension InboxCopy {
     /// `inbox.email`
     internal static var email: String { AppL10n.copyLocale == .frCA ? "Courriel" : "Email" }
 
+    /// `inbox.filter`
+    internal static var filter: String { AppL10n.copyLocale == .frCA ? "Filtrer" : "Filter" }
+
     /// `inbox.image_could_not_read`
     internal static var imageCouldNotRead: String { AppL10n.copyLocale == .frCA ? "Impossible de lire cette image. Sélectionnez-la de nouveau." : "That image could not be read. Try picking it again." }
 
@@ -1386,6 +1415,9 @@ extension InboxCopy {
 
     /// `inbox.inbox`
     internal static var inbox: String { AppL10n.copyLocale == .frCA ? "Réception" : "Inbox" }
+
+    /// `inbox.instagram`
+    internal static var instagram: String { AppL10n.copyLocale == .frCA ? "Instagram" : "Instagram" }
 
     /// `inbox.keep_typing`
     internal static var keepTyping: String { AppL10n.copyLocale == .frCA ? "Continuez à taper" : "Keep typing" }
@@ -1413,6 +1445,9 @@ extension InboxCopy {
     /// `inbox.messages_calls_contact_will`
     internal static var messagesCallsContactWill: String { AppL10n.copyLocale == .frCA ? "Les messages et les appels avec ce contact apparaîtront ici." : "Messages and calls with this contact will appear here." }
 
+    /// `inbox.messenger`
+    internal static var messenger: String { AppL10n.copyLocale == .frCA ? "Messenger" : "Messenger" }
+
     /// `inbox.missed_call`
     internal static var missedCall: String { AppL10n.copyLocale == .frCA ? "Appel manqué" : "Missed call" }
 
@@ -1433,6 +1468,12 @@ extension InboxCopy {
 
     /// `inbox.no_message_workspace_contains`
     internal static var noMessageWorkspaceContains: String { AppL10n.copyLocale == .frCA ? "Aucun message de cet espace de travail ne correspond." : "No message in this workspace contains that." }
+
+    /// `inbox.nothing_assigned_message`
+    internal static var nothingAssignedMessage: String { AppL10n.copyLocale == .frCA ? "Les conversations qu'un membre de l'équipe vous assigne s'affichent ici." : "Conversations a teammate assigns to you show up here." }
+
+    /// `inbox.nothing_assigned_title`
+    internal static var nothingAssignedTitle: String { AppL10n.copyLocale == .frCA ? "Rien ne vous est assigné" : "Nothing assigned to you" }
 
     /// `inbox.nothing_thread`
     internal static var nothingThread: String { AppL10n.copyLocale == .frCA ? "Ce fil est vide" : "Nothing in this thread" }
@@ -1507,6 +1548,9 @@ extension InboxCopy {
     /// `inbox.try_again`
     internal static var tryAgain: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
 
+    /// `inbox.unassigned`
+    internal static var unassigned: String { AppL10n.copyLocale == .frCA ? "Non assignée" : "Unassigned" }
+
     /// `inbox.unread_count`
     internal static func unreadCount(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
@@ -1523,6 +1567,38 @@ extension InboxCopy {
 
     /// `inbox.whatsapp`
     internal static var whatsapp: String { AppL10n.copyLocale == .frCA ? "WhatsApp" : "WhatsApp" }
+
+    /// `inbox.whatsapp_template_label`
+    internal static var whatsappTemplateLabel: String { AppL10n.copyLocale == .frCA ? "Modèle de message" : "Template" }
+
+    /// `inbox.whatsapp_template_placeholder`
+    internal static var whatsappTemplatePlaceholder: String { AppL10n.copyLocale == .frCA ? "Choisir un modèle approuvé" : "Choose an approved template" }
+
+    /// `inbox.whatsapp_template_preview`
+    internal static var whatsappTemplatePreview: String { AppL10n.copyLocale == .frCA ? "Aperçu" : "Preview" }
+
+    /// `inbox.whatsapp_template_send`
+    internal static var whatsappTemplateSend: String { AppL10n.copyLocale == .frCA ? "Envoyer le modèle" : "Send template" }
+
+    /// `inbox.whatsapp_template_variable`
+    internal static func whatsappTemplateVariable(_ number: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "Variable \(number)" : "Variable \(number)"
+    }
+
+    /// `inbox.whatsapp_template_variable_required`
+    internal static var whatsappTemplateVariableRequired: String { AppL10n.copyLocale == .frCA ? "Remplissez cette variable" : "Fill in this variable" }
+
+    /// `inbox.whatsapp_templates_failed`
+    internal static var whatsappTemplatesFailed: String { AppL10n.copyLocale == .frCA ? "Les modèles n'ont pas pu être chargés. Réessayez dans un instant." : "The templates could not be loaded. Try again in a moment." }
+
+    /// `inbox.whatsapp_templates_loading`
+    internal static var whatsappTemplatesLoading: String { AppL10n.copyLocale == .frCA ? "Chargement des modèles" : "Loading templates" }
+
+    /// `inbox.whatsapp_templates_none`
+    internal static var whatsappTemplatesNone: String { AppL10n.copyLocale == .frCA ? "Aucun modèle approuvé pour ce numéro pour l'instant." : "No approved template for this number yet." }
+
+    /// `inbox.whatsapp_window_closed`
+    internal static var whatsappWindowClosed: String { AppL10n.copyLocale == .frCA ? "Fenêtre fermée\u{00A0}: WhatsApp n'accepte maintenant qu'un modèle de message" : "Window closed: WhatsApp only allows a template now" }
 }
 
 extension IncomingCallCopy {

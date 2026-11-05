@@ -145,6 +145,10 @@ final class ThreadModel {
     /// `ThreadDraftWrites.swift`, for the 500-line ceiling; see ``autosaveTask``.
     var draftNotice: String?
 
+    /// The WhatsApp window and templates (`ThreadWhatsApp.swift`). ⚠️ Internal for the
+    /// reason ``autosaveTask`` is: its writers live in that sibling file.
+    var whatsApp = WhatsAppComposer()
+
     convenience init(
         container: AppContainer,
         workspaceId: String,
@@ -319,14 +323,8 @@ final class ThreadModel {
         content.sendFailure = nil
         setContent(content)
 
-        let outcome = await inbox.send(
-            workspaceId: target.workspaceId,
-            target: recipient,
-            body: body,
-            subject: outgoingSubject,
-            mediaUrls: media
-        )
-        switch outcome {
+        // ⚠️ ``sendReply(to:body:media:)`` picks the route: a WhatsApp reply names its sender.
+        switch await sendReply(to: recipient, body: body, media: media) {
         case .success:
             await finishSend()
         case let .failure(error):

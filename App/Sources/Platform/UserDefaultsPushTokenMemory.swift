@@ -35,6 +35,15 @@ final class UserDefaultsPushTokenMemory: PushTokenMemory, @unchecked Sendable {
     /// nothing anywhere reporting it.
     static let voipDefaultsKey = "com.distronode.district.voipPushToken"
 
+    /// The push capabilities the last affirmed alert register declared (DistrictCore
+    /// 8.2.0, ``InboxParity/pushCapabilities``).
+    ///
+    /// ⛔ A THIRD KEY, AND FORGOTTEN WITH THE TOKEN. The repository skips a register only
+    /// when the token AND the declaration match, so an upgrade that starts declaring
+    /// `metaChannels` with an unchanged APNs token still registers once; without this
+    /// key the skip could never fire and every launch would re-register.
+    static let capabilitiesDefaultsKey = "com.distronode.district.pushCapabilities"
+
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -63,5 +72,17 @@ final class UserDefaultsPushTokenMemory: PushTokenMemory, @unchecked Sendable {
 
     func forgetRegisteredVoipToken() {
         defaults.removeObject(forKey: Self.voipDefaultsKey)
+    }
+
+    func lastRegisteredCapabilities() -> String? {
+        defaults.string(forKey: Self.capabilitiesDefaultsKey)
+    }
+
+    func rememberRegisteredCapabilities(_ capabilities: String) {
+        defaults.set(capabilities, forKey: Self.capabilitiesDefaultsKey)
+    }
+
+    func forgetRegisteredCapabilities() {
+        defaults.removeObject(forKey: Self.capabilitiesDefaultsKey)
     }
 }

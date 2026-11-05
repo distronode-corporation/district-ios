@@ -309,6 +309,41 @@ final class InboxModel {
         return conversations.first { $0.threadKey == key }
     }
 
+    // MARK: - Assignment (DistrictCore 8.2.0)
+
+    /// The Assigned to me filter. Every role may use it: it only narrows what is read.
+    var assignedToMeOnly = false
+
+    /// The assign sheet's model while it is open, or nil.
+    var assigning: ThreadAssignModel?
+
+    /// The rows the filter lets through.
+    ///
+    /// ⛔ `assignedToMe` IS THE SERVER'S ANSWER, the same flag the web's filter reads, so
+    /// this client never compares addresses to decide who "me" is. A row without the
+    /// key (a server that ignored `assignments=1`) is not mine.
+    func visible(_ conversations: [ConversationSummary]) -> [ConversationSummary] {
+        Self.visible(conversations, assignedToMeOnly: assignedToMeOnly)
+    }
+
+    /// ``visible(_:)``'s rule, without a model, for its tests.
+    static func visible(_ conversations: [ConversationSummary], assignedToMeOnly: Bool) -> [ConversationSummary] {
+        guard assignedToMeOnly else { return conversations }
+        return conversations.filter { $0.assignedToMe == true }
+    }
+
+    /// Open the assign sheet for one row. Nothing for a role that cannot write.
+    func beginAssigning(_ conversation: ConversationSummary) {
+        guard canReply else { return }
+        assigning = ThreadAssignModel(
+            inbox: container.inbox,
+            workspaces: container.workspaces,
+            workspaceId: workspaceId,
+            threadKey: conversation.threadKey,
+            current: conversation.assigneeEmail
+        )
+    }
+
     // MARK: - Internals
 
     /// Run one search and adopt its answer.
