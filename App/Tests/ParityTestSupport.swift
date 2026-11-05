@@ -133,6 +133,24 @@ enum ParityFixtures {
      "pageInfo":{"hasMore":false,"oldest":"2026-08-15T14:05:00.000Z","oldestId":"msg_1"}}
     """#
 
+    /// The thread behind the closed-window screenshots (04 and 12): the operator's
+    /// WhatsApp reply, then the customer's answer.
+    ///
+    /// ⛔ THE REPLY IS `delivered` EVEN THOUGH THE CUSTOMER HAS READ IT. The service never
+    /// stores or sends `read`: Meta's read receipts, Twilio's `read` and the history
+    /// import all record `delivered` (the website's `lib/whatsapp/status.ts` and
+    /// `webhooks/twilio/message-status`). A `read` seed is a value the vocabulary does not
+    /// list, so its badge says "read" in English and « Autre » in French, which is what
+    /// the first screenshots showed.
+    static let answeredTimeline = #"""
+    {"success":true,"timeline":[
+     {"id":"msg_3","type":"whatsapp","timestamp":"2026-11-03T16:00:00.000Z",
+      "direction":"outbound","body":"Your appointment is booked for Tuesday at 9.","status":"delivered"},
+     {"id":"msg_4","type":"whatsapp","timestamp":"2026-11-03T16:10:00.000Z",
+      "direction":"inbound","body":"Thanks, see you next week.","status":"received"}],
+     "pageInfo":{"hasMore":false,"oldest":"2026-11-03T16:00:00.000Z","oldestId":"msg_3"}}
+    """#
+
     static let sent = #"""
     {"success":true,"message":{"id":"msg_2","messageSid":"SM_1","workspaceId":"ws_1",
      "from":"+16475550100","to":"+14165550177","body":"On my way.","direction":"outbound",
