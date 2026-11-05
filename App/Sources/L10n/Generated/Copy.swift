@@ -1159,6 +1159,11 @@ extension DialerModel {
     internal static func rings(_ country: String, _ number: String) -> String {
         AppL10n.copyLocale == .frCA ? "Pays de destination\u{00A0}: \(country) · \(number)" : "Rings \(country) · \(number)"
     }
+
+    /// `dialer_m.rings_no_country`
+    internal static func ringsNoCountry(_ number: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Numéro composé\u{00A0}: \(number). Ce numéro n'appartient à aucun pays en particulier. Vérifiez-le avant d'appeler." : "Rings \(number). This number does not belong to one country. Check it before you call."
+    }
 }
 
 extension FinishSetupCopy {

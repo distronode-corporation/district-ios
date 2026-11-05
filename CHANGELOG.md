@@ -10,6 +10,13 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+### Known limits
+
+- Dialler: a whole number typed without its trunk prefix may lose a leading digit when that
+  digit equals the trunk prefix (Russia's `800 555 35 35` typed without its `8`). Only Belarus,
+  the UK and Lithuania check a prefix against libphonenumber's number patterns; modelling every
+  country's pattern is left out. The line under the field shows the whole number before Call.
+
 ### Changed
 
 - 3.2.1: MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
@@ -152,6 +159,27 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- Dialler: a pasted `+1 1 416 555 0199` no longer turns into a callable Canadian number. The
+  field showed `(141) 655-50199`, and reading that again took its leading `1` as the trunk
+  prefix, `416 555 0199` with Call on. What the field shows now always reads back to the same
+  number; one that would not is shown as `+114165550199` (Seer on district-core-rust #63).
+- Dialler: every country whose national prefix is `0` in libphonenumber drops its trunk `0`, 103
+  countries where 45 were listed: `0412 123 4567` typed in Venezuela sent `+58 0412…` (also
+  Ecuador, Uruguay and 55 more; Seer on district-core-rust #63). The list is the same in the
+  iOS, Mac and Android apps and district-core-rust.
+- Dialler: the web's other no-country +1 codes, 500, 600, 700, 710 and 900, get the same "does
+  not belong to one country" line as the toll-free ones, as the web's area-code table has it;
+  600 said "Rings Canada" and the others "Rings United States".
+- Dialler: every trunk prefix follows libphonenumber-js 1.13.14. Belarus is `8` (it was `80`,
+  which is still read, as is `0`), Turkmenistan `8` and the Marshall Islands `1` are added, and
+  the prefixes libphonenumber also strips are read: Lithuania's old `8` (`8 612 34567` sent
+  `+370 8612 34567`) and the UK's `180020`.
+- Dialler: a +1 toll-free number (800, 833, 844, 855, 866, 877, 888) no longer says "Rings
+  Canada" or "Rings United States" under the field. It says what the web dialler says, "Rings +1
+  800 555 0100. This number does not belong to one country. Check it before you call." (and the
+  web's French), new key `dialer_m.rings_no_country` (Sean, 2026-11-04, GitLab #2). As on the
+  web it is said from 8 digits with the `1` (Call still off, the number ungrouped until whole).
+  The button keeps its +1 country. The dialler's 13 French strings are marked reviewed.
 - Dialler: three cases Seer found in district-core-rust #63's port of `DialPlan`, which
   this copy had too (and district-macos, fixed the same way). `+7` then `812` typed one key at a
   time kept its 8: a `+` and a calling code with no digit after it now stay in the field, so

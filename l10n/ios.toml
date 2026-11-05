@@ -2756,7 +2756,7 @@ en = "Cancel"
 fr = "Annuler"
 ctx = "button"
 screen = "dialer"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerCopy.cancel" }
 
 [dialer.countries_all]
@@ -2764,7 +2764,7 @@ en = "All countries"
 fr = "Tous les pays"
 ctx = "title"
 screen = "dialer"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerCopy.countriesAll" }
 
 [dialer.countries_no_match]
@@ -2772,7 +2772,7 @@ en = "No country matches."
 fr = "Aucun pays ne correspond."
 ctx = "body"
 screen = "dialer"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerCopy.countriesNoMatch" }
 
 [dialer.countries_suggested]
@@ -2780,7 +2780,7 @@ en = "Suggested"
 fr = "Suggestions"
 ctx = "title"
 screen = "dialer"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerCopy.countriesSuggested" }
 
 [dialer.country]
@@ -2788,7 +2788,7 @@ en = "Country"
 fr = "Pays"
 ctx = "label"
 screen = "dialer"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerCopy.country" }
 note = "On the button in front of the number when no country is chosen yet, and the title of the country list."
 
@@ -2797,7 +2797,7 @@ en = "Opens the list of countries."
 fr = "Ouvre la liste des pays."
 ctx = "a11y"
 screen = "dialer"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerCopy.countryListHint" }
 
 [dialer.country_search]
@@ -2805,7 +2805,7 @@ en = "Country name or code"
 fr = "Nom du pays ou indicatif"
 ctx = "placeholder"
 screen = "dialer"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerCopy.countrySearch" }
 note = "Search prompt: a country is found by its name, its two-letter code or its calling code."
 
@@ -2940,7 +2940,7 @@ fr = "{name}, indicatif +{code}"
 ctx = "a11y"
 screen = "dialer"
 args = { name = "str", code = "str" }
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerModel.countryButton(_:_:)" }
 note = "VoiceOver label of the flag button in front of the number. {name} is a country, {code} its calling code digits."
 
@@ -2968,7 +2968,7 @@ fr = "Saisissez le numéro comme vous le composeriez sur place ({country})."
 ctx = "body"
 screen = "dialer"
 args = { country = "str" }
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerModel.entryHintLocal(_:)" }
 note = "{country} is a country name."
 
@@ -2977,7 +2977,7 @@ en = "Start with + and the country code, or pick a country."
 fr = "Commencez par + et l'indicatif du pays, ou choisissez un pays."
 ctx = "body"
 screen = "dialer"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerModel.entryHintNone" }
 
 [dialer_m.entry_needs_country]
@@ -2986,7 +2986,7 @@ fr = "Choisissez un pays, ou commencez par + et l'indicatif du pays."
 ctx = "error"
 screen = "dialer"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerModel.entryNeedsCountry" }
 
 [dialer_m.entry_wrong_length]
@@ -2995,7 +2995,7 @@ fr = "Ce numéro n'a pas le bon nombre de chiffres pour le pays de destination. 
 ctx = "error"
 screen = "dialer"
 tier = "T2"
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerModel.entryWrongLength" }
 note = "Said only once the person stops typing (the field loses focus, Return or Done, or a refused Call), never while digits are still arriving. The web dialler's sentence, word for word."
 
@@ -3033,9 +3033,19 @@ fr = "Pays de destination\u00A0: {country} · {number}"
 ctx = "body"
 screen = "dialer"
 args = { country = "str", number = "str" }
-state = "draft"
+state = "reviewed"
 id = { swift = "DialerModel.rings(_:_:)" }
 note = "Shown under the number before Call. {country} is a country name, {number} the full international number, e.g. +1 416 555 0199."
+
+[dialer_m.rings_no_country]
+en = "Rings {number}. This number does not belong to one country. Check it before you call."
+fr = "Numéro composé\u00A0: {number}. Ce numéro n'appartient à aucun pays en particulier. Vérifiez-le avant d'appeler."
+ctx = "body"
+screen = "dialer"
+args = { number = "str" }
+state = "reviewed"
+id = { swift = "DialerModel.ringsNoCountry(_:)" }
+note = "Shown under the number before Call, in place of dialer_m.rings, for a +1 toll-free number (800, 833, 844, 855, 866, 877, 888), which belongs to the whole plan rather than one country. {number} is the full international number, e.g. +1 800 555 0100. The web's ringsNoCountry, word for word in both languages (Sean, 2026-11-04, GitLab #2)."
 
 [finish_setup.action]
 en = "Open setup"
