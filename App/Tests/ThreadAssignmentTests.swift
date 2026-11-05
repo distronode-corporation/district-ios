@@ -186,3 +186,19 @@ final class PushCapabilityTests: XCTestCase {
         XCTAssertEqual(registers.first?.json["capabilities"] as? [String], ["metaChannels"])
     }
 }
+
+/// The Inbox's guard against overlapping list reads (Seer, #99).
+final class LatestReadTests: XCTestCase {
+    /// ⛔ ONLY THE LATEST READ BEGUN MAY APPLY ITS ANSWER: a refresh begun before an
+    /// assignment, answering after the re-read that followed it, is dropped.
+    func testOnlyTheLatestReadAppliesItsAnswer() {
+        var reads = LatestRead()
+        let beforeAssigning = reads.begin()
+        let afterAssigning = reads.begin()
+
+        XCTAssertFalse(reads.isLatest(beforeAssigning))
+        XCTAssertTrue(reads.isLatest(afterAssigning))
+        XCTAssertTrue(reads.isLatest(reads.begin()), "each new read is the latest")
+        XCTAssertFalse(reads.isLatest(afterAssigning))
+    }
+}

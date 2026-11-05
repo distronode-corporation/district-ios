@@ -122,7 +122,15 @@ extension ThreadModel {
         // text plus two chips; restoring the text alone would send a message the
         // operator believed had pictures on it.
         guard !draft.mediaUrls.isEmpty, var content = current else { return }
-        content.attachments = Self.restorable(draft.mediaUrls)
+        let restored = Self.restorable(draft.mediaUrls)
+        // ⛔ BUT NOT ONTO A CHANNEL THAT CANNOT CARRY THEM (Seer, #95): a WhatsApp,
+        // Messenger, Instagram or email default would send the text and drop the images
+        // silently. They go with the channel's sentence, as a switch to it drops them.
+        if canAttach {
+            content.attachments = restored
+        } else if canMutate {
+            content.channelNote = Self.attachmentsDropped(count: restored.count, channel: target.replyTarget?.channel)
+        }
         setContent(content)
     }
 

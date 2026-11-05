@@ -96,8 +96,12 @@ extension ThreadModel {
     }
 
     /// Read the sender's approved templates, for the template sheet.
+    ///
+    /// ⚠️ THE LAST SEND'S REFUSAL GOES WITH IT: the sheet opening is a new attempt, and a
+    /// failure left on the model would sit on a form it was never about (Seer, #99).
     func loadWhatsAppTemplates() async {
         guard case let .closed(_, senderId) = whatsApp.window else { return }
+        whatsApp.templateFailure = nil
         whatsApp.templates = .loading
         switch await inbox.whatsAppTemplates(workspaceId: target.workspaceId, senderId: senderId) {
         case let .success(templates):
@@ -105,6 +109,11 @@ extension ThreadModel {
         case let .failure(error):
             whatsApp.templates = .failed(FailureText.from(error))
         }
+    }
+
+    /// A template was chosen: the refusal of a send on another one is not this form's.
+    func clearTemplateFailure() {
+        whatsApp.templateFailure = nil
     }
 
     /// Send one template with its variables. True when the server affirmed it.

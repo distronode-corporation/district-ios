@@ -162,6 +162,7 @@ private struct WhatsAppTemplateForm: View {
         }
         .navigationTitle(template.name)
         .onAppear {
+            model.clearTemplateFailure()
             if values.count != count {
                 values = Array(repeating: "", count: count)
             }

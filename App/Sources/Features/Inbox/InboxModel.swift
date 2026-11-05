@@ -122,6 +122,10 @@ final class InboxModel {
     /// The pending debounced search. Cancelled and replaced on every keystroke.
     private var searchTask: Task<Void, Never>?
 
+    /// Which of overlapping list reads may still apply its answer. Not observed: no view
+    /// shows it.
+    @ObservationIgnored private var reads = LatestRead()
+
     init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
         self.container = container
         self.workspaceId = workspaceId
@@ -158,8 +162,14 @@ final class InboxModel {
     ///   ⚠️ Replacing it with a spinner on a pull-to-refresh throws away what the user
     ///   is looking at in order to show them less.
     func load(refreshing: Bool = false) async {
+        let read = reads.begin()
         state = Self.pending(from: state, refreshing: refreshing)
-        switch await container.inbox.conversations(workspaceId: workspaceId) {
+        let outcome = await container.inbox.conversations(workspaceId: workspaceId)
+        // ⛔ AN OLDER READ THAT ANSWERS LAST IS DROPPED (Seer, #99): a pull-to-refresh
+        // begun before an assignment would otherwise put the old assignee back over the
+        // re-read that followed it. ``LatestRead``.
+        guard reads.isLatest(read) else { return }
+        switch outcome {
         case let .success(list):
             guard !list.conversations.isEmpty else {
                 state = .empty
@@ -407,5 +417,23 @@ final class InboxModel {
         guard refreshing else { return .loading }
         guard case let .content(conversations, isPartial, draftKeys, _) = current else { return .loading }
         return .content(conversations: conversations, isPartial: isPartial, draftKeys: draftKeys, refreshing: true)
+    }
+}
+
+/// Which of several overlapping reads may still apply its answer: only the latest one begun.
+///
+/// ⚠️ A VALUE, NOT A TASK HANDLE, so a read is never cancelled half-way (its request has
+/// already gone): an older answer is simply not applied.
+struct LatestRead {
+    private(set) var latest = 0
+
+    /// Begin a read; its token is the one ``isLatest(_:)`` checks when it answers.
+    mutating func begin() -> Int {
+        latest += 1
+        return latest
+    }
+
+    func isLatest(_ token: Int) -> Bool {
+        token == latest
     }
 }

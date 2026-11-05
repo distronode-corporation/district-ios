@@ -152,6 +152,28 @@ final class WhatsAppTemplateTests: XCTestCase {
         XCTAssertFalse(model.whatsApp.sendingTemplate)
     }
 
+    /// ⛔ A REFUSAL BELONGS TO ITS SEND (Seer, #99): reopening the sheet or choosing another
+    /// template starts clean instead of showing the last send's error on a new form.
+    func testARefusalIsGoneWhenTheSheetReopensOrAnotherTemplateIsChosen() async {
+        let transport = ParityTransport()
+        transport.on(.post, "/messages/send", 400, #"{"error":"Template variables do not match."}"#)
+        let model = await closedThread(transport)
+        await model.loadWhatsAppTemplates()
+        guard case let .ready(templates) = model.whatsApp.templates, let reminder = templates.first else {
+            return XCTFail("no template")
+        }
+
+        _ = await model.sendWhatsAppTemplate(reminder, variables: ["Ada", "Friday"])
+        XCTAssertNotNil(model.whatsApp.templateFailure)
+        model.clearTemplateFailure()
+        XCTAssertNil(model.whatsApp.templateFailure, "another template was chosen")
+
+        _ = await model.sendWhatsAppTemplate(reminder, variables: ["Ada", "Friday"])
+        XCTAssertNotNil(model.whatsApp.templateFailure)
+        await model.loadWhatsAppTemplates()
+        XCTAssertNil(model.whatsApp.templateFailure, "the sheet was opened again")
+    }
+
     func testTheVariableCountIsTheServersElseTheHighestPlaceholder() throws {
         let counted = try Self.template(body: "Hi {{1}}", variableCount: 3)
         let uncounted = try Self.template(body: "Hi {{1}}, see you {{3}} at {{2}}.", variableCount: nil)
