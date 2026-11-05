@@ -3364,7 +3364,7 @@ en = "All conversations"
 fr = "Toutes les conversations"
 ctx = "label"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.allConversations" }
 note = "The Inbox filter's other choice: every conversation, assigned or not."
 
@@ -3373,7 +3373,7 @@ en = "Assign"
 fr = "Assigner"
 ctx = "button"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.assign" }
 note = "The swipe action on an Inbox row that opens the list of members the conversation can be assigned to. The website's verb (« assignée »)."
 
@@ -3382,7 +3382,7 @@ en = "Assigned to"
 fr = "Assignée à"
 ctx = "title"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.assignLabel" }
 note = "The title of the sheet that lists the members a conversation can be assigned to. French agrees with « la conversation ». The website's label (inboxI18n assignLabel)."
 
@@ -3392,7 +3392,7 @@ fr = "Assignée à {email}"
 ctx = "a11y"
 screen = "inbox"
 args = { email = "str" }
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.assignedTo(_:)" }
 note = "Read by VoiceOver on an Inbox row's assignee badge; email is the member's address. The website's sentence (inboxI18n assignedTo)."
 
@@ -3401,7 +3401,7 @@ en = "Assigned to me"
 fr = "Qui me sont assignées"
 ctx = "label"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.assignedToMe" }
 note = "The Inbox filter that shows only the conversations assigned to the person reading. French agrees with « les conversations ». The website's label (inboxI18n assignedToMe)."
 
@@ -3410,7 +3410,7 @@ en = "You"
 fr = "Vous"
 ctx = "label"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.assigneeYou" }
 note = "An Inbox row's assignee badge when the conversation is assigned to the person reading, and their row in the assign sheet."
 
@@ -3467,7 +3467,7 @@ en = "Attachments removed: Messenger and Instagram replies are text-only for now
 fr = "Pièces jointes retirées\u00A0: les réponses Messenger et Instagram sont pour l'instant en texte seulement"
 ctx = "body"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachmentsRemovedMeta" }
 note = "Shown when switching a reply from SMS to Messenger or Instagram drops its images. The website's sentence (inboxI18n attachmentsRemovedForMeta)."
 
@@ -3476,7 +3476,7 @@ en = "Attachments removed: WhatsApp sends are text-only for now"
 fr = "Pièces jointes retirées\u00A0: les envois WhatsApp sont pour l'instant en texte seulement"
 ctx = "body"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachmentsRemovedWhatsapp" }
 note = "Shown when switching a reply from SMS to WhatsApp drops its images. The website's sentence (inboxI18n attachmentsRemovedForWhatsApp)."
 
@@ -3621,7 +3621,7 @@ en = "Filter"
 fr = "Filtrer"
 ctx = "button"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.filter" }
 note = "The Inbox toolbar menu that holds the two filters (all conversations, assigned to me)."
 
@@ -3656,7 +3656,7 @@ en = "Instagram"
 fr = "Instagram"
 ctx = "label"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 same_ok = true
 id = { swift = "InboxCopy.instagram" }
 note = "Meta's product name, the channel of an Instagram thread on its Inbox row and in the composer. The same in both languages, as on the website."
@@ -3733,7 +3733,7 @@ en = "Messenger"
 fr = "Messenger"
 ctx = "label"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 same_ok = true
 id = { swift = "InboxCopy.messenger" }
 note = "Meta's product name, the channel of a Messenger thread on its Inbox row and in the composer. The same in both languages, as on the website."
@@ -3799,7 +3799,7 @@ en = "Conversations a teammate assigns to you show up here."
 fr = "Les conversations qu'un membre de l'équipe vous assigne s'affichent ici."
 ctx = "body"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.nothingAssignedMessage" }
 note = "The line under the Assigned to me filter's empty state."
 
@@ -3808,7 +3808,7 @@ en = "Nothing assigned to you"
 fr = "Rien ne vous est assigné"
 ctx = "title"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.nothingAssignedTitle" }
 note = "The empty state of the Assigned to me filter."
 
@@ -4009,7 +4009,7 @@ en = "Unassigned"
 fr = "Non assignée"
 ctx = "label"
 screen = "inbox"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.unassigned" }
 note = "The first choice in the assign sheet: the conversation belongs to nobody. French agrees with « la conversation ». The website's label (inboxI18n unassigned)."
 
@@ -4048,7 +4048,7 @@ en = "Template"
 fr = "Modèle de message"
 ctx = "title"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.whatsappTemplateLabel" }
 note = "The title of the sheet that lists the approved WhatsApp templates. The website's label (inboxI18n whatsAppTemplateLabel)."
 
@@ -4057,7 +4057,7 @@ en = "Choose an approved template"
 fr = "Choisir un modèle approuvé"
 ctx = "button"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.whatsappTemplatePlaceholder" }
 note = "The button under a closed WhatsApp window that opens the template sheet. The website's placeholder (inboxI18n whatsAppTemplatePlaceholder)."
 
@@ -4066,7 +4066,7 @@ en = "Preview"
 fr = "Aperçu"
 ctx = "title"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.whatsappTemplatePreview" }
 note = "The heading over the template text with its variables filled in. The website's label (inboxI18n whatsAppTemplatePreview)."
 
@@ -4075,7 +4075,7 @@ en = "Send template"
 fr = "Envoyer le modèle"
 ctx = "button"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.whatsappTemplateSend" }
 note = "Sends the chosen WhatsApp template. The website's button (inboxI18n whatsAppTemplateSend)."
 
@@ -4085,7 +4085,7 @@ fr = "Variable {number}"
 ctx = "label"
 screen = "inbox.thread"
 args = { number = "int" }
-state = "draft"
+state = "reviewed"
 same_ok = true
 id = { swift = "InboxCopy.whatsappTemplateVariable(_:)" }
 note = "The label of one template variable's field; number is its placeholder's number in the template ({{1}} is 1). The website's label without the braces."
@@ -4095,7 +4095,7 @@ en = "Fill in this variable"
 fr = "Remplissez cette variable"
 ctx = "body"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.whatsappTemplateVariableRequired" }
 note = "Under an empty template variable while Send template is unavailable. The website's sentence (inboxI18n whatsAppTemplateVariableRequired)."
 
@@ -4104,7 +4104,7 @@ en = "The templates could not be loaded. Try again in a moment."
 fr = "Les modèles n'ont pas pu être chargés. Réessayez dans un instant."
 ctx = "body"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.whatsappTemplatesFailed" }
 note = "The template sheet when the templates could not be read. The website's sentence (inboxI18n whatsAppTemplatesFailed)."
 
@@ -4113,7 +4113,7 @@ en = "Loading templates"
 fr = "Chargement des modèles"
 ctx = "body"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.whatsappTemplatesLoading" }
 note = "While the template sheet reads the approved templates. The website's sentence (inboxI18n whatsAppTemplatesLoading)."
 
@@ -4131,7 +4131,7 @@ en = "Window closed: WhatsApp only allows a template now"
 fr = "Fenêtre fermée\u00A0: WhatsApp n'accepte maintenant qu'un modèle de message"
 ctx = "body"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.whatsappWindowClosed" }
 note = "Shown in place of the reply box on a WhatsApp thread whose 24-hour customer-service window has closed. The website's sentence (inboxI18n whatsAppWindowClosed)."
 
