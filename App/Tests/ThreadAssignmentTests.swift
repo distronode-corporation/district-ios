@@ -198,7 +198,8 @@ final class LatestReadTests: XCTestCase {
 
         XCTAssertFalse(reads.isLatest(beforeAssigning))
         XCTAssertTrue(reads.isLatest(afterAssigning))
-        XCTAssertTrue(reads.isLatest(reads.begin()), "each new read is the latest")
+        let next = reads.begin()
+        XCTAssertTrue(reads.isLatest(next), "each new read is the latest")
         XCTAssertFalse(reads.isLatest(afterAssigning))
     }
 }
