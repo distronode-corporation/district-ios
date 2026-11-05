@@ -4122,7 +4122,8 @@ en = "No approved template for this number yet."
 fr = "Aucun modèle approuvé pour ce numéro pour l'instant."
 ctx = "body"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
+fr_variant = "The website's first sentence only (Sean, 2026-11-05): its second, « Actualisez les modèles dans les paramètres de messagerie », points to a refresh this app cannot do, since its Messaging settings cannot refresh templates."
 id = { swift = "InboxCopy.whatsappTemplatesNone" }
 note = "The template sheet when the sender has no approved template. The website's sentence (inboxI18n whatsAppTemplatesNone), without its second sentence: the app's Messaging settings cannot refresh templates, and an Apple catalog names no web destination (STORE-APPLE)."
 
