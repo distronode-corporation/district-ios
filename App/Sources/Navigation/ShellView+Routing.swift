@@ -255,7 +255,7 @@ extension ShellView {
                     // target rather than the set, so the composer names the channel instead of
                     // offering it; the full set arrives with the list refresh, on the next
                     // open from a row.
-                    replyTargets: [resolved.replyTarget],
+                    replyTargets: InboxParity.replyable([resolved.replyTarget]),
                     // ⚠️ NO TITLE. The route's title is the counterpart name the LIST
                     // resolved, and this path has not read the list; the thread screen falls
                     // back to a neutral noun rather than asserting a name nobody supplied.

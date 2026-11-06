@@ -43,6 +43,11 @@ final class ThreadModel {
 
     private(set) var state: ThreadState = .loading
 
+    /// The composer's images, as last shown or as a restore found them (``ComposerMedia``). ⛔ What
+    /// a re-read puts back and what an autosave writes with no content (Seer, #99), so neither
+    /// loses them. Internal for ``restoreDraft()``. Not observed: no view shows it.
+    @ObservationIgnored var composerMedia = ComposerMedia()
+
     /// The composer's text.
     ///
     /// ⛔ WRITTEN THROUGH ``composerTextChanged(_:)`` FROM THE VIEW, never bound
@@ -66,7 +71,7 @@ final class ThreadModel {
 
     /// ⛔ FALSE ALSO WHEN THERE IS NOTHING TO REPLY TO. `messages/send` excludes
     /// `viewer` server-side, and a thread the server marked neither `canSms` nor
-    /// `canEmail` has no reachable address — offering a box there would collect a
+    /// `canEmail` has no reachable address, offering a box there would collect a
     /// message that could only ever fail to send.
     ///
     /// ⚠️ COMPUTED RATHER THAN A `let`, BECAUSE THE CHANNEL CAN CHANGE.
@@ -109,7 +114,7 @@ final class ThreadModel {
     /// rather than `private(set)` for the same file-scoping reason: the only writer is
     /// ``selectReplyTarget(_:)``, which lives in `ThreadComposerRules.swift`. ⛔ Its
     /// `workspaceId`, `threadKey`, `selector` and `replyTargets` are all `let` on the
-    /// struct, so the only thing a write can move is which target is selected — the
+    /// struct, so the only thing a write can move is which target is selected, the
     /// thread cannot be re-pointed at another conversation by mistake.
     let inbox: InboxRepository
     var target: ThreadTarget
@@ -130,6 +135,9 @@ final class ThreadModel {
     /// about a draft that exists. See ``restoreDraft()``.
     var draftRestored = false
 
+    /// True once the draft read has ANSWERED, a draft or none (``deleteDraftIfBlank(_:)``).
+    var draftRead = false
+
     /// Set once ``recordRead()`` has fired, so a retry of ``open()`` spends no second write.
     var readRecorded = false
 
@@ -144,6 +152,10 @@ final class ThreadModel {
     /// ⚠️ ITS SETTER IS NOT `private` ONLY BECAUSE THE DRAFT WRITES LIVE IN
     /// `ThreadDraftWrites.swift`, for the 500-line ceiling; see ``autosaveTask``.
     var draftNotice: String?
+
+    /// The WhatsApp window and templates (`ThreadWhatsApp.swift`). ⚠️ Internal for the
+    /// reason ``autosaveTask`` is: its writers live in that sibling file.
+    var whatsApp = WhatsAppComposer()
 
     convenience init(
         container: AppContainer,
@@ -188,10 +200,10 @@ final class ThreadModel {
 
     /// Read the NEWEST window of the thread.
     ///
-    /// ⚠️ THIS DISCARDS ANY OLDER PAGES ALREADY EXPANDED, AND ANY ATTACHMENTS. It is
-    /// the retry path and the post-send refresh; both exist to show the operator the
-    /// server's current truth, and after a send the attachments have gone out with
-    /// it. Re-walking the cursor to rebuild scrollback nobody asked for would spend N
+    /// ⚠️ THIS DISCARDS ANY OLDER PAGES ALREADY EXPANDED, BUT NOT THE COMPOSER'S IMAGES
+    /// (``composerMedia``). It is the retry path and the post-send refresh; both exist to show
+    /// the server's current truth, and a send clears the images first, since they went out
+    /// with it. Re-walking the cursor to rebuild scrollback nobody asked for would spend N
     /// requests, and the expand control is still there.
     func load() async {
         guard let selector = target.selector else {
@@ -201,7 +213,7 @@ final class ThreadModel {
         state = .loading
         switch await inbox.timeline(workspaceId: target.workspaceId, selector: selector) {
         case let .success(page):
-            setContent(.from(page))
+            setContent(.from(page, media: composerMedia))
         case let .failure(error):
             state = .failed(FailureText.from(error))
         }
@@ -281,7 +293,7 @@ final class ThreadModel {
     ///
     /// ⛔ THE SECOND REASON ``composerSubject``'s SETTER IS NOT FULLY PRIVATE, and the
     /// same one ``adoptDraft(_:)`` gives: `private(set)` is file-scoped and both
-    /// non-arming writers live in sibling files. Neither may arm a debounce — the
+    /// non-arming writers live in sibling files. Neither may arm a debounce, the
     /// restore would save back the bytes it has just read, and the seeded `Re:` would
     /// spend one of the workspace's 60 writes/min on a line this client derived rather
     /// than the operator typed.
@@ -302,7 +314,7 @@ final class ThreadModel {
     ///
     /// ⚠️ ON SUCCESS THE THREAD IS RE-READ RATHER THAN APPENDED TO LOCALLY. The sent
     /// row gets its id, status and timestamp from the server, and a locally invented
-    /// bubble would show a delivery status this client made up — the one thing an
+    /// bubble would show a delivery status this client made up, the one thing an
     /// operator is actually checking after a send.
     ///
     /// ⛔ AND IT REFUSES AN EMAIL WITH NO SUBJECT, which is ``canSendNow``'s other
@@ -311,24 +323,19 @@ final class ThreadModel {
     /// customer's mail client threads the reply onto the wrong conversation.
     func send() async {
         guard canReply, let recipient = target.replyTarget else { return }
-        guard var content = current, !content.sending, canSendNow else { return }
+        guard var content = current, !content.sending, !content.attaching, canSendNow else { return }
         let body = composerText
-        let media = content.attachments
+        // ⛔ ONLY A CHANNEL THAT CARRIES IMAGES SENDS THEM (max review), behind the hold.
+        let media = canAttach ? content.attachments : []
 
         content.sending = true
         content.sendFailure = nil
         setContent(content)
 
-        let outcome = await inbox.send(
-            workspaceId: target.workspaceId,
-            target: recipient,
-            body: body,
-            subject: outgoingSubject,
-            mediaUrls: media
-        )
-        switch outcome {
+        // ⚠️ ``sendReply(to:body:media:)`` picks the route: a WhatsApp reply names its sender.
+        switch await sendReply(to: recipient, body: body, media: media) {
         case .success:
-            await finishSend()
+            await finishSend(sent: media)
         case let .failure(error):
             // ⚠️ THE CONVERSATION STAYS, AND SO DO THE ATTACHMENTS. They are already
             // uploaded, and dropping them would make a retry re-pick every image.
@@ -338,12 +345,13 @@ final class ThreadModel {
             latest.sending = false
             latest.sendFailure = FailureText.from(error)
             setContent(latest)
+            await noteWindowRefusal(error, for: recipient)
         }
     }
 
     /// Ask the model for a reply and put it in the composer.
     ///
-    /// ⛔ BILLED, NON-IDEMPOTENT, AND ONE EXPLICIT TAP ONLY — one Vertex generation
+    /// ⛔ BILLED, NON-IDEMPOTENT, AND ONE EXPLICIT TAP ONLY, one Vertex generation
     /// per invocation, 20/min per workspace, with no entitlement check in front of
     /// it. It must never be fired from a timer, a retry helper, an autosave debounce
     /// or a view's appearance, and it is guarded against a double tap for the same
@@ -393,7 +401,7 @@ final class ThreadModel {
     ///
     /// ⚠️ AND THE SERVER DRAFT IS DELETED, NOT LEFT TO EXPIRE. A draft that survives
     /// its own send is a message the operator sends twice on their next device.
-    private func finishSend() async {
+    private func finishSend(sent: [String]) async {
         autosaveTask?.cancel()
         autosaveTask = nil
         composerText = ""
@@ -405,6 +413,15 @@ final class ThreadModel {
         if await !deleteDraft(), await !deleteDraft() {
             draftNotice = Self.sentDraftSurvived
         }
+        // ⛔ ONLY WHAT WENT OUT IS CLEARED (max review, #99 and #95): held images stay, as their
+        // sentence says, and so does one that landed mid-send. With no body they are not
+        // stored (a blank draft is a DELETE); the next keystroke's autosave writes them back.
+        let held = composerMedia.held
+        composerMedia = ComposerMedia(
+            attachments: composerMedia.attachments.filter { !sent.contains($0) },
+            held: held,
+            note: held.isEmpty ? nil : composerMedia.note
+        )
         await load()
         seedSubjectIfNeeded()
     }
@@ -427,6 +444,11 @@ final class ThreadModel {
     /// ⚠️ INTERNAL RATHER THAN `private` FOR ``restoreDraft()``; see ``autosaveTask``.
     func setContent(_ content: ThreadContent) {
         state = content.events.isEmpty ? .empty(content) : .content(content)
+        composerMedia = ComposerMedia(
+            attachments: content.attachments,
+            held: content.heldAttachments,
+            note: content.channelNote
+        )
     }
 
     /// ⛔ THE COPY ALREADY ON SCREEN WINS A COLLISION. Both are the same row from the

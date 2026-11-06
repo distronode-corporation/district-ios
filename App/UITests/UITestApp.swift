@@ -48,6 +48,7 @@ class UITestApp: XCTestCase {
         A11yID.Account.delete,
         A11yID.Marketplace.release,
         A11yID.Inbox.send,
+        A11yID.Inbox.whatsAppTemplateSend,
         A11yID.Dialer.call,
         A11yID.VoiceStudio.save,
         A11yID.Desk.composeSubmit,

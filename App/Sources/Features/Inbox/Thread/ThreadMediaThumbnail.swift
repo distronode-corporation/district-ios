@@ -24,9 +24,14 @@ struct ThreadMediaThumbnail: View {
         AsyncImage(url: URL(string: url)) { phase in
             switch phase {
             case let .success(image):
+                // ⛔ A SQUARE, AND ONLY THE IMAGE (max review screenshots): with the `minHeight`
+                // below, a loaded image filled whatever height it was offered, and the reply
+                // box's horizontal strip offers any, so a staged image stood a whole box tall.
                 image
                     .resizable()
                     .scaledToFill()
+                    .frame(width: 96, height: 96)
+                    .clipped()
             case .failure:
                 caption(InboxCopy.imageUnavailable)
             case .empty:

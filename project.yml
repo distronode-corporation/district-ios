@@ -88,9 +88,9 @@ packages:
   # package's five libraries, unchanged by the move.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    exactVersion: 8.1.0
+    exactVersion: 8.2.0
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
-  # with `exact: 5.0.0`, but swift-crypto takes swift-asn1 by RANGE, so without
+  # with `exact: 5.0.3` (8.2.0), but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
   # day the cache misses. A root-level package reference is a constraint on the
   # whole graph, and XcodeGen writes one for every package listed here whether or

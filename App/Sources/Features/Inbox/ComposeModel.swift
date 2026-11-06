@@ -454,7 +454,7 @@ extension ComposeModel {
             // resolver's `counterpart` is the UNWRAPPED address. Carrying the typed
             // string forward instead would keep this screen's derivation alive on a
             // surface that no longer needs it.
-            replyTargets: [resolved.replyTarget],
+            replyTargets: InboxParity.replyable([resolved.replyTarget]),
             // ⚠️ NO TITLE. The route's title is the counterpart name the LIST resolved,
             // and this path has not read the list; the thread screen falls back to a
             // neutral noun rather than asserting a name nobody supplied.

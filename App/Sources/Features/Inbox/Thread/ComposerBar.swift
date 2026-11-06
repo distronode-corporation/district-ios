@@ -53,19 +53,30 @@ struct ComposerBar: View {
             draftStrip
             draftNoticeStrip
             failureStrip
-            subjectField
-            attachmentStrip
-            field
-            // ⚠️ ONE ROW AT EVERY TEXT SIZE: the three controls are icons, so only Send's
-            // word grows, and the field above keeps the whole width it needs at AX5.
-            HStack(spacing: DistrictSpacing.row) {
-                attachControl
-                draftControl
-                Spacer(minLength: DistrictSpacing.tight)
-                sendControl
+            // ⛔ A CLOSED WHATSAPP WINDOW TAKES ONLY A TEMPLATE: free text there is refused
+            // by the server, so the box is replaced rather than left to fail (8.2.0).
+            if model.whatsAppWindowClosed {
+                WhatsAppClosedWindow(model: model)
+                ComposerAttachmentStrip(model: model, content: content)
+            } else {
+                subjectField
+                ComposerAttachmentStrip(model: model, content: content)
+                field
+                // ⚠️ ONE ROW AT EVERY TEXT SIZE: the three controls are icons, so only Send's
+                // word grows, and the field above keeps the whole width it needs at AX5.
+                HStack(spacing: DistrictSpacing.row) {
+                    attachControl
+                    draftControl
+                    Spacer(minLength: DistrictSpacing.tight)
+                    sendControl
+                }
+                .imageScale(.large)
             }
-            .imageScale(.large)
         }
+        // ⚠️ RE-READ ON EVERY CHANNEL SWITCH: the window belongs to the WhatsApp reply only.
+        .task(id: model.selectedReplyIndex) { await model.refreshWhatsAppWindow() }
+        // ⛔ AND AGAIN WHEN AN OPEN WINDOW REACHES ITS CLOSE, so free text is not offered past it.
+        .task(id: model.whatsApp.window) { await model.rereadWindowAtExpiry() }
         .padding(.horizontal, DistrictSpacing.gutter)
         .padding(.vertical, DistrictSpacing.row)
         .background(colors.surface)
@@ -98,11 +109,9 @@ struct ComposerBar: View {
     /// for the other one, and the badge is still the thing that stops the channel
     /// being hidden.
     ///
-    /// ⚠️ WHATSAPP CANNOT APPEAR HERE AT ALL, AND THAT IS A WIRE GAP RATHER THAN AN
-    /// OMISSION IN THIS PICKER. `conversations` publishes no `canWhatsapp`, so
-    /// ``ConversationSummary/replyTargets`` can never produce a WhatsApp target and a
-    /// WhatsApp-only thread arrives marked `canSms: true` — it goes out as SMS. Fixing
-    /// it needs a server field, not a client rule.
+    /// ⚠️ WHATSAPP, MESSENGER AND INSTAGRAM APPEAR HERE LIKE SMS AND EMAIL. Since DistrictCore
+    /// 8.2.0, ``ConversationSummary/replyTargets`` reads the row's `replyOptions`, so a
+    /// WhatsApp-only customer is offered WhatsApp, never SMS, and the order is the server's.
     @ViewBuilder
     private var channelStrip: some View {
         if model.replyTargets.count > 1 {
@@ -140,7 +149,8 @@ struct ComposerBar: View {
                 }
             }
             .pickerStyle(.segmented)
-            .disabled(content.sending)
+            // ⚠️ AND WHILE AN UPLOAD IS IN FLIGHT (max review): it lands held off SMS anyway.
+            .disabled(content.sending || content.attaching)
             if let recipient = model.recipientName {
                 recipientLine(recipient)
             }
@@ -187,6 +197,9 @@ struct ComposerBar: View {
             Text(note)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
+                // ⚠️ ITS WHOLE HEIGHT (max review screenshots): beside the held chips' strip it
+                // was squeezed to one truncated line.
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -275,31 +288,6 @@ struct ComposerBar: View {
                 Button(InboxCopy.dismiss) { model.dismissFailure() }
                     .buttonStyle(.districtGhost)
             }
-        }
-    }
-
-    /// The images waiting to go out with the next send.
-    ///
-    /// ⚠️ ALREADY UPLOADED, so removing one costs nothing server-side and the send
-    /// carries only URLs. Uploading at PICK time rather than at SEND time means an
-    /// upload failure costs a retry of one image instead of failing a billable send
-    /// that has already spent its rate-limit slot.
-    @ViewBuilder
-    private var attachmentStrip: some View {
-        if !content.attachments.isEmpty {
-            ScrollView(.horizontal) {
-                HStack(alignment: .top, spacing: DistrictSpacing.tight) {
-                    ForEach(content.attachments, id: \.self) { url in
-                        VStack(spacing: DistrictSpacing.hairline) {
-                            ThreadMediaThumbnail(url: url)
-                            Button(InboxCopy.remove) { model.removeAttachment(url) }
-                                .buttonStyle(.districtGhost)
-                                .accessibilityLabel(InboxCopy.removeAttachment)
-                        }
-                    }
-                }
-            }
-            .scrollIndicators(.hidden)
         }
     }
 
@@ -392,7 +380,8 @@ struct ComposerBar: View {
         .buttonStyle(.districtPrimary)
         // ⛔ COMMAND-RETURN, NEVER RETURN. See the ⛔ on the type.
         .keyboardShortcut(.return, modifiers: .command)
-        .disabled(content.sending || !model.canSendNow)
+        // ⛔ AND WHILE AN IMAGE UPLOADS (max review): it would land after the send took the list.
+        .disabled(content.sending || content.attaching || !model.canSendNow)
         // ⛔ IT IS IN `UITestApp.forbiddenSurfaces`, AND THE REFUSAL IN
         // `UITestApp.tap(_:)` KEYS ON THIS IDENTIFIER. Without it that guard would
         // protect a string that appears nowhere in the app — a vacuous guard on the
@@ -438,46 +427,6 @@ struct ComposerBar: View {
         Binding(
             get: { model.selectedReplyIndex },
             set: { model.selectReplyTarget($0) }
-        )
-    }
-
-    /// Read the picked item's bytes and hand them to the model.
-    ///
-    /// ⛔ THE BYTES CROSS INTO THE MODEL THROUGH ONE `@MainActor` CALL and nothing
-    /// else is carried across: `Data` is a value, the model owns every decision about
-    /// it, and the type and size are refused there before a byte is uploaded.
-    ///
-    /// ⚠️ A NIL OR THROWING LOAD IS "COULD NOT BE READ", WHICH IS NOT THE SAME AS A
-    /// REJECTED TYPE OR SIZE. Those three call for three different next actions from
-    /// the operator, and collapsing them would leave them re-picking the same file.
-    private func read(_ item: PhotosPickerItem) async {
-        guard let data = try? await item.loadTransferable(type: Data.self) else {
-            model.refuseAttachment(ThreadModel.unreadableAttachment)
-            return
-        }
-        await model.attach(data, mimeType: item.preferredMIMEType(allowed: MediaUploadLimits.allowedMimeTypes))
-    }
-
-    /// Read a file chosen in the Files picker and hand it to the model, as ``read(_:)`` does.
-    ///
-    /// ⛔ THE SECURITY-SCOPED ACCESS IS OPENED AND CLOSED AROUND THE ONE READ. The picker
-    /// grants this app the chosen file only, through the URL's scope; reading outside it fails
-    /// as "could not be read".
-    private func readFile(_ result: Result<URL, any Error>) async {
-        guard case let .success(url) = result else { return }
-        let scoped = url.startAccessingSecurityScopedResource()
-        defer {
-            if scoped {
-                url.stopAccessingSecurityScopedResource()
-            }
-        }
-        guard let data = try? Data(contentsOf: url) else {
-            model.refuseAttachment(ThreadModel.unreadableAttachment)
-            return
-        }
-        await model.attach(
-            data,
-            mimeType: AttachmentFile.mimeType(of: url, allowed: MediaUploadLimits.allowedMimeTypes)
         )
     }
 }

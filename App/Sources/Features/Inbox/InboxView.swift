@@ -129,6 +129,7 @@ private struct InboxScreen: View {
         content.fillsListColumn()
             .navigationTitle(InboxCopy.inbox)
             .toolbar { toolbar }
+            .inboxAssignment(model)
             .sheet(isPresented: $composing) {
                 // ⚠️ A CLOSURE LITERAL RATHER THAN `onSent: landed`. The measured
                 // compiler abort in `.swiftlint.yml`'s custom rule is specific to a
@@ -306,7 +307,7 @@ private struct InboxScreen: View {
             // "immediately" HALF OF GUIDELINE 1.2: the server also stops returning
             // blocked threads, but only from the NEXT read.
             // ⚠️ `let` INSIDE THE BUILDER, as `ComposerBar.attachControl` does.
-            let visible = conversations.filter { !blocked.isBlocked(conversation: $0, in: workspaceId) }
+            let visible = model.visible(conversations).filter { !blocked.isBlocked(conversation: $0, in: workspaceId) }
             if visible.isEmpty {
                 noConversations
             } else {
@@ -325,11 +326,7 @@ private struct InboxScreen: View {
     /// with a blocked caller get the same screen. The Contacts tab is where the
     /// blocked set is visible.
     private var noConversations: some View {
-        EmptyStateView(
-            systemImage: "tray",
-            title: InboxCopy.noConversationsYet,
-            message: InboxCopy.textsEmailsCustomersWill
-        )
+        InboxEmptyState(assignedToMeOnly: model.assignedToMeOnly)
     }
 
     /// ⚠️ SKELETON ROWS, NOT A CENTRED SPINNER. The list that is arriving has a known
@@ -371,7 +368,7 @@ private struct InboxScreen: View {
                 // ⚠️ SUFFIXED WITH THE THREAD KEY, WHICH IS WHAT THE `ForEach` KEYS
                 // ON. "The first row" is not an address that survives a reorder.
                 .accessibilityIdentifier(A11yID.Inbox.row(conversation.threadKey))
-                .rowContextMenu(RowContextActions.thread(counterpart: conversation.counterpart))
+                .inboxRowMenu(conversation, model: model)
                 .routeListRow(selects: selection != nil)
             }
             if isPartial {

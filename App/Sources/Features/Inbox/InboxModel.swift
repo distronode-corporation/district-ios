@@ -122,8 +122,19 @@ final class InboxModel {
     /// The pending debounced search. Cancelled and replaced on every keystroke.
     private var searchTask: Task<Void, Never>?
 
-    init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
+    /// Which of overlapping list reads may still apply its answer. Not observed: no view
+    /// shows it.
+    @ObservationIgnored private var reads = LatestRead()
+
+    /// The container's one repository, or a test's (``init(container:workspaceId:role:inbox:)``).
+    private let inbox: InboxRepository
+
+    /// - Parameter inbox: ⚠️ THE TEST SEAM ONLY, a repository over a scripted transport. Production
+    ///   passes nothing and reads through the container's one repository, for the reason the ⛔ on
+    ///   ``AppContainer`` gives.
+    init(container: AppContainer, workspaceId: String, role: WorkspaceRole?, inbox: InboxRepository? = nil) {
         self.container = container
+        self.inbox = inbox ?? container.inbox
         self.workspaceId = workspaceId
         // ⚠️ `allowsMutation` rather than `role != .viewer`, so an UNPARSED role also
         // reads as read-only: `fromWire` fails closed and nil means no privileges.
@@ -158,8 +169,14 @@ final class InboxModel {
     ///   ⚠️ Replacing it with a spinner on a pull-to-refresh throws away what the user
     ///   is looking at in order to show them less.
     func load(refreshing: Bool = false) async {
+        let read = reads.begin()
         state = Self.pending(from: state, refreshing: refreshing)
-        switch await container.inbox.conversations(workspaceId: workspaceId) {
+        let outcome = await inbox.conversations(workspaceId: workspaceId)
+        // ⛔ AN OLDER READ THAT ANSWERS LAST IS DROPPED (Seer, #99): a pull-to-refresh
+        // begun before an assignment would otherwise put the old assignee back over the
+        // re-read that followed it. ``LatestRead``.
+        guard reads.isLatest(read) else { return }
+        switch outcome {
         case let .success(list):
             guard !list.conversations.isEmpty else {
                 state = .empty
@@ -186,7 +203,7 @@ final class InboxModel {
             UnreadBadge.set(unreadTotal)
             // ⚠️ THE WATCH'S INBOX FOLLOWS A FRESH READ OF THIS ONE.
             container.watchBridge.setNeedsSnapshot()
-            await loadDraftBadges()
+            await loadDraftBadges(read: read)
         case let .failure(error):
             // ⛔ THE BADGE IS LEFT EXACTLY AS IT WAS, AND IS NOT ZEROED. Zero means
             // "nothing unread", never "we could not ask".
@@ -220,7 +237,7 @@ final class InboxModel {
         // ⚠️ HOISTED INTO LOCALS BEFORE THE AWAIT, as ``markRead(_:)`` does: the
         // repository is a `Sendable` struct, so nothing non-`Sendable` has to cross,
         // and ``AppContainer`` is `@MainActor` and would.
-        let repository = container.inbox
+        let repository = inbox
         let id = workspaceId
         guard case .success = await repository.markAllRead(workspaceId: id) else { return }
         // ⛔ RE-READ RATHER THAN OVERLAID. The server has just changed what every other
@@ -309,6 +326,41 @@ final class InboxModel {
         return conversations.first { $0.threadKey == key }
     }
 
+    // MARK: - Assignment (DistrictCore 8.2.0)
+
+    /// The Assigned to me filter. Every role may use it: it only narrows what is read.
+    var assignedToMeOnly = false
+
+    /// The assign sheet's model while it is open, or nil.
+    var assigning: ThreadAssignModel?
+
+    /// The rows the filter lets through.
+    ///
+    /// ⛔ `assignedToMe` IS THE SERVER'S ANSWER, the same flag the web's filter reads, so
+    /// this client never compares addresses to decide who "me" is. A row without the
+    /// key (a server that ignored `assignments=1`) is not mine.
+    func visible(_ conversations: [ConversationSummary]) -> [ConversationSummary] {
+        Self.visible(conversations, assignedToMeOnly: assignedToMeOnly)
+    }
+
+    /// ``visible(_:)``'s rule, without a model, for its tests.
+    static func visible(_ conversations: [ConversationSummary], assignedToMeOnly: Bool) -> [ConversationSummary] {
+        guard assignedToMeOnly else { return conversations }
+        return conversations.filter { $0.assignedToMe == true }
+    }
+
+    /// Open the assign sheet for one row. Nothing for a role that cannot write.
+    func beginAssigning(_ conversation: ConversationSummary) {
+        guard canReply else { return }
+        assigning = ThreadAssignModel(
+            inbox: inbox,
+            workspaces: container.workspaces,
+            workspaceId: workspaceId,
+            threadKey: conversation.threadKey,
+            current: conversation.assigneeEmail
+        )
+    }
+
     // MARK: - Internals
 
     /// Run one search and adopt its answer.
@@ -319,7 +371,7 @@ final class InboxModel {
     /// newer answer with the older one — results that are correct for a query the
     /// field no longer holds, which is indistinguishable from a broken search.
     private func runSearch(_ query: String) async {
-        let outcome = await container.inbox.search(workspaceId: workspaceId, query: query)
+        let outcome = await inbox.search(workspaceId: workspaceId, query: query)
         guard !Task.isCancelled else { return }
         switch outcome {
         case let .success(results):
@@ -353,9 +405,12 @@ final class InboxModel {
     /// ⚠️ THE STATE IS RE-READ AFTER THE AWAIT rather than closed over from before it.
     /// A refresh or a failure can land while this request is in flight, and writing a
     /// captured list back would resurrect rows the newer read had already replaced.
-    private func loadDraftBadges() async {
+    /// - Parameter read: the list read these badges belong to (``LatestRead``).
+    private func loadDraftBadges(read: Int) async {
         guard canReply else { return }
-        guard case let .success(drafts) = await container.inbox.drafts(workspaceId: workspaceId) else { return }
+        let outcome = await inbox.drafts(workspaceId: workspaceId)
+        // ⛔ AN OLDER READ'S BADGES ARE DROPPED TOO (Seer, #99), as its list is.
+        guard reads.isLatest(read), case let .success(drafts) = outcome else { return }
         guard case let .content(conversations, isPartial, _, refreshing) = state else { return }
         state = .content(
             conversations: conversations,
@@ -372,5 +427,23 @@ final class InboxModel {
         guard refreshing else { return .loading }
         guard case let .content(conversations, isPartial, draftKeys, _) = current else { return .loading }
         return .content(conversations: conversations, isPartial: isPartial, draftKeys: draftKeys, refreshing: true)
+    }
+}
+
+/// Which of several overlapping reads may still apply its answer: only the latest one begun.
+///
+/// ⚠️ A VALUE, NOT A TASK HANDLE, so a read is never cancelled half-way (its request has
+/// already gone): an older answer is simply not applied.
+struct LatestRead {
+    private(set) var latest = 0
+
+    /// Begin a read; its token is the one ``isLatest(_:)`` checks when it answers.
+    mutating func begin() -> Int {
+        latest += 1
+        return latest
+    }
+
+    func isLatest(_ token: Int) -> Bool {
+        token == latest
     }
 }

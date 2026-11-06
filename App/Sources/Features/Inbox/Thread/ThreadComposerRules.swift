@@ -41,26 +41,22 @@ extension ThreadModel {
     /// ⛔ THE TYPED TEXT SURVIVES, AND THAT IS THE WHOLE POINT OF A SWITCH RATHER THAN
     /// A NEW SCREEN. The operator has written a reply to a person; which wire it
     /// leaves on is a separate decision and changing it must not cost them the words.
-    /// ``composerText`` is deliberately untouched here, and so is the autosave timer —
+    /// ``composerText`` is deliberately untouched here, and so is the autosave timer,
     /// no debounce is armed, because nothing the operator typed has changed and a
     /// write would spend one of the workspace's 60/min to store identical bytes.
     ///
     /// ⛔ THE THREAD KEY DOES NOT MOVE EITHER: THERE IS ONE DRAFT PER THREAD, NOT ONE
     /// PER CHANNEL. The drafts row is keyed on `(workspaceId, threadKey, authorEmail)`
     /// and the server has no channel column, so a per-channel draft is not
-    /// representable — and it is not wanted: the half-finished reply is about the
+    /// representable, and it is not wanted: the half-finished reply is about the
     /// customer, not about SMS. See the ⛔ on ``ThreadTarget/threadKey``.
     ///
-    /// ⛔ MOVING TO EMAIL DISCARDS STAGED IMAGES **AND SAYS SO**. The email branch of
-    /// `messages/send` never looks at `mediaUrls`, so leaving them staged would send a
-    /// message the operator believes carries pictures and the customer receives
-    /// without them — a loss nothing downstream reports, because the send succeeds.
-    /// Dropping them silently is the worse half of a bad choice, so
-    /// ``ThreadContent/channelNote`` carries the sentence and it survives until the
-    /// next switch or send.
-    /// ⚠️ THE UPLOADED ROWS ARE NOT DELETED SERVER-SIDE and there is no route that
-    /// would; they become orphan `MessageMedia` rows, exactly as
-    /// ``removeAttachment(_:)`` documents.
+    /// ⛔ MOVING TO A TEXT-ONLY CHANNEL HOLDS STAGED IMAGES **AND SAYS SO**. The email branch
+    /// of `messages/send` never looks at `mediaUrls`, and WhatsApp, Messenger and Instagram
+    /// replies are text, so sending them staged would deliver a message without the pictures
+    /// the operator believes it carries, a loss nothing downstream reports. They are held
+    /// instead (kept in the draft, not sent, back on SMS), and ``ThreadContent/channelNote``
+    /// carries the sentence until the next switch or send.
     ///
     /// ⚠️ EVERYTHING ELSE IS DERIVED AND THEREFORE NEEDS NO RECOMPUTE. ``canAttach``,
     /// ``canReply``, ``requiresSubject`` and ``channelName`` all read
@@ -78,7 +74,7 @@ extension ThreadModel {
         let wasAttachable = canAttach
         target.select(index)
         guard index == target.selectedIndex else { return }
-        dropAttachmentsIfChannelCannotCarryThem(wasAttachable: wasAttachable)
+        holdAttachmentsIfChannelCannotCarryThem(wasAttachable: wasAttachable)
         seedSubjectIfNeeded()
     }
 
@@ -88,30 +84,73 @@ extension ThreadModel {
     /// than as one function doing five things, and because the note it writes needs a
     /// sentence of its own.
     ///
-    /// ⛔ IT ONLY FIRES ON THE SMS → EMAIL DIRECTION. Going the other way there is
-    /// nothing staged to lose (the Attach control was hidden), so a note there would
-    /// be an alarm about nothing.
-    private func dropAttachmentsIfChannelCannotCarryThem(wasAttachable: Bool) {
+    /// ⛔ HELD, NOT DISCARDED (Seer, #99). Staged images moved to a channel that cannot
+    /// carry them go to ``ThreadContent/heldAttachments``: the stored draft keeps them, the
+    /// send leaves them out, and the note says so. A switch back to SMS returns them.
+    ///
+    /// ⚠️ THE NOTE IS SAID ONLY WHILE SOMETHING IS HELD. Switching between two text-only
+    /// channels with nothing staged would be an alarm about nothing.
+    private func holdAttachmentsIfChannelCannotCarryThem(wasAttachable: Bool) {
         guard var content = current else { return }
         content.channelNote = nil
-        guard wasAttachable, !canAttach, !content.attachments.isEmpty else {
-            setContent(content)
-            return
+        if canAttach {
+            let back = (content.attachments + content.heldAttachments).reduce(into: [String]()) { kept, url in
+                if !kept.contains(url) {
+                    kept.append(url)
+                }
+            }
+            content.attachments = Array(back.prefix(Self.maximumAttachments))
+            content.heldAttachments = []
+        } else if wasAttachable || !content.heldAttachments.isEmpty {
+            content.heldAttachments += content.attachments
+            content.attachments = []
+            content.channelNote = heldNote(content.heldAttachments)
         }
-        let count = content.attachments.count
-        content.attachments = []
-        content.channelNote = Self.attachmentsDropped(count: count)
         setContent(content)
     }
 
-    /// ⚠️ SINGULAR AND PLURAL SPELLED OUT, matching the thread's own attachment
-    /// badge. "1 images" is the kind of detail that makes a product look unfinished.
+    /// The held images' sentence for the selected channel and this thread's targets.
+    func attachmentsHeldNote(count: Int) -> String {
+        Self.attachmentsHeld(
+            count: count,
+            channel: target.replyTarget?.channel,
+            smsOffered: replyTargets.contains { $0.channel == MessageChannel.sms }
+        )
+    }
+
+    /// The held sentence for `held`, or nil when nothing is held.
+    func heldNote(_ held: [String]) -> String? {
+        held.isEmpty ? nil : attachmentsHeldNote(count: held.count)
+    }
+
+    /// What VoiceOver says on a held image's chip: held, and the channel it will not go out on
+    /// (max review, #99 and #95). ⚠️ Email is its own sentence, because French says « par
+    /// courriel » where a brand name keeps its capital.
+    var heldAttachmentLabel: String {
+        guard let channel = target.replyTarget?.channel, channel != MessageChannel.email else {
+            return InboxCopy.attachmentHeldByEmail
+        }
+        return InboxCopy.attachmentHeldOn(ThreadChannelName.of(channel))
+    }
+
+    /// ⛔ IT SAYS WHAT HAPPENS, WHICH IS THAT NOTHING IS LOST (xhigh review, #99 and #95). The
+    /// images are held: kept in the draft, not sent on this channel, and back as chips on SMS.
+    /// "Removed" told the operator they were gone.
     ///
-    /// ⚠️ IT NAMES THE CHANNEL AS THE REASON rather than saying "not supported". The
-    /// operator's next action is either to switch back or to send without them, and
-    /// only the first sentence tells them which is available.
-    private static func attachmentsDropped(count: Int) -> String {
-        InboxCopy.attachmentsDropped(count)
+    /// ⛔ AND IT OFFERS SMS ONLY WHERE THERE IS SMS: on a thread with no SMS reply, "switch to
+    /// SMS" names a control that does not exist, so the second sentence is left out.
+    ///
+    /// ⚠️ IT NAMES THE CHANNEL SWITCHED TO AS THE REASON, and spells out singular and plural,
+    /// matching the thread's own attachment badge.
+    static func attachmentsHeld(count: Int, channel: String?, smsOffered: Bool) -> String {
+        let held = if channel == MessageChannel.whatsapp {
+            InboxCopy.attachmentsHeldWhatsapp(count)
+        } else if channel == MessageChannel.messenger || channel == MessageChannel.instagram {
+            InboxCopy.attachmentsHeldMeta(count)
+        } else {
+            InboxCopy.attachmentsHeldEmail(count)
+        }
+        return smsOffered ? held + " " + InboxCopy.attachmentsSwitchToSms : held
     }
 
     // MARK: - The channel, said out loud
@@ -120,13 +159,13 @@ extension ThreadModel {
     ///
     /// ⚠️ NOT DERIVED FROM THE SHAPE OF THE ADDRESS. The pair was chosen by
     /// ``ConversationSummary/replyTargets`` and carried here verbatim; reading an `@`
-    /// out of the recipient would be a second, disagreeing decision — the exact thing
+    /// out of the recipient would be a second, disagreeing decision, the exact thing
     /// ``ReplyTarget`` exists to prevent.
     ///
     /// ⚠️ THE NAMING ITSELF LIVES IN ``ThreadChannelName``, and that is the point
     /// rather than tidiness: the picker has to label a target
     /// that is NOT the selected one, so a naming rule reachable only through
-    /// `target.replyTarget` could not serve it — and two copies of the rule is how the
+    /// `target.replyTarget` could not serve it, and two copies of the rule is how the
     /// badge and the segment come to disagree about what "WhatsApp" is called.
     var channelName: String? {
         guard let channel = target.replyTarget?.channel else { return nil }
@@ -179,7 +218,7 @@ extension ThreadModel {
 
     /// Fill an empty subject with `Re: <the thread's newest subject>`.
     ///
-    /// ⛔ ONLY WHEN THE BOX IS EMPTY, so it can add and never overwrite — the same rule
+    /// ⛔ ONLY WHEN THE BOX IS EMPTY, so it can add and never overwrite, the same rule
     /// ``restoreDraft()`` applies to the body, and for the same reason: adopting into
     /// an empty box can only help, replacing a non-empty one can only lose.
     ///
@@ -242,6 +281,12 @@ enum ThreadChannelName {
         if channel == MessageChannel.whatsapp {
             return InboxCopy.whatsapp
         }
+        if channel == MessageChannel.messenger {
+            return InboxCopy.messenger
+        }
+        if channel == MessageChannel.instagram {
+            return InboxCopy.instagram
+        }
         if channel == voicemail {
             return InboxCopy.voicemail
         }
@@ -252,8 +297,8 @@ enum ThreadChannelName {
     /// message left on a call.
     ///
     /// ⚠️ A LITERAL HERE BECAUSE DistrictCore's ``MessageChannel`` HAS NO CONSTANT FOR IT.
-    /// It names the three channels a reply can go out on, and nobody replies by voicemail,
-    /// but an Inbox row that mixes channels still names this one (3.0.2 walk 2, a port of
-    /// district-macos #67: French drew « VOICEMAIL »).
+    /// It names the channels a reply can go out on, and nobody replies by voicemail,
+    /// but an Inbox row that mixes channels still names this one (3.0.2 walk 2: French
+    /// drew « VOICEMAIL »).
     static let voicemail = "voicemail"
 }

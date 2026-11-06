@@ -106,6 +106,7 @@ extension ThreadModel {
             noteDraftUnread(outcome)
             return
         }
+        draftRead = true
         // ⛔ nil IS THE ORDINARY ANSWER, NOT A FAILURE. Almost every thread has no
         // draft, and the route answers `{success, draft: null}` rather than 404
         // precisely so the composer's normal open path is not an error in every log.
@@ -121,8 +122,36 @@ extension ThreadModel {
         // ⚠️ ATTACHMENTS COME BACK WITH IT. A draft saved with two images restores as
         // text plus two chips; restoring the text alone would send a message the
         // operator believed had pictures on it.
-        guard !draft.mediaUrls.isEmpty, var content = current else { return }
-        content.attachments = Self.restorable(draft.mediaUrls)
+        guard !draft.mediaUrls.isEmpty else { return }
+        let restored = Self.restorable(draft.mediaUrls)
+        // ⛔ BUT NOT ONTO A CHANNEL THAT CANNOT CARRY THEM (Seer, #95): a WhatsApp,
+        // Messenger, Instagram or email default would send the text and drop the images
+        // silently. They are held, with the channel's sentence: kept in the draft, never
+        // sent, and back as chips on a switch to SMS (``ThreadContent/heldAttachments``).
+        // ⛔ MERGED WITH WHAT IS ALREADY IN THE BOX, NEVER REPLACING IT (Seer, #99, 4489180780):
+        // an image attached while the read was in flight was dropped. Deduplicated by URL, the
+        // operator's own first, five at most.
+        guard canMutate else { return }
+        let shown = current.map {
+            ComposerMedia(attachments: $0.attachments, held: $0.heldAttachments, note: $0.channelNote)
+        } ?? composerMedia
+        let merged = Self.restorable(shown.attachments + shown.held + restored)
+        var media = ComposerMedia()
+        if canAttach {
+            media.attachments = merged
+        } else {
+            media.held = merged
+            media.note = heldNote(merged)
+        }
+        // ⛔ AND NOT LOST WHEN THE THREAD COULD NOT BE READ (xhigh review): the latch is set,
+        // so this runs once, and the retry's re-read puts them on its content (``load()``).
+        guard var content = current else {
+            composerMedia = media
+            return
+        }
+        content.attachments = media.attachments
+        content.heldAttachments = media.held
+        content.channelNote = media.note
         setContent(content)
     }
 
@@ -130,7 +159,7 @@ extension ThreadModel {
     ///
     /// ⛔ DEDUPLICATED, IN ORDER, BECAUSE THE ROW IS A LIST OF STRINGS THE SERVER
     /// STORES AS IT WAS GIVEN THEM. Every URL this client uploads is a fresh uuid, so
-    /// a repeat can only arrive from a draft written elsewhere — and a duplicate id
+    /// a repeat can only arrive from a draft written elsewhere, and a duplicate id
     /// inside one `ForEach` is a rendering fault rather than a cosmetic repeat.
     ///
     /// ⚠️ CAPPED AT THE SEND CEILING TOO, so a draft holding six (the drafts route

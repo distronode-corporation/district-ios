@@ -6,7 +6,7 @@ import Foundation
 /// ⛔ A SIBLING FILE FOR THE REASON `ThreadDraftFlush.swift` AND `ThreadDraftRestore.swift`
 /// BOTH GIVE: `ThreadModel.swift` sits within a few lines of the 500 `swiftlint --strict`
 /// allows (`file_length` warns at 500 and every warning is an error in CI), and stored
-/// properties such as the email subject need room in the type's own body — a stored
+/// properties such as the email subject need room in the type's own body, a stored
 /// property cannot live in an extension. The attachment half is the largest piece that
 /// stands WHOLE on its own, so it is the one that lives here.
 ///
@@ -24,12 +24,16 @@ extension ThreadModel {
     /// ``MediaUploadLimits`` re-checks inside the repository and the route checks
     /// again; this is a shortcut, never the boundary.
     ///
-    /// ⚠️ EVERY REFUSAL LANDS IN THE SAME PLACE as a send or generation failure — the
-    /// strip above the composer — because giving each its own slot would mean three
+    /// ⚠️ EVERY REFUSAL LANDS IN THE SAME PLACE as a send or generation failure, the
+    /// strip above the composer, because giving each its own slot would mean three
     /// dismiss controls in one visual location.
+    ///
+    /// ⛔ GATED ON THE ROLE, NOT THE CHANNEL (max review, #99 and #95). The picker reads its
+    /// bytes before this runs, and a channel switch during that read used to drop the photo
+    /// here without a word; an upload that lands off SMS is held instead (``land(_:)``).
     func attach(_ data: Data, mimeType: String) async {
-        guard canAttach, var content = current, !content.attaching else { return }
-        guard content.attachments.count < Self.maximumAttachments else {
+        guard canMutate, var content = current, !content.attaching else { return }
+        guard content.attachments.count + content.heldAttachments.count < Self.maximumAttachments else {
             refuseAttachment(Self.tooManyAttachments)
             return
         }
@@ -48,14 +52,50 @@ extension ThreadModel {
             mimeType: mimeType,
             bytes: data
         )
-        guard var latest = current else { return }
-        latest.attaching = false
         switch outcome {
         case let .success(media):
-            latest.attachments.append(media.url)
+            land(media.url)
         case let .failure(error):
+            guard var latest = current else { return }
+            latest.attaching = false
             latest.sendFailure = FailureText.from(error)
+            setContent(latest)
         }
+    }
+
+    /// Put one finished upload where the selected channel can use it.
+    ///
+    /// ⛔ NOTHING IS LOST ACROSS A CHANNEL SWITCH (max review, #99 and #95). On a channel that
+    /// carries images it is staged; on one that cannot (the operator switched while it
+    /// uploaded) it is held, with the held sentence, and comes back on SMS.
+    ///
+    /// ⛔ AND NOT WHILE THE THREAD IS RE-READ EITHER: with no content on screen it goes to
+    /// ``ThreadModel/composerMedia``, which the re-read puts back.
+    func land(_ url: String) {
+        var media = current.map {
+            ComposerMedia(attachments: $0.attachments, held: $0.heldAttachments, note: $0.channelNote)
+        } ?? composerMedia
+        // ⛔ THE CAP IS CHECKED AGAIN ON LANDING (Seer, #99, 4489456427): a draft restored while
+        // this uploaded can have filled the five, so the image is dropped and the limit said,
+        // in the same words as a sixth pick. With no content on screen there is nowhere to say it.
+        guard media.attachments.count + media.held.count < Self.maximumAttachments else {
+            refuseAttachment(Self.tooManyAttachments)
+            return
+        }
+        if canAttach {
+            media.attachments.append(url)
+        } else {
+            media.held.append(url)
+            media.note = heldNote(media.held)
+        }
+        guard var latest = current else {
+            composerMedia = media
+            return
+        }
+        latest.attaching = false
+        latest.attachments = media.attachments
+        latest.heldAttachments = media.held
+        latest.channelNote = media.note
         setContent(latest)
     }
 
@@ -65,10 +105,17 @@ extension ThreadModel {
     /// WOULD. It becomes an orphan `MessageMedia` row that nothing references:
     /// bounded at 5MB, invisible, and cheaper than inventing a delete endpoint whose
     /// only caller would be this button.
+    ///
+    /// ⛔ A HELD IMAGE IS REMOVED THE SAME WAY (max review, #99 and #95): its chip is dimmed,
+    /// with its own Remove, and the held sentence counts what is left. ⚠️ The autosave is
+    /// armed so the stored draft follows; without it the image came back on the next open.
     func removeAttachment(_ url: String) {
         guard var content = current else { return }
         content.attachments.removeAll { $0 == url }
+        content.heldAttachments.removeAll { $0 == url }
+        content.channelNote = heldNote(content.heldAttachments)
         setContent(content)
+        armAutosave(composerText)
     }
 
     /// Record a client-authored attachment refusal.

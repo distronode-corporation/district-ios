@@ -150,6 +150,15 @@ enum A11yID {
 
         /// ⛔ A FORBIDDEN SURFACE. See `UITestApp.ForbiddenSurfaces`.
         static let send = "district-inbox-send"
+
+        /// The members sheet a row's Assign action opens (DistrictCore 8.2.0).
+        static let assignSheet = "district-inbox-assign-sheet"
+        /// The Inbox toolbar's filter menu (all conversations, assigned to me).
+        static let filter = "district-inbox-filter"
+        /// The closed WhatsApp window's template button, and the sheet it opens.
+        static let whatsAppTemplates = "district-inbox-whatsapp-templates"
+        /// ⛔ A FORBIDDEN SURFACE like ``send``: it sends a billed WhatsApp template.
+        static let whatsAppTemplateSend = "district-inbox-whatsapp-template-send"
     }
 
     enum Dialer {

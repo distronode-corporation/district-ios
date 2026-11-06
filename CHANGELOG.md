@@ -19,6 +19,36 @@ built from history before publication, so they have no tags in this repository.
 
 ### Changed
 
+- App parity with the web Inbox, on DistrictCore `exactVersion` 8.2.0 (district-core-swift#52).
+  WhatsApp, Messenger and Instagram threads are answered on the channel the server's
+  `replyOptions` name (first is the default, `[]` is no reply box, an unknown channel is
+  skipped), so a WhatsApp-only customer is no longer answered by SMS; the SMS stopgap's 409
+  (`sms_reply_not_customer_channel`) is said in English and French. Messenger and Instagram
+  threads are listed, labelled and answered as text. The Inbox asks for `assignments=1`: an
+  assignee badge on each row, an Assigned to me filter, and an assign sheet (members, no
+  viewers; Unassigned) with the `assignee_is_viewer` and `assignee_not_member` refusals. A
+  closed WhatsApp window replaces the reply box with the approved templates (variables,
+  preview, `sendWhatsAppTemplate`), and an open one names its sender. The alert push register
+  declares `metaChannels`. 24 new strings in English and French, the French reviewed (Sean's
+  sign-off, 2026-11-05). The held-images sentences then replace the three "removed" ones with
+  four new strings (`inbox.attachments_held_*`, `inbox.attachments_switch_to_sms`), the French
+  reviewed too (Sean's sign-off, 2026-11-05, "Approve all").
+  iPhone and iPad: Assign is a row's leading swipe action and a context-menu item. Apple Watch: unchanged code; it
+  reads the phone's snapshot, whose `canReply` and wrist replies now follow `replyOptions`.
+  The max review's findings (Sean, "All except 9"): an image that finishes uploading after a
+  switch to a text-only channel, or is handed over after one, is held rather than lost, and Send
+  and the channel picker wait for an upload; held images show in the reply box as dimmed chips
+  marked Held, each with Remove (which updates the saved draft), and VoiceOver names the channel
+  they are not sent on; a text-only send keeps them; the assign sheet cannot be closed mid-save
+  and re-reads the current owner when it opens; overlapping WhatsApp window reads apply only the
+  latest, and the read at the window's close re-arms while the answer is already past. Three new
+  strings (`inbox.attachment_held`, `inbox.attachment_held_by_email`, `inbox.attachment_held_on`),
+  the French reviewed (Sean's sign-off, 2026-11-06, "Approve all 3").
+  A blank reply box deletes the saved draft only once the draft has been read, so removing an
+  image or clearing the box after a failed read cannot delete a reply nobody has seen; a save
+  that lands counts as read, since the server then holds only this composer's text. A draft
+  restored after an image was attached merges its images with it (by URL) instead of replacing it,
+  and an upload that lands once that merge filled the five is dropped with the five-image sentence.
 - 3.2.1: MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
   pair is project-level, so every target carries the same value. DistrictCore stays at
   `exactVersion` 8.1.0.

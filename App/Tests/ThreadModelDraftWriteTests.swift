@@ -62,13 +62,51 @@ final class ThreadModelDraftWriteTests: XCTestCase {
     }
 
     func testAFailedBlankBoxDeleteIsSaidToo() async {
-        let transport = ScriptedTransport([Self.refused])
+        let transport = ScriptedTransport([Self.noDraft, Self.refused])
         let model = Self.model(transport)
+        await model.restoreDraft()
 
         let handled = await model.deleteDraftIfBlank("   ")
 
         XCTAssertTrue(handled)
+        XCTAssertEqual(transport.count(of: .delete), 1)
         XCTAssertEqual(model.draftNotice, ThreadModel.draftNotSaved)
+    }
+
+    /// ⛔ NO BLANK-BOX DELETE BEFORE THE DRAFT HAS BEEN READ (Seer, #99, 4489056023): after a
+    /// failed read the server may hold a reply nobody has seen, and clearing the box must not
+    /// delete it unread. Once a read answers, a blank box deletes again.
+    func testABlankBoxDeletesNothingUntilTheDraftHasBeenRead() async {
+        let transport = ScriptedTransport([Self.refused, Self.noDraft, Self.deleted])
+        let model = Self.model(transport)
+        await model.restoreDraft()
+        XCTAssertFalse(model.draftRead, "the read failed")
+
+        let handled = await model.deleteDraftIfBlank("")
+        await model.persistDraft("  ")
+
+        XCTAssertTrue(handled, "the blank case is handled, with no write")
+        XCTAssertEqual(transport.count(of: .delete), 0)
+        await model.restoreDraft()
+        XCTAssertTrue(model.draftRead)
+        await model.persistDraft("")
+        XCTAssertEqual(transport.count(of: .delete), 1)
+    }
+
+    /// ⛔ A SAVE THAT LANDS AFTER A FAILED READ LETS A CLEARED BOX DELETE AGAIN (Seer, #95,
+    /// 4489168707): the server then holds only this composer's own text, which would otherwise
+    /// come back on the next open.
+    func testASaveThatLandsAfterAFailedReadLetsABlankBoxDelete() async {
+        let transport = ScriptedTransport([Self.refused, Self.saved, Self.deleted])
+        let model = Self.model(transport)
+        await model.restoreDraft()
+        XCTAssertFalse(model.draftRead, "the read failed")
+
+        await model.persistDraft("Half a reply, finished")
+        XCTAssertTrue(model.draftRead, "the save landed")
+        await model.persistDraft("")
+
+        XCTAssertEqual(transport.count(of: .delete), 1)
     }
 
     // MARK: - Helpers
@@ -101,6 +139,8 @@ final class ThreadModelDraftWriteTests: XCTestCase {
     """#)
 
     private static let deleted = (200, #"{"success":true}"#)
+
+    private static let noDraft = (200, #"{"success":true,"draft":null}"#)
 
     private static let saved = (200, #"""
     {"success":true,"draft":{"threadKey":"contact:c_1","body":"Half a reply, finished",

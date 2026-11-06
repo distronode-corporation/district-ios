@@ -6,7 +6,7 @@ import Foundation
 ///
 /// ⛔ FOUR FIELDS THAT MUST AGREE, SO THEY TRAVEL TOGETHER. ``threadKey`` is the
 /// drafts table's key, ``selector`` is the timeline's, and ``replyTarget`` is where a
-/// send goes — three vocabularies for one thread, and assembling them from
+/// send goes, three vocabularies for one thread, and assembling them from
 /// independent navigation arguments is how a draft gets saved against one thread and
 /// displayed in another. The same reasoning that put `to` and `channel` inside
 /// ``ReplyTarget``.
@@ -27,7 +27,7 @@ struct ThreadTarget {
     /// not one per channel: the drafts row is keyed on `(workspaceId, threadKey,
     /// authorEmail)` and the server has no channel column at all, so switching from
     /// SMS to email keeps writing and restoring the same row. That is also the
-    /// behaviour an operator expects — the half-typed reply is about the customer,
+    /// behaviour an operator expects, the half-typed reply is about the customer,
     /// not about the wire it leaves on.
     let threadKey: String
     /// ⛔ Nil when ``threadKey`` is in neither form, which is a malformed destination
@@ -80,8 +80,8 @@ struct ThreadTarget {
 
     /// Point the composer at another channel.
     ///
-    /// ⚠️ IT ONLY MOVES THE INDEX. Everything that follows from the choice —
-    /// attachments, the subject requirement, the note about dropped images — belongs
+    /// ⚠️ IT ONLY MOVES THE INDEX. Everything that follows from the choice,
+    /// attachments, the subject requirement, the note about dropped images, belongs
     /// to ``ThreadModel/selectReplyTarget(_:)``, because those touch loaded content
     /// and this type holds none.
     ///
@@ -98,7 +98,7 @@ struct ThreadTarget {
     ///
     /// ⛔ THE PREFIX IS STRIPPED, AND SENDING THE WHOLE KEY WOULD MATCH NOTHING. The
     /// timeline route's address parameter takes a counterpart, so `addr:14165550123`
-    /// entire is not a value it can ever match — the suffix is. That suffix is the
+    /// entire is not a value it can ever match, the suffix is. That suffix is the
     /// server's own normalised address key (bare digits for a phone, lowercased for
     /// an email) and the route re-normalises whatever it is handed, so giving it back
     /// is idempotent rather than lossy.
@@ -179,6 +179,15 @@ struct ThreadContent {
     var sendFailure: FailureText?
     /// ⛔ Already uploaded, capped at ``ThreadModel/maximumAttachments``.
     var attachments: [String]
+    /// Images the draft holds that the selected channel cannot carry: a restored draft's,
+    /// or those staged before a switch away from SMS.
+    ///
+    /// ⛔ KEPT IN THE STORED DRAFT, NEVER SENT (Seer, #99). The autosave writes them with
+    /// ``attachments``, so a draft opened on a WhatsApp default does not lose its images to
+    /// the next keystroke, and a switch back to SMS returns them as chips. A send on the
+    /// text-only channel goes out as text, as ``channelNote`` says, and they stay (max review).
+    /// The composer draws them as dimmed chips marked held, each with its own Remove.
+    var heldAttachments: [String]
     /// What changed when the operator switched channel, said out loud.
     ///
     /// ⛔ ITS OWN SLOT RATHER THAN A FOURTH TENANT OF ``sendFailure``, AND THE REASON
@@ -186,7 +195,7 @@ struct ThreadContent {
     /// staged images, because the email branch of `messages/send` never looks at
     /// `mediaUrls`. `sendFailure` is cleared by the next send, attach or generate and
     /// by its own Dismiss, so this sentence would disappear at exactly the moment it
-    /// matters — while the operator is composing the message they believe still has
+    /// matters, while the operator is composing the message they believe still has
     /// pictures on it. It follows ``draftFailure``'s shape: a named field for a named
     /// event, drawn beside the control it belongs to.
     ///
@@ -203,9 +212,26 @@ struct ThreadContent {
     var draftGenerating: Bool
 }
 
+/// The composer's images and their sentence, held on the model outside ``ThreadState``.
+///
+/// ⛔ A RE-READ REPLACES THE CONTENT, AND THESE MUST OUTLIVE IT (xhigh review, #99 and #95).
+/// They are uploaded and in the stored draft, so a re-read after a template send, a failed
+/// read or a retry puts them back (``ThreadModel/load()``), an autosave while there is no
+/// content still writes them, and only a send that carried them clears them.
+struct ComposerMedia: Equatable {
+    var attachments: [String] = []
+    var held: [String] = []
+    var note: String?
+
+    /// What the stored draft holds: both, the held ones never sent.
+    var all: [String] {
+        attachments + held
+    }
+}
+
 extension ThreadContent {
-    /// The state a freshly read page starts in.
-    static func from(_ page: ThreadPage) -> ThreadContent {
+    /// The state a freshly read page starts in, with the composer's images put back.
+    static func from(_ page: ThreadPage, media: ComposerMedia = ComposerMedia()) -> ThreadContent {
         ThreadContent(
             events: page.events,
             hasMore: page.hasMore,
@@ -216,8 +242,9 @@ extension ThreadContent {
             incompleteCount: page.droppedEventCount,
             sending: false,
             sendFailure: nil,
-            attachments: [],
-            channelNote: nil,
+            attachments: media.attachments,
+            heldAttachments: media.held,
+            channelNote: media.note,
             attaching: false,
             draftGenerating: false
         )
@@ -231,7 +258,7 @@ extension ThreadContent {
 /// still REPLY, so the composer, its attachments and its in-flight flags have to
 /// survive the case that says there is no history. It is reachable only after a
 /// SUCCESSFUL read, which is the property that keeps "there is nothing" separate from
-/// "we could not look" — see the ⛔ on ``FailureText``.
+/// "we could not look", see the ⛔ on ``FailureText``.
 enum ThreadState {
     case loading
     case content(ThreadContent)

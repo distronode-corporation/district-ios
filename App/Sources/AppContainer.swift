@@ -436,9 +436,9 @@ final class AppContainer {
         // ⚠️ FROM THE ONE `contacts` ABOVE, never a fresh repository. Same rule as
         // every other line here; see the ⚠️ on the stored properties.
         blockedContacts = BlockedContactsStore(contacts: contacts)
-        inbox = InboxRepository(client: api)
+        inbox = InboxRepository(client: api, options: InboxParity.readOptions)
         devices = DevicesRepository(client: api)
-        pushTokens = PushTokenRepository(client: api, memory: UserDefaultsPushTokenMemory())
+        pushTokens = InboxParity.pushTokens(client: api)
 
         analytics = AnalyticsRepository(client: api)
         scheduling = SchedulingRepository(client: api)

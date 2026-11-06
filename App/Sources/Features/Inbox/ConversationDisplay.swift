@@ -42,9 +42,16 @@ struct ConversationDisplay {
     /// The direction glyph and the last message's body, on one line.
     let subtitle: String
 
-    /// Uppercased channel names, and EMPTY for a single-channel thread. See
-    /// ``channelLabels(_:)``.
+    /// Uppercased channel names, and EMPTY for a single-channel SMS or email thread.
+    /// See ``channelLabels(_:)``.
     let channelLabels: [String]
+
+    /// Who the thread is assigned to, short enough for a badge: « You » for the person
+    /// reading, else the member's address before the `@`. nil when unassigned.
+    let assigneeLabel: String?
+
+    /// The assignee's whole address, for VoiceOver (``InboxCopy/assignedTo(_:)``).
+    let assigneeEmail: String?
 
     /// ⛔ nil FOR AN INBOUND LAST MESSAGE, and that is the port of `MessageTone.kt`'s
     /// own scope rather than a simplification: it documents itself as "which tone an
@@ -69,6 +76,8 @@ extension ConversationDisplay {
             avatarTone: contactName == nil ? .neutral : .district,
             subtitle: Self.subtitle(body: last.body, outbound: outbound),
             channelLabels: Self.channelLabels(conversation.channels),
+            assigneeLabel: Self.assigneeLabel(conversation),
+            assigneeEmail: Self.usable(conversation.assigneeEmail),
             statusLabel: outbound ? AppWire.label(.messageDeliveryStatus, last.status) : nil,
             statusTone: MessageStatusTone.tone(for: last.status)
         )
@@ -84,12 +93,36 @@ extension ConversationDisplay {
     /// ⚠️ CHANNELS ONLY WHEN THE THREAD ACTUALLY MIXES THEM, ported verbatim from the
     /// Android row. A single-channel thread does not need to be told it is SMS, and a
     /// badge on every row is noise that hides the one badge that matters.
+    ///
+    /// ⛔ EXCEPT A THREAD WHOSE ONE CHANNEL IS NOT SMS OR EMAIL (DistrictCore 8.2.0). A
+    /// Messenger or Instagram thread is titled `fb:…` or `ig:…` until the customer is a
+    /// Contact, and a WhatsApp one by a bare number that reads as a texting thread; the
+    /// badge is the only thing on the row that says where the reply goes.
     private static func channelLabels(_ channels: [String]) -> [String] {
-        guard channels.count > 1 else { return [] }
+        guard channels.count > 1 || channels.contains(where: { !unlabelledAlone.contains($0) }) else { return [] }
         // ⚠️ English keeps the wire word in capitals (`EMAIL`), as it always has; French
         // names the channel (« COURRIEL »).
         guard AppL10n.copyLocale == .frCA else { return channels.map { $0.uppercased() } }
         return channels.map { ThreadChannelName.of($0).uppercased() }
+    }
+
+    /// The channels a single-channel row does not badge, as before 8.2.0: SMS, email and
+    /// the messages the receptionist took on calls.
+    private static let unlabelledAlone: Set<String> = [
+        MessageChannel.sms,
+        MessageChannel.email,
+        ThreadChannelName.voicemail,
+    ]
+
+    /// ⛔ THE SERVER DECIDES WHO "ME" IS (`assignedToMe`), not a comparison with an
+    /// address this client holds: the session's email and the stored assignee can differ
+    /// in case or alias, and the web's filter reads the same flag.
+    private static func assigneeLabel(_ conversation: ConversationSummary) -> String? {
+        if conversation.assignedToMe == true {
+            return InboxCopy.assigneeYou
+        }
+        guard let email = usable(conversation.assigneeEmail) else { return nil }
+        return email.split(separator: "@", maxSplits: 1).first.map(String.init) ?? email
     }
 
     /// ⚠️ A ONE-CHARACTER GLYPH, NOT A WORD. The Android row's note argues against a

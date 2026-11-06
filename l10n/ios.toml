@@ -3359,6 +3359,61 @@ state = "reviewed"
 id = { swift = "InCallCopy.wordRingTimedOut" }
 note = "Follows 'Call ended · '."
 
+[inbox.all_conversations]
+en = "All conversations"
+fr = "Toutes les conversations"
+ctx = "label"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.allConversations" }
+note = "The Inbox filter's other choice: every conversation, assigned or not."
+
+[inbox.assign]
+en = "Assign"
+fr = "Assigner"
+ctx = "button"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.assign" }
+note = "The swipe action on an Inbox row that opens the list of members the conversation can be assigned to. The website's verb (« assignée »)."
+
+[inbox.assign_label]
+en = "Assigned to"
+fr = "Assignée à"
+ctx = "title"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.assignLabel" }
+note = "The title of the sheet that lists the members a conversation can be assigned to. French agrees with « la conversation ». The website's label (inboxI18n assignLabel)."
+
+[inbox.assigned_to]
+en = "Assigned to {email}"
+fr = "Assignée à {email}"
+ctx = "a11y"
+screen = "inbox"
+args = { email = "str" }
+state = "reviewed"
+id = { swift = "InboxCopy.assignedTo(_:)" }
+note = "Read by VoiceOver on an Inbox row's assignee badge; email is the member's address. The website's sentence (inboxI18n assignedTo)."
+
+[inbox.assigned_to_me]
+en = "Assigned to me"
+fr = "Qui me sont assignées"
+ctx = "label"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.assignedToMe" }
+note = "The Inbox filter that shows only the conversations assigned to the person reading. French agrees with « les conversations ». The website's label (inboxI18n assignedToMe)."
+
+[inbox.assignee_you]
+en = "You"
+fr = "Vous"
+ctx = "label"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.assigneeYou" }
+note = "An Inbox row's assignee badge when the conversation is assigned to the person reading, and their row in the assign sheet."
+
 [inbox.attach_file]
 en = "Attach file"
 fr = "Joindre un fichier"
@@ -3395,17 +3450,78 @@ args = { count = "int" }
 state = "reviewed"
 id = { swift = "InboxCopy.attachmentCount(_:)" }
 
-[inbox.attachments_dropped]
-en.one = "image was removed: email replies cannot carry attachments. Switch back to SMS to send them."
-en.other = "{count} images were removed: email replies cannot carry attachments. Switch back to SMS to send them."
-fr.one = "{count} image a été retirée\u00A0: les réponses par courriel n'acceptent pas les pièces jointes. Revenez au texto pour l'envoyer."
-fr.other = "{count} images ont été retirées\u00A0: les réponses par courriel n'acceptent pas les pièces jointes. Revenez au texto pour les envoyer."
+[inbox.attachment_held]
+en = "Held"
+fr = "En attente"
+ctx = "label"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.attachmentHeld" }
+note = "On a held image's chip in the reply box: an image the draft keeps that the selected channel cannot carry, drawn dimmed with its own Remove. It is not sent on this channel and comes back as an attachment on a switch to SMS."
+
+[inbox.attachment_held_by_email]
+en = "Image held, not sent by email"
+fr = "Image en attente, non envoyée par courriel"
+ctx = "a11y"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.attachmentHeldByEmail" }
+note = "Read by VoiceOver on a held image's chip when the reply goes out by email. French agrees with « image »."
+
+[inbox.attachment_held_on]
+en = "Image held, not sent on {channel}"
+fr = "Image en attente, non envoyée par {channel}"
+ctx = "a11y"
+screen = "inbox.thread"
+args = { channel = "str" }
+state = "reviewed"
+id = { swift = "InboxCopy.attachmentHeldOn(_:)" }
+note = "Read by VoiceOver on a held image's chip; channel is the reply's channel name as the picker shows it (WhatsApp, Messenger, Instagram). French agrees with « image »."
+
+[inbox.attachments_held_email]
+en.one = "The image stays in the draft: email replies cannot carry attachments, so it will not be sent."
+en.other = "{count} images stay in the draft: email replies cannot carry attachments, so they will not be sent."
+fr.one = "{count} image reste dans le brouillon\u00A0: les réponses par courriel n'acceptent pas les pièces jointes, elle ne sera donc pas envoyée."
+fr.other = "{count} images restent dans le brouillon\u00A0: les réponses par courriel n'acceptent pas les pièces jointes, elles ne seront donc pas envoyées."
 ctx = "body"
 screen = "inbox.thread"
 args = { count = "int" }
 state = "reviewed"
-id = { swift = "InboxCopy.attachmentsDropped(_:)" }
-note = "Shown when switching a reply to email drops its images. The English one form names no number and starts lower case, as shipped; count is never 0."
+id = { swift = "InboxCopy.attachmentsHeldEmail(_:)" }
+note = "Shown when a reply on email holds the draft's images (a switch from SMS, or a draft restored on email). The images are kept in the stored draft and come back as attachments on a switch to SMS. The one form names no number; count is never 0."
+
+[inbox.attachments_held_meta]
+en.one = "The image stays in the draft: Messenger and Instagram replies are text-only for now, so it will not be sent."
+en.other = "{count} images stay in the draft: Messenger and Instagram replies are text-only for now, so they will not be sent."
+fr.one = "{count} image reste dans le brouillon\u00A0: les réponses Messenger et Instagram sont pour l'instant en texte seulement, elle ne sera donc pas envoyée."
+fr.other = "{count} images restent dans le brouillon\u00A0: les réponses Messenger et Instagram sont pour l'instant en texte seulement, elles ne seront donc pas envoyées."
+ctx = "body"
+screen = "inbox.thread"
+args = { count = "int" }
+state = "reviewed"
+id = { swift = "InboxCopy.attachmentsHeldMeta(_:)" }
+note = "Shown when a reply on Messenger or Instagram holds the draft's images. The images are kept in the stored draft and come back as attachments on a switch to SMS. The one form names no number; count is never 0."
+
+[inbox.attachments_held_whatsapp]
+en.one = "The image stays in the draft: WhatsApp replies are text-only for now, so it will not be sent."
+en.other = "{count} images stay in the draft: WhatsApp replies are text-only for now, so they will not be sent."
+fr.one = "{count} image reste dans le brouillon\u00A0: les réponses WhatsApp sont pour l'instant en texte seulement, elle ne sera donc pas envoyée."
+fr.other = "{count} images restent dans le brouillon\u00A0: les réponses WhatsApp sont pour l'instant en texte seulement, elles ne seront donc pas envoyées."
+ctx = "body"
+screen = "inbox.thread"
+args = { count = "int" }
+state = "reviewed"
+id = { swift = "InboxCopy.attachmentsHeldWhatsapp(_:)" }
+note = "Shown when a reply on WhatsApp holds the draft's images. The images are kept in the stored draft and come back as attachments on a switch to SMS. The one form names no number; count is never 0."
+
+[inbox.attachments_switch_to_sms]
+en = "To send images, switch to SMS."
+fr = "Pour envoyer des images, passez au texto."
+ctx = "body"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.attachmentsSwitchToSms" }
+note = "Follows an attachments_held_* sentence, after one space, only on a thread that offers an SMS reply."
 
 [inbox.call]
 en = "Call"
@@ -3543,6 +3659,15 @@ screen = "inbox.thread"
 state = "reviewed"
 id = { swift = "InboxCopy.email" }
 
+[inbox.filter]
+en = "Filter"
+fr = "Filtrer"
+ctx = "button"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.filter" }
+note = "The Inbox toolbar menu that holds the two filters (all conversations, assigned to me)."
+
 [inbox.image_could_not_read]
 en = "That image could not be read. Try picking it again."
 fr = "Impossible de lire cette image. Sélectionnez-la de nouveau."
@@ -3568,6 +3693,16 @@ state = "reviewed"
 fr_variant = "iPad list column title: « Boîte de réception » truncates; « Réception » as the iOS tab and Apple Mail (visual QA AP-026)"
 id = { swift = "InboxCopy.inbox" }
 note = "3.0.2 (visual QA AP-026): the screen's title. « Boîte de réception » truncated to « Boîte de récep… » in the iPad list column; « Réception » is Apple Mail's own French for Inbox and the tab bar's word already."
+
+[inbox.instagram]
+en = "Instagram"
+fr = "Instagram"
+ctx = "label"
+screen = "inbox"
+state = "reviewed"
+same_ok = true
+id = { swift = "InboxCopy.instagram" }
+note = "Meta's product name, the channel of an Instagram thread on its Inbox row and in the composer. The same in both languages, as on the website."
 
 [inbox.keep_typing]
 en = "Keep typing"
@@ -3636,6 +3771,16 @@ screen = "inbox.thread"
 state = "reviewed"
 id = { swift = "InboxCopy.messagesCallsContactWill" }
 
+[inbox.messenger]
+en = "Messenger"
+fr = "Messenger"
+ctx = "label"
+screen = "inbox"
+state = "reviewed"
+same_ok = true
+id = { swift = "InboxCopy.messenger" }
+note = "Meta's product name, the channel of a Messenger thread on its Inbox row and in the composer. The same in both languages, as on the website."
+
 [inbox.missed_call]
 en = "Missed call"
 fr = "Appel manqué"
@@ -3691,6 +3836,24 @@ ctx = "body"
 screen = "inbox"
 state = "reviewed"
 id = { swift = "InboxCopy.noMessageWorkspaceContains" }
+
+[inbox.nothing_assigned_message]
+en = "Conversations a teammate assigns to you show up here."
+fr = "Les conversations qu'un membre de l'équipe vous assigne s'affichent ici."
+ctx = "body"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.nothingAssignedMessage" }
+note = "The line under the Assigned to me filter's empty state."
+
+[inbox.nothing_assigned_title]
+en = "Nothing assigned to you"
+fr = "Rien ne vous est assigné"
+ctx = "title"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.nothingAssignedTitle" }
+note = "The empty state of the Assigned to me filter."
 
 [inbox.nothing_thread]
 en = "Nothing in this thread"
@@ -3884,6 +4047,15 @@ screen = "inbox.thread"
 state = "reviewed"
 id = { swift = "InboxCopy.tryAgain" }
 
+[inbox.unassigned]
+en = "Unassigned"
+fr = "Non assignée"
+ctx = "label"
+screen = "inbox"
+state = "reviewed"
+id = { swift = "InboxCopy.unassigned" }
+note = "The first choice in the assign sheet: the conversation belongs to nobody. French agrees with « la conversation ». The website's label (inboxI18n unassigned)."
+
 [inbox.unread_count]
 en.one = "{count} unread"
 en.other = "{count} unread"
@@ -3913,6 +4085,99 @@ screen = "inbox.thread"
 state = "reviewed"
 same_ok = true
 id = { swift = "InboxCopy.whatsapp" }
+
+[inbox.whatsapp_template_label]
+en = "Template"
+fr = "Modèle de message"
+ctx = "title"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.whatsappTemplateLabel" }
+note = "The title of the sheet that lists the approved WhatsApp templates. The website's label (inboxI18n whatsAppTemplateLabel)."
+
+[inbox.whatsapp_template_placeholder]
+en = "Choose an approved template"
+fr = "Choisir un modèle approuvé"
+ctx = "button"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.whatsappTemplatePlaceholder" }
+note = "The button under a closed WhatsApp window that opens the template sheet. The website's placeholder (inboxI18n whatsAppTemplatePlaceholder)."
+
+[inbox.whatsapp_template_preview]
+en = "Preview"
+fr = "Aperçu"
+ctx = "title"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.whatsappTemplatePreview" }
+note = "The heading over the template text with its variables filled in. The website's label (inboxI18n whatsAppTemplatePreview)."
+
+[inbox.whatsapp_template_send]
+en = "Send template"
+fr = "Envoyer le modèle"
+ctx = "button"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.whatsappTemplateSend" }
+note = "Sends the chosen WhatsApp template. The website's button (inboxI18n whatsAppTemplateSend)."
+
+[inbox.whatsapp_template_variable]
+en = "Variable {number}"
+fr = "Variable {number}"
+ctx = "label"
+screen = "inbox.thread"
+args = { number = "int" }
+state = "reviewed"
+same_ok = true
+id = { swift = "InboxCopy.whatsappTemplateVariable(_:)" }
+note = "The label of one template variable's field; number is its placeholder's number in the template ({{1}} is 1). The website's label without the braces."
+
+[inbox.whatsapp_template_variable_required]
+en = "Fill in this variable"
+fr = "Remplissez cette variable"
+ctx = "body"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.whatsappTemplateVariableRequired" }
+note = "Under an empty template variable while Send template is unavailable. The website's sentence (inboxI18n whatsAppTemplateVariableRequired)."
+
+[inbox.whatsapp_templates_failed]
+en = "The templates could not be loaded. Try again in a moment."
+fr = "Les modèles n'ont pas pu être chargés. Réessayez dans un instant."
+ctx = "body"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.whatsappTemplatesFailed" }
+note = "The template sheet when the templates could not be read. The website's sentence (inboxI18n whatsAppTemplatesFailed)."
+
+[inbox.whatsapp_templates_loading]
+en = "Loading templates"
+fr = "Chargement des modèles"
+ctx = "body"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.whatsappTemplatesLoading" }
+note = "While the template sheet reads the approved templates. The website's sentence (inboxI18n whatsAppTemplatesLoading)."
+
+[inbox.whatsapp_templates_none]
+en = "No approved template for this number yet."
+fr = "Aucun modèle approuvé pour ce numéro pour l'instant."
+ctx = "body"
+screen = "inbox.thread"
+state = "reviewed"
+fr_variant = "The website's first sentence only (Sean, 2026-11-05): its second, « Actualisez les modèles dans les paramètres de messagerie », points to a refresh this app cannot do, since its Messaging settings cannot refresh templates."
+id = { swift = "InboxCopy.whatsappTemplatesNone" }
+note = "The template sheet when the sender has no approved template. The website's sentence (inboxI18n whatsAppTemplatesNone), without its second sentence: the app's Messaging settings cannot refresh templates, and an Apple catalog names no web destination (STORE-APPLE)."
+
+[inbox.whatsapp_window_closed]
+en = "Window closed: WhatsApp only allows a template now"
+fr = "Fenêtre fermée\u00A0: WhatsApp n'accepte maintenant qu'un modèle de message"
+ctx = "body"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.whatsappWindowClosed" }
+note = "Shown in place of the reply box on a WhatsApp thread whose 24-hour customer-service window has closed. The website's sentence (inboxI18n whatsAppWindowClosed)."
 
 [incoming_call.answer]
 en = "Answer"
