@@ -210,8 +210,11 @@ extension ThreadModel {
     ///
     /// ⚠️ THE BODY RULE IS UNCHANGED: blank refuses even with images attached, because
     /// `messages/send` guards on `!body` before it looks at `mediaUrls`.
+    ///
+    /// ⛔ AND A CLOSED MESSENGER OR INSTAGRAM WINDOW REFUSES, as on the website: the box stays
+    /// and its text is kept, and the warning above it says why (``metaWindowClosed``).
     var canSendNow: Bool {
-        guard !Self.isBlank(composerText) else { return false }
+        guard !metaWindowClosed, !Self.isBlank(composerText) else { return false }
         guard requiresSubject else { return true }
         return !Self.isBlank(composerSubject)
     }

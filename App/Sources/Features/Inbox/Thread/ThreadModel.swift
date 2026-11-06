@@ -156,6 +156,8 @@ final class ThreadModel {
     /// The WhatsApp window and templates (`ThreadWhatsApp.swift`). ⚠️ Internal for the
     /// reason ``autosaveTask`` is: its writers live in that sibling file.
     var whatsApp = WhatsAppComposer()
+    /// Meta's reply window on a Messenger or Instagram reply (`ThreadMetaWindow.swift`).
+    var meta = MetaWindowComposer()
 
     convenience init(
         container: AppContainer,
@@ -336,6 +338,7 @@ final class ThreadModel {
         switch await sendReply(to: recipient, body: body, media: media) {
         case .success:
             await finishSend(sent: media)
+            await noteMetaSend(to: recipient)
         case let .failure(error):
             // ⚠️ THE CONVERSATION STAYS, AND SO DO THE ATTACHMENTS. They are already
             // uploaded, and dropping them would make a retry re-pick every image.
@@ -346,6 +349,7 @@ final class ThreadModel {
             latest.sendFailure = FailureText.from(error)
             setContent(latest)
             await noteWindowRefusal(error, for: recipient)
+            noteMetaWindowRefusal(error, for: recipient)
         }
     }
 
@@ -365,7 +369,8 @@ final class ThreadModel {
     /// when the model returns nothing, and blanking a composer the operator had typed
     /// in is the single most destructive thing this button could do.
     func generateDraft() async {
-        guard canReply, let selector = target.selector else { return }
+        // ⛔ NOT IN META'S HUMAN AGENT WINDOW: that reply is tagged as a person's.
+        guard canReply, !metaHumanAgent, let selector = target.selector else { return }
         guard var content = current, !content.draftGenerating else { return }
         content.draftGenerating = true
         content.sendFailure = nil

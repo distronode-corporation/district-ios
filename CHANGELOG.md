@@ -19,6 +19,14 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
+- Messenger and Instagram reply window (3.3.0, Sean's decisions of 2026-11-06: web parity), on
+  DistrictCore 8.3.0's `InboxRepository.metaWindow`. A Messenger or Instagram reply reads Meta's
+  window when its channel is selected and again after a send, with the WhatsApp window's
+  guards (latest read only, a cancelled read dropped, an answer for another address dropped).
+  Closed shows the website's warning and disables Send (the text is kept); a 409
+  `messenger_window_closed` closes it at once. The 7-day human agent window shows the
+  website's badge and offers no AI draft. Open and an unknown state block nothing, and no
+  countdown is drawn. Two strings, the website's English and French.
 - Live supervise (3.3.0, Sean's decisions of 2026-11-05), on DistrictCore 8.2.0's
   `SuperviseSession`, `CallsRepository.monitor`/`takeOver` and `WhisperReceipt`. A Live calls
   hub (Overview row, iPad sidebar) lists the call log's calls in progress and follows the

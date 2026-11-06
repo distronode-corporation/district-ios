@@ -3781,6 +3781,24 @@ same_ok = true
 id = { swift = "InboxCopy.messenger" }
 note = "Meta's product name, the channel of a Messenger thread on its Inbox row and in the composer. The same in both languages, as on the website."
 
+[inbox.meta_human_agent]
+en = "Human agent reply (7-day window)"
+fr = "Réponse d'un agent humain (fenêtre de 7\u00A0jours)"
+ctx = "label"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.metaHumanAgent" }
+note = "A badge over the reply box on a Messenger or Instagram thread in Meta's 7-day human agent window: the reply goes tagged as a person's, so the AI draft is not offered. \"Human agent\" is Meta's own term. The website's badge (inboxI18n metaHumanAgent)."
+
+[inbox.meta_window_closed]
+en = "Reply window closed: Messenger and Instagram allow a reply only within 24 hours of the customer's last message (7 days for a human agent reply, when it is turned on). You can reply once they write again."
+fr = "Fenêtre de réponse fermée\u00A0: Messenger et Instagram n'acceptent une réponse que dans les 24\u00A0heures suivant le dernier message du client (7\u00A0jours pour une réponse d'un agent humain, si elle est activée). Vous pourrez répondre quand il vous écrira de nouveau."
+ctx = "body"
+screen = "inbox.thread"
+state = "reviewed"
+id = { swift = "InboxCopy.metaWindowClosed" }
+note = "A warning over the reply box on a Messenger or Instagram thread whose reply window has closed; Send is disabled under it. The website's sentence (inboxI18n metaWindowClosed)."
+
 [inbox.missed_call]
 en = "Missed call"
 fr = "Appel manqué"
