@@ -50,6 +50,7 @@ struct ComposerBar: View {
         VStack(alignment: .leading, spacing: DistrictSpacing.tight) {
             channelStrip
             channelNoteStrip
+            MetaWindowStrip(model: model)
             draftStrip
             draftNoticeStrip
             failureStrip
@@ -66,15 +67,22 @@ struct ComposerBar: View {
                 // word grows, and the field above keeps the whole width it needs at AX5.
                 HStack(spacing: DistrictSpacing.row) {
                     attachControl
-                    draftControl
+                    // ⛔ NO AI DRAFT IN META'S HUMAN AGENT WINDOW, as on the website.
+                    if !model.metaHumanAgent {
+                        draftControl
+                    }
                     Spacer(minLength: DistrictSpacing.tight)
                     sendControl
                 }
                 .imageScale(.large)
             }
         }
-        // ⚠️ RE-READ ON EVERY CHANNEL SWITCH: the window belongs to the WhatsApp reply only.
-        .task(id: model.selectedReplyIndex) { await model.refreshWhatsAppWindow() }
+        // ⚠️ RE-READ ON EVERY CHANNEL SWITCH: each window belongs to its own channel's reply,
+        // and each read forgets its window when the reply is not on that channel.
+        .task(id: model.selectedReplyIndex) {
+            await model.refreshWhatsAppWindow()
+            await model.refreshMetaWindow()
+        }
         // ⛔ AND AGAIN WHEN AN OPEN WINDOW REACHES ITS CLOSE, so free text is not offered past it.
         .task(id: model.whatsApp.window) { await model.rereadWindowAtExpiry() }
         .padding(.horizontal, DistrictSpacing.gutter)

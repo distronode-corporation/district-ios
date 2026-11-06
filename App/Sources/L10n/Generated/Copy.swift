@@ -1484,6 +1484,12 @@ extension InboxCopy {
     /// `inbox.messenger`
     internal static var messenger: String { AppL10n.copyLocale == .frCA ? "Messenger" : "Messenger" }
 
+    /// `inbox.meta_human_agent`
+    internal static var metaHumanAgent: String { AppL10n.copyLocale == .frCA ? "Réponse d'un agent humain (fenêtre de 7\u{00A0}jours)" : "Human agent reply (7-day window)" }
+
+    /// `inbox.meta_window_closed`
+    internal static var metaWindowClosed: String { AppL10n.copyLocale == .frCA ? "Fenêtre de réponse fermée\u{00A0}: Messenger et Instagram n'acceptent une réponse que dans les 24\u{00A0}heures suivant le dernier message du client (7\u{00A0}jours pour une réponse d'un agent humain, si elle est activée). Vous pourrez répondre quand il vous écrira de nouveau." : "Reply window closed: Messenger and Instagram allow a reply only within 24 hours of the customer's last message (7 days for a human agent reply, when it is turned on). You can reply once they write again." }
+
     /// `inbox.missed_call`
     internal static var missedCall: String { AppL10n.copyLocale == .frCA ? "Appel manqué" : "Missed call" }
 
