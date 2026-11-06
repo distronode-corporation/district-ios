@@ -297,6 +297,101 @@ final class LiveCallsModelTests: XCTestCase {
     }
 }
 
+/// A read cancelled part way (Seer, district-macos PR #98).
+extension LiveCallsModelTests {
+    /// ⛔ A READ CANCELLED PART WAY IS A FAILURE, NOT THE PAGES IT REACHED (Seer, district-macos
+    /// PR #98): the later page fails because the task was cancelled, as `ApiClient` answers a
+    /// cancelled request, and the list on screen is kept.
+    func testACancelledReadIsAFailureNotAPartialList() async throws {
+        let first = try page("new", minutesAgo: 5)
+        let cancelling = OffsetPager<CallSummary>(identify: { $0.id }, fetch: { limit, offset in
+            guard offset == 0 else {
+                withUnsafeCurrentTask { $0?.cancel() }
+                return .failure(.transport("cancelled"))
+            }
+            return .success(OffsetPage(items: Array(first.prefix(limit))))
+        })
+        let now = now
+        let result = await Task { await LiveCallsModel.readLive(pager: cancelling, now: now) }.value
+        if case .success = result {
+            XCTFail("a cancelled read must not hand back a partial list")
+        }
+    }
+
+    /// ⛔ AND THROUGH THE MODEL: the next event cancels the re-read on its way, and the live call
+    /// on the second page stays listed.
+    func testAReReadCancelledByTheNextEventKeepsTheList() async throws {
+        let log = try CancellableLog(
+            first: [row("cmh1first", status: "in-progress", minutesAgo: 2)] + page("new", minutesAgo: 5).dropFirst(),
+            second: [row("cmh1second", status: "in-progress", minutesAgo: 30)] + page("old", minutesAgo: 600)
+        )
+        let now = now
+        let model = LiveCallsModel(
+            workspaceId: SuperviseFixtures.workspaceId,
+            events: LiveEventFeed(
+                workspaceId: SuperviseFixtures.workspaceId,
+                dependencies: SuperviseFixtures.feedDependencies()
+            ),
+            read: { await LiveCallsModel.readLive(pager: log.pager(), now: now) },
+            sleep: { _ in }
+        )
+        await model.load()
+        XCTAssertEqual(model.calls.map(\.id), ["cmh1first", "cmh1second"])
+
+        model.events.onEvent?(SuperviseFixtures.envelope(.callStarted, .object([:]), callId: "cmh1new"))
+        await waitUntil(state: "reads \(log.reads)") { log.waiting }
+        model.events.onEvent?(SuperviseFixtures.envelope(.callStarted, .object([:]), callId: "cmh1new2"))
+        await waitUntil(state: "reads \(log.reads)") { log.reads == 3 }
+
+        XCTAssertEqual(model.calls.map(\.id), ["cmh1first", "cmh1second"])
+    }
+
+    /// The call log for ``testAReReadCancelledByTheNextEventKeepsTheList()``: the first read
+    /// answers both pages; the second holds its second page until its task is cancelled and then
+    /// fails, as `URLSession` does; every later read fails at once.
+    private final class CancellableLog: @unchecked Sendable {
+        private let lock = NSLock()
+        private let first: [CallSummary]
+        private let second: [CallSummary]
+        private var made = 0
+        private var held = false
+
+        init(first: [CallSummary], second: [CallSummary]) {
+            self.first = first
+            self.second = second
+        }
+
+        var reads: Int {
+            lock.withLock { made }
+        }
+
+        var waiting: Bool {
+            lock.withLock { held }
+        }
+
+        func pager() -> OffsetPager<CallSummary> {
+            let read = lock.withLock {
+                made += 1
+                return made
+            }
+            return OffsetPager(identify: { $0.id }, fetch: { [self] _, offset in
+                switch (read, offset) {
+                case (1, 0), (2, 0):
+                    return .success(OffsetPage(items: first))
+                case (1, _):
+                    return .success(OffsetPage(items: second))
+                case (2, _):
+                    lock.withLock { held = true }
+                    try? await Task.sleep(for: .seconds(30))
+                    return .failure(.transport("cancelled"))
+                default:
+                    return .failure(.transport("offline"))
+                }
+            })
+        }
+    }
+}
+
 /// Holds the first read until the test opens it; later reads answer at once.
 private final class ReadGate: @unchecked Sendable {
     private let lock = NSLock()

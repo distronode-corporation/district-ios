@@ -93,7 +93,10 @@ final class LiveCallsModel {
         for page in 0 ..< maxPages {
             switch await pager.loadNext(limit: pageLimit) {
             case let .failure(error):
-                return page == 0 ? .failure(error) : .success(rows)
+                // ⛔ A READ CANCELLED PART WAY (a burst of events reschedules it) IS A FAILURE,
+                // NEVER THE PAGES IT GOT TO (Seer, district-macos PR #98): those would drop every
+                // live call on a later page until the next read. A failure keeps the list on screen.
+                return page == 0 || Task.isCancelled ? .failure(error) : .success(rows)
             case let .success(slice):
                 rows += slice.items
                 if slice.isEnd {

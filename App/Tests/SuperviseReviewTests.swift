@@ -257,4 +257,30 @@ final class SuperviseReviewTests: XCTestCase {
         XCTAssertFalse(CallTeardown.isWorkspaceSwitch(from: "ws_1", to: "ws_1"))
         XCTAssertFalse(CallTeardown.isWorkspaceSwitch(from: "ws_1", to: nil))
     }
+
+    /// ⛔ A PICKER SWITCH PASSES THROUGH NIL AND STILL ENDS A SUPERVISION (Seer, district-macos
+    /// PR #98): `WorkspaceSessionModel.select(_:)` puts the state back to `.loading` while the new
+    /// list is read, so the shell sees A, nil, B, and neither step alone is a switch.
+    func testASwitchThroughNilEndsASupervision() async throws {
+        final class Supervisor: SupervisionEnding {
+            var ended = 0
+            func endSupervision() async {
+                ended += 1
+            }
+        }
+        let supervisor = Supervisor()
+        let stack = CallStack(microphone: FakeMicrophoneAccess(status: .granted))
+        stack.supervisor = supervisor
+
+        // The first workspace resolving, and the same one read again, are not switches.
+        for workspaceId in [nil, "ws_1", nil, "ws_1"] {
+            stack.workspaceSelected(workspaceId)
+        }
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertEqual(supervisor.ended, 0)
+
+        stack.workspaceSelected(nil)
+        stack.workspaceSelected("ws_2")
+        await waitUntil(state: "ended \(supervisor.ended)") { supervisor.ended == 1 }
+    }
 }
