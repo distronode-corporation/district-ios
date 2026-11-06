@@ -358,6 +358,10 @@ final class WatchLiveRelay: WatchLiveHandling {
     func end(_ reason: String) {
         guard let session else { return }
         self.session = nil
+        // ⚠️ THE RECEIPT GOES WITH THE SESSION (Seer, PR #101): a screen opened again must not
+        // show, and scroll to, an answer it already had as if it had just arrived. One still
+        // on its way is stored when it lands, for the next screen.
+        receipts[session.callId] = nil
         session.watchdog?.cancel()
         session.feed.deactivate()
         if session.mode == .socket {

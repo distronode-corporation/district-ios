@@ -121,6 +121,24 @@ final class WatchLiveRequestTests: XCTestCase {
         XCTAssertNil(after.live?.receipt)
     }
 
+    /// ⚠️ A RECEIPT ENDS WITH ITS RELAY SESSION (Seer, PR #101): the call's screen opened again
+    /// does not get an answer it already showed.
+    func testAReceiptIsDroppedWhenTheSessionEnds() async {
+        let sources = FakeLiveSources()
+        sources.receiptResult = WhisperReceipt(applied: true, firstWords: "Sure.", reason: nil)
+        sources.feed.onActivate = { $0.snapshot([LiveFixtures.segment("a", index: 0)]) }
+        let relay = makeRelay(sources)
+        _ = await relay.answer(subscribe)
+        _ = await relay.answer(.whisper(workspaceId: LiveFixtures.workspaceId, callId: LiveFixtures.callId, text: "Hi"))
+        await waitUntil { relay.receipts[LiveFixtures.callId] != nil }
+
+        _ = await relay.answer(.liveUnsubscribe(workspaceId: LiveFixtures.workspaceId, callId: LiveFixtures.callId))
+        let reopened = await relay.answer(subscribe)
+
+        XCTAssertNil(relay.receipts[LiveFixtures.callId])
+        XCTAssertNil(reopened.live?.receipt)
+    }
+
     /// A refused note waits for no receipt.
     func testAFailedWhisperWaitsForNoReceipt() async {
         let sources = FakeLiveSources()
