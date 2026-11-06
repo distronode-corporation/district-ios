@@ -32,7 +32,10 @@ final class TelemetryReceiptListener: WatchReceiptWaiting {
     private let callId: String
     private let clock: any LiveClock
     private var pump: Task<Void, Never>?
-    private(set) var connected = false
+    /// The broadcaster has this socket on its list. ⛔ NOT THE HANDSHAKE (max review of PR #101,
+    /// item 9): the socket is added to the workspace's relay list only after its first frame is
+    /// read, so the first server frame (the reply to the transcript subscribe) is the sign.
+    private(set) var ready = false
     private(set) var found: WhisperReceipt?
     /// The receipt came, the call ended, or the socket ended: nothing more to wait for.
     private(set) var finished = false
@@ -43,17 +46,20 @@ final class TelemetryReceiptListener: WatchReceiptWaiting {
         self.clock = clock
     }
 
-    /// Start the socket, and return once it is open (or `milliseconds` ran out, or it ended).
+    /// Start the socket, and return once the broadcaster is relaying to it (or `milliseconds`
+    /// ran out, or it ended).
     func open(within milliseconds: Int64) async {
         let runner = runner
+        let callId = callId
         pump = Task { [weak self] in
+            await runner.subscribeTranscript(callId: callId)
             await runner.start()
             for await update in runner.updates {
                 guard let self else { return }
                 handle(update)
             }
         }
-        await wait(milliseconds) { $0.connected || $0.finished }
+        await wait(milliseconds) { $0.ready || $0.finished }
     }
 
     func receipt(within milliseconds: Int64) async -> WhisperReceipt? {
@@ -67,9 +73,10 @@ final class TelemetryReceiptListener: WatchReceiptWaiting {
     }
 
     private func handle(_ update: TelemetryUpdate) {
+        if case .event = update {
+            ready = true
+        }
         switch update {
-        case .connected:
-            connected = true
         case let .event(envelope) where envelope.callId == callId:
             if let receipt = envelope.whisperReceipt {
                 found = receipt

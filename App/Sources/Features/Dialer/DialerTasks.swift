@@ -74,3 +74,10 @@ extension DialerModel {
         }
     }
 }
+
+extension DialerModel: SoftphoneEnding {
+    /// Hang up, as the in-app button does (sign-out; ``CallTeardown/endsSoftphone(_:)``).
+    func endSoftphone() async {
+        await hangUp()
+    }
+}

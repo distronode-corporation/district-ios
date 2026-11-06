@@ -175,7 +175,12 @@ struct ShellView: View {
             // this the deep link would work only when the app was already open,
             // which is never in the case it exists for. Kotlin's
             // `PushDeepLinkEffect` keys its effect on the same two values.
-            .onChange(of: workspaceSession.workspaceId) {
+            .onChange(of: workspaceSession.workspaceId) { previous, current in
+                // ⛔ A SWITCH ENDS A LIVE SUPERVISION HOWEVER IT WAS MADE, the picker included
+                // (max review of PR #101, item 5).
+                if CallTeardown.isWorkspaceSwitch(from: previous, to: current) {
+                    Task { await container.callStack.endSupervision() }
+                }
                 // ⛔ FIRST, AND THE ORDER IS LOAD BEARING. This drops the previous
                 // tenant's pushed screens; the two resolvers below may append a route
                 // for the NEW tenant, and running them the other way round would clear

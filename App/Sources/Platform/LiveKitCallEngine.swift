@@ -182,6 +182,14 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     private func startMicrophone() async {
         do {
             try await room.setMicrophone(enabled: true)
+            // ⛔ A SUPERVISE LEG SAYS THE MICROPHONE STARTED (max review of PR #101, item 1). The
+            // reducer's unmute on `.connected` is dropped by the join gate while this start is on
+            // its way, so without this event a takeover's card read "muted" over a live
+            // microphone, and a later system mute was ignored. The dialler's path is unchanged.
+            if announcesPresentParticipants {
+                await bridge.connectedReported()
+                continuation.yield(.microphoneChanged(enabled: true))
+            }
         } catch {
             callLog.info("microphone did not start: \(error.localizedDescription, privacy: .public)")
             await bridge.connectedReported()
@@ -293,6 +301,18 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
         self.deduplicatesParticipants = deduplicatesParticipants
     }
 
+    /// Bring the count back to the room as it is after a full reconnect: a leave for each
+    /// participant counted but gone, a join for each one present but not counted.
+    func recount(_ participants: [CallParticipant]) {
+        guard deduplicatesParticipants else { return }
+        let now = Set(participants.map(\.identity))
+        let gone: Set<String> = lock.withLock { present.subtracting(now) }
+        for identity in gone.sorted() {
+            participantDisconnected(CallParticipant(identity: identity, name: nil, isAgent: false))
+        }
+        announcePresent(participants)
+    }
+
     /// Report the participants already in the room as joins, each once.
     func announcePresent(_ participants: [CallParticipant]) {
         for participant in participants {
@@ -310,8 +330,15 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
     }
 
     /// A participant left. ⚠️ Internal so the tests can speak as the SDK.
-    func participantDisconnected(_ participant: CallParticipant) {
+    ///
+    /// - Parameter stillInRoom: whether the room still lists them. ⛔ The SDK's own teardown (an
+    ///   eviction, a network loss, a full reconnect) fires `participantDidDisconnect` for every
+    ///   remote participant BEFORE `didDisconnectWithError`, while they are still listed; a real
+    ///   leave removes them first (max review of PR #101, item 3). Dropping those keeps a drop a
+    ///   drop, not "the call has ended".
+    func participantDisconnected(_ participant: CallParticipant, stillInRoom: Bool = false) {
         if deduplicatesParticipants {
+            guard !stillInRoom else { return }
             let removed = lock.withLock { present.remove(participant.identity) != nil }
             // ⚠️ A leave for someone never counted is dropped, or the count would go below the
             // room.
@@ -370,6 +397,10 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
     @objc
     func room(_ room: Room, didCompleteReconnectWithMode mode: ReconnectMode) {
         continuation.yield(.connected)
+        // ⚠️ A FULL RECONNECT REJOINS FROM SCRATCH: the count is brought back to the room.
+        if mode == .full {
+            recount(room.remoteParticipants.values.map(Self.participant))
+        }
     }
 
     @objc
@@ -400,7 +431,8 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
 
     @objc
     func room(_ room: Room, participantDidDisconnect participant: RemoteParticipant) {
-        participantDisconnected(Self.participant(participant))
+        let stillInRoom = participant.identity.map { room.remoteParticipants[$0] != nil } ?? false
+        participantDisconnected(Self.participant(participant), stillInRoom: stillInRoom)
     }
 
     /// ⚠️ THE SDK'S OWN CLASSIFICATION FOR `isAgent`, NEVER AN IDENTITY PREFIX. The

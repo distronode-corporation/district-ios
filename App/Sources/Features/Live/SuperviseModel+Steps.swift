@@ -26,9 +26,17 @@ extension SuperviseModel {
             Task { await systemEnded() }
         case let .muteRequested(uuid, muted):
             guard uuid == callUUID else { return }
-            guard state.holdsTheCall else {
+            switch state.phase {
+            case .requestingTakeover, .joiningTakeover:
+                // ⛔ A MUTE PRESSED WHILE THE TAKEOVER IS ON ITS WAY IS KEPT, NOT UNDONE (max review
+                // of PR #101, item 8): it is applied once the coach room is joined (``settle()``).
+                pendingMute = muted
+                return
+            case .takenOver:
+                break
+            default:
                 // ⛔ A LISTENER HAS NO MICROPHONE TO MUTE, BUT CALLKIT HAS ALREADY SHOWN ONE MUTED
-                // (xhigh review of PR #101, item 5), and the takeover would open the microphone
+                // (xhigh review of PR #101, item 5), and a takeover would open the microphone
                 // under a system UI that still says muted. Put the system's control back.
                 // ⚠️ Only for a mute: the unmute that comes back is ignored here, so no loop.
                 if muted {
@@ -54,6 +62,10 @@ extension SuperviseModel {
             return
         }
         await apply(.stopPressed)
+    }
+
+    private func isCurrent(_ leg: SuperviseLeg, _ generation: Int) -> Bool {
+        claimed && state.leg == leg && state.generation == generation
     }
 
     func perform(_ command: SuperviseCommand) async {
@@ -85,7 +97,12 @@ extension SuperviseModel {
             await apply(.listenRefused(.decoding("call id is not a call")))
             return
         }
-        switch await server.monitor(callId: id, platform: .ios) {
+        // ⛔ AN ANSWER FOR AN ATTEMPT THE PERSON ABANDONED IS DROPPED (max review of PR #101, item
+        // 7): after Stop and Listen again, the first attempt's refusal is not the second one's.
+        let attempt = callUUID
+        let answer = await server.monitor(callId: id, platform: .ios)
+        guard callUUID == attempt else { return }
+        switch answer {
         case let .success(seat):
             await apply(.listenGranted(seat))
         case let .failure(error):
@@ -94,7 +111,10 @@ extension SuperviseModel {
     }
 
     private func requestTakeover() async {
-        switch await server.takeOver(workspaceId: workspaceId, callId: callId) {
+        let attempt = callUUID
+        let answer = await server.takeOver(workspaceId: workspaceId, callId: callId)
+        guard callUUID == attempt else { return }
+        switch answer {
         case let .success(seat):
             await apply(.takeoverGranted(seat))
         case let .failure(error):
@@ -110,8 +130,17 @@ extension SuperviseModel {
     /// engine says late: the listen engine's `disconnected` after a takeover, or a stopped
     /// listen's after Listen was pressed again.
     private func join(_ leg: SuperviseLeg, generation: Int, url: String, token: String) async {
+        // ⛔ ONLY FOR THE JOIN THE SESSION STILL WANTS (max review of PR #101, item 2): an end
+        // during the takeover's room swap (Stop, the call ending, the lock screen) must not build
+        // a coach engine with a published microphone that nothing will ever end.
+        guard isCurrent(leg, generation) else { return }
         legTask?.cancel()
         let events = await media.beginLeg(leg)
+        guard isCurrent(leg, generation) else {
+            // ⚠️ THE ENGINE ALREADY EXISTS: end it, connected to nothing.
+            media.endLeg()
+            return
+        }
         engineLeg = leg
         legTask = Task { @MainActor [weak self] in
             for await event in events {
@@ -125,8 +154,14 @@ extension SuperviseModel {
     /// React to the phase the reducer has just reached.
     func settle() async {
         switch state.phase {
-        case .listening, .takenOver:
+        case .listening:
             reportConnected()
+        case .takenOver:
+            reportConnected()
+            if pendingMute {
+                pendingMute = false
+                await media.perform(.setMuted(true))
+            }
         case .idle, .over:
             // ⛔ NOT WHILE THE OS IS STILL STARTING THE CALL: a note sent in that second is an
             // event in `idle` too, and releasing then would drop the listen-in just pressed.

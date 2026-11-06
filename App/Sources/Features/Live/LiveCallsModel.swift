@@ -152,10 +152,14 @@ final class LiveCallsModel {
         case .callUpdated:
             // ⚠️ OFF THE LIST UNLESS IN PROGRESS, BUT REMEMBERED AS ENDED ONLY WHEN IT IS: a call
             // still ringing comes back with the next read once it is answered.
+            // ⚠️ AND A RE-READ ONLY FOR AN UPDATE THAT CAN ADD A ROW (max review of PR #101, item
+            // 12): each reads up to ``maxPages`` pages, and on a busy line most updates are about
+            // calls already listed or already gone. A ringing call is re-read when it is answered.
             if let status = envelope.callStatus, status != CallWire.statusInProgress {
                 remove(envelope.callId, ended: CallWire.hasEnded(status))
+            } else {
+                scheduleReread()
             }
-            scheduleReread()
         case .callStarted:
             scheduleReread()
         default:

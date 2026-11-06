@@ -48,6 +48,32 @@ protocol SupervisionEnding: AnyObject {
     func endSupervision() async
 }
 
+/// The outbound call the call stack can end without naming the dialler.
+@MainActor
+protocol SoftphoneEnding: AnyObject {
+    func endSoftphone() async
+}
+
+/// When the session's end takes the device's calls down with it.
+enum CallTeardown {
+    /// ⛔ THE KEYPAD'S CALL ENDS ON SIGN-OUT ONLY (Sean, 2026-11-06: "End it on sign-out only"):
+    /// signing out, a session that ended, a session that must sign in again (all `signedOut`).
+    /// NOT on `unavailable` (the session is intact) and NOT on a workspace switch.
+    static func endsSoftphone(_ phase: AuthPhase) -> Bool {
+        if case .signedOut = phase {
+            return true
+        }
+        return false
+    }
+
+    /// ⛔ A SWITCH IS ONE WORKSPACE TO ANOTHER (max review of PR #101, item 5), however it was
+    /// made (a link, a push or the picker). The first workspace resolving is not a switch.
+    static func isWorkspaceSwitch(from previous: String?, to current: String?) -> Bool {
+        guard let previous, let current else { return false }
+        return previous != current
+    }
+}
+
 @MainActor
 final class CallStack {
     /// What the OS is told, and what it asks for back. ⛔ Process-lifetime.
@@ -111,6 +137,11 @@ final class CallStack {
     /// microphone on a customer's call that nobody could otherwise reach in the app.
     func endSupervision() async {
         await (supervisor as? SupervisionEnding)?.endSupervision()
+    }
+
+    /// End the keypad's call, if there is one. See ``CallTeardown/endsSoftphone(_:)``.
+    func endSoftphone() async {
+        await (softphone as? SoftphoneEnding)?.endSoftphone()
     }
 
     /// Whether a telephone call is live on this device, in either direction.

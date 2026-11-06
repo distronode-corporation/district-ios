@@ -63,6 +63,8 @@ final class WatchLiveRelay: WatchLiveHandling {
     private var receiptWait: Task<Void, Never>?
     /// The latest note's wait, closed when the next note replaces it.
     private var currentWait: (any WatchReceiptWaiting)?
+    /// One more for every note: a note whose number is no longer the latest touches no receipt.
+    private var noteSequence = 0
 
     @MainActor
     final class Session {
@@ -145,7 +147,7 @@ final class WatchLiveRelay: WatchLiveHandling {
             return await update(workspaceId: workspaceId, callId: callId, cursor: cursor)
         case let .liveUnsubscribe(_, callId):
             if session?.callId == callId {
-                end("unsubscribed")
+                end("unsubscribed", dropsReceipt: true)
             }
             return .success
         case let .whisper(workspaceId, callId, text):
@@ -182,20 +184,29 @@ final class WatchLiveRelay: WatchLiveHandling {
         // ⛔ THE RECEIPT'S SOCKET IS OPEN BEFORE THE NOTE GOES (xhigh review, item 2), under a
         // background task: the watch's message woke this app for seconds.
         let lease = BackgroundTaskLease.begin("district.watch-receipt", on: backgroundTasks)
+        let began = clock.nowMilliseconds()
+        // ⛔ NUMBERED BEFORE THE FIRST AWAIT (max review of PR #101, item 6): two notes sent close
+        // together interleave across the awaits below, and only the latest may touch the receipt.
+        noteSequence += 1
+        let note = noteSequence
         receipts[callId] = nil
         receiptWait?.cancel()
         currentWait?.cancel()
         let wait = await sources.listenForReceipt(workspaceId: workspaceId, callId: callId)
-        currentWait = wait
+        if note == noteSequence {
+            currentWait = wait
+        } else {
+            wait.cancel()
+        }
         let reply = await Self.reply(sources.whisper(workspaceId: workspaceId, callId: callId, text: line)) { _ in
             .success
         }
-        guard reply.ok else {
+        guard reply.ok, note == noteSequence else {
             wait.cancel()
             lease.end()
             return reply
         }
-        awaitReceipt(wait, callId: callId, lease: lease)
+        awaitReceipt(wait, callId: callId, note: note, began: began, lease: lease)
         return reply
     }
 
@@ -206,11 +217,21 @@ final class WatchLiveRelay: WatchLiveHandling {
     /// Wait for the note's receipt. ⚠️ THE RECEIPT RIDES THE NEXT KEEPALIVE'S ANSWER
     /// (``compose(_:reset:)``); nothing is pushed. ⛔ NONE IN TIME IS SAID AS SUCH, never left
     /// as a silence the person reads as "still waiting".
-    private func awaitReceipt(_ wait: any WatchReceiptWaiting, callId: String, lease: BackgroundTaskLease) {
+    ///
+    /// ⚠️ THE BUDGET COUNTS FROM THE NOTE, NOT FROM HERE (max review, item 10): the socket and the
+    /// send already spent some of the background time.
+    private func awaitReceipt(
+        _ wait: any WatchReceiptWaiting,
+        callId: String,
+        note: Int,
+        began: Int64,
+        lease: BackgroundTaskLease
+    ) {
+        let left = max(0, Self.receiptWaitMilliseconds &- (clock.nowMilliseconds() &- began))
         receiptWait = Task { [weak self] in
-            let receipt = await wait.receipt(within: Self.receiptWaitMilliseconds)
+            let receipt = await wait.receipt(within: left)
             lease.end()
-            guard !Task.isCancelled, let self else { return }
+            guard !Task.isCancelled, let self, note == noteSequence else { return }
             receipts[callId] = receipt.map(WatchLiveComposer.receipt) ?? WatchLiveComposer.noReceipt
             diagnostics.record(.reply, "receipt call=\(WatchRelayDiagnostics.tail(callId)) found=\(receipt != nil)")
         }
@@ -222,9 +243,9 @@ final class WatchLiveRelay: WatchLiveHandling {
         let now = clock.nowMilliseconds()
         if let current = session {
             if current.callId != callId {
-                end("another call")
+                end("another call", dropsReceipt: true)
             } else if current.cursor != cursor {
-                end(cursor == nil ? "resubscribed" : "cursor changed")
+                end(cursor == nil ? "resubscribed" : "cursor changed", dropsReceipt: cursor == nil)
             } else if now &- current.lastKeepaliveAt > Self.keepaliveTimeoutMilliseconds {
                 // ⚠️ THE WATCHDOG DOES NOT RUN WHILE THE APP IS SUSPENDED, so a keepalive that
                 // wakes it after the timeout finds the session it should already have ended.
@@ -367,13 +388,17 @@ final class WatchLiveRelay: WatchLiveHandling {
     }
 
     /// Stop relaying: close any socket, end the background task, forget the session.
-    func end(_ reason: String) {
+    ///
+    /// - Parameter dropsReceipt: ⛔ TRUE ONLY WHEN THE WATCH CLOSED THE SCREEN, OPENED IT AGAIN OR
+    ///   MOVED TO ANOTHER CALL (max review of PR #101, item 4). A session that ended on time (no
+    ///   keepalive for 20 s with the wrist down, the background time running out) keeps the
+    ///   receipt, so the next keepalive still carries an answer the watch has not had.
+    func end(_ reason: String, dropsReceipt: Bool = false) {
         guard let session else { return }
         self.session = nil
-        // ⚠️ THE RECEIPT GOES WITH THE SESSION (Seer, PR #101): a screen opened again must not
-        // show, and scroll to, an answer it already had as if it had just arrived. One still
-        // on its way is stored when it lands, for the next screen.
-        receipts[session.callId] = nil
+        if dropsReceipt {
+            receipts[session.callId] = nil
+        }
         session.watchdog?.cancel()
         session.feed.deactivate()
         if session.mode == .socket {

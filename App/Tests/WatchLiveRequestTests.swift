@@ -144,6 +144,58 @@ final class WatchLiveRequestTests: XCTestCase {
         XCTAssertNil(reopened.live?.receipt)
     }
 
+    /// ⛔ A RECEIPT SURVIVES A KEEPALIVE TIMEOUT (max review, item 4): the wrist down for more
+    /// than 20 s ends the relay session on time, and the next keepalive still carries the answer.
+    func testAReceiptSurvivesAKeepaliveTimeout() async {
+        let sources = FakeLiveSources()
+        sources.receiptResult = WhisperReceipt(applied: true, firstWords: "Sure.", reason: nil)
+        sources.feed.onActivate = { $0.snapshot([LiveFixtures.segment("a", index: 0)]) }
+        let relay = makeRelay(sources)
+        let first = await relay.answer(subscribe)
+        _ = await relay.answer(.whisper(workspaceId: LiveFixtures.workspaceId, callId: LiveFixtures.callId, text: "Hi"))
+        await waitUntil { relay.receipts[LiveFixtures.callId] != nil }
+
+        clock.advance(by: WatchLiveRelay.keepaliveTimeoutMilliseconds + 1000)
+        let late = await relay.answer(keepalive(first.live?.cursor))
+
+        XCTAssertEqual(late.live?.receipt?.detail, SuperviseCopy.whisperFirstWords("Sure."))
+    }
+
+    /// ⛔ TWO NOTES IN FLIGHT: ONLY THE LATEST TOUCHES THE RECEIPT (max review, item 6).
+    func testTheEarlierOfTwoNotesTouchesNoReceipt() async {
+        let sources = FakeLiveSources()
+        var gate: CheckedContinuation<Void, Never>?
+        sources.onWhisper = { text in
+            guard text == "First" else { return }
+            await withCheckedContinuation { gate = $0 }
+        }
+        sources.receiptResult = WhisperReceipt(applied: true, firstWords: "Second answer.", reason: nil)
+        let relay = makeRelay(sources)
+
+        let firstNote = Task { await relay.answer(.whisper(workspaceId: "ws_1", callId: "call_1", text: "First")) }
+        await waitUntil { gate != nil }
+        _ = await relay.answer(.whisper(workspaceId: "ws_1", callId: "call_1", text: "Second"))
+        await waitUntil { relay.receipts["call_1"] != nil }
+        gate?.resume()
+        _ = await firstNote.value
+        try? await Task.sleep(for: .milliseconds(100))
+
+        XCTAssertEqual(relay.receipts["call_1"]?.detail, SuperviseCopy.whisperFirstWords("Second answer."))
+        XCTAssertTrue(sources.waits[0].cancelled, "the earlier note's wait is closed")
+        XCTAssertEqual(tasks.ended.count, tasks.begun.count, "no background task left running")
+    }
+
+    /// ⚠️ THE BUDGET COUNTS FROM THE NOTE (max review, item 10): time spent sending comes off.
+    func testTheReceiptBudgetCountsFromTheNote() async {
+        let sources = FakeLiveSources()
+        let clock = clock
+        sources.onWhisper = { _ in clock.advance(by: 5000) }
+        let relay = makeRelay(sources)
+        _ = await relay.answer(.whisper(workspaceId: "ws_1", callId: "call_1", text: "Hi"))
+        await waitUntil { relay.receipts["call_1"] != nil }
+        XCTAssertEqual(sources.waits.first?.within, WatchLiveRelay.receiptWaitMilliseconds - 5000)
+    }
+
     /// A refused note closes the wait it opened, and ends its background task.
     func testAFailedWhisperClosesItsReceiptWait() async {
         let sources = FakeLiveSources()

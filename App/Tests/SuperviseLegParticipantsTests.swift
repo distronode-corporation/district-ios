@@ -138,4 +138,135 @@ final class SuperviseLegParticipantsTests: XCTestCase {
 
         XCTAssertEqual(events, [.connected, .participantLeft(webSupervisor)])
     }
+
+    // MARK: - The max review
+
+    /// ⛔ THE SDK'S TEARDOWN LEAVES ARE NOT THE ROOM EMPTYING (item 3): on an eviction, a network
+    /// loss or a full reconnect they fire while the room still lists everyone.
+    func testTeardownLeavesWhileStillListedAreDropped() async throws {
+        let (engine, room) = engine(announcing: true)
+        try await engine.connect(url: "wss://sfu.example.test", token: "t")
+        room.bridge.participantDisconnected(caller, stillInRoom: true)
+        room.bridge.participantDisconnected(agent, stillInRoom: true)
+        room.bridge.participantDisconnected(webSupervisor, stillInRoom: false)
+
+        let events = await first(5, of: engine)
+
+        XCTAssertEqual(events.last, .participantLeft(webSupervisor), "only the real leave")
+        let session = listening(events)
+        XCTAssertEqual(session.state.phase, .listening)
+        XCTAssertEqual(session.state.media.remoteParticipants, 2)
+    }
+
+    /// A full reconnect brings the count back to the room as it now is.
+    func testAFullReconnectRecountsTheRoom() async throws {
+        let (engine, room) = engine(announcing: true)
+        try await engine.connect(url: "wss://sfu.example.test", token: "t")
+        let newAgent = CallParticipant(identity: "agent-2", name: "Ava", isAgent: true)
+        room.bridge.recount([caller, newAgent])
+
+        let events = await first(7, of: engine)
+
+        XCTAssertEqual(Array(events.suffix(3)), [
+            .participantLeft(CallParticipant(identity: "agent-1", name: nil, isAgent: false)),
+            .participantLeft(CallParticipant(identity: "user-web", name: nil, isAgent: false)),
+            .participantJoined(newAgent),
+        ])
+        XCTAssertEqual(listening(events).state.media.remoteParticipants, 2)
+    }
+}
+
+/// ⛔ A TAKEOVER OVER THE REAL ENGINE: THE CARD SAYS THE MICROPHONE IS LIVE (max review of PR
+/// #101, item 1). The reducer's unmute on `.connected` reaches the engine while its microphone
+/// start is still on its way and is dropped by the join gate; only the engine reporting the start
+/// tells the session the microphone is live. The fakes used to echo it and hid the bug.
+@MainActor
+final class SuperviseTakeoverMicrophoneTests: XCTestCase {
+    private final class HeldMicrophoneRoom: CallRoom, @unchecked Sendable {
+        let bridge: RoomEventBridge
+        private let lock = NSLock()
+        private var held: CheckedContinuation<Void, Never>?
+        private var recorded: [String] = []
+
+        init(bridge: RoomEventBridge) {
+            self.bridge = bridge
+        }
+
+        var calls: [String] {
+            lock.withLock { recorded }
+        }
+
+        var isHolding: Bool {
+            lock.withLock { held != nil }
+        }
+
+        func connect(url _: String, token _: String) async throws {
+            lock.withLock { recorded.append("connect") }
+            bridge.reportConnected()
+        }
+
+        func setMicrophone(enabled: Bool) async throws {
+            lock.withLock { recorded.append("setMicrophone(\(enabled))") }
+            if enabled, calls.count == 2 {
+                await withCheckedContinuation { continuation in lock.withLock { held = continuation } }
+            }
+        }
+
+        func release() {
+            let continuation: CheckedContinuation<Void, Never>? = lock.withLock {
+                defer { held = nil }
+                return held
+            }
+            continuation?.resume()
+        }
+
+        func disconnect() async {}
+    }
+
+    func testTheCoachMicrophoneIsReportedLiveOverTheRealEngine() async throws {
+        var made: HeldMicrophoneRoom?
+        let engine = LiveKitCallEngine(
+            audio: AudioSessionCoordinator(notificationCenter: NotificationCenter()),
+            publishesMicrophone: true,
+            announcesPresentParticipants: true,
+            prepareAudio: {},
+            makeRoom: { bridge in
+                let room = HeldMicrophoneRoom(bridge: bridge)
+                made = room
+                return room
+            }
+        )
+        let room = try XCTUnwrap(made)
+
+        var session = SuperviseSession(callId: "cmh1live", role: .agency)
+        session.handle(.listenPressed)
+        guard case let .join(_, listenGeneration, _, _)? = session.handle(.listenGranted(url: "u", token: "t")).first
+        else { return XCTFail("no listen join") }
+        session.handle(.engine(.listen, generation: listenGeneration, .connected))
+        session.handle(.takeOverPressed)
+        let granted = session.handle(.takeoverGranted(url: "u", token: "t"))
+        guard case let .join(.takeover, generation, _, _)? = granted.last else { return XCTFail("no coach join") }
+
+        let joining = Task { try await engine.connect(url: "u", token: "t") }
+        var stream = engine.events.makeAsyncIterator()
+        let connected = await stream.next()
+        XCTAssertEqual(connected, .connected)
+        for command in session.handle(.engine(.takeover, generation: generation, .connected)) {
+            if case let .engine(_, .setMuted(muted)) = command {
+                await engine.setMuted(muted)
+            }
+        }
+        await waitUntil { room.isHolding }
+        XCTAssertEqual(session.state.phase, .takenOver)
+        XCTAssertFalse(session.state.media.microphoneEnabled, "still starting")
+
+        room.release()
+        try await joining.value
+        let started = await stream.next()
+        XCTAssertEqual(started, .microphoneChanged(enabled: true))
+        try session.handle(.engine(.takeover, generation: generation, XCTUnwrap(started)))
+
+        XCTAssertTrue(session.state.media.microphoneEnabled, "the card says the microphone is live")
+        XCTAssertEqual(room.calls, ["connect", "setMicrophone(true)"], "one microphone track")
+    }
 }

@@ -72,9 +72,13 @@ final class FakeLiveSources: WatchLiveSourcing {
         cardResult
     }
 
+    /// Run as each note is sent: a test holds the first one, or spends clock time.
+    var onWhisper: (@MainActor (String) async -> Void)?
+
     func whisper(workspaceId _: String, callId _: String, text: String) async -> Result<Void, WatchActionFailure> {
         whispered.append(text)
         order.append("whisper")
+        await onWhisper?(text)
         return whisperResult
     }
 
@@ -108,13 +112,16 @@ final class FakeLiveSources: WatchLiveSourcing {
 final class FakeReceiptWait: WatchReceiptWaiting {
     let answer: WhisperReceipt?
     private(set) var cancelled = false
+    /// The budget it was asked to wait within.
+    private(set) var within: Int64?
 
     init(answer: WhisperReceipt?) {
         self.answer = answer
     }
 
-    func receipt(within _: Int64) async -> WhisperReceipt? {
-        cancelled ? nil : answer
+    func receipt(within milliseconds: Int64) async -> WhisperReceipt? {
+        within = milliseconds
+        return cancelled ? nil : answer
     }
 
     func cancel() {

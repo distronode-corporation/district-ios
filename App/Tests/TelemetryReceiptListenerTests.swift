@@ -52,18 +52,32 @@ final class TelemetryReceiptListenerTests: XCTestCase {
         """
     }
 
+    /// Open, and answer the transcript subscribe with a first server frame.
     private func opened() async -> (TelemetryReceiptListener, FakeWebSocketTask?) {
         let listener = listener()
-        _ = await drive(Task { await listener.open(within: 3000) })
+        let opening = Task { await listener.open(within: 3000) }
+        await waitUntil { self.script.tasks.first?.sent.contains { $0.contains("transcript.subscribe") } == true }
+        script.tasks.first?.deliver(envelope("call_updated", callId: "another", data: #"{"status":"in-progress"}"#))
+        _ = await drive(opening)
         return (listener, script.tasks.first)
     }
 
-    /// ⛔ OPEN MEANS CONNECTED: the note may go out once `open` returns.
-    func testOpenReturnsOnceTheSocketIsConnected() async {
+    /// ⛔ READY MEANS THE BROADCASTER IS RELAYING TO IT (max review, item 9): the first server
+    /// frame after the transcript subscribe, not the handshake.
+    func testOpenReturnsOnceTheFirstServerFrameArrives() async {
         let (listener, task) = await opened()
-        XCTAssertTrue(listener.connected)
+        XCTAssertTrue(listener.ready)
         XCTAssertNotNil(task)
         XCTAssertEqual(script.urls.count, 1)
+    }
+
+    /// A handshake alone is not ready: the open waits out its bound, and the note goes anyway.
+    func testAHandshakeAloneIsNotReady() async {
+        let listener = listener()
+        let start = clock.nowMilliseconds()
+        _ = await drive(Task { await listener.open(within: 3000) })
+        XCTAssertFalse(listener.ready)
+        XCTAssertGreaterThanOrEqual(clock.nowMilliseconds() - start, 3000)
     }
 
     func testTheCallsReceiptIsTaken() async {

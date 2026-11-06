@@ -153,9 +153,15 @@ final class ListenInRecents {
     ///
     /// ⚠️ NANP ONLY: another country's national form (`020 7946 0018`) does not meet its E.164
     /// (`+442079460018`), and that row's tap does nothing, as before.
+    ///
+    /// ⚠️ ONLY A PHONE-SHAPED HANDLE TAKES THE DIGITS PATH (max review of PR #101, item 11): digits
+    /// and `+ - . ( )` and spaces, with at least seven digits. A name that happens to hold digits
+    /// ("Unit 4B") is compared as text.
     static func normalized(_ handle: String) -> String {
-        let digits = handle.filter(\.isASCII).filter(\.isNumber)
-        guard !digits.isEmpty else { return handle.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+        let trimmed = handle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let phoneCharacters = Set("0123456789+-.() ")
+        let digits = trimmed.filter { $0.isASCII && $0.isNumber }
+        guard trimmed.allSatisfy(phoneCharacters.contains), digits.count >= 7 else { return trimmed.lowercased() }
         return digits.count == 10 ? "1" + digits : digits
     }
 

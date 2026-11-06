@@ -256,6 +256,34 @@ final class LiveCallsModelTests: XCTestCase {
         XCTAssertEqual(rows.count, LiveCallsModel.pageLimit)
     }
 
+    /// ⚠️ ONLY AN UPDATE THAT CAN ADD A ROW RE-READS (max review, item 12): an in-progress one does;
+    /// a completed or ringing one takes the row off without reading ten pages again.
+    func testOnlyAnInProgressUpdateReReads() async throws {
+        let reads = try Reads([.success(rows())])
+        let model = makeModel(reads)
+        await model.load()
+
+        model.events.onEvent?(SuperviseFixtures.envelope(
+            .callUpdated,
+            .object(["status": .string("completed")]),
+            callId: "cmh1live"
+        ))
+        model.events.onEvent?(SuperviseFixtures.envelope(
+            .callUpdated,
+            .object(["status": .string("ringing")]),
+            callId: "cmh1ring"
+        ))
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertEqual(reads.count, 1)
+
+        model.events.onEvent?(SuperviseFixtures.envelope(
+            .callUpdated,
+            .object(["status": .string("in-progress")]),
+            callId: "cmh1ring"
+        ))
+        await waitUntil { reads.count == 2 }
+    }
+
     /// A `call_updated` whose status left `in-progress` is an ending too.
     func testAnUpdateThatLeftInProgressTakesTheCallOff() async throws {
         let model = try makeModel(Reads([.success(rows())]))

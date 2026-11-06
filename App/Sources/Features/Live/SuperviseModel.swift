@@ -83,6 +83,8 @@ final class SuperviseModel {
     var engineLeg: SuperviseLeg?
     var legTask: Task<Void, Never>?
     var startTask: Task<Void, Never>?
+    /// A system mute pressed while the takeover was on its way, applied once it is joined.
+    var pendingMute = false
 
     /// Where a started listen-in is remembered for a Recents tap. ⚠️ nil in most tests.
     var recents: ListenInRecents?
@@ -295,6 +297,13 @@ final class SuperviseModel {
             await perform(command)
         }
         await settle()
+        // ⛔ A DROP IS CHECKED AGAINST THE CALL'S ROW (max review of PR #101, item 3): a room that
+        // was deleted because the call ended ends as "The call has ended.", not as a drop.
+        if case .some(.listenDropped) = state.problem, event.isEngine {
+            Task { await refresh() }
+        } else if case .some(.takeoverDropped) = state.problem, event.isEngine {
+            Task { await refresh() }
+        }
     }
 
     /// ⛔ THE ONE EXIT, AND IT DROPS THE CLAIM LAST: the claim is this object's only strong
@@ -307,6 +316,7 @@ final class SuperviseModel {
         engineLeg = nil
         starting = false
         connectedReported = false
+        pendingMute = false
         guard claimed else { return }
         claimed = false
         callUUID = nil
@@ -353,5 +363,14 @@ final class SuperviseModel {
 extension SuperviseModel: SupervisionEnding {
     func endSupervision() async {
         await stop()
+    }
+}
+
+private extension SuperviseEvent {
+    var isEngine: Bool {
+        if case .engine = self {
+            return true
+        }
+        return false
     }
 }

@@ -28,6 +28,7 @@
 
         private var handler: ((CallKitRequest) -> Void)?
         private var events: AsyncStream<CallEngineEvent>.Continuation?
+        private var leg: SuperviseLeg?
 
         func claim(_: AnyObject, handler: @escaping (CallKitRequest) -> Void) {
             self.handler = handler
@@ -51,7 +52,8 @@
             after(milliseconds: 0) { $0.handler?(.muteRequested(uuid: uuid, muted: muted)) }
         }
 
-        func beginLeg(_: SuperviseLeg) async -> AsyncStream<CallEngineEvent> {
+        func beginLeg(_ leg: SuperviseLeg) async -> AsyncStream<CallEngineEvent> {
+            self.leg = leg
             events?.finish()
             let (stream, continuation) = AsyncStream<CallEngineEvent>.makeStream()
             events = continuation
@@ -65,10 +67,15 @@
                 // what a supervise leg's engine does for the people present at the join
                 // (``LiveKitCallEngine``'s `announcesPresentParticipants`; the SDK alone does not).
                 let events = events
+                let publishes = leg == .takeover
                 after(milliseconds: 3000) { _ in
                     events?.yield(.participantJoined(CallParticipant(identity: "caller", name: nil, isAgent: false)))
                     events?.yield(.participantJoined(CallParticipant(identity: "agent", name: "Ava", isAgent: true)))
                     events?.yield(.connected)
+                    // ⚠️ THE COACH LEG'S MICROPHONE STARTED, as the engine reports it.
+                    if publishes {
+                        events?.yield(.microphoneChanged(enabled: true))
+                    }
                 }
             case let .setMuted(muted):
                 events?.yield(.microphoneChanged(enabled: !muted))

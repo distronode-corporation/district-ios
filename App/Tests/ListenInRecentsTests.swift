@@ -100,6 +100,10 @@ final class ListenInRecentsTests: XCTestCase {
         XCTAssertEqual(ListenInRecents.normalized("(416) 555-0177"), "14165550177")
         XCTAssertEqual(ListenInRecents.normalized("+442079460018"), "442079460018")
         XCTAssertEqual(ListenInRecents.normalized("  Maya Chen "), "maya chen")
+        // ⚠️ A NAME HOLDING DIGITS STAYS A NAME (max review, item 11); a short code is not a number.
+        XCTAssertEqual(ListenInRecents.normalized("Unit 4B Reception 5550177"), "unit 4b reception 5550177")
+        XCTAssertEqual(ListenInRecents.normalized("Suite 101"), "suite 101")
+        XCTAssertEqual(ListenInRecents.normalized("12345"), "12345")
         let recents = makeRecents()
         recents.record(handle: "+14165550177", workspaceId: "ws_1", callId: "cmh1live")
         XCTAssertEqual(recents.entry(forHandle: "(416) 555-0177")?.callId, "cmh1live")

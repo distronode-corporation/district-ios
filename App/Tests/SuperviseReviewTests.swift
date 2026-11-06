@@ -147,4 +147,114 @@ final class SuperviseReviewTests: XCTestCase {
         await listen(model)
         XCTAssertEqual(media.engines.count, 2)
     }
+
+    // MARK: - The max review
+
+    /// ⛔ AN END DURING THE ROOM SWAP BUILDS NO ORPHAN COACH ENGINE (item 2): the engine already
+    /// built is ended, connected to nothing.
+    func testAnEndDuringTheSwapEndsTheCoachEngineUnconnected() async throws {
+        let model = try makeModel()
+        await listen(model)
+        server.answerTakeover(.success(SuperviseFixtures.coachSeat))
+        media.holdsBeginLeg = true
+        let taking = Task { await model.takeOver() }
+        await waitUntil { self.media.isHoldingBeginLeg }
+
+        await model.stop()
+        media.clearLog()
+        media.releaseBeginLeg()
+        await taking.value
+
+        XCTAssertEqual(media.log, ["endLeg"], "ended, and never connected")
+        XCTAssertFalse(media.log.contains { $0.hasPrefix("connect") })
+        XCTAssertEqual(model.state.phase, .idle)
+    }
+
+    /// ⛔ A DROP IS CHECKED AGAINST THE ROW (item 3): a room deleted because the call ended ends
+    /// as over; a drop on a live call stays a drop.
+    func testADropOnAnEndedCallEndsOverAndOnALiveCallStaysADrop() async throws {
+        let model = try makeModel()
+        await listen(model)
+        try server.answerDetail(.success(SuperviseFixtures.call(status: "in-progress")))
+        media.engine(.listen, .disconnected(reason: "network"))
+        await waitUntil { model.state.problem != nil }
+        await waitUntil { self.server.requests.contains { $0.hasPrefix("detail") } }
+        XCTAssertEqual(model.state.problem, .listenDropped(reason: "network"))
+        XCTAssertEqual(model.state.phase, .idle)
+
+        await listen(model)
+        try server.answerDetail(.success(SuperviseFixtures.call(status: "completed")))
+        media.engine(.listen, .disconnected(reason: "room deleted"))
+        await waitUntil { model.state.phase == .over }
+    }
+
+    /// ⛔ A REFUSAL FOR AN ABANDONED LISTEN IS NOT THE NEXT ONE'S (item 7).
+    func testAStaleRefusalAfterStopAndListenAgainIsDropped() async throws {
+        let model = try makeModel()
+        server.answerMonitor(.failure(.http(status: 409, message: nil, code: "call_ended")))
+        server.holdsMonitor = true
+        model.listen()
+        media.performStart()
+        await waitUntil { self.server.isHoldingMonitor }
+        await model.stop()
+
+        server.answerMonitor(.success(SuperviseFixtures.listenSeat))
+        model.listen()
+        media.performStart()
+        await waitUntil { self.media.log.contains("connect wss://sfu.example.test listen.jwt") }
+        server.releaseMonitor()
+        try await Task.sleep(for: .milliseconds(150))
+
+        XCTAssertNil(model.state.problem, "the first attempt's refusal is dropped")
+        XCTAssertEqual(model.state.phase, .joiningListen)
+    }
+
+    /// ⛔ A MUTE PRESSED WHILE THE TAKEOVER IS ON ITS WAY IS KEPT AND APPLIED ONCE JOINED (item 8).
+    func testAMuteDuringTheTakeoverIsAppliedOnceJoined() async throws {
+        let model = try makeModel()
+        await listen(model)
+        let uuid = try XCTUnwrap(media.uuid)
+        server.answerTakeover(.success(SuperviseFixtures.coachSeat))
+        await model.takeOver()
+        XCTAssertEqual(model.state.phase, .joiningTakeover)
+        media.clearLog()
+
+        media.system(.muteRequested(uuid: uuid, muted: true))
+        media.engine(.takeover, .connected)
+        await waitUntil(state: "\(media.log)") { self.media.log.contains("setMuted true") }
+
+        XCTAssertEqual(media.log, ["setMuted false", "setMuted true"])
+        XCTAssertFalse(media.log.contains("requestMuted false"), "not undone")
+    }
+
+    // MARK: - The dialler and a workspace switch
+
+    /// ⛔ THE KEYPAD'S CALL ENDS ON SIGN-OUT ONLY (Sean, 2026-11-06), never on `unavailable`.
+    func testTheKeypadCallEndsOnSignOutOnly() async {
+        XCTAssertTrue(CallTeardown.endsSoftphone(.signedOut("Signed out.")))
+        XCTAssertFalse(CallTeardown.endsSoftphone(.unavailable("Try again.")))
+        XCTAssertFalse(CallTeardown.endsSoftphone(.signedIn))
+        XCTAssertFalse(CallTeardown.endsSoftphone(.checking))
+
+        final class Softphone: SoftphoneEnding {
+            var ended = 0
+            func endSoftphone() async {
+                ended += 1
+            }
+        }
+        let softphone = Softphone()
+        let stack = CallStack(microphone: FakeMicrophoneAccess(status: .granted))
+        stack.softphone = softphone
+        await stack.endSoftphone()
+        XCTAssertEqual(softphone.ended, 1)
+    }
+
+    /// ⛔ A SWITCH FROM ONE WORKSPACE TO ANOTHER, HOWEVER MADE (the picker included), ends a
+    /// supervision; the first workspace resolving does not (item 5).
+    func testOnlyAWorkspaceToWorkspaceChangeIsASwitch() {
+        XCTAssertTrue(CallTeardown.isWorkspaceSwitch(from: "ws_1", to: "ws_2"))
+        XCTAssertFalse(CallTeardown.isWorkspaceSwitch(from: nil, to: "ws_1"))
+        XCTAssertFalse(CallTeardown.isWorkspaceSwitch(from: "ws_1", to: "ws_1"))
+        XCTAssertFalse(CallTeardown.isWorkspaceSwitch(from: "ws_1", to: nil))
+    }
 }

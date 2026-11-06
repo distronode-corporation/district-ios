@@ -69,8 +69,25 @@ final class FakeSuperviseMedia: SuperviseMedia {
         log.append("requestMuted \(muted)")
     }
 
+    /// When set, building a leg's engine waits here (an end during the room swap).
+    var holdsBeginLeg = false
+    private var heldBeginLeg: CheckedContinuation<Void, Never>?
+
+    var isHoldingBeginLeg: Bool {
+        heldBeginLeg != nil
+    }
+
+    func releaseBeginLeg() {
+        let held = heldBeginLeg
+        heldBeginLeg = nil
+        held?.resume()
+    }
+
     func beginLeg(_ leg: SuperviseLeg) async -> AsyncStream<CallEngineEvent> {
         log.append("beginLeg \(leg)")
+        if holdsBeginLeg {
+            await withCheckedContinuation { heldBeginLeg = $0 }
+        }
         let (stream, continuation) = AsyncStream<CallEngineEvent>.makeStream()
         engines.append((leg, continuation))
         return stream
@@ -172,11 +189,34 @@ final class FakeSuperviseServer: SuperviseServing, @unchecked Sendable {
         lock.withLock { whisperGate != nil }
     }
 
+    /// When set, the next monitor answer waits here (an answer for an abandoned Listen).
+    var holdsMonitor = false
+    private var monitorGate: CheckedContinuation<Void, Never>?
+
+    var isHoldingMonitor: Bool {
+        lock.withLock { monitorGate != nil }
+    }
+
+    func releaseMonitor() {
+        let gate: CheckedContinuation<Void, Never>? = lock.withLock {
+            defer { monitorGate = nil }
+            return monitorGate
+        }
+        gate?.resume()
+    }
+
     func monitor(callId: SupervisedCallID, platform: ClientPlatform) async -> Result<CallMonitorResponse, ApiError> {
-        lock.withLock {
+        let result: Result<CallMonitorResponse, ApiError> = lock.withLock {
             asked.append("monitor \(callId.value) \(platform.rawValue)")
             return monitorResults.isEmpty ? .failure(.transport("unscripted")) : monitorResults.removeFirst()
         }
+        if lock.withLock({ holdsMonitor }) {
+            lock.withLock { holdsMonitor = false }
+            await withCheckedContinuation { continuation in
+                lock.withLock { monitorGate = continuation }
+            }
+        }
+        return result
     }
 
     func takeOver(workspaceId: String, callId: String) async -> Result<CallTakeoverResponse, ApiError> {
