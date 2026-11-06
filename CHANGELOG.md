@@ -19,6 +19,12 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
+- Dialler design A (3.3.0, Sean's pick of 2026-11-03, #95): a flag and calling-code button in
+  front of the number opens a searchable country list, the number is typed the local way and
+  formats as it is typed, and a line before Call reads `Rings <country> · <international
+  number>`. That E.164 number is what `calls/dial` is sent (it was the typed text). The home
+  country is the one most of the workspace's numbers belong to, cached per workspace; a
+  workspace with no numbers picks one or types `+`. `DialPlan`, `DialerCountryPicker`.
 - Messenger and Instagram reply window (3.3.0, Sean's decisions of 2026-11-06: web parity), on
   DistrictCore 8.3.0's `InboxRepository.metaWindow`. A Messenger or Instagram reply reads Meta's
   window when its channel is selected and again after a send, with the WhatsApp window's
@@ -85,6 +91,10 @@ built from history before publication, so they have no tags in this repository.
   that lands counts as read, since the server then holds only this composer's text. A draft
   restored after an image was attached merges its images with it (by URL) instead of replacing it,
   and an upload that lands once that merge filled the five is dropped with the five-image sentence.
+- 3.3.0: MARKETING_VERSION 3.3.0, Live supervise and Inbox parity (WhatsApp, Messenger and
+  Instagram replies, assignment, the Messenger and Instagram reply window). The version pair is
+  project-level, so every target carries the same value. DistrictCore is at `exactVersion`
+  8.3.0. The build number is still set by `scripts/archive-imac.sh`.
 - 3.2.1: MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
   pair is project-level, so every target carries the same value. DistrictCore stays at
   `exactVersion` 8.1.0.
@@ -666,6 +676,19 @@ built from history before publication, so they have no tags in this repository.
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
 
+## [3.3.0] - 2026-11-06
+
+Watch your live calls as they happen, and step in when you need to.
+
+- A new Live calls screen lists the calls your receptionist is taking right now. Listen in without the caller hearing you, send your receptionist a private note and see whether it was used, or take over the call yourself and hand it back when you are done.
+- On your Apple Watch, a note you send during a live call now shows whether your receptionist used it.
+- Reply to WhatsApp, Messenger and Instagram conversations on the channel the customer wrote on, so a WhatsApp customer is no longer answered by text message.
+- Messenger and Instagram conversations now appear in your inbox. When the reply window has closed, the app says so and keeps your text until the customer writes again. A human agent reply shows its 7-day window.
+- When a WhatsApp conversation's window has closed, send one of your approved templates instead.
+- Assign a conversation to a teammate, see who each conversation is assigned to, and show only the ones assigned to you.
+- The keypad has a country button in front of the number. Type the number the local way, and the line under it shows the country it rings and the full international number before you call. A number with the wrong number of digits for its country is explained once you stop typing.
+- A number that belongs to no one country, such as a +1 800 toll-free number, now says so instead of naming a country.
+
 ## [3.2.1] - 2026-10-27
 
 Small fixes for calls and the Apple Watch app.
@@ -873,7 +896,8 @@ Voice Studio is the headline of 2.0.
 
 The first release on the App Store.
 
-[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/distronode-corporation/district-ios/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/distronode-corporation/district-ios/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/distronode-corporation/district-ios/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/distronode-corporation/district-ios/compare/v3.0.3...v3.1.0
