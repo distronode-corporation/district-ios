@@ -139,6 +139,24 @@ final class CallStack {
         await (supervisor as? SupervisionEnding)?.endSupervision()
     }
 
+    /// The last workspace the shell resolved, for ``workspaceSelected(_:)``.
+    private var lastWorkspaceId: String?
+
+    /// The shell resolved a workspace: a switch from another one ends a live supervision.
+    ///
+    /// ⛔ COMPARED WITH THE LAST WORKSPACE THAT RESOLVED, NOT WITH THE VALUE JUST BEFORE (Seer,
+    /// district-macos PR #98). A switch passes through nil while the new list loads
+    /// (`WorkspaceSessionModel.select(_:)` reads the list again), so the change arrives as A to
+    /// nil, then nil to B, and neither of those is one workspace to another. ⚠️ Synchronous, so
+    /// two changes in a row are compared in the order they came.
+    func workspaceSelected(_ workspaceId: String?) {
+        guard let workspaceId else { return }
+        let previous = lastWorkspaceId
+        lastWorkspaceId = workspaceId
+        guard CallTeardown.isWorkspaceSwitch(from: previous, to: workspaceId) else { return }
+        Task { await endSupervision() }
+    }
+
     /// End the keypad's call, if there is one. See ``CallTeardown/endsSoftphone(_:)``.
     func endSoftphone() async {
         await (softphone as? SoftphoneEnding)?.endSoftphone()
