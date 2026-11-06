@@ -44,11 +44,17 @@ struct ThreadAssignSheet: View {
                     ForEach(emails, id: \.self) { email in
                         row(email, email: email)
                     }
-                } footer: {
-                    if let failure = model.failure {
-                        Text(failure.message)
-                            .foregroundStyle(DistrictColors.resolve(colorScheme).destructive)
-                    }
+                }
+            }
+            // ⛔ PINNED ABOVE THE ROSTER, NOT IN ITS FOOTER (Seer, #99 and #95): a long member list
+            // scrolled the refusal out of sight, so a failed write looked like nothing happened.
+            .safeAreaInset(edge: .top) {
+                if let failure = model.failure {
+                    Text(failure.message)
+                        .foregroundStyle(DistrictColors.resolve(colorScheme).destructive)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(.bar)
                 }
             }
             .disabled(model.saving)

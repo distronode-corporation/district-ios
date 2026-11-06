@@ -43,6 +43,11 @@ final class ThreadModel {
 
     private(set) var state: ThreadState = .loading
 
+    /// The draft's images as last shown: attachments and held. ⛔ What an autosave writes while
+    /// the content is being re-read or failed to re-read (Seer, #99), so a save in that window
+    /// never stores the draft without its images. Not observed: no view shows it.
+    @ObservationIgnored private(set) var composerMedia: [String] = []
+
     /// The composer's text.
     ///
     /// ⛔ WRITTEN THROUGH ``composerTextChanged(_:)`` FROM THE VIEW, never bound
@@ -425,6 +430,7 @@ final class ThreadModel {
     /// ⚠️ INTERNAL RATHER THAN `private` FOR ``restoreDraft()``; see ``autosaveTask``.
     func setContent(_ content: ThreadContent) {
         state = content.events.isEmpty ? .empty(content) : .content(content)
+        composerMedia = content.attachments + content.heldAttachments
     }
 
     /// ⛔ THE COPY ALREADY ON SCREEN WINS A COLLISION. Both are the same row from the

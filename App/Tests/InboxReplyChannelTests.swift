@@ -202,6 +202,31 @@ final class InboxReplyChannelTests: XCTestCase {
         )
     }
 
+    /// ⛔ A SAVE WHILE THE THREAD CANNOT BE SHOWN KEEPS THE DRAFT'S IMAGES (Seer, #99): a re-read
+    /// that fails leaves no content, and the autosave writes the images last shown.
+    func testASaveAfterAFailedReReadKeepsTheDraftsImages() async {
+        let image = "https://www.distronode.test/api/media/media_parity_roof"
+        let stored = #"{"success":true,"draft":{"threadKey":"addr:14165550177","body":"On my way.","#
+            + #""subject":null,"mediaUrls":[""# + image + #""],"updatedAt":"2026-11-05T14:30:00.000Z"}}"#
+        let transport = ParityTransport()
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/timeline", 500, #"{"error":"unavailable"}"#)
+        transport.on(.get, "/messages/drafts", 200, stored)
+        transport.on(.put, "/messages/drafts", 200, stored)
+        let model = ParityFixtures.thread(
+            transport,
+            targets: [ReplyTarget(to: "+14165550177", channel: MessageChannel.sms)]
+        )
+        await model.load()
+        await model.restoreDraft()
+        await model.load()
+        XCTAssertNil(model.current, "the re-read failed")
+
+        await model.persistDraft("On my way.")
+        let saved = transport.requests(to: "/messages/drafts").last { $0.method == .put }
+        XCTAssertEqual(saved?.json["mediaUrls"] as? [String], [image])
+    }
+
     /// ⛔ A DRAFT'S IMAGES ARE NEVER SENT ON A TEXT-ONLY CHANNEL, AND NEVER LOST (Seer, #95 and
     /// #99). Restored onto a WhatsApp default they are held with the channel's sentence; the
     /// autosave keeps them in the stored draft; a switch to SMS returns them as chips, and a
