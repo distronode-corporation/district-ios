@@ -129,6 +129,9 @@ extension ThreadModel {
         guard Self.templateComplete(template, values) else { return false }
 
         whatsApp.sendingTemplate = true
+        // ⛔ HELD UNTIL THE WHOLE SEND IS DONE, THE RE-READ INCLUDED (Seer, #95): Send must not come
+        // back while the thread is re-read, or a second tap sends a second billed template.
+        defer { whatsApp.sendingTemplate = false }
         whatsApp.templateFailure = nil
         let outcome = await inbox.sendWhatsAppTemplate(
             workspaceId: target.workspaceId,
@@ -137,7 +140,6 @@ extension ThreadModel {
             template: template,
             variables: values
         )
-        whatsApp.sendingTemplate = false
         switch outcome {
         case .success:
             // ⛔ THE TEMPLATE DID NOT GO OUT THROUGH THE COMPOSER, SO THE COMPOSER'S IMAGES STAY
