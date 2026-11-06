@@ -266,6 +266,71 @@ final class ComposerHeldImagesTests: XCTestCase {
         XCTAssertTrue(transport.requests(to: "/messages/drafts").filter { $0.method == .delete }.isEmpty)
     }
 
+    /// ⛔ A DRAFT RESTORED AFTER AN IMAGE WAS ATTACHED IS MERGED WITH IT, NOT PUT IN ITS PLACE
+    /// (Seer, #99, 4489180780): deduplicated by URL, the operator's own image first.
+    func testARestoredDraftsImagesAreMergedWithOnesAttachedMeanwhile() async {
+        let transport = ParityTransport()
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/messages/drafts", 200, Self.draft([Self.roof, Self.gutter]))
+        transport.on(.post, "/messages/media", 200, Self.uploaded(Self.gutter))
+        let model = ParityFixtures.thread(transport, targets: [Self.sms])
+        await model.load()
+        let gate = transport.hold(.get, "/messages/drafts")
+
+        let restore = Task { await model.restoreDraft() }
+        await waitUntil { transport.requests(to: "/messages/drafts").count == 1 }
+        await model.attach(Self.png, mimeType: "image/png")
+        gate.open()
+        await restore.value
+
+        XCTAssertEqual(model.current?.attachments, [Self.gutter, Self.roof])
+    }
+
+    /// ⛔ AND ON A TEXT-ONLY CHANNEL THE MERGED IMAGES ARE HELD TOGETHER, counted in one sentence.
+    func testARestoredDraftsImagesAreMergedWithHeldOnes() async throws {
+        let transport = ParityTransport()
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/messages/drafts", 200, Self.draft([Self.roof]))
+        let model = ParityFixtures.thread(transport, targets: [Self.whatsApp])
+        await model.load()
+        var content = try XCTUnwrap(model.current)
+        content.heldAttachments = [Self.gutter]
+        model.setContent(content)
+
+        await model.restoreDraft()
+
+        XCTAssertEqual(model.current?.heldAttachments, [Self.gutter, Self.roof])
+        XCTAssertEqual(
+            model.current?.channelNote,
+            "2 images stay in the draft: WhatsApp replies are text-only for now, so they will not be sent."
+        )
+    }
+
+    /// ⛔ AN UPLOAD THAT LANDS AFTER A RESTORE FILLED THE FIVE IS DROPPED AND THE LIMIT IS SAID
+    /// (Seer, #99, 4489456427): the cap was checked only before the upload, so the composer could
+    /// hold six, and the send and the drafts route refuse more than five.
+    func testAnUploadThatLandsOnAFullComposerIsDroppedAndTheLimitSaid() async {
+        let five = (1 ... 5).map { "https://www.distronode.test/api/media/media_parity_\($0)" }
+        let transport = ParityTransport()
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/messages/drafts", 200, Self.draft(five))
+        transport.on(.post, "/messages/media", 200, Self.uploaded(Self.roof))
+        let gate = transport.hold(.post, "/messages/media")
+        let model = ParityFixtures.thread(transport, targets: [Self.sms])
+        await model.load()
+
+        let upload = Task { await model.attach(Self.png, mimeType: "image/png") }
+        await waitUntil { transport.requests(to: "/messages/media").count == 1 }
+        await model.restoreDraft()
+        XCTAssertEqual(model.current?.attachments, five, "the restore filled the five")
+        gate.open()
+        await upload.value
+
+        XCTAssertEqual(model.current?.attachments, five, "the late image is not a sixth")
+        XCTAssertEqual(model.current?.sendFailure?.message, "You can attach up to 5 images to one message.")
+        XCTAssertEqual(model.current?.attaching, false)
+    }
+
     /// ⚠️ ON EMAIL THE CHIP SAYS "BY EMAIL", and French « par courriel », lower case.
     func testAHeldChipOnEmailSaysByEmail() {
         let model = ParityFixtures.thread(

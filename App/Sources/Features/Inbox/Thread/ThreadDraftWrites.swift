@@ -62,6 +62,9 @@ extension ThreadModel {
         switch result {
         case .success:
             draftNotice = nil
+            // ⛔ A WRITE THAT LANDED MEANS THE SERVER HOLDS ONLY WHAT THIS COMPOSER WROTE (Seer, #95,
+            // 4489168707), so a later blank box may delete it even after a failed read.
+            draftRead = true
             return true
         case .failure:
             draftNotice = Self.draftNotSaved
