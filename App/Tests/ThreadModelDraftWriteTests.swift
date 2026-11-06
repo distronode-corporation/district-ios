@@ -93,6 +93,22 @@ final class ThreadModelDraftWriteTests: XCTestCase {
         XCTAssertEqual(transport.count(of: .delete), 1)
     }
 
+    /// ⛔ A SAVE THAT LANDS AFTER A FAILED READ LETS A CLEARED BOX DELETE AGAIN (Seer, #95,
+    /// 4489168707): the server then holds only this composer's own text, which would otherwise
+    /// come back on the next open.
+    func testASaveThatLandsAfterAFailedReadLetsABlankBoxDelete() async {
+        let transport = ScriptedTransport([Self.refused, Self.saved, Self.deleted])
+        let model = Self.model(transport)
+        await model.restoreDraft()
+        XCTAssertFalse(model.draftRead, "the read failed")
+
+        await model.persistDraft("Half a reply, finished")
+        XCTAssertTrue(model.draftRead, "the save landed")
+        await model.persistDraft("")
+
+        XCTAssertEqual(transport.count(of: .delete), 1)
+    }
+
     // MARK: - Helpers
 
     private static func model(_ transport: ScriptedTransport) -> ThreadModel {

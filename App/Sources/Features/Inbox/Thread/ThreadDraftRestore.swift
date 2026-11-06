@@ -128,12 +128,20 @@ extension ThreadModel {
         // Messenger, Instagram or email default would send the text and drop the images
         // silently. They are held, with the channel's sentence: kept in the draft, never
         // sent, and back as chips on a switch to SMS (``ThreadContent/heldAttachments``).
+        // ⛔ MERGED WITH WHAT IS ALREADY IN THE BOX, NEVER REPLACING IT (Seer, #99, 4489180780):
+        // an image attached while the read was in flight was dropped. Deduplicated by URL, the
+        // operator's own first, five at most.
+        guard canMutate else { return }
+        let shown = current.map {
+            ComposerMedia(attachments: $0.attachments, held: $0.heldAttachments, note: $0.channelNote)
+        } ?? composerMedia
+        let merged = Self.restorable(shown.attachments + shown.held + restored)
         var media = ComposerMedia()
         if canAttach {
-            media.attachments = restored
-        } else if canMutate {
-            media.held = restored
-            media.note = attachmentsHeldNote(count: restored.count)
+            media.attachments = merged
+        } else {
+            media.held = merged
+            media.note = heldNote(merged)
         }
         // ⛔ AND NOT LOST WHEN THE THREAD COULD NOT BE READ (xhigh review): the latch is set,
         // so this runs once, and the retry's re-read puts them on its content (``load()``).
