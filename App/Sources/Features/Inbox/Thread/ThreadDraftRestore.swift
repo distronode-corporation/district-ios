@@ -125,10 +125,12 @@ extension ThreadModel {
         let restored = Self.restorable(draft.mediaUrls)
         // ⛔ BUT NOT ONTO A CHANNEL THAT CANNOT CARRY THEM (Seer, #95): a WhatsApp,
         // Messenger, Instagram or email default would send the text and drop the images
-        // silently. They go with the channel's sentence, as a switch to it drops them.
+        // silently. They are held, with the channel's sentence: kept in the draft, never
+        // sent, and back as chips on a switch to SMS (``ThreadContent/heldAttachments``).
         if canAttach {
             content.attachments = restored
         } else if canMutate {
+            content.heldAttachments = restored
             content.channelNote = Self.attachmentsDropped(count: restored.count, channel: target.replyTarget?.channel)
         }
         setContent(content)

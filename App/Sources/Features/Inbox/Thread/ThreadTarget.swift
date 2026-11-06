@@ -179,6 +179,14 @@ struct ThreadContent {
     var sendFailure: FailureText?
     /// ⛔ Already uploaded, capped at ``ThreadModel/maximumAttachments``.
     var attachments: [String]
+    /// Images the draft holds that the selected channel cannot carry: a restored draft's,
+    /// or those staged before a switch away from SMS.
+    ///
+    /// ⛔ KEPT IN THE STORED DRAFT, NEVER SENT (Seer, #99). The autosave writes them with
+    /// ``attachments``, so a draft opened on a WhatsApp default does not lose its images to
+    /// the next keystroke, and a switch back to SMS returns them as chips. A send on the
+    /// text-only channel goes out as text, as ``channelNote`` says, and the draft is gone.
+    var heldAttachments: [String]
     /// What changed when the operator switched channel, said out loud.
     ///
     /// ⛔ ITS OWN SLOT RATHER THAN A FOURTH TENANT OF ``sendFailure``, AND THE REASON
@@ -217,6 +225,7 @@ extension ThreadContent {
             sending: false,
             sendFailure: nil,
             attachments: [],
+            heldAttachments: [],
             channelNote: nil,
             attaching: false,
             draftGenerating: false

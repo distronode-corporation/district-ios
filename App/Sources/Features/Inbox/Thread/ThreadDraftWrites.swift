@@ -38,7 +38,8 @@ extension ThreadModel {
             threadKey: target.threadKey,
             body: text,
             subject: outgoingSubject,
-            mediaUrls: current?.attachments ?? []
+            // ⛔ WITH THE HELD IMAGES: a text-only channel must not erase them from the draft.
+            mediaUrls: (current?.attachments ?? []) + (current?.heldAttachments ?? [])
         ))
     }
 

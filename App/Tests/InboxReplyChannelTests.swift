@@ -202,28 +202,44 @@ final class InboxReplyChannelTests: XCTestCase {
         )
     }
 
-    /// ⛔ A DRAFT'S IMAGES ARE NOT RESTORED ONTO A TEXT-ONLY CHANNEL (Seer, #95): on a
-    /// WhatsApp default they would have gone out silently as text. They are dropped with the
-    /// channel's sentence, as a switch to it drops them; on SMS they come back as chips.
-    func testARestoredDraftsImagesFollowTheChannelTheyWouldGoOutOn() async {
+    /// ⛔ A DRAFT'S IMAGES ARE NEVER SENT ON A TEXT-ONLY CHANNEL, AND NEVER LOST (Seer, #95 and
+    /// #99). Restored onto a WhatsApp default they are held with the channel's sentence; the
+    /// autosave keeps them in the stored draft; a switch to SMS returns them as chips, and a
+    /// switch back holds them again.
+    func testARestoredDraftsImagesAreHeldOnATextOnlyChannelAndKeptInTheDraft() async {
         let image = "https://www.distronode.test/api/media/media_parity_roof"
-        let draft = #"{"success":true,"draft":{"threadKey":"addr:14165550177","body":"On my way.","#
+        let stored = #"{"success":true,"draft":{"threadKey":"addr:14165550177","body":"On my way.","#
             + #""subject":null,"mediaUrls":[""# + image + #""],"updatedAt":"2026-11-05T14:30:00.000Z"}}"#
-        for (channel, attachments, note) in [
-            (MessageChannel.whatsapp, [String](), "Attachments removed: WhatsApp sends are text-only for now"),
-            (MessageChannel.sms, [image], nil),
-        ] {
-            let transport = ParityTransport()
-            transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
-            transport.on(.get, "/messages/drafts", 200, draft)
-            let model = ParityFixtures.thread(transport, targets: [ReplyTarget(to: "+14165550177", channel: channel)])
-            await model.load()
-            await model.restoreDraft()
+        let whatsAppSentence = "Attachments removed: WhatsApp sends are text-only for now"
+        let transport = ParityTransport()
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/messages/drafts", 200, stored)
+        transport.on(.put, "/messages/drafts", 200, stored)
+        let model = ParityFixtures.thread(transport, targets: [
+            ReplyTarget(to: "+14165550177", channel: MessageChannel.whatsapp),
+            ReplyTarget(to: "+14165550177", channel: MessageChannel.sms),
+        ])
+        await model.load()
+        await model.restoreDraft()
 
-            XCTAssertEqual(model.composerText, "On my way.", channel)
-            XCTAssertEqual(model.current?.attachments, attachments, channel)
-            XCTAssertEqual(model.current?.channelNote, note, channel)
-        }
+        XCTAssertEqual(model.composerText, "On my way.")
+        XCTAssertEqual(model.current?.attachments, [])
+        XCTAssertEqual(model.current?.heldAttachments, [image])
+        XCTAssertEqual(model.current?.channelNote, whatsAppSentence)
+
+        await model.persistDraft("On my way, see you at nine.")
+        let saved = transport.requests(to: "/messages/drafts").last { $0.method == .put }
+        XCTAssertEqual(saved?.json["mediaUrls"] as? [String], [image], "the autosave keeps the held image")
+
+        model.selectReplyTarget(1)
+        XCTAssertEqual(model.current?.attachments, [image], "SMS carries it again")
+        XCTAssertEqual(model.current?.heldAttachments, [])
+        XCTAssertNil(model.current?.channelNote)
+
+        model.selectReplyTarget(0)
+        XCTAssertEqual(model.current?.attachments, [])
+        XCTAssertEqual(model.current?.heldAttachments, [image])
+        XCTAssertEqual(model.current?.channelNote, whatsAppSentence)
     }
 
     // MARK: - The Watch

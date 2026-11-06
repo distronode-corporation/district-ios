@@ -196,7 +196,7 @@ final class InboxModel {
             UnreadBadge.set(unreadTotal)
             // ⚠️ THE WATCH'S INBOX FOLLOWS A FRESH READ OF THIS ONE.
             container.watchBridge.setNeedsSnapshot()
-            await loadDraftBadges()
+            await loadDraftBadges(read: read)
         case let .failure(error):
             // ⛔ THE BADGE IS LEFT EXACTLY AS IT WAS, AND IS NOT ZEROED. Zero means
             // "nothing unread", never "we could not ask".
@@ -398,9 +398,12 @@ final class InboxModel {
     /// ⚠️ THE STATE IS RE-READ AFTER THE AWAIT rather than closed over from before it.
     /// A refresh or a failure can land while this request is in flight, and writing a
     /// captured list back would resurrect rows the newer read had already replaced.
-    private func loadDraftBadges() async {
+    /// - Parameter read: the list read these badges belong to (``LatestRead``).
+    private func loadDraftBadges(read: Int) async {
         guard canReply else { return }
-        guard case let .success(drafts) = await container.inbox.drafts(workspaceId: workspaceId) else { return }
+        let outcome = await container.inbox.drafts(workspaceId: workspaceId)
+        // ⛔ AN OLDER READ'S BADGES ARE DROPPED TOO (Seer, #99), as its list is.
+        guard reads.isLatest(read), case let .success(drafts) = outcome else { return }
         guard case let .content(conversations, isPartial, _, refreshing) = state else { return }
         state = .content(
             conversations: conversations,

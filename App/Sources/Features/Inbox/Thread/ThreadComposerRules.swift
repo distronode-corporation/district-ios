@@ -78,7 +78,7 @@ extension ThreadModel {
         let wasAttachable = canAttach
         target.select(index)
         guard index == target.selectedIndex else { return }
-        dropAttachmentsIfChannelCannotCarryThem(wasAttachable: wasAttachable)
+        holdAttachmentsIfChannelCannotCarryThem(wasAttachable: wasAttachable)
         seedSubjectIfNeeded()
     }
 
@@ -88,19 +88,33 @@ extension ThreadModel {
     /// than as one function doing five things, and because the note it writes needs a
     /// sentence of its own.
     ///
-    /// ⛔ IT ONLY FIRES ON THE SMS → EMAIL DIRECTION. Going the other way there is
-    /// nothing staged to lose (the Attach control was hidden), so a note there would
-    /// be an alarm about nothing.
-    private func dropAttachmentsIfChannelCannotCarryThem(wasAttachable: Bool) {
+    /// ⛔ HELD, NOT DISCARDED (Seer, #99). Staged images moved to a channel that cannot
+    /// carry them go to ``ThreadContent/heldAttachments``: the stored draft keeps them, the
+    /// send leaves them out, and the note says so. A switch back to SMS returns them.
+    ///
+    /// ⚠️ THE NOTE IS SAID ONLY WHILE SOMETHING IS HELD. Switching between two text-only
+    /// channels with nothing staged would be an alarm about nothing.
+    private func holdAttachmentsIfChannelCannotCarryThem(wasAttachable: Bool) {
         guard var content = current else { return }
         content.channelNote = nil
-        guard wasAttachable, !canAttach, !content.attachments.isEmpty else {
-            setContent(content)
-            return
+        if canAttach {
+            let back = (content.attachments + content.heldAttachments).reduce(into: [String]()) { kept, url in
+                if !kept.contains(url) {
+                    kept.append(url)
+                }
+            }
+            content.attachments = Array(back.prefix(Self.maximumAttachments))
+            content.heldAttachments = []
+        } else if wasAttachable || !content.heldAttachments.isEmpty {
+            content.heldAttachments += content.attachments
+            content.attachments = []
+            if !content.heldAttachments.isEmpty {
+                content.channelNote = Self.attachmentsDropped(
+                    count: content.heldAttachments.count,
+                    channel: target.replyTarget?.channel
+                )
+            }
         }
-        let count = content.attachments.count
-        content.attachments = []
-        content.channelNote = Self.attachmentsDropped(count: count, channel: target.replyTarget?.channel)
         setContent(content)
     }
 
