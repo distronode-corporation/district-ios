@@ -39,8 +39,9 @@ extension ThreadModel {
             body: text,
             subject: outgoingSubject,
             // ⛔ WITH THE HELD IMAGES: a text-only channel must not erase them from the draft;
-            // nor a save while the thread is re-read (``ThreadModel/composerMedia``).
-            mediaUrls: current.map { $0.attachments + $0.heldAttachments } ?? composerMedia
+            // nor a save while the thread is re-read or could not be (``ThreadModel/composerMedia``,
+            // which every content change keeps equal to what is shown).
+            mediaUrls: composerMedia.all
         ))
     }
 

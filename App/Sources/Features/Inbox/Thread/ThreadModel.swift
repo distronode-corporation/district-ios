@@ -43,10 +43,10 @@ final class ThreadModel {
 
     private(set) var state: ThreadState = .loading
 
-    /// The draft's images as last shown: attachments and held. ⛔ What an autosave writes while
-    /// the content is being re-read or failed to re-read (Seer, #99), so a save in that window
-    /// never stores the draft without its images. Not observed: no view shows it.
-    @ObservationIgnored private(set) var composerMedia: [String] = []
+    /// The composer's images, as last shown or as a restore found them (``ComposerMedia``). ⛔ What
+    /// a re-read puts back and what an autosave writes with no content (Seer, #99), so neither
+    /// loses them. Internal for ``restoreDraft()``. Not observed: no view shows it.
+    @ObservationIgnored var composerMedia = ComposerMedia()
 
     /// The composer's text.
     ///
@@ -197,10 +197,10 @@ final class ThreadModel {
 
     /// Read the NEWEST window of the thread.
     ///
-    /// ⚠️ THIS DISCARDS ANY OLDER PAGES ALREADY EXPANDED, AND ANY ATTACHMENTS. It is
-    /// the retry path and the post-send refresh; both exist to show the operator the
-    /// server's current truth, and after a send the attachments have gone out with
-    /// it. Re-walking the cursor to rebuild scrollback nobody asked for would spend N
+    /// ⚠️ THIS DISCARDS ANY OLDER PAGES ALREADY EXPANDED, BUT NOT THE COMPOSER'S IMAGES
+    /// (``composerMedia``). It is the retry path and the post-send refresh; both exist to show
+    /// the server's current truth, and a send clears the images first, since they went out
+    /// with it. Re-walking the cursor to rebuild scrollback nobody asked for would spend N
     /// requests, and the expand control is still there.
     func load() async {
         guard let selector = target.selector else {
@@ -210,7 +210,7 @@ final class ThreadModel {
         state = .loading
         switch await inbox.timeline(workspaceId: target.workspaceId, selector: selector) {
         case let .success(page):
-            setContent(.from(page))
+            setContent(.from(page, media: composerMedia))
         case let .failure(error):
             state = .failed(FailureText.from(error))
         }
@@ -341,6 +341,7 @@ final class ThreadModel {
             latest.sending = false
             latest.sendFailure = FailureText.from(error)
             setContent(latest)
+            await noteWindowRefusal(error, for: recipient)
         }
     }
 
@@ -408,6 +409,9 @@ final class ThreadModel {
         if await !deleteDraft(), await !deleteDraft() {
             draftNotice = Self.sentDraftSurvived
         }
+        // ⚠️ THE IMAGES WENT OUT WITH IT (and a text-only send's held ones with the draft), so
+        // the re-read below must not put them back.
+        composerMedia = ComposerMedia()
         await load()
         seedSubjectIfNeeded()
     }
@@ -430,7 +434,11 @@ final class ThreadModel {
     /// ⚠️ INTERNAL RATHER THAN `private` FOR ``restoreDraft()``; see ``autosaveTask``.
     func setContent(_ content: ThreadContent) {
         state = content.events.isEmpty ? .empty(content) : .content(content)
-        composerMedia = content.attachments + content.heldAttachments
+        composerMedia = ComposerMedia(
+            attachments: content.attachments,
+            held: content.heldAttachments,
+            note: content.channelNote
+        )
     }
 
     /// ⛔ THE COPY ALREADY ON SCREEN WINS A COLLISION. Both are the same row from the

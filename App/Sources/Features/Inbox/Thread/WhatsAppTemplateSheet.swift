@@ -29,8 +29,12 @@ struct WhatsAppClosedWindow: View {
 
 /// The sender's approved templates; one chosen, its variables, a preview and Send.
 ///
-/// ⛔ ONLY APPROVED TEMPLATES ARE LISTED (``WhatsAppTemplate/isSendable``): Meta refuses
-/// any other, and the website's picker offers the same set.
+/// ⛔ ONLY THE TEMPLATES THE SEND ROUTE ACCEPTS ARE LISTED (``ThreadModel/offerable(_:senderId:)``),
+/// the website's rule: approved, numbered placeholders, a body, and this sender's or no one's.
+///
+/// ⛔ NOT DISMISSED MID-SEND (xhigh review): Cancel, the swipe down and the form's Back are all
+/// held while a template is in flight, as on the Mac, so the operator never leaves a billed
+/// send whose answer they will not see.
 struct WhatsAppTemplateSheet: View {
     let model: ThreadModel
 
@@ -49,11 +53,13 @@ struct WhatsAppTemplateSheet: View {
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(InboxCopy.cancel) { dismiss() }
+                            .disabled(model.whatsApp.sendingTemplate)
                             .keyboardShortcut(.cancelAction)
                     }
                 }
                 .task { await model.loadWhatsAppTemplates() }
         }
+        .interactiveDismissDisabled(model.whatsApp.sendingTemplate)
         .accessibilityIdentifier(A11yID.Inbox.whatsAppTemplates)
     }
 
@@ -161,6 +167,7 @@ private struct WhatsAppTemplateForm: View {
             }
         }
         .navigationTitle(template.name)
+        .navigationBarBackButtonHidden(model.whatsApp.sendingTemplate)
         .onAppear {
             model.clearTemplateFailure()
             if values.count != count {

@@ -2,7 +2,7 @@ import DistrictModel
 import SwiftUI
 
 /// The Inbox's thread assignment controls (DistrictCore 8.2.0): the Assigned to me
-/// filter in the toolbar, and the assign sheet a row's swipe action opens.
+/// filter in the toolbar, and the assign sheet a row's swipe action or context menu opens.
 ///
 /// ⚠️ A FILE OF ITS OWN BECAUSE `InboxView.swift` SITS AT THE 500-LINE `file_length`
 /// CEILING `swiftlint --strict` ENFORCES. The screen attaches this with one modifier and
@@ -46,21 +46,40 @@ private struct InboxAssignmentLayer: ViewModifier {
     }
 }
 
-/// The row's Assign swipe action, for a role that may write.
-private struct InboxAssignSwipe: ViewModifier {
+/// A row's Assign: the leading swipe action, and the same item after the row menu's copies,
+/// for a role that may write.
+///
+/// ⛔ NOT SWIPE-ONLY (xhigh review): a swipe is found by nobody using a pointer, VoiceOver or
+/// Full Keyboard Access, so a long press (or a secondary click on iPad) offers Assign too. It
+/// is the one row-menu item that is not a copy; ``RowContextAction``'s rule holds for the
+/// copies, and this opens the same sheet as the swipe, as the Mac's row menu does.
+private struct InboxRowMenu: ViewModifier {
     let conversation: ConversationSummary
     let model: InboxModel
 
     func body(content: Content) -> some View {
+        let copies = RowContextActions.thread(counterpart: conversation.counterpart)
         if model.canReply {
-            content.swipeActions(edge: .leading) {
-                Button(InboxCopy.assign, systemImage: "person.crop.circle.badge.plus") {
-                    model.beginAssigning(conversation)
-                }
-                .tint(.accentColor)
-            }
-        } else {
             content
+                .contextMenu {
+                    RowContextCopyItems(actions: copies)
+                    if !copies.isEmpty {
+                        Divider()
+                    }
+                    assignButton
+                }
+                .swipeActions(edge: .leading) {
+                    assignButton
+                        .tint(.accentColor)
+                }
+        } else {
+            content.rowContextMenu(copies)
+        }
+    }
+
+    private var assignButton: some View {
+        Button(InboxCopy.assign, systemImage: "person.crop.circle.badge.plus") {
+            model.beginAssigning(conversation)
         }
     }
 }
@@ -77,9 +96,9 @@ extension View {
         modifier(InboxAssignmentLayer(model: model))
     }
 
-    /// The Assign swipe action, on one Inbox row.
-    func inboxAssignSwipe(_ conversation: ConversationSummary, model: InboxModel) -> some View {
-        modifier(InboxAssignSwipe(conversation: conversation, model: model))
+    /// One Inbox row's context menu (its copy items, then Assign) and its Assign swipe action.
+    func inboxRowMenu(_ conversation: ConversationSummary, model: InboxModel) -> some View {
+        modifier(InboxRowMenu(conversation: conversation, model: model))
     }
 }
 

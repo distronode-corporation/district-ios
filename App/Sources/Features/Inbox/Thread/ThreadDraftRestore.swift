@@ -121,18 +121,28 @@ extension ThreadModel {
         // ⚠️ ATTACHMENTS COME BACK WITH IT. A draft saved with two images restores as
         // text plus two chips; restoring the text alone would send a message the
         // operator believed had pictures on it.
-        guard !draft.mediaUrls.isEmpty, var content = current else { return }
+        guard !draft.mediaUrls.isEmpty else { return }
         let restored = Self.restorable(draft.mediaUrls)
         // ⛔ BUT NOT ONTO A CHANNEL THAT CANNOT CARRY THEM (Seer, #95): a WhatsApp,
         // Messenger, Instagram or email default would send the text and drop the images
         // silently. They are held, with the channel's sentence: kept in the draft, never
         // sent, and back as chips on a switch to SMS (``ThreadContent/heldAttachments``).
+        var media = ComposerMedia()
         if canAttach {
-            content.attachments = restored
+            media.attachments = restored
         } else if canMutate {
-            content.heldAttachments = restored
-            content.channelNote = Self.attachmentsDropped(count: restored.count, channel: target.replyTarget?.channel)
+            media.held = restored
+            media.note = attachmentsHeldNote(count: restored.count)
         }
+        // ⛔ AND NOT LOST WHEN THE THREAD COULD NOT BE READ (xhigh review): the latch is set,
+        // so this runs once, and the retry's re-read puts them on its content (``load()``).
+        guard var content = current else {
+            composerMedia = media
+            return
+        }
+        content.attachments = media.attachments
+        content.heldAttachments = media.held
+        content.channelNote = media.note
         setContent(content)
     }
 

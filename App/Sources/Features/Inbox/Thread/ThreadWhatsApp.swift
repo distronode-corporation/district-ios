@@ -14,14 +14,16 @@ struct WhatsAppComposer {
         /// Not read, not a WhatsApp reply, or the read failed. Free text is offered,
         /// and the server's refusal is the answer if the window has closed.
         case unknown
-        case open(to: String, senderId: String)
+        /// ⚠️ `expiresAt` IS THE SERVER'S ISO-8601 CLOSE, and the composer re-reads the window
+        /// then (``ThreadModel/rereadWindowAtExpiry(now:)``).
+        case open(to: String, senderId: String, expiresAt: String?)
         case closed(to: String, senderId: String)
     }
 
     enum Templates {
         case idle
         case loading
-        /// ⛔ ONLY `isSendable` ONES: Meta refuses a template it has not approved.
+        /// ⛔ ONLY THE ONES THE SEND ROUTE ACCEPTS (``ThreadModel/offerable(_:senderId:)``).
         case ready([WhatsAppTemplate])
         case failed(FailureText)
     }
@@ -48,9 +50,10 @@ extension ThreadModel {
 
     /// Read the window for the selected reply, or forget it when that is not WhatsApp.
     ///
-    /// ⚠️ CALLED WHENEVER THE SELECTED CHANNEL CHANGES (the composer's `.task(id:)`), and
-    /// after a send. ⛔ A RESULT FOR AN ADDRESS NO LONGER SELECTED IS DROPPED: the
-    /// operator can switch channel while the read is in flight.
+    /// ⚠️ CALLED WHENEVER THE SELECTED CHANNEL CHANGES (the composer's `.task(id:)`), after a
+    /// template send, when an open window reaches its close, and when a send is refused for a
+    /// closed one. ⛔ A RESULT FOR AN ADDRESS NO LONGER SELECTED IS DROPPED: the operator can
+    /// switch channel while the read is in flight.
     func refreshWhatsAppWindow() async {
         guard canMutate, let recipient = target.replyTarget, recipient.channel == MessageChannel.whatsapp else {
             whatsApp.window = .unknown
@@ -61,12 +64,46 @@ extension ThreadModel {
         switch outcome {
         case let .success(response):
             whatsApp.window = response.window.open
-                ? .open(to: recipient.to, senderId: response.senderId)
+                ? .open(to: recipient.to, senderId: response.senderId, expiresAt: response.window.expiresAt)
                 : .closed(to: recipient.to, senderId: response.senderId)
         case .failure:
             whatsApp.window = .unknown
         }
     }
+
+    /// Re-read an open window when it closes.
+    ///
+    /// ⛔ THE WINDOW CLOSES WHILE THE THREAD IS OPEN (xhigh review, #99 and #95): read once, an
+    /// open window stayed open on screen past its `expiresAt`, and the box offered free text
+    /// the server refuses. The composer runs this in a `.task(id:)` on the window, so a new
+    /// answer or a closed screen cancels the wait; the website re-reads its clock the same way.
+    func rereadWindowAtExpiry(now: Date = .now) async {
+        guard case let .open(_, _, expiresAt) = whatsApp.window,
+              let delay = Self.untilWindowCloses(expiresAt, now: now) else { return }
+        try? await Task.sleep(for: delay)
+        guard !Task.isCancelled else { return }
+        await refreshWhatsAppWindow()
+    }
+
+    /// How long until `expiresAt`, zero once it has passed; nil when there is no instant to
+    /// wait for (none sent, or one this client cannot read), which leaves the window as read.
+    static func untilWindowCloses(_ expiresAt: String?, now: Date) -> Duration? {
+        guard let expiresAt, let closes = WireInstant.parse(expiresAt) else { return nil }
+        return .milliseconds(max(0, Int((closes.timeIntervalSince(now) * 1000).rounded(.up))))
+    }
+
+    /// A send refused for a closed window re-reads it.
+    ///
+    /// ⛔ 409 `whatsapp_window_closed` IS THE SERVER SAYING THE WINDOW SHUT (xhigh review): the
+    /// re-read puts the template button where the box was, as the website's `markClosed` does.
+    /// Any other refusal, or another channel's, leaves the window alone.
+    func noteWindowRefusal(_ error: ApiError, for recipient: ReplyTarget) async {
+        guard recipient.channel == MessageChannel.whatsapp, error.code == Self.windowClosedCode else { return }
+        await refreshWhatsAppWindow()
+    }
+
+    /// The send route's code for free text refused by a closed window.
+    static let windowClosedCode = "whatsapp_window_closed"
 
     /// Send the composer's text on the selected channel.
     ///
@@ -89,7 +126,7 @@ extension ThreadModel {
 
     /// The open window's sender when `recipient` is the WhatsApp reply it was read for.
     private func openWindowSender(for recipient: ReplyTarget) -> String? {
-        guard recipient.channel == MessageChannel.whatsapp, case let .open(to, senderId) = whatsApp.window else {
+        guard recipient.channel == MessageChannel.whatsapp, case let .open(to, senderId, _) = whatsApp.window else {
             return nil
         }
         return to == recipient.to ? senderId : nil
@@ -105,7 +142,7 @@ extension ThreadModel {
         whatsApp.templates = .loading
         switch await inbox.whatsAppTemplates(workspaceId: target.workspaceId, senderId: senderId) {
         case let .success(templates):
-            whatsApp.templates = .ready(templates.filter(\.isSendable))
+            whatsApp.templates = .ready(templates.filter { Self.offerable($0, senderId: senderId) })
         case let .failure(error):
             whatsApp.templates = .failed(FailureText.from(error))
         }
@@ -122,8 +159,9 @@ extension ThreadModel {
     /// template's placeholders and answers 400, and the sheet keeps Send disabled until
     /// every one is filled. The values go out trimmed, as the web's do.
     func sendWhatsAppTemplate(_ template: WhatsAppTemplate, variables: [String]) async -> Bool {
-        guard canMutate, !whatsApp.sendingTemplate, template.isSendable else { return false }
+        guard canMutate, !whatsApp.sendingTemplate else { return false }
         guard case let .closed(to, senderId) = whatsApp.window, target.replyTarget?.to == to else { return false }
+        guard Self.offerable(template, senderId: senderId) else { return false }
         let count = Self.templateVariableCount(template)
         let values = variables.prefix(count).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
         guard Self.templateComplete(template, values) else { return false }
@@ -143,16 +181,9 @@ extension ThreadModel {
         switch outcome {
         case .success:
             // ⛔ THE TEMPLATE DID NOT GO OUT THROUGH THE COMPOSER, SO THE COMPOSER'S IMAGES STAY
-            // (Seer, #99 and #95). The re-read rebuilds the thread's content, and without this
-            // the held draft images would be gone and the next autosave would erase them.
-            let composer = current.map { (attachments: $0.attachments, held: $0.heldAttachments, note: $0.channelNote) }
+            // (Seer, #99 and #95): the re-read puts them back (``ThreadModel/composerMedia``),
+            // and so does a later retry when this re-read fails.
             await load()
-            if let composer, var content = current {
-                content.attachments = composer.attachments
-                content.heldAttachments = composer.held
-                content.channelNote = composer.note
-                setContent(content)
-            }
             await refreshWhatsAppWindow()
             return true
         case let .failure(error):
@@ -161,23 +192,22 @@ extension ThreadModel {
         }
     }
 
-    /// How many variables a template takes: the server's count, else the highest
-    /// `{{n}}` in its body.
+    /// True when the send route would accept this template from `senderId`.
+    ///
+    /// ⛔ THE WEBSITE'S RULE (`sendableWhatsAppTemplates`), AND THE SERVER'S (xhigh review): approved,
+    /// tied to no sender or to this one, a non-blank body, and numbered placeholders. A nil
+    /// `variableCount` is a body the server cannot fill (named placeholders, or unreadable),
+    /// and `loadWhatsAppTemplateRef` refuses every send of it, so it is never offered.
+    static func offerable(_ template: WhatsAppTemplate, senderId: String) -> Bool {
+        guard template.isSendable, let count = template.variableCount, count >= 0 else { return false }
+        guard !isBlank(template.body) else { return false }
+        return template.senderId == nil || template.senderId == senderId
+    }
+
+    /// How many variables a template takes: the server's count. ⚠️ Only an
+    /// ``offerable(_:senderId:)`` template reaches the sheet, so the count is always set there.
     static func templateVariableCount(_ template: WhatsAppTemplate) -> Int {
-        if let count = template.variableCount {
-            return max(count, 0)
-        }
-        var highest = 0
-        var rest = template.body[...]
-        while let open = rest.range(of: "{{") {
-            rest = rest[open.upperBound...]
-            guard let close = rest.range(of: "}}") else { break }
-            if let number = Int(rest[..<close.lowerBound]) {
-                highest = max(highest, number)
-            }
-            rest = rest[close.upperBound...]
-        }
-        return highest
+        max(template.variableCount ?? 0, 0)
     }
 
     /// True when every variable the template takes has a non-blank value.

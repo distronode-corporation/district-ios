@@ -149,6 +149,42 @@ final class WhatsAppTemplateTests: XCTestCase {
         XCTAssertEqual(saved?.json["mediaUrls"] as? [String], [image])
     }
 
+    /// ⛔ AND WHEN THAT RE-READ FAILS, THE RETRY BRINGS THEM BACK (xhigh review): the restore is
+    /// latched and will not run again, so the images live on the model, not only in the content.
+    func testATemplateSendWhoseReReadFailsGetsTheImagesBackOnTheRetry() async {
+        let image = "https://www.distronode.test/api/media/media_parity_roof"
+        let stored = #"{"success":true,"draft":{"threadKey":"addr:14165550177","body":"On my way.","#
+            + #""subject":null,"mediaUrls":[""# + image + #""],"updatedAt":"2026-11-05T14:30:00.000Z"}}"#
+        let transport = ParityTransport()
+        transport.on(.get, "/whatsapp/window", 200, ParityFixtures.windowClosed)
+        transport.on(.get, "/whatsapp/templates", 200, ParityFixtures.templates)
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/timeline", 500, #"{"error":"unavailable"}"#)
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/messages/drafts", 200, stored)
+        transport.on(.put, "/messages/drafts", 200, stored)
+        transport.on(.post, "/messages/send", 200, ParityFixtures.sent)
+        let model = ParityFixtures.thread(transport, targets: Self.whatsApp)
+        await model.load()
+        await model.restoreDraft()
+        await model.refreshWhatsAppWindow()
+        await model.loadWhatsAppTemplates()
+        guard case let .ready(templates) = model.whatsApp.templates, let reminder = templates.first else {
+            return XCTFail("no template")
+        }
+
+        let sent = await model.sendWhatsAppTemplate(reminder, variables: ["Ada", "Friday"])
+        XCTAssertTrue(sent)
+        XCTAssertNil(model.current, "the re-read failed")
+        await model.open()
+
+        XCTAssertEqual(model.current?.heldAttachments, [image], "the retry's content has the held image")
+        XCTAssertNotNil(model.current?.channelNote)
+        await model.persistDraft("On my way.")
+        let saved = transport.requests(to: "/messages/drafts").last { $0.method == .put }
+        XCTAssertEqual(saved?.json["mediaUrls"] as? [String], [image])
+    }
+
     /// ⛔ A BLANK VARIABLE SENDS NOTHING.
     func testABlankVariableSendsNothing() async {
         let transport = ParityTransport()
@@ -203,22 +239,87 @@ final class WhatsAppTemplateTests: XCTestCase {
         XCTAssertNil(model.whatsApp.templateFailure, "the sheet was opened again")
     }
 
-    func testTheVariableCountIsTheServersElseTheHighestPlaceholder() throws {
-        let counted = try Self.template(body: "Hi {{1}}", variableCount: 3)
-        let uncounted = try Self.template(body: "Hi {{1}}, see you {{3}} at {{2}}.", variableCount: nil)
+    /// ⛔ ONLY WHAT THE SEND ROUTE ACCEPTS IS OFFERED (xhigh review; the website's
+    /// `sendableWhatsAppTemplates`): an approved template with named placeholders, a blank body,
+    /// or another sender's is refused by the server on every send, so it is never listed.
+    func testOnlyTemplatesTheServerWouldSendAreOffered() throws {
+        let numbered = try Self.template(body: "Hi {{1}}", variableCount: 1)
+        let noVariables = try Self.template(body: "We are open today.", variableCount: 0)
         let named = try Self.template(body: "Bonjour {{first_name}}", variableCount: nil)
+        let blank = try Self.template(body: "  ", variableCount: 0)
+        let ours = try Self.template(body: "Hi {{1}}", variableCount: 1, senderId: "wa_sender_1")
+        let theirs = try Self.template(body: "Hi {{1}}", variableCount: 1, senderId: "wa_sender_2")
+        let pending = try Self.template(body: "Hi {{1}}", variableCount: 1, status: "pending")
 
-        XCTAssertEqual(ThreadModel.templateVariableCount(counted), 3)
-        XCTAssertEqual(ThreadModel.templateVariableCount(uncounted), 3)
-        XCTAssertEqual(ThreadModel.templateVariableCount(named), 0)
-        XCTAssertTrue(ThreadModel.templateComplete(uncounted, ["a", "b", "c"]))
-        XCTAssertFalse(ThreadModel.templateComplete(uncounted, ["a", "b"]))
+        let offered = [numbered, noVariables, named, blank, ours, theirs, pending].map {
+            ThreadModel.offerable($0, senderId: "wa_sender_1")
+        }
+
+        XCTAssertEqual(offered, [true, true, false, false, true, false, false])
+        XCTAssertEqual(ThreadModel.templateVariableCount(numbered), 1)
+        XCTAssertTrue(ThreadModel.templateComplete(numbered, ["Ada"]))
+        XCTAssertFalse(ThreadModel.templateComplete(numbered, [" "]))
     }
 
-    private static func template(body: String, variableCount: Int?) throws -> WhatsAppTemplate {
+    /// ⛔ THE SHEET LISTS THE SAME SET, and a send of one it does not list goes nowhere.
+    func testTheSheetDropsATemplateTheServerRefusesAndItCannotBeSent() async throws {
+        let transport = ParityTransport()
+        transport.on(.get, "/whatsapp/templates", 200, #"""
+        {"success":true,"templates":[
+         {"id":"wa_tpl_named","senderId":null,"name":"follow_up","language":"fr_CA","category":"UTILITY",
+          "status":"approved","body":"Bonjour {{first_name}}","variableCount":null},
+         {"id":"wa_tpl_other","senderId":"wa_sender_2","name":"other","language":"en_US","category":"UTILITY",
+          "status":"approved","body":"Hi {{1}}","variableCount":1}]}
+        """#)
+        let model = await closedThread(transport)
+
+        await model.loadWhatsAppTemplates()
+
+        guard case let .ready(templates) = model.whatsApp.templates else {
+            return XCTFail("templates not ready: \(model.whatsApp.templates)")
+        }
+        XCTAssertEqual(templates.map(\.id), [])
+        let named = try Self.template(body: "Bonjour {{first_name}}", variableCount: nil)
+        let sent = await model.sendWhatsAppTemplate(named, variables: [])
+        XCTAssertFalse(sent)
+        XCTAssertTrue(transport.requests(to: "/messages/send").isEmpty)
+    }
+
+    /// ⛔ TWO TAPS SEND ONE TEMPLATE: the second, made while the first is in flight, sends
+    /// nothing, and Send comes back only once the first is answered.
+    func testASecondTapWhileATemplateIsInFlightSendsNothing() async {
+        let transport = ParityTransport()
+        transport.on(.post, "/messages/send", 200, ParityFixtures.sent)
+        let gate = transport.hold(.post, "/messages/send")
+        let model = await closedThread(transport)
+        await model.loadWhatsAppTemplates()
+        guard case let .ready(templates) = model.whatsApp.templates, let reminder = templates.first else {
+            return XCTFail("no template")
+        }
+
+        let first = Task { await model.sendWhatsAppTemplate(reminder, variables: ["Ada", "Friday"]) }
+        await waitUntil { transport.requests(to: "/messages/send").count == 1 }
+        let second = await model.sendWhatsAppTemplate(reminder, variables: ["Ada", "Friday"])
+        XCTAssertTrue(model.whatsApp.sendingTemplate, "held while the first is in flight")
+        gate.open()
+        let firstSent = await first.value
+
+        XCTAssertFalse(second)
+        XCTAssertTrue(firstSent)
+        XCTAssertEqual(transport.requests(to: "/messages/send").count, 1)
+        XCTAssertFalse(model.whatsApp.sendingTemplate)
+    }
+
+    private static func template(
+        body: String,
+        variableCount: Int?,
+        senderId: String? = nil,
+        status: String = "approved"
+    ) throws -> WhatsAppTemplate {
         let count = variableCount.map(String.init) ?? "null"
+        let sender = senderId.map { "\"\($0)\"" } ?? "null"
         let json = #"""
-        {"id":"t","senderId":null,"name":"n","language":"en_US","category":"UTILITY","status":"approved",
+        {"id":"t","senderId":\#(sender),"name":"n","language":"en_US","category":"UTILITY","status":"\#(status)",
          "body":"\#(body)","variableCount":\#(count)}
         """#
         return try JSONDecoder().decode(WhatsAppTemplate.self, from: Data(json.utf8))

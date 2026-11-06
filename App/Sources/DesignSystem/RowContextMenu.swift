@@ -75,11 +75,21 @@ extension View {
             self
         } else {
             contextMenu {
-                ForEach(actions) { action in
-                    Button(action.title, systemImage: "doc.on.doc") {
-                        UIPasteboard.general.string = action.value
-                    }
-                }
+                RowContextCopyItems(actions: actions)
+            }
+        }
+    }
+}
+
+/// The copy items of a row menu, for a menu that adds its own items after them (the Inbox
+/// row's Assign).
+struct RowContextCopyItems: View {
+    let actions: [RowContextAction]
+
+    var body: some View {
+        ForEach(actions) { action in
+            Button(action.title, systemImage: "doc.on.doc") {
+                UIPasteboard.general.string = action.value
             }
         }
     }

@@ -51,16 +51,12 @@ extension ThreadModel {
     /// representable — and it is not wanted: the half-finished reply is about the
     /// customer, not about SMS. See the ⛔ on ``ThreadTarget/threadKey``.
     ///
-    /// ⛔ MOVING TO EMAIL DISCARDS STAGED IMAGES **AND SAYS SO**. The email branch of
-    /// `messages/send` never looks at `mediaUrls`, so leaving them staged would send a
-    /// message the operator believes carries pictures and the customer receives
-    /// without them — a loss nothing downstream reports, because the send succeeds.
-    /// Dropping them silently is the worse half of a bad choice, so
-    /// ``ThreadContent/channelNote`` carries the sentence and it survives until the
-    /// next switch or send.
-    /// ⚠️ THE UPLOADED ROWS ARE NOT DELETED SERVER-SIDE and there is no route that
-    /// would; they become orphan `MessageMedia` rows, exactly as
-    /// ``removeAttachment(_:)`` documents.
+    /// ⛔ MOVING TO A TEXT-ONLY CHANNEL HOLDS STAGED IMAGES **AND SAYS SO**. The email branch
+    /// of `messages/send` never looks at `mediaUrls`, and WhatsApp, Messenger and Instagram
+    /// replies are text, so sending them staged would deliver a message without the pictures
+    /// the operator believes it carries, a loss nothing downstream reports. They are held
+    /// instead (kept in the draft, not sent, back on SMS), and ``ThreadContent/channelNote``
+    /// carries the sentence until the next switch or send.
     ///
     /// ⚠️ EVERYTHING ELSE IS DERIVED AND THEREFORE NEEDS NO RECOMPUTE. ``canAttach``,
     /// ``canReply``, ``requiresSubject`` and ``channelName`` all read
@@ -109,33 +105,39 @@ extension ThreadModel {
             content.heldAttachments += content.attachments
             content.attachments = []
             if !content.heldAttachments.isEmpty {
-                content.channelNote = Self.attachmentsDropped(
-                    count: content.heldAttachments.count,
-                    channel: target.replyTarget?.channel
-                )
+                content.channelNote = attachmentsHeldNote(count: content.heldAttachments.count)
             }
         }
         setContent(content)
     }
 
-    /// ⚠️ SINGULAR AND PLURAL SPELLED OUT, matching the thread's own attachment
-    /// badge. "1 images" is the kind of detail that makes a product look unfinished.
+    /// The held images' sentence for the selected channel and this thread's targets.
+    func attachmentsHeldNote(count: Int) -> String {
+        Self.attachmentsHeld(
+            count: count,
+            channel: target.replyTarget?.channel,
+            smsOffered: replyTargets.contains { $0.channel == MessageChannel.sms }
+        )
+    }
+
+    /// ⛔ IT SAYS WHAT HAPPENS, WHICH IS THAT NOTHING IS LOST (xhigh review, #99 and #95). The
+    /// images are held: kept in the draft, not sent on this channel, and back as chips on SMS.
+    /// "Removed" told the operator they were gone.
     ///
-    /// ⚠️ IT NAMES THE CHANNEL AS THE REASON rather than saying "not supported". The
-    /// operator's next action is either to switch back or to send without them, and
-    /// only the first sentence tells them which is available.
+    /// ⛔ AND IT OFFERS SMS ONLY WHERE THERE IS SMS: on a thread with no SMS reply, "switch to
+    /// SMS" names a control that does not exist, so the second sentence is left out.
     ///
-    /// ⛔ AND THE CHANNEL IT NAMES IS THE ONE SWITCHED TO. WhatsApp, Messenger and
-    /// Instagram are text-only too, and the email sentence on a WhatsApp switch told the
-    /// operator something false; those take the website's sentences.
-    static func attachmentsDropped(count: Int, channel: String?) -> String {
-        if channel == MessageChannel.whatsapp {
-            return InboxCopy.attachmentsRemovedWhatsapp
+    /// ⚠️ IT NAMES THE CHANNEL SWITCHED TO AS THE REASON, and spells out singular and plural,
+    /// matching the thread's own attachment badge.
+    static func attachmentsHeld(count: Int, channel: String?, smsOffered: Bool) -> String {
+        let held = if channel == MessageChannel.whatsapp {
+            InboxCopy.attachmentsHeldWhatsapp(count)
+        } else if channel == MessageChannel.messenger || channel == MessageChannel.instagram {
+            InboxCopy.attachmentsHeldMeta(count)
+        } else {
+            InboxCopy.attachmentsHeldEmail(count)
         }
-        if channel == MessageChannel.messenger || channel == MessageChannel.instagram {
-            return InboxCopy.attachmentsRemovedMeta
-        }
-        return InboxCopy.attachmentsDropped(count)
+        return smsOffered ? held + " " + InboxCopy.attachmentsSwitchToSms : held
     }
 
     // MARK: - The channel, said out loud

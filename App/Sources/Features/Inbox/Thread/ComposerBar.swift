@@ -74,6 +74,8 @@ struct ComposerBar: View {
         }
         // ⚠️ RE-READ ON EVERY CHANNEL SWITCH: the window belongs to the WhatsApp reply only.
         .task(id: model.selectedReplyIndex) { await model.refreshWhatsAppWindow() }
+        // ⛔ AND AGAIN WHEN AN OPEN WINDOW REACHES ITS CLOSE, so free text is not offered past it.
+        .task(id: model.whatsApp.window) { await model.rereadWindowAtExpiry() }
         .padding(.horizontal, DistrictSpacing.gutter)
         .padding(.vertical, DistrictSpacing.row)
         .background(colors.surface)
@@ -106,11 +108,9 @@ struct ComposerBar: View {
     /// for the other one, and the badge is still the thing that stops the channel
     /// being hidden.
     ///
-    /// ⚠️ WHATSAPP CANNOT APPEAR HERE AT ALL, AND THAT IS A WIRE GAP RATHER THAN AN
-    /// OMISSION IN THIS PICKER. `conversations` publishes no `canWhatsapp`, so
-    /// ``ConversationSummary/replyTargets`` can never produce a WhatsApp target and a
-    /// WhatsApp-only thread arrives marked `canSms: true` — it goes out as SMS. Fixing
-    /// it needs a server field, not a client rule.
+    /// ⚠️ WHATSAPP, MESSENGER AND INSTAGRAM APPEAR HERE LIKE SMS AND EMAIL. Since DistrictCore
+    /// 8.2.0, ``ConversationSummary/replyTargets`` reads the row's `replyOptions`, so a
+    /// WhatsApp-only customer is offered WhatsApp, never SMS, and the order is the server's.
     @ViewBuilder
     private var channelStrip: some View {
         if model.replyTargets.count > 1 {

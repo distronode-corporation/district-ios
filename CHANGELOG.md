@@ -30,8 +30,10 @@ built from history before publication, so they have no tags in this repository.
   closed WhatsApp window replaces the reply box with the approved templates (variables,
   preview, `sendWhatsAppTemplate`), and an open one names its sender. The alert push register
   declares `metaChannels`. 24 new strings in English and French, the French reviewed (Sean's
-  sign-off, 2026-11-05).
-  iPhone and iPad: Assign is a row's leading swipe action. Apple Watch: unchanged code; it
+  sign-off, 2026-11-05). The held-images sentences then replace the three "removed" ones with
+  four new strings (`inbox.attachments_held_*`, `inbox.attachments_switch_to_sms`), the French
+  in draft until Sean signs it off.
+  iPhone and iPad: Assign is a row's leading swipe action and a context-menu item. Apple Watch: unchanged code; it
   reads the phone's snapshot, whose `canReply` and wrist replies now follow `replyOptions`.
 - 3.2.1: MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
   pair is project-level, so every target carries the same value. DistrictCore stays at
