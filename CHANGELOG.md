@@ -43,6 +43,16 @@ built from history before publication, so they have no tags in this repository.
   on a colleague's own call. The microphone permission text names taking over a call. New
   strings: the website's sentences and Sean's seven approved ones, plus four app-only drafts.
 
+### Fixed
+
+- Live supervise: switching workspace from the picker now ends a live supervision. The switch
+  reaches the shell as one workspace, then none while the new list loads, then the next, so the
+  call stack compares with the last workspace that resolved (`CallStack.workspaceSelected`).
+- Live calls: a re-read cancelled part way (the next event reschedules it) is a failure, so the
+  list on screen is kept rather than replaced by the pages read so far, which could drop a live
+  call on a later page. A read queued behind the cancelled one runs in a fresh task, so it
+  lands instead of failing at once and leaving the list stale until the next event.
+
 ### Changed
 
 - App parity with the web Inbox, on DistrictCore `exactVersion` 8.2.0 (district-core-swift#52).

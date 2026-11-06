@@ -297,6 +297,161 @@ final class LiveCallsModelTests: XCTestCase {
     }
 }
 
+/// A read cancelled part way (Seer, district-macos PR #98).
+extension LiveCallsModelTests {
+    /// ⛔ A READ CANCELLED PART WAY IS A FAILURE, NOT THE PAGES IT REACHED (Seer, district-macos
+    /// PR #98): the later page fails because the task was cancelled, as `ApiClient` answers a
+    /// cancelled request, and the list on screen is kept.
+    func testACancelledReadIsAFailureNotAPartialList() async throws {
+        let first = try page("new", minutesAgo: 5)
+        let cancelling = OffsetPager<CallSummary>(identify: { $0.id }, fetch: { limit, offset in
+            guard offset == 0 else {
+                withUnsafeCurrentTask { $0?.cancel() }
+                return .failure(.transport("cancelled"))
+            }
+            return .success(OffsetPage(items: Array(first.prefix(limit))))
+        })
+        let now = now
+        let result = await Task { await LiveCallsModel.readLive(pager: cancelling, now: now) }.value
+        if case .success = result {
+            XCTFail("a cancelled read must not hand back a partial list")
+        }
+    }
+
+    /// ⛔ AND THROUGH THE MODEL: the next event cancels the re-read on its way, and the live call
+    /// on the second page stays listed.
+    func testAReReadCancelledByTheNextEventKeepsTheList() async throws {
+        let log = try CancellableLog(
+            first: [row("cmh1first", status: "in-progress", minutesAgo: 2)] + page("new", minutesAgo: 5).dropFirst(),
+            second: [row("cmh1second", status: "in-progress", minutesAgo: 30)] + page("old", minutesAgo: 600)
+        )
+        let now = now
+        let model = LiveCallsModel(
+            workspaceId: SuperviseFixtures.workspaceId,
+            events: LiveEventFeed(
+                workspaceId: SuperviseFixtures.workspaceId,
+                dependencies: SuperviseFixtures.feedDependencies()
+            ),
+            read: { await LiveCallsModel.readLive(pager: log.pager(), now: now) },
+            sleep: { _ in }
+        )
+        await model.load()
+        XCTAssertEqual(model.calls.map(\.id), ["cmh1first", "cmh1second"])
+
+        model.events.onEvent?(SuperviseFixtures.envelope(.callStarted, .object([:]), callId: "cmh1new"))
+        await waitUntil(state: "reads \(log.reads)") { log.waiting }
+        model.events.onEvent?(SuperviseFixtures.envelope(.callStarted, .object([:]), callId: "cmh1new2"))
+        await waitUntil(state: "reads \(log.reads)") { log.reads == 3 }
+
+        XCTAssertEqual(model.calls.map(\.id), ["cmh1first", "cmh1second"])
+    }
+
+    /// ⛔ A READ QUEUED BEHIND THE CANCELLED ONE STILL LANDS (Sean, 2026-11-06): it runs in a
+    /// fresh task, where its request is not refused, and the list takes the call it brings.
+    func testAReadQueuedBehindACancelledReadLands() async throws {
+        let live = try row("cmh1first", status: "in-progress", minutesAgo: 2)
+        let first = try [live] + page("new", minutesAgo: 5).dropFirst()
+        let log = try CancellableLog(
+            first: first,
+            second: [row("cmh1second", status: "in-progress", minutesAgo: 30)] + page("old", minutesAgo: 600),
+            later: [row("cmh1third", status: "in-progress", minutesAgo: 1), live]
+        )
+        let delays = Delays()
+        let now = now
+        let model = LiveCallsModel(
+            workspaceId: SuperviseFixtures.workspaceId,
+            events: LiveEventFeed(
+                workspaceId: SuperviseFixtures.workspaceId,
+                dependencies: SuperviseFixtures.feedDependencies()
+            ),
+            read: { await LiveCallsModel.readLive(pager: log.pager(), now: now) },
+            sleep: { _ in try await delays.sleep() }
+        )
+        await model.load()
+
+        model.events.onEvent?(SuperviseFixtures.envelope(.callStarted, .object([:]), callId: "cmh1new"))
+        await waitUntil(state: "reads \(log.reads)") { log.waiting }
+        // A pull to refresh while the re-read is on its way queues one more read behind it.
+        await model.load()
+        // The next event cancels the re-read on its way; its own re-read is still in its delay.
+        model.events.onEvent?(SuperviseFixtures.envelope(.callStarted, .object([:]), callId: "cmh1third"))
+
+        await waitUntil(state: "\(model.calls.map(\.id)), reads \(log.reads)") {
+            model.calls.map(\.id).contains("cmh1third")
+        }
+        XCTAssertEqual(log.reads, 3)
+    }
+
+    /// The model's re-read delay: the first passes at once, every later one outlasts the test.
+    private final class Delays: @unchecked Sendable {
+        private let lock = NSLock()
+        private var made = 0
+
+        func sleep() async throws {
+            let first = lock.withLock {
+                made += 1
+                return made == 1
+            }
+            guard !first else { return }
+            try await Task.sleep(for: .seconds(30))
+        }
+    }
+
+    /// The call log for the cancelled re-reads: the first read answers both pages; the second
+    /// holds its second page until its task is cancelled and then fails; a later read answers
+    /// `later` as one page, or fails as offline. ⚠️ A request from a task already cancelled fails
+    /// at once, as `URLSession` refuses it and `ApiClient` reports a transport failure.
+    private final class CancellableLog: @unchecked Sendable {
+        private let lock = NSLock()
+        private let first: [CallSummary]
+        private let second: [CallSummary]
+        private let later: [CallSummary]?
+        private var made = 0
+        private var held = false
+
+        init(first: [CallSummary], second: [CallSummary], later: [CallSummary]? = nil) {
+            self.first = first
+            self.second = second
+            self.later = later
+        }
+
+        var reads: Int {
+            lock.withLock { made }
+        }
+
+        var waiting: Bool {
+            lock.withLock { held }
+        }
+
+        func pager() -> OffsetPager<CallSummary> {
+            let read = lock.withLock {
+                made += 1
+                return made
+            }
+            return OffsetPager(identify: { $0.id }, fetch: { [self] _, offset in
+                guard !Task.isCancelled else {
+                    return .failure(.transport("cancelled"))
+                }
+                switch (read, offset) {
+                case (1, 0), (2, 0):
+                    return .success(OffsetPage(items: first))
+                case (1, _):
+                    return .success(OffsetPage(items: second))
+                case (2, _):
+                    lock.withLock { held = true }
+                    try? await Task.sleep(for: .seconds(30))
+                    return .failure(.transport("cancelled"))
+                default:
+                    guard let later else {
+                        return .failure(.transport("offline"))
+                    }
+                    return .success(OffsetPage(items: later))
+                }
+            })
+        }
+    }
+}
+
 /// Holds the first read until the test opens it; later reads answer at once.
 private final class ReadGate: @unchecked Sendable {
     private let lock = NSLock()
