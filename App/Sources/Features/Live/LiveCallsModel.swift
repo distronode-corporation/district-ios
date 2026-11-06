@@ -39,6 +39,9 @@ final class LiveCallsModel {
     private let sleep: @Sendable (Duration) async throws -> Void
     @ObservationIgnored private var reread: Task<Void, Never>?
     @ObservationIgnored private var loading = false
+    /// A read was asked for while one was on its way. ⛔ It runs once that one lands: the read
+    /// on its way may have been answered before the event that asked for this one.
+    @ObservationIgnored private var readAgain = false
 
     init(
         workspaceId: String,
@@ -74,12 +77,22 @@ final class LiveCallsModel {
         return []
     }
 
-    /// Read the page. ⚠️ A read already on its way is not doubled.
+    /// Read the page. ⚠️ A read already on its way is not doubled, and NOT DROPPED either: one
+    /// more read follows it (Seer, PR #101), however many were asked for meanwhile.
     func load() async {
-        guard !loading else { return }
+        guard !loading else {
+            readAgain = true
+            return
+        }
         loading = true
-        let result = await read()
+        repeat {
+            readAgain = false
+            await apply(read())
+        } while readAgain
         loading = false
+    }
+
+    private func apply(_ result: Result<[CallSummary], ApiError>) {
         switch result {
         case let .success(rows):
             let live = rows.filter { CallDisplay($0).transcribesLive }

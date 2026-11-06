@@ -83,6 +83,32 @@ final class LiveCallsModelTests: XCTestCase {
         await waitUntil { reads.count == 2 }
     }
 
+    /// ⛔ A READ ASKED FOR WHILE ONE IS ON ITS WAY RUNS AFTER IT, ONCE (Seer, PR #101): the read
+    /// on its way may predate the call that started.
+    func testAReadAskedForDuringAReadRunsAfterIt() async throws {
+        let gate = ReadGate()
+        let first = try rows()
+        let second = try [LiveFixtures.call(id: "cmh1late", status: "in-progress")] + first
+        let model = LiveCallsModel(
+            workspaceId: SuperviseFixtures.workspaceId,
+            events: LiveEventFeed(
+                workspaceId: SuperviseFixtures.workspaceId,
+                dependencies: SuperviseFixtures.feedDependencies()
+            ),
+            read: { await gate.next(first: first, then: second) },
+            sleep: { _ in }
+        )
+        let loading = Task { await model.load() }
+        await waitUntil { gate.waiting }
+        await model.load()
+        await model.load()
+        gate.open()
+        await loading.value
+
+        XCTAssertEqual(gate.reads, 2, "one more read, not one per request")
+        XCTAssertEqual(model.calls.map(\.id), ["cmh1late", "cmh1live"])
+    }
+
     /// A `call_updated` whose status left `in-progress` is an ending too.
     func testAnUpdateThatLeftInProgressTakesTheCallOff() async throws {
         let model = try makeModel(Reads([.success(rows())]))
@@ -93,5 +119,40 @@ final class LiveCallsModelTests: XCTestCase {
             callId: "cmh1live"
         ))
         XCTAssertEqual(model.calls.map(\.id), [])
+    }
+}
+
+/// Holds the first read until the test opens it; later reads answer at once.
+private final class ReadGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var gate: CheckedContinuation<Void, Never>?
+    private var count = 0
+
+    var reads: Int {
+        lock.withLock { count }
+    }
+
+    var waiting: Bool {
+        lock.withLock { gate != nil }
+    }
+
+    func open() {
+        let held: CheckedContinuation<Void, Never>? = lock.withLock {
+            defer { gate = nil }
+            return gate
+        }
+        held?.resume()
+    }
+
+    func next(first: [CallSummary], then later: [CallSummary]) async -> Result<[CallSummary], ApiError> {
+        let isFirst: Bool = lock.withLock {
+            count += 1
+            return count == 1
+        }
+        guard isFirst else { return .success(later) }
+        await withCheckedContinuation { continuation in
+            lock.withLock { gate = continuation }
+        }
+        return .success(first)
     }
 }
