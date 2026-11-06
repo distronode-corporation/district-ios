@@ -42,6 +42,10 @@ final class LiveCallsModel {
     /// A read was asked for while one was on its way. ⛔ It runs once that one lands: the read
     /// on its way may have been answered before the event that asked for this one.
     @ObservationIgnored private var readAgain = false
+    /// Every call the socket said has ended. ⛔ FILTERED OUT OF EVERY LATER READ (Seer, PR #101):
+    /// a read answered before the end would otherwise put the call back as live, and an ended call
+    /// never becomes live again.
+    @ObservationIgnored private var ended: Set<String> = []
 
     init(
         workspaceId: String,
@@ -95,7 +99,7 @@ final class LiveCallsModel {
     private func apply(_ result: Result<[CallSummary], ApiError>) {
         switch result {
         case let .success(rows):
-            let live = rows.filter { CallDisplay($0).transcribesLive }
+            let live = rows.filter { CallDisplay($0).transcribesLive && !ended.contains($0.id) }
             state = .ready(live)
         case let .failure(error):
             // ⚠️ A RE-READ THAT FAILS KEEPS THE LIST IT HAD: the socket's events still arrive,
@@ -124,6 +128,7 @@ final class LiveCallsModel {
     }
 
     private func remove(_ callId: String) {
+        ended.insert(callId)
         guard case let .ready(rows) = state else { return }
         state = .ready(rows.filter { $0.id != callId })
     }

@@ -109,6 +109,29 @@ final class LiveCallsModelTests: XCTestCase {
         XCTAssertEqual(model.calls.map(\.id), ["cmh1late", "cmh1live"])
     }
 
+    /// ⛔ A READ ANSWERED BEFORE A CALL ENDED DOES NOT PUT IT BACK (Seer, PR #101).
+    func testACallThatEndedDuringAReadStaysOff() async throws {
+        let gate = ReadGate()
+        let rows = try rows()
+        let model = LiveCallsModel(
+            workspaceId: SuperviseFixtures.workspaceId,
+            events: LiveEventFeed(
+                workspaceId: SuperviseFixtures.workspaceId,
+                dependencies: SuperviseFixtures.feedDependencies()
+            ),
+            read: { await gate.next(first: rows, then: rows) },
+            sleep: { _ in }
+        )
+        let loading = Task { await model.load() }
+        await waitUntil { gate.waiting }
+        model.events.onEvent?(SuperviseFixtures.envelope(.callEnded, .object([:]), callId: "cmh1live"))
+        gate.open()
+        await loading.value
+        await model.load()
+
+        XCTAssertEqual(model.calls.map(\.id), [], "the stale read and the next one both leave it off")
+    }
+
     /// A `call_updated` whose status left `in-progress` is an ending too.
     func testAnUpdateThatLeftInProgressTakesTheCallOff() async throws {
         let model = try makeModel(Reads([.success(rows())]))
