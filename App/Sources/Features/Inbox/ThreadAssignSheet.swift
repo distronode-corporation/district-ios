@@ -20,12 +20,16 @@ struct ThreadAssignSheet: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
+                        // ⛔ NOT WHILE A WRITE IS IN FLIGHT (max review, #99), nor a swipe down: the
+                        // refusal is said here (``ThreadAssignModel/canDismiss``).
                         Button(InboxCopy.cancel) { dismiss() }
                             .keyboardShortcut(.cancelAction)
+                            .disabled(!model.canDismiss)
                     }
                 }
                 .task { await model.load() }
         }
+        .interactiveDismissDisabled(!model.canDismiss)
         .accessibilityIdentifier(A11yID.Inbox.assignSheet)
     }
 

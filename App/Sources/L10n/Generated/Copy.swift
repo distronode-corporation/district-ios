@@ -1330,6 +1330,17 @@ extension InboxCopy {
         return "\(count) attachments"
     }
 
+    /// `inbox.attachment_held`
+    internal static var attachmentHeld: String { AppL10n.copyLocale == .frCA ? "En attente" : "Held" }
+
+    /// `inbox.attachment_held_by_email`
+    internal static var attachmentHeldByEmail: String { AppL10n.copyLocale == .frCA ? "Image en attente, non envoyée par courriel" : "Image held, not sent by email" }
+
+    /// `inbox.attachment_held_on`
+    internal static func attachmentHeldOn(_ channel: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Image en attente, non envoyée par \(channel)" : "Image held, not sent on \(channel)"
+    }
+
     /// `inbox.attachments_held_email`
     internal static func attachmentsHeldEmail(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {

@@ -3450,6 +3450,34 @@ args = { count = "int" }
 state = "reviewed"
 id = { swift = "InboxCopy.attachmentCount(_:)" }
 
+[inbox.attachment_held]
+en = "Held"
+fr = "En attente"
+ctx = "label"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.attachmentHeld" }
+note = "On a held image's chip in the reply box: an image the draft keeps that the selected channel cannot carry, drawn dimmed with its own Remove. It is not sent on this channel and comes back as an attachment on a switch to SMS."
+
+[inbox.attachment_held_by_email]
+en = "Image held, not sent by email"
+fr = "Image en attente, non envoyée par courriel"
+ctx = "a11y"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.attachmentHeldByEmail" }
+note = "Read by VoiceOver on a held image's chip when the reply goes out by email. French agrees with « image »."
+
+[inbox.attachment_held_on]
+en = "Image held, not sent on {channel}"
+fr = "Image en attente, non envoyée par {channel}"
+ctx = "a11y"
+screen = "inbox.thread"
+args = { channel = "str" }
+state = "draft"
+id = { swift = "InboxCopy.attachmentHeldOn(_:)" }
+note = "Read by VoiceOver on a held image's chip; channel is the reply's channel name as the picker shows it (WhatsApp, Messenger, Instagram). French agrees with « image »."
+
 [inbox.attachments_held_email]
 en.one = "The image stays in the draft: email replies cannot carry attachments, so it will not be sent."
 en.other = "{count} images stay in the draft: email replies cannot carry attachments, so they will not be sent."
@@ -3458,7 +3486,7 @@ fr.other = "{count} images restent dans le brouillon\u00A0: les réponses par co
 ctx = "body"
 screen = "inbox.thread"
 args = { count = "int" }
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachmentsHeldEmail(_:)" }
 note = "Shown when a reply on email holds the draft's images (a switch from SMS, or a draft restored on email). The images are kept in the stored draft and come back as attachments on a switch to SMS. The one form names no number; count is never 0."
 
@@ -3470,7 +3498,7 @@ fr.other = "{count} images restent dans le brouillon\u00A0: les réponses Messen
 ctx = "body"
 screen = "inbox.thread"
 args = { count = "int" }
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachmentsHeldMeta(_:)" }
 note = "Shown when a reply on Messenger or Instagram holds the draft's images. The images are kept in the stored draft and come back as attachments on a switch to SMS. The one form names no number; count is never 0."
 
@@ -3482,7 +3510,7 @@ fr.other = "{count} images restent dans le brouillon\u00A0: les réponses WhatsA
 ctx = "body"
 screen = "inbox.thread"
 args = { count = "int" }
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachmentsHeldWhatsapp(_:)" }
 note = "Shown when a reply on WhatsApp holds the draft's images. The images are kept in the stored draft and come back as attachments on a switch to SMS. The one form names no number; count is never 0."
 
@@ -3491,7 +3519,7 @@ en = "To send images, switch to SMS."
 fr = "Pour envoyer des images, passez au texto."
 ctx = "body"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachmentsSwitchToSms" }
 note = "Follows an attachments_held_* sentence, after one space, only on a thread that offers an SMS reply."
 

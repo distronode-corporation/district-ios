@@ -31,6 +31,10 @@ struct WhatsAppComposer {
     var window: Window = .unknown
     var templates: Templates = .idle
 
+    /// ⛔ WHICH WINDOW READ MAY APPLY ITS ANSWER: only the latest begun (max review, #99 and
+    /// #95), as the Inbox list's reads (``LatestRead``).
+    var windowReads = LatestRead()
+
     /// ⛔ THE TEMPLATE SEND'S SINGLE-FLIGHT GUARD. A template is billed by Meta per
     /// conversation, and two taps before a re-render must not send it twice.
     var sendingTemplate = false
@@ -54,13 +58,18 @@ extension ThreadModel {
     /// template send, when an open window reaches its close, and when a send is refused for a
     /// closed one. ⛔ A RESULT FOR AN ADDRESS NO LONGER SELECTED IS DROPPED: the operator can
     /// switch channel while the read is in flight.
+    ///
+    /// ⛔ AND SO IS AN OLDER READ'S, OR A CANCELLED ONE'S (max review, #99 and #95). Two reads
+    /// overlap (a switch away and back, a refused send beside the expiry re-read), and they
+    /// answered in any order: an older "open" could put the box back over a newer "closed".
     func refreshWhatsAppWindow() async {
+        let read = whatsApp.windowReads.begin()
         guard canMutate, let recipient = target.replyTarget, recipient.channel == MessageChannel.whatsapp else {
             whatsApp.window = .unknown
             return
         }
         let outcome = await inbox.whatsAppWindow(workspaceId: target.workspaceId, to: recipient.to)
-        guard target.replyTarget == recipient else { return }
+        guard whatsApp.windowReads.isLatest(read), !Task.isCancelled, target.replyTarget == recipient else { return }
         switch outcome {
         case let .success(response):
             whatsApp.window = response.window.open
@@ -77,13 +86,30 @@ extension ThreadModel {
     /// open window stayed open on screen past its `expiresAt`, and the box offered free text
     /// the server refuses. The composer runs this in a `.task(id:)` on the window, so a new
     /// answer or a closed screen cancels the wait; the website re-reads its clock the same way.
-    func rereadWindowAtExpiry(now: Date = .now) async {
+    ///
+    /// ⛔ IT RE-ARMS WHILE THE ANSWER IS STILL OPEN AND ALREADY PAST ITS CLOSE HERE (max review,
+    /// #99 and #95): a device clock ahead of the server's. The same answer leaves the
+    /// `.task(id:)` as it was, so the re-read fired once and never again; it now backs off from
+    /// `backoff` to ``windowRereadCeiling`` until the window closes or the answer moves.
+    func rereadWindowAtExpiry(now: () -> Date = { .now }, backoff: Duration = windowRereadBackoff) async {
         guard case let .open(_, _, expiresAt) = whatsApp.window,
-              let delay = Self.untilWindowCloses(expiresAt, now: now) else { return }
+              let delay = Self.untilWindowCloses(expiresAt, now: now()) else { return }
         try? await Task.sleep(for: delay)
-        guard !Task.isCancelled else { return }
-        await refreshWhatsAppWindow()
+        var wait = backoff
+        while !Task.isCancelled {
+            await refreshWhatsAppWindow()
+            guard !Task.isCancelled, case let .open(_, _, again) = whatsApp.window,
+                  Self.untilWindowCloses(again, now: now()) == .zero else { return }
+            try? await Task.sleep(for: wait)
+            wait = min(wait * 2, Self.windowRereadCeiling)
+        }
     }
+
+    /// The first wait before re-reading a window whose answer is already past its close.
+    static let windowRereadBackoff: Duration = .seconds(5)
+
+    /// The longest wait between those re-reads.
+    static let windowRereadCeiling: Duration = .seconds(60)
 
     /// How long until `expiresAt`, zero once it has passed; nil when there is no instant to
     /// wait for (none sent, or one this client cannot read), which leaves the window as read.

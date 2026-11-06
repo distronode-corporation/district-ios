@@ -29,6 +29,12 @@ final class ThreadAssignModel {
     /// two pushes to the assignee.
     private(set) var saving = false
 
+    /// ⛔ FALSE WHILE A WRITE IS IN FLIGHT (max review, #99 and #95): Cancel, a swipe down and
+    /// Esc each closed the sheet mid-save, so a refusal arrived with nowhere to be said.
+    var canDismiss: Bool {
+        !saving
+    }
+
     /// The refusal of the last write, said in the sheet: `assignee_is_viewer`,
     /// `assignee_not_member` or anything else, through ``FailureText``.
     private(set) var failure: FailureText?
@@ -36,7 +42,10 @@ final class ThreadAssignModel {
     let threadKey: String
 
     /// The address the thread is assigned to now, or nil. The sheet ticks it.
-    let current: String?
+    ///
+    /// ⚠️ THE ROW'S VALUE UNTIL ``load()`` RE-READS IT (max review, #99 and #95): the list can
+    /// be minutes old, and a colleague's assignment since would tick the wrong owner.
+    private(set) var current: String?
 
     private let inbox: InboxRepository
     private let workspaces: WorkspaceRepository
@@ -61,8 +70,21 @@ final class ThreadAssignModel {
     /// ⚠️ THE CURRENT ASSIGNEE STAYS LISTED even when the roster no longer holds them
     /// (removed since, or the read raced a change), as the web's picker does, so the
     /// tick has a row to sit on.
+    ///
+    /// ⛔ THE OWNER IS RE-READ WITH THE ROSTER (max review, #99 and #95): there is no route for
+    /// one thread's assignment, so the list is read again and this thread's row adopted. A
+    /// failed read, or a row outside the list's scan, keeps the value the sheet opened with.
     func load() async {
-        switch await workspaces.members(workspaceId: workspaceId) {
+        let inbox = inbox
+        let workspaces = workspaces
+        let workspaceId = workspaceId
+        async let roster = workspaces.members(workspaceId: workspaceId)
+        async let list = inbox.conversations(workspaceId: workspaceId)
+        let reread = await list
+        if case let .success(read) = reread, let row = read.conversations.first(where: { $0.threadKey == threadKey }) {
+            current = row.assigneeEmail
+        }
+        switch await roster {
         case let .success(response):
             members = .ready(Self.assignable(response.members, current: current))
         case let .failure(error):

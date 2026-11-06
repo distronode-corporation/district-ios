@@ -57,9 +57,10 @@ struct ComposerBar: View {
             // by the server, so the box is replaced rather than left to fail (8.2.0).
             if model.whatsAppWindowClosed {
                 WhatsAppClosedWindow(model: model)
+                ComposerAttachmentStrip(model: model, content: content)
             } else {
                 subjectField
-                attachmentStrip
+                ComposerAttachmentStrip(model: model, content: content)
                 field
                 // ⚠️ ONE ROW AT EVERY TEXT SIZE: the three controls are icons, so only Send's
                 // word grows, and the field above keeps the whole width it needs at AX5.
@@ -148,7 +149,8 @@ struct ComposerBar: View {
                 }
             }
             .pickerStyle(.segmented)
-            .disabled(content.sending)
+            // ⚠️ AND WHILE AN UPLOAD IS IN FLIGHT (max review): it lands held off SMS anyway.
+            .disabled(content.sending || content.attaching)
             if let recipient = model.recipientName {
                 recipientLine(recipient)
             }
@@ -195,6 +197,9 @@ struct ComposerBar: View {
             Text(note)
                 .font(DistrictType.caption)
                 .foregroundStyle(colors.mutedForeground)
+                // ⚠️ ITS WHOLE HEIGHT (max review screenshots): beside the held chips' strip it
+                // was squeezed to one truncated line.
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -283,31 +288,6 @@ struct ComposerBar: View {
                 Button(InboxCopy.dismiss) { model.dismissFailure() }
                     .buttonStyle(.districtGhost)
             }
-        }
-    }
-
-    /// The images waiting to go out with the next send.
-    ///
-    /// ⚠️ ALREADY UPLOADED, so removing one costs nothing server-side and the send
-    /// carries only URLs. Uploading at PICK time rather than at SEND time means an
-    /// upload failure costs a retry of one image instead of failing a billable send
-    /// that has already spent its rate-limit slot.
-    @ViewBuilder
-    private var attachmentStrip: some View {
-        if !content.attachments.isEmpty {
-            ScrollView(.horizontal) {
-                HStack(alignment: .top, spacing: DistrictSpacing.tight) {
-                    ForEach(content.attachments, id: \.self) { url in
-                        VStack(spacing: DistrictSpacing.hairline) {
-                            ThreadMediaThumbnail(url: url)
-                            Button(InboxCopy.remove) { model.removeAttachment(url) }
-                                .buttonStyle(.districtGhost)
-                                .accessibilityLabel(InboxCopy.removeAttachment)
-                        }
-                    }
-                }
-            }
-            .scrollIndicators(.hidden)
         }
     }
 
@@ -400,7 +380,8 @@ struct ComposerBar: View {
         .buttonStyle(.districtPrimary)
         // ⛔ COMMAND-RETURN, NEVER RETURN. See the ⛔ on the type.
         .keyboardShortcut(.return, modifiers: .command)
-        .disabled(content.sending || !model.canSendNow)
+        // ⛔ AND WHILE AN IMAGE UPLOADS (max review): it would land after the send took the list.
+        .disabled(content.sending || content.attaching || !model.canSendNow)
         // ⛔ IT IS IN `UITestApp.forbiddenSurfaces`, AND THE REFUSAL IN
         // `UITestApp.tap(_:)` KEYS ON THIS IDENTIFIER. Without it that guard would
         // protect a string that appears nowhere in the app — a vacuous guard on the

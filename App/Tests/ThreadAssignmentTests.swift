@@ -194,6 +194,69 @@ final class ThreadAssignmentTests: XCTestCase {
             XCTAssertFalse(sheet.saving)
         }
     }
+
+    // MARK: - The max review (#99 and #95)
+
+    /// ⛔ THE SHEET CANNOT BE DISMISSED WHILE A WRITE IS IN FLIGHT (Cancel, a swipe down, Esc): the
+    /// refusal is said in the sheet, and one closed mid-save said nothing.
+    func testTheSheetCannotBeDismissedMidWriteAndTheRefusalStaysInSight() async {
+        let transport = ParityTransport()
+        transport.on(
+            .post, "/conversations/assign", 400,
+            #"{"success":false,"error":"Not a member.","code":"assignee_not_member"}"#
+        )
+        let gate = transport.hold(.post, "/conversations/assign")
+        let sheet = model(transport)
+        XCTAssertTrue(sheet.canDismiss)
+
+        let write = Task { await sheet.assign("former@contract.test") }
+        await waitUntil { transport.requests(to: "/conversations/assign").count == 1 }
+        XCTAssertFalse(sheet.canDismiss, "blocked while saving")
+        gate.open()
+        let assigned = await write.value
+
+        XCTAssertFalse(assigned)
+        XCTAssertTrue(sheet.canDismiss)
+        XCTAssertNotNil(sheet.failure, "the refusal is there to read")
+    }
+
+    /// ⛔ THE SHEET RE-READS THE OWNER WHEN IT OPENS: the row it was opened from can be minutes old,
+    /// and a colleague's assignment since would tick the wrong member.
+    func testTheSheetRereadsTheCurrentOwnerWhenItOpens() async {
+        let row = ParityFixtures.row(
+            threadKey: "contact:c_1", counterpart: "+14165550177", channels: ["sms"], replyOptions: "[]",
+            assigneeEmail: "teammate@contract.test"
+        )
+        let transport = ParityTransport()
+        transport.on(.get, "/workspace/members", 200, Self.roster)
+        transport.on(.get, "/conversations", 200, ParityFixtures.conversations([row]))
+        let sheet = model(transport, current: "owner@contract.test")
+
+        await sheet.load()
+
+        XCTAssertEqual(sheet.current, "teammate@contract.test")
+        XCTAssertEqual(transport.requests(to: "/conversations").count, 1)
+    }
+
+    /// ⚠️ A FAILED RE-READ, OR A ROW OUTSIDE THE LIST'S SCAN, KEEPS THE OWNER THE SHEET OPENED WITH.
+    func testAFailedOwnerRereadKeepsTheRowsOwner() async {
+        let transport = ParityTransport()
+        transport.on(.get, "/workspace/members", 200, Self.roster)
+        let failed = model(transport, current: "owner@contract.test")
+        await failed.load()
+        XCTAssertEqual(failed.current, "owner@contract.test", "the list read failed")
+
+        let other = ParityFixtures.row(
+            threadKey: "contact:c_2",
+            counterpart: "+2",
+            channels: ["sms"],
+            replyOptions: "[]"
+        )
+        transport.on(.get, "/conversations", 200, ParityFixtures.conversations([other]))
+        let missing = model(transport, current: "owner@contract.test")
+        await missing.load()
+        XCTAssertEqual(missing.current, "owner@contract.test", "the row is not in the list")
+    }
 }
 
 /// App parity (2): the push declaration that goes with the Meta reads.
