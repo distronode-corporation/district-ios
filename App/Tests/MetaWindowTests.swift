@@ -251,6 +251,26 @@ final class MetaWindowTests: XCTestCase {
         XCTAssertEqual(model.meta.window, .unknown)
     }
 
+    /// ⛔ A CANCELLED CALLER BEGINS NO READ, so it cannot make a newer read stale (Seer, #105):
+    /// the composer's cancelled task reaches this read only after its WhatsApp read returns.
+    func testACancelledCallerCannotStaleANewerRead() async {
+        let transport = ParityTransport()
+        transport.on(.get, "/messages/send", 200, Self.closed)
+        let gate = transport.hold(.get, "/messages/send")
+        let model = thread(transport)
+
+        let newer = Task { await model.refreshMetaWindow() }
+        await waitUntil { transport.requests(to: "/messages/send").count == 1 }
+        let cancelled = Task { await model.refreshMetaWindow() }
+        cancelled.cancel()
+        await cancelled.value
+        XCTAssertEqual(transport.requests(to: "/messages/send").count, 1, "the cancelled caller read nothing")
+        gate.open()
+        await newer.value
+
+        XCTAssertTrue(model.metaWindowClosed, "the newer read's answer stands")
+    }
+
     /// ⛔ A READ THAT ANSWERS AFTER A CHANNEL SWITCH IS DROPPED.
     func testAStaleReadIsDroppedAfterAChannelSwitch() async {
         let transport = ParityTransport()

@@ -50,7 +50,11 @@ extension ThreadModel {
     /// channel (a switch, and the composer coming back after a reload), and after a send.
     /// ⛔ AN OLDER READ'S ANSWER, A CANCELLED ONE'S, AND ONE FOR AN ADDRESS NO LONGER SELECTED
     /// ARE DROPPED, the same three guards as ``refreshWhatsAppWindow()``.
+    /// ⛔ AND A CANCELLED CALLER BEGINS NO READ AT ALL (Seer, #105): the composer's task awaits
+    /// the WhatsApp read first, and a task cancelled by a channel switch that went on to begin
+    /// here would make the newer task's read stale, leaving the window unknown.
     func refreshMetaWindow() async {
+        guard !Task.isCancelled else { return }
         let read = meta.reads.begin()
         guard let recipient = selectedMetaReply else {
             meta.window = .unknown
