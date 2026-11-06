@@ -13,6 +13,7 @@ struct LiveCallView: View {
     @State private var draft = ""
 
     private static let bottom = "watch.live.bottom"
+    private static let receipt = "watch.live.receipt"
 
     private var transcript: WatchLiveTranscript? {
         store.live.transcript?.call.id == call.id ? store.live.transcript : nil
@@ -36,6 +37,12 @@ struct LiveCallView: View {
             // ⚠️ THE NEWEST LINE STAYS IN VIEW: a wrist glances, it does not scroll to find it.
             .onChange(of: transcript?.lines.count) { proxy.scrollTo(Self.bottom, anchor: .bottom) }
             .onChange(of: transcript?.interim?.text) { proxy.scrollTo(Self.bottom, anchor: .bottom) }
+            // ⚠️ A RECEIPT THAT ARRIVES IS BROUGHT INTO VIEW: it answers the note just sent from this
+            // wrist, which is what the person is waiting to read (Q4).
+            .onChange(of: transcript?.receipt, initial: true) { _, receipt in
+                guard receipt != nil else { return }
+                proxy.scrollTo(Self.receipt, anchor: .bottom)
+            }
         }
         .navigationTitle(call.caller)
         .onAppear { store.live.open(call) }
@@ -114,6 +121,7 @@ struct LiveCallView: View {
             WriteStatusRow(store: store, key: key)
             if let receipt = transcript?.receipt {
                 ReceiptRow(receipt: receipt)
+                    .id(Self.receipt)
             }
         }
         .accessibilityIdentifier("watch.live.steer")
