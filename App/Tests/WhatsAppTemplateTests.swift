@@ -118,6 +118,7 @@ final class WhatsAppTemplateTests: XCTestCase {
         XCTAssertEqual(send.json["whatsappSenderId"] as? String, "wa_sender_1")
         XCTAssertEqual(send.json["body"] as? String, "Hi Ada, this is a reminder of your appointment on Friday.")
         XCTAssertEqual(transport.requests(to: "/whatsapp/window").count, 2, "the window is re-read after")
+        XCTAssertFalse(model.whatsApp.sendingTemplate, "released once the re-read is done")
     }
 
     /// ⛔ A TEMPLATE SEND KEEPS THE DRAFT'S HELD IMAGES (Seer, #99 and #95): the thread is re-read
