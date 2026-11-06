@@ -186,20 +186,86 @@ final class InboxReplyChannelTests: XCTestCase {
         XCTAssertEqual(labels, [["MESSENGER"], ["INSTAGRAM"], ["WHATSAPP"], [], [], []])
     }
 
-    /// ⛔ SWITCHING TO A TEXT-ONLY CHANNEL NAMES THAT CHANNEL as the reason images went.
-    func testTheAttachmentsNoteNamesTheChannelSwitchedTo() {
+    /// ⛔ THE HELD IMAGES' SENTENCE NAMES THE CHANNEL, SAYS THEY ARE KEPT, AND OFFERS SMS ONLY
+    /// WHERE THERE IS SMS (xhigh review): "removed" said they were gone, and "switch back to SMS"
+    /// named a control a thread without SMS does not have.
+    func testTheHeldImagesSentenceNamesTheChannelAndOffersSmsOnlyWhereThereIsSms() {
         XCTAssertEqual(
-            ThreadModel.attachmentsDropped(count: 2, channel: MessageChannel.whatsapp),
-            "Attachments removed: WhatsApp sends are text-only for now"
+            ThreadModel.attachmentsHeld(count: 2, channel: MessageChannel.whatsapp, smsOffered: true),
+            "2 images stay in the draft: WhatsApp replies are text-only for now, so they will not be sent. "
+                + "To send images, switch to SMS."
         )
         XCTAssertEqual(
-            ThreadModel.attachmentsDropped(count: 2, channel: MessageChannel.instagram),
-            "Attachments removed: Messenger and Instagram replies are text-only for now"
+            ThreadModel.attachmentsHeld(count: 1, channel: MessageChannel.instagram, smsOffered: false),
+            "The image stays in the draft: Messenger and Instagram replies are text-only for now, "
+                + "so it will not be sent."
         )
         XCTAssertEqual(
-            ThreadModel.attachmentsDropped(count: 2, channel: MessageChannel.email),
-            InboxCopy.attachmentsDropped(2)
+            ThreadModel.attachmentsHeld(count: 1, channel: MessageChannel.email, smsOffered: false),
+            "The image stays in the draft: email replies cannot carry attachments, so it will not be sent."
         )
+        french {
+            XCTAssertEqual(
+                ThreadModel.attachmentsHeld(count: 1, channel: MessageChannel.whatsapp, smsOffered: true),
+                "1 image reste dans le brouillon\u{00A0}: les réponses WhatsApp sont pour l'instant en texte "
+                    + "seulement, elle ne sera donc pas envoyée. Pour envoyer des images, passez au texto."
+            )
+            XCTAssertEqual(
+                ThreadModel.attachmentsHeld(count: 3, channel: MessageChannel.email, smsOffered: false),
+                "3 images restent dans le brouillon\u{00A0}: les réponses par courriel n'acceptent pas les "
+                    + "pièces jointes, elles ne seront donc pas envoyées."
+            )
+        }
+    }
+
+    /// ⛔ A DRAFT RESTORED WHILE THE THREAD CANNOT BE READ KEEPS ITS IMAGES FOR THE RETRY (xhigh
+    /// review): the restore is latched, so it puts them on the model, and the retry's re-read
+    /// shows them.
+    func testADraftRestoredWhileTheThreadCannotBeReadKeepsItsImagesForTheRetry() async {
+        let image = "https://www.distronode.test/api/media/media_parity_roof"
+        let stored = #"{"success":true,"draft":{"threadKey":"addr:14165550177","body":"On my way.","#
+            + #""subject":null,"mediaUrls":[""# + image + #""],"updatedAt":"2026-11-05T14:30:00.000Z"}}"#
+        let transport = ParityTransport()
+        transport.on(.get, "/timeline", 500, #"{"error":"unavailable"}"#)
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/messages/drafts", 200, stored)
+        let model = ParityFixtures.thread(
+            transport,
+            targets: [ReplyTarget(to: "+14165550177", channel: MessageChannel.sms)]
+        )
+
+        await model.open()
+        XCTAssertNil(model.current, "the first read failed")
+        XCTAssertEqual(model.composerText, "On my way.")
+        await model.open()
+
+        XCTAssertEqual(model.current?.attachments, [image])
+        XCTAssertEqual(transport.requests(to: "/messages/drafts").count, 1, "the restore ran once")
+    }
+
+    /// ⛔ A SAVE WHILE THE THREAD CANNOT BE SHOWN KEEPS THE DRAFT'S IMAGES (Seer, #99): a re-read
+    /// that fails leaves no content, and the autosave writes the images last shown.
+    func testASaveAfterAFailedReReadKeepsTheDraftsImages() async {
+        let image = "https://www.distronode.test/api/media/media_parity_roof"
+        let stored = #"{"success":true,"draft":{"threadKey":"addr:14165550177","body":"On my way.","#
+            + #""subject":null,"mediaUrls":[""# + image + #""],"updatedAt":"2026-11-05T14:30:00.000Z"}}"#
+        let transport = ParityTransport()
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/timeline", 500, #"{"error":"unavailable"}"#)
+        transport.on(.get, "/messages/drafts", 200, stored)
+        transport.on(.put, "/messages/drafts", 200, stored)
+        let model = ParityFixtures.thread(
+            transport,
+            targets: [ReplyTarget(to: "+14165550177", channel: MessageChannel.sms)]
+        )
+        await model.load()
+        await model.restoreDraft()
+        await model.load()
+        XCTAssertNil(model.current, "the re-read failed")
+
+        await model.persistDraft("On my way.")
+        let saved = transport.requests(to: "/messages/drafts").last { $0.method == .put }
+        XCTAssertEqual(saved?.json["mediaUrls"] as? [String], [image])
     }
 
     /// ⛔ A DRAFT'S IMAGES ARE NEVER SENT ON A TEXT-ONLY CHANNEL, AND NEVER LOST (Seer, #95 and
@@ -210,7 +276,8 @@ final class InboxReplyChannelTests: XCTestCase {
         let image = "https://www.distronode.test/api/media/media_parity_roof"
         let stored = #"{"success":true,"draft":{"threadKey":"addr:14165550177","body":"On my way.","#
             + #""subject":null,"mediaUrls":[""# + image + #""],"updatedAt":"2026-11-05T14:30:00.000Z"}}"#
-        let whatsAppSentence = "Attachments removed: WhatsApp sends are text-only for now"
+        let whatsAppSentence = "The image stays in the draft: WhatsApp replies are text-only for now, "
+            + "so it will not be sent. To send images, switch to SMS."
         let transport = ParityTransport()
         transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
         transport.on(.get, "/messages/drafts", 200, stored)

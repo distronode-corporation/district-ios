@@ -3450,35 +3450,50 @@ args = { count = "int" }
 state = "reviewed"
 id = { swift = "InboxCopy.attachmentCount(_:)" }
 
-[inbox.attachments_dropped]
-en.one = "image was removed: email replies cannot carry attachments. Switch back to SMS to send them."
-en.other = "{count} images were removed: email replies cannot carry attachments. Switch back to SMS to send them."
-fr.one = "{count} image a été retirée\u00A0: les réponses par courriel n'acceptent pas les pièces jointes. Revenez au texto pour l'envoyer."
-fr.other = "{count} images ont été retirées\u00A0: les réponses par courriel n'acceptent pas les pièces jointes. Revenez au texto pour les envoyer."
+[inbox.attachments_held_email]
+en.one = "The image stays in the draft: email replies cannot carry attachments, so it will not be sent."
+en.other = "{count} images stay in the draft: email replies cannot carry attachments, so they will not be sent."
+fr.one = "{count} image reste dans le brouillon\u00A0: les réponses par courriel n'acceptent pas les pièces jointes, elle ne sera donc pas envoyée."
+fr.other = "{count} images restent dans le brouillon\u00A0: les réponses par courriel n'acceptent pas les pièces jointes, elles ne seront donc pas envoyées."
 ctx = "body"
 screen = "inbox.thread"
 args = { count = "int" }
-state = "reviewed"
-id = { swift = "InboxCopy.attachmentsDropped(_:)" }
-note = "Shown when switching a reply to email drops its images. The English one form names no number and starts lower case, as shipped; count is never 0."
+state = "draft"
+id = { swift = "InboxCopy.attachmentsHeldEmail(_:)" }
+note = "Shown when a reply on email holds the draft's images (a switch from SMS, or a draft restored on email). The images are kept in the stored draft and come back as attachments on a switch to SMS. The one form names no number; count is never 0."
 
-[inbox.attachments_removed_meta]
-en = "Attachments removed: Messenger and Instagram replies are text-only for now"
-fr = "Pièces jointes retirées\u00A0: les réponses Messenger et Instagram sont pour l'instant en texte seulement"
+[inbox.attachments_held_meta]
+en.one = "The image stays in the draft: Messenger and Instagram replies are text-only for now, so it will not be sent."
+en.other = "{count} images stay in the draft: Messenger and Instagram replies are text-only for now, so they will not be sent."
+fr.one = "{count} image reste dans le brouillon\u00A0: les réponses Messenger et Instagram sont pour l'instant en texte seulement, elle ne sera donc pas envoyée."
+fr.other = "{count} images restent dans le brouillon\u00A0: les réponses Messenger et Instagram sont pour l'instant en texte seulement, elles ne seront donc pas envoyées."
 ctx = "body"
 screen = "inbox.thread"
-state = "reviewed"
-id = { swift = "InboxCopy.attachmentsRemovedMeta" }
-note = "Shown when switching a reply from SMS to Messenger or Instagram drops its images. The website's sentence (inboxI18n attachmentsRemovedForMeta)."
+args = { count = "int" }
+state = "draft"
+id = { swift = "InboxCopy.attachmentsHeldMeta(_:)" }
+note = "Shown when a reply on Messenger or Instagram holds the draft's images. The images are kept in the stored draft and come back as attachments on a switch to SMS. The one form names no number; count is never 0."
 
-[inbox.attachments_removed_whatsapp]
-en = "Attachments removed: WhatsApp sends are text-only for now"
-fr = "Pièces jointes retirées\u00A0: les envois WhatsApp sont pour l'instant en texte seulement"
+[inbox.attachments_held_whatsapp]
+en.one = "The image stays in the draft: WhatsApp replies are text-only for now, so it will not be sent."
+en.other = "{count} images stay in the draft: WhatsApp replies are text-only for now, so they will not be sent."
+fr.one = "{count} image reste dans le brouillon\u00A0: les réponses WhatsApp sont pour l'instant en texte seulement, elle ne sera donc pas envoyée."
+fr.other = "{count} images restent dans le brouillon\u00A0: les réponses WhatsApp sont pour l'instant en texte seulement, elles ne seront donc pas envoyées."
 ctx = "body"
 screen = "inbox.thread"
-state = "reviewed"
-id = { swift = "InboxCopy.attachmentsRemovedWhatsapp" }
-note = "Shown when switching a reply from SMS to WhatsApp drops its images. The website's sentence (inboxI18n attachmentsRemovedForWhatsApp)."
+args = { count = "int" }
+state = "draft"
+id = { swift = "InboxCopy.attachmentsHeldWhatsapp(_:)" }
+note = "Shown when a reply on WhatsApp holds the draft's images. The images are kept in the stored draft and come back as attachments on a switch to SMS. The one form names no number; count is never 0."
+
+[inbox.attachments_switch_to_sms]
+en = "To send images, switch to SMS."
+fr = "Pour envoyer des images, passez au texto."
+ctx = "body"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.attachmentsSwitchToSms" }
+note = "Follows an attachments_held_* sentence, after one space, only on a thread that offers an SMS reply."
 
 [inbox.call]
 en = "Call"

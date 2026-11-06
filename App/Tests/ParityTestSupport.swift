@@ -32,11 +32,21 @@ final class ParityTransport: HTTPTransport, @unchecked Sendable {
 
     private let lock = NSLock()
     private var routes: [String: [(Int, String)]] = [:]
+    private var holds: [String: [ParityGate]] = [:]
     private var sent: [Sent] = []
 
     /// Queue an answer for `method` on the path ending in `suffix`.
     func on(_ method: HTTPMethod, _ suffix: String, _ status: Int = 200, _ body: String) {
         lock.withLock { routes[Self.key(method, suffix), default: []].append((status, body)) }
+    }
+
+    /// Hold the next request on `method` and `suffix` until the returned gate opens: the
+    /// request is recorded at once, and its answer waits. For a second tap while one is in
+    /// flight, and for an older read that answers last.
+    func hold(_ method: HTTPMethod, _ suffix: String) -> ParityGate {
+        let gate = ParityGate()
+        lock.withLock { holds[Self.key(method, suffix), default: []].append(gate) }
+        return gate
     }
 
     var requests: [Sent] {
@@ -49,19 +59,29 @@ final class ParityTransport: HTTPTransport, @unchecked Sendable {
 
     func send(_ request: HTTPRequest, followRedirects: Bool) async throws -> HTTPResponse {
         _ = followRedirects
-        let answer: (Int, String)? = lock.withLock {
+        // ⚠️ THE ANSWER IS CHOSEN ON ARRIVAL, BEFORE ANY HOLD: a held request answers with
+        // what was next when it was sent, however late it is let go.
+        let (answer, held): ((Int, String)?, ParityGate?) = lock.withLock {
             sent.append(Sent(
                 method: request.method,
                 url: request.url,
                 body: request.body.flatMap { String(bytes: $0, encoding: .utf8) } ?? ""
             ))
+            var gate: ParityGate?
+            for (key, gates) in holds where !gates.isEmpty {
+                let (method, suffix) = Self.split(key)
+                guard method == request.method.rawValue, request.url.path.hasSuffix(suffix) else { continue }
+                gate = holds[key]?.removeFirst()
+                break
+            }
             for (key, queue) in routes where !queue.isEmpty {
                 let (method, suffix) = Self.split(key)
                 guard method == request.method.rawValue, request.url.path.hasSuffix(suffix) else { continue }
-                return routes[key]?.count == 1 ? queue[0] : routes[key]?.removeFirst()
+                return (routes[key]?.count == 1 ? queue[0] : routes[key]?.removeFirst(), gate)
             }
-            return nil
+            return (nil, gate)
         }
+        await held?.wait()
         guard let (status, body) = answer else {
             return HTTPResponse(statusCode: 500, headers: [:], body: nil)
         }
@@ -75,6 +95,37 @@ final class ParityTransport: HTTPTransport, @unchecked Sendable {
     private static func split(_ key: String) -> (String, String) {
         let parts = key.split(separator: " ", maxSplits: 1).map(String.init)
         return (parts[0], parts[1])
+    }
+}
+
+/// One held answer (``ParityTransport/hold(_:_:)``): the request waits until ``open()``.
+final class ParityGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var isOpen = false
+    private var waiting: CheckedContinuation<Void, Never>?
+
+    func wait() async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            let resumeNow = lock.withLock {
+                if isOpen {
+                    return true
+                }
+                waiting = continuation
+                return false
+            }
+            if resumeNow {
+                continuation.resume()
+            }
+        }
+    }
+
+    func open() {
+        let continuation = lock.withLock {
+            isOpen = true
+            defer { waiting = nil }
+            return waiting
+        }
+        continuation?.resume()
     }
 }
 

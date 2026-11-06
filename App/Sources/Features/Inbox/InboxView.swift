@@ -368,8 +368,7 @@ private struct InboxScreen: View {
                 // ⚠️ SUFFIXED WITH THE THREAD KEY, WHICH IS WHAT THE `ForEach` KEYS
                 // ON. "The first row" is not an address that survives a reorder.
                 .accessibilityIdentifier(A11yID.Inbox.row(conversation.threadKey))
-                .rowContextMenu(RowContextActions.thread(counterpart: conversation.counterpart))
-                .inboxAssignSwipe(conversation, model: model)
+                .inboxRowMenu(conversation, model: model)
                 .routeListRow(selects: selection != nil)
             }
             if isPartial {

@@ -110,6 +110,63 @@ final class ThreadAssignmentTests: XCTestCase {
         XCTAssertTrue(writes[1].json["assigneeEmail"] is NSNull, "unassign sends an explicit null")
     }
 
+    /// ⛔ TWO TAPS WRITE ONE ASSIGNMENT: the second, made while the first is in flight, writes
+    /// nothing.
+    func testASecondTapWhileAnAssignmentIsInFlightWritesNothing() async {
+        let transport = ParityTransport()
+        transport.on(.post, "/conversations/assign", 200, Self.assigned)
+        let gate = transport.hold(.post, "/conversations/assign")
+        let sheet = model(transport)
+
+        let first = Task { await sheet.assign("teammate@contract.test") }
+        await waitUntil { transport.requests(to: "/conversations/assign").count == 1 }
+        let second = await sheet.assign("owner@contract.test")
+        XCTAssertTrue(sheet.saving)
+        gate.open()
+        let firstAssigned = await first.value
+
+        XCTAssertFalse(second)
+        XCTAssertTrue(firstAssigned)
+        XCTAssertEqual(transport.requests(to: "/conversations/assign").count, 1)
+        XCTAssertFalse(sheet.saving)
+    }
+
+    /// ⛔ AN OLDER LIST READ THAT ANSWERS LAST IS DROPPED (Seer, #99): a refresh begun before an
+    /// assignment, answering after the re-read that followed it, must not put the old assignee
+    /// back on screen.
+    func testAnOlderListReadThatAnswersLastIsDropped() async throws {
+        let before = ParityFixtures.row(
+            threadKey: "contact:c_1", counterpart: "+14165550177", channels: ["sms"], replyOptions: "[]",
+            assigneeEmail: nil
+        )
+        let after = ParityFixtures.row(
+            threadKey: "contact:c_1", counterpart: "+14165550177", channels: ["sms"], replyOptions: "[]",
+            assigneeEmail: "teammate@contract.test"
+        )
+        let transport = ParityTransport()
+        transport.on(.get, "/conversations", 200, ParityFixtures.conversations([before]))
+        transport.on(.get, "/conversations", 200, ParityFixtures.conversations([after]))
+        let gate = transport.hold(.get, "/conversations")
+        let unreachable = try XCTUnwrap(URL(string: "https://inbox.invalid"))
+        let inbox = InboxModel(
+            container: AppContainer(baseURL: unreachable),
+            workspaceId: "ws_1",
+            role: .client,
+            inbox: ParityFixtures.inbox(transport)
+        )
+
+        let older = Task { await inbox.load(refreshing: true) }
+        await waitUntil { transport.requests(to: "/conversations").count == 1 }
+        await inbox.load(refreshing: true)
+        gate.open()
+        await older.value
+
+        guard case let .content(conversations, _, _, _) = inbox.state else {
+            return XCTFail("no list: \(inbox.state)")
+        }
+        XCTAssertEqual(conversations.map(\.assigneeEmail), ["teammate@contract.test"], "the newer answer stands")
+    }
+
     /// ⛔ BOTH REFUSALS ARE SAID, in French from the catalog.
     func testTheViewerAndNonMemberRefusalsAreSaidInFrench() async {
         let cases = [

@@ -1330,25 +1330,50 @@ extension InboxCopy {
         return "\(count) attachments"
     }
 
-    /// `inbox.attachments_dropped`
-    internal static func attachmentsDropped(_ count: Int) -> String {
+    /// `inbox.attachments_held_email`
+    internal static func attachmentsHeldEmail(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
             if count == 0 || count == 1 {
-                return "\(count) image a été retirée\u{00A0}: les réponses par courriel n'acceptent pas les pièces jointes. Revenez au texto pour l'envoyer."
+                return "\(count) image reste dans le brouillon\u{00A0}: les réponses par courriel n'acceptent pas les pièces jointes, elle ne sera donc pas envoyée."
             }
-            return "\(count) images ont été retirées\u{00A0}: les réponses par courriel n'acceptent pas les pièces jointes. Revenez au texto pour les envoyer."
+            return "\(count) images restent dans le brouillon\u{00A0}: les réponses par courriel n'acceptent pas les pièces jointes, elles ne seront donc pas envoyées."
         }
         if count == 1 {
-            return "image was removed: email replies cannot carry attachments. Switch back to SMS to send them."
+            return "The image stays in the draft: email replies cannot carry attachments, so it will not be sent."
         }
-        return "\(count) images were removed: email replies cannot carry attachments. Switch back to SMS to send them."
+        return "\(count) images stay in the draft: email replies cannot carry attachments, so they will not be sent."
     }
 
-    /// `inbox.attachments_removed_meta`
-    internal static var attachmentsRemovedMeta: String { AppL10n.copyLocale == .frCA ? "Pièces jointes retirées\u{00A0}: les réponses Messenger et Instagram sont pour l'instant en texte seulement" : "Attachments removed: Messenger and Instagram replies are text-only for now" }
+    /// `inbox.attachments_held_meta`
+    internal static func attachmentsHeldMeta(_ count: Int) -> String {
+        if AppL10n.copyLocale == .frCA {
+            if count == 0 || count == 1 {
+                return "\(count) image reste dans le brouillon\u{00A0}: les réponses Messenger et Instagram sont pour l'instant en texte seulement, elle ne sera donc pas envoyée."
+            }
+            return "\(count) images restent dans le brouillon\u{00A0}: les réponses Messenger et Instagram sont pour l'instant en texte seulement, elles ne seront donc pas envoyées."
+        }
+        if count == 1 {
+            return "The image stays in the draft: Messenger and Instagram replies are text-only for now, so it will not be sent."
+        }
+        return "\(count) images stay in the draft: Messenger and Instagram replies are text-only for now, so they will not be sent."
+    }
 
-    /// `inbox.attachments_removed_whatsapp`
-    internal static var attachmentsRemovedWhatsapp: String { AppL10n.copyLocale == .frCA ? "Pièces jointes retirées\u{00A0}: les envois WhatsApp sont pour l'instant en texte seulement" : "Attachments removed: WhatsApp sends are text-only for now" }
+    /// `inbox.attachments_held_whatsapp`
+    internal static func attachmentsHeldWhatsapp(_ count: Int) -> String {
+        if AppL10n.copyLocale == .frCA {
+            if count == 0 || count == 1 {
+                return "\(count) image reste dans le brouillon\u{00A0}: les réponses WhatsApp sont pour l'instant en texte seulement, elle ne sera donc pas envoyée."
+            }
+            return "\(count) images restent dans le brouillon\u{00A0}: les réponses WhatsApp sont pour l'instant en texte seulement, elles ne seront donc pas envoyées."
+        }
+        if count == 1 {
+            return "The image stays in the draft: WhatsApp replies are text-only for now, so it will not be sent."
+        }
+        return "\(count) images stay in the draft: WhatsApp replies are text-only for now, so they will not be sent."
+    }
+
+    /// `inbox.attachments_switch_to_sms`
+    internal static var attachmentsSwitchToSms: String { AppL10n.copyLocale == .frCA ? "Pour envoyer des images, passez au texto." : "To send images, switch to SMS." }
 
     /// `inbox.call`
     internal static var call: String { AppL10n.copyLocale == .frCA ? "Appeler" : "Call" }
