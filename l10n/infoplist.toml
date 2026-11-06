@@ -19,6 +19,6 @@ fr = "District AI utilise le microphone pour vos appels passés ou reçus, et po
 ctx = "legal"
 screen = "permissions"
 tier = "T0"
-state = "draft"
+state = "reviewed"
 id = { apple = "NSMicrophoneUsageDescription" }
-note = "The iOS microphone permission prompt. Must equal project.yml's Info.plist value. Names taking over a live call (3.3.0): a listen-in publishes nothing, a takeover publishes the microphone."
+note = "The iOS microphone permission prompt. Must equal project.yml's Info.plist value. Names taking over a live call (3.3.0): a listen-in publishes nothing, a takeover publishes the microphone. French approved by Sean, 2026-11-05."

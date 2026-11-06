@@ -242,6 +242,7 @@ final class SessionModel {
         await container.signOut(beforeRevoke: { await push.unregisterForSignOut() })
         push.forget()
         selection.setSelectedWorkspaceId(nil)
+        container.listenInRecents.clear()
         phase = .signedOut(SessionCopy.signedOut)
         // ⛔ THE WATCH FORGETS THE ACCOUNT NOW, with no read: there is no session left to
         // read with. See ``WatchBridgeService/publishSignedOut()``.

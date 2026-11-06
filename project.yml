@@ -316,6 +316,8 @@ targets:
         # carries a call id, never a number.
         NSUserActivityTypes:
           - com.distronode.district.call-back
+          # A listen-in tapped in the system's Recents (ListenInRecents).
+          - INStartCallIntent
         # ⛔ WITHOUT IT `Activity.request` THROWS AND NO CALL LIVE ACTIVITY EVER STARTS (3.2);
         # the extension that draws it is `DistrictAIWidgets`.
         NSSupportsLiveActivities: true

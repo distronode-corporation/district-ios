@@ -265,6 +265,8 @@ struct ShellView: View {
             // tap from here.
             // "Call back" from the watch's call card. See ``continueCallBack(_:)``.
             .onContinueUserActivity(CallBackHandoff.activityType) { continueCallBack($0) }
+            // A listen-in tapped in the system's Recents. See ``continueListenIn(_:)``.
+            .onContinueUserActivity(ListenInRecents.activityType) { continueListenIn($0) }
             .sheet(item: $browserHandOff) { handOff in
                 SafariView(url: handOff.url)
             }

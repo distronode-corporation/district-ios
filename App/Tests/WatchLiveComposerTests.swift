@@ -53,7 +53,7 @@ final class WatchLiveComposerTests: XCTestCase {
         XCTAssertEqual(held, WatchWhisperReceipt(
             applied: false,
             headline: SuperviseCopy.whisperNotApplied,
-            detail: SuperviseCopy.whisperNotUsedTakenOver
+            detail: SuperviseCopy.reasonOnly(SuperviseCopy.whisperNotUsedTakenOver)
         ))
     }
 

@@ -67,7 +67,24 @@ enum SuperviseCopy {
             let words = receipt.firstWords.trimmingCharacters(in: .whitespacesAndNewlines)
             return (whisperApplied, words.isEmpty ? nil : whisperFirstWords(words))
         }
-        let detail = receipt.reason?.isTakenOver == true ? whisperNotUsedTakenOver : whisperNotUsedTransfer
-        return (whisperNotApplied, detail)
+        let sentence = receipt.reason?.isTakenOver == true ? whisperNotUsedTakenOver : whisperNotUsedTransfer
+        return (whisperNotApplied, reasonOnly(sentence))
+    }
+
+    /// The website's "not used" sentences open with "Not used: " / « Consigne non utilisée : »,
+    /// which repeats the approved line above them (Sean, 2026-11-05: "Approved line + reason
+    /// only").
+    ///
+    /// ⛔ THE REASON COMES FROM THE AGENT'S CODE (`transfer`, `taken_over`), NEVER FROM FREE TEXT;
+    /// this only trims the catalog's own sentence for that code, so the website's words stay the
+    /// one source. ⚠️ EXACTLY THESE TWO PREFIXES, and a sentence without one is returned as it
+    /// was. What remains starts with a capital.
+    static let notUsedPrefixes = ["Not used: ", "Consigne non utilisée\u{00A0}: "]
+
+    static func reasonOnly(_ sentence: String) -> String {
+        guard let prefix = notUsedPrefixes.first(where: sentence.hasPrefix) else { return sentence }
+        let rest = sentence.dropFirst(prefix.count)
+        guard let first = rest.first else { return sentence }
+        return first.uppercased() + rest.dropFirst()
     }
 }

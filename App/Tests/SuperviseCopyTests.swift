@@ -35,15 +35,43 @@ final class SuperviseCopyTests: XCTestCase {
     func testAHeldNoteSaysWhyInTheWebsitesWords() {
         let takenOver = SuperviseCopy.receipt(WhisperReceipt(applied: false, firstWords: "", reason: .takenOver))
         XCTAssertEqual(takenOver.headline, "Your receptionist could not use your note.")
-        XCTAssertEqual(takenOver.detail, "Not used: a team member is holding the call.")
+        XCTAssertEqual(takenOver.detail, "A team member is holding the call.")
         for reason: WhisperReceipt.Reason? in [.transfer, .unknown("voicemail"), nil] {
             let receipt = SuperviseCopy.receipt(WhisperReceipt(applied: false, firstWords: "", reason: reason))
-            XCTAssertEqual(receipt.detail, "Not used: the call is being transferred.", "\(String(describing: reason))")
+            XCTAssertEqual(receipt.detail, "The call is being transferred.", "\(String(describing: reason))")
         }
         let french = L10nRuntime.withLocale(.frCA) {
             SuperviseCopy.receipt(WhisperReceipt(applied: false, firstWords: "", reason: .takenOver)).detail
         }
-        XCTAssertEqual(french, "Consigne non utilisée\(nbsp): un membre de l'équipe a pris l'appel.")
+        XCTAssertEqual(french, "Un membre de l'équipe a pris l'appel.")
+    }
+
+    /// ⛔ "APPROVED LINE + REASON ONLY" (Sean, 2026-11-05): exactly the two known prefixes go,
+    /// what remains starts with a capital, and a sentence without a prefix is left as it was.
+    func testOnlyTheKnownNotUsedPrefixesAreStripped() {
+        XCTAssertEqual(
+            SuperviseCopy.reasonOnly("Not used: the call is being transferred."),
+            "The call is being transferred."
+        )
+        XCTAssertEqual(
+            SuperviseCopy.reasonOnly("Consigne non utilisée\(nbsp): l'appel est en cours de transfert."),
+            "L'appel est en cours de transfert."
+        )
+        XCTAssertEqual(SuperviseCopy.reasonOnly("The call is being transferred."), "The call is being transferred.")
+        XCTAssertEqual(
+            SuperviseCopy.reasonOnly("not used: lower case is not the prefix"),
+            "not used: lower case is not the prefix"
+        )
+        XCTAssertEqual(
+            SuperviseCopy.reasonOnly("Consigne non utilisée : plain space"),
+            "Consigne non utilisée : plain space"
+        )
+        XCTAssertEqual(SuperviseCopy.reasonOnly("Not used: "), "Not used: ", "nothing after the prefix: left alone")
+        XCTAssertEqual(
+            SuperviseCopy.reasonOnly("Consigne non utilisée\(nbsp): écoute impossible."),
+            "Écoute impossible.",
+            "an accented first letter is capitalised"
+        )
     }
 
     /// ⛔ A REFUSAL IS SAID BY ITS CODE, NEVER BY THE SERVER'S ENGLISH; an unknown code gets the

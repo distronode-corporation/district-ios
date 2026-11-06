@@ -64,6 +64,25 @@ final class SuperviseModelTests: XCTestCase {
         XCTAssertFalse(model.state.media.microphoneEnabled, "a listener publishes nothing")
     }
 
+    /// The system call a listen-in is goes into Recents, so the call it was is remembered for a
+    /// tap there, once the OS has performed the start and not before.
+    func test_IOS_SUPERVISE_24_aStartedListenInIsRememberedForRecents() async throws {
+        let suite = "test.supervise-recents.\(UUID().uuidString)"
+        defer { UserDefaults().removePersistentDomain(forName: suite) }
+        let recents = ListenInRecents(defaults: UserDefaults(suiteName: suite) ?? .standard)
+        let model = try makeModel()
+        model.recents = recents
+        server.answerMonitor(.success(SuperviseFixtures.listenSeat))
+
+        model.listen()
+        XCTAssertNil(recents.entry(forHandle: "+15555550100"), "not before the OS performed the start")
+        media.performStart()
+        await waitUntil { recents.entry(forHandle: "+15555550100") != nil }
+
+        XCTAssertEqual(recents.entry(forHandle: "+15555550100")?.callId, SuperviseFixtures.callId)
+        XCTAssertEqual(recents.entry(forHandle: "+15555550100")?.workspaceId, SuperviseFixtures.workspaceId)
+    }
+
     /// ⛔ ONE CALL ON THE DEVICE: refused with a sentence while a call or a room holds it, and
     /// nothing is claimed or started.
     func test_IOS_SUPERVISE_02_aBusyDeviceRefusesListenWithItsSentence() throws {

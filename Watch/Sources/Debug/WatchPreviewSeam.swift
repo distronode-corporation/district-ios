@@ -183,8 +183,8 @@
                         ? "Votre réceptionniste n'a pas pu utiliser votre consigne."
                         : "Your receptionist could not use your note.",
                     detail: french
-                        ? "Consigne non utilisée\u{00A0}: l'appel est en cours de transfert."
-                        : "Not used: the call is being transferred."
+                        ? "L'appel est en cours de transfert."
+                        : "The call is being transferred."
                 )
             default:
                 nil

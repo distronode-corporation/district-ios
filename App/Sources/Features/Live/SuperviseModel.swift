@@ -83,6 +83,9 @@ final class SuperviseModel {
     var legTask: Task<Void, Never>?
     var startTask: Task<Void, Never>?
 
+    /// Where a started listen-in is remembered for a Recents tap. ⚠️ nil in most tests.
+    var recents: ListenInRecents?
+
     /// How long the OS may take to perform the start before the attempt is abandoned.
     static let startTimeoutSeconds = 10
 
@@ -247,6 +250,8 @@ final class SuperviseModel {
             return
         }
         media.reportConnecting(uuid: uuid, callerName: CallDisplay(call).callerLabel)
+        // ⚠️ THE SYSTEM CALL EXISTS NOW, SO RECENTS WILL SHOW IT: remember which call it was.
+        recents?.record(handle: Self.handle(for: call), workspaceId: workspaceId, callId: callId)
         await apply(.listenPressed)
     }
 

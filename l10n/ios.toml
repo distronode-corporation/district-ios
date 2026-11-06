@@ -14585,18 +14585,18 @@ en = "You are in a room on this device. Leave it before listening in."
 fr = "Vous êtes dans une salle sur cet appareil. Quittez-la avant d'écouter un appel."
 ctx = "error"
 screen = "live"
-state = "draft"
+state = "reviewed"
 id = { swift = "SuperviseCopy.busyInRoom" }
-note = "App-only. Listen was pressed while a meeting room holds the device's audio."
+note = "App-only. Listen was pressed while a meeting room holds the device's audio. French approved by Sean, 2026-11-05."
 
 [supervise.busy_with_call]
 en = "There is already a call on this device. End it before listening in."
 fr = "Un appel est déjà en cours sur cet appareil. Terminez-le avant d'écouter un appel."
 ctx = "error"
 screen = "live"
-state = "draft"
+state = "reviewed"
 id = { swift = "SuperviseCopy.busyWithCall" }
-note = "App-only. Listen was pressed while a phone call (placed, answered or supervised) holds the device."
+note = "App-only. Listen was pressed while a phone call (placed, answered or supervised) holds the device. French approved by Sean, 2026-11-05."
 
 [supervise.call_ended]
 en = "The call has ended."
@@ -14720,9 +14720,9 @@ en = "iOS did not start the listen-in. Another call may already be in progress."
 fr = "iOS n'a pas lancé l'écoute de l'appel. Un autre appel est peut-être déjà en cours."
 ctx = "error"
 screen = "live"
-state = "draft"
+state = "reviewed"
 id = { swift = "SuperviseCopy.notStarted" }
-note = "App-only. CallKit refused, or never answered, the system call a listen-in is."
+note = "App-only. CallKit refused, or never answered, the system call a listen-in is. French approved by Sean, 2026-11-05."
 
 [supervise.page_subtitle]
 en = "Calls happening right now. Listen in, send your receptionist a private note, or take the call yourself."
@@ -14875,9 +14875,9 @@ fr = "«\u00A0{words}\u00A0»"
 ctx = "format"
 screen = "live"
 args = { words = "str" }
-state = "draft"
+state = "reviewed"
 id = { swift = "SuperviseCopy.whisperFirstWords(_:)" }
-note = "App-only. The receipt's second line: the first words the receptionist said after acting on the note, quoted. {words} is customer speech, never translated."
+note = "App-only. The receipt's second line: the first words the receptionist said after acting on the note, quoted. {words} is customer speech, never translated. French approved by Sean, 2026-11-05."
 
 [supervise.whisper_heading]
 en = "Note to your receptionist"

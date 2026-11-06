@@ -363,6 +363,8 @@ final class AppContainer {
     /// A number for the dialler to show, handed over by a Handoff from the watch's call card
     /// (``CallBackHandoff``). ⚠️ Shown, never dialled: the person presses Call.
     let dialerPrefill = DialerPrefill()
+    /// The listen-ins Recents shows, for a tap there (``ListenInRecents``). ⛔ Cleared at sign-out.
+    let listenInRecents = ListenInRecents()
 
     private let store: any TokenStore
 

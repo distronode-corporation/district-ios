@@ -61,7 +61,7 @@ extension SuperviseModel {
         workspaceId: String,
         role: WorkspaceRole?
     ) -> SuperviseModel {
-        SuperviseModel(
+        let model = SuperviseModel(
             call: call,
             workspaceId: workspaceId,
             role: role,
@@ -74,6 +74,8 @@ extension SuperviseModel {
             ),
             events: LiveEventFeed(workspaceId: workspaceId, dependencies: .live(container: container))
         )
+        model.recents = container.listenInRecents
+        return model
     }
 
     private static func media(container: AppContainer) -> any SuperviseMedia {

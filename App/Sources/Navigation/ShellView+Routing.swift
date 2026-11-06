@@ -112,6 +112,7 @@ extension ShellView {
     /// `onChange` modifiers in `ShellView.swift`, and `private` is file-scoped.
     func resolvePendingLink() {
         resolvePendingCallBack()
+        resolvePendingListenIn()
         guard let destination = pendingLink else { return }
         let selected = workspaceSession.workspaceId
         guard !destination.requiresWorkspace || selected != nil else { return }
@@ -156,6 +157,37 @@ extension ShellView {
                   let number = WatchLiveComposer.callBackNumber(row)
             else { return }
             prefill.offer(number, workspaceId: target.workspaceId)
+        }
+    }
+
+    /// A listen-in tapped in Recents: that call's Live screen while it is live, its call log
+    /// entry once it has ended (Sean, 2026-11-05). ⚠️ A handle this device never listened under
+    /// (a keypad call, another app's row) does nothing, as before.
+    func continueListenIn(_ activity: NSUserActivity) {
+        guard let handle = ListenInRecents.handle(of: activity) else { return }
+        container.listenInRecents.pending = handle
+        resolvePendingListenIn()
+    }
+
+    /// ⚠️ WAITS FOR THE WORKSPACE LIST, like ``resolvePendingCallBack()``.
+    func resolvePendingListenIn() {
+        let recents = container.listenInRecents
+        guard let handle = recents.pending, !workspaceSession.workspaces.isEmpty else { return }
+        recents.pending = nil
+        guard let target = recents.entry(forHandle: handle),
+              let entry = workspaceSession.workspaces.first(where: { $0.id == target.workspaceId })
+        else { return }
+        let switching = workspaceSession.workspaceId == target.workspaceId ? nil : target.workspaceId
+        let role = WorkspaceRole.fromWire(entry.role)
+        let calls = container.calls
+        Task {
+            guard case let .success(row) = await calls.detail(workspaceId: target.workspaceId, callId: target.callId)
+            else { return }
+            apply(PushRouteAction(
+                tab: .overview,
+                selectWorkspaceId: switching,
+                route: ListenInRecents.route(for: row, workspaceId: target.workspaceId, role: role)
+            ))
         }
     }
 
