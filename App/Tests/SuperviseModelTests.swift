@@ -69,7 +69,7 @@ final class SuperviseModelTests: XCTestCase {
     func test_IOS_SUPERVISE_24_aStartedListenInIsRememberedForRecents() async throws {
         let suite = "test.supervise-recents.\(UUID().uuidString)"
         defer { UserDefaults().removePersistentDomain(forName: suite) }
-        let recents = ListenInRecents(defaults: UserDefaults(suiteName: suite) ?? .standard)
+        let recents = ListenInRecents(defaults: UserDefaults(suiteName: suite) ?? .standard, keys: MemoryRecentsKeys())
         let model = try makeModel()
         model.recents = recents
         server.answerMonitor(.success(SuperviseFixtures.listenSeat))

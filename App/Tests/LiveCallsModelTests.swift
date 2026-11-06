@@ -1,4 +1,5 @@
 @testable import DistrictAI
+import DistrictData
 import DistrictModel
 import XCTest
 
@@ -164,6 +165,95 @@ final class LiveCallsModelTests: XCTestCase {
         XCTAssertTrue(CallWire.hasEnded("completed"))
         XCTAssertTrue(CallWire.hasEnded("no-answer"))
         XCTAssertTrue(CallWire.hasEnded("failed"))
+    }
+
+    // MARK: - Reading past the first page (xhigh review, item 10)
+
+    private let now = Date(timeIntervalSince1970: 1_790_000_000)
+
+    private func row(_ id: String, status: String, minutesAgo: Double) throws -> CallSummary {
+        let stamp = ISO8601DateFormatter().string(from: now.addingTimeInterval(-minutesAgo * 60))
+        return try LiveFixtures.call(id: id, status: status, createdAt: stamp)
+    }
+
+    /// A pager over fixed pages, counting the reads.
+    private final class Pages: @unchecked Sendable {
+        private let lock = NSLock()
+        private let pages: [[CallSummary]]
+        private var asked = 0
+
+        init(_ pages: [[CallSummary]]) {
+            self.pages = pages
+        }
+
+        var reads: Int {
+            lock.withLock { asked }
+        }
+
+        func pager() -> OffsetPager<CallSummary> {
+            OffsetPager(identify: { $0.id }, fetch: { limit, offset in
+                let index = offset / limit
+                let page: [CallSummary] = self.lock.withLock {
+                    self.asked += 1
+                    return index < self.pages.count ? self.pages[index] : []
+                }
+                return .success(OffsetPage(items: page))
+            })
+        }
+    }
+
+    private func page(_ prefix: String, status: String = "completed", minutesAgo: Double) throws -> [CallSummary] {
+        try (0 ..< LiveCallsModel.pageLimit).map { try row("\(prefix)\($0)", status: status, minutesAgo: minutesAgo) }
+    }
+
+    /// ⛔ A LIVE CALL BEHIND FIFTY NEWER ONES IS STILL LISTED.
+    func testALiveCallOnTheSecondPageIsRead() async throws {
+        let pages = try Pages([
+            page("new", minutesAgo: 5),
+            [row("cmh1second", status: "in-progress", minutesAgo: 30)] + page("old", minutesAgo: 600),
+        ])
+
+        let rows = try await LiveCallsModel.readLive(pager: pages.pager(), now: now).get()
+
+        XCTAssertTrue(rows.contains { $0.id == "cmh1second" })
+    }
+
+    /// Reading stops at the first page that ends older than any live call can be.
+    func testReadingStopsOncePagesAreOlderThanAnyLiveCall() async throws {
+        let pages = try Pages([
+            page("new", minutesAgo: 5),
+            page("old", minutesAgo: 300),
+            page("older", minutesAgo: 900),
+        ])
+
+        _ = await LiveCallsModel.readLive(pager: pages.pager(), now: now)
+
+        XCTAssertEqual(pages.reads, 2)
+    }
+
+    /// And at the end of the log, and never past the page cap.
+    func testReadingStopsAtTheEndAndAtTheCap() async throws {
+        let short = try Pages([page("new", minutesAgo: 5), [row("last", status: "completed", minutesAgo: 6)]])
+        _ = await LiveCallsModel.readLive(pager: short.pager(), now: now)
+        XCTAssertEqual(short.reads, 2)
+
+        let endless = try Pages((0 ..< 20).map { try page("p\($0)-", minutesAgo: 5) })
+        _ = await LiveCallsModel.readLive(pager: endless.pager(), now: now)
+        XCTAssertEqual(endless.reads, LiveCallsModel.maxPages)
+    }
+
+    /// A first page that fails is a failure; a later one keeps what was read.
+    func testAFailedFirstPageFailsAndALaterOneKeepsTheRows() async throws {
+        let failing = OffsetPager<CallSummary>(identify: { $0.id }, fetch: { _, _ in .failure(.transport("offline")) })
+        if case .success = await LiveCallsModel.readLive(pager: failing, now: now) {
+            XCTFail("expected a failure")
+        }
+        let first = try page("new", minutesAgo: 5)
+        let later = OffsetPager<CallSummary>(identify: { $0.id }, fetch: { limit, offset in
+            offset == 0 ? .success(OffsetPage(items: Array(first.prefix(limit)))) : .failure(.transport("offline"))
+        })
+        let rows = try await LiveCallsModel.readLive(pager: later, now: now).get()
+        XCTAssertEqual(rows.count, LiveCallsModel.pageLimit)
     }
 
     /// A `call_updated` whose status left `in-progress` is an ending too.

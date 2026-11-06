@@ -40,8 +40,11 @@ struct LiveCallView: View {
             // ⚠️ A RECEIPT THAT ARRIVES IS BROUGHT INTO VIEW: it answers the note just sent from this
             // wrist, which is what the person is waiting to read (Q4).
             .onChange(of: transcript?.receipt, initial: true) { _, receipt in
-                guard receipt != nil else { return }
+                guard let receipt else { return }
                 proxy.scrollTo(Self.receipt, anchor: .bottom)
+                // ⛔ AND SAID ALOUD (xhigh review of PR #101, item 11).
+                let text = [receipt.headline, receipt.detail].compactMap(\.self).joined(separator: " ")
+                AccessibilityNotification.Announcement(text).post()
             }
         }
         .navigationTitle(call.caller)

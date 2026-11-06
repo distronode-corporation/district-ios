@@ -26,8 +26,14 @@ final class LiveCallsModel {
         case failed(FailureText)
     }
 
-    /// The most rows read: the log's first page, newest first.
+    /// One page of the log, newest first.
     static let pageLimit = 50
+    /// The most pages read for one list.
+    static let maxPages = 10
+    /// How old a call may be and still be live. ⚠️ A page whose oldest row is older than this
+    /// cannot hold a live call further down, so reading stops there (xhigh review of PR #101,
+    /// item 10: the first page alone missed a live call behind 50 newer ones).
+    static let liveWindowSeconds: TimeInterval = 4 * 60 * 60
     /// How long a burst of events is gathered into one re-read.
     static let rereadDelay: Duration = .milliseconds(800)
 
@@ -69,9 +75,37 @@ final class LiveCallsModel {
             workspaceId: workspaceId,
             events: LiveEventFeed(workspaceId: workspaceId, dependencies: .live(container: container)),
             read: {
-                await calls.pager(workspaceId: workspaceId).loadNext(limit: LiveCallsModel.pageLimit).map(\.items)
+                await LiveCallsModel.readLive(pager: calls.pager(workspaceId: workspaceId), now: Date())
             }
         )
+    }
+
+    /// Read the log's pages, newest first, until one ends older than any live call, the log
+    /// ends, or ``maxPages`` were read. ⛔ NO NEW API FIELD: the same call-log route and pager.
+    ///
+    /// ⚠️ A FAILURE AFTER THE FIRST PAGE KEEPS WHAT WAS READ: the newest calls are already in it,
+    /// and the socket's next event asks again.
+    nonisolated static func readLive(
+        pager: OffsetPager<CallSummary>,
+        now: Date
+    ) async -> Result<[CallSummary], ApiError> {
+        var rows: [CallSummary] = []
+        for page in 0 ..< maxPages {
+            switch await pager.loadNext(limit: pageLimit) {
+            case let .failure(error):
+                return page == 0 ? .failure(error) : .success(rows)
+            case let .success(slice):
+                rows += slice.items
+                if slice.isEnd {
+                    return .success(rows)
+                }
+                let oldest = slice.items.last.flatMap { WireInstant.parse($0.createdAt) }
+                if let oldest, now.timeIntervalSince(oldest) > liveWindowSeconds {
+                    return .success(rows)
+                }
+            }
+        }
+        return .success(rows)
     }
 
     var calls: [CallSummary] {

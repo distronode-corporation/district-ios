@@ -163,17 +163,13 @@ extension ShellView {
     /// A listen-in tapped in Recents: that call's Live screen while it is live, its call log
     /// entry once it has ended (Sean, 2026-11-05). ⚠️ A handle this device never listened under
     /// (a keypad call, another app's row) does nothing, as before.
-    func continueListenIn(_ activity: NSUserActivity) {
-        guard let handle = ListenInRecents.handle(of: activity) else { return }
-        container.listenInRecents.pending = handle
-        resolvePendingListenIn()
-    }
-
+    ///
     /// ⚠️ WAITS FOR THE WORKSPACE LIST, like ``resolvePendingCallBack()``.
     func resolvePendingListenIn() {
         let recents = container.listenInRecents
-        guard let handle = recents.pending, !workspaceSession.workspaces.isEmpty else { return }
-        recents.pending = nil
+        guard recents.pending != nil, !workspaceSession.workspaces.isEmpty,
+              let handle = recents.takePending()
+        else { return }
         guard let target = recents.entry(forHandle: handle),
               let entry = workspaceSession.workspaces.first(where: { $0.id == target.workspaceId })
         else { return }
@@ -222,6 +218,7 @@ extension ShellView {
     private func apply(_ action: PushRouteAction) {
         if let workspaceId = action.selectWorkspaceId {
             Task { await container.callStack.endRoom(.workspaceChanged) }
+            Task { await container.callStack.endSupervision() }
             Task { await workspaceSession.select(workspaceId) }
             // ⛔ EVERY OTHER STACK IS CLEARED HERE AND NOT LEFT TO
             // ``ShellPaths/adopt(_:)``. The line below rebuilds ONE stack; every other

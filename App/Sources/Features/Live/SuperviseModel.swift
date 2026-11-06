@@ -14,6 +14,7 @@ protocol SuperviseServing: Sendable {
     func monitor(callId: SupervisedCallID, platform: ClientPlatform) async -> Result<CallMonitorResponse, ApiError>
     func takeOver(workspaceId: String, callId: String) async -> Result<CallTakeoverResponse, ApiError>
     func whisper(workspaceId: String, callId: String, text: String) async -> Result<Void, ApiError>
+    func detail(workspaceId: String, callId: String) async -> Result<CallSummary, ApiError>
 }
 
 extension CallsRepository: SuperviseServing {}
@@ -101,12 +102,33 @@ final class SuperviseModel {
         self.call = call
         callId = call.id
         self.workspaceId = workspaceId
-        session = SuperviseSession(call: call, role: role)
+        var session = SuperviseSession(call: call, role: role)
+        // ⛔ A ROW THAT HAS ALREADY ENDED OPENS ON "The call has ended." (xhigh review, item 3),
+        // never on Listen and a note box for a call that is over. Idle to over performs nothing.
+        if CallWire.hasEnded(call.status) {
+            session.handle(.callEnded)
+        }
+        self.session = session
         self.server = server
         self.media = media
         self.transcript = transcript
         self.events = events
         events.onEvent = { [weak self] in self?.received($0) }
+        // ⚠️ EVERY OPEN, THE FIRST INCLUDED: the server replays no call events, so whatever ended
+        // the call while no socket was open (the phone locked, the app in the background) is only
+        // in the call's row.
+        events.onOpen = { [weak self] in
+            Task { await self?.refresh() }
+        }
+    }
+
+    /// Read the call's row again, and end the supervision if the call is over.
+    func refresh() async {
+        guard case let .success(row) = await server.detail(workspaceId: workspaceId, callId: callId),
+              CallWire.hasEnded(row.status)
+        else { return }
+        await apply(.callEnded)
+        transcript.callEnded()
     }
 
     var state: SuperviseState {
@@ -205,13 +227,15 @@ final class SuperviseModel {
         }
         sending = true
         whisperProblem = nil
+        // ⛔ THE PREVIOUS RECEIPT GOES BEFORE THE SEND, NOT AFTER ITS ANSWER (xhigh review of PR
+        // #101, item 6): the agent can answer this note before the route's 200 arrives, and
+        // clearing then would wipe this note's own receipt. The website clears first too.
+        await apply(.whisperSent)
         let result = await server.whisper(workspaceId: workspaceId, callId: callId, text: text)
         sending = false
         switch result {
         case .success:
             draft = ""
-            // ⚠️ THE PREVIOUS RECEIPT IS NOT THIS NOTE'S: the event names no note.
-            await apply(.whisperSent)
         case let .failure(error):
             whisperProblem = SuperviseCopy.refusal(error, fallback: SuperviseCopy.whisperFailed)
         }
@@ -323,5 +347,11 @@ final class SuperviseModel {
     static func handle(for call: CallSummary) -> String {
         let number = call.direction == "inbound" ? CallerIdentity.resolved(call.from) : nil
         return number ?? CallDisplay(call).callerLabel
+    }
+}
+
+extension SuperviseModel: SupervisionEnding {
+    func endSupervision() async {
+        await stop()
     }
 }

@@ -61,8 +61,9 @@
         func perform(_ command: CallCommand) async {
             switch command {
             case .connect:
-                // ⚠️ THE CALLER AND THE RECEPTIONIST ARE IN THE ROOM, so the room does not read as
-                // emptied (the reducer's "the call ended" signal).
+                // ⚠️ THE CALLER AND THE RECEPTIONIST ARE IN THE ROOM, ANNOUNCED AS JOINS: that is
+                // what a supervise leg's engine does for the people present at the join
+                // (``LiveKitCallEngine``'s `announcesPresentParticipants`; the SDK alone does not).
                 let events = events
                 after(milliseconds: 3000) { _ in
                     events?.yield(.participantJoined(CallParticipant(identity: "caller", name: nil, isAgent: false)))

@@ -14730,6 +14730,15 @@ state = "reviewed"
 id = { swift = "SuperviseCopy.monitoringConnected" }
 note = "Word for word from the website's Live page (liveI18n.ts monitoringConnected)."
 
+[supervise.no_receipt]
+en = "No answer from your receptionist about this note."
+fr = "Aucune réponse de votre réceptionniste au sujet de cette consigne."
+ctx = "body"
+screen = "live"
+state = "draft"
+id = { swift = "SuperviseCopy.noReceipt" }
+note = "App-only (xhigh review of PR #101, item 9). The Apple Watch's receipt line when the receptionist did not answer a note from the wrist within the time the phone may wait in the background."
+
 [supervise.not_started]
 en = "iOS did not start the listen-in. Another call may already be in progress."
 fr = "iOS n'a pas lancé l'écoute de l'appel. Un autre appel est peut-être déjà en cours."

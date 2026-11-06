@@ -14,7 +14,7 @@
     ///     -WatchPreviewLanguage en|fr-CA        the phone's language in the made-up snapshot
     ///     -WatchPreviewStale                    a snapshot 25 minutes old
     ///     -WatchPreviewWrite unreachable|failed the thread's reply state
-    ///     -WatchPreviewReceipt used|notUsed     the live call's whisper receipt
+    ///     -WatchPreviewReceipt used|notUsed|noAnswer the live call's whisper receipt
     ///
     /// ⚠️ THE WATCH CONNECTIVITY SESSION IS NOT STARTED WHILE ARMED, so a real snapshot cannot
     /// replace the made-up one mid-screenshot.
@@ -185,6 +185,14 @@
                     detail: french
                         ? "L'appel est en cours de transfert."
                         : "The call is being transferred."
+                )
+            case "noAnswer":
+                WatchWhisperReceipt(
+                    applied: false,
+                    headline: french
+                        ? "Aucune réponse de votre réceptionniste au sujet de cette consigne."
+                        : "No answer from your receptionist about this note.",
+                    detail: nil
                 )
             default:
                 nil

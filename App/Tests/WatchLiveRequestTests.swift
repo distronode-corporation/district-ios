@@ -107,6 +107,7 @@ final class WatchLiveRequestTests: XCTestCase {
         let reply = await relay.answer(keepalive(first.live?.cursor))
 
         XCTAssertEqual(sources.receiptWaits, [LiveFixtures.callId])
+        XCTAssertEqual(sources.order, ["listen", "whisper"], "the receipt's socket is open before the note goes")
         XCTAssertEqual(reply.live?.receipt, WatchWhisperReceipt(
             applied: true,
             headline: SuperviseCopy.whisperApplied,
@@ -115,10 +116,14 @@ final class WatchLiveRequestTests: XCTestCase {
         XCTAssertEqual(tasks.begun.count, 1, "one background task, the receipt's")
         XCTAssertEqual(tasks.ended, tasks.begun, "and it is ended once the wait is over")
 
+        // ⚠️ THE NEXT NOTE CLOSES THE LAST ONE'S WAIT, and none in time is said as such.
         sources.receiptResult = nil
         _ = await relay.answer(.whisper(workspaceId: LiveFixtures.workspaceId, callId: LiveFixtures.callId, text: "Hi"))
+        XCTAssertTrue(sources.waits[0].cancelled)
+        await waitUntil { relay.receipts[LiveFixtures.callId] != nil }
         let after = await relay.answer(keepalive(first.live?.cursor))
-        XCTAssertNil(after.live?.receipt)
+        XCTAssertEqual(after.live?.receipt, WatchLiveComposer.noReceipt)
+        XCTAssertEqual(after.live?.receipt?.headline, "No answer from your receptionist about this note.")
     }
 
     /// ⚠️ A RECEIPT ENDS WITH ITS RELAY SESSION (Seer, PR #101): the call's screen opened again
@@ -139,13 +144,16 @@ final class WatchLiveRequestTests: XCTestCase {
         XCTAssertNil(reopened.live?.receipt)
     }
 
-    /// A refused note waits for no receipt.
-    func testAFailedWhisperWaitsForNoReceipt() async {
+    /// A refused note closes the wait it opened, and ends its background task.
+    func testAFailedWhisperClosesItsReceiptWait() async {
         let sources = FakeLiveSources()
         sources.whisperResult = .failure(WatchActionFailure(sentence: "The call has ended."))
         let relay = makeRelay(sources)
         _ = await relay.answer(.whisper(workspaceId: "ws_1", callId: "call_1", text: "Hello"))
-        XCTAssertEqual(sources.receiptWaits, [])
+        XCTAssertEqual(sources.order, ["listen", "whisper"])
+        XCTAssertTrue(sources.waits.first?.cancelled == true, "a refused note closes its wait")
+        XCTAssertTrue(tasks.ended.count == tasks.begun.count, "and ends its background task")
+        XCTAssertNil(relay.receipts["call_1"])
     }
 
     // MARK: - Lists and cards

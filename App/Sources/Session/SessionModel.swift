@@ -112,6 +112,9 @@ final class SessionModel {
         case let .reauthRequired(reason):
             phase = .signedOut(Self.text(for: reason))
             push.forget()
+            // ⛔ THE LISTEN-IN MAP TOO (xhigh review of PR #101, item 7): the next sign-in may be
+            // another account.
+            container.listenInRecents.clear()
         case let .retryLater(reason):
             phase = .unavailable(Self.text(for: reason))
         }

@@ -147,8 +147,27 @@ private struct SuperviseScreen: View {
             }
         }
         .onDisappear { deactivate() }
+        // ⛔ SAID ALOUD, NOT ONLY DRAWN (xhigh review of PR #101, item 11): a live microphone, the
+        // call ending and the receipt each change what the person may do, and VoiceOver users
+        // would otherwise learn of them only by exploring the screen again.
+        .onChange(of: state.phase) { _, phase in
+            switch phase {
+            case .takenOver: announce(SuperviseCopy.takenOverHeading)
+            case .over: announce(SuperviseCopy.callEnded)
+            default: break
+            }
+        }
+        .onChange(of: state.receipt) { _, receipt in
+            guard let receipt else { return }
+            let words = SuperviseCopy.receipt(receipt)
+            announce([words.headline, words.detail].compactMap(\.self).joined(separator: " "))
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(A11yID.Live.supervise)
+    }
+
+    private func announce(_ text: String) {
+        AccessibilityNotification.Announcement(text).post()
     }
 
     private func activate() {

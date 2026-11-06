@@ -41,6 +41,13 @@ import Foundation
 /// ⚠️ `@MainActor` BECAUSE ``CallKitBridge`` IS. Everything underneath is `Sendable`,
 /// so reaching the nonisolated engine from here is an ordinary async call rather than
 /// an actor hop.
+/// A live supervision the call stack can end without naming the feature type.
+@MainActor
+protocol SupervisionEnding: AnyObject {
+    /// Leave the call, as Stop listening or Hand back does.
+    func endSupervision() async
+}
+
 @MainActor
 final class CallStack {
     /// What the OS is told, and what it asks for back. ⛔ Process-lifetime.
@@ -96,6 +103,15 @@ final class CallStack {
     /// The live supervision that owns the call, so a Live screen rebuilt around it can find
     /// it again, or nil. ⛔ Weak, for the reason ``softphone`` is: the claim keeps it alive.
     weak var supervisor: AnyObject?
+
+    /// End a live supervision, if there is one.
+    ///
+    /// ⛔ ON SIGN-OUT, A SESSION THAT ENDED AND A WORKSPACE SWITCH (xhigh review of PR #101,
+    /// item 4), beside ``endRoom(_:)``: the screen that drives it is gone, and a takeover is a live
+    /// microphone on a customer's call that nobody could otherwise reach in the app.
+    func endSupervision() async {
+        await (supervisor as? SupervisionEnding)?.endSupervision()
+    }
 
     /// Whether a telephone call is live on this device, in either direction.
     ///
@@ -169,10 +185,17 @@ final class CallStack {
     /// ``LiveKitCallEngine``'s `publishesMicrophone`. Every other rule of ``beginCall()``
     /// holds: the room yields first, and a previous engine is torn down, which is how a
     /// takeover replaces the listen engine with the coach's.
-    func beginCall(publishingMicrophone: Bool) async -> AsyncStream<CallEngineEvent> {
+    func beginCall(
+        publishingMicrophone: Bool,
+        announcingPresentParticipants: Bool = false
+    ) async -> AsyncStream<CallEngineEvent> {
         await endRoom(.telephoneCall)
         endCall()
-        let engine = LiveKitCallEngine(audio: audio, publishesMicrophone: publishingMicrophone)
+        let engine = LiveKitCallEngine(
+            audio: audio,
+            publishesMicrophone: publishingMicrophone,
+            announcesPresentParticipants: announcingPresentParticipants
+        )
         self.engine = engine
         return engine.events
     }

@@ -76,9 +76,27 @@ final class FakeSuperviseMedia: SuperviseMedia {
         return stream
     }
 
+    /// When set, a connect waits here until the test lets it go (a join still in flight).
+    var holdsConnect = false
+    private var heldConnect: CheckedContinuation<Void, Never>?
+
+    var isHoldingConnect: Bool {
+        heldConnect != nil
+    }
+
+    func releaseConnect() {
+        let held = heldConnect
+        heldConnect = nil
+        held?.resume()
+    }
+
     func perform(_ command: CallCommand) async {
         switch command {
-        case let .connect(url, token): log.append("connect \(url) \(token)")
+        case let .connect(url, token):
+            log.append("connect \(url) \(token)")
+            if holdsConnect {
+                await withCheckedContinuation { heldConnect = $0 }
+            }
         case .disconnect: log.append("disconnect")
         case let .setMuted(muted): log.append("setMuted \(muted)")
         case let .setSpeakerphone(enabled): log.append("speaker \(enabled)")
@@ -165,6 +183,19 @@ final class FakeSuperviseServer: SuperviseServing, @unchecked Sendable {
         lock.withLock {
             asked.append("takeOver \(workspaceId) \(callId)")
             return takeoverResults.isEmpty ? .failure(.transport("unscripted")) : takeoverResults.removeFirst()
+        }
+    }
+
+    private var detailResult: Result<CallSummary, ApiError> = .failure(.transport("unscripted"))
+
+    func answerDetail(_ result: Result<CallSummary, ApiError>) {
+        lock.withLock { detailResult = result }
+    }
+
+    func detail(workspaceId: String, callId: String) async -> Result<CallSummary, ApiError> {
+        lock.withLock {
+            asked.append("detail \(workspaceId) \(callId)")
+            return detailResult
         }
     }
 

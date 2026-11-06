@@ -42,7 +42,7 @@ final class LiveSuperviseScreenshotTests: XCTestCase {
     }
 
     private func launch(role: String) {
-        fixture("set?reset=1&calls=none&monitor=ok&receipt=used&role=\(role)")
+        fixture("set?reset=1&calls=none&monitor=ok&receipt=used&stale=&role=\(role)")
         app.launchArguments = [
             "-UITestSession",
             "-AppleLanguages", "(\(language))",
@@ -156,6 +156,22 @@ final class LiveSuperviseScreenshotTests: XCTestCase {
         sleep(4)
         capture("18-viewer-listening")
         element(A11yID.Live.stop).tap()
+    }
+
+    // MARK: - A call that ended before its screen opened
+
+    /// ⛔ THE SCREEN OPENS ON "The call has ended.", never on Listen (xhigh review, item 3): the
+    /// list still showed the call, and its row says it is over.
+    func test_03_aCallThatEndedBeforeItsScreenOpened() {
+        launch(role: "agency")
+        fixture("set?calls=some&stale=cmhlive02anon")
+        refreshList()
+        XCTAssertTrue(element(A11yID.Live.row("cmhlive02anon")).waitForExistence(timeout: 20))
+        element(A11yID.Live.row("cmhlive02anon")).tap()
+        XCTAssertTrue(app.staticTexts[language == "en" ? "The call has ended." : "L'appel est terminé."]
+            .waitForExistence(timeout: 20))
+        XCTAssertFalse(element(A11yID.Live.listen).exists)
+        capture("19-opened-after-it-ended")
     }
 
     // MARK: - Helpers

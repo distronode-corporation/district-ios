@@ -17,9 +17,9 @@ protocol WatchLiveSourcing {
     func feed(workspaceId: String, callId: String) -> any WatchLiveTranscriptFeed
     /// A feed is about to open a socket: the next credential may come from the cache.
     func willActivate() async
-    /// Wait for the receptionist's answer to the note just sent on `callId`, or nil when none
-    /// came in time (or the call ended first).
-    func awaitReceipt(workspaceId: String, callId: String) async -> WhisperReceipt?
+    /// Open the wait for the receptionist's answer to a note about to be sent on `callId`.
+    /// ⛔ Returns once its socket is open, so the note goes out after it (``TelemetryReceiptListener``).
+    func listenForReceipt(workspaceId: String, callId: String) async -> any WatchReceiptWaiting
 }
 
 /// One call's live transcript as the relay drives it: ``LiveTranscriptModel``, the call
@@ -129,57 +129,26 @@ final class ContainerWatchLiveSources: WatchLiveSourcing {
         await minter.beginActivation()
     }
 
-    /// How long a note's receipt is waited for. ⚠️ The receptionist acts on a note at its next
-    /// turn, so this is a turn or two of conversation, not a network round trip.
-    static let receiptWaitSeconds = 45
+    /// How long the receipt socket may take to open before the note is sent anyway.
+    static let receiptConnectMilliseconds: Int64 = 3000
 
-    /// ⛔ ITS OWN `broadcast: true` SOCKET, BECAUSE THE TRANSCRIPT'S CANNOT HEAR IT. The
-    /// broadcaster relays `whisper_applied` to the workspace and skips a `broadcast:false`
-    /// socket, which is what ``LiveTranscriptModel`` opens (see ``LiveEventFeed``). Opened only
-    /// for this wait, and closed when the receipt, the call's end or the time limit comes.
-    func awaitReceipt(workspaceId: String, callId: String) async -> WhisperReceipt? {
+    func listenForReceipt(workspaceId: String, callId: String) async -> any WatchReceiptWaiting {
         await minter.beginActivation()
-        let runner = TelemetryConnectionRunner(
-            workspaceId: workspaceId,
-            broadcast: true,
-            minter: minter,
-            transport: URLSessionTelemetryTransport(),
-            clock: SystemLiveClock(),
-            jitter: TelemetryConnectionRunner.randomJitter
+        let clock = SystemLiveClock()
+        let listener = TelemetryReceiptListener(
+            runner: TelemetryConnectionRunner(
+                workspaceId: workspaceId,
+                broadcast: true,
+                minter: minter,
+                transport: URLSessionTelemetryTransport(),
+                clock: clock,
+                jitter: TelemetryConnectionRunner.randomJitter
+            ),
+            callId: callId,
+            clock: clock
         )
-        await runner.start()
-        let receipt = await withTaskGroup(of: WhisperReceipt?.self) { group in
-            group.addTask { await Self.receipt(on: runner.updates, callId: callId) }
-            group.addTask {
-                try? await Task.sleep(for: .seconds(Self.receiptWaitSeconds))
-                return nil
-            }
-            let first = await group.next() ?? nil
-            group.cancelAll()
-            return first
-        }
-        await runner.stop()
-        return receipt
-    }
-
-    /// The first receipt for `callId` on `updates`, or nil once the call or the socket ends.
-    nonisolated static func receipt(on updates: AsyncStream<TelemetryUpdate>, callId: String) async -> WhisperReceipt? {
-        for await update in updates {
-            switch update {
-            case let .event(envelope) where envelope.callId == callId:
-                if let receipt = envelope.whisperReceipt {
-                    return receipt
-                }
-                if envelope.eventType == .callEnded {
-                    return nil
-                }
-            case .ended:
-                return nil
-            default:
-                continue
-            }
-        }
-        return nil
+        await listener.open(within: Self.receiptConnectMilliseconds)
+        return listener
     }
 }
 
@@ -290,6 +259,11 @@ enum WatchLiveComposer {
     static func receipt(_ receipt: WhisperReceipt) -> WatchWhisperReceipt {
         let words = SuperviseCopy.receipt(receipt)
         return WatchWhisperReceipt(applied: receipt.applied, headline: words.headline, detail: words.detail)
+    }
+
+    /// No answer to the note in time: said plainly, with the not-used mark.
+    static var noReceipt: WatchWhisperReceipt {
+        WatchWhisperReceipt(applied: false, headline: SuperviseCopy.noReceipt, detail: nil)
     }
 
     static func line(_ segment: TranscriptSegment) -> WatchLiveLine {

@@ -61,6 +61,8 @@ final class WatchLiveRelay: WatchLiveHandling {
     private(set) var receipts: [String: WatchWhisperReceipt] = [:]
     /// The wait for the latest note's receipt. ⚠️ One at a time: a new note replaces the wait.
     private var receiptWait: Task<Void, Never>?
+    /// The latest note's wait, closed when the next note replaces it.
+    private var currentWait: (any WatchReceiptWaiting)?
 
     @MainActor
     final class Session {
@@ -177,30 +179,40 @@ final class WatchLiveRelay: WatchLiveHandling {
         guard line.utf16.count <= WatchLiveComposer.whisperLimit else {
             return .failure(WatchBridgeCopy.whisperTooLong)
         }
+        // ⛔ THE RECEIPT'S SOCKET IS OPEN BEFORE THE NOTE GOES (xhigh review, item 2), under a
+        // background task: the watch's message woke this app for seconds.
+        let lease = BackgroundTaskLease.begin("district.watch-receipt", on: backgroundTasks)
+        receipts[callId] = nil
+        receiptWait?.cancel()
+        currentWait?.cancel()
+        let wait = await sources.listenForReceipt(workspaceId: workspaceId, callId: callId)
+        currentWait = wait
         let reply = await Self.reply(sources.whisper(workspaceId: workspaceId, callId: callId, text: line)) { _ in
             .success
         }
-        if reply.ok {
-            awaitReceipt(workspaceId: workspaceId, callId: callId)
+        guard reply.ok else {
+            wait.cancel()
+            lease.end()
+            return reply
         }
+        awaitReceipt(wait, callId: callId, lease: lease)
         return reply
     }
 
-    /// Wait for the note's receipt, under a background task: the watch's message woke this app
-    /// for seconds, and the receptionist answers at its next turn.
-    ///
-    /// ⚠️ THE RECEIPT RIDES THE NEXT KEEPALIVE'S ANSWER (``compose(_:reset:)``); nothing is pushed.
-    private func awaitReceipt(workspaceId: String, callId: String) {
-        receipts[callId] = nil
-        receiptWait?.cancel()
-        let sources = sources
-        let lease = BackgroundTaskLease.begin("district.watch-receipt", on: backgroundTasks)
+    /// How long the receipt is waited for. ⚠️ Inside the seconds iOS gives a background wake
+    /// (about 30), and the agent itself gives up on a note after 30 s (xhigh review, item 9).
+    static let receiptWaitMilliseconds: Int64 = 25000
+
+    /// Wait for the note's receipt. ⚠️ THE RECEIPT RIDES THE NEXT KEEPALIVE'S ANSWER
+    /// (``compose(_:reset:)``); nothing is pushed. ⛔ NONE IN TIME IS SAID AS SUCH, never left
+    /// as a silence the person reads as "still waiting".
+    private func awaitReceipt(_ wait: any WatchReceiptWaiting, callId: String, lease: BackgroundTaskLease) {
         receiptWait = Task { [weak self] in
-            let receipt = await sources.awaitReceipt(workspaceId: workspaceId, callId: callId)
+            let receipt = await wait.receipt(within: Self.receiptWaitMilliseconds)
             lease.end()
-            guard !Task.isCancelled, let self, let receipt else { return }
-            receipts[callId] = WatchLiveComposer.receipt(receipt)
-            diagnostics.record(.reply, "receipt call=\(WatchRelayDiagnostics.tail(callId)) applied=\(receipt.applied)")
+            guard !Task.isCancelled, let self else { return }
+            receipts[callId] = receipt.map(WatchLiveComposer.receipt) ?? WatchLiveComposer.noReceipt
+            diagnostics.record(.reply, "receipt call=\(WatchRelayDiagnostics.tail(callId)) found=\(receipt != nil)")
         }
     }
 

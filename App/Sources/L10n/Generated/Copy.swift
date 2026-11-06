@@ -5550,6 +5550,9 @@ extension SuperviseCopy {
     /// `supervise.monitoring_connected`
     internal static var monitoringConnected: String { AppL10n.copyLocale == .frCA ? "Vous écoutez l'appel" : "You are listening" }
 
+    /// `supervise.no_receipt`
+    internal static var noReceipt: String { AppL10n.copyLocale == .frCA ? "Aucune réponse de votre réceptionniste au sujet de cette consigne." : "No answer from your receptionist about this note." }
+
     /// `supervise.not_started`
     internal static var notStarted: String { AppL10n.copyLocale == .frCA ? "iOS n'a pas lancé l'écoute de l'appel. Un autre appel est peut-être déjà en cours." : "iOS did not start the listen-in. Another call may already be in progress." }
 

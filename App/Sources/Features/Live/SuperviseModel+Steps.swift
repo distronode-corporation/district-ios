@@ -26,8 +26,18 @@ extension SuperviseModel {
             Task { await systemEnded() }
         case let .muteRequested(uuid, muted):
             guard uuid == callUUID else { return }
+            guard state.holdsTheCall else {
+                // ⛔ A LISTENER HAS NO MICROPHONE TO MUTE, BUT CALLKIT HAS ALREADY SHOWN ONE MUTED
+                // (xhigh review of PR #101, item 5), and the takeover would open the microphone
+                // under a system UI that still says muted. Put the system's control back.
+                // ⚠️ Only for a mute: the unmute that comes back is ignored here, so no loop.
+                if muted {
+                    media.requestMuted(uuid: uuid, muted: false)
+                }
+                return
+            }
             // ⛔ AN ABSOLUTE REQUEST MEETS A TOGGLE EVENT: applied only when the two disagree.
-            guard state.holdsTheCall, state.media.microphoneEnabled == muted else { return }
+            guard state.media.microphoneEnabled == muted else { return }
             Task { await apply(.muteToggled) }
         case .answerRequested:
             // ⚠️ INBOUND, AND NEVER THIS MODEL'S: ``IncomingCallModel`` owns an answer.

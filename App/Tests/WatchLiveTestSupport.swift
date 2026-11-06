@@ -74,6 +74,7 @@ final class FakeLiveSources: WatchLiveSourcing {
 
     func whisper(workspaceId _: String, callId _: String, text: String) async -> Result<Void, WatchActionFailure> {
         whispered.append(text)
+        order.append("whisper")
         return whisperResult
     }
 
@@ -86,13 +87,38 @@ final class FakeLiveSources: WatchLiveSourcing {
         activationsPrepared += 1
     }
 
-    /// The receipt the next wait answers, and the calls waited on.
+    /// The receipt the next wait answers (nil: none in time), the calls waited on, every wait
+    /// made, and the order of the listen and the send.
     var receiptResult: WhisperReceipt?
     private(set) var receiptWaits: [String] = []
+    private(set) var waits: [FakeReceiptWait] = []
+    private(set) var order: [String] = []
 
-    func awaitReceipt(workspaceId _: String, callId: String) async -> WhisperReceipt? {
+    func listenForReceipt(workspaceId _: String, callId: String) async -> any WatchReceiptWaiting {
         receiptWaits.append(callId)
-        return receiptResult
+        order.append("listen")
+        let wait = FakeReceiptWait(answer: receiptResult)
+        waits.append(wait)
+        return wait
+    }
+}
+
+/// A receipt wait that answers at once, and says whether it was cancelled.
+@MainActor
+final class FakeReceiptWait: WatchReceiptWaiting {
+    let answer: WhisperReceipt?
+    private(set) var cancelled = false
+
+    init(answer: WhisperReceipt?) {
+        self.answer = answer
+    }
+
+    func receipt(within _: Int64) async -> WhisperReceipt? {
+        cancelled ? nil : answer
+    }
+
+    func cancel() {
+        cancelled = true
     }
 }
 
@@ -150,7 +176,8 @@ enum LiveFixtures {
         from: String = "+15555550100",
         aiSummary: String = "Wants a visit tomorrow.",
         actionItems: [String]? = nil,
-        receptionistOnCall: Bool? = nil
+        receptionistOnCall: Bool? = nil,
+        createdAt: String = "2026-10-24T18:00:00.000Z"
     ) throws -> CallSummary {
         let analysis = actionItems.map { items in
             let list = items.map { #""\#($0)""# }.joined(separator: ",")
@@ -161,7 +188,7 @@ enum LiveFixtures {
         {"id":"\(id)","type":"\(direction)","number":"\(number)","status":"\(status)","duration":"1m 5s",\
         "time":"t","aiSummary":"\(aiSummary)","transcript":"","callerName":"","summary":"",\
         "from":"\(from)","direction":"\(direction)","durationRaw":65,\
-        "createdAt":"2026-10-24T18:00:00.000Z"\(analysis)\(receptionist)}
+        "createdAt":"\(createdAt)"\(analysis)\(receptionist)}
         """
         return try JSONDecoder().decode(CallSummary.self, from: Data(json.utf8))
     }

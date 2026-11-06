@@ -127,7 +127,9 @@ final class CallStackSuperviseMedia: SuperviseMedia {
     }
 
     func beginLeg(_ leg: SuperviseLeg) async -> AsyncStream<CallEngineEvent> {
-        await stack.beginCall(publishingMicrophone: leg == .takeover)
+        // ⛔ BOTH LEGS COUNT THE PEOPLE ALREADY IN THE ROOM (xhigh review, item 1): the room
+        // emptying is how `SuperviseSession` knows the call ended.
+        await stack.beginCall(publishingMicrophone: leg == .takeover, announcingPresentParticipants: true)
     }
 
     func perform(_ command: CallCommand) async {
