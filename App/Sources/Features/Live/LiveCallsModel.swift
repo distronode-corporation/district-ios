@@ -129,8 +129,15 @@ final class LiveCallsModel {
         repeat {
             readAgain = false
             await apply(read())
-        } while readAgain
+        } while readAgain && !Task.isCancelled
         loading = false
+        // ⛔ A READ QUEUED BEHIND A CANCELLED ONE RUNS IN A FRESH TASK (Sean, 2026-11-06): in the
+        // cancelled task its request fails at once, and the list would stay stale until the next
+        // event. A burst of events cancels the re-read on its way, so this is the common case.
+        if readAgain {
+            readAgain = false
+            Task { [weak self] in await self?.load() }
+        }
     }
 
     private func apply(_ result: Result<[CallSummary], ApiError>) {

@@ -42,7 +42,8 @@ built from history before publication, so they have no tags in this repository.
   call stack compares with the last workspace that resolved (`CallStack.workspaceSelected`).
 - Live calls: a re-read cancelled part way (the next event reschedules it) is a failure, so the
   list on screen is kept rather than replaced by the pages read so far, which could drop a live
-  call on a later page.
+  call on a later page. A read queued behind the cancelled one runs in a fresh task, so it
+  lands instead of failing at once and leaving the list stale until the next event.
 
 ### Changed
 
