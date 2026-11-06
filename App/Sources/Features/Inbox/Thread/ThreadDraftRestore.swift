@@ -106,6 +106,7 @@ extension ThreadModel {
             noteDraftUnread(outcome)
             return
         }
+        draftRead = true
         // ⛔ nil IS THE ORDINARY ANSWER, NOT A FAILURE. Almost every thread has no
         // draft, and the route answers `{success, draft: null}` rather than 404
         // precisely so the composer's normal open path is not an error in every log.
@@ -150,7 +151,7 @@ extension ThreadModel {
     ///
     /// ⛔ DEDUPLICATED, IN ORDER, BECAUSE THE ROW IS A LIST OF STRINGS THE SERVER
     /// STORES AS IT WAS GIVEN THEM. Every URL this client uploads is a fresh uuid, so
-    /// a repeat can only arrive from a draft written elsewhere — and a duplicate id
+    /// a repeat can only arrive from a draft written elsewhere, and a duplicate id
     /// inside one `ForEach` is a rendering fault rather than a cosmetic repeat.
     ///
     /// ⚠️ CAPPED AT THE SEND CEILING TOO, so a draft holding six (the drafts route

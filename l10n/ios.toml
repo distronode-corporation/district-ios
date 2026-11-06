@@ -3455,7 +3455,7 @@ en = "Held"
 fr = "En attente"
 ctx = "label"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachmentHeld" }
 note = "On a held image's chip in the reply box: an image the draft keeps that the selected channel cannot carry, drawn dimmed with its own Remove. It is not sent on this channel and comes back as an attachment on a switch to SMS."
 
@@ -3464,7 +3464,7 @@ en = "Image held, not sent by email"
 fr = "Image en attente, non envoyée par courriel"
 ctx = "a11y"
 screen = "inbox.thread"
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachmentHeldByEmail" }
 note = "Read by VoiceOver on a held image's chip when the reply goes out by email. French agrees with « image »."
 
@@ -3474,7 +3474,7 @@ fr = "Image en attente, non envoyée par {channel}"
 ctx = "a11y"
 screen = "inbox.thread"
 args = { channel = "str" }
-state = "draft"
+state = "reviewed"
 id = { swift = "InboxCopy.attachmentHeldOn(_:)" }
 note = "Read by VoiceOver on a held image's chip; channel is the reply's channel name as the picker shows it (WhatsApp, Messenger, Instagram). French agrees with « image »."
 

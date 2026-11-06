@@ -135,6 +135,9 @@ final class ThreadModel {
     /// about a draft that exists. See ``restoreDraft()``.
     var draftRestored = false
 
+    /// True once the draft read has ANSWERED, a draft or none (``deleteDraftIfBlank(_:)``).
+    var draftRead = false
+
     /// Set once ``recordRead()`` has fired, so a retry of ``open()`` spends no second write.
     var readRecorded = false
 

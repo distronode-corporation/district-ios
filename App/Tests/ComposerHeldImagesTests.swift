@@ -246,6 +246,26 @@ final class ComposerHeldImagesTests: XCTestCase {
         XCTAssertNil(model.current?.channelNote, "nothing held, nothing said")
     }
 
+    /// ⛔ REMOVING AN IMAGE ON A BLANK BOX DELETES NO UNREAD DRAFT (Seer, #99, 4489056023): the
+    /// draft read failed, so the server may hold a reply nobody has seen.
+    func testRemovingAnImageAfterAFailedDraftReadDeletesNothing() async {
+        let transport = ParityTransport()
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/messages/drafts", 500, #"{"error":"unavailable"}"#)
+        transport.on(.post, "/messages/media", 200, Self.uploaded(Self.roof))
+        transport.on(.delete, "/messages/drafts", 200, #"{"success":true}"#)
+        let model = ParityFixtures.thread(transport, targets: [Self.sms])
+        await model.open()
+        XCTAssertNotNil(model.current?.draftFailure, "the draft could not be read")
+        await model.attach(Self.png, mimeType: "image/png")
+
+        model.removeAttachment(Self.roof)
+        await model.flushDraft()
+
+        XCTAssertEqual(model.current?.attachments, [])
+        XCTAssertTrue(transport.requests(to: "/messages/drafts").filter { $0.method == .delete }.isEmpty)
+    }
+
     /// ⚠️ ON EMAIL THE CHIP SAYS "BY EMAIL", and French « par courriel », lower case.
     func testAHeldChipOnEmailSaysByEmail() {
         let model = ParityFixtures.thread(
