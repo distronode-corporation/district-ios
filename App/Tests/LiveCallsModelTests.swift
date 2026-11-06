@@ -132,6 +132,40 @@ final class LiveCallsModelTests: XCTestCase {
         XCTAssertEqual(model.calls.map(\.id), [], "the stale read and the next one both leave it off")
     }
 
+    /// ⛔ A CALL STILL RINGING IS NOT REMEMBERED AS ENDED (Seer, PR #101): it comes back with
+    /// the next read once it is answered; a terminal status keeps it off.
+    func testARingingUpdateIsNotAnEnding() async throws {
+        let ringing = try [LiveFixtures.call(id: "cmh1ring2", status: "ringing")]
+        let answered = try [LiveFixtures.call(id: "cmh1ring2", status: "in-progress")]
+        let model = try makeModel(Reads([.success(ringing), .success(answered), .success(answered)]))
+        await model.load()
+        model.events.onEvent?(SuperviseFixtures.envelope(
+            .callUpdated,
+            .object(["status": .string("ringing")]),
+            callId: "cmh1ring2"
+        ))
+        await model.load()
+        XCTAssertEqual(model.calls.map(\.id), ["cmh1ring2"], "answered after ringing: listed")
+
+        model.events.onEvent?(SuperviseFixtures.envelope(
+            .callUpdated,
+            .object(["status": .string("completed")]),
+            callId: "cmh1ring2"
+        ))
+        await model.load()
+        XCTAssertEqual(model.calls.map(\.id), [], "completed: off, and kept off")
+    }
+
+    func testOnlyATerminalStatusHasEnded() {
+        XCTAssertFalse(CallWire.hasEnded("in-progress"))
+        XCTAssertFalse(CallWire.hasEnded("ringing"))
+        XCTAssertFalse(CallWire.hasEnded("queued"))
+        XCTAssertFalse(CallWire.hasEnded("initiated"))
+        XCTAssertTrue(CallWire.hasEnded("completed"))
+        XCTAssertTrue(CallWire.hasEnded("no-answer"))
+        XCTAssertTrue(CallWire.hasEnded("failed"))
+    }
+
     /// A `call_updated` whose status left `in-progress` is an ending too.
     func testAnUpdateThatLeftInProgressTakesTheCallOff() async throws {
         let model = try makeModel(Reads([.success(rows())]))

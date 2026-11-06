@@ -114,10 +114,12 @@ final class LiveCallsModel {
     private func received(_ envelope: TelemetryEnvelope) {
         switch envelope.eventType {
         case .callEnded:
-            remove(envelope.callId)
+            remove(envelope.callId, ended: true)
         case .callUpdated:
+            // ⚠️ OFF THE LIST UNLESS IN PROGRESS, BUT REMEMBERED AS ENDED ONLY WHEN IT IS: a call
+            // still ringing comes back with the next read once it is answered.
             if let status = envelope.callStatus, status != CallWire.statusInProgress {
-                remove(envelope.callId)
+                remove(envelope.callId, ended: CallWire.hasEnded(status))
             }
             scheduleReread()
         case .callStarted:
@@ -127,8 +129,10 @@ final class LiveCallsModel {
         }
     }
 
-    private func remove(_ callId: String) {
-        ended.insert(callId)
+    private func remove(_ callId: String, ended isOver: Bool) {
+        if isOver {
+            ended.insert(callId)
+        }
         guard case let .ready(rows) = state else { return }
         state = .ready(rows.filter { $0.id != callId })
     }

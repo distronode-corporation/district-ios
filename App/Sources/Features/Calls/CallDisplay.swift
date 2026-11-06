@@ -275,6 +275,14 @@ enum CallWire {
     static let directionOutbound = "outbound"
     static let statusInProgress = "in-progress"
     static let statusRinging = "ringing"
+
+    /// Whether a call with this status is over. ⛔ NOT "anything but in progress" (Seer, PR #101):
+    /// a call that has not been answered yet (`ringing`, `queued`, `initiated`) is not live, but it
+    /// is not over either, and the Live screens must not remember it as ended.
+    static func hasEnded(_ status: String) -> Bool {
+        status != statusInProgress && !["ringing", "queued", "initiated"].contains(status)
+    }
+
     static let transferSuccess = "success"
     static let transferFailure = "failed"
 }

@@ -222,8 +222,8 @@ final class SuperviseModel {
             Task { await apply(.whisperReceipt(receipt)) }
             return
         }
-        let leftInProgress = envelope.callStatus.map { $0 != CallWire.statusInProgress } == true
-        let ended = envelope.eventType == .callEnded || (envelope.eventType == .callUpdated && leftInProgress)
+        let over = envelope.callStatus.map(CallWire.hasEnded) == true
+        let ended = envelope.eventType == .callEnded || (envelope.eventType == .callUpdated && over)
         guard ended else { return }
         Task {
             await apply(.callEnded)
