@@ -71,7 +71,7 @@ final class ThreadModel {
 
     /// ⛔ FALSE ALSO WHEN THERE IS NOTHING TO REPLY TO. `messages/send` excludes
     /// `viewer` server-side, and a thread the server marked neither `canSms` nor
-    /// `canEmail` has no reachable address — offering a box there would collect a
+    /// `canEmail` has no reachable address, offering a box there would collect a
     /// message that could only ever fail to send.
     ///
     /// ⚠️ COMPUTED RATHER THAN A `let`, BECAUSE THE CHANNEL CAN CHANGE.
@@ -114,7 +114,7 @@ final class ThreadModel {
     /// rather than `private(set)` for the same file-scoping reason: the only writer is
     /// ``selectReplyTarget(_:)``, which lives in `ThreadComposerRules.swift`. ⛔ Its
     /// `workspaceId`, `threadKey`, `selector` and `replyTargets` are all `let` on the
-    /// struct, so the only thing a write can move is which target is selected — the
+    /// struct, so the only thing a write can move is which target is selected, the
     /// thread cannot be re-pointed at another conversation by mistake.
     let inbox: InboxRepository
     var target: ThreadTarget
@@ -290,7 +290,7 @@ final class ThreadModel {
     ///
     /// ⛔ THE SECOND REASON ``composerSubject``'s SETTER IS NOT FULLY PRIVATE, and the
     /// same one ``adoptDraft(_:)`` gives: `private(set)` is file-scoped and both
-    /// non-arming writers live in sibling files. Neither may arm a debounce — the
+    /// non-arming writers live in sibling files. Neither may arm a debounce, the
     /// restore would save back the bytes it has just read, and the seeded `Re:` would
     /// spend one of the workspace's 60 writes/min on a line this client derived rather
     /// than the operator typed.
@@ -311,7 +311,7 @@ final class ThreadModel {
     ///
     /// ⚠️ ON SUCCESS THE THREAD IS RE-READ RATHER THAN APPENDED TO LOCALLY. The sent
     /// row gets its id, status and timestamp from the server, and a locally invented
-    /// bubble would show a delivery status this client made up — the one thing an
+    /// bubble would show a delivery status this client made up, the one thing an
     /// operator is actually checking after a send.
     ///
     /// ⛔ AND IT REFUSES AN EMAIL WITH NO SUBJECT, which is ``canSendNow``'s other
@@ -320,9 +320,10 @@ final class ThreadModel {
     /// customer's mail client threads the reply onto the wrong conversation.
     func send() async {
         guard canReply, let recipient = target.replyTarget else { return }
-        guard var content = current, !content.sending, canSendNow else { return }
+        guard var content = current, !content.sending, !content.attaching, canSendNow else { return }
         let body = composerText
-        let media = content.attachments
+        // ⛔ ONLY A CHANNEL THAT CARRIES IMAGES SENDS THEM (max review), behind the hold.
+        let media = canAttach ? content.attachments : []
 
         content.sending = true
         content.sendFailure = nil
@@ -331,7 +332,7 @@ final class ThreadModel {
         // ⚠️ ``sendReply(to:body:media:)`` picks the route: a WhatsApp reply names its sender.
         switch await sendReply(to: recipient, body: body, media: media) {
         case .success:
-            await finishSend()
+            await finishSend(sent: media)
         case let .failure(error):
             // ⚠️ THE CONVERSATION STAYS, AND SO DO THE ATTACHMENTS. They are already
             // uploaded, and dropping them would make a retry re-pick every image.
@@ -347,7 +348,7 @@ final class ThreadModel {
 
     /// Ask the model for a reply and put it in the composer.
     ///
-    /// ⛔ BILLED, NON-IDEMPOTENT, AND ONE EXPLICIT TAP ONLY — one Vertex generation
+    /// ⛔ BILLED, NON-IDEMPOTENT, AND ONE EXPLICIT TAP ONLY, one Vertex generation
     /// per invocation, 20/min per workspace, with no entitlement check in front of
     /// it. It must never be fired from a timer, a retry helper, an autosave debounce
     /// or a view's appearance, and it is guarded against a double tap for the same
@@ -397,7 +398,7 @@ final class ThreadModel {
     ///
     /// ⚠️ AND THE SERVER DRAFT IS DELETED, NOT LEFT TO EXPIRE. A draft that survives
     /// its own send is a message the operator sends twice on their next device.
-    private func finishSend() async {
+    private func finishSend(sent: [String]) async {
         autosaveTask?.cancel()
         autosaveTask = nil
         composerText = ""
@@ -409,9 +410,15 @@ final class ThreadModel {
         if await !deleteDraft(), await !deleteDraft() {
             draftNotice = Self.sentDraftSurvived
         }
-        // ⚠️ THE IMAGES WENT OUT WITH IT (and a text-only send's held ones with the draft), so
-        // the re-read below must not put them back.
-        composerMedia = ComposerMedia()
+        // ⛔ ONLY WHAT WENT OUT IS CLEARED (max review, #99 and #95): held images stay, as their
+        // sentence says, and so does one that landed mid-send. With no body they are not
+        // stored (a blank draft is a DELETE); the next keystroke's autosave writes them back.
+        let held = composerMedia.held
+        composerMedia = ComposerMedia(
+            attachments: composerMedia.attachments.filter { !sent.contains($0) },
+            held: held,
+            note: held.isEmpty ? nil : composerMedia.note
+        )
         await load()
         seedSubjectIfNeeded()
     }
