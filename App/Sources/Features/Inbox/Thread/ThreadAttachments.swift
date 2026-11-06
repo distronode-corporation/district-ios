@@ -75,6 +75,13 @@ extension ThreadModel {
         var media = current.map {
             ComposerMedia(attachments: $0.attachments, held: $0.heldAttachments, note: $0.channelNote)
         } ?? composerMedia
+        // ⛔ THE CAP IS CHECKED AGAIN ON LANDING (Seer, #99, 4489456427): a draft restored while
+        // this uploaded can have filled the five, so the image is dropped and the limit said,
+        // in the same words as a sixth pick. With no content on screen there is nowhere to say it.
+        guard media.attachments.count + media.held.count < Self.maximumAttachments else {
+            refuseAttachment(Self.tooManyAttachments)
+            return
+        }
         if canAttach {
             media.attachments.append(url)
         } else {

@@ -306,6 +306,31 @@ final class ComposerHeldImagesTests: XCTestCase {
         )
     }
 
+    /// ⛔ AN UPLOAD THAT LANDS AFTER A RESTORE FILLED THE FIVE IS DROPPED AND THE LIMIT IS SAID
+    /// (Seer, #99, 4489456427): the cap was checked only before the upload, so the composer could
+    /// hold six, and the send and the drafts route refuse more than five.
+    func testAnUploadThatLandsOnAFullComposerIsDroppedAndTheLimitSaid() async {
+        let five = (1 ... 5).map { "https://www.distronode.test/api/media/media_parity_\($0)" }
+        let transport = ParityTransport()
+        transport.on(.get, "/timeline", 200, ParityFixtures.timeline)
+        transport.on(.get, "/messages/drafts", 200, Self.draft(five))
+        transport.on(.post, "/messages/media", 200, Self.uploaded(Self.roof))
+        let gate = transport.hold(.post, "/messages/media")
+        let model = ParityFixtures.thread(transport, targets: [Self.sms])
+        await model.load()
+
+        let upload = Task { await model.attach(Self.png, mimeType: "image/png") }
+        await waitUntil { transport.requests(to: "/messages/media").count == 1 }
+        await model.restoreDraft()
+        XCTAssertEqual(model.current?.attachments, five, "the restore filled the five")
+        gate.open()
+        await upload.value
+
+        XCTAssertEqual(model.current?.attachments, five, "the late image is not a sixth")
+        XCTAssertEqual(model.current?.sendFailure?.message, "You can attach up to 5 images to one message.")
+        XCTAssertEqual(model.current?.attaching, false)
+    }
+
     /// ⚠️ ON EMAIL THE CHIP SAYS "BY EMAIL", and French « par courriel », lower case.
     func testAHeldChipOnEmailSaysByEmail() {
         let model = ParityFixtures.thread(

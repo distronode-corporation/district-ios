@@ -47,7 +47,8 @@ built from history before publication, so they have no tags in this repository.
   A blank reply box deletes the saved draft only once the draft has been read, so removing an
   image or clearing the box after a failed read cannot delete a reply nobody has seen; a save
   that lands counts as read, since the server then holds only this composer's text. A draft
-  restored after an image was attached merges its images with it (by URL) instead of replacing it.
+  restored after an image was attached merges its images with it (by URL) instead of replacing it,
+  and an upload that lands once that merge filled the five is dropped with the five-image sentence.
 - 3.2.1: MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
   pair is project-level, so every target carries the same value. DistrictCore stays at
   `exactVersion` 8.1.0.
