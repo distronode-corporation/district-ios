@@ -29,12 +29,12 @@ final class SidebarItemTests: XCTestCase {
         XCTAssertEqual(SidebarItem.allCases.filter { $0.tab != nil }, tabItems)
     }
 
-    /// ⛔ ELEVEN HUB SECTIONS, one per `.route` row on the Overview.
+    /// ⛔ TWELVE HUB SECTIONS, one per `.route` row on the Overview (Live calls since 3.3.0).
     func test_IOS_SIDEBAR_02_theHubSectionsAreTheOverviewsRouteRows() {
         XCTAssertEqual(
             hubItems,
             [
-                .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .desk, .dialer,
+                .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .desk, .dialer, .live,
                 .scheduling, .support, .settings,
             ]
         )
@@ -175,7 +175,7 @@ final class SidebarItemTests: XCTestCase {
     func test_IOS_SIDEBAR_10_theViewerAndNilRoleLists() {
         let readOnly: [SidebarItem] = [
             .overview, .inbox, .calls, .contacts, .hq, .analytics, .marketplace, .billing, .rooms,
-            .workflows, .scheduling, .settings, .account,
+            .workflows, .live, .scheduling, .settings, .account,
         ]
         XCTAssertEqual(SidebarItem.visible(workspaceId: workspaceId, role: .viewer), readOnly)
         XCTAssertEqual(SidebarItem.visible(workspaceId: workspaceId, role: nil), readOnly)
@@ -200,7 +200,7 @@ final class SidebarItemTests: XCTestCase {
     // MARK: - Every route
 
     /// ⛔ BUMP THIS AND ADD A SAMPLE BELOW when ``expectation(for:)`` gains an arm.
-    private static let routeCaseCount = 18
+    private static let routeCaseCount = 20
 
     private static let everyRoute: [Route] = [
         .callDetail(workspaceId: "ws_1", callId: "call_1"),
@@ -220,6 +220,8 @@ final class SidebarItemTests: XCTestCase {
         .rooms(workspaceId: "ws_1", role: .agency),
         .activeRoom(workspaceId: "ws_1", role: .agency, roomName: "meet_ws_1_a"),
         .dialer(workspaceId: "ws_1", role: .agency),
+        .liveCalls(workspaceId: "ws_1", role: .agency),
+        .superviseCall(workspaceId: "ws_1", role: .agency, callId: "cmh1live"),
         .workspaceSettings(workspaceId: "ws_1", role: .agency, section: .hub),
         .workspaceSettings(workspaceId: "ws_1", role: .agency, section: .members),
         .scheduling(workspaceId: "ws_1", role: .agency, section: .hub),
@@ -264,6 +266,8 @@ final class SidebarItemTests: XCTestCase {
         case .rooms: Expectation("rooms", .rooms, root: true)
         case .activeRoom: Expectation("activeRoom", .rooms)
         case .dialer: Expectation("dialer", .dialer, root: true)
+        case .liveCalls: Expectation("liveCalls", .live, root: true)
+        case .superviseCall: Expectation("superviseCall", .live)
         case .desk: Expectation("desk", .desk, root: true)
         case .deskTicket: Expectation("deskTicket", .desk)
         case .support: Expectation("support", .support, root: true)

@@ -17,6 +17,9 @@ protocol WatchLiveSourcing {
     func feed(workspaceId: String, callId: String) -> any WatchLiveTranscriptFeed
     /// A feed is about to open a socket: the next credential may come from the cache.
     func willActivate() async
+    /// Open the wait for the receptionist's answer to a note about to be sent on `callId`.
+    /// ⛔ Returns once its socket is open, so the note goes out after it (``TelemetryReceiptListener``).
+    func listenForReceipt(workspaceId: String, callId: String) async -> any WatchReceiptWaiting
 }
 
 /// One call's live transcript as the relay drives it: ``LiveTranscriptModel``, the call
@@ -125,6 +128,28 @@ final class ContainerWatchLiveSources: WatchLiveSourcing {
     func willActivate() async {
         await minter.beginActivation()
     }
+
+    /// How long the receipt socket may take to open before the note is sent anyway.
+    static let receiptConnectMilliseconds: Int64 = 3000
+
+    func listenForReceipt(workspaceId: String, callId: String) async -> any WatchReceiptWaiting {
+        await minter.beginActivation()
+        let clock = SystemLiveClock()
+        let listener = TelemetryReceiptListener(
+            runner: TelemetryConnectionRunner(
+                workspaceId: workspaceId,
+                broadcast: true,
+                minter: minter,
+                transport: URLSessionTelemetryTransport(),
+                clock: clock,
+                jitter: TelemetryConnectionRunner.randomJitter
+            ),
+            callId: callId,
+            clock: clock
+        )
+        await listener.open(within: Self.receiptConnectMilliseconds)
+        return listener
+    }
 }
 
 /// Telemetry credentials, reused across the relay's short sockets.
@@ -188,7 +213,9 @@ enum WatchLiveComposer {
                 workspaceId: workspaceId,
                 caller: display.displayName.map(WatchMasking.caller) ?? display.callerLabel,
                 startedAt: WireInstant.parse(row.createdAt),
-                canWhisper: WorkspaceRole.allowsMutation(role)
+                // ⛔ THE PHONE'S RULE (`SuperviseState.mayWhisper`): a writer, on a call the
+                // receptionist is on.
+                canWhisper: WorkspaceRole.allowsMutation(role) && row.hasReceptionist
             )
         }
     }
@@ -225,6 +252,18 @@ enum WatchLiveComposer {
     static func callBackNumber(_ row: CallSummary) -> String? {
         guard row.direction == "inbound" else { return nil }
         return CallerIdentity.resolved(row.from)
+    }
+
+    /// ⛔ THE PHONE'S OWN WORDING (``SuperviseCopy/receipt(_:)``), so the wrist and the Live
+    /// screen say the same thing about the same note.
+    static func receipt(_ receipt: WhisperReceipt) -> WatchWhisperReceipt {
+        let words = SuperviseCopy.receipt(receipt)
+        return WatchWhisperReceipt(applied: receipt.applied, headline: words.headline, detail: words.detail)
+    }
+
+    /// No answer to the note in time: said plainly, with the not-used mark.
+    static var noReceipt: WatchWhisperReceipt {
+        WatchWhisperReceipt(applied: false, headline: SuperviseCopy.noReceipt, detail: nil)
     }
 
     static func line(_ segment: TranscriptSegment) -> WatchLiveLine {

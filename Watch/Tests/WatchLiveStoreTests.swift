@@ -77,6 +77,21 @@ final class WatchLiveStoreTests: XCTestCase {
         live.close()
     }
 
+    /// ⛔ Q4: THE RECEIPT IS SHOWN AS THE PHONE LAST SENT IT, an absent one included: the phone
+    /// drops it when the next note goes, and a phone before 3.3.0 never sends one.
+    func testTheReceiptIsWhatThePhoneLastSent() {
+        let live = WatchLiveStore(link: ScriptedLink { _ in .noAnswer })
+        live.open(call)
+        let receipt = WatchWhisperReceipt(applied: false, headline: "Not used.", detail: "Transferring.")
+
+        live.apply(update(cursor: "c1", reset: true, receipt: receipt))
+        XCTAssertEqual(live.transcript?.receipt, receipt)
+
+        live.apply(update(cursor: "c1"))
+        XCTAssertNil(live.transcript?.receipt)
+        live.close()
+    }
+
     /// The subscribe, then a keepalive carrying the cursor and the last round trip.
     func testTheKeepaliveCarriesTheCursorAndTheRoundTrip() async {
         let link = ScriptedLink { [self] action in
@@ -290,7 +305,8 @@ final class WatchLiveStoreTests: XCTestCase {
         lines: [WatchLiveLine] = [],
         retracted: [String] = [],
         interim: WatchLiveLine? = nil,
-        phase: WatchLivePhase = .live
+        phase: WatchLivePhase = .live,
+        receipt: WatchWhisperReceipt? = nil
     ) -> WatchLiveUpdate {
         WatchLiveUpdate(
             callId: callId,
@@ -300,7 +316,8 @@ final class WatchLiveStoreTests: XCTestCase {
             retracted: retracted,
             interim: interim,
             phase: phase,
-            complete: true
+            complete: true,
+            receipt: receipt
         )
     }
 

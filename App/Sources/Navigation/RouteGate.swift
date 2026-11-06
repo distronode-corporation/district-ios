@@ -97,6 +97,10 @@ extension RouteGate {
         // this is `.partial` and not `.hidden`: a viewer can fill every screen.
         case .scheduling:
             .partial
+        // ⚠️ LISTEN IS OPEN TO A VIEWER (`calls/token` admits `viewer`); the note and the
+        // takeover are not, and the screen offers neither (`SuperviseState`).
+        case .liveCalls, .superviseCall:
+            .partial
         // Everything else admits all three roles: the call log and one call, HQ,
         // analytics, the marketplace, billing, the rooms lobby and one room, and
         // this account's devices.

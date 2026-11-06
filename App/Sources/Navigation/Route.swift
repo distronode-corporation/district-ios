@@ -143,6 +143,19 @@ enum Route: Hashable, Sendable {
     /// the truth: the socket died and the call is over.
     case dialer(workspaceId: String, role: WorkspaceRole?)
 
+    /// Live calls: the workspace's calls in progress (iOS-first; the website's Live page).
+    ///
+    /// ⛔ THE ROLE IS A REAL GATE ONE LEVEL DOWN: a viewer may listen and nothing else, and a
+    /// role that did not parse may do nothing (`SuperviseState`).
+    case liveCalls(workspaceId: String, role: WorkspaceRole?)
+
+    /// One live call's supervision, pushed from ``liveCalls(workspaceId:role:)``.
+    ///
+    /// ⛔ ARRIVING STARTS NOTHING, for ``dialer(workspaceId:role:)``'s reason: a destination
+    /// restored after process death must not join a customer's call nobody asked to hear.
+    /// Listen is a press, and the live supervision is held by the call stack, not the path.
+    case superviseCall(workspaceId: String, role: WorkspaceRole?, callId: String)
+
     /// `Routes.WORKSPACE_SETTINGS` and its sections.
     ///
     /// ⛔ THE ROLE HERE IS A REAL GATE, unlike ``marketplace(workspaceId:role:)`` and

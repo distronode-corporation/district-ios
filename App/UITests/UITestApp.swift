@@ -52,6 +52,8 @@ class UITestApp: XCTestCase {
         A11yID.Dialer.call,
         A11yID.VoiceStudio.save,
         A11yID.Desk.composeSubmit,
+        // ⛔ A CUSTOMER'S CALL IN PROGRESS: only the loopback `LiveSuperviseScreenshotTests`.
+        A11yID.Live.listen, A11yID.Live.takeOver, A11yID.Live.whisperSend,
     ]
 
     override func setUp() {
@@ -252,7 +254,7 @@ enum UITestLaunch {
 /// address them by. The order is the sidebar's, which a case asserts.
 enum ShellSection: CaseIterable {
     case overview, inbox, calls, contacts
-    case hq, analytics, marketplace, billing, rooms, workflows, desk, dialer, scheduling, support, settings
+    case hq, analytics, marketplace, billing, rooms, workflows, desk, dialer, live, scheduling, support, settings
     case account
 
     /// The tab bar button's label on compact width, or nil for a hub section, which is a row
@@ -264,7 +266,7 @@ enum ShellSection: CaseIterable {
         case .calls: A11yID.NavLabel.calls
         case .contacts: A11yID.NavLabel.contacts
         case .account: A11yID.NavLabel.account
-        case .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .desk, .dialer, .scheduling,
+        case .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .desk, .dialer, .live, .scheduling,
              .support, .settings:
             nil
         }
@@ -285,6 +287,7 @@ enum ShellSection: CaseIterable {
         case .workflows: "workflows"
         case .desk: "desk"
         case .dialer: "dialer"
+        case .live: "live"
         case .scheduling: "scheduling"
         case .support: "support"
         case .settings: "settings"
@@ -308,6 +311,7 @@ enum ShellSection: CaseIterable {
         case .workflows: A11yID.Sidebar.workflows
         case .desk: A11yID.Sidebar.desk
         case .dialer: A11yID.Sidebar.dialer
+        case .live: A11yID.Sidebar.live
         case .scheduling: A11yID.Sidebar.scheduling
         case .support: A11yID.Sidebar.support
         case .settings: A11yID.Sidebar.settings
@@ -320,7 +324,7 @@ enum ShellSection: CaseIterable {
     var isListSection: Bool {
         switch self {
         case .inbox, .calls, .contacts, .desk, .support: true
-        case .overview, .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .dialer, .scheduling,
+        case .overview, .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .dialer, .live, .scheduling,
              .settings, .account:
             false
         }

@@ -1,3 +1,4 @@
+import DistrictCall
 import Foundation
 import LiveKit
 import OSLog
@@ -21,6 +22,17 @@ protocol CallRoom: AnyObject, Sendable {
 
     /// Leave. ⛔ Idempotent, see ``LiveKitCallEngine/disconnect()``.
     func disconnect() async
+
+    /// Who was already in the room when the join completed: the SDK announces them nowhere
+    /// else. See ``LiveKitCallEngine``'s `announcesPresentParticipants`.
+    func presentParticipants() -> [CallParticipant]
+}
+
+extension CallRoom {
+    /// ⚠️ A room that cannot say reports nobody, which is the dialler's behaviour today.
+    func presentParticipants() -> [CallParticipant] {
+        []
+    }
 }
 
 /// The LiveKit `Room` behind ``CallRoom``.
@@ -93,6 +105,10 @@ final class LiveKitCallRoom: CallRoom, @unchecked Sendable {
 
     func disconnect() async {
         await room.disconnect()
+    }
+
+    func presentParticipants() -> [CallParticipant] {
+        room.remoteParticipants.values.map(RoomEventBridge.participant)
     }
 }
 

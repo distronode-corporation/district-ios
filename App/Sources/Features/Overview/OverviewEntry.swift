@@ -107,6 +107,8 @@ extension OverviewEntry {
             // cannot redial; a shortcut that placed a call from here would hand that
             // property straight back. Same for Rooms above it.
             Row("dialer", OverviewCopy.dial, .route(.dialer(workspaceId: workspaceId, role: role))),
+            // ⛔ THE LIST, AND NOTHING THAT LISTENS: arriving joins no call (`Route.superviseCall`).
+            Row("live", SuperviseCopy.pageTitle, .route(.liveCalls(workspaceId: workspaceId, role: role))),
             // ⚠️ THE ROW OPENS THE HUB, NOT A SECTION. The hub is where the tenancy card
             // and Enable live, and a workspace with no booking page has nothing to show
             // in any of the nine sections — so landing anywhere else would be a screen

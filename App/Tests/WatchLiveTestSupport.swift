@@ -72,8 +72,13 @@ final class FakeLiveSources: WatchLiveSourcing {
         cardResult
     }
 
+    /// Run as each note is sent: a test holds the first one, or spends clock time.
+    var onWhisper: (@MainActor (String) async -> Void)?
+
     func whisper(workspaceId _: String, callId _: String, text: String) async -> Result<Void, WatchActionFailure> {
         whispered.append(text)
+        order.append("whisper")
+        await onWhisper?(text)
         return whisperResult
     }
 
@@ -84,6 +89,43 @@ final class FakeLiveSources: WatchLiveSourcing {
 
     func willActivate() async {
         activationsPrepared += 1
+    }
+
+    /// The receipt the next wait answers (nil: none in time), the calls waited on, every wait
+    /// made, and the order of the listen and the send.
+    var receiptResult: WhisperReceipt?
+    private(set) var receiptWaits: [String] = []
+    private(set) var waits: [FakeReceiptWait] = []
+    private(set) var order: [String] = []
+
+    func listenForReceipt(workspaceId _: String, callId: String) async -> any WatchReceiptWaiting {
+        receiptWaits.append(callId)
+        order.append("listen")
+        let wait = FakeReceiptWait(answer: receiptResult)
+        waits.append(wait)
+        return wait
+    }
+}
+
+/// A receipt wait that answers at once, and says whether it was cancelled.
+@MainActor
+final class FakeReceiptWait: WatchReceiptWaiting {
+    let answer: WhisperReceipt?
+    private(set) var cancelled = false
+    /// The budget it was asked to wait within.
+    private(set) var within: Int64?
+
+    init(answer: WhisperReceipt?) {
+        self.answer = answer
+    }
+
+    func receipt(within milliseconds: Int64) async -> WhisperReceipt? {
+        within = milliseconds
+        return cancelled ? nil : answer
+    }
+
+    func cancel() {
+        cancelled = true
     }
 }
 
@@ -130,23 +172,30 @@ enum LiveFixtures {
     }
 
     /// A call-log row, as the feed and the detail route answer it.
+    /// ⚠️ `id` DEFAULTS TO `call_1`, which ``SupervisedCallID`` refuses (it carries `_`); the
+    /// supervise tests pass a cuid-shaped one. `receptionistOnCall` nil leaves the key out, as a
+    /// server before live supervise does.
     static func call(
+        id: String = "call_1",
         status: String = "completed",
         direction: String = "inbound",
         number: String = "Marie Tremblay",
         from: String = "+15555550100",
         aiSummary: String = "Wants a visit tomorrow.",
-        actionItems: [String]? = nil
+        actionItems: [String]? = nil,
+        receptionistOnCall: Bool? = nil,
+        createdAt: String = "2026-10-24T18:00:00.000Z"
     ) throws -> CallSummary {
         let analysis = actionItems.map { items in
             let list = items.map { #""\#($0)""# }.joined(separator: ",")
             return #","analysis":{"actionItems":[\#(list)]}"#
         } ?? ""
+        let receptionist = receptionistOnCall.map { #","receptionistOnCall":\#($0)"# } ?? ""
         let json = """
-        {"id":"call_1","type":"\(direction)","number":"\(number)","status":"\(status)","duration":"1m 5s",\
+        {"id":"\(id)","type":"\(direction)","number":"\(number)","status":"\(status)","duration":"1m 5s",\
         "time":"t","aiSummary":"\(aiSummary)","transcript":"","callerName":"","summary":"",\
         "from":"\(from)","direction":"\(direction)","durationRaw":65,\
-        "createdAt":"2026-10-24T18:00:00.000Z"\(analysis)}
+        "createdAt":"\(createdAt)"\(analysis)\(receptionist)}
         """
         return try JSONDecoder().decode(CallSummary.self, from: Data(json.utf8))
     }

@@ -63,10 +63,34 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     /// ⛔ ONE MICROPHONE TRACK PER CALL: see ``setMuted(_:)`` and `DistrictCall.CallJoinGate`.
     private let joinGate = CallJoinGate()
 
-    convenience init(audio: AudioSessionCoordinator) {
+    /// Whether the join is followed by the call's microphone track.
+    ///
+    /// ⛔ FALSE ONLY FOR A LISTEN-IN (`SuperviseLeg.listen`). Its seat is minted
+    /// `canSubscribe` only, so a publish would be refused by the server and reported as a
+    /// microphone that would not start, and the voice agent reads a supervisor with a
+    /// microphone as a whisperer to unsubscribe. A listener publishes nothing, ever.
+    private let publishesMicrophone: Bool
+
+    /// Whether the participants already in the room are reported as joins once the join is done.
+    ///
+    /// ⛔ TRUE ONLY FOR A SUPERVISE LEG (xhigh review of PR #101, item 1). LiveKit 2.17.0 delivers
+    /// the participants present at the join in the connect response and NEVER as
+    /// `participantDidConnect`, but their leave still fires `participantDidDisconnect`. A count
+    /// that never saw them join therefore reads empty when any one of them leaves (a web
+    /// supervisor, the agent after a transfer), and `SuperviseSession` ends the supervision as
+    /// "the call has ended". The dialler keeps its own path, untouched.
+    private let announcesPresentParticipants: Bool
+
+    convenience init(
+        audio: AudioSessionCoordinator,
+        publishesMicrophone: Bool = true,
+        announcesPresentParticipants: Bool = false
+    ) {
         _ = LiveKitCallEngine.diagnostics
         self.init(
             audio: audio,
+            publishesMicrophone: publishesMicrophone,
+            announcesPresentParticipants: announcesPresentParticipants,
             prepareAudio: { AudioManager.shared.audioSession.isAutomaticConfigurationEnabled = false },
             makeRoom: { LiveKitCallRoom(delegate: $0) }
         )
@@ -75,6 +99,8 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     /// ⚠️ THE SEAM FOR TESTS: `makeRoom` is handed the bridge the room must report to.
     init(
         audio: AudioSessionCoordinator,
+        publishesMicrophone: Bool = true,
+        announcesPresentParticipants: Bool = false,
         prepareAudio: @escaping @Sendable () async -> Void,
         makeRoom: (RoomEventBridge) -> any CallRoom
     ) {
@@ -82,9 +108,11 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
         events = stream
         self.continuation = continuation
         self.audio = audio
+        self.publishesMicrophone = publishesMicrophone
+        self.announcesPresentParticipants = announcesPresentParticipants
         self.prepareAudio = prepareAudio
 
-        let bridge = RoomEventBridge(continuation: continuation)
+        let bridge = RoomEventBridge(continuation: continuation, deduplicatesParticipants: announcesPresentParticipants)
         self.bridge = bridge
         room = makeRoom(bridge)
 
@@ -133,7 +161,12 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
             continuation.yield(.failed(message: error.localizedDescription))
             throw error
         }
-        await startMicrophone()
+        if announcesPresentParticipants {
+            bridge.announcePresent(room.presentParticipants())
+        }
+        if publishesMicrophone {
+            await startMicrophone()
+        }
         await joinGate.finish(joined: true)
     }
 
@@ -149,6 +182,14 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     private func startMicrophone() async {
         do {
             try await room.setMicrophone(enabled: true)
+            // ⛔ A SUPERVISE LEG SAYS THE MICROPHONE STARTED (max review of PR #101, item 1). The
+            // reducer's unmute on `.connected` is dropped by the join gate while this start is on
+            // its way, so without this event a takeover's card read "muted" over a live
+            // microphone, and a later system mute was ignored. The dialler's path is unchanged.
+            if announcesPresentParticipants {
+                await bridge.connectedReported()
+                continuation.yield(.microphoneChanged(enabled: true))
+            }
         } catch {
             callLog.info("microphone did not start: \(error.localizedDescription, privacy: .public)")
             await bridge.connectedReported()
@@ -249,8 +290,61 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
     /// Opens once the first `.connected` is on the stream; see ``ConnectedLatch``.
     private let connected = ConnectedLatch()
 
-    init(continuation: AsyncStream<CallEngineEvent>.Continuation) {
+    /// Whether joins and leaves are counted by identity (a supervise leg only): a participant
+    /// announced as present is not announced again by a late `participantDidConnect`.
+    private let deduplicatesParticipants: Bool
+    private let lock = NSLock()
+    private var present: Set<String> = []
+
+    init(continuation: AsyncStream<CallEngineEvent>.Continuation, deduplicatesParticipants: Bool = false) {
         self.continuation = continuation
+        self.deduplicatesParticipants = deduplicatesParticipants
+    }
+
+    /// Bring the count back to the room as it is after a full reconnect: a leave for each
+    /// participant counted but gone, a join for each one present but not counted.
+    func recount(_ participants: [CallParticipant]) {
+        guard deduplicatesParticipants else { return }
+        let now = Set(participants.map(\.identity))
+        let gone: Set<String> = lock.withLock { present.subtracting(now) }
+        for identity in gone.sorted() {
+            participantDisconnected(CallParticipant(identity: identity, name: nil, isAgent: false))
+        }
+        announcePresent(participants)
+    }
+
+    /// Report the participants already in the room as joins, each once.
+    func announcePresent(_ participants: [CallParticipant]) {
+        for participant in participants {
+            participantConnected(participant)
+        }
+    }
+
+    /// A participant joined. ⚠️ Internal so the tests can speak as the SDK.
+    func participantConnected(_ participant: CallParticipant) {
+        if deduplicatesParticipants {
+            let inserted = lock.withLock { present.insert(participant.identity).inserted }
+            guard inserted else { return }
+        }
+        continuation.yield(.participantJoined(participant))
+    }
+
+    /// A participant left. ⚠️ Internal so the tests can speak as the SDK.
+    ///
+    /// - Parameter stillInRoom: whether the room still lists them. ⛔ The SDK's own teardown (an
+    ///   eviction, a network loss, a full reconnect) fires `participantDidDisconnect` for every
+    ///   remote participant BEFORE `didDisconnectWithError`, while they are still listed; a real
+    ///   leave removes them first (max review of PR #101, item 3). Dropping those keeps a drop a
+    ///   drop, not "the call has ended".
+    func participantDisconnected(_ participant: CallParticipant, stillInRoom: Bool = false) {
+        if deduplicatesParticipants {
+            guard !stillInRoom else { return }
+            let removed = lock.withLock { present.remove(participant.identity) != nil }
+            // ⚠️ A leave for someone never counted is dropped, or the count would go below the
+            // room.
+            guard removed else { return }
+        }
+        continuation.yield(.participantLeft(participant))
     }
 
     /// Put `.connected` on the stream, then open the latch: in that order, so whatever waits
@@ -303,6 +397,10 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
     @objc
     func room(_ room: Room, didCompleteReconnectWithMode mode: ReconnectMode) {
         continuation.yield(.connected)
+        // ⚠️ A FULL RECONNECT REJOINS FROM SCRATCH: the count is brought back to the room.
+        if mode == .full {
+            recount(room.remoteParticipants.values.map(Self.participant))
+        }
     }
 
     @objc
@@ -328,12 +426,13 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
     /// soon as the carrier accepts, and the SIP bridge adds the callee at pickup.
     @objc
     func room(_ room: Room, participantDidConnect participant: RemoteParticipant) {
-        continuation.yield(.participantJoined(Self.participant(participant)))
+        participantConnected(Self.participant(participant))
     }
 
     @objc
     func room(_ room: Room, participantDidDisconnect participant: RemoteParticipant) {
-        continuation.yield(.participantLeft(Self.participant(participant)))
+        let stillInRoom = participant.identity.map { room.remoteParticipants[$0] != nil } ?? false
+        participantDisconnected(Self.participant(participant), stillInRoom: stillInRoom)
     }
 
     /// ⚠️ THE SDK'S OWN CLASSIFICATION FOR `isAgent`, NEVER AN IDENTITY PREFIX. The
@@ -343,7 +442,7 @@ final class RoomEventBridge: NSObject, RoomDelegate, @unchecked Sendable {
     ///
     /// ⚠️ A BLANK NAME BECOMES nil, matching the Kotlin mapper: an empty string would
     /// render as a participant with a name that is one space wide.
-    private static func participant(_ participant: RemoteParticipant) -> CallParticipant {
+    static func participant(_ participant: RemoteParticipant) -> CallParticipant {
         let name = participant.name?.trimmingCharacters(in: .whitespacesAndNewlines)
         return CallParticipant(
             identity: participant.identity?.stringValue ?? "",

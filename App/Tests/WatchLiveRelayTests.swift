@@ -370,4 +370,8 @@ private final class ModelSources: WatchLiveSourcing {
     }
 
     func willActivate() async {}
+
+    func listenForReceipt(workspaceId _: String, callId _: String) async -> any WatchReceiptWaiting {
+        FakeReceiptWait(answer: nil)
+    }
 }

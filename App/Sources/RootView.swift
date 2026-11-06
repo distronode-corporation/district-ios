@@ -118,6 +118,12 @@ private struct SessionGate: View {
         // that ever resolves it — in either direction. See the ⛔ on
         // ``IncomingCallSession``.
         .onChange(of: session.phase, initial: true) { sessionChanged() }
+        // ⛔ A LISTEN-IN TAPPED IN RECENTS IS CAUGHT HERE, NOT ON THE SHELL (xhigh review of PR
+        // #101, item 8): on a cold launch the shell is not mounted yet when the activity arrives.
+        // The shell acts on it once it has a workspace list.
+        .onContinueUserActivity(ListenInRecents.activityType) { activity in
+            container.listenInRecents.pending = ListenInRecents.handle(of: activity)
+        }
     }
 
     /// ⛔ THE ROOM IS ENDED WHENEVER THIS GATE LEAVES `signedIn`, AND THAT IS THE ONLY
@@ -142,6 +148,12 @@ private struct SessionGate: View {
             return
         }
         Task { await container.callStack.endRoom(.sessionEnded) }
+        // ⛔ AND A LISTEN-IN OR A TAKEOVER (xhigh review of PR #101, item 4).
+        Task { await container.callStack.endSupervision() }
+        // ⛔ AND THE KEYPAD'S CALL, ON SIGN-OUT ONLY (Sean, 2026-11-06).
+        if CallTeardown.endsSoftphone(session.phase) {
+            Task { await container.callStack.endSoftphone() }
+        }
     }
 
     /// The authenticator step as a sheet item. ⚠️ Writing nil is a dismissal (Cancel or

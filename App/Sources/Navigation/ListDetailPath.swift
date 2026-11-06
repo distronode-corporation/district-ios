@@ -76,7 +76,7 @@ extension SidebarItem {
         case .inbox, .calls, .contacts, .desk, .support:
             true
         case .overview, .account, .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .dialer,
-             .scheduling, .settings:
+             .live, .scheduling, .settings:
             false
         }
     }

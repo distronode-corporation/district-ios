@@ -13,6 +13,7 @@ struct LiveCallView: View {
     @State private var draft = ""
 
     private static let bottom = "watch.live.bottom"
+    private static let receipt = "watch.live.receipt"
 
     private var transcript: WatchLiveTranscript? {
         store.live.transcript?.call.id == call.id ? store.live.transcript : nil
@@ -36,6 +37,15 @@ struct LiveCallView: View {
             // ⚠️ THE NEWEST LINE STAYS IN VIEW: a wrist glances, it does not scroll to find it.
             .onChange(of: transcript?.lines.count) { proxy.scrollTo(Self.bottom, anchor: .bottom) }
             .onChange(of: transcript?.interim?.text) { proxy.scrollTo(Self.bottom, anchor: .bottom) }
+            // ⚠️ A RECEIPT THAT ARRIVES IS BROUGHT INTO VIEW: it answers the note just sent from this
+            // wrist, which is what the person is waiting to read (Q4).
+            .onChange(of: transcript?.receipt, initial: true) { _, receipt in
+                guard let receipt else { return }
+                proxy.scrollTo(Self.receipt, anchor: .bottom)
+                // ⛔ AND SAID ALOUD (xhigh review of PR #101, item 11).
+                let text = [receipt.headline, receipt.detail].compactMap(\.self).joined(separator: " ")
+                AccessibilityNotification.Announcement(text).post()
+            }
         }
         .navigationTitle(call.caller)
         .onAppear { store.live.open(call) }
@@ -112,12 +122,37 @@ struct LiveCallView: View {
                 }
                 .disabled(sending)
             WriteStatusRow(store: store, key: key)
+            if let receipt = transcript?.receipt {
+                ReceiptRow(receipt: receipt)
+                    .id(Self.receipt)
+            }
         }
         .accessibilityIdentifier("watch.live.steer")
     }
 
     private func send(_ text: String) {
         Task { await store.whisper(text, on: call) }
+    }
+}
+
+/// The receptionist's answer to the latest note: used, or not used and why (Sean, 2026-11-05,
+/// Q4). ⚠️ The words are the phone's, already in its language (``WatchWhisperReceipt``).
+struct ReceiptRow: View {
+    let receipt: WatchWhisperReceipt
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Label(receipt.headline, systemImage: receipt.applied ? "checkmark.circle" : "exclamationmark.circle")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(receipt.applied ? Color.accentColor : .orange)
+            if let detail = receipt.detail {
+                Text(detail)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("watch.live.receipt")
     }
 }
 

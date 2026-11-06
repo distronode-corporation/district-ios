@@ -175,7 +175,12 @@ struct ShellView: View {
             // this the deep link would work only when the app was already open,
             // which is never in the case it exists for. Kotlin's
             // `PushDeepLinkEffect` keys its effect on the same two values.
-            .onChange(of: workspaceSession.workspaceId) {
+            .onChange(of: workspaceSession.workspaceId) { previous, current in
+                // ⛔ A SWITCH ENDS A LIVE SUPERVISION HOWEVER IT WAS MADE, the picker included
+                // (max review of PR #101, item 5).
+                if CallTeardown.isWorkspaceSwitch(from: previous, to: current) {
+                    Task { await container.callStack.endSupervision() }
+                }
                 // ⛔ FIRST, AND THE ORDER IS LOAD BEARING. This drops the previous
                 // tenant's pushed screens; the two resolvers below may append a route
                 // for the NEW tenant, and running them the other way round would clear
@@ -265,6 +270,8 @@ struct ShellView: View {
             // tap from here.
             // "Call back" from the watch's call card. See ``continueCallBack(_:)``.
             .onContinueUserActivity(CallBackHandoff.activityType) { continueCallBack($0) }
+            // A listen-in tapped in Recents, caught by `RootView`. See ``resolvePendingListenIn()``.
+            .onChange(of: container.listenInRecents.pending, initial: true) { resolvePendingListenIn() }
             .sheet(item: $browserHandOff) { handOff in
                 SafariView(url: handOff.url)
             }

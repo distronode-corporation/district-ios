@@ -112,6 +112,9 @@ final class SessionModel {
         case let .reauthRequired(reason):
             phase = .signedOut(Self.text(for: reason))
             push.forget()
+            // ⛔ THE LISTEN-IN MAP TOO (xhigh review of PR #101, item 7): the next sign-in may be
+            // another account.
+            container.listenInRecents.clear()
         case let .retryLater(reason):
             phase = .unavailable(Self.text(for: reason))
         }
@@ -242,6 +245,7 @@ final class SessionModel {
         await container.signOut(beforeRevoke: { await push.unregisterForSignOut() })
         push.forget()
         selection.setSelectedWorkspaceId(nil)
+        container.listenInRecents.clear()
         phase = .signedOut(SessionCopy.signedOut)
         // ⛔ THE WATCH FORGETS THE ACCOUNT NOW, with no read: there is no session left to
         // read with. See ``WatchBridgeService/publishSignedOut()``.

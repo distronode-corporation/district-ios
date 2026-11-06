@@ -14,6 +14,7 @@
     ///     -WatchPreviewLanguage en|fr-CA        the phone's language in the made-up snapshot
     ///     -WatchPreviewStale                    a snapshot 25 minutes old
     ///     -WatchPreviewWrite unreachable|failed the thread's reply state
+    ///     -WatchPreviewReceipt used|notUsed|noAnswer the live call's whisper receipt
     ///
     /// ⚠️ THE WATCH CONNECTIVITY SESSION IS NOT STARTED WHILE ARMED, so a real snapshot cannot
     /// replace the made-up one mid-screenshot.
@@ -153,11 +154,49 @@
                 inProgress: false,
                 canCallBack: true
             )
+            var transcript = WatchLiveTranscript(call: call, lines: lines, phase: .live)
+            transcript.receipt = previewReceipt(french: french)
             store.live.preview(
                 calls: [call],
-                transcript: WatchLiveTranscript(call: call, lines: lines, phase: .live),
+                transcript: transcript,
                 cards: ["c1": .card(card, asking: false)]
             )
+        }
+
+        /// The receipt the phone would send, in its words (`SuperviseCopy.receipt`), made up.
+        private static func previewReceipt(french: Bool) -> WatchWhisperReceipt? {
+            switch argument("-WatchPreviewReceipt") {
+            case "used":
+                WatchWhisperReceipt(
+                    applied: true,
+                    headline: french
+                        ? "Votre réceptionniste a utilisé votre consigne."
+                        : "Your receptionist used your note.",
+                    detail: french
+                        ? "«\u{00A0}Nous pouvons passer demain à 9\u{00A0}h.\u{00A0}»"
+                        : "“We can come by tomorrow at 9 a.m.”"
+                )
+            case "notUsed":
+                WatchWhisperReceipt(
+                    applied: false,
+                    headline: french
+                        ? "Votre réceptionniste n'a pas pu utiliser votre consigne."
+                        : "Your receptionist could not use your note.",
+                    detail: french
+                        ? "L'appel est en cours de transfert."
+                        : "The call is being transferred."
+                )
+            case "noAnswer":
+                WatchWhisperReceipt(
+                    applied: false,
+                    headline: french
+                        ? "Aucune réponse de votre réceptionniste au sujet de cette consigne."
+                        : "No answer from your receptionist about this note.",
+                    detail: nil
+                )
+            default:
+                nil
+            }
         }
 
         /// The three families on one screen, roughly at their sizes on a face.

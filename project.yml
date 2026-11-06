@@ -316,6 +316,8 @@ targets:
         # carries a call id, never a number.
         NSUserActivityTypes:
           - com.distronode.district.call-back
+          # A listen-in tapped in the system's Recents (ListenInRecents).
+          - INStartCallIntent
         # ⛔ WITHOUT IT `Activity.request` THROWS AND NO CALL LIVE ACTIVITY EVER STARTS (3.2);
         # the extension that draws it is `DistrictAIWidgets`.
         NSSupportsLiveActivities: true
@@ -362,7 +364,7 @@ targets:
         # FOR THE APP STORE. iOS raises the microphone prompt on the first capture
         # and CRASHES the app outright if the string is absent, so a softphone
         # without this line dies on its first outgoing call.
-        NSMicrophoneUsageDescription: "District AI uses the microphone for calls you place and answer."
+        NSMicrophoneUsageDescription: "District AI uses the microphone for calls you place and answer, and for live calls you take over."
         # ⚠️ DECLARED THOUGH THE SOFTPHONE NEVER OPENS A CAMERA. The LiveKit binary
         # references the camera APIs, so App Store review asks for the string on
         # the whole app; meet rooms are the surface that actually use it.

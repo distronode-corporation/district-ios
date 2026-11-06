@@ -112,6 +112,7 @@ extension ShellView {
     /// `onChange` modifiers in `ShellView.swift`, and `private` is file-scoped.
     func resolvePendingLink() {
         resolvePendingCallBack()
+        resolvePendingListenIn()
         guard let destination = pendingLink else { return }
         let selected = workspaceSession.workspaceId
         guard !destination.requiresWorkspace || selected != nil else { return }
@@ -159,6 +160,33 @@ extension ShellView {
         }
     }
 
+    /// A listen-in tapped in Recents: that call's Live screen while it is live, its call log
+    /// entry once it has ended (Sean, 2026-11-05). ⚠️ A handle this device never listened under
+    /// (a keypad call, another app's row) does nothing, as before.
+    ///
+    /// ⚠️ WAITS FOR THE WORKSPACE LIST, like ``resolvePendingCallBack()``.
+    func resolvePendingListenIn() {
+        let recents = container.listenInRecents
+        guard recents.pending != nil, !workspaceSession.workspaces.isEmpty,
+              let handle = recents.takePending()
+        else { return }
+        guard let target = recents.entry(forHandle: handle),
+              let entry = workspaceSession.workspaces.first(where: { $0.id == target.workspaceId })
+        else { return }
+        let switching = workspaceSession.workspaceId == target.workspaceId ? nil : target.workspaceId
+        let role = WorkspaceRole.fromWire(entry.role)
+        let calls = container.calls
+        Task {
+            guard case let .success(row) = await calls.detail(workspaceId: target.workspaceId, callId: target.callId)
+            else { return }
+            apply(PushRouteAction(
+                tab: .overview,
+                selectWorkspaceId: switching,
+                route: ListenInRecents.route(for: row, workspaceId: target.workspaceId, role: role)
+            ))
+        }
+    }
+
     // ── Applying an action ───────────────────────────────────────────────────
 
     /// ⛔ THE ONE PLACE ANYTHING MOVES A TAB, WHICH IS WHY PUSHES AND LINKS SHARE AN
@@ -190,6 +218,7 @@ extension ShellView {
     private func apply(_ action: PushRouteAction) {
         if let workspaceId = action.selectWorkspaceId {
             Task { await container.callStack.endRoom(.workspaceChanged) }
+            Task { await container.callStack.endSupervision() }
             Task { await workspaceSession.select(workspaceId) }
             // ⛔ EVERY OTHER STACK IS CLEARED HERE AND NOT LEFT TO
             // ``ShellPaths/adopt(_:)``. The line below rebuilds ONE stack; every other

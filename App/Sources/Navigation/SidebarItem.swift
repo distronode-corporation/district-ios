@@ -28,6 +28,7 @@ enum SidebarItem: Hashable, CaseIterable {
     case workflows
     case desk
     case dialer
+    case live
     case scheduling
     case support
     case settings
@@ -46,7 +47,7 @@ enum SidebarItem: Hashable, CaseIterable {
         case .calls: .calls
         case .contacts: .contacts
         case .account: .account
-        case .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .desk, .dialer,
+        case .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .desk, .dialer, .live,
              .scheduling, .support, .settings:
             nil
         }
@@ -80,6 +81,7 @@ enum SidebarItem: Hashable, CaseIterable {
         case .workflows: .workflows(workspaceId: workspaceId, role: role)
         case .desk: .desk(workspaceId: workspaceId, role: role)
         case .dialer: .dialer(workspaceId: workspaceId, role: role)
+        case .live: .liveCalls(workspaceId: workspaceId, role: role)
         case .scheduling: .scheduling(workspaceId: workspaceId, role: role, section: .hub)
         case .support: .support(workspaceId: workspaceId, role: role)
         case .settings: .workspaceSettings(workspaceId: workspaceId, role: role, section: .hub)
@@ -105,11 +107,12 @@ enum SidebarItem: Hashable, CaseIterable {
         case .workflows: .workflows
         case .desk: .desk
         case .dialer: .dialer
+        case .liveCalls: .live
         case .support: .support
         case let .scheduling(_, _, section): section == .hub ? .scheduling : nil
         case let .workspaceSettings(_, _, section): section == .hub ? .settings : nil
         case .callDetail, .thread, .contactDetail, .activeRoom, .supportRequest, .deskTicket,
-             .devices:
+             .superviseCall, .devices:
             nil
         }
     }
@@ -133,8 +136,10 @@ enum SidebarItem: Hashable, CaseIterable {
     /// under workspace B's ticket.
     static func ownerRoot(of route: Route) -> Route? {
         switch route {
-        case .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .desk, .dialer, .support:
+        case .hq, .analytics, .marketplace, .billing, .rooms, .workflows, .desk, .dialer, .liveCalls, .support:
             route
+        case let .superviseCall(workspaceId, role, _):
+            .liveCalls(workspaceId: workspaceId, role: role)
         case let .activeRoom(workspaceId, role, _):
             .rooms(workspaceId: workspaceId, role: role)
         case let .deskTicket(workspaceId, role, _):

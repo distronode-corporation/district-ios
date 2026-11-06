@@ -49,6 +49,10 @@ enum RouteDestinations {
         case let .callDetail(workspaceId, callId):
             CallDetailView(container: container, workspaceId: workspaceId, callId: callId)
 
+        // ⛔ NEITHER JOINS ANYTHING ON ARRIVAL; see the ⛔ on `Route.superviseCall`.
+        case .liveCalls, .superviseCall:
+            liveDestination(for: route, container: container)
+
         // ⛔ THE SET IS CARRIED WHOLE AND NOT NARROWED HERE. `Route.thread` holds every
         // channel the thread can be answered on, best first, and the composer is what
         // offers the choice; taking `.first` at this seam is what the old two-optional
@@ -192,6 +196,22 @@ enum RouteDestinations {
             // build that goes to external testers (App Store Review Guideline 2.1). The
             // switch stays EXHAUSTIVE with no `default`, so a new `Route`
             // case fails to compile here rather than quietly landing on a stub.
+        }
+    }
+
+    /// Live calls and one call's supervision, split out of
+    /// ``view(for:container:session:accountSession:)`` for its line budget. ⚠️ The `default` is
+    /// unreachable by construction, as on ``helpDestination(for:container:)``.
+    @MainActor
+    @ViewBuilder
+    private static func liveDestination(for route: Route, container: AppContainer) -> some View {
+        switch route {
+        case let .liveCalls(workspaceId, role):
+            LiveCallsView(container: container, workspaceId: workspaceId, role: role)
+        case let .superviseCall(workspaceId, role, callId):
+            SuperviseView(container: container, workspaceId: workspaceId, role: role, callId: callId)
+        default:
+            EmptyView()
         }
     }
 

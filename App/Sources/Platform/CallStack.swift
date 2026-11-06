@@ -41,6 +41,39 @@ import Foundation
 /// ⚠️ `@MainActor` BECAUSE ``CallKitBridge`` IS. Everything underneath is `Sendable`,
 /// so reaching the nonisolated engine from here is an ordinary async call rather than
 /// an actor hop.
+/// A live supervision the call stack can end without naming the feature type.
+@MainActor
+protocol SupervisionEnding: AnyObject {
+    /// Leave the call, as Stop listening or Hand back does.
+    func endSupervision() async
+}
+
+/// The outbound call the call stack can end without naming the dialler.
+@MainActor
+protocol SoftphoneEnding: AnyObject {
+    func endSoftphone() async
+}
+
+/// When the session's end takes the device's calls down with it.
+enum CallTeardown {
+    /// ⛔ THE KEYPAD'S CALL ENDS ON SIGN-OUT ONLY (Sean, 2026-11-06: "End it on sign-out only"):
+    /// signing out, a session that ended, a session that must sign in again (all `signedOut`).
+    /// NOT on `unavailable` (the session is intact) and NOT on a workspace switch.
+    static func endsSoftphone(_ phase: AuthPhase) -> Bool {
+        if case .signedOut = phase {
+            return true
+        }
+        return false
+    }
+
+    /// ⛔ A SWITCH IS ONE WORKSPACE TO ANOTHER (max review of PR #101, item 5), however it was
+    /// made (a link, a push or the picker). The first workspace resolving is not a switch.
+    static func isWorkspaceSwitch(from previous: String?, to current: String?) -> Bool {
+        guard let previous, let current else { return false }
+        return previous != current
+    }
+}
+
 @MainActor
 final class CallStack {
     /// What the OS is told, and what it asks for back. ⛔ Process-lifetime.
@@ -92,6 +125,24 @@ final class CallStack {
     /// ⚠️ `AnyObject` RATHER THAN THE MODEL'S TYPE, for the reason ``room`` is a protocol:
     /// this tier names no feature type. The dialler casts it back.
     weak var softphone: AnyObject?
+
+    /// The live supervision that owns the call, so a Live screen rebuilt around it can find
+    /// it again, or nil. ⛔ Weak, for the reason ``softphone`` is: the claim keeps it alive.
+    weak var supervisor: AnyObject?
+
+    /// End a live supervision, if there is one.
+    ///
+    /// ⛔ ON SIGN-OUT, A SESSION THAT ENDED AND A WORKSPACE SWITCH (xhigh review of PR #101,
+    /// item 4), beside ``endRoom(_:)``: the screen that drives it is gone, and a takeover is a live
+    /// microphone on a customer's call that nobody could otherwise reach in the app.
+    func endSupervision() async {
+        await (supervisor as? SupervisionEnding)?.endSupervision()
+    }
+
+    /// End the keypad's call, if there is one. See ``CallTeardown/endsSoftphone(_:)``.
+    func endSoftphone() async {
+        await (softphone as? SoftphoneEnding)?.endSoftphone()
+    }
 
     /// Whether a telephone call is live on this device, in either direction.
     ///
@@ -156,9 +207,26 @@ final class CallStack {
     /// refuses a dial while a room is live, so only an inbound answer reaches here with
     /// a room to yield. See the ⛔ on ``RoomAudioYield/telephoneCall``.
     func beginCall() async -> AsyncStream<CallEngineEvent> {
+        await beginCall(publishingMicrophone: true)
+    }
+
+    /// ``beginCall()``, for a join that may publish nothing at all.
+    ///
+    /// ⛔ `false` ONLY FOR A LISTEN-IN, whose seat cannot publish; see
+    /// ``LiveKitCallEngine``'s `publishesMicrophone`. Every other rule of ``beginCall()``
+    /// holds: the room yields first, and a previous engine is torn down, which is how a
+    /// takeover replaces the listen engine with the coach's.
+    func beginCall(
+        publishingMicrophone: Bool,
+        announcingPresentParticipants: Bool = false
+    ) async -> AsyncStream<CallEngineEvent> {
         await endRoom(.telephoneCall)
         endCall()
-        let engine = LiveKitCallEngine(audio: audio)
+        let engine = LiveKitCallEngine(
+            audio: audio,
+            publishesMicrophone: publishingMicrophone,
+            announcesPresentParticipants: announcingPresentParticipants
+        )
         self.engine = engine
         return engine.events
     }
