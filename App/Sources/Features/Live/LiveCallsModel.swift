@@ -27,13 +27,13 @@ final class LiveCallsModel {
     }
 
     /// One page of the log, newest first.
-    static let pageLimit = 50
+    nonisolated static let pageLimit = 50
     /// The most pages read for one list.
-    static let maxPages = 10
+    nonisolated static let maxPages = 10
     /// How old a call may be and still be live. ⚠️ A page whose oldest row is older than this
     /// cannot hold a live call further down, so reading stops there (xhigh review of PR #101,
     /// item 10: the first page alone missed a live call behind 50 newer ones).
-    static let liveWindowSeconds: TimeInterval = 4 * 60 * 60
+    nonisolated static let liveWindowSeconds: TimeInterval = 4 * 60 * 60
     /// How long a burst of events is gathered into one re-read.
     static let rereadDelay: Duration = .milliseconds(800)
 

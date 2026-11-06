@@ -46,7 +46,7 @@ final class SuperviseReviewTests: XCTestCase {
         let model = try makeModel()
         await listen(model)
         media.clearLog()
-        server.answerDetail(.success(SuperviseFixtures.call(status: "completed")))
+        try server.answerDetail(.success(SuperviseFixtures.call(status: "completed")))
 
         model.events.onOpen?()
         await waitUntil { model.state.phase == .over }
@@ -58,7 +58,7 @@ final class SuperviseReviewTests: XCTestCase {
     func testAReconnectOnALiveCallChangesNothing() async throws {
         let model = try makeModel()
         await listen(model)
-        server.answerDetail(.success(SuperviseFixtures.call(status: "in-progress")))
+        try server.answerDetail(.success(SuperviseFixtures.call(status: "in-progress")))
 
         await model.refresh()
 
