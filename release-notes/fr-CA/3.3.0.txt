@@ -1,0 +1,10 @@
+Suivez vos appels en direct et intervenez quand il le faut.
+
+- Un nouvel écran, Appels en cours, liste les appels que votre réceptionniste prend en ce moment. Écoutez l'appel sans que l'appelant vous entende, soufflez une consigne privée à votre réceptionniste et voyez si elle l'a utilisée, ou prenez l'appel vous-même, puis redonnez-le-lui quand vous avez terminé.
+- Sur votre Apple Watch, une consigne envoyée pendant un appel en direct indique maintenant si votre réceptionniste l'a utilisée.
+- Répondez aux conversations WhatsApp, Messenger et Instagram sur le canal où le client vous a écrit : un client WhatsApp ne reçoit plus votre réponse par texto.
+- Les conversations Messenger et Instagram s'affichent maintenant dans votre boîte de réception. Quand la fenêtre de réponse est fermée, l'application vous le dit et garde votre texte jusqu'à ce que le client vous écrive de nouveau. Une réponse d'un agent humain affiche sa fenêtre de 7 jours.
+- Quand la fenêtre d'une conversation WhatsApp est fermée, envoyez plutôt l'un de vos modèles de message approuvés.
+- Assignez une conversation à un collègue, voyez à qui chaque conversation est assignée et affichez seulement celles qui vous sont assignées.
+- Le clavier affiche un bouton de pays devant le numéro. Composez le numéro comme on le fait localement : la ligne en dessous indique le pays de destination et le numéro international complet avant l'appel. Un numéro qui n'a pas le bon nombre de chiffres pour son pays est signalé quand vous arrêtez de taper.
+- Un numéro qui n'appartient à aucun pays en particulier, comme un numéro sans frais +1 800, l'indique maintenant au lieu de nommer un pays.
