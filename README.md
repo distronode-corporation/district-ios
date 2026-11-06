@@ -14,4 +14,6 @@ States: 01 empty list, 02 list, 03 idle, 04 connecting, 05 listening, 06 receipt
 07 take-over confirmation, 08 taking over, 09 taken over, 10 taken over and muted,
 11 handed back with a receipt not used, 12 call ended, 13 list after the call ended,
 14 a colleague's own call (listen only), 15 listening to it, 16 listen refused (call ended),
-17 viewer, 18 viewer listening.
+17 viewer, 18 viewer listening, 19 a call that ended before its screen opened (xhigh review).
+
+Watch `watch-{en,fr-CA}-receipt-noAnswer.png`: no answer to the note within the phone's wait.
