@@ -140,7 +140,17 @@ extension ThreadModel {
         whatsApp.sendingTemplate = false
         switch outcome {
         case .success:
+            // ⛔ THE TEMPLATE DID NOT GO OUT THROUGH THE COMPOSER, SO THE COMPOSER'S IMAGES STAY
+            // (Seer, #99 and #95). The re-read rebuilds the thread's content, and without this
+            // the held draft images would be gone and the next autosave would erase them.
+            let composer = current.map { (attachments: $0.attachments, held: $0.heldAttachments, note: $0.channelNote) }
             await load()
+            if let composer, var content = current {
+                content.attachments = composer.attachments
+                content.heldAttachments = composer.held
+                content.channelNote = composer.note
+                setContent(content)
+            }
             await refreshWhatsAppWindow()
             return true
         case let .failure(error):

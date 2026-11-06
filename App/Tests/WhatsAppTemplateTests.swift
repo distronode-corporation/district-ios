@@ -120,6 +120,34 @@ final class WhatsAppTemplateTests: XCTestCase {
         XCTAssertEqual(transport.requests(to: "/whatsapp/window").count, 2, "the window is re-read after")
     }
 
+    /// ⛔ A TEMPLATE SEND KEEPS THE DRAFT'S HELD IMAGES (Seer, #99 and #95): the thread is re-read
+    /// after the send, but the composer was not what went out, so its images survive the
+    /// re-read and the next autosave still stores them.
+    func testATemplateSendKeepsTheDraftsHeldImages() async {
+        let image = "https://www.distronode.test/api/media/media_parity_roof"
+        let stored = #"{"success":true,"draft":{"threadKey":"addr:14165550177","body":"On my way.","#
+            + #""subject":null,"mediaUrls":[""# + image + #""],"updatedAt":"2026-11-05T14:30:00.000Z"}}"#
+        let transport = ParityTransport()
+        transport.on(.get, "/messages/drafts", 200, stored)
+        transport.on(.put, "/messages/drafts", 200, stored)
+        transport.on(.post, "/messages/send", 200, ParityFixtures.sent)
+        let model = await closedThread(transport)
+        await model.restoreDraft()
+        XCTAssertEqual(model.current?.heldAttachments, [image])
+        await model.loadWhatsAppTemplates()
+        guard case let .ready(templates) = model.whatsApp.templates, let reminder = templates.first else {
+            return XCTFail("no template")
+        }
+
+        let sent = await model.sendWhatsAppTemplate(reminder, variables: ["Ada", "Friday"])
+
+        XCTAssertTrue(sent)
+        XCTAssertEqual(model.current?.heldAttachments, [image], "the re-read keeps the held image")
+        await model.persistDraft("On my way.")
+        let saved = transport.requests(to: "/messages/drafts").last { $0.method == .put }
+        XCTAssertEqual(saved?.json["mediaUrls"] as? [String], [image])
+    }
+
     /// ⛔ A BLANK VARIABLE SENDS NOTHING.
     func testABlankVariableSendsNothing() async {
         let transport = ParityTransport()
