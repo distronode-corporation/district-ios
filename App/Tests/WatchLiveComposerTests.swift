@@ -31,6 +31,32 @@ final class WatchLiveComposerTests: XCTestCase {
         XCTAssertEqual(unknown.first?.canWhisper, false, "a role that could not be read steers nothing")
     }
 
+    /// ⛔ Q2: NO STEERING ON A COLLEAGUE'S OWN SOFTPHONE CALL, whatever the role; an absent flag
+    /// (a server before live supervise) reads as the receptionist being on the call.
+    func testAColleaguesOwnCallIsListedWithoutSteering() throws {
+        let rows = try [
+            LiveFixtures.call(id: "cmh1own", status: "in-progress", receptionistOnCall: false),
+            LiveFixtures.call(id: "cmh1ai", status: "in-progress", receptionistOnCall: true),
+            LiveFixtures.call(id: "cmh1old", status: "in-progress"),
+        ]
+
+        let calls = WatchLiveComposer.liveCalls(rows, workspaceId: "ws_1", role: .agency)
+
+        XCTAssertEqual(calls.map(\.canWhisper), [false, true, true])
+    }
+
+    /// The receipt in the phone's own words (``SuperviseCopy/receipt(_:)``).
+    func testAReceiptIsComposedInThePhonesWords() {
+        let used = WatchLiveComposer.receipt(WhisperReceipt(applied: true, firstWords: "", reason: nil))
+        let held = WatchLiveComposer.receipt(WhisperReceipt(applied: false, firstWords: "", reason: .takenOver))
+        XCTAssertEqual(used, WatchWhisperReceipt(applied: true, headline: SuperviseCopy.whisperApplied, detail: nil))
+        XCTAssertEqual(held, WatchWhisperReceipt(
+            applied: false,
+            headline: SuperviseCopy.whisperNotApplied,
+            detail: SuperviseCopy.whisperNotUsedTakenOver
+        ))
+    }
+
     // MARK: - The card
 
     func testACardCarriesTheSummaryAndTheActionItems() throws {

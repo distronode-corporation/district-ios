@@ -5479,6 +5479,135 @@ extension SignInTermsCopy {
     internal static var termsName: String { AppL10n.copyLocale == .frCA ? "conditions d'utilisation" : "Terms of Service" }
 }
 
+extension SuperviseCopy {
+    /// `supervise.busy_in_room`
+    internal static var busyInRoom: String { AppL10n.copyLocale == .frCA ? "Vous êtes dans une salle sur cet appareil. Quittez-la avant d'écouter un appel." : "You are in a room on this device. Leave it before listening in." }
+
+    /// `supervise.busy_with_call`
+    internal static var busyWithCall: String { AppL10n.copyLocale == .frCA ? "Un appel est déjà en cours sur cet appareil. Terminez-le avant d'écouter un appel." : "There is already a call on this device. End it before listening in." }
+
+    /// `supervise.call_ended`
+    internal static var callEnded: String { AppL10n.copyLocale == .frCA ? "L'appel est terminé." : "The call has ended." }
+
+    /// `supervise.disconnect`
+    internal static var disconnect: String { AppL10n.copyLocale == .frCA ? "Arrêter d'écouter" : "Stop listening" }
+
+    /// `supervise.empty_body`
+    internal static var emptyBody: String { AppL10n.copyLocale == .frCA ? "Quand quelqu'un est en ligne avec votre réceptionniste, l'appel s'affiche ici." : "When someone is on the phone with your receptionist, the call shows up here." }
+
+    /// `supervise.empty_heading`
+    internal static var emptyHeading: String { AppL10n.copyLocale == .frCA ? "Aucun appel en ce moment" : "No calls right now" }
+
+    /// `supervise.feed_reconnecting`
+    internal static var feedReconnecting: String { AppL10n.copyLocale == .frCA ? "Connexion aux appels en cours perdue. Reconnexion…" : "Lost the connection to live calls. Reconnecting…" }
+
+    /// `supervise.hand_back`
+    internal static var handBack: String { AppL10n.copyLocale == .frCA ? "Redonner l'appel à votre réceptionniste" : "Hand back to your receptionist" }
+
+    /// `supervise.joining`
+    internal static var joining: String { AppL10n.copyLocale == .frCA ? "Connexion à l'appel en cours." : "Connecting you to the call." }
+
+    /// `supervise.listen_in_body`
+    internal static var listenInBody: String { AppL10n.copyLocale == .frCA ? "Entendez l'appel en direct. L'appelant ne vous entend pas." : "Hear the call as it happens. The caller does not hear you." }
+
+    /// `supervise.listen_in_heading`
+    internal static var listenInHeading: String { AppL10n.copyLocale == .frCA ? "Écouter l'appel" : "Listen in" }
+
+    /// `supervise.live_call`
+    internal static var liveCall: String { AppL10n.copyLocale == .frCA ? "Appel en cours" : "Live call" }
+
+    /// `supervise.monitor_audio`
+    internal static var monitorAudio: String { AppL10n.copyLocale == .frCA ? "Écouter" : "Listen" }
+
+    /// `supervise.monitor_connect_failed`
+    internal static var monitorConnectFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de vous connecter à l'appel. Réessayez." : "Could not connect you to the call. Try again." }
+
+    /// `supervise.monitoring_connected`
+    internal static var monitoringConnected: String { AppL10n.copyLocale == .frCA ? "Vous écoutez l'appel" : "You are listening" }
+
+    /// `supervise.not_started`
+    internal static var notStarted: String { AppL10n.copyLocale == .frCA ? "iOS n'a pas lancé l'écoute de l'appel. Un autre appel est peut-être déjà en cours." : "iOS did not start the listen-in. Another call may already be in progress." }
+
+    /// `supervise.page_subtitle`
+    internal static var pageSubtitle: String { AppL10n.copyLocale == .frCA ? "Les appels en ce moment. Écoutez, soufflez une consigne à votre réceptionniste ou prenez l'appel vous-même." : "Calls happening right now. Listen in, send your receptionist a private note, or take the call yourself." }
+
+    /// `supervise.page_title`
+    internal static var pageTitle: String { AppL10n.copyLocale == .frCA ? "Appels en cours" : "Live calls" }
+
+    /// `supervise.receptionist_not_on_call`
+    internal static var receptionistNotOnCall: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste ne participe pas à cet appel" : "Receptionist not on this call" }
+
+    /// `supervise.take_over`
+    internal static var takeOver: String { AppL10n.copyLocale == .frCA ? "Prendre l'appel" : "Take over the call" }
+
+    /// `supervise.take_over_cancel`
+    internal static var takeOverCancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
+
+    /// `supervise.take_over_confirm`
+    internal static var takeOverConfirm: String { AppL10n.copyLocale == .frCA ? "Prendre l'appel" : "Take over" }
+
+    /// `supervise.take_over_confirm_body`
+    internal static var takeOverConfirmBody: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste annonce à l'appelant qu'un superviseur prend le relais, puis se met en retrait. Votre micro reste ouvert dans l'appel jusqu'à ce que vous lui redonniez l'appel. Rien n'est enregistré." : "Your receptionist tells the caller a supervisor is taking over, then steps back. Your microphone is live on the call until you hand it back. Nothing is recorded." }
+
+    /// `supervise.take_over_confirm_heading`
+    internal static var takeOverConfirmHeading: String { AppL10n.copyLocale == .frCA ? "Prendre cet appel?" : "Take over this call?" }
+
+    /// `supervise.take_over_join_failed`
+    internal static var takeOverJoinFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de rejoindre l'appel avec votre micro. Vérifiez qu'un micro est branché et que District AI peut l'utiliser, puis réessayez." : "Could not join the call with your microphone. Check that a microphone is connected and that District AI may use it, then try again." }
+
+    /// `supervise.taken_over_body`
+    internal static var takenOverBody: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste s'est mise en retrait et attend en ligne. Redonnez-lui l'appel et elle reprend la conversation." : "Your receptionist has stepped back and is waiting on the line. Hand the call back and it carries on." }
+
+    /// `supervise.taken_over_heading`
+    internal static var takenOverHeading: String { AppL10n.copyLocale == .frCA ? "Vous êtes en ligne avec l'appelant" : "You are on the call" }
+
+    /// `supervise.takeover_failed`
+    internal static var takeoverFailed: String { AppL10n.copyLocale == .frCA ? "Impossible de prendre l'appel. Réessayez." : "The call could not be taken over. Try again." }
+
+    /// `supervise.taking_over`
+    internal static var takingOver: String { AppL10n.copyLocale == .frCA ? "Prise de l'appel en cours." : "Taking over the call." }
+
+    /// `supervise.whisper_applied`
+    internal static var whisperApplied: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste a utilisé votre consigne." : "Your receptionist used your note." }
+
+    /// `supervise.whisper_disabled_placeholder`
+    internal static var whisperDisabledPlaceholder: String { AppL10n.copyLocale == .frCA ? "Les observateurs ne peuvent pas souffler de consigne" : "Viewers cannot send notes" }
+
+    /// `supervise.whisper_failed`
+    internal static var whisperFailed: String { AppL10n.copyLocale == .frCA ? "La consigne soufflée n'a pas été transmise. Réessayez." : "The note was not delivered. Try again." }
+
+    /// `supervise.whisper_first_words`
+    internal static func whisperFirstWords(_ words: String) -> String {
+        AppL10n.copyLocale == .frCA ? "«\u{00A0}\(words)\u{00A0}»" : "“\(words)”"
+    }
+
+    /// `supervise.whisper_heading`
+    internal static var whisperHeading: String { AppL10n.copyLocale == .frCA ? "Consigne à votre réceptionniste" : "Note to your receptionist" }
+
+    /// `supervise.whisper_not_applied`
+    internal static var whisperNotApplied: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste n'a pas pu utiliser votre consigne." : "Your receptionist could not use your note." }
+
+    /// `supervise.whisper_not_used_taken_over`
+    internal static var whisperNotUsedTakenOver: String { AppL10n.copyLocale == .frCA ? "Consigne non utilisée\u{00A0}: un membre de l'équipe a pris l'appel." : "Not used: a team member is holding the call." }
+
+    /// `supervise.whisper_not_used_transfer`
+    internal static var whisperNotUsedTransfer: String { AppL10n.copyLocale == .frCA ? "Consigne non utilisée\u{00A0}: l'appel est en cours de transfert." : "Not used: the call is being transferred." }
+
+    /// `supervise.whisper_placeholder`
+    internal static var whisperPlaceholder: String { AppL10n.copyLocale == .frCA ? "Par exemple\u{00A0}: offrez un rabais de 10\u{00A0}% pour réserver aujourd'hui." : "For example: Offer a 10% discount to book today." }
+
+    /// `supervise.whisper_send`
+    internal static var whisperSend: String { AppL10n.copyLocale == .frCA ? "Souffler la consigne" : "Send note" }
+
+    /// `supervise.whisper_taken_over_placeholder`
+    internal static var whisperTakenOverPlaceholder: String { AppL10n.copyLocale == .frCA ? "Redonnez l'appel à votre réceptionniste pour souffler une consigne" : "Hand the call back to your receptionist to send a note" }
+
+    /// `supervise.whisper_too_long`
+    internal static func whisperTooLong(_ max: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "La consigne doit compter au plus \(max) caractères." : "Keep the note to \(max) characters or fewer."
+    }
+}
+
 extension SupportCopy {
     /// `support.close`
     internal static var close: String { AppL10n.copyLocale == .frCA ? "Marquer comme réglée" : "Mark resolved" }

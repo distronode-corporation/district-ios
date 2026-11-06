@@ -93,6 +93,10 @@ final class CallStack {
     /// this tier names no feature type. The dialler casts it back.
     weak var softphone: AnyObject?
 
+    /// The live supervision that owns the call, so a Live screen rebuilt around it can find
+    /// it again, or nil. ⛔ Weak, for the reason ``softphone`` is: the claim keeps it alive.
+    weak var supervisor: AnyObject?
+
     /// Whether a telephone call is live on this device, in either direction.
     ///
     /// ⛔ THE CLAIM ON ``onSystemRequest``, NOT ``engine``, AND THE DIFFERENCE IS THE
@@ -156,9 +160,19 @@ final class CallStack {
     /// refuses a dial while a room is live, so only an inbound answer reaches here with
     /// a room to yield. See the ⛔ on ``RoomAudioYield/telephoneCall``.
     func beginCall() async -> AsyncStream<CallEngineEvent> {
+        await beginCall(publishingMicrophone: true)
+    }
+
+    /// ``beginCall()``, for a join that may publish nothing at all.
+    ///
+    /// ⛔ `false` ONLY FOR A LISTEN-IN, whose seat cannot publish; see
+    /// ``LiveKitCallEngine``'s `publishesMicrophone`. Every other rule of ``beginCall()``
+    /// holds: the room yields first, and a previous engine is torn down, which is how a
+    /// takeover replaces the listen engine with the coach's.
+    func beginCall(publishingMicrophone: Bool) async -> AsyncStream<CallEngineEvent> {
         await endRoom(.telephoneCall)
         endCall()
-        let engine = LiveKitCallEngine(audio: audio)
+        let engine = LiveKitCallEngine(audio: audio, publishesMicrophone: publishingMicrophone)
         self.engine = engine
         return engine.events
     }

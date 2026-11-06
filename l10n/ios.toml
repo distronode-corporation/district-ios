@@ -14580,6 +14580,378 @@ tier = "T0"
 state = "reviewed"
 id = { swift = "SignInTermsCopy.termsName" }
 
+[supervise.busy_in_room]
+en = "You are in a room on this device. Leave it before listening in."
+fr = "Vous êtes dans une salle sur cet appareil. Quittez-la avant d'écouter un appel."
+ctx = "error"
+screen = "live"
+state = "draft"
+id = { swift = "SuperviseCopy.busyInRoom" }
+note = "App-only. Listen was pressed while a meeting room holds the device's audio."
+
+[supervise.busy_with_call]
+en = "There is already a call on this device. End it before listening in."
+fr = "Un appel est déjà en cours sur cet appareil. Terminez-le avant d'écouter un appel."
+ctx = "error"
+screen = "live"
+state = "draft"
+id = { swift = "SuperviseCopy.busyWithCall" }
+note = "App-only. Listen was pressed while a phone call (placed, answered or supervised) holds the device."
+
+[supervise.call_ended]
+en = "The call has ended."
+fr = "L'appel est terminé."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.callEnded" }
+note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. A status line; the server refusal api_error.call_ended keeps its own sentence."
+
+[supervise.disconnect]
+en = "Stop listening"
+fr = "Arrêter d'écouter"
+ctx = "button"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.disconnect" }
+note = "Word for word from the website's Live page (liveI18n.ts disconnect)."
+
+[supervise.empty_body]
+en = "When someone is on the phone with your receptionist, the call shows up here."
+fr = "Quand quelqu'un est en ligne avec votre réceptionniste, l'appel s'affiche ici."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.emptyBody" }
+note = "Word for word from the website's Live page (liveI18n.ts emptyBody)."
+
+[supervise.empty_heading]
+en = "No calls right now"
+fr = "Aucun appel en ce moment"
+ctx = "title"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.emptyHeading" }
+note = "Word for word from the website's Live page (liveI18n.ts emptyHeading)."
+
+[supervise.feed_reconnecting]
+en = "Lost the connection to live calls. Reconnecting…"
+fr = "Connexion aux appels en cours perdue. Reconnexion…"
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.feedReconnecting" }
+note = "Word for word from the website's Live page (liveI18n.ts feedReconnecting)."
+
+[supervise.hand_back]
+en = "Hand back to your receptionist"
+fr = "Redonner l'appel à votre réceptionniste"
+ctx = "button"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.handBack" }
+note = "Word for word from the website's Live page (liveI18n.ts handBack)."
+
+[supervise.joining]
+en = "Connecting you to the call."
+fr = "Connexion à l'appel en cours."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.joining" }
+note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word."
+
+[supervise.listen_in_body]
+en = "Hear the call as it happens. The caller does not hear you."
+fr = "Entendez l'appel en direct. L'appelant ne vous entend pas."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.listenInBody" }
+note = "Word for word from the website's Live page (liveI18n.ts listenInBody)."
+
+[supervise.listen_in_heading]
+en = "Listen in"
+fr = "Écouter l'appel"
+ctx = "title"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.listenInHeading" }
+note = "Word for word from the website's Live page (liveI18n.ts listenInHeading)."
+
+[supervise.live_call]
+en = "Live call"
+fr = "Appel en cours"
+ctx = "label"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.liveCall" }
+note = "Word for word from the website's Live page (liveI18n.ts liveCall)."
+
+[supervise.monitor_audio]
+en = "Listen"
+fr = "Écouter"
+ctx = "button"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.monitorAudio" }
+note = "Word for word from the website's Live page (liveI18n.ts monitorAudio)."
+
+[supervise.monitor_connect_failed]
+en = "Could not connect you to the call. Try again."
+fr = "Impossible de vous connecter à l'appel. Réessayez."
+ctx = "error"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.monitorConnectFailed" }
+note = "Word for word from the website's Live page (liveI18n.ts monitorConnectFailed). Said when the listen seat was refused without a code this build knows, or the room could not be joined."
+
+[supervise.monitoring_connected]
+en = "You are listening"
+fr = "Vous écoutez l'appel"
+ctx = "title"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.monitoringConnected" }
+note = "Word for word from the website's Live page (liveI18n.ts monitoringConnected)."
+
+[supervise.not_started]
+en = "iOS did not start the listen-in. Another call may already be in progress."
+fr = "iOS n'a pas lancé l'écoute de l'appel. Un autre appel est peut-être déjà en cours."
+ctx = "error"
+screen = "live"
+state = "draft"
+id = { swift = "SuperviseCopy.notStarted" }
+note = "App-only. CallKit refused, or never answered, the system call a listen-in is."
+
+[supervise.page_subtitle]
+en = "Calls happening right now. Listen in, send your receptionist a private note, or take the call yourself."
+fr = "Les appels en ce moment. Écoutez, soufflez une consigne à votre réceptionniste ou prenez l'appel vous-même."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.pageSubtitle" }
+note = "Word for word from the website's Live page (liveI18n.ts pageSubtitle)."
+
+[supervise.page_title]
+en = "Live calls"
+fr = "Appels en cours"
+ctx = "title"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.pageTitle" }
+note = "Word for word from the website's Live page (liveI18n.ts pageTitle). Also the sidebar and Overview label."
+
+[supervise.receptionist_not_on_call]
+en = "Receptionist not on this call"
+fr = "Votre réceptionniste ne participe pas à cet appel"
+ctx = "label"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.receptionistNotOnCall" }
+note = "Sean-approved for the apps, 2026-11-05, word for word. Shown on a team member's own softphone call (receptionistOnCall false), where Whisper and Take over are hidden and Listen stays."
+
+[supervise.take_over]
+en = "Take over the call"
+fr = "Prendre l'appel"
+ctx = "button"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takeOver" }
+note = "Word for word from the website's Live page (liveI18n.ts takeOver)."
+
+[supervise.take_over_cancel]
+en = "Cancel"
+fr = "Annuler"
+ctx = "button"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takeOverCancel" }
+note = "Word for word from the website's Live page (liveI18n.ts takeOverCancel)."
+
+[supervise.take_over_confirm]
+en = "Take over"
+fr = "Prendre l'appel"
+ctx = "button"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takeOverConfirm" }
+note = "Word for word from the website's Live page (liveI18n.ts takeOverConfirm)."
+
+[supervise.take_over_confirm_body]
+en = "Your receptionist tells the caller a supervisor is taking over, then steps back. Your microphone is live on the call until you hand it back. Nothing is recorded."
+fr = "Votre réceptionniste annonce à l'appelant qu'un superviseur prend le relais, puis se met en retrait. Votre micro reste ouvert dans l'appel jusqu'à ce que vous lui redonniez l'appel. Rien n'est enregistré."
+ctx = "body"
+screen = "live"
+tier = "T0"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takeOverConfirmBody" }
+note = "Word for word from the website's Live page (liveI18n.ts takeOverConfirmBody)."
+
+[supervise.take_over_confirm_heading]
+en = "Take over this call?"
+fr = "Prendre cet appel?"
+ctx = "title"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takeOverConfirmHeading" }
+note = "Word for word from the website's Live page (liveI18n.ts takeOverConfirmHeading)."
+
+[supervise.take_over_join_failed]
+en = "Could not join the call with your microphone. Check that a microphone is connected and that District AI may use it, then try again."
+fr = "Impossible de rejoindre l'appel avec votre micro. Vérifiez qu'un micro est branché et que District AI peut l'utiliser, puis réessayez."
+ctx = "error"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takeOverJoinFailed" }
+note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. Also said when iOS refuses the microphone before the takeover is asked for."
+
+[supervise.taken_over_body]
+en = "Your receptionist has stepped back and is waiting on the line. Hand the call back and it carries on."
+fr = "Votre réceptionniste s'est mise en retrait et attend en ligne. Redonnez-lui l'appel et elle reprend la conversation."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takenOverBody" }
+note = "Word for word from the website's Live page (liveI18n.ts takenOverBody)."
+
+[supervise.taken_over_heading]
+en = "You are on the call"
+fr = "Vous êtes en ligne avec l'appelant"
+ctx = "title"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takenOverHeading" }
+note = "Word for word from the website's Live page (liveI18n.ts takenOverHeading)."
+
+[supervise.takeover_failed]
+en = "The call could not be taken over. Try again."
+fr = "Impossible de prendre l'appel. Réessayez."
+ctx = "error"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takeoverFailed" }
+note = "Word for word from the website's Live page (liveI18n.ts takeoverFailed)."
+
+[supervise.taking_over]
+en = "Taking over the call."
+fr = "Prise de l'appel en cours."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.takingOver" }
+note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word."
+
+[supervise.whisper_applied]
+en = "Your receptionist used your note."
+fr = "Votre réceptionniste a utilisé votre consigne."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperApplied" }
+note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. The receipt's first line when the note was acted on."
+
+[supervise.whisper_disabled_placeholder]
+en = "Viewers cannot send notes"
+fr = "Les observateurs ne peuvent pas souffler de consigne"
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperDisabledPlaceholder" }
+note = "Word for word from the website's Live page (liveI18n.ts whisperDisabledPlaceholder)."
+
+[supervise.whisper_failed]
+en = "The note was not delivered. Try again."
+fr = "La consigne soufflée n'a pas été transmise. Réessayez."
+ctx = "error"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperFailed" }
+note = "Word for word from the website's Live page (liveI18n.ts whisperFailed)."
+
+[supervise.whisper_first_words]
+en = "“{words}”"
+fr = "«\u00A0{words}\u00A0»"
+ctx = "format"
+screen = "live"
+args = { words = "str" }
+state = "draft"
+id = { swift = "SuperviseCopy.whisperFirstWords(_:)" }
+note = "App-only. The receipt's second line: the first words the receptionist said after acting on the note, quoted. {words} is customer speech, never translated."
+
+[supervise.whisper_heading]
+en = "Note to your receptionist"
+fr = "Consigne à votre réceptionniste"
+ctx = "title"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperHeading" }
+note = "Word for word from the website's Live page (liveI18n.ts whisperHeading)."
+
+[supervise.whisper_not_applied]
+en = "Your receptionist could not use your note."
+fr = "Votre réceptionniste n'a pas pu utiliser votre consigne."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperNotApplied" }
+note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. The receipt's first line when the note was held back; the reason follows."
+
+[supervise.whisper_not_used_taken_over]
+en = "Not used: a team member is holding the call."
+fr = "Consigne non utilisée\u00A0: un membre de l'équipe a pris l'appel."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperNotUsedTakenOver" }
+note = "Word for word from the website's Live page (liveI18n.ts whisperReceipt, taken_over)."
+
+[supervise.whisper_not_used_transfer]
+en = "Not used: the call is being transferred."
+fr = "Consigne non utilisée\u00A0: l'appel est en cours de transfert."
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperNotUsedTransfer" }
+note = "Word for word from the website's Live page (liveI18n.ts whisperReceipt, every other reason)."
+
+[supervise.whisper_placeholder]
+en = "For example: Offer a 10% discount to book today."
+fr = "Par exemple\u00A0: offrez un rabais de 10\u00A0% pour réserver aujourd'hui."
+ctx = "placeholder"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperPlaceholder" }
+note = "Word for word from the website's Live page (liveI18n.ts whisperPlaceholder)."
+
+[supervise.whisper_send]
+en = "Send note"
+fr = "Souffler la consigne"
+ctx = "button"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperSend" }
+note = "Word for word from the website's Live page (liveI18n.ts whisperSend)."
+
+[supervise.whisper_taken_over_placeholder]
+en = "Hand the call back to your receptionist to send a note"
+fr = "Redonnez l'appel à votre réceptionniste pour souffler une consigne"
+ctx = "body"
+screen = "live"
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperTakenOverPlaceholder" }
+note = "Word for word from the website's Live page (liveI18n.ts whisperTakenOverPlaceholder)."
+
+[supervise.whisper_too_long]
+en = "Keep the note to {max} characters or fewer."
+fr = "La consigne doit compter au plus {max} caractères."
+ctx = "error"
+screen = "live"
+args = { max = "int" }
+state = "reviewed"
+id = { swift = "SuperviseCopy.whisperTooLong(_:)" }
+note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. {max} is the route's limit, 2000."
+
 [support.close]
 en = "Mark resolved"
 fr = "Marquer comme réglée"

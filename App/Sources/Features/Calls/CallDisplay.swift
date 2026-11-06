@@ -268,7 +268,10 @@ extension CallDisplay {
 /// file the other readers cannot see is precisely what lets `"Inbound SIP Caller"`
 /// render as a contact's name here, on the overview, and in the dialler. The whole
 /// set lives in ``CallerIdentity`` with the server lines that write it.
-private enum CallWire {
+///
+/// ⚠️ MODULE-VISIBLE SINCE LIVE SUPERVISE: a `call_updated` event carries the status as a
+/// string, and the Live screens compare it with this one constant rather than a copy.
+enum CallWire {
     static let directionOutbound = "outbound"
     static let statusInProgress = "in-progress"
     static let statusRinging = "ringing"

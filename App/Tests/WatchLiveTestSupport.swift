@@ -85,6 +85,15 @@ final class FakeLiveSources: WatchLiveSourcing {
     func willActivate() async {
         activationsPrepared += 1
     }
+
+    /// The receipt the next wait answers, and the calls waited on.
+    var receiptResult: WhisperReceipt?
+    private(set) var receiptWaits: [String] = []
+
+    func awaitReceipt(workspaceId _: String, callId: String) async -> WhisperReceipt? {
+        receiptWaits.append(callId)
+        return receiptResult
+    }
 }
 
 /// Cursors `cursor-1`, `cursor-2`, … in order.
@@ -130,23 +139,29 @@ enum LiveFixtures {
     }
 
     /// A call-log row, as the feed and the detail route answer it.
+    /// ⚠️ `id` DEFAULTS TO `call_1`, which ``SupervisedCallID`` refuses (it carries `_`); the
+    /// supervise tests pass a cuid-shaped one. `receptionistOnCall` nil leaves the key out, as a
+    /// server before live supervise does.
     static func call(
+        id: String = "call_1",
         status: String = "completed",
         direction: String = "inbound",
         number: String = "Marie Tremblay",
         from: String = "+15555550100",
         aiSummary: String = "Wants a visit tomorrow.",
-        actionItems: [String]? = nil
+        actionItems: [String]? = nil,
+        receptionistOnCall: Bool? = nil
     ) throws -> CallSummary {
         let analysis = actionItems.map { items in
             let list = items.map { #""\#($0)""# }.joined(separator: ",")
             return #","analysis":{"actionItems":[\#(list)]}"#
         } ?? ""
+        let receptionist = receptionistOnCall.map { #","receptionistOnCall":\#($0)"# } ?? ""
         let json = """
-        {"id":"call_1","type":"\(direction)","number":"\(number)","status":"\(status)","duration":"1m 5s",\
+        {"id":"\(id)","type":"\(direction)","number":"\(number)","status":"\(status)","duration":"1m 5s",\
         "time":"t","aiSummary":"\(aiSummary)","transcript":"","callerName":"","summary":"",\
         "from":"\(from)","direction":"\(direction)","durationRaw":65,\
-        "createdAt":"2026-10-24T18:00:00.000Z"\(analysis)}
+        "createdAt":"2026-10-24T18:00:00.000Z"\(analysis)\(receptionist)}
         """
         return try JSONDecoder().decode(CallSummary.self, from: Data(json.utf8))
     }

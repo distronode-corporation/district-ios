@@ -85,14 +85,19 @@ final class LiveKitCallEngineJoinTests: XCTestCase {
         }
     }
 
-    private func makeEngine() -> (LiveKitCallEngine, FakeRoom) {
+    private func makeEngine(publishesMicrophone: Bool = true) -> (LiveKitCallEngine, FakeRoom) {
         var made: FakeRoom?
         let audio = AudioSessionCoordinator(notificationCenter: NotificationCenter())
-        let engine = LiveKitCallEngine(audio: audio, prepareAudio: {}, makeRoom: { bridge in
-            let room = FakeRoom(bridge: bridge)
-            made = room
-            return room
-        })
+        let engine = LiveKitCallEngine(
+            audio: audio,
+            publishesMicrophone: publishesMicrophone,
+            prepareAudio: {},
+            makeRoom: { bridge in
+                let room = FakeRoom(bridge: bridge)
+                made = room
+                return room
+            }
+        )
         guard let room = made else {
             fatalError("the engine did not build its room")
         }
@@ -116,6 +121,16 @@ final class LiveKitCallEngineJoinTests: XCTestCase {
         try await engine.connect(url: "wss://media.example", token: "token")
 
         XCTAssertEqual(room.calls, ["connect", "setMicrophone(true)"])
+    }
+
+    /// ⛔ A LISTEN-IN PUBLISHES NOTHING, EVER: its seat is `canSubscribe` only, and the voice agent
+    /// reads a supervisor with a microphone as a whisperer (`SuperviseLeg.listen`).
+    func testAListenOnlyJoinNeverStartsTheMicrophone() async throws {
+        let (engine, room) = makeEngine(publishesMicrophone: false)
+
+        try await engine.connect(url: "wss://media.example", token: "token")
+
+        XCTAssertEqual(room.calls, ["connect"])
     }
 
     func testAnUnmuteWhileTheMicrophoneStartsNeverReachesTheSDK() async throws {

@@ -92,6 +92,44 @@ final class WatchLiveRequestTests: XCTestCase {
         XCTAssertEqual(sources.whispered.count, 1)
     }
 
+    /// ⛔ Q4: A DELIVERED NOTE'S RECEIPT RIDES THE NEXT KEEPALIVE, in the phone's words, under
+    /// a background task of its own; the next note drops it until its own receipt comes.
+    func testADeliveredWhispersReceiptRidesTheNextKeepalive() async {
+        let sources = FakeLiveSources()
+        sources.receiptResult = WhisperReceipt(applied: true, firstWords: "We can come at nine.", reason: nil)
+        // ⚠️ EVERY OPEN BRINGS A SNAPSHOT, or the relay waits out its window on the manual clock.
+        sources.feed.onActivate = { $0.snapshot([LiveFixtures.segment("a", index: 0)]) }
+        let relay = makeRelay(sources)
+        let first = await relay.answer(subscribe)
+
+        _ = await relay.answer(.whisper(workspaceId: LiveFixtures.workspaceId, callId: LiveFixtures.callId, text: "Hi"))
+        await waitUntil { relay.receipts[LiveFixtures.callId] != nil }
+        let reply = await relay.answer(keepalive(first.live?.cursor))
+
+        XCTAssertEqual(sources.receiptWaits, [LiveFixtures.callId])
+        XCTAssertEqual(reply.live?.receipt, WatchWhisperReceipt(
+            applied: true,
+            headline: SuperviseCopy.whisperApplied,
+            detail: SuperviseCopy.whisperFirstWords("We can come at nine.")
+        ))
+        XCTAssertEqual(tasks.begun.count, 1, "one background task, the receipt's")
+        XCTAssertEqual(tasks.ended, tasks.begun, "and it is ended once the wait is over")
+
+        sources.receiptResult = nil
+        _ = await relay.answer(.whisper(workspaceId: LiveFixtures.workspaceId, callId: LiveFixtures.callId, text: "Hi"))
+        let after = await relay.answer(keepalive(first.live?.cursor))
+        XCTAssertNil(after.live?.receipt)
+    }
+
+    /// A refused note waits for no receipt.
+    func testAFailedWhisperWaitsForNoReceipt() async {
+        let sources = FakeLiveSources()
+        sources.whisperResult = .failure(WatchActionFailure(sentence: "The call has ended."))
+        let relay = makeRelay(sources)
+        _ = await relay.answer(.whisper(workspaceId: "ws_1", callId: "call_1", text: "Hello"))
+        XCTAssertEqual(sources.receiptWaits, [])
+    }
+
     // MARK: - Lists and cards
 
     func testTheListAndTheCardAreTheSourcesAnswers() async {

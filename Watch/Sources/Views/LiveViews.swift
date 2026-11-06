@@ -112,12 +112,36 @@ struct LiveCallView: View {
                 }
                 .disabled(sending)
             WriteStatusRow(store: store, key: key)
+            if let receipt = transcript?.receipt {
+                ReceiptRow(receipt: receipt)
+            }
         }
         .accessibilityIdentifier("watch.live.steer")
     }
 
     private func send(_ text: String) {
         Task { await store.whisper(text, on: call) }
+    }
+}
+
+/// The receptionist's answer to the latest note: used, or not used and why (Sean, 2026-11-05,
+/// Q4). ⚠️ The words are the phone's, already in its language (``WatchWhisperReceipt``).
+struct ReceiptRow: View {
+    let receipt: WatchWhisperReceipt
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Label(receipt.headline, systemImage: receipt.applied ? "checkmark.circle" : "exclamationmark.circle")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(receipt.applied ? Color.accentColor : .orange)
+            if let detail = receipt.detail {
+                Text(detail)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("watch.live.receipt")
     }
 }
 

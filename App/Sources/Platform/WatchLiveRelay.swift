@@ -56,6 +56,12 @@ final class WatchLiveRelay: WatchLiveHandling {
     /// The call being relayed, if any. For tests and for the diagnostics.
     private(set) var session: Session?
 
+    /// The receptionist's answer to the latest note sent from the watch, by call.
+    /// ⛔ DROPPED WHEN THE NEXT NOTE IS SENT: a receipt answers the latest note, not a given one.
+    private(set) var receipts: [String: WatchWhisperReceipt] = [:]
+    /// The wait for the latest note's receipt. ⚠️ One at a time: a new note replaces the wait.
+    private var receiptWait: Task<Void, Never>?
+
     @MainActor
     final class Session {
         let workspaceId: String
@@ -171,7 +177,31 @@ final class WatchLiveRelay: WatchLiveHandling {
         guard line.utf16.count <= WatchLiveComposer.whisperLimit else {
             return .failure(WatchBridgeCopy.whisperTooLong)
         }
-        return await Self.reply(sources.whisper(workspaceId: workspaceId, callId: callId, text: line)) { _ in .success }
+        let reply = await Self.reply(sources.whisper(workspaceId: workspaceId, callId: callId, text: line)) { _ in
+            .success
+        }
+        if reply.ok {
+            awaitReceipt(workspaceId: workspaceId, callId: callId)
+        }
+        return reply
+    }
+
+    /// Wait for the note's receipt, under a background task: the watch's message woke this app
+    /// for seconds, and the receptionist answers at its next turn.
+    ///
+    /// ⚠️ THE RECEIPT RIDES THE NEXT KEEPALIVE'S ANSWER (``compose(_:reset:)``); nothing is pushed.
+    private func awaitReceipt(workspaceId: String, callId: String) {
+        receipts[callId] = nil
+        receiptWait?.cancel()
+        let sources = sources
+        let lease = BackgroundTaskLease.begin("district.watch-receipt", on: backgroundTasks)
+        receiptWait = Task { [weak self] in
+            let receipt = await sources.awaitReceipt(workspaceId: workspaceId, callId: callId)
+            lease.end()
+            guard !Task.isCancelled, let self, let receipt else { return }
+            receipts[callId] = WatchLiveComposer.receipt(receipt)
+            diagnostics.record(.reply, "receipt call=\(WatchRelayDiagnostics.tail(callId)) applied=\(receipt.applied)")
+        }
     }
 
     // MARK: - The transcript
@@ -302,7 +332,8 @@ final class WatchLiveRelay: WatchLiveHandling {
             retracted: retracted,
             interim: lines.last { !$0.final }.map(WatchLiveComposer.line),
             phase: WatchLiveComposer.phase(of: session.feed),
-            complete: session.feed.complete
+            complete: session.feed.complete,
+            receipt: receipts[session.callId]
         )
         // ⚠️ TRIMMED LINES COUNT AS SENT: they were the oldest, and offering them on the next
         // keepalive would put them below newer ones on the wrist.

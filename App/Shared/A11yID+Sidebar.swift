@@ -24,6 +24,7 @@ extension A11yID {
         static let workflows = "district-sidebar-workflows"
         static let desk = "district-sidebar-desk"
         static let dialer = "district-sidebar-dialer"
+        static let live = "district-sidebar-live"
         static let scheduling = "district-sidebar-scheduling"
         static let support = "district-sidebar-support"
         static let settings = "district-sidebar-settings"

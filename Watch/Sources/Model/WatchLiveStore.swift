@@ -15,6 +15,8 @@ struct WatchLiveTranscript: Equatable {
     /// ⛔ WHY THE LAST ASK FAILED, IN WORDS, until the next one succeeds: an unreachable phone
     /// is said, never shown as a transcript that simply stopped.
     var failure: String?
+    /// The receptionist's answer to the latest note, as the phone last sent it (Sean, Q4).
+    var receipt: WatchWhisperReceipt?
 }
 
 /// The after-call card, as the wrist holds it.
@@ -190,6 +192,9 @@ final class WatchLiveStore {
         held.interim = update.interim
         held.phase = update.phase
         held.complete = update.complete
+        // ⚠️ AS SENT, nil INCLUDED: the phone drops the receipt when the next note goes, and a
+        // phone before 3.3.0 never sends one.
+        held.receipt = update.receipt
         held.cursor = update.cursor
         held.failure = nil
         transcript = held

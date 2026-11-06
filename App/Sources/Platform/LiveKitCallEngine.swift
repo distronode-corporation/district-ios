@@ -63,10 +63,19 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     /// ⛔ ONE MICROPHONE TRACK PER CALL: see ``setMuted(_:)`` and `DistrictCall.CallJoinGate`.
     private let joinGate = CallJoinGate()
 
-    convenience init(audio: AudioSessionCoordinator) {
+    /// Whether the join is followed by the call's microphone track.
+    ///
+    /// ⛔ FALSE ONLY FOR A LISTEN-IN (`SuperviseLeg.listen`). Its seat is minted
+    /// `canSubscribe` only, so a publish would be refused by the server and reported as a
+    /// microphone that would not start, and the voice agent reads a supervisor with a
+    /// microphone as a whisperer to unsubscribe. A listener publishes nothing, ever.
+    private let publishesMicrophone: Bool
+
+    convenience init(audio: AudioSessionCoordinator, publishesMicrophone: Bool = true) {
         _ = LiveKitCallEngine.diagnostics
         self.init(
             audio: audio,
+            publishesMicrophone: publishesMicrophone,
             prepareAudio: { AudioManager.shared.audioSession.isAutomaticConfigurationEnabled = false },
             makeRoom: { LiveKitCallRoom(delegate: $0) }
         )
@@ -75,6 +84,7 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
     /// ⚠️ THE SEAM FOR TESTS: `makeRoom` is handed the bridge the room must report to.
     init(
         audio: AudioSessionCoordinator,
+        publishesMicrophone: Bool = true,
         prepareAudio: @escaping @Sendable () async -> Void,
         makeRoom: (RoomEventBridge) -> any CallRoom
     ) {
@@ -82,6 +92,7 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
         events = stream
         self.continuation = continuation
         self.audio = audio
+        self.publishesMicrophone = publishesMicrophone
         self.prepareAudio = prepareAudio
 
         let bridge = RoomEventBridge(continuation: continuation)
@@ -133,7 +144,9 @@ final class LiveKitCallEngine: CallEngine, @unchecked Sendable {
             continuation.yield(.failed(message: error.localizedDescription))
             throw error
         }
-        await startMicrophone()
+        if publishesMicrophone {
+            await startMicrophone()
+        }
         await joinGate.finish(joined: true)
     }
 

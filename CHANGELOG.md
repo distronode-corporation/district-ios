@@ -17,6 +17,24 @@ built from history before publication, so they have no tags in this repository.
   the UK and Lithuania check a prefix against libphonenumber's number patterns; modelling every
   country's pattern is left out. The line under the field shows the whole number before Call.
 
+### Added
+
+- Live supervise (3.3.0, Sean's decisions of 2026-11-05), on DistrictCore 8.2.0's
+  `SuperviseSession`, `CallsRepository.monitor`/`takeOver` and `WhisperReceipt`. A Live calls
+  hub (Overview row, iPad sidebar) lists the call log's calls in progress and follows the
+  workspace's `broadcast: true` telemetry (a call ending comes off at once); `calls/active` is
+  not used. A call's screen offers Listen, a note to the receptionist with its receipt, Take
+  over (confirmed in the website's words) and Hand back, beside the live transcript. Listen is
+  a CallKit call through the app's one `CallStack` and `AudioSessionCoordinator`, so it shows on
+  the lock screen and in Recents and a takeover continues it with the phone locked; the listen
+  leg publishes no microphone, and the microphone is asked for before a takeover. A viewer
+  listens only; a colleague's own softphone call (`receptionistOnCall == false`) offers Listen
+  only, with the routes' `call_has_no_receptionist` as the fallback; an ended call's refusal
+  (`call_ended`) is said in the core's words. Apple Watch: a note sent from the wrist shows its
+  receipt (used, or not used and why), relayed by the phone on the next keepalive; no steering
+  on a colleague's own call. The microphone permission text names taking over a call. New
+  strings: the website's sentences and Sean's seven approved ones, plus four app-only drafts.
+
 ### Changed
 
 - App parity with the web Inbox, on DistrictCore `exactVersion` 8.2.0 (district-core-swift#52).
