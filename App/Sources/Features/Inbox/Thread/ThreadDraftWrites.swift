@@ -11,13 +11,19 @@ import Foundation
 extension ThreadModel {
     /// ⛔ A BLANK BOX SENDS DELETE, NEVER A PUT WITH AN EMPTY BODY. The route answers
     /// 400 `empty_body` to the latter, deliberately, because a blank draft is the
-    /// ABSENCE of one rather than an empty one — and a stored blank row would make
+    /// ABSENCE of one rather than an empty one, and a stored blank row would make
     /// the Inbox badge count a thread with nothing to restore. The two writes share
     /// one rate-limit bucket, so getting this wrong also burns a slot to be refused.
+    ///
+    /// ⛔ AND NO DELETE BEFORE THE DRAFT HAS BEEN READ (Seer, #99, 4489056023). After a failed
+    /// read, or while it is in flight, the server may hold a reply nobody has seen: a blank box
+    /// (cleared, or an image removed) would delete it unread. The blank case is still handled,
+    /// with no write; the next save after a successful read decides.
     ///
     /// - Returns: true when the blank case was handled and nothing else should write.
     func deleteDraftIfBlank(_ text: String) async -> Bool {
         guard Self.isBlank(text) else { return false }
+        guard draftRead else { return true }
         await deleteDraft()
         return true
     }
