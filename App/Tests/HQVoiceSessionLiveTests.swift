@@ -110,6 +110,19 @@ final class HQVoiceSessionLiveTests: HQVoiceSessionCase {
         )
     }
 
+    /// ⚠️ A REFUSED MUTE LEAVES THE MICROPHONE ON, AND ONE MORE TAP RETRIES THE MUTE (Seer, round 4).
+    func testAFailedChangeIsRetriedByOneTap() async {
+        let session = makeSession()
+        await goLive(session)
+        engine.refusesMicrophone = true
+        await session.toggleMute()
+        XCTAssertTrue(session.isMicrophoneOn, "the mute failed, so the microphone is still on")
+        engine.refusesMicrophone = false
+        await session.toggleMute()
+        XCTAssertFalse(session.isMicrophoneOn)
+        XCTAssertEqual(engine.microphone, [true, false, false], "the second tap retried the mute")
+    }
+
     func testAnUnknownMicModeIsAnOpenMicrophoneWithAMuteSwitch() async {
         transport.reply("voice-token", 200, HQVoiceTransport.token(micMode: "whisper"))
         let session = makeSession()

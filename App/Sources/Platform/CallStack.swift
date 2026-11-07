@@ -139,6 +139,16 @@ final class CallStack {
         await (supervisor as? SupervisionEnding)?.endSupervision()
     }
 
+    /// HQ by voice, held here so it outlives the screen that started it: a rebuilt HQ screen
+    /// (a rotation, a sidebar swap, a pop and a push) finds the same session again, its notice
+    /// included. ⚠️ `AnyObject` for ``room``'s reason: this tier names no feature type.
+    var hqVoice: AnyObject?
+
+    /// Abandon a room that was being set up (``PendingRoom``): on a sign-out and a workspace switch.
+    func endPendingRoom() async {
+        await (hqVoice as? PendingRoom)?.abandon()
+    }
+
     /// The last workspace the shell resolved, for ``workspaceSelected(_:)``.
     private var lastWorkspaceId: String?
 
@@ -154,7 +164,10 @@ final class CallStack {
         let previous = lastWorkspaceId
         lastWorkspaceId = workspaceId
         guard CallTeardown.isWorkspaceSwitch(from: previous, to: workspaceId) else { return }
-        Task { await endSupervision() }
+        Task {
+            await endSupervision()
+            await endPendingRoom()
+        }
     }
 
     /// End the keypad's call, if there is one. See ``CallTeardown/endsSoftphone(_:)``.

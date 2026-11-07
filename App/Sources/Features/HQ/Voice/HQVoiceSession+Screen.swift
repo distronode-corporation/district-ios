@@ -1,14 +1,18 @@
 import DistrictModel
 
 extension HQVoiceSession {
-    /// The session for an HQ screen: the one still live on the call stack for this workspace,
-    /// else a new idle one.
+    /// The session for an HQ screen: the one the call stack holds for this workspace, in any
+    /// phase, else a new one it then holds.
+    ///
+    /// ⛔ HELD BY THE CALL STACK, NOT THE SCREEN (Seer, round 4): a screen rebuilt while a token
+    /// is minting or the notice is up finds the same session, so nothing minted is orphaned. A
+    /// sign-out or a workspace switch abandons it (``CallStack/endPendingRoom()``).
     static func forScreen(container: AppContainer, workspaceId: String, role: WorkspaceRole?) -> HQVoiceSession {
         let stack = container.callStack
-        if let live = stack.room as? HQVoiceSession, live.workspaceId == workspaceId {
-            return live
+        if let held = stack.hqVoice as? HQVoiceSession, held.workspaceId == workspaceId {
+            return held
         }
-        return HQVoiceSession(
+        let session = HQVoiceSession(
             workspaceId: workspaceId,
             canConfirm: WorkspaceRole.allowsMutation(role),
             hq: container.hq,
@@ -16,6 +20,8 @@ extension HQVoiceSession {
             microphone: microphone(stack),
             makeEngine: engine
         )
+        stack.hqVoice = session
+        return session
     }
 
     private static func microphone(_ stack: CallStack) -> any MicrophoneAccess {

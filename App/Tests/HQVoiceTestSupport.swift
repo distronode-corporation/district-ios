@@ -116,12 +116,16 @@ final class FakeHQVoiceEngine: HQVoiceEngine {
         resumed.forEach { $0.resume() }
     }
 
+    /// While true, each microphone change fails, as `LiveKitHQVoiceEngine` reports one: the
+    /// state before it.
+    var refusesMicrophone = false
+
     func setMicrophone(enabled: Bool) async -> Bool {
         microphone.append(enabled)
         if holdsMicrophone {
             await withCheckedContinuation { waiting.append($0) }
         }
-        return enabled
+        return refusesMicrophone ? !enabled : enabled
     }
 
     func disconnect() async {

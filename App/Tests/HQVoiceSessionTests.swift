@@ -172,6 +172,50 @@ final class HQVoiceSessionTests: HQVoiceSessionCase {
         XCTAssertEqual(transport.count("voice-context"), 0)
     }
 
+    /// ⛔ A SIGN-OUT DURING THE NOTICE DISCARDS THE SESSION, ONCE (Seer, round 4).
+    func testASignOutDuringTheNoticeDiscardsOnce() async {
+        let session = makeSession()
+        stack.hqVoice = session
+        await session.start(history: [], locale: "en")
+        await stack.endPendingRoom()
+        await stack.endPendingRoom()
+        XCTAssertEqual(session.phase, .idle)
+        XCTAssertEqual(discarded, 1)
+        XCTAssertNil(engine.joined)
+    }
+
+    func testAWorkspaceSwitchDuringTheNoticeDiscards() async {
+        let session = makeSession()
+        stack.hqVoice = session
+        stack.workspaceSelected("ws1")
+        await session.start(history: [], locale: "en")
+        stack.workspaceSelected("ws2")
+        let gone = await eventually { discarded == 1 }
+        XCTAssertTrue(gone)
+        XCTAssertEqual(session.phase, .idle)
+    }
+
+    func testAbandoningALiveSessionLeavesItToTheRoomRules() async {
+        let session = makeSession()
+        await goLive(session)
+        await session.abandon()
+        XCTAssertEqual(session.phase, .live, "a live session is ended by endRoom, not abandoned")
+    }
+
+    /// ⛔ A REBUILT HQ SCREEN FINDS THE SAME SESSION; another workspace gets its own.
+    func testARebuiltScreenKeepsTheSession() throws {
+        let container = try AppContainer(
+            baseURL: XCTUnwrap(URL(string: "https://calls.invalid")),
+            microphone: FakeMicrophoneAccess(status: .granted)
+        )
+        let first = HQVoiceSession.forScreen(container: container, workspaceId: "ws1", role: .agency)
+        let rebuilt = HQVoiceSession.forScreen(container: container, workspaceId: "ws1", role: .agency)
+        XCTAssertTrue(first === rebuilt)
+        XCTAssertTrue(container.callStack.hqVoice === first)
+        let other = HQVoiceSession.forScreen(container: container, workspaceId: "ws2", role: .agency)
+        XCTAssertFalse(other === first)
+    }
+
     func testARingLeavesAMeetingUpUntilTheAnswer() async {
         let meeting = MeetingRoom()
         stack.claimRoom(meeting)

@@ -24,7 +24,7 @@ import Observation
 /// (``yieldAudio(_:)``).
 @MainActor
 @Observable
-final class HQVoiceSession: RoomAudio {
+final class HQVoiceSession: RoomAudio, PendingRoom {
     enum Phase: Equatable {
         case idle
         case minting
@@ -216,6 +216,9 @@ final class HQVoiceSession: RoomAudio {
             let applied = await engine.setMicrophone(enabled: wanted)
             if micWanted == wanted, phase == .live {
                 isMicrophoneOn = applied
+                // ⚠️ A REFUSED CHANGE IS NOT WANTED ANY MORE (Seer, round 4): the next tap retries
+                // the state the screen shows, not the one that failed.
+                micWanted = applied
             }
         }
         microphoneChange = change
@@ -270,6 +273,16 @@ final class HQVoiceSession: RoomAudio {
     /// ⛔ A DISTRICT CALL, A SIGN-OUT OR A WORKSPACE CHANGE ENDS IT. See ``CallStack/endRoom(_:)``.
     func yieldAudio(_ reason: RoomAudioYield) async {
         await finish(reason == .telephoneCall ? .callArrived : .byMember, releasing: false)
+    }
+
+    /// ⛔ A SIGN-OUT OR A WORKSPACE SWITCH BEFORE THE JOIN: a notice is declined (discarded), and
+    /// a token still minting is discarded when it arrives (``start(history:locale:)``).
+    func abandon() async {
+        switch phase {
+        case .notice: await cancelNotice()
+        case .minting: phase = .idle
+        case .idle, .connecting, .live, .ended: break
+        }
     }
 
     /// ⛔ AT THE RING, NOT THE ANSWER: see ``RoomAudio/yieldsAtRing``.

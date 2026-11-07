@@ -88,3 +88,15 @@ enum RoomAudioYield: Sendable, Equatable {
     /// them, so the same gap applies.
     case workspaceChanged
 }
+
+/// A room that is being set up but holds no audio yet (HQ by voice minting its token, or
+/// waiting on its region notice), as the call stack needs to see it.
+///
+/// ⛔ A SIGN-OUT OR A WORKSPACE SWITCH ABANDONS IT, so a session the service opened is
+/// discarded rather than left behind a screen that no longer exists. See
+/// ``CallStack/endPendingRoom()``.
+@MainActor
+protocol PendingRoom: AnyObject {
+    /// Give up a room that was never joined. ⚠️ A no-op once it is live: ``RoomAudio`` ends that.
+    func abandon() async
+}

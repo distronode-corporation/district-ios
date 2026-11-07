@@ -148,6 +148,8 @@ private struct SessionGate: View {
             return
         }
         Task { await container.callStack.endRoom(.sessionEnded) }
+        // ⛔ AND HQ BY VOICE BEFORE IT JOINED: its minted session is discarded.
+        Task { await container.callStack.endPendingRoom() }
         // ⛔ AND A LISTEN-IN OR A TAKEOVER (xhigh review of PR #101, item 4).
         Task { await container.callStack.endSupervision() }
         // ⛔ AND THE KEYPAD'S CALL, ON SIGN-OUT ONLY (Sean, 2026-11-06).
