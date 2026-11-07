@@ -228,7 +228,8 @@ struct SipCard: View {
                         value: MarketplaceCopy.sipTrunkMeta(
                             status: AppWire.label(.sipTrunkStatus, trunk.status),
                             addresses: trunk.ipAccessControlList.count
-                        )
+                        ),
+                        identifierLabel: true
                     )
                     // ⚠️ A ROW WITH NO CARRIER SIDS IS A BILLING ITEM WITH NOTHING BEHIND IT,
                     // which the list can genuinely report for a row written before real
