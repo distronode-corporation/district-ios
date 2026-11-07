@@ -92,3 +92,48 @@ screen = "live_activity"
 state = "reviewed"
 id = { swift = "WidgetCopy.stale" }
 note = "Shown when the Live Activity has had no update for 30 minutes (a lost push), so the status above may be out of date."
+
+[widgets.summary_calls_week]
+en = "Calls this week"
+fr = "Appels cette semaine"
+ctx = "label"
+screen = "home_widget"
+state = "draft"
+id = { swift = "WidgetCopy.summaryCallsWeek" }
+note = "Label above the number of calls in the last seven days, as Overview's weekly call volume."
+
+[widgets.summary_description]
+en = "Unread messages and this week's calls for your workspace."
+fr = "Messages non lus et appels de la semaine de votre espace de travail."
+ctx = "body"
+screen = "home_widget"
+state = "draft"
+id = { swift = "WidgetCopy.summaryDescription" }
+note = "The Home Screen widget's description in the widget gallery."
+
+[widgets.summary_display_name]
+en = "At a glance"
+fr = "En un coup d'œil"
+ctx = "title"
+screen = "home_widget"
+state = "draft"
+id = { swift = "WidgetCopy.summaryDisplayName" }
+note = "The Home Screen widget's name in the widget gallery."
+
+[widgets.summary_signed_out]
+en = "Open District AI to see your workspace."
+fr = "Ouvrez District AI pour voir votre espace de travail."
+ctx = "body"
+screen = "home_widget"
+state = "draft"
+id = { swift = "WidgetCopy.summarySignedOut" }
+note = "Shown when the app has not written anything yet, or after sign-out."
+
+[widgets.summary_unread]
+en = "Unread"
+fr = "Non lus"
+ctx = "label"
+screen = "home_widget"
+state = "draft"
+id = { swift = "WidgetCopy.summaryUnread" }
+note = "Label above the number of unread messages. Plural masculine in French: « messages non lus »."

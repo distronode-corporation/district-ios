@@ -115,6 +115,8 @@ final class SessionModel {
             // ⛔ THE LISTEN-IN MAP TOO (xhigh review of PR #101, item 7): the next sign-in may be
             // another account.
             container.listenInRecents.clear()
+            // ⛔ AND THE HOME SCREEN WIDGET'S WORKSPACE AND COUNTS, for the same reason.
+            WidgetSnapshotPublisher.signedOut()
         case let .retryLater(reason):
             phase = .unavailable(Self.text(for: reason))
         }
@@ -246,6 +248,7 @@ final class SessionModel {
         push.forget()
         selection.setSelectedWorkspaceId(nil)
         container.listenInRecents.clear()
+        WidgetSnapshotPublisher.signedOut()
         phase = .signedOut(SessionCopy.signedOut)
         // ⛔ THE WATCH FORGETS THE ACCOUNT NOW, with no read: there is no session left to
         // read with. See ``WatchBridgeService/publishSignedOut()``.

@@ -2,7 +2,8 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-/// The iPhone widget extension. Today it holds one thing, the call's Live Activity.
+/// The iPhone widget extension: the call's Live Activity, and the Home Screen widget
+/// (``DistrictSummaryWidget``), which reads the one snapshot the app writes for it.
 ///
 /// ⛔ ITS DEPLOYMENT TARGET IS iOS 18, ABOVE THE APP'S 17, AND THAT IS THE AVAILABILITY GUARD.
 /// The Apple Watch Smart Stack needs `.supplementalActivityFamilies([.small])` (iOS 18), and
@@ -15,6 +16,7 @@ import WidgetKit
 struct DistrictAIWidgets: WidgetBundle {
     var body: some Widget {
         DistrictCallLiveActivity()
+        DistrictSummaryWidget()
     }
 }
 

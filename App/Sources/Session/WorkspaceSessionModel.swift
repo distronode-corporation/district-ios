@@ -108,6 +108,11 @@ final class WorkspaceSessionModel {
         switch await container.workspaces.list() {
         case let .success(page):
             apply(page)
+            // ⚠️ THE HOME SCREEN WIDGET NAMES THE SELECTED WORKSPACE; a new one drops the
+            // last one's counts (``WidgetSnapshot/selecting(workspace:at:)``).
+            if let name = selectedEntry?.name {
+                WidgetSnapshotPublisher.selected(workspace: name)
+            }
         case let .failure(error):
             state = Self.failureState(error)
         }
