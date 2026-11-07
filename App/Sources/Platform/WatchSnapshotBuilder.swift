@@ -30,6 +30,11 @@ final class ContainerWatchSnapshotSource: WatchSnapshotSourcing {
         case .retryLater:
             return nil
         }
+        // ⛔ A SNAPSHOT IS NEVER BUILT FROM THE OFFLINE COPY. The Watch stamps what it is
+        // sent as live (`generatedAt`); if any read below was answered from the saved copy,
+        // nothing is published and the Watch keeps its last snapshot, which carries its own
+        // time. See ``OfflineCachingTransport``.
+        let savedServes = OfflineRead.status.savedServes
         let workspaces = WorkspaceSessionModel(container: container)
         await workspaces.load()
         guard let entry = workspaces.selectedEntry else {
@@ -45,14 +50,16 @@ final class ContainerWatchSnapshotSource: WatchSnapshotSourcing {
         async let unread = inbox.unreadCount(workspaceId: id)
         async let conversations = inbox.conversations(workspaceId: id)
         async let calls = pager.loadNext(limit: WatchSnapshot.listLimit)
-        return await WatchSnapshotComposer.compose(
+        let reads = await (availability, unread, conversations, calls)
+        guard OfflineRead.status.savedServes == savedServes else { return nil }
+        return WatchSnapshotComposer.compose(
             WatchSnapshotComposer.Reads(
                 workspaceId: id,
                 workspaceName: entry.name,
-                availability: availability,
-                unread: unread,
-                conversations: conversations.map(\.conversations),
-                calls: calls.map(\.items)
+                availability: reads.0,
+                unread: reads.1,
+                conversations: reads.2.map(\.conversations),
+                calls: reads.3.map(\.items)
             ),
             at: now,
             language: language

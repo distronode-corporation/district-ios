@@ -19,8 +19,14 @@ final class OfflineStatus {
         saved.values.min()
     }
 
+    /// How many answers have come from the saved copy since launch. A reader that must not
+    /// pass a saved copy off as live (the Watch snapshot) compares it before and after its
+    /// reads.
+    private(set) var savedServes = 0
+
     func servedSaved(path: String, savedAt: Date) {
         saved[path] = min(saved[path] ?? savedAt, savedAt)
+        savedServes += 1
     }
 
     func servedLive(path: String) {
