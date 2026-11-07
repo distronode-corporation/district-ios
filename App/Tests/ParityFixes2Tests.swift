@@ -44,6 +44,7 @@ final class ParityFixes2Tests: XCTestCase {
         XCTAssertTrue(row.contains("identifierLabel: true"), "the SIP host row wraps again")
         let chrome = try source("Features/Settings/SettingsChrome.swift")
         XCTAssertTrue(chrome.contains(".lineLimit(identifierLabel ? 1 : nil)"))
+        XCTAssertTrue(chrome.contains(".minimumScaleFactor(identifierLabel ? 0.8 : 1)"))
         XCTAssertTrue(chrome.contains(".truncationMode(.middle)"))
     }
 
