@@ -18,7 +18,15 @@ import Foundation
 ///
 /// ⚠️ THE LANGUAGE IS PART OF THE KEY. The service answers in the language the request
 /// asked for, so a saved French answer is never shown to an English screen.
-final class OfflineReadCache: Sendable {
+///
+/// ⛔ A SAVE THAT STARTED BEFORE ``clear()`` IS DROPPED. A read in flight when the user
+/// signs out would otherwise write the old account's answer back after the wipe, where
+/// the next account on this device could be shown it. ``generation`` moves on every
+/// clear, and ``store(_:for:generation:)`` refuses a save from an older one.
+///
+/// ⚠️ BOUNDED: every distinct query is its own file, so each save also removes expired
+/// files and keeps at most ``maximumFiles``, newest first.
+final class OfflineReadCache: @unchecked Sendable {
     /// A saved answer and when it was saved.
     struct Entry: Equatable, Sendable {
         let body: Data
@@ -42,8 +50,16 @@ final class OfflineReadCache: Sendable {
     /// enough to fetch again rather than hold.
     static let maximumBodyBytes = 2 * 1024 * 1024
 
+    /// The most answers kept at once. Five screens, a few workspaces and their first
+    /// pages fit easily; older ones are removed first.
+    static let maximumFiles = 64
+
     private let directory: URL
     private let now: @Sendable () -> Date
+    // ⚠️ GUARDED BY `lock`, and the save itself runs under it, so a clear cannot slip
+    // between the generation check and the write.
+    private let lock = NSLock()
+    private var currentGeneration = 0
 
     init(directory: URL = OfflineReadCache.defaultDirectory, now: @escaping @Sendable () -> Date = { Date() }) {
         self.directory = directory
@@ -62,20 +78,31 @@ final class OfflineReadCache: Sendable {
         return cachedPaths.contains { path == $0 }
     }
 
+    /// The current generation, read before a request is sent and handed back to
+    /// ``store(_:for:generation:)``.
+    var generation: Int {
+        lock.withLock { currentGeneration }
+    }
+
     /// Keeps a successful answer. Does nothing for a request the cache does not keep,
-    /// an empty body or one over ``maximumBodyBytes``.
-    func store(_ body: Data, for request: HTTPRequest) {
+    /// an empty body, one over ``maximumBodyBytes``, or a save whose request started
+    /// before the last ``clear()``.
+    func store(_ body: Data, for request: HTTPRequest, generation: Int) {
         guard Self.isCacheable(request), !body.isEmpty, body.count <= Self.maximumBodyBytes else { return }
-        let stamp = withUnsafeBytes(of: now().timeIntervalSince1970.bitPattern.bigEndian) { Data($0) }
-        do {
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            try (stamp + body).write(
-                to: file(for: request),
-                options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
-            )
-        } catch {
-            // ⚠️ A FAILED SAVE COSTS ONLY THE OFFLINE COPY. The live answer has already
-            // been returned to the screen; nothing to report.
+        lock.withLock {
+            guard generation == currentGeneration else { return }
+            let stamp = withUnsafeBytes(of: now().timeIntervalSince1970.bitPattern.bigEndian) { Data($0) }
+            do {
+                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                try (stamp + body).write(
+                    to: file(for: request),
+                    options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
+                )
+            } catch {
+                // ⚠️ A FAILED SAVE COSTS ONLY THE OFFLINE COPY. The live answer has already
+                // been returned to the screen; nothing to report.
+            }
+            prune()
         }
     }
 
@@ -85,8 +112,7 @@ final class OfflineReadCache: Sendable {
         guard Self.isCacheable(request), let data = try? Data(contentsOf: file(for: request)), data.count > 8 else {
             return nil
         }
-        let bits = data.prefix(8).reduce(UInt64(0)) { $0 << 8 | UInt64($1) }
-        let savedAt = Date(timeIntervalSince1970: Double(bitPattern: bits))
+        let savedAt = Self.savedAt(data)
         let age = now().timeIntervalSince(savedAt)
         guard age >= 0, age <= Self.maximumAge else { return nil }
         return Entry(body: Data(data.dropFirst(8)), savedAt: savedAt)
@@ -95,7 +121,35 @@ final class OfflineReadCache: Sendable {
     /// Removes every saved answer. Runs on sign-out, so the next account on this
     /// device never sees the last one's data.
     func clear() {
-        try? FileManager.default.removeItem(at: directory)
+        lock.withLock {
+            currentGeneration += 1
+            try? FileManager.default.removeItem(at: directory)
+        }
+    }
+
+    /// Removes expired files, then the oldest beyond ``maximumFiles``, by the save time
+    /// each file starts with (the clock this type is given, not the file system's).
+    private func prune() {
+        guard let files = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+        else { return }
+        let dated = files.map { ($0, Self.savedAt(of: $0) ?? .distantPast) }.sorted { $0.1 > $1.1 }
+        let cutoff = now().addingTimeInterval(-Self.maximumAge)
+        for (index, item) in dated.enumerated() where index >= Self.maximumFiles || item.1 < cutoff {
+            try? FileManager.default.removeItem(at: item.0)
+        }
+    }
+
+    /// The save time a file starts with: eight big-endian bytes of a `Double`.
+    private static func savedAt(of file: URL) -> Date? {
+        guard let handle = try? FileHandle(forReadingFrom: file) else { return nil }
+        defer { try? handle.close() }
+        guard let head = try? handle.read(upToCount: 8), head.count == 8 else { return nil }
+        return savedAt(head)
+    }
+
+    private static func savedAt(_ head: Data) -> Date {
+        let bits = head.prefix(8).reduce(UInt64(0)) { $0 << 8 | UInt64($1) }
+        return Date(timeIntervalSince1970: Double(bitPattern: bits))
     }
 
     private func file(for request: HTTPRequest) -> URL {

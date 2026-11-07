@@ -13,6 +13,8 @@ import Observation
 /// Collapsing that into a sign-out screen is the same class of mistake as rendering
 /// `workspace/list`'s 503 `REGIONS_DEGRADED` as an empty list: "we could not look"
 /// and "there is nothing" read to a paying customer as account loss.
+/// ⚠️ THE THIRD (OFFLINE) IS `signedIn`, NOT `unavailable`, since the offline read cache:
+/// the shell opens on the saved copy. See ``SessionModel/refreshPhase()``.
 enum AuthPhase: Equatable {
     case checking
     case signedIn
@@ -117,7 +119,13 @@ final class SessionModel {
             container.listenInRecents.clear()
             // ⛔ AND THE OFFLINE READ CACHE, for the same reason: it holds this account's data.
             OfflineRead.cache.clear()
-            OfflineRead.status.servedLive()
+            OfflineRead.status.reset()
+        case .retryLater(.refreshNotSent):
+            // ⛔ OFFLINE WITH THE SESSION INTACT IS SIGNED IN. The refresh provably never left
+            // the device, so the stored session is untouched; the shell opens, and the API
+            // client reads the offline copy (``OfflineCachingTransport``). Shown as
+            // `unavailable`, a cold launch offline never reached the copy at all.
+            phase = .signedIn
         case let .retryLater(reason):
             phase = .unavailable(Self.text(for: reason))
         }
@@ -250,7 +258,7 @@ final class SessionModel {
         selection.setSelectedWorkspaceId(nil)
         container.listenInRecents.clear()
         OfflineRead.cache.clear()
-        OfflineRead.status.servedLive()
+        OfflineRead.status.reset()
         phase = .signedOut(SessionCopy.signedOut)
         // ⛔ THE WATCH FORGETS THE ACCOUNT NOW, with no read: there is no session left to
         // read with. See ``WatchBridgeService/publishSignedOut()``.

@@ -4,20 +4,32 @@ import Observation
 
 /// What the screens need to know about the offline copy: whether the last read they
 /// were given came from it, and when it was saved. ``OfflineBanner`` draws it.
+///
+/// ⚠️ BY PATH, NOT ONE FLAG. A live answer on one screen does not make another screen's
+/// saved copy live: Overview stays marked until an Overview read is answered live. The
+/// path (not the whole URL) is the unit, so switching workspaces and reading Overview
+/// live clears the other workspace's Overview too, which is no longer on screen.
 @MainActor
 @Observable
 final class OfflineStatus {
-    /// When the shown copy was saved, or nil while the app is reading live answers.
-    private(set) var showingSavedAt: Date?
+    private var saved: [String: Date] = [:]
 
-    func servedSaved(_ savedAt: Date) {
-        // ⚠️ THE OLDEST COPY ON SCREEN IS THE ONE TO STATE, so a later, fresher
-        // answer from the cache does not hide that another screen is older.
-        showingSavedAt = min(showingSavedAt ?? savedAt, savedAt)
+    /// When the oldest copy still shown was saved, or nil while every screen is live.
+    var showingSavedAt: Date? {
+        saved.values.min()
     }
 
-    func servedLive() {
-        showingSavedAt = nil
+    func servedSaved(path: String, savedAt: Date) {
+        saved[path] = min(saved[path] ?? savedAt, savedAt)
+    }
+
+    func servedLive(path: String) {
+        saved[path] = nil
+    }
+
+    /// Forgets every saved copy, on sign-out.
+    func reset() {
+        saved = [:]
     }
 }
 
@@ -48,14 +60,14 @@ final class OfflineCachingTransport: HTTPTransport, @unchecked Sendable {
 
     private let inner: any HTTPTransport
     private let cache: OfflineReadCache
-    private let status: @Sendable (Date?) async -> Void
+    private let status: @Sendable (String, Date?) async -> Void
 
-    /// - Parameter status: told the save time when a saved answer was served, and nil
-    ///   when a cacheable read was answered live.
+    /// - Parameter status: told the request's path and the save time when a saved answer
+    ///   was served, and the path and nil when a cacheable read was answered live.
     init(
         wrapping inner: any HTTPTransport,
         cache: OfflineReadCache,
-        status: @escaping @Sendable (Date?) async -> Void
+        status: @escaping @Sendable (String, Date?) async -> Void
     ) {
         self.inner = inner
         self.cache = cache
@@ -69,13 +81,16 @@ final class OfflineCachingTransport: HTTPTransport, @unchecked Sendable {
             }
             throw URLError(.notConnectedToInternet)
         }
+        // ⛔ READ BEFORE THE REQUEST GOES OUT: a sign-out while it is in flight moves the
+        // generation on, and the cache then drops this answer. See ``OfflineReadCache``.
+        let generation = cache.generation
         do {
             let response = try await inner.send(request, followRedirects: followRedirects)
             if OfflineReadCache.isCacheable(request), (200 ..< 300).contains(response.statusCode) {
                 if let body = response.body {
-                    cache.store(body, for: request)
+                    cache.store(body, for: request, generation: generation)
                 }
-                await status(nil)
+                await status(request.url.path, nil)
             }
             return response
         } catch {
@@ -87,7 +102,7 @@ final class OfflineCachingTransport: HTTPTransport, @unchecked Sendable {
     /// The saved answer as a 200, or nil when there is none.
     private func saved(for request: HTTPRequest) async -> HTTPResponse? {
         guard let entry = cache.entry(for: request) else { return nil }
-        await status(entry.savedAt)
+        await status(request.url.path, entry.savedAt)
         return HTTPResponse(
             statusCode: 200,
             headers: [
@@ -124,12 +139,12 @@ enum OfflineRead {
 
     /// `inner` with the read cache in front of it, reporting to ``status``.
     static func transport(wrapping inner: any HTTPTransport) -> OfflineCachingTransport {
-        OfflineCachingTransport(wrapping: inner, cache: cache) { savedAt in
+        OfflineCachingTransport(wrapping: inner, cache: cache) { path, savedAt in
             await MainActor.run {
                 if let savedAt {
-                    status.servedSaved(savedAt)
+                    status.servedSaved(path: path, savedAt: savedAt)
                 } else {
-                    status.servedLive()
+                    status.servedLive(path: path)
                 }
             }
         }
