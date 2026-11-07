@@ -11,8 +11,9 @@ import UIKit
 /// ⛔ ONE DEFINITION, BECAUSE TWO WOULD BE TWO PLACES TO GET THE REFUSAL WRONG.
 /// `accessToken()` returns an outcome, not a token, and only `.available` carries one:
 /// every other case (a refresh in flight that failed, a credential the server has
-/// revoked) must send NO Authorization header rather than an empty or stale one. Both
-/// `api` and `schedulingSSO` take this one closure.
+/// revoked) must send NO Authorization header rather than an empty or stale one.
+/// `schedulingSSO` takes this closure; `api` takes ``offlineBearer(_:)``, the same
+/// refusal plus the offline placeholder its transport never sends.
 ///
 /// ⚠️ IN ITS OWN FILE AND `internal` RATHER THAN `private`, WHICH IS A LINT CEILING
 /// RATHER THAN A WIDENING WITH MEANING. `AppContainer.swift` sits at SwiftLint's 500-line
@@ -30,6 +31,23 @@ extension AppContainer {
         { [coordinator] in
             guard case let .available(token) = await coordinator.accessToken() else { return nil }
             return token
+        }
+    }
+
+    /// ``bearer(_:)`` for `api` alone: the same, except that a refresh that provably
+    /// never left the device (`.retryLater(.refreshNotSent)`, the device is offline)
+    /// gives ``OfflineCachingTransport/offlinePlaceholderToken`` instead of nil.
+    ///
+    /// ⛔ ONLY `api` TAKES THIS, AND ONLY BECAUSE ITS TRANSPORT IS THE OFFLINE ONE, which
+    /// never sends a request carrying the placeholder. `schedulingSSO` keeps ``bearer(_:)``:
+    /// its transport would send the placeholder to the service.
+    static func offlineBearer(_ coordinator: TokenRefreshCoordinator) -> @Sendable () async -> String? {
+        { [coordinator] in
+            switch await coordinator.accessToken() {
+            case let .available(token): token
+            case .retryLater(.refreshNotSent): OfflineCachingTransport.offlinePlaceholderToken
+            default: nil
+            }
         }
     }
 

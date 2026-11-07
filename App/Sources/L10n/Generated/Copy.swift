@@ -4658,6 +4658,16 @@ extension SessionCopy {
     /// `session.no_longer_available`
     internal static var noLongerAvailable: String { AppL10n.copyLocale == .frCA ? "Cet élément n'est plus disponible." : "That is no longer available." }
 
+    /// `session.offline_saved_earlier`
+    internal static func offlineSavedEarlier(_ stamp: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Hors ligne. Affichage des données enregistrées le \(stamp)" : "Offline. Showing what was saved on \(stamp)"
+    }
+
+    /// `session.offline_saved_today`
+    internal static func offlineSavedToday(_ time: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Hors ligne. Affichage des données enregistrées à \(time)" : "Offline. Showing what was saved at \(time)"
+    }
+
     /// `session.refresh_not_sent`
     internal static var refreshNotSent: String { AppL10n.copyLocale == .frCA ? "Vous semblez être hors ligne. Votre session est toujours active." : "You appear to be offline. Your session is still active." }
 
