@@ -30,8 +30,22 @@ final class ContainerWatchSnapshotSource: WatchSnapshotSourcing {
         case .retryLater:
             return nil
         }
+        // ⛔ A SNAPSHOT IS NEVER BUILT FROM THE OFFLINE COPY. The Watch stamps what it is
+        // sent as live (`generatedAt`); if any of THESE reads was answered from the saved
+        // copy, nothing is published and the Watch keeps its last snapshot, which carries
+        // its own time. Checked after the workspace list (a saved empty list would otherwise
+        // publish a fresh-looking "no workspace") and after the four reads. See
+        // ``OfflineReadScope``.
+        let mark = OfflineReadMark()
+        return await OfflineReadScope.$served.withValue(mark) {
+            await liveSnapshot(at: now, language: language, mark: mark)
+        }
+    }
+
+    private func liveSnapshot(at now: Date, language: String, mark: OfflineReadMark) async -> WatchSnapshot? {
         let workspaces = WorkspaceSessionModel(container: container)
         await workspaces.load()
+        guard !mark.isMarked else { return nil }
         guard let entry = workspaces.selectedEntry else {
             return WatchSnapshotComposer.noWorkspace(at: now, language: language)
         }
@@ -45,14 +59,16 @@ final class ContainerWatchSnapshotSource: WatchSnapshotSourcing {
         async let unread = inbox.unreadCount(workspaceId: id)
         async let conversations = inbox.conversations(workspaceId: id)
         async let calls = pager.loadNext(limit: WatchSnapshot.listLimit)
-        return await WatchSnapshotComposer.compose(
+        let reads = await (availability, unread, conversations, calls)
+        guard !mark.isMarked else { return nil }
+        return WatchSnapshotComposer.compose(
             WatchSnapshotComposer.Reads(
                 workspaceId: id,
                 workspaceName: entry.name,
-                availability: availability,
-                unread: unread,
-                conversations: conversations.map(\.conversations),
-                calls: calls.map(\.items)
+                availability: reads.0,
+                unread: reads.1,
+                conversations: reads.2.map(\.conversations),
+                calls: reads.3.map(\.items)
             ),
             at: now,
             language: language

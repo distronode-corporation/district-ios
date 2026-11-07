@@ -414,16 +414,16 @@ final class AppContainer {
         // for that lesson with an OkHttp interceptor that had to `runBlocking`
         // on a dispatcher thread the refresh itself needed.
         //
-        // ⚠️ EVERY NON-`available` OUTCOME BECOMES nil, AND `ApiClient` TURNS nil
-        // INTO A LOCAL 401 rather than sending an unauthenticated request. The
-        // DISTINCTION between "signed out" and "could not check" is not lost —
-        // it is the UI's job to ask the coordinator directly (see
-        // `SessionModel`), because a request-path closure has nowhere to put
-        // it.
+        // ⚠️ EVERY NON-`available` OUTCOME BUT "OFFLINE" BECOMES nil, AND `ApiClient`
+        // TURNS nil INTO A LOCAL 401 rather than sending an unauthenticated request.
+        // Offline becomes a placeholder the transport answers from the read cache and
+        // never sends (see ``OfflineCachingTransport``). It is the UI's job to tell
+        // "signed out" from "could not check" by asking the coordinator directly (see
+        // `SessionModel`), because a request-path closure has nowhere to put it.
         api = ApiClient(
             baseURL: baseURL,
-            transport: transport,
-            accessToken: Self.bearer(coordinator),
+            transport: OfflineRead.transport(wrapping: transport),
+            accessToken: Self.offlineBearer(coordinator),
             rejectedToken: Self.rejected(coordinator)
         )
 

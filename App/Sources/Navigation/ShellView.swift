@@ -159,6 +159,7 @@ struct ShellView: View {
 
     var body: some View {
         gate
+            .safeAreaInset(edge: .top, spacing: 0) { OfflineBanner(status: OfflineRead.status) }
             .task {
                 // ⚠️ Once per appearance of this view identity, not per redraw.
                 await workspaceSession.load()

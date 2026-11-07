@@ -13,6 +13,8 @@ import Observation
 /// Collapsing that into a sign-out screen is the same class of mistake as rendering
 /// `workspace/list`'s 503 `REGIONS_DEGRADED` as an empty list: "we could not look"
 /// and "there is nothing" read to a paying customer as account loss.
+/// ⚠️ THE THIRD (OFFLINE) IS `signedIn`, NOT `unavailable`, since the offline read cache:
+/// the shell opens on the saved copy. See ``SessionModel/refreshPhase()``.
 enum AuthPhase: Equatable {
     case checking
     case signedIn
@@ -115,6 +117,15 @@ final class SessionModel {
             // ⛔ THE LISTEN-IN MAP TOO (xhigh review of PR #101, item 7): the next sign-in may be
             // another account.
             container.listenInRecents.clear()
+            // ⛔ AND THE OFFLINE READ CACHE, for the same reason: it holds this account's data.
+            OfflineRead.cache.clear()
+            OfflineRead.status.reset()
+        case .retryLater(.refreshNotSent):
+            // ⛔ OFFLINE WITH THE SESSION INTACT IS SIGNED IN. The refresh provably never left
+            // the device, so the stored session is untouched; the shell opens, and the API
+            // client reads the offline copy (``OfflineCachingTransport``). Shown as
+            // `unavailable`, a cold launch offline never reached the copy at all.
+            phase = .signedIn
         case let .retryLater(reason):
             phase = .unavailable(Self.text(for: reason))
         }
@@ -189,6 +200,11 @@ final class SessionModel {
     private func settle(_ outcome: LoginOutcome) async {
         switch outcome {
         case .success:
+            // ⛔ A NEW SESSION STARTS WITH NO OFFLINE COPY. A session can end without either
+            // sign-out path running (a token revoked elsewhere and noticed later), so the copy
+            // is also cleared here: whatever is on disk may be another account's.
+            OfflineRead.cache.clear()
+            OfflineRead.status.reset()
             await refreshPhase()
             // ⚠️ AFTER the phase is settled, so a model woken by the change reads a
             // coordinator that already holds a token rather than racing the refresh.
@@ -246,6 +262,8 @@ final class SessionModel {
         push.forget()
         selection.setSelectedWorkspaceId(nil)
         container.listenInRecents.clear()
+        OfflineRead.cache.clear()
+        OfflineRead.status.reset()
         phase = .signedOut(SessionCopy.signedOut)
         // ⛔ THE WATCH FORGETS THE ACCOUNT NOW, with no read: there is no session left to
         // read with. See ``WatchBridgeService/publishSignedOut()``.

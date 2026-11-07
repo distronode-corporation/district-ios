@@ -12295,6 +12295,28 @@ tier = "T2"
 state = "reviewed"
 id = { swift = "SessionCopy.noLongerAvailable" }
 
+[session.offline_saved_earlier]
+en = "Offline. Showing what was saved on {stamp}"
+fr = "Hors ligne. Affichage des données enregistrées le\u00A0{stamp}"
+ctx = "body"
+screen = "session"
+tier = "T2"
+args = { stamp = "date" }
+state = "draft"
+id = { swift = "SessionCopy.offlineSavedEarlier(_:)" }
+note = "As offline_saved_today, for a copy saved on an earlier day. {stamp} is a date and time already formatted."
+
+[session.offline_saved_today]
+en = "Offline. Showing what was saved at {time}"
+fr = "Hors ligne. Affichage des données enregistrées à\u00A0{time}"
+ctx = "body"
+screen = "session"
+tier = "T2"
+args = { time = "date" }
+state = "draft"
+id = { swift = "SessionCopy.offlineSavedToday(_:)" }
+note = "Shown above every screen while the app is offline and shows the copy it saved earlier today. {time} is a time of day already formatted (« 15 h 04 », \"3:04 p.m.\"). No final period: the English time can end with one."
+
 [session.refresh_not_sent]
 en = "You appear to be offline. Your session is still active."
 fr = "Vous semblez être hors ligne. Votre session est toujours active."
