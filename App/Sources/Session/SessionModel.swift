@@ -200,6 +200,11 @@ final class SessionModel {
     private func settle(_ outcome: LoginOutcome) async {
         switch outcome {
         case .success:
+            // ⛔ A NEW SESSION STARTS WITH NO OFFLINE COPY. A session can end without either
+            // sign-out path running (a token revoked elsewhere and noticed later), so the copy
+            // is also cleared here: whatever is on disk may be another account's.
+            OfflineRead.cache.clear()
+            OfflineRead.status.reset()
             await refreshPhase()
             // ⚠️ AFTER the phase is settled, so a model woken by the change reads a
             // coordinator that already holds a token rather than racing the refresh.

@@ -279,6 +279,11 @@ final class OfflineReadCacheTests: XCTestCase {
         let signOut = try XCTUnwrap(session.components(separatedBy: "func signOut() async {").dropFirst().first?
             .prefix(600))
         XCTAssertTrue(signOut.contains("OfflineRead.cache.clear()"))
+        // ⛔ AND EVERY SIGN-IN, which all settle through `settle(.success)`, before the phase.
+        let signIn = try XCTUnwrap(session.components(separatedBy: "case .success:").last?.prefix(400))
+        let clearAt = try XCTUnwrap(signIn.range(of: "OfflineRead.cache.clear()"))
+        let phaseAt = try XCTUnwrap(signIn.range(of: "await refreshPhase()"))
+        XCTAssertLessThan(clearAt.lowerBound, phaseAt.lowerBound)
     }
 
     // MARK: - The banner
