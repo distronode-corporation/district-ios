@@ -274,7 +274,7 @@ struct ShellView: View {
             .onChange(of: container.listenInRecents.pending, initial: true) { resolvePendingListenIn() }
             .sheet(item: $browserHandOff) { SafariView(url: $0.url) }
             // ⛔ HQ by voice hears each navigation: a page id and a record id, never a name.
-            .onChange(of: paths.hqVoicePlace) { (container.callStack.room as? HQVoiceSession)?.report($1) }
+            .onChange(of: paths.hqVoicePlace) { (container.callStack.hqVoice as? HQVoiceSession)?.report($1) }
             // ⛔ A FULL-SCREEN COVER RATHER THAN A NAVIGATION DESTINATION, and it
             // covers the WHOLE shell rather than one tab. A ring can arrive for a
             // workspace that is not the selected one and while any tab is showing;

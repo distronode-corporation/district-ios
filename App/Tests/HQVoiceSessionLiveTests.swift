@@ -202,9 +202,10 @@ final class HQVoiceSessionLiveTests: HQVoiceSessionCase {
 
     func testEachNavigationIsReportedWhileLive() async {
         let session = makeSession()
+        await session.start(history: [], locale: "en")
         session.report(HQVoicePlace(.contacts))
         XCTAssertEqual(transport.count("voice-context"), 0, "nothing is reported before the session is live")
-        await goLive(session)
+        await session.begin()
         let first = await eventually { transport.count("voice-context") == 1 }
         XCTAssertTrue(first)
         XCTAssertTrue(transport.bodies("voice-context")[0].contains(#""contacts""#), "the place before the join")
@@ -225,6 +226,20 @@ final class HQVoiceSessionLiveTests: HQVoiceSessionCase {
         session.report(HQVoicePlace(.inbox))
         try? await Task.sleep(for: .milliseconds(50))
         XCTAssertEqual(transport.count("voice-context"), 2, "nothing is reported once it ended")
+    }
+
+    /// ⚠️ A SESSION ENDED ON CONTACTS, THEN A NEW ONE FROM HQ: its first report is HQ (Seer, round 6).
+    func testANewSessionReportsHQFirst() async {
+        let session = makeSession()
+        await goLive(session)
+        session.report(HQVoicePlace(.contacts))
+        _ = await eventually { transport.count("voice-context") == 2 }
+        await session.stop()
+        await goLive(session)
+        let third = await eventually { transport.count("voice-context") == 3 }
+        XCTAssertTrue(third)
+        let body = transport.bodies("voice-context")[2]
+        XCTAssertTrue(body.contains(#""page":"hq""#), body)
     }
 
     func testTheSecretsAreNotInTheSessionDescription() async {

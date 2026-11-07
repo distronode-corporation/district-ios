@@ -226,8 +226,9 @@ final class HQVoiceSession: RoomAudio, PendingRoom {
     }
 
     /// Reports the screen to the agent, on each shell navigation. Fire and forget: the next
-    /// report replaces a lost one. ⚠️ Remembered before the join, so the first report says
-    /// where the member is rather than assuming the HQ screen.
+    /// report replaces a lost one. ⚠️ Remembered in every phase (the shell forwards each
+    /// navigation), so the first report after the join says where the member is; a new session
+    /// starts from HQ, where Talk is.
     func report(_ place: HQVoicePlace) {
         self.place = place
         guard phase == .live, let roomName = credential?.roomName else { return }
@@ -328,6 +329,9 @@ final class HQVoiceSession: RoomAudio, PendingRoom {
         proposals = []
         agentState = nil
         screenVersion = 0
+        // ⚠️ TALK IS ONLY ON THE HQ SCREEN, so a new session starts there, whatever the last one
+        // reported (Seer, round 6).
+        place = HQVoicePlace(.hq)
     }
 
     private func startTimer() {
