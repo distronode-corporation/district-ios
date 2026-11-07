@@ -19,10 +19,10 @@
 /// the identifier: the demo workspace's contacts are fictional `+1 555 01xx`
 /// numbers and the harness refuses to block anything else.
 ///
-/// ⚠️ NEW STRINGS, WITH NO KOTLIN TWIN, AND THEY WILL NOT GET ONE. The Android client
-/// has no blocking or reporting surface: Play's own user-generated-content policy is
-/// enforced through the listing questionnaire rather than through a binary review, so
-/// this is iOS-first for the same reason `district-sign-in-apple` is.
+/// ⚠️ ANDROID BLOCKS CALLERS AND REPORTS CONTENT TOO, and shares most of these strings
+/// (`district-contact-block`, `-unblock`, `-blocked-badge` and the `district-report-*`
+/// set). Its confirm is `district-contact-block-confirm` where this one is
+/// `district-contact-confirm-block`; align them in the change that next touches either.
 ///
 /// ⚠️ ITS OWN FILE, matching the four `A11yID+Scheduling*.swift` siblings. `A11yID.swift`
 /// is the base and the extensions are expected rather than exceptional.

@@ -70,10 +70,10 @@ extension OverviewEntry {
     /// are absent, because their read excludes them server-side. ⚠️ The decision lives in
     /// `RouteGate`, and there is no special case here.
     ///
-    /// ⚠️ `Scheduling` HAS NO ANDROID COUNTERPART, so its position is chosen here
-    /// rather than ported: last of the workspace surfaces and immediately before the
-    /// settings hub, because it is a workspace-level configuration rather than an
-    /// operating screen.
+    /// ⚠️ `Scheduling` SITS IN A DIFFERENT PLACE ON ANDROID, whose Overview lists it
+    /// straight after Workflows. Here it is last of the workspace surfaces and
+    /// immediately before the settings hub, because it is a workspace-level
+    /// configuration rather than an operating screen.
     ///
     /// ⚠️ ITS GATE RESOLVES TO ``RouteGate/partial`` FOR A VIEWER. The hub leads to nine
     /// sections, one of which (recordings) carries a download a viewer may not spend — so

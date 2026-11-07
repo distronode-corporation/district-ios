@@ -81,7 +81,8 @@ struct CarrierSection: View {
         case .loading:
             SkeletonBlock(height: 56)
         case let .ready(enabled, _):
-            SettingsCard(eyebrow: MarketplaceCopy.verifyEyebrow) {
+            // ⚠️ NO EYEBROW: the row's own label is the card's title (see ``SettingsCard``).
+            SettingsCard {
                 SettingsReadOnlyRow(
                     label: MarketplaceCopy.verifyEyebrow,
                     value: enabled ? MarketplaceCopy.verifyOn : MarketplaceCopy.verifyOff

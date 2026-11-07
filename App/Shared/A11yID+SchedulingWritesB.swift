@@ -9,10 +9,9 @@
 /// `A11yID.SchedulingWritesB.Bookings.cancel` grouping would be a build failure
 /// rather than a style note.
 ///
-/// ⚠️ NO ANDROID COUNTERPART EXISTS FOR ANY OF THESE. The scheduling admin is
-/// iOS-first, so unlike the identifiers in `A11yID.swift` these are new strings
-/// rather than copies — and the day Android grows the surface, these are the names
-/// it should take.
+/// ⚠️ ANDROID HAS THESE SURFACES TOO, and about a third of the strings are shared with
+/// it (the booking cancel and reassign ones, for example). Where Android names the same
+/// element, copy its string verbatim, as `A11yID` requires.
 extension A11yID {
     enum SchedulingWritesB {
         // Bookings
