@@ -25,6 +25,19 @@ protocol RoomAudio: AnyObject, Sendable {
     /// ⚠️ AWAITED BY THE CALLER, so the room is gone before the call's engine is
     /// built. See ``CallStack/beginCall()``.
     func yieldAudio(_ reason: RoomAudioYield) async
+
+    /// Whether a District call's RING, not only its answer, ends this room.
+    ///
+    /// ⚠️ FALSE FOR A MEETING (see the ⚠️ on ``RoomAudioYield/telephoneCall``), TRUE FOR HQ BY
+    /// VOICE: a conversation with HQ costs nothing to end, and an agent talking over the ring
+    /// would bury it. See ``CallStack/ringArrived()``.
+    var yieldsAtRing: Bool { get }
+}
+
+extension RoomAudio {
+    var yieldsAtRing: Bool {
+        false
+    }
 }
 
 /// Why a room is being asked to give up this device's audio.

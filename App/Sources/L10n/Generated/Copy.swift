@@ -1234,6 +1234,146 @@ extension HQCopy {
 
     /// `hq.viewer_cannot_confirm`
     internal static var viewerCannotConfirm: String { AppL10n.copyLocale == .frCA ? "Votre rôle dans cet espace de travail est Lecteur\u{00A0}: demandez à un membre ayant le rôle Administrateur ou Membre de l'appliquer." : "You are in this workspace as a viewer, so ask an agency or client member to apply this." }
+
+    /// `hq.voice_applied`
+    internal static var voiceApplied: String { AppL10n.copyLocale == .frCA ? "Fait." : "Done." }
+
+    /// `hq.voice_busy`
+    internal static var voiceBusy: String { AppL10n.copyLocale == .frCA ? "Le mode vocal ne peut pas démarrer pendant un appel ou une réunion." : "Voice can't start during a call or a meeting." }
+
+    /// `hq.voice_cancel`
+    internal static var voiceCancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
+
+    /// `hq.voice_cancelled`
+    internal static var voiceCancelled: String { AppL10n.copyLocale == .frCA ? "Annulé." : "Cancelled." }
+
+    /// `hq.voice_confirm`
+    internal static var voiceConfirm: String { AppL10n.copyLocale == .frCA ? "Confirmer" : "Confirm" }
+
+    /// `hq.voice_connecting`
+    internal static var voiceConnecting: String { AppL10n.copyLocale == .frCA ? "Connexion…" : "Connecting…" }
+
+    /// `hq.voice_ended`
+    internal static var voiceEnded: String { AppL10n.copyLocale == .frCA ? "Le mode vocal est terminé." : "Voice ended." }
+
+    /// `hq.voice_ended_call`
+    internal static var voiceEndedCall: String { AppL10n.copyLocale == .frCA ? "Le mode vocal s'est arrêté pour un appel." : "Voice ended for a call." }
+
+    /// `hq.voice_ended_timeout`
+    internal static var voiceEndedTimeout: String { AppL10n.copyLocale == .frCA ? "La session vocale de 30 minutes est terminée." : "The 30-minute voice session has ended." }
+
+    /// `hq.voice_failed`
+    internal static var voiceFailed: String { AppL10n.copyLocale == .frCA ? "La modification n'a pas pu être faite." : "The change could not be made." }
+
+    /// `hq.voice_hold_to_talk`
+    internal static var voiceHoldToTalk: String { AppL10n.copyLocale == .frCA ? "Maintenir pour parler" : "Hold to talk" }
+
+    /// `hq.voice_join_failed`
+    internal static var voiceJoinFailed: String { AppL10n.copyLocale == .frCA ? "Le mode vocal n'a pas pu se connecter. Réessayez." : "Voice couldn't connect. Try again." }
+
+    /// `hq.voice_language_en`
+    internal static var voiceLanguageEn: String { AppL10n.copyLocale == .frCA ? "Anglais" : "English" }
+
+    /// `hq.voice_language_fr`
+    internal static var voiceLanguageFr: String { AppL10n.copyLocale == .frCA ? "Français" : "French" }
+
+    /// `hq.voice_language_portal`
+    internal static var voiceLanguagePortal: String { AppL10n.copyLocale == .frCA ? "Comme l'application" : "Same as the app" }
+
+    /// `hq.voice_length_brief`
+    internal static var voiceLengthBrief: String { AppL10n.copyLocale == .frCA ? "Réponses brèves" : "Brief answers" }
+
+    /// `hq.voice_length_detailed`
+    internal static var voiceLengthDetailed: String { AppL10n.copyLocale == .frCA ? "Réponses détaillées" : "Detailed answers" }
+
+    /// `hq.voice_length_normal`
+    internal static var voiceLengthNormal: String { AppL10n.copyLocale == .frCA ? "Réponses normales" : "Normal answers" }
+
+    /// `hq.voice_listening`
+    internal static var voiceListening: String { AppL10n.copyLocale == .frCA ? "À l'écoute" : "Listening" }
+
+    /// `hq.voice_mic_denied`
+    internal static var voiceMicDenied: String { AppL10n.copyLocale == .frCA ? "Autorisez le microphone dans Réglages pour parler à HQ." : "Allow the microphone in Settings to talk to HQ." }
+
+    /// `hq.voice_mic_explainer`
+    internal static var voiceMicExplainer: String { AppL10n.copyLocale == .frCA ? "HQ vous écoute par le microphone tant que le mode vocal est actif." : "HQ listens through your microphone while voice is on." }
+
+    /// `hq.voice_mic_open`
+    internal static var voiceMicOpen: String { AppL10n.copyLocale == .frCA ? "Micro ouvert" : "Open mic" }
+
+    /// `hq.voice_mic_push`
+    internal static var voiceMicPush: String { AppL10n.copyLocale == .frCA ? "Maintenir pour parler" : "Hold to talk" }
+
+    /// `hq.voice_mute`
+    internal static var voiceMute: String { AppL10n.copyLocale == .frCA ? "Couper le micro" : "Mute" }
+
+    /// `hq.voice_notice_body`
+    internal static func voiceNoticeBody(_ region: String) -> String {
+        AppL10n.copyLocale == .frCA ? "PLACEHOLDER\u{00A0}: lieu de traitement de votre voix\u{00A0}: \(region)." : "PLACEHOLDER: where your voice is processed: \(region)."
+    }
+
+    /// `hq.voice_notice_cancel`
+    internal static var voiceNoticeCancel: String { AppL10n.copyLocale == .frCA ? "Pas maintenant" : "Not now" }
+
+    /// `hq.voice_notice_start`
+    internal static var voiceNoticeStart: String { AppL10n.copyLocale == .frCA ? "Commencer à parler" : "Start talking" }
+
+    /// `hq.voice_notice_title`
+    internal static var voiceNoticeTitle: String { AppL10n.copyLocale == .frCA ? "Avant de parler" : "Before you talk" }
+
+    /// `hq.voice_pace_faster`
+    internal static var voicePaceFaster: String { AppL10n.copyLocale == .frCA ? "Plus rapide" : "Faster" }
+
+    /// `hq.voice_pace_normal`
+    internal static var voicePaceNormal: String { AppL10n.copyLocale == .frCA ? "Rythme normal" : "Normal pace" }
+
+    /// `hq.voice_pace_slower`
+    internal static var voicePaceSlower: String { AppL10n.copyLocale == .frCA ? "Plus lent" : "Slower" }
+
+    /// `hq.voice_proposal_fallback`
+    internal static var voiceProposalFallback: String { AppL10n.copyLocale == .frCA ? "HQ propose une modification." : "HQ proposes a change." }
+
+    /// `hq.voice_setting_language`
+    internal static var voiceSettingLanguage: String { AppL10n.copyLocale == .frCA ? "Langue" : "Language" }
+
+    /// `hq.voice_setting_length`
+    internal static var voiceSettingLength: String { AppL10n.copyLocale == .frCA ? "Longueur des réponses" : "Answer length" }
+
+    /// `hq.voice_setting_mic`
+    internal static var voiceSettingMic: String { AppL10n.copyLocale == .frCA ? "Microphone" : "Microphone" }
+
+    /// `hq.voice_setting_pace`
+    internal static var voiceSettingPace: String { AppL10n.copyLocale == .frCA ? "Débit" : "Pace" }
+
+    /// `hq.voice_setting_voice`
+    internal static var voiceSettingVoice: String { AppL10n.copyLocale == .frCA ? "Voix" : "Voice" }
+
+    /// `hq.voice_settings`
+    internal static var voiceSettings: String { AppL10n.copyLocale == .frCA ? "Réglages vocaux" : "Voice settings" }
+
+    /// `hq.voice_settings_save`
+    internal static var voiceSettingsSave: String { AppL10n.copyLocale == .frCA ? "Enregistrer" : "Save" }
+
+    /// `hq.voice_settings_saved`
+    internal static var voiceSettingsSaved: String { AppL10n.copyLocale == .frCA ? "Enregistré." : "Saved." }
+
+    /// `hq.voice_speaking`
+    internal static var voiceSpeaking: String { AppL10n.copyLocale == .frCA ? "HQ parle" : "Speaking" }
+
+    /// `hq.voice_start`
+    internal static var voiceStart: String { AppL10n.copyLocale == .frCA ? "Parler à HQ" : "Talk to HQ" }
+
+    /// `hq.voice_stop`
+    internal static var voiceStop: String { AppL10n.copyLocale == .frCA ? "Terminer le mode vocal" : "End voice" }
+
+    /// `hq.voice_thinking`
+    internal static var voiceThinking: String { AppL10n.copyLocale == .frCA ? "Réflexion en cours" : "Thinking" }
+
+    /// `hq.voice_unmute`
+    internal static var voiceUnmute: String { AppL10n.copyLocale == .frCA ? "Réactiver le micro" : "Unmute" }
+
+    /// `hq.voice_you`
+    internal static var voiceYou: String { AppL10n.copyLocale == .frCA ? "Vous" : "You" }
 }
 
 extension InCallCopy {
