@@ -21,8 +21,8 @@
 ///
 /// ⚠️ ANDROID BLOCKS CALLERS AND REPORTS CONTENT TOO, and shares most of these strings
 /// (`district-contact-block`, `-unblock`, `-blocked-badge` and the `district-report-*`
-/// set). Its confirm is `district-contact-block-confirm` where this one is
-/// `district-contact-confirm-block`; align them in the change that next touches either.
+/// set) and `district-contact-block-confirm`, which ``A11yID/Contacts/confirmBlock`` now
+/// copies.
 ///
 /// ⚠️ ITS OWN FILE, matching the four `A11yID+Scheduling*.swift` siblings. `A11yID.swift`
 /// is the base and the extensions are expected rather than exceptional.
