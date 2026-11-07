@@ -30,6 +30,11 @@ final class ParityFixes2Tests: XCTestCase {
         XCTAssertEqual(MarketplaceCopy.carrierBalance("n/a", currency: "USD"), "Solde\(nbsp): n/a USD")
         XCTAssertEqual(MarketplaceCopy.carrierBalance("inf", currency: nil), "Solde\(nbsp): inf")
         XCTAssertEqual(MarketplaceCopy.carrierBalance("1e20", currency: nil), "Solde\(nbsp): 1e20")
+        // A half-cent rounds up from the decimal string, not from its binary neighbour.
+        XCTAssertEqual(MarketplaceCopy.carrierBalance("1.005", currency: nil), "Solde\(nbsp): 1,01")
+        XCTAssertEqual(MarketplaceCopy.carrierBalance("-2.675", currency: nil), "Solde\(nbsp): -2,68")
+        // A number with something after it is not a balance.
+        XCTAssertEqual(MarketplaceCopy.carrierBalance("12 USD", currency: nil), "Solde\(nbsp): 12 USD")
 
         L10nRuntime.locale = .en
         XCTAssertEqual(MarketplaceCopy.carrierBalance("12.50", currency: "USD"), "Balance 12.50 USD")
