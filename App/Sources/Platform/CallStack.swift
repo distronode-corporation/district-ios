@@ -167,6 +167,9 @@ final class CallStack {
         Task {
             await endSupervision()
             await endPendingRoom()
+            // ⛔ AND A LIVE ROOM, HQ VOICE OR A MEETING (Sean, 2026-11-07: "End voice and meetings on
+            // switch"), as the deep-link switch already does: the room belongs to the old workspace.
+            await endRoom(.workspaceChanged)
         }
     }
 

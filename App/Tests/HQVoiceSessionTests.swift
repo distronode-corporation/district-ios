@@ -195,6 +195,34 @@ final class HQVoiceSessionTests: HQVoiceSessionCase {
         XCTAssertEqual(session.phase, .idle)
     }
 
+    /// ⛔ A PICKER SWITCH ENDS LIVE VOICE, ONCE, AND A RE-SELECT OF THE SAME WORKSPACE DOES NOTHING.
+    func testAWorkspaceSwitchEndsLiveVoiceOnce() async {
+        let session = makeSession()
+        stack.workspaceSelected("ws1")
+        await goLive(session)
+        stack.workspaceSelected("ws1")
+        try? await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(session.phase, .live, "the same workspace again changes nothing")
+        stack.workspaceSelected("ws2")
+        let ended = await eventually { session.phase == .ended(.byMember) }
+        XCTAssertTrue(ended, "got \(session.phase)")
+        XCTAssertEqual(self.ended, 1)
+        XCTAssertFalse(stack.hasLiveRoom)
+    }
+
+    func testAWorkspaceSwitchEndsAMeeting() async {
+        let meeting = MeetingRoom()
+        stack.claimRoom(meeting)
+        stack.workspaceSelected("ws1")
+        stack.workspaceSelected("ws1")
+        try? await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(meeting.yields, [])
+        stack.workspaceSelected("ws2")
+        let ended = await eventually { meeting.yields == [.workspaceChanged] }
+        XCTAssertTrue(ended)
+        XCTAssertFalse(stack.hasLiveRoom)
+    }
+
     func testAbandoningALiveSessionLeavesItToTheRoomRules() async {
         let session = makeSession()
         await goLive(session)
