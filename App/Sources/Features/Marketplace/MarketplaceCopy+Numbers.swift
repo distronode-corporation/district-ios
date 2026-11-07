@@ -33,11 +33,28 @@ import Foundation
 extension MarketplaceCopy {
     // MARK: - Carrier connectivity
 
+    /// ⚠️ FRENCH GOES THROUGH THE CORE'S MONEY TABLE, as ``priceLabel(monthlyPrice:currency:)``
+    /// does: « Solde : 12,50 $ US », never « 12.50 USD », and « 12,50 » with no currency.
+    /// The carrier sends the balance as a decimal STRING, so one that does not parse as a
+    /// number is shown as sent rather than guessed at. English keeps the raw value it has
+    /// always shown.
     static func carrierBalance(_ balance: String, currency: String?) -> String {
+        let code = currency?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if L10nRuntime.locale != .en, let cents = balanceCents(balance) {
+            return carrierBalanceAmount(L10nFormat.moneyOrBare(minorUnits: cents, currency: code.isEmpty ? nil : code))
+        }
         guard let currency, !currency.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return carrierBalanceAmount(balance)
         }
         return carrierBalanceWithCurrency(balance, currency)
+    }
+
+    /// The balance in cents, or nil when the string is not a finite number small enough
+    /// to count in `Int` (a balance that size is a bad value, shown as sent).
+    private static func balanceCents(_ balance: String) -> Int? {
+        guard let amount = Double(balance.trimmingCharacters(in: .whitespaces)),
+              amount.isFinite, abs(amount) < 1e13 else { return nil }
+        return Int((amount * 100).rounded(.toNearestOrAwayFromZero))
     }
 
     // MARK: - Registrations

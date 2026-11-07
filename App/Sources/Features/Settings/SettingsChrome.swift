@@ -259,6 +259,11 @@ struct SettingsCard<Inner: View>: View {
 struct SettingsReadOnlyRow: View {
     let label: String
     let value: String?
+    /// ⚠️ A LABEL THAT IS AN IDENTIFIER (a SIP host name) STAYS ON ONE LINE. Wrapped, a
+    /// narrow phone broke `contract-legacy.sip.twilio.com` at its hyphen, which reads as
+    /// two names. It shrinks a little first, then gives up its middle, never its ends;
+    /// VoiceOver still reads the whole name.
+    var identifierLabel = false
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -271,6 +276,9 @@ struct SettingsReadOnlyRow: View {
             Text(label)
                 .font(DistrictType.labelSmall)
                 .foregroundStyle(colors.mutedForeground)
+                .lineLimit(identifierLabel ? 1 : nil)
+                .minimumScaleFactor(identifierLabel ? 0.8 : 1)
+                .truncationMode(.middle)
             Spacer(minLength: DistrictSpacing.tight)
             // ⚠️ "Not set" RATHER THAN A BLANK. An empty line beside a label reads as
             // a rendering fault, and on this screen it would read as a value that
