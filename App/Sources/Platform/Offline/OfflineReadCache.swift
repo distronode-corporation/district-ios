@@ -106,12 +106,20 @@ final class OfflineReadCache: @unchecked Sendable {
         }
     }
 
-    /// The saved answer for a request, or nil when there is none or it is older than
-    /// ``maximumAge``.
-    func entry(for request: HTTPRequest) -> Entry? {
-        guard Self.isCacheable(request), let data = try? Data(contentsOf: file(for: request)), data.count > 8 else {
-            return nil
+    /// The saved answer for a request that started in `generation`, or nil when there is
+    /// none, it is older than ``maximumAge``, or a ``clear()`` has run since the request
+    /// started.
+    ///
+    /// ⛔ THE CHECK AND THE READ RUN UNDER THE LOCK ``clear()`` TAKES, so a sign-out cannot
+    /// land between loading the old account's file and handing it back. A request that
+    /// started before the sign-out is served nothing, whatever is on disk by then.
+    func entry(for request: HTTPRequest, generation: Int) -> Entry? {
+        guard Self.isCacheable(request) else { return nil }
+        let data: Data? = lock.withLock {
+            guard generation == currentGeneration else { return nil }
+            return try? Data(contentsOf: file(for: request))
         }
+        guard let data, data.count > 8 else { return nil }
         let savedAt = Self.savedAt(data)
         let age = now().timeIntervalSince(savedAt)
         guard age >= 0, age <= Self.maximumAge else { return nil }

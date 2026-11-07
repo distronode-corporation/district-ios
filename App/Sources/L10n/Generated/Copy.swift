@@ -4660,12 +4660,12 @@ extension SessionCopy {
 
     /// `session.offline_saved_earlier`
     internal static func offlineSavedEarlier(_ stamp: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Hors ligne. Affichage des données enregistrées le \(stamp)" : "Offline. Showing what was saved on \(stamp)"
+        AppL10n.copyLocale == .frCA ? "Hors ligne. Affichage des données enregistrées le\u{00A0}\(stamp)" : "Offline. Showing what was saved on \(stamp)"
     }
 
     /// `session.offline_saved_today`
     internal static func offlineSavedToday(_ time: String) -> String {
-        AppL10n.copyLocale == .frCA ? "Hors ligne. Affichage des données enregistrées à \(time)" : "Offline. Showing what was saved at \(time)"
+        AppL10n.copyLocale == .frCA ? "Hors ligne. Affichage des données enregistrées à\u{00A0}\(time)" : "Offline. Showing what was saved at \(time)"
     }
 
     /// `session.refresh_not_sent`

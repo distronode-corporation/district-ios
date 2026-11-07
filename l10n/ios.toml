@@ -12297,7 +12297,7 @@ id = { swift = "SessionCopy.noLongerAvailable" }
 
 [session.offline_saved_earlier]
 en = "Offline. Showing what was saved on {stamp}"
-fr = "Hors ligne. Affichage des données enregistrées le {stamp}"
+fr = "Hors ligne. Affichage des données enregistrées le\u00A0{stamp}"
 ctx = "body"
 screen = "session"
 tier = "T2"
@@ -12308,7 +12308,7 @@ note = "As offline_saved_today, for a copy saved on an earlier day. {stamp} is a
 
 [session.offline_saved_today]
 en = "Offline. Showing what was saved at {time}"
-fr = "Hors ligne. Affichage des données enregistrées à {time}"
+fr = "Hors ligne. Affichage des données enregistrées à\u00A0{time}"
 ctx = "body"
 screen = "session"
 tier = "T2"

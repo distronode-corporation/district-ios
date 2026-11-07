@@ -7,7 +7,7 @@ import SwiftUI
 /// ⛔ IT NAMES WHEN THE COPY WAS SAVED, NOT JUST THAT IT IS OLD. Someone reading a call
 /// list offline needs to know which calls could be missing, and the time is that answer.
 ///
-/// ⚠️ IT GOES AWAY ON ITS OWN. ``OfflineStatus/servedLive()`` runs on the next read the
+/// ⚠️ IT GOES AWAY ON ITS OWN. ``OfflineStatus/servedLive(path:)`` runs on the next read the
 /// service answers, so there is nothing to dismiss and nothing to forget to dismiss.
 struct OfflineBanner: View {
     let status: OfflineStatus

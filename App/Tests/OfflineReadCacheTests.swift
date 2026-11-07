@@ -40,9 +40,12 @@ final class OfflineReadCacheTests: XCTestCase {
         let start = Date(timeIntervalSince1970: 1_800_000_000)
         let cache = OfflineReadCache(directory: directory) { start }
         cache.store(body, for: request(), generation: cache.generation)
-        XCTAssertEqual(cache.entry(for: request()), OfflineReadCache.Entry(body: body, savedAt: start))
+        XCTAssertEqual(
+            cache.entry(for: request(), generation: cache.generation),
+            OfflineReadCache.Entry(body: body, savedAt: start)
+        )
         // Another workspace is another key.
-        XCTAssertNil(cache.entry(for: request(query: "?workspaceId=ws_2")))
+        XCTAssertNil(cache.entry(for: request(query: "?workspaceId=ws_2"), generation: cache.generation))
     }
 
     /// ⛔ ONLY THE LISTED READS, AND ONLY A GET.
@@ -51,9 +54,9 @@ final class OfflineReadCacheTests: XCTestCase {
         cache.store(body, for: request(.post), generation: cache.generation)
         cache.store(body, for: request(.get, "/api/district/calls/token"), generation: cache.generation)
         cache.store(body, for: request(.get, "/api/district/messages/send"), generation: cache.generation)
-        XCTAssertNil(cache.entry(for: request(.post)))
-        XCTAssertNil(cache.entry(for: request(.get, "/api/district/calls/token")))
-        XCTAssertNil(cache.entry(for: request(.get, "/api/district/messages/send")))
+        XCTAssertNil(cache.entry(for: request(.post), generation: cache.generation))
+        XCTAssertNil(cache.entry(for: request(.get, "/api/district/calls/token"), generation: cache.generation))
+        XCTAssertNil(cache.entry(for: request(.get, "/api/district/messages/send"), generation: cache.generation))
         for path in OfflineReadCache.cachedPaths {
             XCTAssertTrue(OfflineReadCache.isCacheable(request(.get, path)), path)
             XCTAssertFalse(OfflineReadCache.isCacheable(request(.patch, path)), path)
@@ -64,8 +67,8 @@ final class OfflineReadCacheTests: XCTestCase {
     func test_OFF_03_theLanguageIsPartOfTheKey() {
         let cache = OfflineReadCache(directory: directory)
         cache.store(body, for: request(language: "fr-CA"), generation: cache.generation)
-        XCTAssertNil(cache.entry(for: request(language: "en")))
-        XCTAssertNotNil(cache.entry(for: request(language: "fr-CA")))
+        XCTAssertNil(cache.entry(for: request(language: "en"), generation: cache.generation))
+        XCTAssertNotNil(cache.entry(for: request(language: "fr-CA"), generation: cache.generation))
     }
 
     func test_OFF_04_anOldCopyIsNotShownAndClearRemovesEverything() {
@@ -73,20 +76,20 @@ final class OfflineReadCacheTests: XCTestCase {
         let cache = OfflineReadCache(directory: directory) { now }
         cache.store(body, for: request(), generation: cache.generation)
         now += OfflineReadCache.maximumAge + 1
-        XCTAssertNil(cache.entry(for: request()), "a copy older than a week is shown")
+        XCTAssertNil(cache.entry(for: request(), generation: cache.generation), "a copy older than a week is shown")
         now -= 2
-        XCTAssertNotNil(cache.entry(for: request()))
+        XCTAssertNotNil(cache.entry(for: request(), generation: cache.generation))
         cache.clear()
-        XCTAssertNil(cache.entry(for: request()))
+        XCTAssertNil(cache.entry(for: request(), generation: cache.generation))
         XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
     }
 
     func test_OFF_05_emptyAndOversizedBodiesAreNotKept() {
         let cache = OfflineReadCache(directory: directory)
         cache.store(Data(), for: request(), generation: cache.generation)
-        XCTAssertNil(cache.entry(for: request()))
+        XCTAssertNil(cache.entry(for: request(), generation: cache.generation))
         cache.store(Data(count: OfflineReadCache.maximumBodyBytes + 1), for: request(), generation: cache.generation)
-        XCTAssertNil(cache.entry(for: request()))
+        XCTAssertNil(cache.entry(for: request(), generation: cache.generation))
     }
 
     /// ⛔ THE FILE NAMES NAME NOTHING: no workspace id, no path.
@@ -105,9 +108,43 @@ final class OfflineReadCacheTests: XCTestCase {
         let before = cache.generation
         cache.clear()
         cache.store(body, for: request(), generation: before)
-        XCTAssertNil(cache.entry(for: request()), "a save from before the clear came back")
+        XCTAssertNil(
+            cache.entry(for: request(), generation: cache.generation),
+            "a save from before the clear came back"
+        )
         cache.store(body, for: request(), generation: cache.generation)
-        XCTAssertNotNil(cache.entry(for: request()))
+        XCTAssertNotNil(cache.entry(for: request(), generation: cache.generation))
+    }
+
+    /// ⛔ AND A READ FROM BEFORE A SIGN-OUT IS SERVED NOTHING. The request started in the
+    /// old generation; a clear lands before its saved answer is handed back, and the file
+    /// on disk by then (the next account's) must not be served to it either.
+    func test_OFF_17_aReadFromBeforeAClearIsServedNothing() {
+        let cache = OfflineReadCache(directory: directory)
+        cache.store(body, for: request(), generation: cache.generation)
+        let started = cache.generation
+        cache.clear()
+        let next = Data(#"{"success":true,"calls":["next account"]}"#.utf8)
+        cache.store(next, for: request(), generation: cache.generation)
+        XCTAssertNil(cache.entry(for: request(), generation: started), "a pre-clear read was served")
+        XCTAssertEqual(cache.entry(for: request(), generation: cache.generation)?.body, next)
+    }
+
+    /// The transport side of the same rule: a clear between the request starting and the
+    /// saved answer being read leaves the request with an offline failure, not a copy.
+    func test_OFF_18_theTransportServesNothingAcrossAClear() async {
+        let cache = OfflineReadCache(directory: directory)
+        cache.store(body, for: request(), generation: cache.generation)
+        let inner = ClearingTransport(cache: cache)
+        let transport = OfflineCachingTransport(wrapping: inner, cache: cache) { _, _ in }
+        do {
+            _ = try await transport.send(request(), followRedirects: true)
+            XCTFail("a copy was served across a sign-out")
+        } catch let error as URLError {
+            XCTAssertEqual(error.code, .notConnectedToInternet)
+        } catch {
+            XCTFail("\(error)")
+        }
     }
 
     /// ⚠️ BOUNDED: expired files go, and at most `maximumFiles` stay, newest first.
@@ -122,10 +159,16 @@ final class OfflineReadCacheTests: XCTestCase {
         }
         let names = try FileManager.default.contentsOfDirectory(atPath: directory.path)
         XCTAssertEqual(names.count, OfflineReadCache.maximumFiles)
-        XCTAssertNil(cache.entry(for: request(query: "?workspaceId=old")))
-        XCTAssertNil(cache.entry(for: request(query: "?workspaceId=ws_1&page=0")), "the oldest page was kept")
+        XCTAssertNil(cache.entry(for: request(query: "?workspaceId=old"), generation: cache.generation))
+        XCTAssertNil(
+            cache.entry(for: request(query: "?workspaceId=ws_1&page=0"), generation: cache.generation),
+            "the oldest page was kept"
+        )
         let last = OfflineReadCache.maximumFiles + 4
-        XCTAssertNotNil(cache.entry(for: request(query: "?workspaceId=ws_1&page=\(last)")))
+        XCTAssertNotNil(cache.entry(
+            for: request(query: "?workspaceId=ws_1&page=\(last)"),
+            generation: cache.generation
+        ))
     }
 
     /// ⚠️ THE BANNER FOLLOWS EACH SCREEN: a live answer on one path does not make another
@@ -211,7 +254,11 @@ final class OfflineReadCacheTests: XCTestCase {
         inner.answer = .success(HTTPResponse(statusCode: 500, body: Data("{}".utf8)))
         let refused = try await transport.send(request(), followRedirects: true)
         XCTAssertEqual(refused.statusCode, 500, "an error answer was replaced by the saved copy")
-        XCTAssertEqual(cache.entry(for: request())?.body, body, "an error answer overwrote the saved copy")
+        XCTAssertEqual(
+            cache.entry(for: request(), generation: cache.generation)?.body,
+            body,
+            "an error answer overwrote the saved copy"
+        )
     }
 
     func test_OFF_10_whichFailuresMeanUnreachable() {
@@ -294,9 +341,12 @@ final class OfflineReadCacheTests: XCTestCase {
         let sameDay = savedAt.addingTimeInterval(60)
         L10nRuntime.locale = .frCA
         let today = OfflineBanner.text(savedAt: savedAt, now: sameDay, zone: zone)
-        XCTAssertTrue(today.hasPrefix("Hors ligne. Affichage des données enregistrées à 16\u{00A0}h\u{00A0}20"), today)
+        XCTAssertTrue(
+            today.hasPrefix("Hors ligne. Affichage des données enregistrées à\u{00A0}16\u{00A0}h\u{00A0}20"),
+            today
+        )
         let earlier = OfflineBanner.text(savedAt: savedAt, now: savedAt.addingTimeInterval(3 * 86400), zone: zone)
-        XCTAssertTrue(earlier.hasPrefix("Hors ligne. Affichage des données enregistrées le "), earlier)
+        XCTAssertTrue(earlier.hasPrefix("Hors ligne. Affichage des données enregistrées le\u{00A0}"), earlier)
         L10nRuntime.locale = .en
         XCTAssertTrue(
             OfflineBanner.text(savedAt: savedAt, now: sameDay, zone: zone)
@@ -325,6 +375,21 @@ private final class RecordingTransport: HTTPTransport, @unchecked Sendable {
             return _answer
         }
         return try answer.get()
+    }
+}
+
+/// Clears the cache while the request is "in flight", then fails it as offline: a sign-out
+/// that lands between the request starting and its saved answer being read.
+private final class ClearingTransport: HTTPTransport, @unchecked Sendable {
+    let cache: OfflineReadCache
+
+    init(cache: OfflineReadCache) {
+        self.cache = cache
+    }
+
+    func send(_: HTTPRequest, followRedirects _: Bool) async throws -> HTTPResponse {
+        cache.clear()
+        throw URLError(.notConnectedToInternet)
     }
 }
 

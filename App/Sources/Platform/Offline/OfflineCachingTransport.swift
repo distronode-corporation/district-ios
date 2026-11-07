@@ -75,15 +75,16 @@ final class OfflineCachingTransport: HTTPTransport, @unchecked Sendable {
     }
 
     func send(_ request: HTTPRequest, followRedirects: Bool) async throws -> HTTPResponse {
+        // ⛔ READ BEFORE ANYTHING ELSE: a sign-out while this request is in flight moves the
+        // generation on, and the cache then neither keeps its answer nor serves it a saved
+        // one. See ``OfflineReadCache``.
+        let generation = cache.generation
         if Self.carriesPlaceholder(request) {
-            if let saved = await saved(for: request) {
+            if let saved = await saved(for: request, generation: generation) {
                 return saved
             }
             throw URLError(.notConnectedToInternet)
         }
-        // ⛔ READ BEFORE THE REQUEST GOES OUT: a sign-out while it is in flight moves the
-        // generation on, and the cache then drops this answer. See ``OfflineReadCache``.
-        let generation = cache.generation
         do {
             let response = try await inner.send(request, followRedirects: followRedirects)
             if OfflineReadCache.isCacheable(request), (200 ..< 300).contains(response.statusCode) {
@@ -94,14 +95,16 @@ final class OfflineCachingTransport: HTTPTransport, @unchecked Sendable {
             }
             return response
         } catch {
-            guard Self.isUnreachable(error), let saved = await saved(for: request) else { throw error }
+            guard Self.isUnreachable(error), let saved = await saved(for: request, generation: generation) else {
+                throw error
+            }
             return saved
         }
     }
 
     /// The saved answer as a 200, or nil when there is none.
-    private func saved(for request: HTTPRequest) async -> HTTPResponse? {
-        guard let entry = cache.entry(for: request) else { return nil }
+    private func saved(for request: HTTPRequest, generation: Int) async -> HTTPResponse? {
+        guard let entry = cache.entry(for: request, generation: generation) else { return nil }
         await status(request.url.path, entry.savedAt)
         return HTTPResponse(
             statusCode: 200,
