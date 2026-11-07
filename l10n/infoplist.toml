@@ -14,11 +14,11 @@ id = { apple = "NSCameraUsageDescription" }
 note = "The iOS camera permission prompt. Must stay true for both surfaces: the softphone publishes no video in either direction. Must equal project.yml's Info.plist value."
 
 [infoplist.microphone_usage]
-en = "District AI uses the microphone for calls you place and answer, and for live calls you take over."
-fr = "District AI utilise le microphone pour vos appels passés ou reçus, et pour les appels en cours que vous prenez."
+en = "District AI uses the microphone for calls you place and answer, for live calls you take over, and when you talk to District HQ."
+fr = "District AI utilise le microphone pour vos appels passés ou reçus, pour les appels en cours que vous prenez et quand vous parlez à District HQ."
 ctx = "legal"
 screen = "permissions"
 tier = "T0"
-state = "reviewed"
+state = "draft"
 id = { apple = "NSMicrophoneUsageDescription" }
-note = "The iOS microphone permission prompt. Must equal project.yml's Info.plist value. Names taking over a live call (3.3.0): a listen-in publishes nothing, a takeover publishes the microphone. French approved by Sean, 2026-11-05."
+note = "The iOS microphone permission prompt. Must equal project.yml's Info.plist value. Names taking over a live call (3.3.0): a listen-in publishes nothing, a takeover publishes the microphone. Names District HQ by voice (Sean, 2026-11-07): the French is draft again until reviewed."

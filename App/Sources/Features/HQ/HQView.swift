@@ -1,3 +1,4 @@
+import DistrictData
 import DistrictModel
 import SwiftUI
 
@@ -29,7 +30,15 @@ struct HQView: View {
     /// of the text would be a second copy for no reason.
     @State private var draft = ""
 
+    /// HQ by voice. ⚠️ A live session is found again on the call stack, so a rebuilt screen
+    /// shows the session that is still running rather than a second Talk button.
+    @State private var voice: HQVoiceSession
+    @State private var voiceSettings: HQVoiceSettingsModel?
+
     @Environment(\.colorScheme) private var colorScheme
+
+    private let hq: HQRepository
+    private let workspaceId: String
 
     init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
         // ⚠️ `State(initialValue:)` in `init`, as every other model-owning screen does:
@@ -38,6 +47,13 @@ struct HQView: View {
         _model = State(
             initialValue: HQModel(container: container, workspaceId: workspaceId, role: role)
         )
+        _voice = State(initialValue: HQVoiceSession.forScreen(
+            container: container,
+            workspaceId: workspaceId,
+            role: role
+        ))
+        hq = container.hq
+        self.workspaceId = workspaceId
     }
 
     private var colors: DistrictColors {
@@ -51,6 +67,9 @@ struct HQView: View {
         }
         .navigationTitle(HQCopy.title)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $voiceSettings) { settings in
+            NavigationStack { HQVoiceSettingsView(model: settings) }
+        }
     }
 
     // MARK: - The conversation
@@ -90,6 +109,9 @@ struct HQView: View {
             thinkingRow
             confirmCard
             promptFailure
+            HQVoiceBar(session: voice, history: { model.voiceHistory }, openSettings: {
+                voiceSettings = HQVoiceSettingsModel(hq: hq, workspaceId: workspaceId)
+            })
             composer
         }
         .padding(DistrictSpacing.gutter)

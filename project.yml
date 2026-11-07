@@ -88,7 +88,7 @@ packages:
   # package's five libraries, unchanged by the move.
   DistrictCore:
     url: https://github.com/distronode-corporation/district-core-swift
-    exactVersion: 8.3.0
+    exactVersion: 8.4.1
   # ⛔ LINKED BY NOTHING, DECLARED ONLY TO PIN IT. DistrictCore pins swift-crypto
   # with `exact: 5.0.3` (8.2.0), but swift-crypto takes swift-asn1 by RANGE, so without
   # this entry Xcode resolves the newest swift-asn1 that range allows on whatever
@@ -364,7 +364,7 @@ targets:
         # FOR THE APP STORE. iOS raises the microphone prompt on the first capture
         # and CRASHES the app outright if the string is absent, so a softphone
         # without this line dies on its first outgoing call.
-        NSMicrophoneUsageDescription: "District AI uses the microphone for calls you place and answer, and for live calls you take over."
+        NSMicrophoneUsageDescription: "District AI uses the microphone for calls you place and answer, for live calls you take over, and when you talk to District HQ."
         # ⚠️ DECLARED THOUGH THE SOFTPHONE NEVER OPENS A CAMERA. The LiveKit binary
         # references the camera APIs, so App Store review asks for the string on
         # the whole app; meet rooms are the surface that actually use it.

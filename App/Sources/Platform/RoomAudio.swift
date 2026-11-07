@@ -25,6 +25,19 @@ protocol RoomAudio: AnyObject, Sendable {
     /// ⚠️ AWAITED BY THE CALLER, so the room is gone before the call's engine is
     /// built. See ``CallStack/beginCall()``.
     func yieldAudio(_ reason: RoomAudioYield) async
+
+    /// Whether a District call's RING, not only its answer, ends this room.
+    ///
+    /// ⚠️ FALSE FOR A MEETING (see the ⚠️ on ``RoomAudioYield/telephoneCall``), TRUE FOR HQ BY
+    /// VOICE: a conversation with HQ costs nothing to end, and an agent talking over the ring
+    /// would bury it. See ``CallStack/ringArrived()``.
+    var yieldsAtRing: Bool { get }
+}
+
+extension RoomAudio {
+    var yieldsAtRing: Bool {
+        false
+    }
 }
 
 /// Why a room is being asked to give up this device's audio.
@@ -74,4 +87,16 @@ enum RoomAudioYield: Sendable, Equatable {
     /// state, which renders instead of the tabs and destroys the room screen with
     /// them, so the same gap applies.
     case workspaceChanged
+}
+
+/// A room that is being set up but holds no audio yet (HQ by voice minting its token, or
+/// waiting on its region notice), as the call stack needs to see it.
+///
+/// ⛔ A SIGN-OUT OR A WORKSPACE SWITCH ABANDONS IT, so a session the service opened is
+/// discarded rather than left behind a screen that no longer exists. See
+/// ``CallStack/endPendingRoom()``.
+@MainActor
+protocol PendingRoom: AnyObject {
+    /// Give up a room that was never joined. ⚠️ A no-op once it is live: ``RoomAudio`` ends that.
+    func abandon() async
 }
