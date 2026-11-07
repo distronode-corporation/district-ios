@@ -19,14 +19,8 @@ final class OfflineStatus {
         saved.values.min()
     }
 
-    /// How many answers have come from the saved copy since launch. A reader that must not
-    /// pass a saved copy off as live (the Watch snapshot) compares it before and after its
-    /// reads.
-    private(set) var savedServes = 0
-
     func servedSaved(path: String, savedAt: Date) {
         saved[path] = min(saved[path] ?? savedAt, savedAt)
-        savedServes += 1
     }
 
     func servedLive(path: String) {
@@ -111,6 +105,7 @@ final class OfflineCachingTransport: HTTPTransport, @unchecked Sendable {
     /// The saved answer as a 200, or nil when there is none.
     private func saved(for request: HTTPRequest, generation: Int) async -> HTTPResponse? {
         guard let entry = cache.entry(for: request, generation: generation) else { return nil }
+        OfflineReadScope.served?.mark()
         await status(request.url.path, entry.savedAt)
         return HTTPResponse(
             statusCode: 200,
@@ -157,5 +152,29 @@ enum OfflineRead {
                 }
             }
         }
+    }
+}
+
+/// A reader that must not pass the saved copy off as live (the Watch snapshot) runs its
+/// reads inside this scope and asks afterwards whether any of THEM was answered from it.
+///
+/// ⚠️ TASK-LOCAL, NOT PROCESS-WIDE: it reaches the reads awaited inside
+/// `withValue` (an `async let` child included) and nothing a screen reads at the same time,
+/// so another screen's saved answer cannot make the Watch drop a live snapshot.
+enum OfflineReadScope {
+    @TaskLocal static var served: OfflineReadMark?
+}
+
+/// Set once any read in its scope was answered from the saved copy.
+final class OfflineReadMark: @unchecked Sendable {
+    private let lock = NSLock()
+    private var marked = false
+
+    var isMarked: Bool {
+        lock.withLock { marked }
+    }
+
+    func mark() {
+        lock.withLock { marked = true }
     }
 }
