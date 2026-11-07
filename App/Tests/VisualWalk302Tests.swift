@@ -34,6 +34,39 @@ final class VisualWalk302Tests: XCTestCase {
         XCTAssertTrue(code.contains("Toggle(\n                DeskCopy.notifyLabel,"))
     }
 
+    /// ⛔ NO SETTINGS CARD ANYWHERE IS TITLED WITH ITS OWN ROW'S LABEL. The one-time passcodes
+    /// card, the persona avatar card and the scheduling image rows each printed the same words
+    /// as the eyebrow and as the read-only row's label; the row keeps them.
+    func test_VW_07_noSettingsCardRepeatsItsRowLabel() throws {
+        let root = try SourceScan.sourceRoot()
+        let marker = "SettingsCard(eyebrow: "
+        var scanned = 0
+        for file in try SourceScan.swiftFiles(under: root) {
+            let lines = try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
+                .components(separatedBy: "\n")
+            for (index, line) in lines.enumerated() {
+                guard let range = line.range(of: marker) else { continue }
+                scanned += 1
+                let eyebrow = String(line[range.upperBound...].prefix { $0 != ")" })
+                let following = lines[(index + 1) ..< min(index + 6, lines.count)].joined(separator: "\n")
+                for ending in [",", ")", "\n"] {
+                    XCTAssertFalse(
+                        following.contains("label: \(eyebrow)\(ending)"),
+                        "\(SourceScan.relativePath(file)): \(eyebrow) titles a card and labels its row"
+                    )
+                }
+            }
+        }
+        XCTAssertGreaterThan(scanned, 20, "the scan found too few cards to mean anything")
+        let carrier = try source("Features/Marketplace/CarrierSection.swift")
+        XCTAssertTrue(carrier.contains("label: MarketplaceCopy.verifyEyebrow,"), "the passcodes row lost its label")
+        let persona = try source("Features/Settings/PersonaView.swift")
+        XCTAssertTrue(persona.contains("SettingsReadOnlyRow(label: SettingsCopy.personaAvatarLabel,"))
+        let image = try source("Features/Scheduling/Writes/SchedulingWritesBImageRow.swift")
+        XCTAssertTrue(image.contains("SettingsReadOnlyRow(label: label, value: publishedUrl)"))
+        XCTAssertFalse(image.contains("SettingsCard(eyebrow: label)"))
+    }
+
     /// ⛔ REVOKE KEY, REVOKE ACCESS AND DELETE WEBHOOK ARE DESTRUCTIVE-STYLED (as the Mac's
     /// AP-023), and each still only asks: its confirmation dialog is attached to the button.
     func test_VW_02_developerRemovalsAreDestructiveAndStillAsk() throws {
@@ -101,7 +134,11 @@ final class VisualWalk302Tests: XCTestCase {
         XCTAssertEqual(Self.hex(UIColor(DistrictColors.dark.border)), "24393D", "the dark border token moved")
         let ground = try source("Navigation/RouteList.swift")
         XCTAssertFalse(ground.contains(".listRowSeparator(.hidden)"), "the route rows hide their separator again")
-        XCTAssertTrue(ground.contains(".listRowSeparator(.visible)"))
+        // The top edge hidden and the bottom shown: every edge visible, or an automatic top,
+        // drew the first row's top hairline under the header or the search bar.
+        XCTAssertTrue(ground.contains(".listRowSeparator(.hidden, edges: .top)"))
+        XCTAssertTrue(ground.contains(".listRowSeparator(.visible, edges: .bottom)"))
+        XCTAssertFalse(ground.contains(".listRowSeparator(.visible)"), "every edge is forced visible again")
         XCTAssertTrue(ground.contains(".listRowSeparatorTint(Self.separator)"))
         let tint = try XCTUnwrap(ground.components(separatedBy: ".listRowSeparatorTint(").dropFirst().first?
             .components(separatedBy: "\n").first)

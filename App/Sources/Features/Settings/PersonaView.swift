@@ -175,8 +175,9 @@ struct PersonaView: View {
 
     // MARK: - The avatar, which is a status
 
+    /// ⚠️ NO EYEBROW: the row's own label is the card's title (see ``SettingsCard``).
     private var avatar: some View {
-        SettingsCard(eyebrow: SettingsCopy.personaAvatarLabel) {
+        SettingsCard {
             SettingsReadOnlyRow(label: SettingsCopy.personaAvatarLabel, value: avatarState)
             Text(SettingsCopy.personaAvatarNote)
                 .font(DistrictType.caption)

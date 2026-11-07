@@ -181,9 +181,8 @@ enum Route: Hashable, Sendable {
     /// that, and re-deriving it from a role STRING would hide the button from an owner
     /// whose role did not parse. See the ⛔ in ``RouteDestinations``.
     ///
-    /// ⚠️ NO ANDROID COUNTERPART EXISTS YET. `Routes` has no scheduling destination,
-    /// so this case is iOS-first rather than ported, and the Android client will need
-    /// one when that feature lands on both.
+    /// ⚠️ ANDROID'S COUNTERPART IS `Routes.scheduling`, opened from its Overview as this
+    /// one is. The two were built in parallel, so check both when the family changes.
     case scheduling(workspaceId: String, role: WorkspaceRole?, section: SchedulingSection)
 
     /// Support: this workspace's own requests **with Distronode**.
@@ -199,8 +198,8 @@ enum Route: Hashable, Sendable {
     /// correspondence rather than operational status — so the destination is hidden
     /// outright rather than offered read-only. See ``RouteGate``.
     ///
-    /// ⚠️ NO ANDROID COUNTERPART YET. `Routes` has no support destination, so this
-    /// case is iOS-first rather than ported.
+    /// ⚠️ ANDROID'S COUNTERPART IS `Routes.SUPPORT`, with `Routes.SUPPORT_REQUEST` for
+    /// ``supportRequest(workspaceId:role:key:)``.
     case support(workspaceId: String, role: WorkspaceRole?)
 
     /// One support request and its conversation.
@@ -235,8 +234,8 @@ enum Route: Hashable, Sendable {
     /// customer's name, email address and phone number in the clear plus the
     /// correspondence about them.
     ///
-    /// ⚠️ NO ANDROID COUNTERPART EXISTS YET. `Routes` has no desk destination, so this
-    /// case is iOS-first rather than ported.
+    /// ⚠️ ANDROID'S COUNTERPART IS `Routes.DESK`, with `Routes.DESK_TICKET` for
+    /// ``deskTicket(workspaceId:role:ticketId:)``.
     case desk(workspaceId: String, role: WorkspaceRole?)
 
     /// One ticket and its thread.
@@ -304,6 +303,7 @@ enum SettingsSection: String, Hashable, CaseIterable {
     /// these rows are what `getWorkspaceRole` answers from. `WorkspaceRole.canMutate`
     /// is the WRONG gate for them. See ``RouteGate/allowsMembershipWrites(_:)``.
     case members
-    /// ⚠️ iOS-first; no Android counterpart yet.
+    /// ⚠️ Android has no settings row for scheduling: it opens the surface from its
+    /// Overview only (`Routes.scheduling`).
     case scheduling
 }
