@@ -155,6 +155,23 @@ final class HQVoiceSessionTests: HQVoiceSessionCase {
         XCTAssertEqual(ended, 1)
     }
 
+    /// ⚠️ A RING WHILE THE MICROPHONE IS STILL PUBLISHING: no clock and no screen report for a
+    /// session that has already ended.
+    func testARingDuringTheMicrophonePublishStartsNoClock() async {
+        let session = makeSession()
+        await session.start(history: [], locale: "en")
+        engine.holdsMicrophone = true
+        let begin = Task { await session.begin() }
+        _ = await eventually { engine.pendingMicrophone == 1 }
+        await stack.ringArrived()
+        engine.holdsMicrophone = false
+        engine.releaseMicrophone()
+        await begin.value
+        XCTAssertEqual(session.phase, .ended(.callArrived))
+        XCTAssertEqual(slept, [], "no 30-minute clock for an ended session")
+        XCTAssertEqual(transport.count("voice-context"), 0)
+    }
+
     func testARingLeavesAMeetingUpUntilTheAnswer() async {
         let meeting = MeetingRoom()
         stack.claimRoom(meeting)

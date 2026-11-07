@@ -38,7 +38,10 @@ final class HQVoiceTransport: HTTPTransport, @unchecked Sendable {
         bodies(route).count
     }
 
+    /// ⚠️ A CANCELLED CALLER FAILS, as `URLSession` fails it, so a request sent from a task that
+    /// cancelled itself is caught here rather than in production.
     func send(_ request: HTTPRequest, followRedirects _: Bool) async throws -> HTTPResponse {
+        try Task.checkCancellation()
         let path = request.url.path
         let route = path.hasSuffix("/proposals/cancel") ? "proposals/cancel" : request.url.lastPathComponent
         return lock.withLock {

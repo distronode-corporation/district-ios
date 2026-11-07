@@ -181,6 +181,8 @@ final class HQVoiceSession: RoomAudio {
         phase = .live
         micWanted = micMode == .open
         isMicrophoneOn = micWanted ? await engine.setMicrophone(enabled: true) : false
+        // ⚠️ A RING OR A STOP DURING THE MICROPHONE'S PUBLISH has already ended the session.
+        guard phase == .live else { return }
         startTimer()
         report(place)
     }
@@ -320,6 +322,9 @@ final class HQVoiceSession: RoomAudio {
             } catch {
                 return
             }
+            // ⛔ THE CLOCK LETS GO OF ITSELF FIRST: `finish` cancels ``timer``, and a cancelled
+            // task's `hq/voice-end` would fail before it was sent.
+            self?.timer = nil
             await self?.finish(.timedOut)
         }
     }
