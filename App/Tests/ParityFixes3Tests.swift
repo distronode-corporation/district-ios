@@ -29,5 +29,11 @@ final class ParityFixes3Tests: XCTestCase {
         XCTAssertTrue(labels.contains("MarketplaceTab.allCases"), "every tab is measured")
         XCTAssertTrue(labels.contains(".lineLimit(1)"))
         XCTAssertTrue(labels.contains(".fixedSize()"))
+        // The measurement is the control's own font: 13 pt (it does not follow Dynamic
+        // Type), at the selected segment's weight, with the measured 6 pt either side.
+        XCTAssertTrue(labels.contains(".font(.system(size: Self.segmentLabelSize, weight: .semibold))"))
+        XCTAssertTrue(labels.contains(".padding(.horizontal, Self.segmentLabelPadding)"))
+        XCTAssertTrue(code.contains("private static let segmentLabelSize: CGFloat = 13\n"))
+        XCTAssertTrue(code.contains("private static let segmentLabelPadding: CGFloat = 6\n"))
     }
 }
