@@ -19,7 +19,7 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
-- District HQ by voice (Sean, 2026-11-07), on DistrictCore 8.4.0's voice routes and packets.
+- District HQ by voice (Sean, 2026-11-07), on DistrictCore 8.4.1's voice routes and packets.
   Talk to HQ on the HQ screen mints a session only on the tap, shows the service's
   `processingRegion` before the microphone opens (Start or Cancel; Cancel discards the
   session), then joins the encrypted LiveKit room with the microphone only. `push` mode starts
@@ -29,8 +29,12 @@ built from history before publication, so they have no tags in this repository.
   session; starting one during a call or a meeting is refused with a sentence. The allowance
   answer shows the service's own text, and the text console keeps working. A voice settings
   screen reads and saves the voice, answer length, pace, language and microphone mode. The
-  region notice text is a placeholder until its reviewed wording arrives, and the discard and
-  end calls wait on their routes (`HQVoiceClosing`). The microphone prompt names District HQ.
+  notice is the web's disclosure (Gemini Live and Deepgram, in the United States), with a line
+  above it when the workspace's region is not where voice is processed. A session that never
+  went live (a declined notice, a failed join) is discarded (`hq/voice-discard`); one the app
+  ends (Stop, 30 minutes, a ring, a sign-out) is ended (`hq/voice-end`). Microphone changes
+  are serialized, so a quick press and release never leaves it open. The microphone prompt
+  names District HQ.
 - Dialler design A (3.3.0, Sean's pick of 2026-11-03, #95): a flag and calling-code button in
   front of the number opens a searchable country list, the number is typed the local way and
   formats as it is typed, and a line before Call reads `Rings <country> · <international

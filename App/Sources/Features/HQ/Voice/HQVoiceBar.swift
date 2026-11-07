@@ -16,6 +16,7 @@ struct HQVoiceBar: View {
     let openSettings: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.workspaceRegion) private var workspaceRegion
 
     private var colors: DistrictColors {
         .resolve(colorScheme)
@@ -43,7 +44,13 @@ struct HQVoiceBar: View {
         .accessibilityIdentifier(A11yID.HQVoice.bar)
         .sheet(isPresented: noticeShown) {
             if case let .notice(credential) = session.phase {
-                HQVoiceNotice(session: session, region: credential.processingRegion)
+                HQVoiceNotice(
+                    session: session,
+                    regionLine: HQVoiceNotice.regionLine(
+                        processing: credential.processingRegion,
+                        workspace: workspaceRegion
+                    )
+                )
             }
         }
     }
@@ -219,10 +226,18 @@ struct HQVoiceBar: View {
 
 /// The region notice: where the voice is processed, before the microphone opens.
 ///
-/// ⛔ THE REGION IS THE SERVICE'S `processingRegion`, never a list kept here.
-private struct HQVoiceNotice: View {
+/// ⛔ THE REGION IS THE SERVICE'S `processingRegion`, never a list kept here: the line above
+/// the disclosure appears only when it is not the workspace's own region.
+struct HQVoiceNotice: View {
     let session: HQVoiceSession
-    let region: String
+    let regionLine: String?
+
+    /// The line above the disclosure, or nil when voice is processed in the workspace's region
+    /// (or the workspace's region is not known).
+    static func regionLine(processing: String, workspace: String?) -> String? {
+        guard let workspace, workspace != processing else { return nil }
+        return HQCopy.voiceNoticeRegion(RegionCopy.label(workspace))
+    }
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -231,15 +246,28 @@ private struct HQVoiceNotice: View {
     }
 
     var body: some View {
+        // ⚠️ THE TEXT SCROLLS AND THE TWO BUTTONS STAY BELOW IT, so a large text size never
+        // pushes Start and Cancel off the sheet.
         VStack(alignment: .leading, spacing: DistrictSpacing.row) {
-            Text(HQCopy.voiceNoticeTitle)
-                .font(DistrictType.title)
-                .foregroundStyle(colors.foreground)
-                .accessibilityAddTraits(.isHeader)
-            Text(HQCopy.voiceNoticeBody(region.uppercased()))
-                .font(DistrictType.bodySmall)
-                .foregroundStyle(colors.foreground)
-                .fixedSize(horizontal: false, vertical: true)
+            ScrollView {
+                VStack(alignment: .leading, spacing: DistrictSpacing.row) {
+                    Text(HQCopy.voiceNoticeTitle)
+                        .font(DistrictType.title)
+                        .foregroundStyle(colors.foreground)
+                        .accessibilityAddTraits(.isHeader)
+                    if let regionLine {
+                        Text(regionLine)
+                            .font(DistrictType.titleSmall)
+                            .foregroundStyle(colors.foreground)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Text(HQCopy.voiceNoticeBody)
+                        .font(DistrictType.bodySmall)
+                        .foregroundStyle(colors.foreground)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
             HStack(spacing: DistrictSpacing.row) {
                 Button(HQCopy.voiceNoticeStart) { Task { await session.begin() } }
                     .buttonStyle(.districtPrimary)
@@ -248,12 +276,11 @@ private struct HQVoiceNotice: View {
                     .buttonStyle(.districtGhost)
                     .accessibilityIdentifier(A11yID.HQVoice.noticeCancel)
             }
-            Spacer(minLength: 0)
         }
         .padding(DistrictSpacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(colors.background)
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         // ⚠️ `.contain` FIRST: an identifier on a plain stack replaces its buttons' own.
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(A11yID.HQVoice.notice)
@@ -315,4 +342,10 @@ private struct HQVoiceProposalCard: View {
         case .cancelled: HQCopy.voiceCancelled
         }
     }
+}
+
+extension EnvironmentValues {
+    /// The selected workspace's region (`us`, `ca`, `eu`, `apac`), for the HQ voice notice.
+    /// Set by ``ShellView``; nil outside the signed-in shell.
+    @Entry var workspaceRegion: String?
 }

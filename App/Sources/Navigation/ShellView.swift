@@ -158,7 +158,7 @@ struct ShellView: View {
     }
 
     var body: some View {
-        gate
+        gate.environment(\.workspaceRegion, workspaceSession.selectedEntry?.region)
             .safeAreaInset(edge: .top, spacing: 0) { OfflineBanner(status: OfflineRead.status) }
             .task {
                 // ⚠️ Once per appearance of this view identity, not per redraw.

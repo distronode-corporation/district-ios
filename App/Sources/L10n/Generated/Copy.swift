@@ -1308,18 +1308,21 @@ extension HQCopy {
     internal static var voiceMute: String { AppL10n.copyLocale == .frCA ? "Couper le micro" : "Mute" }
 
     /// `hq.voice_notice_body`
-    internal static func voiceNoticeBody(_ region: String) -> String {
-        AppL10n.copyLocale == .frCA ? "PLACEHOLDER\u{00A0}: lieu de traitement de votre voix\u{00A0}: \(region)." : "PLACEHOLDER: where your voice is processed: \(region)."
-    }
+    internal static var voiceNoticeBody: String { AppL10n.copyLocale == .frCA ? "Votre voix est traitée aux États-Unis, tout comme ce que District HQ lit pour vous pendant une session vocale (appels, contacts, messages et base de connaissances). Le mode vocal utilise Gemini Live dans la région us-east4 de Google Cloud pour tous les espaces de travail, quelle que soit la région du vôtre. Les phrases préétablies de District HQ, comme la relecture d'un changement avant que vous le confirmiez, sont prononcées par Deepgram, également aux États-Unis. Rien n'est enregistré." : "Your voice is processed in the United States, and so is what District HQ reads for you during a voice session (calls, contacts, messages and knowledge). Voice mode runs on Gemini Live in Google Cloud's us-east4 region for every workspace, whatever your workspace's region. District HQ's scripted lines, such as reading back a change before you confirm it, are voiced by Deepgram, also in the United States. Nothing is recorded." }
 
     /// `hq.voice_notice_cancel`
     internal static var voiceNoticeCancel: String { AppL10n.copyLocale == .frCA ? "Pas maintenant" : "Not now" }
+
+    /// `hq.voice_notice_region`
+    internal static func voiceNoticeRegion(_ region: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Les données de cet espace de travail se trouvent dans la région \(region), mais les conversations vocales avec District HQ sont traitées aux États-Unis." : "This workspace's data lives in \(region), but District HQ voice conversations are processed in the United States."
+    }
 
     /// `hq.voice_notice_start`
     internal static var voiceNoticeStart: String { AppL10n.copyLocale == .frCA ? "Commencer à parler" : "Start talking" }
 
     /// `hq.voice_notice_title`
-    internal static var voiceNoticeTitle: String { AppL10n.copyLocale == .frCA ? "Avant de parler" : "Before you talk" }
+    internal static var voiceNoticeTitle: String { AppL10n.copyLocale == .frCA ? "Où votre voix est traitée" : "Where your voice is processed" }
 
     /// `hq.voice_pace_faster`
     internal static var voicePaceFaster: String { AppL10n.copyLocale == .frCA ? "Plus rapide" : "Faster" }

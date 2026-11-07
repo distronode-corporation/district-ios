@@ -3449,14 +3449,13 @@ id = { swift = "HQCopy.voiceMute" }
 note = "Mutes an open microphone during a voice session."
 
 [hq.voice_notice_body]
-en = "PLACEHOLDER: where your voice is processed: {region}."
-fr = "PLACEHOLDER\u00A0: lieu de traitement de votre voix\u00A0: {region}."
+en = "Your voice is processed in the United States, and so is what District HQ reads for you during a voice session (calls, contacts, messages and knowledge). Voice mode runs on Gemini Live in Google Cloud's us-east4 region for every workspace, whatever your workspace's region. District HQ's scripted lines, such as reading back a change before you confirm it, are voiced by Deepgram, also in the United States. Nothing is recorded."
+fr = "Votre voix est traitée aux États-Unis, tout comme ce que District HQ lit pour vous pendant une session vocale (appels, contacts, messages et base de connaissances). Le mode vocal utilise Gemini Live dans la région us-east4 de Google Cloud pour tous les espaces de travail, quelle que soit la région du vôtre. Les phrases préétablies de District HQ, comme la relecture d'un changement avant que vous le confirmiez, sont prononcées par Deepgram, également aux États-Unis. Rien n'est enregistré."
 ctx = "body"
 screen = "hq"
-args = { region = "str" }
 state = "draft"
-id = { swift = "HQCopy.voiceNoticeBody(_:)" }
-note = "⚠️ PLACEHOLDER, NOT FOR RELEASE. The release manager sends the exact wording every client uses (it names the voice and read-back providers). {region} is the service's processingRegion as a region name (« États-Unis »)."
+id = { swift = "HQCopy.voiceNoticeBody" }
+note = "The region notice, shown after a voice session is created and before the microphone opens. The web's disclosure (hqVoiceI18n.ts), word for word. The Deepgram sentence is new and draft; the rest is the web's reviewed text, so the whole string is draft."
 
 [hq.voice_notice_cancel]
 en = "Not now"
@@ -3466,6 +3465,16 @@ screen = "hq"
 state = "draft"
 id = { swift = "HQCopy.voiceNoticeCancel" }
 note = "Declines the region notice: nothing is joined and the session is discarded."
+
+[hq.voice_notice_region]
+en = "This workspace's data lives in {region}, but District HQ voice conversations are processed in the United States."
+fr = "Les données de cet espace de travail se trouvent dans la région {region}, mais les conversations vocales avec District HQ sont traitées aux États-Unis."
+ctx = "body"
+screen = "hq"
+args = { region = "str" }
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeRegion(_:)" }
+note = "Above the region notice, only when the service's processingRegion is not the workspace's region. {region} is the workspace region's display name (region.*). The web's regionDisclosure, word for word."
 
 [hq.voice_notice_start]
 en = "Start talking"
@@ -3477,13 +3486,13 @@ id = { swift = "HQCopy.voiceNoticeStart" }
 note = "Accepts the region notice and opens the voice session."
 
 [hq.voice_notice_title]
-en = "Before you talk"
-fr = "Avant de parler"
+en = "Where your voice is processed"
+fr = "Où votre voix est traitée"
 ctx = "title"
 screen = "hq"
 state = "draft"
 id = { swift = "HQCopy.voiceNoticeTitle" }
-note = "The region notice's title, shown after a voice session is created and before the microphone opens."
+note = "The region notice's title (the web's disclosureHeader), shown after a voice session is created and before the microphone opens."
 
 [hq.voice_pace_faster]
 en = "Faster"

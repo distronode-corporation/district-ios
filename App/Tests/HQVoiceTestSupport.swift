@@ -98,29 +98,32 @@ final class FakeHQVoiceEngine: HQVoiceEngine {
         joined = (url, token)
     }
 
+    /// While true, each microphone change waits for ``releaseMicrophone()``, as a slow
+    /// track publish would.
+    var holdsMicrophone = false
+    private var waiting: [CheckedContinuation<Void, Never>] = []
+
+    var pendingMicrophone: Int {
+        waiting.count
+    }
+
+    func releaseMicrophone() {
+        let resumed = waiting
+        waiting = []
+        resumed.forEach { $0.resume() }
+    }
+
     func setMicrophone(enabled: Bool) async -> Bool {
         microphone.append(enabled)
+        if holdsMicrophone {
+            await withCheckedContinuation { waiting.append($0) }
+        }
         return enabled
     }
 
     func disconnect() async {
         disconnects += 1
         continuation.finish()
-    }
-}
-
-/// The two closing calls, recorded. See ``HQVoiceClosing``.
-@MainActor
-final class RecordingHQVoiceClosing: HQVoiceClosing {
-    private(set) var discarded: [String] = []
-    private(set) var ended: [String] = []
-
-    func discard(workspaceId _: String, sessionId: String) async {
-        discarded.append(sessionId)
-    }
-
-    func end(workspaceId _: String, roomName: String) async {
-        ended.append(roomName)
     }
 }
 

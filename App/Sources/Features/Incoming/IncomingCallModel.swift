@@ -274,9 +274,9 @@ final class IncomingCallModel: LiveCallControls {
         }
         liveActivities.rang(workspaceId: workspace.rawValue, callId: call.rawValue)
         Task {
-            await calls.ringArrived() // ⛔ HQ by voice ends at the ring; a meeting at the answer.
             await apply(.ringing(workspace: workspace, call: call, atMilliseconds: Self.nowMilliseconds()))
             armRingTimeout(uuid: uuid)
+            await calls.ringArrived() // ⛔ After the ring is applied: HQ voice ends here, a meeting at the answer.
         }
         // ⛔ LAST, AND IT MAY NEVER MOVE AHEAD OF THE REPORT OR THE GUARDS ABOVE. ⚠️ The capture is
         // STRONG for the reason the claim above is; ``release()`` cancels it. See ``IncomingCallIdentity``.

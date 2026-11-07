@@ -72,6 +72,16 @@ final class HQVoicePlaceTests: XCTestCase {
         XCTAssertNil(paths.hqVoicePlace.selected)
     }
 
+    func testTheRegionLineOnlyWhenVoiceLeavesTheWorkspaceRegion() {
+        XCTAssertNil(HQVoiceNotice.regionLine(processing: "us", workspace: "us"))
+        XCTAssertNil(HQVoiceNotice.regionLine(processing: "us", workspace: nil))
+        XCTAssertEqual(
+            HQVoiceNotice.regionLine(processing: "us", workspace: "ca"),
+            HQCopy.voiceNoticeRegion(RegionCopy.label("ca"))
+        )
+        XCTAssertTrue(HQCopy.voiceNoticeRegion("Canada").contains("Canada"))
+    }
+
     private func thread(_ key: String, title: String) -> Route {
         .thread(workspaceId: "ws1", role: .agency, threadKey: key, replyTargets: [], title: title)
     }

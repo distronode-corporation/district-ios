@@ -3,28 +3,6 @@ import DistrictModel
 import Foundation
 import Observation
 
-/// The two calls that close a session on the service, behind one seam.
-///
-/// ⚠️ NOT YET WIRED: `POST hq/voice-discard {workspaceId, sessionId}` (a notice declined, the
-/// row deleted while it is under 90 seconds old) and `POST hq/voice-end {roomName}` (a
-/// running session stopped, only the minutes used counted) join district-core-swift with
-/// their mobile fixtures. Until then ``PendingHQVoiceClosing`` sends nothing, the room is
-/// still left (or never joined), and the session ends at its 30 minutes on the service.
-@MainActor
-protocol HQVoiceClosing: AnyObject {
-    /// The member declined the region notice: nothing was joined.
-    func discard(workspaceId: String, sessionId: String) async
-    /// The member stopped a running session.
-    func end(workspaceId: String, roomName: String) async
-}
-
-/// The seam until the core gains the two routes. See ``HQVoiceClosing``.
-@MainActor
-final class PendingHQVoiceClosing: HQVoiceClosing {
-    func discard(workspaceId _: String, sessionId _: String) async {}
-    func end(workspaceId _: String, roomName _: String) async {}
-}
-
 /// One District HQ voice session, from the member's tap to its end.
 ///
 /// ⛔ A TOKEN IS MINTED ONLY ON THE MEMBER'S TAP (``start(history:)``), never as a prefetch:
@@ -33,6 +11,10 @@ final class PendingHQVoiceClosing: HQVoiceClosing {
 /// ⛔ THE REGION NOTICE COMES BEFORE THE MICROPHONE. The credential's `processingRegion` is
 /// shown (``Phase/notice(_:)``) and nothing is joined until the member says Start
 /// (``begin()``); Cancel joins nothing and discards the session (``cancelNotice()``).
+///
+/// ⛔ A SESSION THAT NEVER WENT LIVE IS DISCARDED, ONE THE APP ENDS IS ENDED. A declined
+/// notice and a failed join call `hq/voice-discard`; Stop, the 30 minutes, a ring and a
+/// sign-out call `hq/voice-end`, so only the minutes used are counted. Both by `sessionId`.
 ///
 /// ⛔ PUSH-TO-TALK STARTS MUTED. With ``HQMicMode/push`` the microphone opens only while the
 /// button is held (``holdToTalk(_:)``); with an open mode it opens on the join.
@@ -88,13 +70,15 @@ final class HQVoiceSession: RoomAudio {
     private let hq: HQRepository
     private let callStack: CallStack
     private let microphone: any MicrophoneAccess
-    private let closing: any HQVoiceClosing
     private let makeEngine: @MainActor (String) -> any HQVoiceEngine
     private let sleep: @Sendable (TimeInterval) async throws -> Void
     private var engine: (any HQVoiceEngine)?
     private var credential: HQVoiceTokenResponse?
     private var listening: Task<Void, Never>?
     private var timer: Task<Void, Never>?
+    private var microphoneChange: Task<Void, Never>?
+    /// The microphone state last asked for, which ``setMicrophone(_:)`` applies in order.
+    private var micWanted = false
     private var screenVersion = 0
     private var place = HQVoicePlace(.hq)
 
@@ -104,7 +88,6 @@ final class HQVoiceSession: RoomAudio {
         hq: HQRepository,
         callStack: CallStack,
         microphone: any MicrophoneAccess,
-        closing: any HQVoiceClosing = PendingHQVoiceClosing(),
         makeEngine: @escaping @MainActor (String) -> any HQVoiceEngine = { LiveKitHQVoiceEngine(e2eeKey: $0) },
         sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) }
     ) {
@@ -113,7 +96,6 @@ final class HQVoiceSession: RoomAudio {
         self.hq = hq
         self.callStack = callStack
         self.microphone = microphone
-        self.closing = closing
         self.makeEngine = makeEngine
         self.sleep = sleep
     }
@@ -148,7 +130,7 @@ final class HQVoiceSession: RoomAudio {
         // session the service did open is discarded.
         guard phase == .minting else {
             if case let .success(credential) = answer {
-                await closing.discard(workspaceId: workspaceId, sessionId: credential.sessionId)
+                await discard(credential)
             }
             return
         }
@@ -172,7 +154,7 @@ final class HQVoiceSession: RoomAudio {
         guard case let .notice(credential) = phase else { return }
         self.credential = nil
         phase = .idle
-        await closing.discard(workspaceId: workspaceId, sessionId: credential.sessionId)
+        await discard(credential)
     }
 
     /// The member said Start on the notice: claim the audio, join, open the microphone only
@@ -181,7 +163,7 @@ final class HQVoiceSession: RoomAudio {
         guard case let .notice(credential) = phase, let key = credential.e2ee?.key else { return }
         guard !callStack.hasLiveCall, !callStack.hasLiveRoom else {
             phase = .ended(.busy)
-            await closing.discard(workspaceId: workspaceId, sessionId: credential.sessionId)
+            await discard(credential)
             return
         }
         phase = .connecting
@@ -197,7 +179,8 @@ final class HQVoiceSession: RoomAudio {
         }
         guard phase == .connecting else { return }
         phase = .live
-        isMicrophoneOn = micMode == .open ? await engine.setMicrophone(enabled: true) : false
+        micWanted = micMode == .open
+        isMicrophoneOn = micWanted ? await engine.setMicrophone(enabled: true) : false
         startTimer()
         report(place)
     }
@@ -206,16 +189,32 @@ final class HQVoiceSession: RoomAudio {
 
     /// Push-to-talk: the microphone is open only while held.
     func holdToTalk(_ held: Bool) async {
-        guard phase == .live, micMode == .push, let engine else { return }
-        isMicrophoneOn = await engine.setMicrophone(enabled: held) && held
+        guard phase == .live, micMode == .push else { return }
+        await setMicrophone(held)
     }
 
     /// An open microphone's mute switch.
     func toggleMute() async {
-        guard phase == .live, micMode == .open, let engine else { return }
-        let wanted = !isMicrophoneOn
-        let applied = await engine.setMicrophone(enabled: wanted)
-        isMicrophoneOn = applied
+        guard phase == .live, micMode == .open else { return }
+        await setMicrophone(!micWanted)
+    }
+
+    /// ⛔ SERIALIZED, AND A REQUEST OVERTAKEN BY A NEWER ONE IS SKIPPED. Opening the microphone
+    /// publishes a track over the network, so a quick press and release could otherwise finish
+    /// out of order and leave the microphone open after the button was let go.
+    private func setMicrophone(_ wanted: Bool) async {
+        micWanted = wanted
+        let previous = microphoneChange
+        let change = Task { [weak self] in
+            await previous?.value
+            guard let self, micWanted == wanted, phase == .live, let engine else { return }
+            let applied = await engine.setMicrophone(enabled: wanted)
+            if micWanted == wanted, phase == .live {
+                isMicrophoneOn = applied
+            }
+        }
+        microphoneChange = change
+        await change.value
     }
 
     /// Reports the screen to the agent, on each shell navigation. Fire and forget: the next
@@ -260,20 +259,12 @@ final class HQVoiceSession: RoomAudio {
             await cancelNotice()
             return
         }
-        let roomName = credential?.roomName
         await finish(.byMember)
-        if let roomName {
-            await closing.end(workspaceId: workspaceId, roomName: roomName)
-        }
     }
 
     /// ⛔ A DISTRICT CALL, A SIGN-OUT OR A WORKSPACE CHANGE ENDS IT. See ``CallStack/endRoom(_:)``.
     func yieldAudio(_ reason: RoomAudioYield) async {
-        let roomName = credential?.roomName
         await finish(reason == .telephoneCall ? .callArrived : .byMember, releasing: false)
-        if let roomName {
-            await closing.end(workspaceId: workspaceId, roomName: roomName)
-        }
     }
 
     /// ⛔ AT THE RING, NOT THE ANSWER: see ``RoomAudio/yieldsAtRing``.
@@ -281,8 +272,12 @@ final class HQVoiceSession: RoomAudio {
         true
     }
 
+    /// ⚠️ THE ROOM CLOSING ON ITS OWN (``EndReason/disconnected``) CALLS NOTHING: the service
+    /// ended it.
     private func finish(_ reason: EndReason, releasing: Bool = true) async {
         guard isActive else { return }
+        let wasLive = phase == .live
+        let credential = credential
         timer?.cancel()
         timer = nil
         listening?.cancel()
@@ -290,12 +285,24 @@ final class HQVoiceSession: RoomAudio {
         let engine = engine
         self.engine = nil
         isMicrophoneOn = false
+        micWanted = false
         agentState = nil
         if releasing {
             callStack.releaseRoom(self)
         }
         phase = .ended(reason)
         await engine?.disconnect()
+        guard let credential, reason != .disconnected else { return }
+        if wasLive {
+            _ = await hq.endVoice(workspaceId: workspaceId, sessionId: credential.sessionId)
+        } else {
+            await discard(credential)
+        }
+    }
+
+    /// A session that never went live: the notice declined, or the join failed or was refused.
+    private func discard(_ credential: HQVoiceTokenResponse) async {
+        _ = await hq.discardVoice(workspaceId: workspaceId, sessionId: credential.sessionId)
     }
 
     private func reset() {

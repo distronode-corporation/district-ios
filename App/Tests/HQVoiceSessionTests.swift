@@ -4,53 +4,7 @@ import XCTest
 
 /// The HQ voice session against a fake room and a stub service: when it mints, what comes
 /// before the microphone, how it ends, and how it shares the audio with calls and meetings.
-@MainActor
-final class HQVoiceSessionTests: XCTestCase {
-    private var transport = HQVoiceTransport()
-    private var engine = FakeHQVoiceEngine()
-    private var closing = RecordingHQVoiceClosing()
-    private var stack = CallStack(microphone: FakeMicrophoneAccess(status: .granted))
-    private var slept: [TimeInterval] = []
-
-    override func setUp() async throws {
-        transport = HQVoiceTransport()
-        transport.reply("voice-token", 200, HQVoiceTransport.token())
-        transport.reply("voice-context", 200, #"{"success":true}"#)
-        engine = FakeHQVoiceEngine()
-        closing = RecordingHQVoiceClosing()
-        stack = CallStack(microphone: FakeMicrophoneAccess(status: .granted))
-        slept = []
-    }
-
-    /// A session whose 30-minute clock never rings unless `timesOut`.
-    private func makeSession(
-        microphone: any MicrophoneAccess = FakeMicrophoneAccess(status: .granted),
-        canConfirm: Bool = true,
-        timesOut: Bool = false
-    ) -> HQVoiceSession {
-        let engine = engine
-        return HQVoiceSession(
-            workspaceId: "ws1",
-            canConfirm: canConfirm,
-            hq: transport.repository,
-            callStack: stack,
-            microphone: microphone,
-            closing: closing,
-            makeEngine: { _ in engine },
-            sleep: { [weak self] seconds in
-                await MainActor.run { self?.slept.append(seconds) }
-                if !timesOut {
-                    try await Task.sleep(for: .seconds(3600))
-                }
-            }
-        )
-    }
-
-    private func goLive(_ session: HQVoiceSession) async {
-        await session.start(history: [], locale: "en")
-        await session.begin()
-    }
-
+final class HQVoiceSessionTests: HQVoiceSessionCase {
     // MARK: - Starting
 
     func testNothingIsMintedUntilTheMemberTaps() async {
@@ -87,7 +41,8 @@ final class HQVoiceSessionTests: XCTestCase {
         await session.start(history: [], locale: "en")
         await session.cancelNotice()
         XCTAssertEqual(session.phase, .idle)
-        XCTAssertEqual(closing.discarded, ["sess-secret"])
+        XCTAssertEqual(discarded, 1)
+        XCTAssertEqual(transport.bodies("voice-discard"), [#"{"sessionId":"sess-secret","workspaceId":"ws1"}"#])
         XCTAssertNil(engine.joined)
     }
 
@@ -96,18 +51,18 @@ final class HQVoiceSessionTests: XCTestCase {
         await goLive(session)
         await session.stop()
         XCTAssertEqual(session.phase, .ended(.byMember))
-        XCTAssertEqual(closing.ended, ["hq_ws1_abc"])
+        XCTAssertEqual(transport.bodies("voice-end"), [#"{"sessionId":"sess-secret","workspaceId":"ws1"}"#])
         XCTAssertEqual(engine.disconnects, 1)
         XCTAssertFalse(stack.hasLiveRoom)
-        XCTAssertTrue(closing.discarded.isEmpty)
+        XCTAssertEqual(discarded, 0)
     }
 
     func testStopAtTheNoticeIsCancel() async {
         let session = makeSession()
         await session.start(history: [], locale: "en")
         await session.stop()
-        XCTAssertEqual(closing.discarded, ["sess-secret"])
-        XCTAssertTrue(closing.ended.isEmpty)
+        XCTAssertEqual(discarded, 1)
+        XCTAssertEqual(ended, 0)
     }
 
     func testTheAllowanceAnswerShowsTheServiceSentence() async {
@@ -134,9 +89,11 @@ final class HQVoiceSessionTests: XCTestCase {
     func testTheSessionEndsAtThirtyMinutes() async {
         let session = makeSession(timesOut: true)
         await goLive(session)
-        let ended = await eventually { session.phase == .ended(.timedOut) }
-        XCTAssertTrue(ended, "got \(session.phase)")
+        let timedOut = await eventually { session.phase == .ended(.timedOut) }
+        XCTAssertTrue(timedOut, "got \(session.phase)")
         XCTAssertEqual(slept, [HQVoice.sessionSeconds])
+        let endSent = await eventually { ended == 1 }
+        XCTAssertTrue(endSent, "the app ended it, so the service is told")
         XCTAssertEqual(HQVoice.sessionSeconds, 30 * 60)
     }
 
@@ -146,6 +103,8 @@ final class HQVoiceSessionTests: XCTestCase {
         await goLive(session)
         XCTAssertEqual(session.phase, .ended(.failed(HQCopy.voiceJoinFailed)))
         XCTAssertFalse(stack.hasLiveRoom)
+        XCTAssertEqual(discarded, 1, "a session that never went live is discarded")
+        XCTAssertEqual(ended, 0)
     }
 
     func testADeniedMicrophoneMintsNothing() async {
@@ -181,7 +140,7 @@ final class HQVoiceSessionTests: XCTestCase {
         stack.onSystemRequest = { _ in }
         await session.begin()
         XCTAssertEqual(session.phase, .ended(.busy))
-        XCTAssertEqual(closing.discarded, ["sess-secret"])
+        XCTAssertEqual(discarded, 1)
         XCTAssertNil(engine.joined)
     }
 
@@ -193,7 +152,7 @@ final class HQVoiceSessionTests: XCTestCase {
         XCTAssertEqual(HQVoiceBar.sentence(.callArrived), HQCopy.voiceEndedCall)
         XCTAssertFalse(stack.hasLiveRoom)
         XCTAssertEqual(engine.disconnects, 1)
-        XCTAssertEqual(closing.ended, ["hq_ws1_abc"])
+        XCTAssertEqual(ended, 1)
     }
 
     func testARingLeavesAMeetingUpUntilTheAnswer() async {
@@ -217,138 +176,6 @@ final class HQVoiceSessionTests: XCTestCase {
         await stack.endRoom(.sessionEnded)
         XCTAssertEqual(session.phase, .ended(.byMember))
         XCTAssertEqual(engine.disconnects, 1)
-    }
-
-    // MARK: - The microphone
-
-    func testPushStartsMuted() async {
-        transport.reply("voice-token", 200, HQVoiceTransport.token(micMode: "push"))
-        let session = makeSession()
-        await goLive(session)
-        XCTAssertEqual(session.phase, .live)
-        XCTAssertEqual(session.micMode, .push)
-        XCTAssertFalse(session.isMicrophoneOn, "push-to-talk is muted until held")
-        XCTAssertEqual(engine.microphone, [], "the microphone is never opened at the join")
-
-        await session.holdToTalk(true)
-        XCTAssertTrue(session.isMicrophoneOn)
-        await session.holdToTalk(false)
-        XCTAssertFalse(session.isMicrophoneOn)
-        XCTAssertEqual(engine.microphone, [true, false])
-        await session.toggleMute()
-        XCTAssertEqual(engine.microphone, [true, false], "push has no mute switch")
-    }
-
-    func testAnUnknownMicModeIsAnOpenMicrophoneWithAMuteSwitch() async {
-        transport.reply("voice-token", 200, HQVoiceTransport.token(micMode: "whisper"))
-        let session = makeSession()
-        await goLive(session)
-        XCTAssertEqual(session.micMode, .open)
-        XCTAssertTrue(session.isMicrophoneOn)
-        await session.toggleMute()
-        XCTAssertFalse(session.isMicrophoneOn)
-        await session.holdToTalk(true)
-        XCTAssertEqual(engine.microphone, [true, false], "an open mode does not hold to talk")
-    }
-
-    // MARK: - What the room says
-
-    func testOnlyFinalSegmentsAreKept() async {
-        let session = makeSession()
-        await goLive(session)
-        engine.emit(.transcript(HQVoiceSegment(id: "s1", text: "Add a", isFinal: false, fromMember: true)))
-        engine.emit(.transcript(HQVoiceSegment(id: "s1", text: "Add a note.", isFinal: true, fromMember: true)))
-        engine.emit(.agentState(.thinking))
-        let done = await eventually { session.agentState == .thinking }
-        XCTAssertTrue(done)
-        XCTAssertEqual(session.segments.map(\.text), ["Add a note."])
-        XCTAssertEqual(session.segments.first?.fromMember, true)
-    }
-
-    func testAProposalAndItsVoiceResolution() async {
-        let session = makeSession()
-        await goLive(session)
-        let proposal = HQVoiceProposal(proposalId: "p1", tool: "add_note", args: .object([:]), summary: "Add a note.")
-        engine.emit(.packet(.proposal(proposal)))
-        engine.emit(.packet(.proposal(proposal)))
-        engine.emit(.packet(.resolved(HQVoiceResolution(
-            proposalId: "p1", status: .applied, error: nil, joinCallId: nil
-        ))))
-        let resolved = await eventually { session.proposals.first?.outcome == .applied }
-        XCTAssertTrue(resolved)
-        XCTAssertEqual(session.proposals.count, 1, "a repeated proposal is one card")
-    }
-
-    func testCancelAProposalCallsTheCancelRoute() async {
-        transport.reply("proposals/cancel", 200, #"{"success":true}"#)
-        let session = makeSession()
-        await goLive(session)
-        engine.emit(.packet(.proposal(HQVoiceProposal(
-            proposalId: "p2", tool: "add_note", args: .object([:]), summary: "Add a note."
-        ))))
-        _ = await eventually { !session.proposals.isEmpty }
-        await session.cancel(session.proposals[0])
-        XCTAssertEqual(session.proposals[0].outcome, .cancelled)
-        XCTAssertTrue(transport.bodies("proposals/cancel").first?.contains(#""proposalId":"p2""#) == true)
-    }
-
-    func testAViewerCannotConfirm() async {
-        let session = makeSession(canConfirm: false)
-        await goLive(session)
-        engine.emit(.packet(.proposal(HQVoiceProposal(
-            proposalId: "p3", tool: "add_note", args: .object([:]), summary: "Add a note."
-        ))))
-        _ = await eventually { !session.proposals.isEmpty }
-        await session.confirm(session.proposals[0])
-        XCTAssertNil(session.proposals[0].outcome)
-        XCTAssertEqual(transport.paths.filter { $0.hasSuffix("/hq") }, [])
-    }
-
-    func testTheRoomClosingEndsTheSession() async {
-        let session = makeSession()
-        await goLive(session)
-        engine.emit(.disconnected)
-        let ended = await eventually { session.phase == .ended(.disconnected) }
-        XCTAssertTrue(ended)
-        XCTAssertFalse(stack.hasLiveRoom)
-    }
-
-    // MARK: - Screen context
-
-    func testEachNavigationIsReportedWhileLive() async {
-        let session = makeSession()
-        session.report(HQVoicePlace(.contacts))
-        XCTAssertEqual(transport.count("voice-context"), 0, "nothing is reported before the session is live")
-        await goLive(session)
-        let first = await eventually { transport.count("voice-context") == 1 }
-        XCTAssertTrue(first)
-        XCTAssertTrue(transport.bodies("voice-context")[0].contains(#""contacts""#), "the place before the join")
-
-        var paths = ShellPaths()
-        paths.adopt("ws1")
-        paths.setRegularSelection(.calls, workspaceId: "ws1", role: .agency)
-        paths.setRegularPath([.callDetail(workspaceId: "ws1", callId: "call_42")], for: .calls)
-        session.report(paths.hqVoicePlace)
-        let second = await eventually { transport.count("voice-context") == 2 }
-        XCTAssertTrue(second)
-        let body = transport.bodies("voice-context")[1]
-        XCTAssertTrue(body.contains(#""calls""#), body)
-        XCTAssertTrue(body.contains("call_42"), body)
-        XCTAssertTrue(body.contains("hq_ws1_abc"), body)
-
-        await session.stop()
-        session.report(HQVoicePlace(.inbox))
-        try? await Task.sleep(for: .milliseconds(50))
-        XCTAssertEqual(transport.count("voice-context"), 2, "nothing is reported once it ended")
-    }
-
-    func testTheSecretsAreNotInTheSessionDescription() async {
-        let session = makeSession()
-        await session.start(history: [], locale: "en")
-        let printed = "\(session.phase)"
-        XCTAssertFalse(printed.contains("tok-secret"), printed)
-        XCTAssertFalse(printed.contains("sess-secret"), printed)
-        XCTAssertFalse(printed.contains("k3y"), printed)
     }
 }
 
