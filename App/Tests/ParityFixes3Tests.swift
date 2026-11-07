@@ -17,11 +17,15 @@ final class ParityFixes3Tests: XCTestCase {
         )
         XCTAssertTrue(segments.contains("if dynamicTypeSize.isAccessibilitySize {\n            tabMenu"))
         XCTAssertTrue(segments.contains("ViewThatFits(in: .horizontal)"))
-        XCTAssertTrue(segments.contains("segmentLabels\n                    .hidden()"), "the fit is measured on the labels")
+        XCTAssertTrue(
+            segments.contains("segmentLabels\n                    .hidden()"),
+            "the fit is measured on the labels"
+        )
         XCTAssertTrue(segments.contains(".pickerStyle(.segmented)"))
         let fallback = try XCTUnwrap(segments.components(separatedBy: ".pickerStyle(.segmented)").last)
         XCTAssertTrue(fallback.contains("tabMenu"), "the menu is the fallback")
-        let labels = try XCTUnwrap(code.components(separatedBy: "private var segmentLabels").dropFirst().first?.prefix(500))
+        let labels = try XCTUnwrap(code.components(separatedBy: "private var segmentLabels").dropFirst().first?
+            .prefix(500))
         XCTAssertTrue(labels.contains("MarketplaceTab.allCases"), "every tab is measured")
         XCTAssertTrue(labels.contains(".lineLimit(1)"))
         XCTAssertTrue(labels.contains(".fixedSize()"))
