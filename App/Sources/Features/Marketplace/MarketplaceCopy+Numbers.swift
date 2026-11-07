@@ -33,11 +33,39 @@ import Foundation
 extension MarketplaceCopy {
     // MARK: - Carrier connectivity
 
+    /// ⚠️ FRENCH GOES THROUGH THE CORE'S MONEY TABLE, as ``priceLabel(monthlyPrice:currency:)``
+    /// does: « Solde : 12,50 $ US », never « 12.50 USD », and « 12,50 » with no currency.
+    /// The carrier sends the balance as a decimal STRING, so one that does not parse as a
+    /// number is shown as sent rather than guessed at. English keeps the raw value it has
+    /// always shown.
     static func carrierBalance(_ balance: String, currency: String?) -> String {
+        let code = currency?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if L10nRuntime.locale != .en, let cents = balanceCents(balance) {
+            return carrierBalanceAmount(L10nFormat.moneyOrBare(minorUnits: cents, currency: code.isEmpty ? nil : code))
+        }
         guard let currency, !currency.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return carrierBalanceAmount(balance)
         }
         return carrierBalanceWithCurrency(balance, currency)
+    }
+
+    /// The balance in cents, or nil when the string is not a plain decimal (`-12.50`, leading
+    /// zeroes allowed) of at most 13 integer digits; anything else is a bad value, shown as
+    /// sent.
+    ///
+    /// ⚠️ PARSED AS A DECIMAL, NEVER A `Double`. In binary `1.005` is just under the
+    /// half-cent, so it rounded to « 1,00 » instead of « 1,01 ». The plain-decimal check
+    /// comes first because `Decimal(string:)` reads a leading number and ignores the rest.
+    private static func balanceCents(_ balance: String) -> Int? {
+        let text = balance.trimmingCharacters(in: .whitespaces)
+        guard text.wholeMatch(of: /-?0*[0-9]{1,13}(\.[0-9]+)?/) != nil,
+              let amount = Decimal(string: text, locale: Locale(identifier: "en_US_POSIX")) else { return nil }
+        var cents = amount * 100
+        var rounded = Decimal()
+        NSDecimalRound(&rounded, &cents, 0, .plain)
+        // ⚠️ `int64Value`, NOT `intValue`: a 13-digit balance is 15 digits of cents, past
+        // what a 32-bit conversion can hold.
+        return Int(NSDecimalNumber(decimal: rounded).int64Value)
     }
 
     // MARK: - Registrations

@@ -21,8 +21,8 @@
 ///
 /// ⚠️ ANDROID BLOCKS CALLERS AND REPORTS CONTENT TOO, and shares most of these strings
 /// (`district-contact-block`, `-unblock`, `-blocked-badge` and the `district-report-*`
-/// set). Its confirm is `district-contact-block-confirm` where this one is
-/// `district-contact-confirm-block`; align them in the change that next touches either.
+/// set) and `district-contact-block-confirm`, which ``A11yID/Contacts/confirmBlock`` now
+/// copies.
 ///
 /// ⚠️ ITS OWN FILE, matching the four `A11yID+Scheduling*.swift` siblings. `A11yID.swift`
 /// is the base and the extensions are expected rather than exceptional.
@@ -64,7 +64,11 @@ extension A11yID.Contacts {
     /// The confirmation dialog's own Block and Unblock buttons. ⚠️ Not yet seen on a
     /// device: if a dialog action drops its identifier, the walk's lookup finds nothing
     /// and says so, rather than tapping the wrong button.
-    static let confirmBlock = "district-contact-confirm-block"
+    ///
+    /// ⚠️ ANDROID'S STRING, VERBATIM (`ContactBlocking.kt`); it was
+    /// `district-contact-confirm-block` through 3.3.0. Android has no unblock confirmation,
+    /// so ``confirmUnblock`` has no twin to copy.
+    static let confirmBlock = "district-contact-block-confirm"
     static let confirmUnblock = "district-contact-confirm-unblock"
 }
 
