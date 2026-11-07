@@ -3544,8 +3544,8 @@ en = "Microphone"
 fr = "Microphone"
 ctx = "label"
 screen = "hq"
-same_ok = true
 state = "draft"
+same_ok = true
 id = { swift = "HQCopy.voiceSettingMic" }
 note = "Voice settings: how the microphone behaves."
 
