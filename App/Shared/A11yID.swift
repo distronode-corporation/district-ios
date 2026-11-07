@@ -318,10 +318,11 @@ enum A11yID {
 
     /// The scheduling hub, its nine sections and the two drill-downs.
     ///
-    /// ⚠️ iOS-FIRST THROUGHOUT: Android has no scheduling surface at all, so nothing here
-    /// is ported and the names are chosen to match the WEB's section paths (`event-types`,
-    /// not `eventTypes`) so a cross-client test plan can address the same screen by the
-    /// same word on both.
+    /// ⚠️ BUILT ALONGSIDE ANDROID'S RATHER THAN PORTED FROM IT. Where Android has the same
+    /// element it uses the same string (`district-scheduling-root`, `-link`); check its
+    /// `SchedulingScreen.kt` before adding one. The names match the WEB's section paths
+    /// (`event-types`, not `eventTypes`) so a cross-client test plan can address the same
+    /// screen by the same word on every client.
     enum Scheduling {
         static let root = "district-scheduling-root"
         static let notice = "district-scheduling-notice"

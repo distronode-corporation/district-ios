@@ -5,10 +5,10 @@
 /// is a conflict on every line either of them touched. An extension compiles into the same two targets
 /// (`App/Shared` is listed by the app AND the UI-test bundle) and costs nothing.
 ///
-/// ⚠️ iOS-FIRST, EVERY ONE OF THEM. Android has no native scheduling admin, so
-/// there is no Kotlin name to copy verbatim the way `A11yID` requires where one
-/// exists. They follow the same `district-<area>-<thing>` shape so the day Android
-/// ports this surface it has names to adopt rather than invent.
+/// ⚠️ ANDROID HAS ITS OWN SCHEDULING ADMIN, BUILT ALONGSIDE THIS ONE, and few of these
+/// strings match it (`district-scheduling-hours-day` does). Where Android names the same
+/// element, copy its string verbatim, as `A11yID` requires; the rest keep the shared
+/// `district-<area>-<thing>` shape.
 ///
 /// ⚠️ ONE LEVEL OF NESTING, deliberately: `.swiftlint.yml` warns at
 /// `nesting.type_level: 2` and `--strict` makes that an error, so a
