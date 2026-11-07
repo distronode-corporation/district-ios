@@ -12,9 +12,10 @@
 /// target and `DistrictAIUITests` from `App/Shared`; anything it imports has to be
 /// importable by a `bundle.ui-testing` target too.
 ///
-/// ⚠️ THE STRINGS ARE iOS-FIRST. Android has no native scheduling admin, so there
-/// is nothing to mirror verbatim the way `district-nav-overview` mirrors it; the
-/// shape (`district-<surface>-<thing>`) is copied instead.
+/// ⚠️ ANDROID HAS ITS OWN DEVELOPER AND CALENDAR WRITES, and some strings are shared
+/// with it (the CalDAV fields, calendar connect and disconnect). Where Android names the
+/// same element, copy its string verbatim, the way `district-nav-overview` is; the rest
+/// keep the shape (`district-<surface>-<thing>`).
 extension A11yID {
     /// API keys, connected apps and webhooks — the Developer tab's writes.
     enum SchedulingDeveloperWrites {

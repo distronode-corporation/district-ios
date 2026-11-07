@@ -53,6 +53,11 @@ extension View {
     /// colour, so it takes the tint. Its leading end is the text column's
     /// (``DistrictListRow``), past the avatar, as an iOS list draws it.
     ///
+    /// ⛔ THE BOTTOM EDGE SHOWN, THE TOP EDGE HIDDEN. `.visible` on every edge also drew
+    /// the first row's top hairline, a line under the header or the search bar, and an
+    /// automatic top edge draws it too (measured on the simulator). Between two rows the
+    /// upper row's bottom edge draws the line.
+    ///
     /// ⛔ THE TINT IS ONE DYNAMIC COLOUR, NEVER A COLOUR PICKED FROM `colorScheme` (3.0.2
     /// walk 3). `listRowSeparatorTint` keeps the colour it was first given across a live
     /// light/dark switch, so a scheme-resolved tint left `#c9d6d8` on the dark rows and
@@ -72,7 +77,8 @@ struct RouteListRowGround: ViewModifier {
     func body(content: Content) -> some View {
         content
             .listRowInsets(EdgeInsets())
-            .listRowSeparator(.visible)
+            .listRowSeparator(.hidden, edges: .top)
+            .listRowSeparator(.visible, edges: .bottom)
             .listRowSeparatorTint(Self.separator)
             .listRowBackground(Self.ground(colorScheme, selects: selects))
     }

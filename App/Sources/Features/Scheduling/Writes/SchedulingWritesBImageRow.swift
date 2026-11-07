@@ -32,8 +32,9 @@ struct SchedulingWritesBImageRow: View {
     @State private var picked: PhotosPickerItem?
     @State private var confirmingRemove = false
 
+    /// ⚠️ NO EYEBROW: the row's own label is the card's title (see ``SettingsCard``).
     var body: some View {
-        SettingsCard(eyebrow: label) {
+        SettingsCard {
             VStack(alignment: .leading, spacing: DistrictSpacing.tight) {
                 SettingsReadOnlyRow(label: label, value: publishedUrl)
                 SchedulingWriteHint(text: SchedulingSettingsWriteCopy.imageHint)

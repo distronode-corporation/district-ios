@@ -278,11 +278,12 @@ final class AppContainer {
     /// The phone-number marketplace: the carrier's inventory, and the lines this
     /// workspace already has.
     ///
-    /// ⛔ READ ONLY, AND THE TYPE HAS NO WRITE METHOD TO CALL. Purchase, release and
-    /// configure routes exist server-side and are deliberately not modelled: buying a
-    /// number creates a recurring carrier charge, releasing one takes a live line out
-    /// of service, and a released number cannot be reclaimed. The app lists, the web
-    /// installs. See the ⛔ on ``NumbersRepository``.
+    /// ⛔ NO PURCHASE, AND THE TYPE HAS NO METHOD THAT BUYS. It lists, configures and
+    /// releases numbers and files carrier registrations (`NumbersRepository+Provisioning`
+    /// in the core); a release asks first, because a released number cannot be
+    /// reclaimed. The purchase route exists server-side and is deliberately not
+    /// modelled: buying a number creates a recurring carrier charge. See the ⛔ on
+    /// ``NumbersRepository``.
     ///
     /// ⚠️ TWO UNRELATED ROUTES BEHIND ONE SCREEN THAT FAIL SEPARATELY, like
     /// ``analytics`` and ``workflows``: each method answers its own `Result`, so a

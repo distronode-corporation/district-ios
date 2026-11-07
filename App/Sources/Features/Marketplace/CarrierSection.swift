@@ -81,7 +81,8 @@ struct CarrierSection: View {
         case .loading:
             SkeletonBlock(height: 56)
         case let .ready(enabled, _):
-            SettingsCard(eyebrow: MarketplaceCopy.verifyEyebrow) {
+            // ⚠️ NO EYEBROW: the row's own label is the card's title (see ``SettingsCard``).
+            SettingsCard {
                 SettingsReadOnlyRow(
                     label: MarketplaceCopy.verifyEyebrow,
                     value: enabled ? MarketplaceCopy.verifyOn : MarketplaceCopy.verifyOff
@@ -227,7 +228,8 @@ struct SipCard: View {
                         value: MarketplaceCopy.sipTrunkMeta(
                             status: AppWire.label(.sipTrunkStatus, trunk.status),
                             addresses: trunk.ipAccessControlList.count
-                        )
+                        ),
+                        identifierLabel: true
                     )
                     // ⚠️ A ROW WITH NO CARRIER SIDS IS A BILLING ITEM WITH NOTHING BEHIND IT,
                     // which the list can genuinely report for a row written before real
