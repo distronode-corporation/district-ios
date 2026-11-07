@@ -138,33 +138,84 @@ struct MarketplaceView: View {
     /// 16-numbers). A `Menu` around an inline `Picker` keeps the checkmarked list, and its
     /// label wraps between words like any other text.
     ///
+    /// ⚠️ AND THE MENU WHENEVER THE FOUR LABELS DO NOT FIT. On an iPhone 16e in French the
+    /// segmented control cut « Mes numéros » to « Mes numér… » at the default text size. A
+    /// segmented control cannot shrink its labels, so it is used only when the four fit, and
+    /// the menu, which shows the current tab in full, takes over when they do not.
+    ///
+    /// ⛔ `ViewThatFits` MEASURES THE LABELS, NOT THE CONTROL. The control's ideal width is
+    /// four equal segments, each as wide as the longest label, so measured directly it
+    /// "did not fit" even where its labels sat comfortably (iPhone 16e, English). The first
+    /// choice is a hidden row of the four labels at the control's font and padding, with
+    /// the control drawn over it at the full width.
+    ///
     /// ⛔ THE SELECTION WRITES THROUGH ``MarketplaceModel/selectTab(_:)``, as the buttons did,
     /// in a closure literal (see the custom lint rule in `.swiftlint.yml`).
     @ViewBuilder
     private var segments: some View {
         if dynamicTypeSize.isAccessibilitySize {
-            Menu {
-                tabPicker.pickerStyle(.inline)
-            } label: {
-                HStack(alignment: .firstTextBaseline, spacing: DistrictSpacing.tight) {
-                    Text(Self.tabTitle(model.tab))
-                        .font(DistrictType.title)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .accessibilityHidden(true)
-                }
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .contentShape(Rectangle())
-            }
-            .accessibilityLabel(MarketplaceCopy.title)
-            .accessibilityValue(Self.tabTitle(model.tab))
-            .accessibilityIdentifier(A11yID.Marketplace.tabs)
+            tabMenu
         } else {
-            tabPicker
-                .pickerStyle(.segmented)
-                .accessibilityIdentifier(A11yID.Marketplace.tabs)
+            ViewThatFits(in: .horizontal) {
+                segmentLabels
+                    .hidden()
+                    .frame(maxWidth: .infinity)
+                    .overlay {
+                        tabPicker
+                            .pickerStyle(.segmented)
+                            .accessibilityIdentifier(A11yID.Marketplace.tabs)
+                    }
+                tabMenu
+            }
         }
+    }
+
+    /// The four labels as the segmented control lays them out, for measuring only: its
+    /// label font and the padding either side of each label.
+    private var segmentLabels: some View {
+        HStack(spacing: 0) {
+            ForEach(MarketplaceTab.allCases, id: \.self) { tab in
+                Text(Self.tabTitle(tab))
+                    .font(.system(size: Self.segmentLabelSize, weight: .semibold))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .padding(.horizontal, Self.segmentLabelPadding)
+            }
+        }
+        .frame(minHeight: Self.segmentHeight)
+    }
+
+    /// The segmented control's label size, which does not follow Dynamic Type, measured
+    /// at the selected segment's weight so the estimate errs wide.
+    private static let segmentLabelSize: CGFloat = 13
+
+    /// The room either side of a segment's label. Measured:
+    /// the four French labels need 314 pt at 13 pt semibold and the control drew them in
+    /// about 358 pt on an iPhone 17, which leaves about 6 pt a side.
+    private static let segmentLabelPadding: CGFloat = 6
+
+    /// The segmented control's height, so the row it is drawn over is no shorter.
+    private static let segmentHeight: CGFloat = 32
+
+    /// The four tabs as a menu: the current tab's title, in full, and a checkmarked list.
+    private var tabMenu: some View {
+        Menu {
+            tabPicker.pickerStyle(.inline)
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: DistrictSpacing.tight) {
+                Text(Self.tabTitle(model.tab))
+                    .font(DistrictType.title)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                Image(systemName: "chevron.up.chevron.down")
+                    .accessibilityHidden(true)
+            }
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .accessibilityLabel(MarketplaceCopy.title)
+        .accessibilityValue(Self.tabTitle(model.tab))
+        .accessibilityIdentifier(A11yID.Marketplace.tabs)
     }
 
     /// The four tabs, in the order the segmented control shows them.
