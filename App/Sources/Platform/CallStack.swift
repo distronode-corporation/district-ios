@@ -281,6 +281,13 @@ final class CallStack {
         await room.yieldAudio(reason)
     }
 
+    /// A District call is ringing: end a room that yields at the ring (``RoomAudio/yieldsAtRing``).
+    /// ⚠️ A meeting stays up until the answer, through ``beginCall()``.
+    func ringArrived() async {
+        guard room?.yieldsAtRing == true else { return }
+        await endRoom(.telephoneCall)
+    }
+
     /// Release the engine once the call's reducer has reached a terminal phase.
     ///
     /// ⚠️ NOT A HANG-UP. The reducers emit ``CallCommand/disconnect`` themselves, exactly

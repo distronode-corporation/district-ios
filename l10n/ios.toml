@@ -3232,6 +3232,422 @@ state = "reviewed"
 id = { swift = "HQCopy.viewerCannotConfirm" }
 note = "⚠️ SHOWN UNDER THE PROPOSAL FOR A ROLE THE SERVER WOULD REFUSE, in place of the Confirm button. A viewer should not normally see a proposal at all (the tool executor declines their write before the confirmation gate is reached), so this exists for the case where that ordering changes, and it says who can apply the change rather than leaving a card with only a Dismiss button on it."
 
+[hq.voice_applied]
+en = "Done."
+fr = "Fait."
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceApplied" }
+note = "A proposed change was applied."
+
+[hq.voice_busy]
+en = "Voice can't start during a call or a meeting."
+fr = "Le mode vocal ne peut pas démarrer pendant un appel ou une réunion."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceBusy" }
+note = "Refused: a call or a meeting holds the audio."
+
+[hq.voice_cancel]
+en = "Cancel"
+fr = "Annuler"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceCancel" }
+note = "Cancels a change HQ proposed by voice."
+
+[hq.voice_cancelled]
+en = "Cancelled."
+fr = "Annulé."
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceCancelled" }
+note = "A proposed change was cancelled."
+
+[hq.voice_confirm]
+en = "Confirm"
+fr = "Confirmer"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceConfirm" }
+note = "Applies a change HQ proposed by voice."
+
+[hq.voice_connecting]
+en = "Connecting…"
+fr = "Connexion…"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceConnecting" }
+note = "While the voice session joins its room."
+
+[hq.voice_ended]
+en = "Voice ended."
+fr = "Le mode vocal est terminé."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceEnded" }
+note = "A voice session ended (by the member, or the room closed)."
+
+[hq.voice_ended_call]
+en = "Voice ended for a call."
+fr = "Le mode vocal s'est arrêté pour un appel."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceEndedCall" }
+note = "A District call rang during a voice session and ended it."
+
+[hq.voice_ended_timeout]
+en = "The 30-minute voice session has ended."
+fr = "La session vocale de 30 minutes est terminée."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceEndedTimeout" }
+note = "A voice session reached its 30 minutes."
+
+[hq.voice_failed]
+en = "The change could not be made."
+fr = "La modification n'a pas pu être faite."
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceFailed" }
+note = "A proposed change failed."
+
+[hq.voice_hold_to_talk]
+en = "Hold to talk"
+fr = "Maintenir pour parler"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceHoldToTalk" }
+note = "Push-to-talk: the microphone is open only while this is held."
+
+[hq.voice_join_failed]
+en = "Voice couldn't connect. Try again."
+fr = "Le mode vocal n'a pas pu se connecter. Réessayez."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceJoinFailed" }
+note = "The voice room could not be joined."
+
+[hq.voice_language_en]
+en = "English"
+fr = "Anglais"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLanguageEn" }
+note = "Language: English."
+
+[hq.voice_language_fr]
+en = "French"
+fr = "Français"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLanguageFr" }
+note = "Language: French."
+
+[hq.voice_language_portal]
+en = "Same as the app"
+fr = "Comme l'application"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLanguagePortal" }
+note = "Language: follow the app's language."
+
+[hq.voice_length_brief]
+en = "Brief answers"
+fr = "Réponses brèves"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLengthBrief" }
+note = "Answer length: brief."
+
+[hq.voice_length_detailed]
+en = "Detailed answers"
+fr = "Réponses détaillées"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLengthDetailed" }
+note = "Answer length: detailed."
+
+[hq.voice_length_normal]
+en = "Normal answers"
+fr = "Réponses normales"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLengthNormal" }
+note = "Answer length: normal."
+
+[hq.voice_listening]
+en = "Listening"
+fr = "À l'écoute"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceListening" }
+note = "The voice agent's state: listening."
+
+[hq.voice_mic_denied]
+en = "Allow the microphone in Settings to talk to HQ."
+fr = "Autorisez le microphone dans Réglages pour parler à HQ."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMicDenied" }
+note = "The microphone permission is off. Réglages is the iOS Settings app's French name."
+
+[hq.voice_mic_explainer]
+en = "HQ listens through your microphone while voice is on."
+fr = "HQ vous écoute par le microphone tant que le mode vocal est actif."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMicExplainer" }
+note = "Shown before the system's microphone prompt, under the Talk button."
+
+[hq.voice_mic_open]
+en = "Open mic"
+fr = "Micro ouvert"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMicOpen" }
+note = "Microphone: open while the session is live."
+
+[hq.voice_mic_push]
+en = "Hold to talk"
+fr = "Maintenir pour parler"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMicPush" }
+note = "Microphone: muted until the talk button is held."
+
+[hq.voice_mute]
+en = "Mute"
+fr = "Couper le micro"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMute" }
+note = "Mutes an open microphone during a voice session."
+
+[hq.voice_notice_body]
+en = "PLACEHOLDER: where your voice is processed: {region}."
+fr = "PLACEHOLDER\u00A0: lieu de traitement de votre voix\u00A0: {region}."
+ctx = "body"
+screen = "hq"
+args = { region = "str" }
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeBody(_:)" }
+note = "⚠️ PLACEHOLDER, NOT FOR RELEASE. The release manager sends the exact wording every client uses (it names the voice and read-back providers). {region} is the service's processingRegion as a region name (« États-Unis »)."
+
+[hq.voice_notice_cancel]
+en = "Not now"
+fr = "Pas maintenant"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeCancel" }
+note = "Declines the region notice: nothing is joined and the session is discarded."
+
+[hq.voice_notice_start]
+en = "Start talking"
+fr = "Commencer à parler"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeStart" }
+note = "Accepts the region notice and opens the voice session."
+
+[hq.voice_notice_title]
+en = "Before you talk"
+fr = "Avant de parler"
+ctx = "title"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeTitle" }
+note = "The region notice's title, shown after a voice session is created and before the microphone opens."
+
+[hq.voice_pace_faster]
+en = "Faster"
+fr = "Plus rapide"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voicePaceFaster" }
+note = "Pace: faster."
+
+[hq.voice_pace_normal]
+en = "Normal pace"
+fr = "Rythme normal"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voicePaceNormal" }
+note = "Pace: normal."
+
+[hq.voice_pace_slower]
+en = "Slower"
+fr = "Plus lent"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voicePaceSlower" }
+note = "Pace: slower."
+
+[hq.voice_proposal_fallback]
+en = "HQ proposes a change."
+fr = "HQ propose une modification."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceProposalFallback" }
+note = "A voice proposal whose summary the service left empty."
+
+[hq.voice_setting_language]
+en = "Language"
+fr = "Langue"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingLanguage" }
+note = "Voice settings: the language HQ speaks."
+
+[hq.voice_setting_length]
+en = "Answer length"
+fr = "Longueur des réponses"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingLength" }
+note = "Voice settings: how long HQ's spoken answers are."
+
+[hq.voice_setting_mic]
+en = "Microphone"
+fr = "Microphone"
+ctx = "label"
+screen = "hq"
+same_ok = true
+state = "draft"
+id = { swift = "HQCopy.voiceSettingMic" }
+note = "Voice settings: how the microphone behaves."
+
+[hq.voice_setting_pace]
+en = "Pace"
+fr = "Débit"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingPace" }
+note = "Voice settings: how fast HQ speaks."
+
+[hq.voice_setting_voice]
+en = "Voice"
+fr = "Voix"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingVoice" }
+note = "Voice settings: which voice HQ speaks with. The values are the voices' own names."
+
+[hq.voice_settings]
+en = "Voice settings"
+fr = "Réglages vocaux"
+ctx = "title"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettings" }
+note = "The District HQ voice settings screen's title and the button that opens it."
+
+[hq.voice_settings_save]
+en = "Save"
+fr = "Enregistrer"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingsSave" }
+note = "Saves the voice settings."
+
+[hq.voice_settings_saved]
+en = "Saved."
+fr = "Enregistré."
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingsSaved" }
+note = "The voice settings were saved."
+
+[hq.voice_speaking]
+en = "Speaking"
+fr = "HQ parle"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSpeaking" }
+note = "The voice agent's state: speaking."
+
+[hq.voice_start]
+en = "Talk to HQ"
+fr = "Parler à HQ"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceStart" }
+note = "The button that starts a District HQ voice session. Each tap starts a session billed against the workspace's voice minutes."
+
+[hq.voice_stop]
+en = "End voice"
+fr = "Terminer le mode vocal"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceStop" }
+note = "Ends a running District HQ voice session."
+
+[hq.voice_thinking]
+en = "Thinking"
+fr = "Réflexion en cours"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceThinking" }
+note = "The voice agent's state: thinking."
+
+[hq.voice_unmute]
+en = "Unmute"
+fr = "Réactiver le micro"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceUnmute" }
+note = "Unmutes the microphone during a voice session."
+
+[hq.voice_you]
+en = "You"
+fr = "Vous"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceYou" }
+note = "Labels the member's own words in the voice transcript."
+
 [in_call.call_ended]
 en = "Call ended"
 fr = "Appel terminé"

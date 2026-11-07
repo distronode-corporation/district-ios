@@ -274,6 +274,7 @@ final class IncomingCallModel: LiveCallControls {
         }
         liveActivities.rang(workspaceId: workspace.rawValue, callId: call.rawValue)
         Task {
+            await calls.ringArrived() // ⛔ HQ by voice ends at the ring; a meeting at the answer.
             await apply(.ringing(workspace: workspace, call: call, atMilliseconds: Self.nowMilliseconds()))
             armRingTimeout(uuid: uuid)
         }
