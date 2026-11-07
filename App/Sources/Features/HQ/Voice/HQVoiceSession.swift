@@ -179,8 +179,11 @@ final class HQVoiceSession: RoomAudio {
         }
         guard phase == .connecting else { return }
         phase = .live
-        micWanted = micMode == .open
-        isMicrophoneOn = micWanted ? await engine.setMicrophone(enabled: true) : false
+        // ⛔ THE FIRST OPEN GOES THROUGH ``setMicrophone(_:)`` like every other change, so a mute
+        // tapped while it publishes is applied after it, not overwritten by it.
+        if micMode == .open {
+            await setMicrophone(true)
+        }
         // ⚠️ A RING OR A STOP DURING THE MICROPHONE'S PUBLISH has already ended the session.
         guard phase == .live else { return }
         startTimer()

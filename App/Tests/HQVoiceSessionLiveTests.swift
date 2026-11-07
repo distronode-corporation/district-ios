@@ -63,6 +63,53 @@ final class HQVoiceSessionLiveTests: HQVoiceSessionCase {
         XCTAssertTrue(session.isMicrophoneOn)
     }
 
+    /// ⛔ A MUTE TAPPED WHILE THE FIRST OPEN IS STILL PUBLISHING WINS: the session ends muted.
+    func testAMuteDuringTheFirstOpenIsAppliedAfterIt() async {
+        let session = makeSession()
+        await session.start(history: [], locale: "en")
+        engine.holdsMicrophone = true
+        let begin = Task { await session.begin() }
+        _ = await eventually { engine.pendingMicrophone == 1 }
+        let mute = Task { await session.toggleMute() }
+        try? await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(engine.microphone, [true], "the mute waits for the open")
+        engine.holdsMicrophone = false
+        engine.releaseMicrophone()
+        await begin.value
+        await mute.value
+        XCTAssertEqual(engine.microphone, [true, false])
+        XCTAssertFalse(session.isMicrophoneOn)
+        XCTAssertEqual(session.phase, .live)
+    }
+
+    /// ⛔ A CLOSED TRANSCRIPTION STREAM IS FINAL whether its flag came in the header or not at
+    /// all (sent at the close), so HQ's words are never dropped.
+    func testAClosedTranscriptionStreamIsFinalWithOrWithoutItsFlag() {
+        let flagged = HQVoiceSegment(
+            closedStream: "stream-1",
+            attributes: [
+                HQVoice.segmentIDAttribute: "seg-1",
+                HQVoice.transcriptionFinalAttribute: "true",
+                HQVoice.transcribedTrackIDAttribute: "TR_mic",
+            ],
+            text: "Add a note.",
+            memberTrack: "TR_mic"
+        )
+        XCTAssertEqual(flagged, HQVoiceSegment(id: "seg-1", text: "Add a note.", isFinal: true, fromMember: true))
+
+        let flagAtClose = HQVoiceSegment(
+            closedStream: "stream-2",
+            attributes: [HQVoice.transcribedTrackIDAttribute: "TR_agent"],
+            text: "Sure.",
+            memberTrack: "TR_mic"
+        )
+        XCTAssertEqual(flagAtClose, HQVoiceSegment(id: "stream-2", text: "Sure.", isFinal: true, fromMember: false))
+        XCTAssertFalse(
+            HQVoiceSegment(closedStream: "s", attributes: [:], text: "Hi.", memberTrack: nil).fromMember,
+            "no track named is HQ's words"
+        )
+    }
+
     func testAnUnknownMicModeIsAnOpenMicrophoneWithAMuteSwitch() async {
         transport.reply("voice-token", 200, HQVoiceTransport.token(micMode: "whisper"))
         let session = makeSession()

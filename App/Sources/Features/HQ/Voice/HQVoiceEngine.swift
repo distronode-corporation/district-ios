@@ -18,6 +18,24 @@ struct HQVoiceSegment: Identifiable, Sendable, Equatable {
     let fromMember: Bool
 }
 
+extension HQVoiceSegment {
+    /// A segment whose text stream has CLOSED.
+    ///
+    /// ⛔ A CLOSED STREAM IS A FINAL SEGMENT, whatever `lk.transcription_final` says or whether it
+    /// arrived at all: the whole text is only handed over once its stream closes, and the agent
+    /// may send the flag at the close rather than in the header. Waiting for a flag that never
+    /// came would drop HQ's words from the transcript.
+    init(closedStream streamID: String, attributes: [String: String], text: String, memberTrack: String?) {
+        let transcribed = attributes[HQVoice.transcribedTrackIDAttribute]
+        self.init(
+            id: attributes[HQVoice.segmentIDAttribute] ?? streamID,
+            text: text,
+            isFinal: true,
+            fromMember: transcribed != nil && transcribed == memberTrack
+        )
+    }
+}
+
 /// What an HQ voice room tells the session.
 enum HQVoiceEngineEvent: Sendable, Equatable {
     case connected
@@ -77,15 +95,13 @@ final class LiveKitHQVoiceEngine: HQVoiceEngine {
         let continuation = continuation
         let room = room
         try await room.registerTextStreamHandler(for: HQVoice.transcriptionTopic) { reader, _ in
-            let attributes = reader.info.attributes
             let text = try await reader.readAll()
-            let memberTrack = room.localParticipant.localAudioTracks.first?.sid.stringValue
-            let transcribed = attributes[HQVoice.transcribedTrackIDAttribute]
+            // ⚠️ READ AFTER THE STREAM CLOSED, so attributes sent at the close are seen.
             continuation.yield(.transcript(HQVoiceSegment(
-                id: attributes[HQVoice.segmentIDAttribute] ?? reader.info.id,
+                closedStream: reader.info.id,
+                attributes: reader.info.attributes,
                 text: text,
-                isFinal: attributes[HQVoice.transcriptionFinalAttribute] == "true",
-                fromMember: transcribed != nil && transcribed == memberTrack
+                memberTrack: room.localParticipant.localAudioTracks.first?.sid.stringValue
             )))
         }
         do {
