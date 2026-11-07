@@ -35,6 +35,8 @@ enum UnreadBadge {
     /// at a caller that has no better answer than this one does.
     static func set(_ count: Int) {
         UNUserNotificationCenter.current().setBadgeCount(max(0, count))
+        // ⚠️ THE HOME SCREEN WIDGET SHOWS THE SAME NUMBER AS THE ICON'S BADGE.
+        WidgetSnapshotPublisher.unread(count)
     }
 
     /// Take the badge off the icon.

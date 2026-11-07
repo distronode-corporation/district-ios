@@ -34,4 +34,19 @@ extension WidgetCopy {
 
     /// `widgets.stale`
     internal static var stale: String { WidgetL10n.copyLocale == .frCA ? "Aucune mise à jour récente" : "Not updated recently" }
+
+    /// `widgets.summary_calls_week`
+    internal static var summaryCallsWeek: String { WidgetL10n.copyLocale == .frCA ? "Appels cette semaine" : "Calls this week" }
+
+    /// `widgets.summary_description`
+    internal static var summaryDescription: String { WidgetL10n.copyLocale == .frCA ? "Messages non lus et appels de la semaine de votre espace de travail." : "Unread messages and this week's calls for your workspace." }
+
+    /// `widgets.summary_display_name`
+    internal static var summaryDisplayName: String { WidgetL10n.copyLocale == .frCA ? "En un coup d'œil" : "At a glance" }
+
+    /// `widgets.summary_signed_out`
+    internal static var summarySignedOut: String { WidgetL10n.copyLocale == .frCA ? "Ouvrez District AI pour voir votre espace de travail." : "Open District AI to see your workspace." }
+
+    /// `widgets.summary_unread`
+    internal static var summaryUnread: String { WidgetL10n.copyLocale == .frCA ? "Non lus" : "Unread" }
 }
