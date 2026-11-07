@@ -35,6 +35,13 @@ final class ParityFixes2Tests: XCTestCase {
         XCTAssertEqual(MarketplaceCopy.carrierBalance("-2.675", currency: nil), "Solde\(nbsp): -2,68")
         // A number with something after it is not a balance.
         XCTAssertEqual(MarketplaceCopy.carrierBalance("12 USD", currency: nil), "Solde\(nbsp): 12 USD")
+        // Leading zeroes are still a number, and 13 integer digits count in cents past 32 bits.
+        XCTAssertEqual(MarketplaceCopy.carrierBalance("00000000000000.50", currency: nil), "Solde\(nbsp): 0,50")
+        XCTAssertEqual(
+            MarketplaceCopy.carrierBalance("1234567890123.45", currency: nil),
+            "Solde\(nbsp): 1\(nbsp)234\(nbsp)567\(nbsp)890\(nbsp)123,45"
+        )
+        XCTAssertEqual(MarketplaceCopy.carrierBalance("12345678901234", currency: nil), "Solde\(nbsp): 12345678901234")
 
         L10nRuntime.locale = .en
         XCTAssertEqual(MarketplaceCopy.carrierBalance("12.50", currency: "USD"), "Balance 12.50 USD")

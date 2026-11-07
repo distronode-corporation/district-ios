@@ -49,20 +49,23 @@ extension MarketplaceCopy {
         return carrierBalanceWithCurrency(balance, currency)
     }
 
-    /// The balance in cents, or nil when the string is not a plain decimal (`-12.50`) small
-    /// enough to count in `Int`; anything else is a bad value, shown as sent.
+    /// The balance in cents, or nil when the string is not a plain decimal (`-12.50`, leading
+    /// zeroes allowed) of at most 13 integer digits; anything else is a bad value, shown as
+    /// sent.
     ///
     /// ⚠️ PARSED AS A DECIMAL, NEVER A `Double`. In binary `1.005` is just under the
     /// half-cent, so it rounded to « 1,00 » instead of « 1,01 ». The plain-decimal check
     /// comes first because `Decimal(string:)` reads a leading number and ignores the rest.
     private static func balanceCents(_ balance: String) -> Int? {
         let text = balance.trimmingCharacters(in: .whitespaces)
-        guard text.wholeMatch(of: /-?[0-9]{1,13}(\.[0-9]+)?/) != nil,
+        guard text.wholeMatch(of: /-?0*[0-9]{1,13}(\.[0-9]+)?/) != nil,
               let amount = Decimal(string: text, locale: Locale(identifier: "en_US_POSIX")) else { return nil }
         var cents = amount * 100
         var rounded = Decimal()
         NSDecimalRound(&rounded, &cents, 0, .plain)
-        return NSDecimalNumber(decimal: rounded).intValue
+        // ⚠️ `int64Value`, NOT `intValue`: a 13-digit balance is 15 digits of cents, past
+        // what a 32-bit conversion can hold.
+        return Int(NSDecimalNumber(decimal: rounded).int64Value)
     }
 
     // MARK: - Registrations
