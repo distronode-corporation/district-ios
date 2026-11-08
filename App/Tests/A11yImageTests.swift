@@ -74,7 +74,7 @@ final class A11yImageTests: XCTestCase {
             count += try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
                 .components(separatedBy: Self.constructor).count - 1
         }
-        // ⚠️ TWENTY-FOUR. The tenth is the chevron on
+        // ⚠️ TWENTY-FIVE. The tenth is the chevron on
         // ``SchedulingHubView``'s section rows and the eleventh is the radio glyph on
         // ``SchedulingCalendarPickerSheet``'s destination rows; both carry
         // `.accessibilityHidden(true)`, because each sits inside a control VoiceOver
@@ -103,7 +103,9 @@ final class A11yImageTests: XCTestCase {
         // and the warning triangle, hidden because the sentence beside it says it cannot open.
         // The twenty-fifth is the chevron on ``IntegrationsView``'s two links, hidden as on the
         // settings hub: the `NavigationLink` already says it opens something.
-        // The twenty-sixth to twenty-eighth are the setup wizard's: ``SetupChoiceRow``'s radio
+        // The twenty-sixth is the lock on ``TwoStepView``'s cover over the secret while the app is
+        // not active, hidden because nobody can read the screen it is drawn for.
+        // The twenty-seventh to twenty-ninth are the setup wizard's: ``SetupChoiceRow``'s radio
         // circle, hidden because the row carries `.isSelected`; ``SetupPicker``'s chevron, hidden
         // because the menu is announced by its label and value; and the hours editor's remove
         // button, whose glyph carries the label because it is the whole button.
@@ -112,8 +114,8 @@ final class A11yImageTests: XCTestCase {
         // definition rather than per caller.
         // Comments do not count: both scans read comment-stripped source.
         XCTAssertEqual(
-            count, 28,
-            "the app has \(count) SF Symbols, not 28: update this number in the same "
+            count, 29,
+            "the app has \(count) SF Symbols, not 29: update this number in the same "
                 + "commit that adds or removes one, having decided how it is announced"
         )
     }

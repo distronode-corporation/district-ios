@@ -66,6 +66,9 @@ struct AccountView: View {
     /// The deletion sheet (``DeleteAccountView``), while it is open.
     @State private var deleting = false
 
+    /// The two-step verification sheet (``TwoStepView``), while it is open.
+    @State private var twoStep = false
+
     init(container: AppContainer, session: SessionModel, push: PushRegistrar) {
         self.container = container
         self.session = session
@@ -82,6 +85,7 @@ struct AccountView: View {
             VStack(alignment: .leading, spacing: DistrictSpacing.section) {
                 deviceCard
                 availabilityCard
+                securityCard
                 accountCard
                 footer
             }
@@ -268,6 +272,29 @@ struct AccountView: View {
         // session the rest of its own run depends on. Identified so a case can ASSERT
         // it is present without being able to press it.
         .accessibilityIdentifier(A11yID.Account.signOut)
+    }
+
+    // ── Security ─────────────────────────────────────────────────────────────
+
+    /// ⚠️ ITS OWN CARD, NOT BESIDE DELETION: see the account card's ⚠️ below.
+    ///
+    /// ⚠️ THE ROW SAYS NOTHING ABOUT ON OR OFF. The status is read when the sheet opens, so the
+    /// Account screen makes no call for it and never shows a stale answer.
+    private var securityCard: some View {
+        card(title: TwoStepCopy.cardTitle) {
+            Button { twoStep = true } label: {
+                DistrictListRow(
+                    title: TwoStepCopy.title,
+                    subtitle: TwoStepCopy.rowSubtitle,
+                    trailing: { glyph("chevron.right") }
+                )
+            }
+            .buttonStyle(.plain)
+            .sheet(isPresented: $twoStep) {
+                TwoStepView(container: container)
+            }
+            .accessibilityIdentifier(A11yID.Account.twoStep)
+        }
     }
 
     // ── Your account ─────────────────────────────────────────────────────────
