@@ -159,6 +159,10 @@ enum A11yID {
         static let whatsAppTemplates = "district-inbox-whatsapp-templates"
         /// ⛔ A FORBIDDEN SURFACE like ``send``: it sends a billed WhatsApp template.
         static let whatsAppTemplateSend = "district-inbox-whatsapp-template-send"
+        /// A received attachment that is not an image: the tile that opens it in Quick Look.
+        static let attachmentFile = "district-inbox-attachment-file"
+        /// A received attachment that could not be fetched, and says so.
+        static let attachmentUnavailable = "district-inbox-attachment-unavailable"
     }
 
     enum Dialer {
