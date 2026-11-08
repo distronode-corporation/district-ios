@@ -198,7 +198,9 @@ final class DeleteAccountModel {
             // what to do.
             Failure(title: DeleteAccountCopy.notDeleted, message: DeleteAccountCopy.errorTryAgainShortly)
         case (.http(401, _, _), _):
-            Failure(title: DeleteAccountCopy.notDeleted, message: SessionCopy.sessionHasEndedPlease)
+            // ⛔ NO "NOT DELETED" HEADLINE: a retry after a delete lost in transport is answered
+            // 401 when the first one did delete the account (the session went with it).
+            Failure(title: nil, message: SessionCopy.sessionHasEndedPlease)
         case (.decoding, _):
             // ⛔ A 2xx THIS BUILD COULD NOT READ MAY BE A DELETION: never claim either way.
             Failure(title: nil, message: DeleteAccountCopy.errorOutcomeUnknown)

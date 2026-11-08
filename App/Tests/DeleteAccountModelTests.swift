@@ -228,6 +228,19 @@ final class DeleteAccountModelTests: XCTestCase {
         XCTAssertTrue(unreadable.deletions.isEmpty)
     }
 
+    /// ⛔ A 401 MAY FOLLOW A DELETION: a retry after a delete lost in transport finds the session
+    /// gone with the account, so the sheet never says the account was kept.
+    func testAnEndedSessionNeverClaimsTheAccountWasKept() async {
+        let transport = SettingsTransport(responses: [(401, #"{"error":"Unauthorized"}"#)])
+        let harness = Harness(transport, sso: .proved(expiresInSeconds: 300))
+        await harness.model.reauthenticate(with: .google)
+        harness.model.confirmation = "you@example.test"
+        await harness.model.delete()
+
+        XCTAssertEqual(harness.model.failure, .init(title: nil, message: SessionCopy.sessionHasEndedPlease))
+        XCTAssertTrue(harness.deletions.isEmpty)
+    }
+
     func testVendorErasureStillPendingIsPassedOn() async {
         let pending = #"{"success":true,"accountDeleted":true,"externalErasurePending":true,"message":"x"}"#
         let harness = Harness(SettingsTransport([pending], status: 202), sso: .proved(expiresInSeconds: 300))
