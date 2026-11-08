@@ -24,6 +24,10 @@ import Observation
 ///
 /// ⚠️ THE EMAIL SENDER NAME AND REPLY-TO ARE NOT HERE: DistrictCore 8.5.0 has no mobile
 /// contract for the email identity, so the step opens the Skills page for them.
+///
+/// ⛔ THE READ AND THE SAVE NEVER OVERLAP. Each builds its `faqs` from the stored ones, and the
+/// service replaces a section whole, so whichever answered second would drop the other's
+/// questions (the drafts, or "what you do"). ``isBusy`` keeps both buttons off while either runs.
 @MainActor
 @Observable
 final class SetupBusinessModel {
@@ -47,6 +51,11 @@ final class SetupBusinessModel {
     private(set) var isSaving = false
     private(set) var showErrors = false
     private(set) var saveError: FailureText?
+
+    /// The website read or the save in flight; see the type's header.
+    var isBusy: Bool {
+        isReading || isSaving
+    }
 
     private let wizard: SetupWizardModel
     private let workspaces: WorkspaceRepository
@@ -108,9 +117,13 @@ final class SetupBusinessModel {
 
     func readWebsite() async {
         let url = websiteUrl.trimmed
-        guard !isReading, !url.isEmpty else { return }
+        guard !isBusy, !url.isEmpty else { return }
         isReading = true
-        defer { isReading = false }
+        wizard.beginStepWrite()
+        defer {
+            isReading = false
+            wizard.endStepWrite()
+        }
         notice = nil
         let locale = AppL10n.copyLocale == .frCA ? "fr" : "en"
         switch await wizard.repository.lookUp(workspaceId: wizard.workspaceId, websiteUrl: url, locale: locale) {
@@ -229,9 +242,13 @@ final class SetupBusinessModel {
     /// marks the step done.
     func save() async {
         showErrors = true
-        guard isValid, !isSaving else { return }
+        guard isValid, !isBusy else { return }
         isSaving = true
-        defer { isSaving = false }
+        wizard.beginStepWrite()
+        defer {
+            isSaving = false
+            wizard.endStepWrite()
+        }
         saveError = nil
         switch await wizard.repository.save(workspaceId: wizard.workspaceId, businessFacts: factsPatch()) {
         case let .success(response):
@@ -264,6 +281,10 @@ final class SetupBusinessModel {
 
     /// The address always (city and country are required), the street only when typed, the
     /// zone when the place implies one, and the "what you do" question in front of the rest.
+    ///
+    /// ⛔ THE STORED POSTAL CODE GOES BACK WITH THE ADDRESS. This step has no field for it, and
+    /// the service replaces the section whole, so leaving it out would erase what step 4 (or
+    /// the web) stored.
     func factsPatch() -> WireJSON {
         var patch: [String: WireJSON] = [:]
         if let zone {
@@ -275,6 +296,10 @@ final class SetupBusinessModel {
         }
         if !subdivision.trimmed.isEmpty {
             address["region"] = .string(subdivision.trimmed)
+        }
+        let postalCode = SetupFacts.address(wizard.data?.businessFacts).postalCode.trimmed
+        if !postalCode.isEmpty {
+            address["postalCode"] = .string(postalCode)
         }
         patch["address"] = .object(address)
         let stored = wizard.data?.businessFacts?["faqs"]?.arrayValue ?? []

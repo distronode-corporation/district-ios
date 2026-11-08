@@ -17,6 +17,11 @@ import Observation
 /// a no-op rather than a second PATCH. The flag is set before the first `await`, on the main
 /// actor, so two taps dispatched before a re-render cannot both pass the guard.
 ///
+/// ⛔ NO MOVE WHILE A STEP IS WRITING. A step's own save awaits its write and then calls
+/// ``complete(_:as:)``, so Back or Skip tapped in between would be overtaken by that late
+/// completion (Back undone, or the step skipped over its own save). Each step write holds
+/// ``beginStepWrite()`` to its end, and ``isMoving`` disables the shell's moves until then.
+///
 /// ⚠️ THE REPOSITORY IS THE TEST SEAM, as on ``IntegrationsModel``: a test drives a real
 /// repository over a canned transport.
 @MainActor
@@ -38,6 +43,11 @@ final class SetupWizardModel {
     /// The last step write's refusal, shown on the step it was for.
     private(set) var stepError: FailureText?
     private(set) var isCompleting = false
+    /// Step writes in flight; see ``beginStepWrite()``.
+    private(set) var stepWrites = 0
+    /// Bumped each time a page opened in a sheet closes, so a step showing state that page
+    /// changes (step 5's transfer number and calendar) reads it again.
+    private(set) var handOffsClosed = 0
     /// What step 1 learned; see ``SetupBusinessDraft``.
     private(set) var draft: SetupBusinessDraft
 
@@ -132,6 +142,7 @@ final class SetupWizardModel {
     /// back not `todo` advances.
     func refreshAfterHandOff() async {
         guard case .ready = phase else { return }
+        defer { handOffsClosed += 1 }
         let step = active
         let before = state(of: step)
         guard case let .success(response) = await repository.load(workspaceId: workspaceId) else { return }
@@ -158,6 +169,20 @@ final class SetupWizardModel {
     }
 
     // MARK: - Moving
+
+    /// A step write or a move in flight: Back, Skip and Finish later wait for it.
+    var isMoving: Bool {
+        isCompleting || stepWrites > 0
+    }
+
+    /// A step's write starts; pair it with ``endStepWrite()`` in a `defer`.
+    func beginStepWrite() {
+        stepWrites += 1
+    }
+
+    func endStepWrite() {
+        stepWrites -= 1
+    }
 
     /// Marks `step` and moves to the next one; true when the write landed.
     ///
@@ -188,11 +213,12 @@ final class SetupWizardModel {
     }
 
     func skip() async {
+        guard !isMoving else { return }
         await complete(active, as: .skipped)
     }
 
     func back() {
-        guard !isCompleting, let previous = SetupFlow.previous(before: active) else { return }
+        guard !isMoving, let previous = SetupFlow.previous(before: active) else { return }
         stepError = nil
         active = previous
     }

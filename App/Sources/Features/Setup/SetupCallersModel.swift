@@ -179,7 +179,11 @@ final class SetupCallersModel {
             return false
         }
         isSaving = true
-        defer { isSaving = false }
+        wizard.beginStepWrite()
+        defer {
+            isSaving = false
+            wizard.endStepWrite()
+        }
         saveError = nil
         switch await wizard.repository.save(workspaceId: wizard.workspaceId, businessFacts: patch()) {
         case let .success(response):
@@ -198,6 +202,9 @@ final class SetupCallersModel {
             saveError = SetupCopy.callersConfirmHoursFirst
             return
         }
+        // ⚠️ HELD ACROSS BOTH, so no move lands between the save and its completion.
+        wizard.beginStepWrite()
+        defer { wizard.endStepWrite() }
         guard await save() else { return }
         await wizard.complete(.callers, as: .done)
     }

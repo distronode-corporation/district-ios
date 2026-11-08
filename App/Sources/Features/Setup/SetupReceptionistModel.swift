@@ -148,7 +148,11 @@ final class SetupReceptionistModel {
         showErrors = true
         guard nameError == nil, greetingError == nil, !isSaving else { return }
         isSaving = true
-        defer { isSaving = false }
+        wizard.beginStepWrite()
+        defer {
+            isSaving = false
+            wizard.endStepWrite()
+        }
         saveError = nil
         let result = await workspaces.savePersona(
             workspaceId: wizard.workspaceId,

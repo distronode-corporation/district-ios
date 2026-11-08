@@ -204,4 +204,12 @@ class SetupStepTestCase: XCTestCase {
     func workspaces(_ transport: SetupTransport) -> WorkspaceRepository {
         WorkspaceRepository(client: transport.client)
     }
+
+    /// Lets work started with `async let` run on the main actor until `condition` holds.
+    func until(_ condition: () -> Bool, file: StaticString = #filePath, line: UInt = #line) async {
+        for _ in 0 ..< 10000 where !condition() {
+            await Task.yield()
+        }
+        XCTAssertTrue(condition(), "never happened", file: file, line: line)
+    }
 }

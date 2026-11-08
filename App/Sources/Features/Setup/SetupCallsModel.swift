@@ -14,7 +14,7 @@ import Observation
 /// ⛔ THE TRANSFER NUMBER AND THE CALENDAR ARE SHOWN HERE AND CHANGED ON THE WEB'S PAGES, IN A
 /// SHEET. DistrictCore 8.5.0's tools write carries the allowlist alone (no
 /// `supportPhoneNumber`), and connecting a calendar is the provider's consent screen. The
-/// step reads both again when the sheet closes.
+/// step reads both again when the sheet closes (``refreshAfterHandOff()``).
 ///
 /// ⛔ CALLER PROFILES ARE AN OPT-IN THAT STARTS OFF: read strictly (only `true` is on), offered
 /// only on the plans that include them (Voice Studio and DGI, the web's `dgiTierAllowed`),
@@ -82,7 +82,7 @@ final class SetupCallsModel {
             storedRing = handling.appRingSeconds
             mode = handling.callHandling
             ringSeconds = handling.appRingSeconds
-            transferNumber = config.toolConfig?.supportPhoneNumber.flatMap { $0.trimmed.isEmpty ? nil : $0 }
+            transferNumber = Self.transferNumber(config)
             profilesOffered = Self.profilesOffered(tier: config.subscriptionTier)
             profilesOn = config.aiPersona?.dgiEnabled == true
             calendarName = (try? connectionsResult.get()).flatMap(Self.calendarName)
@@ -90,6 +90,25 @@ final class SetupCallsModel {
         case let (.failure(error), _), let (_, .failure(error)):
             phase = .failed(FailureText.from(error))
         }
+    }
+
+    /// After a page opened in a sheet closes: the transfer number and the calendar again, the
+    /// two things those pages change.
+    ///
+    /// ⚠️ NOT ``load()``: that resets an answering choice not yet saved, and shows the skeleton.
+    /// A read that fails keeps what is on screen, as the wizard's own re-read does.
+    func refreshAfterHandOff() async {
+        guard case .ready = phase else { return }
+        if case let .success(config) = await workspaces.config(workspaceId: wizard.workspaceId) {
+            transferNumber = Self.transferNumber(config)
+        }
+        if case let .success(connections) = await wizard.repository.connections(workspaceId: wizard.workspaceId) {
+            calendarName = Self.calendarName(connections)
+        }
+    }
+
+    static func transferNumber(_ config: WorkspaceConfig) -> String? {
+        config.toolConfig?.supportPhoneNumber.flatMap { $0.trimmed.isEmpty ? nil : $0 }
     }
 
     static func profilesOffered(tier: String?) -> Bool {
@@ -108,7 +127,11 @@ final class SetupCallsModel {
     func saveAnswering() async {
         guard answeringChanged, !isSavingAnswering else { return }
         isSavingAnswering = true
-        defer { isSavingAnswering = false }
+        wizard.beginStepWrite()
+        defer {
+            isSavingAnswering = false
+            wizard.endStepWrite()
+        }
         error = nil
         answeringSaved = false
         let result = await callHandling.saveCallHandling(
@@ -135,7 +158,11 @@ final class SetupCallsModel {
     func setProfiles(_ on: Bool) async {
         guard profilesOffered, on != profilesOn, !isSavingProfiles else { return }
         isSavingProfiles = true
-        defer { isSavingProfiles = false }
+        wizard.beginStepWrite()
+        defer {
+            isSavingProfiles = false
+            wizard.endStepWrite()
+        }
         error = nil
         switch await workspaces.savePersona(workspaceId: wizard.workspaceId, dgiEnabled: on) {
         case .success:
@@ -149,7 +176,11 @@ final class SetupCallsModel {
     func saveAndContinue() async {
         guard !isContinuing else { return }
         isContinuing = true
-        defer { isContinuing = false }
+        wizard.beginStepWrite()
+        defer {
+            isContinuing = false
+            wizard.endStepWrite()
+        }
         if answeringChanged {
             await saveAnswering()
             guard !answeringChanged else { return }

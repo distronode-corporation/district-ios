@@ -4,6 +4,7 @@ import SwiftUI
 /// Step 5, "Calls, people and bookings". See ``SetupCallsModel``.
 struct SetupCallsStep: View {
     @State private var model: SetupCallsModel
+    private let wizard: SetupWizardModel
     private let baseURL: URL
     private let open: (URL) -> Void
 
@@ -13,6 +14,7 @@ struct SetupCallsStep: View {
             workspaces: container.workspaces,
             callHandling: container.callHandling
         ))
+        self.wizard = wizard
         baseURL = container.baseURL
         self.open = open
     }
@@ -44,6 +46,8 @@ struct SetupCallsStep: View {
             }
         }
         .task { await model.load() }
+        // ⚠️ THE STEP STAYS ON SCREEN UNDER THE SHEET, so `.task` does not run again when it closes.
+        .onChange(of: wizard.handOffsClosed) { Task { await model.refreshAfterHandOff() } }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(A11yID.Setup.step("calls"))
     }

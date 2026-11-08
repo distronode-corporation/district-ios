@@ -36,6 +36,32 @@ final class SetupLaterStepModelTests: SetupStepTestCase {
         XCTAssertNotNil(facts["weeklyHours"] as? [String: Any])
     }
 
+    /// ⛔ NO MOVE WHILE A STEP IS WRITING: Back and Skip tapped during the save are no-ops, so the
+    /// save's own completion is the one move, and no Skip is written over it.
+    func testBackAndSkipWaitForTheStepsOwnSave() async {
+        let transport = SetupTransport([:])
+        let wizard = await wizard(transport, states: ["done", "done", "done", "todo", "todo", "todo"])
+        transport.add(SetupFixture.patchRoute, SetupFixture.setup(["done", "done", "done", "done", "todo", "todo"]))
+        let model = SetupCallersModel(wizard: wizard)
+        XCTAssertEqual(wizard.active, .callers)
+        transport.delay = .milliseconds(200)
+
+        async let saving: Void = model.saveAndContinue()
+        await until { model.isSaving }
+        XCTAssertTrue(wizard.isMoving)
+        wizard.back()
+        await wizard.skip()
+        XCTAssertEqual(wizard.active, .callers, "Back waits for the save")
+        await saving
+
+        XCTAssertEqual(wizard.active, .calls)
+        XCTAssertFalse(wizard.isMoving)
+        let steps = transport.bodies(SetupFixture.patchRoute).compactMap {
+            ($0["setupProgress"] as? [String: Any])?["steps"] as? [String: String]
+        }
+        XCTAssertEqual(steps, [["callers": "done"]], "no Skip was written")
+    }
+
     func testDiscardPutsBackTheStoredHours() async {
         let transport = SetupTransport([SetupFixture.lookupRoute: [(200, SetupFixture.lookup)]])
         let stored = "{\"weeklyHours\":{\"sun\":\"closed\"}}"
@@ -99,6 +125,36 @@ final class SetupLaterStepModelTests: SetupStepTestCase {
         XCTAssertNil(body["appRingSeconds"], "the ring did not change")
         XCTAssertFalse(model.answeringChanged)
         XCTAssertEqual(wizard.active, .golive)
+    }
+
+    /// ⛔ A PAGE CLOSED OVER STEP 5 IS READ AGAIN: the transfer number and the calendar change
+    /// there, and an answering choice not yet saved stays as it is.
+    func testClosingAPageReadsTheTransferNumberAndCalendarAgain() async {
+        let changed = SetupFixture.config().replacingOccurrences(of: "+14165550199", with: "+14165550100")
+        let transport = SetupTransport([
+            SetupFixture.callHandlingRoute: [(200, SetupFixture.callHandling())],
+            SetupFixture.configRoute: [(200, SetupFixture.config()), (200, changed)],
+            SetupFixture.connectionsRoute: [(500, "{\"error\":\"Boom\"}"), (200, SetupFixture.connections)],
+        ])
+        let wizard = await wizard(transport, states: ["done", "done", "done", "done", "todo", "todo"])
+        let model = SetupCallsModel(
+            wizard: wizard,
+            workspaces: workspaces(transport),
+            callHandling: CallHandlingRepository(client: transport.client)
+        )
+        await model.load()
+        XCTAssertEqual(model.transferNumber, "+14165550199")
+        XCTAssertNil(model.calendarName)
+        model.mode = "app_first"
+
+        await wizard.refreshAfterHandOff()
+        XCTAssertEqual(wizard.handOffsClosed, 1, "the step is told a page closed")
+        await model.refreshAfterHandOff()
+
+        XCTAssertEqual(model.transferNumber, "+14165550100")
+        XCTAssertEqual(model.calendarName, "Google Calendar")
+        XCTAssertEqual(model.mode, "app_first", "an unsaved choice is kept")
+        XCTAssertEqual(transport.sent(SetupFixture.callHandlingRoute).count, 1, "call handling is not read again")
     }
 
     /// ⛔ A FAILED READ IS NOT A FORM OF DEFAULTS.

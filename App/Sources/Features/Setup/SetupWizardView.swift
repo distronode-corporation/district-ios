@@ -76,14 +76,14 @@ struct SetupWizardView: View {
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button(SetupCopy.finishLater, action: onClose)
-                        .disabled(model.isCompleting)
+                        .disabled(model.isMoving)
                         .accessibilityIdentifier(A11yID.Setup.finishLater)
                 }
             }
             .districtBackground()
         }
         // ⚠️ NO SWIPE AWAY MID-WRITE: the answer would land on a sheet nobody sees.
-        .interactiveDismissDisabled(model.isCompleting)
+        .interactiveDismissDisabled(model.isMoving)
         .task { await model.load() }
         .sheet(item: $handOff, onDismiss: { Task { await model.refreshAfterHandOff() } }, content: { handOff in
             SafariView(url: handOff.url)
@@ -162,13 +162,13 @@ struct SetupWizardView: View {
             if SetupFlow.previous(before: model.active) != nil {
                 Button(SetupCopy.back) { model.back() }
                     .buttonStyle(.districtSecondary)
-                    .disabled(model.isCompleting)
+                    .disabled(model.isMoving)
                     .accessibilityIdentifier(A11yID.Setup.back)
             }
             Spacer(minLength: 0)
             Button(SetupCopy.skipStep) { Task { await model.skip() } }
                 .buttonStyle(.districtGhost)
-                .disabled(model.isCompleting)
+                .disabled(model.isMoving)
                 .accessibilityIdentifier(A11yID.Setup.skip)
         }
         .padding(.top, DistrictSpacing.tight)

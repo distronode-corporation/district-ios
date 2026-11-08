@@ -127,6 +127,63 @@ final class SetupStepModelTests: SetupStepTestCase {
         XCTAssertEqual(wizard.workspaceName, "Northside Dental")
     }
 
+    /// ⛔ THE SERVICE REPLACES THE ADDRESS WHOLE, so the postal code this step has no field for
+    /// goes back with it.
+    func testSavingKeepsTheStoredPostalCode() async throws {
+        let stored = """
+        {"address":{"line1":"100 Example Street","city":"Toronto","region":"ON","postalCode":"M5V 1A1","country":"CA"}}
+        """
+        let transport = SetupTransport([:])
+        let wizard = await wizard(transport, facts: stored)
+        transport.add(SetupFixture.patchRoute, SetupFixture.setup(facts: stored))
+        let model = SetupBusinessModel(wizard: wizard, workspaces: workspaces(transport))
+        model.businessName = "Northside Dental"
+        model.choose(country: "CA")
+        model.subdivision = "ON"
+        model.city = "Toronto"
+        model.street = "200 Example Street"
+
+        await model.save()
+
+        let facts = try XCTUnwrap(transport.bodies(SetupFixture.patchRoute).first?["businessFacts"] as? [String: Any])
+        XCTAssertEqual(
+            facts["address"] as? [String: String],
+            ["line1": "200 Example Street", "city": "Toronto", "region": "ON", "postalCode": "M5V 1A1", "country": "CA"]
+        )
+    }
+
+    /// ⛔ THE READ AND THE SAVE NEVER OVERLAP: each writes `faqs` from the stored ones, so the
+    /// one answered second would drop the other's questions. Both also hold the wizard's moves.
+    func testTheWebsiteReadAndTheSaveNeverOverlap() async {
+        let transport = SetupTransport([SetupFixture.lookupRoute: [(200, SetupFixture.lookup)]])
+        let wizard = await wizard(transport)
+        transport.add(SetupFixture.patchRoute, SetupFixture.setup())
+        let model = SetupBusinessModel(wizard: wizard, workspaces: workspaces(transport))
+        model.businessName = "Northside Dental"
+        model.choose(country: "CA")
+        model.subdivision = "ON"
+        model.city = "Toronto"
+        model.websiteUrl = "example.com"
+        transport.delay = .milliseconds(200)
+
+        async let reading: Void = model.readWebsite()
+        await until { model.isReading }
+        XCTAssertTrue(model.isBusy)
+        XCTAssertTrue(wizard.isMoving)
+        await model.save()
+        await reading
+        XCTAssertEqual(transport.sent(SetupFixture.patchRoute).count, 1, "the read's drafts alone")
+        XCTAssertFalse(wizard.isMoving)
+
+        async let saving: Void = model.save()
+        await until { model.isSaving }
+        await model.readWebsite()
+        await saving
+        XCTAssertEqual(transport.sent(SetupFixture.lookupRoute).count, 1, "no read during the save")
+        XCTAssertEqual(transport.sent(SetupFixture.patchRoute).count, 3, "then the facts and the step's state")
+        XCTAssertEqual(wizard.active, .number)
+    }
+
     func testAnAddressOnlyReadStillSaysWhatItDid() {
         XCTAssertEqual(
             SetupBusinessModel.foundSentence(services: 0, faqs: 0, hours: false, address: true),

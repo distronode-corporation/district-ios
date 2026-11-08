@@ -46,7 +46,7 @@ struct SetupBusinessStep: View {
                 Task { await model.readWebsite() }
             }
             .buttonStyle(.districtSecondary)
-            .disabled(model.isReading || model.websiteUrl.trimmed.isEmpty)
+            .disabled(model.isBusy || model.websiteUrl.trimmed.isEmpty)
             .accessibilityIdentifier(A11yID.Setup.Business.readWebsite)
             notice
         }
@@ -97,6 +97,7 @@ struct SetupBusinessStep: View {
             SetupPrimaryButton(
                 title: SetupCopy.saveAndContinue,
                 busy: model.isSaving,
+                enabled: !model.isReading,
                 identifier: A11yID.Setup.Business.save
             ) {
                 Task { await model.save() }
