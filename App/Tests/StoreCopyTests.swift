@@ -30,12 +30,7 @@ import XCTest
 /// true of every ⛔ that records why a string says what it says. A line whose first
 /// non-space characters are `//` is not shown to anyone, so it is not scanned.
 ///
-/// ⛔ THREE EXCEPTIONS ARE DELIBERATE AND ARE NOT LOOPHOLES:
-///   - `Features/Account/AccountView.swift` — the account-deletion row says "Opens in your
-///     browser" and opens a distronode.com page. Guideline 5.1.1(v) REQUIRES
-///     an account-deletion path, the web page is that path, and telling a person the tap
-///     leaves the app is honesty about what the control does rather than steering toward a
-///     purchase. Pinned to Android and to both store listings.
+/// ⛔ TWO EXCEPTIONS ARE DELIBERATE AND ARE NOT LOOPHOLES:
 ///   - `Features/Scheduling/**` and the catalog's `scheduling` screens: a hand-off into OUR OWN product. Nothing there
 /// names a
 ///     place today; the exemption keeps this gate out of that feature's way rather than
@@ -141,7 +136,6 @@ final class StoreCopyTests: XCTestCase {
             + "above. PNG, JPEG or WebP, up to 512 KB. It is hosted publicly so their browser can load it, "
             + "and anyone with a thread link can see it.",
         "marketplace.a2p_website_label": "Website (optional)",
-        "account.request_deletion_account_its": "Request deletion of your account and its data. Opens in your browser.",
         "contacts.website": "Website",
         "sign_in.opens_browser_sign_securely": "Opens your browser to sign in securely.",
     ]

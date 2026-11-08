@@ -9,7 +9,7 @@ import XCTest
 /// the run into the video recording App Review asks for. It is deliberately NOT a plan on the
 /// `DistrictAI` scheme, because a scheme with a plan runs that plan instead of its targets
 /// (see project.yml). It signs in for real with the review account, places
-/// one real call to the demo receptionist and opens the account-deletion page without
+/// one real call to the demo receptionist and opens the account-deletion sheet without
 /// touching it, so it deliberately does NOT inherit `UITestApp` and its forbidden set.
 ///
 /// ⚠️ `-UITestSession` WITH NO SESSION: an empty in-memory store, i.e. a fresh install,
@@ -91,17 +91,19 @@ final class ReviewRecordingTests: ReviewRecordingCase {
 
     /// Step 10, same extraction rationale as `walkSchedulingAndSettings`.
     private func walkAccountDeletion() {
-        // Account → Delete account opens the deletion page in Safari; nothing is tapped there.
+        // Account → Delete account opens the in-app deletion sheet: what is deleted and kept,
+        // and the ways to confirm it is you. Nothing in it is tapped; Cancel closes it.
         ShellNavigator.navigate(app, to: .account); pause(3)
-        let delete = any("district-account-delete")
+        let delete = any(A11yID.Account.delete)
         var swipes = 0
         while !delete.isHittable, swipes < 6 {
             app.swipeUp(); swipes += 1; pause(1)
         }
         XCTAssertTrue(delete.waitForExistence(timeout: 10), "delete account row")
         delete.tap()
-        pause(8)
-        app.activate()
+        XCTAssertTrue(any(A11yID.DeleteAccount.usePassword).waitForExistence(timeout: 10), "deletion sheet")
+        pause(6)
+        any(A11yID.DeleteAccount.cancel).tap()
         pause(3)
     }
 }

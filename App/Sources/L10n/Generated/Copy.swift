@@ -11,6 +11,9 @@ extension AccountCopy {
     /// `account.delete_account`
     internal static var deleteAccount: String { AppL10n.copyLocale == .frCA ? "Supprimer le compte" : "Delete account" }
 
+    /// `account.delete_account_subtitle`
+    internal static var deleteAccountSubtitle: String { AppL10n.copyLocale == .frCA ? "Supprimez votre compte et ses données pour de bon. Vous confirmez d'abord qu'il s'agit bien de vous." : "Delete your account and its data for good. You confirm it is you first." }
+
     /// `account.devices`
     internal static var devices: String { AppL10n.copyLocale == .frCA ? "Appareils" : "Devices" }
 
@@ -21,9 +24,6 @@ extension AccountCopy {
 
     /// `account.opaque_id_install_cleared`
     internal static var opaqueIdInstallCleared: String { AppL10n.copyLocale == .frCA ? "Un identifiant opaque propre à cette installation. Il est effacé quand vous supprimez l'application et n'identifie aucun matériel." : "An opaque id for this install. It is cleared when you delete the app, and it identifies no hardware." }
-
-    /// `account.request_deletion_account_its`
-    internal static var requestDeletionAccountIts: String { AppL10n.copyLocale == .frCA ? "Demander la suppression de votre compte et de ses données. S'ouvre hors de l'application." : "Request deletion of your account and its data. Opens in your browser." }
 
     /// `account.see_where_are_signed`
     internal static var seeWhereAreSigned: String { AppL10n.copyLocale == .frCA ? "Voyez où votre compte est connecté et déconnectez un appareil que vous n'avez plus." : "See where you are signed in, and sign out a device you no longer have." }
@@ -771,6 +771,115 @@ extension ContactsCopy {
 
     /// `contacts.website`
     internal static var website: String { AppL10n.copyLocale == .frCA ? "Site" : "Website" }
+}
+
+extension DeleteAccountCopy {
+    /// `delete_account.back`
+    internal static var back: String { AppL10n.copyLocale == .frCA ? "Retour" : "Back" }
+
+    /// `delete_account.cancel`
+    internal static var cancel: String { AppL10n.copyLocale == .frCA ? "Annuler" : "Cancel" }
+
+    /// `delete_account.cannot_be_undone`
+    internal static var cannotBeUndone: String { AppL10n.copyLocale == .frCA ? "Cette action est irréversible." : "This cannot be undone." }
+
+    /// `delete_account.confirm_intro`
+    internal static var confirmIntro: String { AppL10n.copyLocale == .frCA ? "Connectez-vous de nouveau comme d'habitude. Vous aurez ensuite quelques minutes pour supprimer le compte." : "Sign in again the way you usually do. You then have a few minutes to delete the account." }
+
+    /// `delete_account.confirm_it_is_you`
+    internal static var confirmItIsYou: String { AppL10n.copyLocale == .frCA ? "Confirmez qu'il s'agit bien de vous" : "Confirm it is you" }
+
+    /// `delete_account.continue_button`
+    internal static var continueButton: String { AppL10n.copyLocale == .frCA ? "Continuer" : "Continue" }
+
+    /// `delete_account.continue_with`
+    internal static func continueWith(_ provider: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Continuer avec \(provider)" : "Continue with \(provider)"
+    }
+
+    /// `delete_account.deleted`
+    internal static var deleted: String { AppL10n.copyLocale == .frCA ? "Votre compte a été supprimé." : "Your account was deleted." }
+
+    /// `delete_account.deleted_erasure_pending`
+    internal static var deletedErasurePending: String { AppL10n.copyLocale == .frCA ? "Votre compte a été supprimé. Des données de soutien conservées par un fournisseur sont encore en cours d'effacement." : "Your account was deleted. Support data held by a provider is still being erased." }
+
+    /// `delete_account.deleting`
+    internal static var deleting: String { AppL10n.copyLocale == .frCA ? "Suppression…" : "Deleting…" }
+
+    /// `delete_account.email_label`
+    internal static var emailLabel: String { AppL10n.copyLocale == .frCA ? "Votre adresse courriel" : "Your email address" }
+
+    /// `delete_account.error_email_mismatch`
+    internal static var errorEmailMismatch: String { AppL10n.copyLocale == .frCA ? "Ce n'est pas l'adresse courriel de ce compte. Tapez-la exactement, puis réessayez. Rien n'a été supprimé." : "That is not this account's email address. Type it exactly, then try again. Nothing was deleted." }
+
+    /// `delete_account.error_no_password`
+    internal static var errorNoPassword: String { AppL10n.copyLocale == .frCA ? "Ce compte n'a aucun mot de passe. Confirmez qu'il s'agit bien de vous avec Google, Microsoft ou Apple, selon votre mode de connexion." : "This account has no password. Confirm it is you with Google, Microsoft or Apple, whichever you sign in with." }
+
+    /// `delete_account.error_not_confirmed`
+    internal static var errorNotConfirmed: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu confirmer qu'il s'agit bien de vous pour l'instant. Réessayez dans un instant." : "We could not confirm it is you right now. Try again in a moment." }
+
+    /// `delete_account.error_offline_not_confirmed`
+    internal static var errorOfflineNotConfirmed: String { AppL10n.copyLocale == .frCA ? "Vous semblez être hors ligne, et rien n'a été confirmé. Vérifiez votre connexion et réessayez." : "You appear to be offline, so nothing was confirmed. Check your connection and try again." }
+
+    /// `delete_account.error_offline_not_deleted`
+    internal static var errorOfflineNotDeleted: String { AppL10n.copyLocale == .frCA ? "La connexion a échoué, et votre compte n'a pas été supprimé. Vérifiez votre connexion et réessayez." : "We could not connect, so your account was not deleted. Check your connection and try again." }
+
+    /// `delete_account.error_outcome_unknown`
+    internal static var errorOutcomeUnknown: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu lire la réponse, et nous ne savons pas si votre compte a été supprimé. Fermez cette fenêtre et reconnectez-vous pour vérifier." : "We could not read the answer, so we cannot tell whether your account was deleted. Close this and sign in again to check." }
+
+    /// `delete_account.error_proof_expired`
+    internal static var errorProofExpired: String { AppL10n.copyLocale == .frCA ? "Votre confirmation a expiré avant la suppression du compte. Confirmez de nouveau qu'il s'agit bien de vous." : "Your confirmation ran out before the account was deleted. Confirm it is you again." }
+
+    /// `delete_account.error_sheet_did_not_open`
+    internal static var errorSheetDidNotOpen: String { AppL10n.copyLocale == .frCA ? "La fenêtre de connexion n'a pas pu s'ouvrir. Réessayez." : "The sign-in window could not open. Try again." }
+
+    /// `delete_account.error_sign_in_not_verified`
+    internal static var errorSignInNotVerified: String { AppL10n.copyLocale == .frCA ? "Cette connexion n'a pas pu être vérifiée, et rien n'a été confirmé. Réessayez." : "That sign-in could not be verified, so nothing was confirmed. Try again." }
+
+    /// `delete_account.error_too_many_attempts`
+    internal static var errorTooManyAttempts: String { AppL10n.copyLocale == .frCA ? "Trop de tentatives. Attendez une minute, puis réessayez." : "Too many attempts. Wait a minute, then try again." }
+
+    /// `delete_account.error_try_again_shortly`
+    internal static var errorTryAgainShortly: String { AppL10n.copyLocale == .frCA ? "Un problème est survenu de notre côté. Réessayez dans un instant." : "Something went wrong on our side. Try again in a moment." }
+
+    /// `delete_account.error_wrong_account`
+    internal static var errorWrongAccount: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu confirmer qu'il s'agit bien de vous. Dans la fenêtre de connexion, utilisez le compte connecté à cette application, puis réessayez." : "We could not confirm it is you. In the sign-in window, use the account this app is signed in to, then try again." }
+
+    /// `delete_account.error_wrong_code`
+    internal static var errorWrongCode: String { AppL10n.copyLocale == .frCA ? "Ce code n'est pas valide, ou il a déjà été utilisé. Entrez le code le plus récent." : "That code is not valid, or it has already been used. Enter the newest code." }
+
+    /// `delete_account.error_wrong_password`
+    internal static var errorWrongPassword: String { AppL10n.copyLocale == .frCA ? "Ce mot de passe n'est pas le bon. Vérifiez-le et réessayez." : "That password is not correct. Check it and try again." }
+
+    /// `delete_account.last_step`
+    internal static var lastStep: String { AppL10n.copyLocale == .frCA ? "Dernière étape" : "Last step" }
+
+    /// `delete_account.not_deleted`
+    internal static var notDeleted: String { AppL10n.copyLocale == .frCA ? "Votre compte n'a pas été supprimé." : "Your account was not deleted." }
+
+    /// `delete_account.password_label`
+    internal static var passwordLabel: String { AppL10n.copyLocale == .frCA ? "Votre mot de passe" : "Your password" }
+
+    /// `delete_account.submit`
+    internal static var submit: String { AppL10n.copyLocale == .frCA ? "Supprimer mon compte" : "Delete my account" }
+
+    /// `delete_account.subscriptions_cancelled`
+    internal static var subscriptionsCancelled: String { AppL10n.copyLocale == .frCA ? "Les abonnements des espaces de travail dont vous êtes propriétaire sont annulés sur-le-champ." : "The subscriptions of the workspaces you own are cancelled at once." }
+
+    /// `delete_account.title`
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Supprimer votre compte" : "Delete your account" }
+
+    /// `delete_account.type_email`
+    internal static var typeEmail: String { AppL10n.copyLocale == .frCA ? "Tapez l'adresse courriel de votre compte pour confirmer. Rien n'est supprimé avant que vous touchiez Supprimer mon compte." : "Type your account's email address to confirm. Nothing is deleted until you tap Delete my account." }
+
+    /// `delete_account.use_password`
+    internal static var usePassword: String { AppL10n.copyLocale == .frCA ? "Utiliser mon mot de passe" : "Use my password" }
+
+    /// `delete_account.what_is_deleted`
+    internal static var whatIsDeleted: String { AppL10n.copyLocale == .frCA ? "Votre profil d'utilisateur, vos réglages et tous les espaces de travail dont vous êtes propriétaire sont supprimés pour de bon." : "Your user profile, your settings and all workspaces where you are the owner are deleted for good." }
+
+    /// `delete_account.what_is_kept`
+    internal static var whatIsKept: String { AppL10n.copyLocale == .frCA ? "Les espaces de travail dont vous êtes membre sans en être propriétaire sont conservés. Vous n'en faites plus partie, et leurs propriétaires gardent leurs données." : "Workspaces you belong to but do not own are kept. You are removed from them, and their owners keep their data." }
 }
 
 extension DeskCopy {

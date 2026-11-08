@@ -19,6 +19,21 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
+- Account deletion in the app (Guideline 5.1.1(v); Sean, 2026-11-07), on DistrictCore 8.4.2's
+  `NativeReauthRepository`. Account, Delete account opens a sheet that says what is deleted
+  (the profile, the settings and every workspace the person owns, whose subscriptions are
+  cancelled at once) and what is kept (workspaces they belong to but do not own). A fresh
+  re-authentication comes first: a fresh sign-in at Google, Microsoft or Apple in the sign-in
+  window (`/auth/native/reauth`, PKCE and `state` as at sign-in, the installation id sent only
+  as its SHA-256), or the password, with the authenticator code when two-step verification is
+  on. The typed email address then deletes. Every refusal has a sentence saying what to do; a
+  block the service answers (a subscription it could not cancel) is shown under "Your account
+  was not deleted.". The final button is single-flight. After the deletion the app forgets the
+  session, the push token, the workspace choice, the listen-in map and the offline copy, with
+  no revoke or unregister call (the account is gone), and the sign-in screen says the account
+  was deleted, and when vendor-held support data is still being erased. The row no longer
+  opens the deletion page; its address stays as the store listings' data-deletion URL.
+
 - District HQ by voice (Sean, 2026-11-07), on DistrictCore 8.4.1's voice routes and packets.
   Talk to HQ on the HQ screen mints a session only on the tap, shows the service's
   `processingRegion` before the microphone opens (Start or Cancel; Cancel discards the
