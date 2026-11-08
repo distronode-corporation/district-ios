@@ -43,6 +43,8 @@ enum HQVoiceEngineEvent: Sendable, Equatable {
     case transcript(HQVoiceSegment)
     case packet(HQVoicePacket)
     case agentState(HQAgentState)
+    /// The agent participant left the room.
+    case agentLeft
 }
 
 /// The LiveKit side of an HQ voice session: join one encrypted room, publish the microphone
@@ -167,6 +169,14 @@ private final class HQVoiceRoomBridge: NSObject, RoomDelegate, @unchecked Sendab
     ) {
         guard topic == HQVoice.proposalTopic, let packet = HQVoicePacket.read(data) else { return }
         continuation.yield(.packet(packet))
+    }
+
+    /// ⛔ THE AGENT LEAVING ENDS THE SESSION (as on the web): the room may stay open with nobody
+    /// to talk to, and the service's row with it.
+    @objc
+    func room(_ room: Room, participantDidDisconnect participant: RemoteParticipant) {
+        guard participant.kind == .agent else { return }
+        continuation.yield(.agentLeft)
     }
 
     @objc

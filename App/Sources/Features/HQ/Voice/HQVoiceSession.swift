@@ -13,8 +13,11 @@ import Observation
 /// (``begin()``); Cancel joins nothing and discards the session (``cancelNotice()``).
 ///
 /// ⛔ A SESSION THAT NEVER WENT LIVE IS DISCARDED, ONE THE APP ENDS IS ENDED. A declined
-/// notice and a failed join call `hq/voice-discard`; Stop, the 30 minutes, a ring and a
-/// sign-out call `hq/voice-end`, so only the minutes used are counted. Both by `sessionId`.
+/// notice, a failed join and an agent that never joined call `hq/voice-discard`, and a discard
+/// the service refuses falls back to `hq/voice-end` (``discard(_:)``); Stop, the 30 minutes, a
+/// ring, the agent leaving and a sign-out call `hq/voice-end`, so only the minutes used are
+/// counted. Both by `sessionId`. ⚠️ The sign-out ends it BEFORE the credential is revoked
+/// (``SessionModel/signOut()``), or the call would go out with no session.
 ///
 /// ⛔ PUSH-TO-TALK STARTS MUTED. With ``HQMicMode/push`` the microphone opens only while the
 /// button is held (``holdToTalk(_:)``); with an open mode it opens on the join.
@@ -41,6 +44,10 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
         case disconnected
         /// Refused before anything started: a call or a meeting holds the audio.
         case busy
+        /// No agent joined within ``HQVoiceSession/agentJoinSeconds``: none was free. Discarded.
+        case noAgent
+        /// The agent left the room while it was live: the app ends the session.
+        case agentLeft
         case microphoneDenied
         /// The service refused the token; its own sentence (the allowance one included).
         case refused(String)
@@ -72,10 +79,13 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
     private let microphone: any MicrophoneAccess
     private let makeEngine: @MainActor (String) -> any HQVoiceEngine
     private let sleep: @Sendable (TimeInterval) async throws -> Void
+    private let waitForAgent: @Sendable (TimeInterval) async throws -> Void
     private var engine: (any HQVoiceEngine)?
     private var credential: HQVoiceTokenResponse?
     private var listening: Task<Void, Never>?
     private var timer: Task<Void, Never>?
+    /// The agent-join window (``agentJoinSeconds``), from the join until the agent's first state.
+    private var agentWindow: Task<Void, Never>?
     private var microphoneChange: Task<Void, Never>?
     /// The microphone state last asked for, which ``setMicrophone(_:)`` applies in order.
     private var micWanted = false
@@ -89,7 +99,9 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
         callStack: CallStack,
         microphone: any MicrophoneAccess,
         makeEngine: @escaping @MainActor (String) -> any HQVoiceEngine = { LiveKitHQVoiceEngine(e2eeKey: $0) },
-        sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) }
+        sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) },
+        waitForAgent: @escaping @Sendable (TimeInterval) async throws
+            -> Void = { try await Task.sleep(for: .seconds($0)) }
     ) {
         self.workspaceId = workspaceId
         self.canConfirm = canConfirm
@@ -98,7 +110,12 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
         self.microphone = microphone
         self.makeEngine = makeEngine
         self.sleep = sleep
+        self.waitForAgent = waitForAgent
     }
+
+    /// ⛔ AN AGENT THAT HAS NOT JOINED WITHIN THIS LONG MEANS NONE IS COMING, as on the web: the
+    /// session is discarded and ends as ``EndReason/noAgent``, in the service's busy words.
+    static let agentJoinSeconds: TimeInterval = 20
 
     var isActive: Bool {
         switch phase {
@@ -184,6 +201,7 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
             return
         }
         phase = .live
+        startAgentWindow()
         // ⛔ THE FIRST OPEN GOES THROUGH ``setMicrophone(_:)`` like every other change, so a mute
         // tapped while it publishes is applied after it, not overwritten by it.
         if micMode == .open {
@@ -311,12 +329,20 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
 
     /// ⚠️ THE ROOM CLOSING ON ITS OWN (``EndReason/disconnected``) CALLS NOTHING: the service
     /// ended it.
-    private func finish(_ reason: EndReason, releasing: Bool = true) async {
+    ///
+    /// ⛔ THE SERVICE IS TOLD WHILE THE ROOM DISCONNECTS, NOT AFTER IT: on the way to the
+    /// background the app has seconds, and the open row holds one of the fleet's voice slots
+    /// until its 30-minute TTL if the call never leaves.
+    ///
+    /// - Parameter discarding: discard even a live session (an agent that never joined).
+    private func finish(_ reason: EndReason, releasing: Bool = true, discarding: Bool = false) async {
         guard isActive else { return }
-        let wasLive = phase == .live
+        let wasLive = phase == .live && !discarding
         let credential = credential
         timer?.cancel()
         timer = nil
+        agentWindow?.cancel()
+        agentWindow = nil
         listening?.cancel()
         listening = nil
         let engine = engine
@@ -328,18 +354,30 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
             callStack.releaseRoom(self)
         }
         phase = .ended(reason)
-        await engine?.disconnect()
-        guard let credential, reason != .disconnected else { return }
-        if wasLive {
-            _ = await hq.endVoice(workspaceId: workspaceId, sessionId: credential.sessionId)
-        } else {
-            await discard(credential)
+        let disconnecting = Task { await engine?.disconnect() }
+        if let credential, reason != .disconnected {
+            if wasLive {
+                _ = await hq.endVoice(workspaceId: workspaceId, sessionId: credential.sessionId)
+            } else {
+                await discard(credential)
+            }
         }
+        await disconnecting.value
     }
 
-    /// A session that never went live: the notice declined, or the join failed or was refused.
+    /// A session that never went live: the notice declined, the join failed or was refused, or
+    /// no agent joined.
+    ///
+    /// ⛔ ANYTHING BUT A DISCARD IS FOLLOWED BY AN END. The service discards only a row under
+    /// 90 seconds old and otherwise answers `discarded: false`, leaving it open for its 30-minute
+    /// TTL and holding one of the fleet's voice slots; `hq/voice-end` closes the member's open
+    /// rows at any age. A failed discard (offline, a 5xx) is ended for the same reason.
     private func discard(_ credential: HQVoiceTokenResponse) async {
-        _ = await hq.discardVoice(workspaceId: workspaceId, sessionId: credential.sessionId)
+        let discarded = await hq.discardVoice(workspaceId: workspaceId, sessionId: credential.sessionId)
+        if case .success(true) = discarded {
+            return
+        }
+        _ = await hq.endVoice(workspaceId: workspaceId, sessionId: credential.sessionId)
     }
 
     private func reset() {
@@ -351,7 +389,11 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
         // reported (Seer, round 6).
         place = HQVoicePlace(.hq)
     }
+}
 
+// MARK: - The clocks and the room
+
+extension HQVoiceSession {
     private func startTimer() {
         let sleep = sleep
         timer = Task { [weak self] in
@@ -367,6 +409,23 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
         }
     }
 
+    /// ⚠️ NOT STARTED WHEN THE AGENT'S STATE ARRIVED DURING THE JOIN: it has joined already.
+    private func startAgentWindow() {
+        guard agentState == nil else { return }
+        let wait = waitForAgent
+        agentWindow = Task { [weak self] in
+            do {
+                try await wait(Self.agentJoinSeconds)
+            } catch {
+                return
+            }
+            // ⛔ LET GO OF ITSELF FIRST, for ``startTimer()``'s reason: a cancelled task's
+            // discard would fail before it was sent.
+            self?.agentWindow = nil
+            await self?.finish(.noAgent, discarding: true)
+        }
+    }
+
     private func listen(to engine: any HQVoiceEngine) {
         let events = engine.events
         listening = Task { [weak self] in
@@ -377,13 +436,29 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
         }
     }
 
+    /// ⛔ THE EVENT PUMP LETS GO OF ITSELF FIRST, for ``startTimer()``'s reason: this runs inside
+    /// ``listening``, which `finish` cancels, and a cancelled task's `hq/voice-end` or
+    /// `hq/voice-discard` would fail before it was sent. The pump ends when the room's events do.
+    private func finishFromRoom(_ reason: EndReason) async {
+        listening = nil
+        await finish(reason)
+    }
+
     private func handle(_ event: HQVoiceEngineEvent) async {
         switch event {
         case .connected:
             break
+        // ⛔ IN `connecting` TOO: a room deleted during the join must not go live, and the
+        // session that never went live is discarded (``begin()`` sees the phase has moved).
         case .disconnected:
+            switch phase {
+            case .live: await finish(.disconnected)
+            case .connecting: await finishFromRoom(.failed(VoiceFailure.joinFailed))
+            case .idle, .minting, .notice, .ended: break
+            }
+        case .agentLeft:
             if phase == .live {
-                await finish(.disconnected)
+                await finishFromRoom(.agentLeft)
             }
         // ⚠️ FINAL SEGMENTS ONLY: an interim one would be read out by VoiceOver and then replaced.
         case let .transcript(segment):
@@ -395,6 +470,9 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
             }
         case let .agentState(state):
             agentState = state
+            // ⛔ THE AGENT JOINED: the window closes.
+            agentWindow?.cancel()
+            agentWindow = nil
         case let .packet(.proposal(proposal)):
             guard !proposals.contains(where: { $0.id == proposal.proposalId }) else { return }
             proposals.append(ProposalCard(proposal: proposal))

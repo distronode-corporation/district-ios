@@ -154,6 +154,16 @@ final class CallStack {
         await (hqVoice as? VoiceSessionEnding)?.end()
     }
 
+    /// ⛔ THE BACKGROUND END HOLDS A BACKGROUND TASK until the service has heard it: an app
+    /// suspended with the `hq/voice-end` still in flight leaves the session's row open for its
+    /// 30 minutes, holding one of the fleet's voice slots. See ``BackgroundTaskLease``.
+    func endVoiceSessionInBackground(on tasks: any BackgroundTaskScheduling = UIKitBackgroundTasks()) async {
+        guard let session = hqVoice as? VoiceSessionEnding else { return }
+        let lease = BackgroundTaskLease.begin("HQ voice end", on: tasks)
+        await session.end()
+        lease.end()
+    }
+
     /// The last workspace the shell resolved, for ``workspaceSelected(_:)``.
     private var lastWorkspaceId: String?
 

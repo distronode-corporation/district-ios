@@ -10,6 +10,9 @@ class HQVoiceSessionCase: XCTestCase {
     var engine = FakeHQVoiceEngine()
     var stack = CallStack(microphone: FakeMicrophoneAccess(status: .granted))
     var slept: [TimeInterval] = []
+    /// Each agent-join window the session opened, and how many were cancelled before they ran out.
+    var waitedForAgent: [TimeInterval] = []
+    var agentWaitsCancelled = 0
 
     override func setUp() async throws {
         transport = HQVoiceTransport()
@@ -20,13 +23,17 @@ class HQVoiceSessionCase: XCTestCase {
         engine = FakeHQVoiceEngine()
         stack = CallStack(microphone: FakeMicrophoneAccess(status: .granted))
         slept = []
+        waitedForAgent = []
+        agentWaitsCancelled = 0
     }
 
-    /// A session whose 30-minute clock never rings unless `timesOut`.
+    /// A session whose 30-minute clock never rings unless `timesOut`, and whose agent-join window
+    /// never runs out unless `agentNeverJoins`.
     func makeSession(
         microphone: any MicrophoneAccess = FakeMicrophoneAccess(status: .granted),
         canConfirm: Bool = true,
-        timesOut: Bool = false
+        timesOut: Bool = false,
+        agentNeverJoins: Bool = false
     ) -> HQVoiceSession {
         let engine = engine
         return HQVoiceSession(
@@ -40,6 +47,16 @@ class HQVoiceSessionCase: XCTestCase {
                 await MainActor.run { self?.slept.append(seconds) }
                 if !timesOut {
                     try await Task.sleep(for: .seconds(3600))
+                }
+            },
+            waitForAgent: { [weak self] seconds in
+                await MainActor.run { self?.waitedForAgent.append(seconds) }
+                guard !agentNeverJoins else { return }
+                do {
+                    try await Task.sleep(for: .seconds(3600))
+                } catch {
+                    await MainActor.run { self?.agentWaitsCancelled += 1 }
+                    throw error
                 }
             }
         )

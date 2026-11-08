@@ -29,12 +29,16 @@ struct HQVoiceBar: View {
                 idle(note: HQCopy.voiceMicExplainer, isFailure: false)
             case let .ended(reason):
                 idle(note: Self.sentence(reason), isFailure: Self.isFailure(reason))
+            // ⛔ STOP WHILE MINTING AND JOINING TOO: ``HQVoiceSession/stop()`` discards a token
+            // still in flight and disconnects a join that completes after it.
             case .minting, .notice, .connecting:
                 HStack(spacing: DistrictSpacing.tight) {
                     ProgressView()
                     Text(HQCopy.voiceConnecting)
                         .font(DistrictType.caption)
                         .foregroundStyle(colors.mutedForeground)
+                    Spacer(minLength: 0)
+                    stopButton
                 }
             case .live:
                 live
@@ -117,15 +121,19 @@ struct HQVoiceBar: View {
                     .accessibilityIdentifier(A11yID.HQVoice.state)
                 Spacer(minLength: 0)
                 microphone
-                Button(HQCopy.voiceStop) { Task { await session.stop() } }
-                    .buttonStyle(.districtGhost)
-                    .accessibilityIdentifier(A11yID.HQVoice.stop)
+                stopButton
             }
             transcript
             ForEach(session.proposals) { card in
                 HQVoiceProposalCard(session: session, card: card)
             }
         }
+    }
+
+    private var stopButton: some View {
+        Button(HQCopy.voiceStop) { Task { await session.stop() } }
+            .buttonStyle(.districtGhost)
+            .accessibilityIdentifier(A11yID.HQVoice.stop)
     }
 
     private var stateText: String {
@@ -207,10 +215,11 @@ struct HQVoiceBar: View {
 
     static func sentence(_ reason: HQVoiceSession.EndReason) -> String {
         switch reason {
-        case .byMember, .disconnected: HQCopy.voiceEnded
+        case .byMember, .disconnected, .agentLeft: HQCopy.voiceEnded
         case .callArrived: HQCopy.voiceEndedCall
         case .timedOut: HQCopy.voiceEndedTimeout
         case .busy: HQCopy.voiceBusy
+        case .noAgent: HQCopy.voiceNoAgent
         case .microphoneDenied: HQCopy.voiceMicDenied
         case let .refused(message), let .failed(message): message
         }
@@ -218,8 +227,8 @@ struct HQVoiceBar: View {
 
     static func isFailure(_ reason: HQVoiceSession.EndReason) -> Bool {
         switch reason {
-        case .byMember, .disconnected, .callArrived, .timedOut: false
-        case .busy, .microphoneDenied, .refused, .failed: true
+        case .byMember, .disconnected, .agentLeft, .callArrived, .timedOut: false
+        case .busy, .noAgent, .microphoneDenied, .refused, .failed: true
         }
     }
 }

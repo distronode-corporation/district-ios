@@ -81,8 +81,9 @@ struct RootView: View {
                 }
                 // ⛔ HQ BY VOICE ENDS IN THE BACKGROUND (``CallStack/endVoiceSession()``), not at
                 // `inactive` (a banner or Control Center): nothing on screen can stop it there.
+                // ⚠️ Under a background task, so the end reaches the service before suspension.
                 if phase == .background {
-                    Task { await container.callStack.endVoiceSession() }
+                    Task { await container.callStack.endVoiceSessionInBackground() }
                 }
             }
     }
