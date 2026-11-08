@@ -42,29 +42,37 @@ final class SetupWizardModel {
     private(set) var draft: SetupBusinessDraft
 
     let workspaceId: String
-    let workspaceName: String
+    /// The workspace's name as the service holds it: the name it opened with, then each rename's
+    /// echo, so step 1 renames whenever the typed name differs from the stored one.
+    private(set) var workspaceName: String
     let repository: SetupWizardRepository
     private let store: SetupDraftStore
+    /// The persona's stored `language`, nil when it cannot be read.
+    private let personaLanguage: @Sendable () async -> String?
 
     init(
         repository: SetupWizardRepository,
         workspaceId: String,
         workspaceName: String,
-        store: SetupDraftStore = SetupDraftStore(defaults: .standard)
+        store: SetupDraftStore = SetupDraftStore(defaults: .standard),
+        personaLanguage: @escaping @Sendable () async -> String? = { nil }
     ) {
         self.repository = repository
         self.workspaceId = workspaceId
         self.workspaceName = workspaceName
         self.store = store
+        self.personaLanguage = personaLanguage
         draft = store.load(workspaceId: workspaceId)
             ?? SetupBusinessDraft.initial(data: nil, personaLanguage: nil, workspaceName: workspaceName)
     }
 
     convenience init(container: AppContainer, workspaceId: String, workspaceName: String) {
+        let workspaces = container.workspaces
         self.init(
             repository: SetupWizardRepository(client: container.api),
             workspaceId: workspaceId,
-            workspaceName: workspaceName
+            workspaceName: workspaceName,
+            personaLanguage: { try? await workspaces.config(workspaceId: workspaceId).get().aiPersona?.language }
         )
     }
 
@@ -88,8 +96,15 @@ final class SetupWizardModel {
                 return
             }
             data = response
+            // ⛔ STEP 1'S LANGUAGE OPENS ON THE PERSONA'S, as the web's `initialBusinessDraft` does:
+            // opening it on the app's language would let step 3 replace a French receptionist's
+            // `fr-CA` with `en-US` for an owner who never touched the choice.
             if store.load(workspaceId: workspaceId) == nil {
-                draft = SetupBusinessDraft.initial(data: response, personaLanguage: nil, workspaceName: workspaceName)
+                draft = await SetupBusinessDraft.initial(
+                    data: response,
+                    personaLanguage: personaLanguage(),
+                    workspaceName: workspaceName
+                )
             }
             if response.setupProgress?.completedAt != nil {
                 phase = .finished
@@ -131,6 +146,10 @@ final class SetupWizardModel {
     /// A step saved something through the setup route, which answers the whole state.
     func adopt(_ response: DistrictSetupResponse) {
         data = response
+    }
+
+    func renamed(to name: String) {
+        workspaceName = name
     }
 
     func updateDraft(_ next: SetupBusinessDraft) {

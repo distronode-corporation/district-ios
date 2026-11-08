@@ -62,6 +62,23 @@ final class SetupWizardModelTests: XCTestCase {
         guard case .finished = model.phase else { return XCTFail("got \(model.phase)") }
     }
 
+    /// ⛔ STEP 1 OPENS ON THE PERSONA'S LANGUAGE, not the app's, so step 3 cannot replace it unasked.
+    func testStepOneOpensOnThePersonasLanguage() async {
+        let transport = SetupTransport([SetupFixture.setupRoute: [(200, SetupFixture.setup())]])
+        let model = SetupWizardModel(
+            repository: SetupWizardRepository(client: transport.client),
+            workspaceId: "ws_1",
+            workspaceName: "Northside Dental",
+            store: SetupDraftStore(defaults: SetupDefaults.fresh()),
+            personaLanguage: { "fr-CA" }
+        )
+
+        await model.load()
+
+        XCTAssertEqual(model.draft.language, .fr)
+        XCTAssertEqual(SetupLanguage.toSave(stored: "fr-CA", chosen: model.draft.language), "fr-CA")
+    }
+
     // MARK: - The step write
 
     func testCompletingAStepWritesItsStateAloneAndMovesOn() async {

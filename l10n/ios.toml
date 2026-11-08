@@ -15478,6 +15478,15 @@ screen = "setup"
 state = "draft"
 id = { swift = "SetupCopy.back" }
 
+[setup.business_address_found]
+en = "We filled in your address from your website. Check it below."
+fr = "Nous avons rempli votre adresse à partir de votre site Internet. Vérifiez-la ci-dessous."
+ctx = "body"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessAddressFound" }
+note = "When the website read found an address and nothing else. The owner's own website, not a destination (StoreCopyTests allowance)."
+
 [setup.business_city_label]
 en = "City"
 fr = "Ville"

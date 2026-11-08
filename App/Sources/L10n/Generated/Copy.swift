@@ -5814,6 +5814,9 @@ extension SetupCopy {
     /// `setup.back`
     internal static var back: String { AppL10n.copyLocale == .frCA ? "Retour" : "Back" }
 
+    /// `setup.business_address_found`
+    internal static var businessAddressFound: String { AppL10n.copyLocale == .frCA ? "Nous avons rempli votre adresse à partir de votre site Internet. Vérifiez-la ci-dessous." : "We filled in your address from your website. Check it below." }
+
     /// `setup.business_city_label`
     internal static var businessCityLabel: String { AppL10n.copyLocale == .frCA ? "Ville" : "City" }
 

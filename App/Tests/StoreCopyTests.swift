@@ -140,6 +140,7 @@ final class StoreCopyTests: XCTestCase {
         "sign_in.opens_browser_sign_securely": "Opens your browser to sign in securely.",
         // ⚠️ THE OWNER'S OWN WEBSITE, which the setup wizard reads for a draft of their facts
         // (`setup/lookup`): an input, like a contact's website, never a place to go instead.
+        "setup.business_address_found": "We filled in your address from your website. Check it below.",
         "setup.business_description": "Tell us who you are, or let us read your website.",
         "setup.business_hours_found": "We found opening hours on your website; confirm them in step 4.",
         "setup.business_read_nothing": "We read your website but found nothing we could use. Fill in the form "

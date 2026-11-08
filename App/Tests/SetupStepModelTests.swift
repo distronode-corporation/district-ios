@@ -99,6 +99,42 @@ final class SetupStepModelTests: SetupStepTestCase {
         XCTAssertEqual(wizard.active, .number)
     }
 
+    /// A rename and then a rename back both reach the service: the comparison is with the name it
+    /// holds now, not the one the wizard opened with.
+    func testRenamingBackToTheOriginalNameIsSent() async {
+        let renames: [(status: Int, body: String)] = [
+            (200, "{\"success\":true,\"name\":\"Bright Smiles\"}"),
+            (200, "{\"success\":true,\"name\":\"Northside Dental\"}"),
+        ]
+        let transport = SetupTransport([SetupFixture.renameRoute: renames])
+        let wizard = await wizard(transport)
+        transport.add(SetupFixture.patchRoute, SetupFixture.setup())
+        let model = SetupBusinessModel(wizard: wizard, workspaces: workspaces(transport))
+        model.choose(country: "US")
+        model.subdivision = "NY"
+        model.city = "Albany"
+
+        model.businessName = "Bright Smiles"
+        await model.save()
+        wizard.back()
+        model.businessName = "Northside Dental"
+        await model.save()
+
+        XCTAssertEqual(
+            transport.bodies(SetupFixture.renameRoute).compactMap { $0["name"] as? String },
+            ["Bright Smiles", "Northside Dental"]
+        )
+        XCTAssertEqual(wizard.workspaceName, "Northside Dental")
+    }
+
+    func testAnAddressOnlyReadStillSaysWhatItDid() {
+        XCTAssertEqual(
+            SetupBusinessModel.foundSentence(services: 0, faqs: 0, hours: false, address: true),
+            "We filled in your address from your website. Check it below."
+        )
+        XCTAssertEqual(SetupBusinessModel.foundSentence(services: 0, faqs: 0, hours: false), "")
+    }
+
     func testAnUnchangedNameIsNotRenamed() async {
         let transport = SetupTransport([:])
         let wizard = await wizard(transport)

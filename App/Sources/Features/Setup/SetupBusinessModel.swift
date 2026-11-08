@@ -156,7 +156,12 @@ final class SetupBusinessModel {
                 return
             }
         }
-        notice = .found(Self.foundSentence(services: found.services.count, faqs: found.faqs.count, hours: hoursFound))
+        notice = .found(Self.foundSentence(
+            services: found.services.count,
+            faqs: found.faqs.count,
+            hours: hoursFound,
+            address: found.address != nil
+        ))
     }
 
     /// The draft's address fills EMPTY fields only; the owner confirms it by saving the step.
@@ -196,7 +201,10 @@ final class SetupBusinessModel {
     }
 
     /// ⚠️ FRENCH TAKES THE SINGULAR FOR 0 AND 1, ENGLISH FOR 1 ONLY (the web's `<= 1` and `=== 1`).
-    static func foundSentence(services: Int, faqs: Int, hours: Bool) -> String {
+    ///
+    /// ⚠️ AN ADDRESS-ONLY ANSWER STILL SAYS SOMETHING: it filled the form, and an empty notice
+    /// would leave the owner unsure the read did anything.
+    static func foundSentence(services: Int, faqs: Int, hours: Bool, address: Bool = false) -> String {
         var parts: [String] = []
         if services > 0 || faqs > 0 {
             let singular = { (count: Int) in AppL10n.copyLocale == .frCA ? count <= 1 : count == 1 }
@@ -208,6 +216,9 @@ final class SetupBusinessModel {
         }
         if hours {
             parts.append(SetupCopy.businessHoursFound)
+        }
+        if parts.isEmpty, address {
+            parts.append(SetupCopy.businessAddressFound)
         }
         return parts.joined(separator: " ")
     }
@@ -230,12 +241,16 @@ final class SetupBusinessModel {
             return
         }
         let name = businessName.trimmed
-        if name != wizard.workspaceName.trimmed, name != wizard.draft.businessName.trimmed {
-            if case let .failure(error) = await workspaces.rename(workspaceId: wizard.workspaceId, name: name) {
+        if name != wizard.workspaceName.trimmed {
+            switch await workspaces.rename(workspaceId: wizard.workspaceId, name: name) {
+            case let .success(response):
+                // ⛔ THE ECHO, NOT THE REQUEST: the service trims before it stores.
+                wizard.renamed(to: response.name)
+                onRenamed()
+            case let .failure(error):
                 saveError = FailureText.from(error)
                 return
             }
-            onRenamed()
         }
         wizard.updateDraft(SetupBusinessDraft(
             businessName: name,
