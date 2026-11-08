@@ -98,13 +98,15 @@ final class A11yImageTests: XCTestCase {
         // The twentieth to twenty-second are on ``HQVoiceBar``: the settings slider and the
         // microphone toggle each carry a label (they are the whole button), and the waveform
         // beside the agent's state is hidden, because the state is announced as a value.
+        // The twenty-third is the chevron on ``IntegrationsView``'s two links, hidden as on the
+        // settings hub: the `NavigationLink` already says it opens something.
         // ⚠️ `SchedulingEmptyState`'s glyph is NOT among these — `EmptyStateView` takes a
         // symbol NAME and constructs the `Image` itself, so it is counted at that one
         // definition rather than per caller.
         // Comments do not count: both scans read comment-stripped source.
         XCTAssertEqual(
-            count, 22,
-            "the app has \(count) SF Symbols, not 22: update this number in the same "
+            count, 23,
+            "the app has \(count) SF Symbols, not 23: update this number in the same "
                 + "commit that adds or removes one, having decided how it is announced"
         )
     }

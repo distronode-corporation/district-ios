@@ -74,6 +74,11 @@ enum SettingsDestinations {
         case .knowledge:
             KnowledgeView(container: container, workspaceId: workspaceId, role: role)
 
+        // ⚠️ READ-ONLY, AND THE READ ADMITS A VIEWER, so it takes a role only to decide
+        // which affordances to draw. See ``IntegrationsView``.
+        case .integrations:
+            IntegrationsView(container: container, workspaceId: workspaceId, role: role)
+
         case .messaging:
             MessagingView(container: container, workspaceId: workspaceId, role: role)
 

@@ -5197,6 +5197,54 @@ extension SettingsCopy {
     /// `settings.hub_title`
     internal static var hubTitle: String { AppL10n.copyLocale == .frCA ? "Réglages de l'espace" : "Workspace settings" }
 
+    /// `settings.integrations_active_provider`
+    internal static var integrationsActiveProvider: String { AppL10n.copyLocale == .frCA ? "Fournisseur actif" : "Active provider" }
+
+    /// `settings.integrations_calendars_eyebrow`
+    internal static var integrationsCalendarsEyebrow: String { AppL10n.copyLocale == .frCA ? "Agendas" : "Calendars" }
+
+    /// `settings.integrations_calendars_note`
+    internal static var integrationsCalendarsNote: String { AppL10n.copyLocale == .frCA ? "Google et Microsoft approuvent l'accès à l'agenda sur leur propre page de connexion. Pour connecter, reconnecter ou déconnecter un agenda, ouvrez la page Intégrations." : "Google and Microsoft approve calendar access on their own sign-in page. To connect, reconnect or disconnect a calendar, open the Integrations page." }
+
+    /// `settings.integrations_desk_subtitle`
+    internal static var integrationsDeskSubtitle: String { AppL10n.copyLocale == .frCA ? "Les options, le nom public et le logo de votre comptoir." : "Your desk's switches, public name and logo." }
+
+    /// `settings.integrations_enrichment_subtitle`
+    internal static var integrationsEnrichmentSubtitle: String { AppL10n.copyLocale == .frCA ? "Se règle dans Compétences." : "Set under Skills." }
+
+    /// `settings.integrations_enrichment_title`
+    internal static var integrationsEnrichmentTitle: String { AppL10n.copyLocale == .frCA ? "En savoir plus sur les appelants d'affaires" : "Learn about business callers" }
+
+    /// `settings.integrations_not_here`
+    internal static var integrationsNotHere: String { AppL10n.copyLocale == .frCA ? "Le domaine d'envoi et la médiathèque ne sont pas disponibles dans cette app." : "The sending domain and the media library are not available in this app." }
+
+    /// `settings.integrations_open_page`
+    internal static var integrationsOpenPage: String { AppL10n.copyLocale == .frCA ? "Ouvrir la page Intégrations" : "Open the Integrations page" }
+
+    /// `settings.integrations_services_eyebrow`
+    internal static var integrationsServicesEyebrow: String { AppL10n.copyLocale == .frCA ? "Services connectés" : "Connected services" }
+
+    /// `settings.integrations_status_absent`
+    internal static var integrationsStatusAbsent: String { AppL10n.copyLocale == .frCA ? "Non connecté" : "Not connected" }
+
+    /// `settings.integrations_status_active`
+    internal static var integrationsStatusActive: String { AppL10n.copyLocale == .frCA ? "Connecté" : "Connected" }
+
+    /// `settings.integrations_status_error`
+    internal static var integrationsStatusError: String { AppL10n.copyLocale == .frCA ? "Reconnexion requise" : "Reconnection needed" }
+
+    /// `settings.integrations_status_revoked`
+    internal static var integrationsStatusRevoked: String { AppL10n.copyLocale == .frCA ? "Accès révoqué" : "Access revoked" }
+
+    /// `settings.integrations_subtitle`
+    internal static var integrationsSubtitle: String { AppL10n.copyLocale == .frCA ? "Les comptes avec lesquels votre réceptionniste travaille." : "The accounts your receptionist works through." }
+
+    /// `settings.integrations_title`
+    internal static var integrationsTitle: String { AppL10n.copyLocale == .frCA ? "Intégrations" : "Integrations" }
+
+    /// `settings.integrations_viewer_note`
+    internal static var integrationsViewerNote: String { AppL10n.copyLocale == .frCA ? "Avec le rôle Lecteur dans cet espace de travail, vous pouvez voir quels agendas sont connectés, mais pas les modifier." : "You are in this workspace as a viewer, so you can see which calendars are connected and not change them." }
+
     /// `settings.key_id`
     internal static var keyId: String { AppL10n.copyLocale == .frCA ? "ID de clé" : "Key id" }
 
