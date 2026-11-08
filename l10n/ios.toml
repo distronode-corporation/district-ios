@@ -13836,6 +13836,139 @@ state = "reviewed"
 fr_variant = "Apple OS word"
 id = { swift = "SettingsCopy.hubTitle" }
 
+[settings.integrations_active_provider]
+en = "Active provider"
+fr = "Fournisseur actif"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsActiveProvider" }
+
+[settings.integrations_calendars_eyebrow]
+en = "Calendars"
+fr = "Agendas"
+ctx = "title"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsCalendarsEyebrow" }
+
+[settings.integrations_calendars_note]
+en = "Google and Microsoft approve calendar access on their own sign-in page. To connect, reconnect or disconnect a calendar, open the Integrations page."
+fr = "Google et Microsoft approuvent l'accès à l'agenda sur leur propre page de connexion. Pour connecter, reconnecter ou déconnecter un agenda, ouvrez la page Intégrations."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsCalendarsNote" }
+note = "⛔ NAMES NO DESTINATION BEYOND THE PAGE'S OWN TITLE (StoreCopyTests, Guideline 3.1.1). The connect leg is the provider's consent screen, which this app cannot draw, and the Microsoft connect route refuses a native session outright."
+
+[settings.integrations_desk_subtitle]
+en = "Your desk's switches, public name and logo."
+fr = "Les options, le nom public et le logo de votre comptoir."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsDeskSubtitle" }
+
+[settings.integrations_enrichment_subtitle]
+en = "Set under Skills."
+fr = "Se règle dans Compétences."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsEnrichmentSubtitle" }
+
+[settings.integrations_enrichment_title]
+en = "Learn about business callers"
+fr = "En savoir plus sur les appelants d'affaires"
+ctx = "title"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsEnrichmentTitle" }
+note = "The web's own heading for this group (capabilitiesI18n integrationsPage.enrichmentTitle), in both locales."
+
+[settings.integrations_not_here]
+en = "The sending domain and the media library are not available in this app."
+fr = "Le domaine d'envoi et la médiathèque ne sont pas disponibles dans cette app."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsNotHere" }
+note = "⚠️ SAYS WHY THE SCREEN STOPS WHERE IT DOES: neither has a mobile contract yet."
+
+[settings.integrations_open_page]
+en = "Open the Integrations page"
+fr = "Ouvrir la page Intégrations"
+ctx = "button"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsOpenPage" }
+
+[settings.integrations_services_eyebrow]
+en = "Connected services"
+fr = "Services connectés"
+ctx = "title"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsServicesEyebrow" }
+
+[settings.integrations_status_absent]
+en = "Not connected"
+fr = "Non connecté"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsStatusAbsent" }
+
+[settings.integrations_status_active]
+en = "Connected"
+fr = "Connecté"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsStatusActive" }
+
+[settings.integrations_status_error]
+en = "Reconnection needed"
+fr = "Reconnexion requise"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsStatusError" }
+
+[settings.integrations_status_revoked]
+en = "Access revoked"
+fr = "Accès révoqué"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsStatusRevoked" }
+
+[settings.integrations_subtitle]
+en = "The accounts your receptionist works through."
+fr = "Les comptes avec lesquels votre réceptionniste travaille."
+ctx = "body"
+screen = "settings"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsSubtitle" }
+note = "The web's own subtitle for the page (studioI18n areas.integrations), in both locales."
+
+[settings.integrations_title]
+en = "Integrations"
+fr = "Intégrations"
+ctx = "title"
+screen = "settings"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsTitle" }
+note = "The web's own page name (studioI18n areas.integrations), in both locales."
+
+[settings.integrations_viewer_note]
+en = "You are in this workspace as a viewer, so you can see which calendars are connected and not change them."
+fr = "Avec le rôle Lecteur dans cet espace de travail, vous pouvez voir quels agendas sont connectés, mais pas les modifier."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsViewerNote" }
+
 [settings.key_id]
 en = "Key id"
 fr = "ID de clé"

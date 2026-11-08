@@ -147,7 +147,7 @@ extension RouteGate {
         switch section {
         case .persona, .voiceStudio, .capabilities, .directory, .routing, .members:
             .hidden
-        case .hub, .calls, .knowledge, .messaging, .scheduling:
+        case .hub, .calls, .knowledge, .integrations, .messaging, .scheduling:
             .partial
         }
     }

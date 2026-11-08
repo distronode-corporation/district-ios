@@ -101,15 +101,17 @@ final class A11yImageTests: XCTestCase {
         // The twenty-third and twenty-fourth are on ``ReceivedAttachmentView``: the file tile's
         // document glyph, hidden because the tile is announced as the type with an open hint,
         // and the warning triangle, hidden because the sentence beside it says it cannot open.
-        // The twenty-fifth is the lock on ``TwoStepView``'s cover over the secret while the app is
+        // The twenty-fifth is the chevron on ``IntegrationsView``'s two links, hidden as on the
+        // settings hub: the `NavigationLink` already says it opens something.
+        // The twenty-sixth is the lock on ``TwoStepView``'s cover over the secret while the app is
         // not active, hidden because nobody can read the screen it is drawn for.
         // ⚠️ `SchedulingEmptyState`'s glyph is NOT among these — `EmptyStateView` takes a
         // symbol NAME and constructs the `Image` itself, so it is counted at that one
         // definition rather than per caller.
         // Comments do not count: both scans read comment-stripped source.
         XCTAssertEqual(
-            count, 25,
-            "the app has \(count) SF Symbols, not 25: update this number in the same "
+            count, 26,
+            "the app has \(count) SF Symbols, not 26: update this number in the same "
                 + "commit that adds or removes one, having decided how it is announced"
         )
     }

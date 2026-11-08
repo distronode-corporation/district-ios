@@ -166,7 +166,7 @@ struct SettingsHubView: View {
     /// handling page holds three sections (how calls are answered, the dynamic persona
     /// rules, the transfer directory), which are three screens here, so they are three
     /// rows in the web page's own order at the web page's place. Skills is this app's
-    /// capabilities screen. Integrations and Video have no screen in this app and no row.
+    /// capabilities screen. Video has no screen in this app and no row.
     static var groups: [SettingsHubGroup] {
         [
             SettingsHubGroup(SettingsCopy.studioGroupTitle, [
@@ -177,6 +177,7 @@ struct SettingsHubView: View {
                 SettingsHubEntry(.directory, SettingsCopy.directoryTitle, SettingsCopy.directorySubtitle),
                 SettingsHubEntry(.capabilities, SettingsCopy.capabilitiesTitle, SettingsCopy.capabilitiesSubtitle),
                 SettingsHubEntry(.knowledge, SettingsCopy.knowledgeTitle, SettingsCopy.knowledgeSubtitle),
+                SettingsHubEntry(.integrations, SettingsCopy.integrationsTitle, SettingsCopy.integrationsSubtitle),
             ]),
             SettingsHubGroup(SettingsCopy.workspaceGroupTitle, [
                 SettingsHubEntry(.messaging, SettingsCopy.messagingTitle, SettingsCopy.messagingSubtitle),
