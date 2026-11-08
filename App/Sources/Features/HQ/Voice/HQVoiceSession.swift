@@ -307,14 +307,14 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
     /// a token still minting is waited for and discarded (``start(history:locale:)``) BEFORE this
     /// returns (#116), as the Rust core does: a discard sent after the sign-out's revoke fails and
     /// leaves the row open for 30 minutes. The sign-out bounds the wait (``CallStack/endVoiceSession()``).
+    /// ⚠️ IN EVERY PHASE (Seer, PR #122): a Stop or a ring during the mint has left `.minting` already.
     func abandon() async {
         switch phase {
         case .notice: await cancelNotice()
-        case .minting:
-            phase = .idle
-            await mints.settled()
+        case .minting: phase = .idle
         case .idle, .connecting, .live, .ended: break
         }
+        await mints.settled()
     }
 
     /// ⛔ IN ANY PHASE: a session replaced by another workspace's (``forScreen(container:workspaceId:role:)``)
@@ -324,9 +324,8 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
     /// `hq/voice-discard` before).
     func end() async {
         switch phase {
-        case .minting, .notice: await abandon()
+        case .minting, .notice, .idle, .ended: await abandon()
         case .connecting, .live: await finish(.byMember)
-        case .idle, .ended: break
         }
     }
 
