@@ -1568,6 +1568,9 @@ extension InboxCopy {
     /// `inbox.attaching`
     internal static var attaching: String { AppL10n.copyLocale == .frCA ? "Ajout en cours…" : "Attaching…" }
 
+    /// `inbox.attachment_cannot_open`
+    internal static var attachmentCannotOpen: String { AppL10n.copyLocale == .frCA ? "Cette pièce jointe ne peut pas être ouverte ici" : "This attachment can't be opened here" }
+
     /// `inbox.attachment_count`
     internal static func attachmentCount(_ count: Int) -> String {
         if AppL10n.copyLocale == .frCA {
@@ -1582,6 +1585,9 @@ extension InboxCopy {
         return "\(count) attachments"
     }
 
+    /// `inbox.attachment_file`
+    internal static var attachmentFile: String { AppL10n.copyLocale == .frCA ? "Pièce jointe" : "Attachment" }
+
     /// `inbox.attachment_held`
     internal static var attachmentHeld: String { AppL10n.copyLocale == .frCA ? "En attente" : "Held" }
 
@@ -1592,6 +1598,9 @@ extension InboxCopy {
     internal static func attachmentHeldOn(_ channel: String) -> String {
         AppL10n.copyLocale == .frCA ? "Image en attente, non envoyée par \(channel)" : "Image held, not sent on \(channel)"
     }
+
+    /// `inbox.attachment_open_hint`
+    internal static var attachmentOpenHint: String { AppL10n.copyLocale == .frCA ? "Ouvre un aperçu que vous pouvez partager." : "Opens a preview you can share." }
 
     /// `inbox.attachments_held_email`
     internal static func attachmentsHeldEmail(_ count: Int) -> String {
@@ -1695,6 +1704,9 @@ extension InboxCopy {
     /// `inbox.filter`
     internal static var filter: String { AppL10n.copyLocale == .frCA ? "Filtrer" : "Filter" }
 
+    /// `inbox.image_attachment`
+    internal static var imageAttachment: String { AppL10n.copyLocale == .frCA ? "Image jointe" : "Image attachment" }
+
     /// `inbox.image_could_not_read`
     internal static var imageCouldNotRead: String { AppL10n.copyLocale == .frCA ? "Impossible de lire cette image. Sélectionnez-la de nouveau." : "That image could not be read. Try picking it again." }
 
@@ -1709,6 +1721,9 @@ extension InboxCopy {
 
     /// `inbox.keep_typing`
     internal static var keepTyping: String { AppL10n.copyLocale == .frCA ? "Continuez à taper" : "Keep typing" }
+
+    /// `inbox.loading_attachment`
+    internal static var loadingAttachment: String { AppL10n.copyLocale == .frCA ? "Chargement de la pièce jointe" : "Loading attachment" }
 
     /// `inbox.loading_image`
     internal static var loadingImage: String { AppL10n.copyLocale == .frCA ? "Chargement de l'image" : "Loading image" }

@@ -82,6 +82,14 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- Inbox: a received attachment that is not an image (a PDF sent by MMS) no longer draws as a
+  broken image (Sean, 2026-11-08). Each received attachment is fetched once without the bearer
+  token, as DistrictCore requires for media URLs, and branched on the response's `Content-Type`:
+  an image draws as before, anything else is a file tile (its type, as iOS names it, or
+  "Attachment") that opens in Quick Look from a temporary copy, with Quick Look's share button.
+  A fetch that fails (a carrier media URL that wants the carrier's own sign-in answers 401) says
+  "This attachment can't be opened here". The copy is removed when the preview closes. App-only
+  and interim: the timeline's `mediaUrls` still carries no type or name.
 - Live supervise: switching workspace from the picker now ends a live supervision. The switch
   reaches the shell as one workspace, then none while the new list loads, then the next, so the
   call stack compares with the last workspace that resolved (`CallStack.workspaceSelected`).
