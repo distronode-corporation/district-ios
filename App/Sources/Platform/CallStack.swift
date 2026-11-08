@@ -149,6 +149,49 @@ final class CallStack {
         await (hqVoice as? PendingRoom)?.abandon()
     }
 
+    /// End HQ by voice in whatever phase it is in, before the sign-out's revoke
+    /// (``SessionModel/signOut()``).
+    ///
+    /// ⛔ WAITED FOR AT MOST ``voiceEndSeconds`` (Seer, PR #115): a stalled `hq/voice-end` must
+    /// not hold the revoke, since a live refresh token left behind is the worse outcome. The end
+    /// is NOT cancelled at the deadline: a cancelled task's request fails before it is sent, and
+    /// one that is merely late can still close the row.
+    func endVoiceSession() async {
+        guard let session = hqVoice as? VoiceSessionEnding else { return }
+        let (done, signal) = AsyncStream<Void>.makeStream()
+        Task {
+            await session.end()
+            signal.yield()
+        }
+        let deadline = voiceEndDeadline
+        let timer = Task {
+            await deadline(Self.voiceEndSeconds)
+            signal.yield()
+        }
+        for await _ in done {
+            break
+        }
+        timer.cancel()
+    }
+
+    /// How long a sign-out waits for ``endVoiceSession()``.
+    static let voiceEndSeconds: TimeInterval = 3
+
+    /// Waits out ``voiceEndSeconds``, cancellably. A test stands in its own.
+    var voiceEndDeadline: @Sendable (TimeInterval) async -> Void = { seconds in
+        try? await Task.sleep(for: .seconds(seconds))
+    }
+
+    /// ⛔ THE BACKGROUND END HOLDS A BACKGROUND TASK until the service has heard it: an app
+    /// suspended with the `hq/voice-end` still in flight leaves the session's row open for its
+    /// 30 minutes, holding one of the fleet's voice slots. See ``BackgroundTaskLease``.
+    func endVoiceSessionInBackground(on tasks: any BackgroundTaskScheduling = UIKitBackgroundTasks()) async {
+        guard let session = hqVoice as? VoiceSessionEnding else { return }
+        let lease = BackgroundTaskLease.begin("HQ voice end", on: tasks)
+        await session.end()
+        lease.end()
+    }
+
     /// The last workspace the shell resolved, for ``workspaceSelected(_:)``.
     private var lastWorkspaceId: String?
 

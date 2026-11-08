@@ -3740,6 +3740,15 @@ state = "draft"
 id = { swift = "HQCopy.voiceMute" }
 note = "Mutes an open microphone during a voice session."
 
+[hq.voice_no_agent]
+en = "District HQ voice mode is busy right now. Please try again in a few minutes; the text console still works."
+fr = "Le mode vocal de District HQ est occupé en ce moment. Réessayez dans quelques minutes; la console texte fonctionne toujours."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceNoAgent" }
+note = "No agent joined the voice room within 20 seconds (none was free). The same words as the service's own hq_voice_busy refusal."
+
 [hq.voice_notice_body]
 en = "Your voice is processed in the United States, and so is what District HQ reads for you during a voice session (calls, contacts, messages and knowledge). Voice mode runs on Gemini Live in Google Cloud's us-east4 region for every workspace, whatever your workspace's region. District HQ's scripted lines, such as reading back a change before you confirm it, are voiced by Deepgram, also in the United States. Nothing is recorded."
 fr = "Votre voix est traitée aux États-Unis, tout comme ce que District HQ lit pour vous pendant une session vocale (appels, contacts, messages et base de connaissances). Le mode vocal utilise Gemini Live dans la région us-east4 de Google Cloud pour tous les espaces de travail, quelle que soit la région du vôtre. Les phrases préétablies de District HQ, comme la relecture d'un changement avant que vous le confirmiez, sont prononcées par Deepgram, également aux États-Unis. Rien n'est enregistré."
