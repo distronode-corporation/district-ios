@@ -100,19 +100,39 @@ final class DeleteAccountScreenshotTests: XCTestCase {
         for name in ["DISTRICT_UITEST_SESSION", "DISTRICT_UITEST_BASE_URL"] {
             app.launchEnvironment[name] = environment[name]
         }
+        // ⚠️ LANDSCAPE ON AN IPAD, so the sidebar is on screen: ``ShellNavigator`` finds a hidden
+        // one by its English "Show Sidebar" label, which a French run does not draw.
+        XCUIDevice.shared.orientation = .landscapeLeft
         app.launch()
-        XCTAssertTrue(ShellNavigator.shellIsUp(in: app, timeout: 30), "the fixture session must reach the shell")
+        XCTAssertTrue(
+            element(A11yID.Overview.root).waitForExistence(timeout: 30),
+            "the fixture session must reach the shell"
+        )
+        if !ShellNavigator.isCompact(app) {
+            XCTAssertTrue(ShellNavigator.shellIsUp(in: app, timeout: 10), "the sidebar")
+        } else {
+            XCUIDevice.shared.orientation = .portrait
+        }
     }
 
     /// The Account tab by POSITION (the last one) at compact width, the sidebar row otherwise.
-    /// ⚠️ ``ShellNavigator`` taps a tab by its English label, which a French run does not draw.
+    /// ⚠️ ``ShellNavigator`` finds both by English labels, which a French run does not draw.
     private func openAccount() {
         if ShellNavigator.isCompact(app) {
             let tabs = app.tabBars.buttons
             XCTAssertTrue(tabs.firstMatch.waitForExistence(timeout: 30), "the tab bar")
             tabs.element(boundBy: tabs.count - 1).tap()
         } else {
-            XCTAssertTrue(ShellNavigator.navigate(app, to: .account), "the Account row")
+            // ⚠️ BY IDENTIFIER, NOT THROUGH ``ShellNavigator``, which finds the sidebar by its
+            // English "Sidebar" label.
+            let row = app.cells.containing(.any, identifier: A11yID.Sidebar.account).firstMatch
+            var swipes = 0
+            while !(row.exists && row.isHittable), swipes < 6 {
+                app.collectionViews.firstMatch.swipeUp()
+                swipes += 1
+            }
+            XCTAssertTrue(row.waitForExistence(timeout: 10), "the Account row")
+            row.tap()
         }
         XCTAssertTrue(element(A11yID.Account.root).waitForExistence(timeout: 20))
     }
