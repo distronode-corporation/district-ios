@@ -821,8 +821,8 @@ extension DeleteAccountCopy {
     /// `delete_account.error_offline_not_confirmed`
     internal static var errorOfflineNotConfirmed: String { AppL10n.copyLocale == .frCA ? "Vous semblez être hors ligne, et rien n'a été confirmé. Vérifiez votre connexion et réessayez." : "You appear to be offline, so nothing was confirmed. Check your connection and try again." }
 
-    /// `delete_account.error_offline_not_deleted`
-    internal static var errorOfflineNotDeleted: String { AppL10n.copyLocale == .frCA ? "La connexion a échoué, et votre compte n'a pas été supprimé. Vérifiez votre connexion et réessayez." : "We could not connect, so your account was not deleted. Check your connection and try again." }
+    /// `delete_account.error_offline_outcome_unknown`
+    internal static var errorOfflineOutcomeUnknown: String { AppL10n.copyLocale == .frCA ? "La connexion a échoué avant que nous recevions une réponse, et nous ne savons pas si votre compte a été supprimé. Vérifiez votre connexion, puis fermez cette fenêtre et reconnectez-vous pour vérifier." : "The connection failed before we heard back, so we cannot tell whether your account was deleted. Check your connection, then close this and sign in again to check." }
 
     /// `delete_account.error_outcome_unknown`
     internal static var errorOutcomeUnknown: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu lire la réponse, et nous ne savons pas si votre compte a été supprimé. Fermez cette fenêtre et reconnectez-vous pour vérifier." : "We could not read the answer, so we cannot tell whether your account was deleted. Close this and sign in again to check." }

@@ -214,7 +214,7 @@ final class DeleteAccountModelTests: XCTestCase {
         await offline.model.reauthenticate(with: .google)
         offline.model.confirmation = "you@example.test"
         await offline.model.delete()
-        XCTAssertEqual(offline.model.failure?.message, DeleteAccountCopy.errorOfflineNotDeleted)
+        XCTAssertEqual(offline.model.failure?.message, DeleteAccountCopy.errorOfflineOutcomeUnknown)
 
         let unreadable = Harness(
             SettingsTransport([#"{"success":true}"#]),

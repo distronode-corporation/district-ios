@@ -2116,14 +2116,14 @@ screen = "account.delete"
 state = "draft"
 id = { swift = "DeleteAccountCopy.errorOfflineNotConfirmed" }
 
-[delete_account.error_offline_not_deleted]
-en = "We could not connect, so your account was not deleted. Check your connection and try again."
-fr = "La connexion a échoué, et votre compte n'a pas été supprimé. Vérifiez votre connexion et réessayez."
+[delete_account.error_offline_outcome_unknown]
+en = "The connection failed before we heard back, so we cannot tell whether your account was deleted. Check your connection, then close this and sign in again to check."
+fr = "La connexion a échoué avant que nous recevions une réponse, et nous ne savons pas si votre compte a été supprimé. Vérifiez votre connexion, puis fermez cette fenêtre et reconnectez-vous pour vérifier."
 ctx = "error"
 screen = "account.delete"
 state = "draft"
-id = { swift = "DeleteAccountCopy.errorOfflineNotDeleted" }
-note = "The web's deleteThrew, with what to do."
+id = { swift = "DeleteAccountCopy.errorOfflineOutcomeUnknown" }
+note = "A delete that failed in transport: a timeout or a dropped connection can come after the service deleted the account, so never claim either way."
 
 [delete_account.error_outcome_unknown]
 en = "We could not read the answer, so we cannot tell whether your account was deleted. Close this and sign in again to check."

@@ -10,8 +10,8 @@ import Observation
 /// its code) earns a proof bound to this installation and this one action; the typed email then
 /// spends it (`NativeReauthRepository`). Nothing here decides who may delete: a workspace owner,
 /// a refused subscription cancellation or any other block is the service's answer, shown as it
-/// comes (Sean, 2026-11-07: "Fresh SSO/passkey re-auth", and two-step accounts "Allow, with
-/// re-auth").
+/// comes (Sean, 2026-11-07: two-step accounts "Allow, with re-auth"; 2026-11-08: re-auth "Yes,
+/// SSO or password").
 ///
 /// ⛔ SINGLE-FLIGHT ACROSS ALL THREE CALLS. ``busy`` is checked and set before the first
 /// suspension, on the main actor, so two taps dispatched before a re-render send one request.
@@ -185,7 +185,10 @@ final class DeleteAccountModel {
     static func deleteFailure(_ error: ApiError) -> Failure {
         switch (error, error.code) {
         case (.transport, _):
-            Failure(title: nil, message: DeleteAccountCopy.errorOfflineNotDeleted)
+            // ⛔ A TIMEOUT OR A DROPPED CONNECTION CAN COME AFTER THE SERVICE DELETED THE
+            // ACCOUNT, and ``ApiError/transport(_:)`` carries no sign of whether the request left
+            // the device: never claim either way, as for an unreadable answer below.
+            Failure(title: nil, message: DeleteAccountCopy.errorOfflineOutcomeUnknown)
         case (_, "confirmation_mismatch"):
             Failure(title: nil, message: DeleteAccountCopy.errorEmailMismatch)
         case (_, "rate_limited"):
