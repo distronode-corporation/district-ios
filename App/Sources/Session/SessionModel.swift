@@ -259,7 +259,8 @@ final class SessionModel {
     /// ⛔ HQ BY VOICE ENDS FIRST, BEFORE THE REVOKE. `hq/voice-end` and `hq/voice-discard`
     /// authenticate with the session too; ``RootView`` reacts to `.signedOut` only after the
     /// credential is gone, so an end sent from there would fail and leave the session's row
-    /// open for its 30 minutes.
+    /// open for its 30 minutes. ⛔ Bounded like the unregister, for its reason
+    /// (``CallStack/voiceEndSeconds``).
     func signOut() async {
         isBusy = true
         defer { isBusy = false }

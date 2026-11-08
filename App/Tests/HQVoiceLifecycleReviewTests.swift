@@ -8,6 +8,9 @@ import XCTest
 /// during the join never goes live.
 @MainActor
 final class HQVoiceLifecycleReviewTests: HQVoiceSessionCase {
+    /// Each sign-out deadline that ran out.
+    var deadlinesRunOut: [TimeInterval] = []
+
     // MARK: - A refused or failed discard is ended
 
     /// ⛔ `discarded: false` (a row past 90 seconds) leaves it open for 30 minutes: it is ended.
@@ -96,10 +99,13 @@ final class HQVoiceLifecycleReviewTests: HQVoiceSessionCase {
         XCTAssertEqual(session.phase, .ended(.noAgent))
     }
 
+    /// ⚠️ THE WINDOW OPENS IN ITS OWN TASK, so the test waits for it to open before the agent
+    /// speaks: asserted straight after the join, it raced that task (CI run 42437605874).
     func testTheAgentsFirstStateClosesTheWindow() async {
         let session = makeSession()
         await goLive(session)
-        XCTAssertEqual(waitedForAgent, [HQVoiceSession.agentJoinSeconds])
+        let opened = await eventually { waitedForAgent == [HQVoiceSession.agentJoinSeconds] }
+        XCTAssertTrue(opened, "got \(waitedForAgent)")
         engine.emit(.agentState(.listening))
         let closed = await eventually { agentWaitsCancelled == 1 }
         XCTAssertTrue(closed)
@@ -195,11 +201,43 @@ final class HQVoiceLifecycleReviewTests: HQVoiceSessionCase {
         let session = makeSession()
         container.callStack.hqVoice = session
         await goLive(session)
+        container.callStack.voiceEndDeadline = Self.noVoiceEndDeadline
         let model = SessionModel(container: container, push: PushRegistrar(container: container))
         await model.signOut()
         XCTAssertEqual(session.phase, .ended(.byMember))
         XCTAssertEqual(ended, 1)
         XCTAssertFalse(engine.isConnected)
+    }
+
+    /// ⛔ A STALLED END DOES NOT HOLD THE REVOKE (Seer, PR #115): the sign-out stops waiting at
+    /// the deadline, signs out, and the end it left running is still sent.
+    func testAStalledVoiceEndDoesNotHoldTheSignOut() async throws {
+        let container = try AppContainer(
+            baseURL: XCTUnwrap(URL(string: "https://calls.invalid")),
+            microphone: FakeMicrophoneAccess(status: .granted)
+        )
+        let session = makeSession()
+        container.callStack.hqVoice = session
+        await goLive(session)
+        transport.hold("voice-end")
+        // The deadline runs out only once the end is stalled in flight: ordered, no clock.
+        let transport = transport
+        container.callStack.voiceEndDeadline = { [weak self] seconds in
+            while !transport.isHolding {
+                await Task.yield()
+            }
+            await MainActor.run { self?.deadlinesRunOut.append(seconds) }
+        }
+        let model = SessionModel(container: container, push: PushRegistrar(container: container))
+        await model.signOut()
+        XCTAssertEqual(deadlinesRunOut, [CallStack.voiceEndSeconds])
+        XCTAssertEqual(CallStack.voiceEndSeconds, 3)
+        guard case .signedOut = model.phase else { return XCTFail("got \(model.phase)") }
+        XCTAssertTrue(transport.isHolding, "the end is still in flight after the sign-out")
+        XCTAssertEqual(ended, 0)
+        transport.release()
+        let sent = await eventually { ended == 1 && session.phase == .ended(.byMember) }
+        XCTAssertTrue(sent, "the end the sign-out stopped waiting for is still sent, got \(session.phase)")
     }
 
     func testTheSignOutEndsVoiceBeforeTheRevoke() throws {

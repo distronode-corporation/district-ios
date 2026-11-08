@@ -22,6 +22,7 @@ class HQVoiceSessionCase: XCTestCase {
         transport.reply("voice-discard", 200, #"{"success":true,"discarded":true}"#)
         engine = FakeHQVoiceEngine()
         stack = CallStack(microphone: FakeMicrophoneAccess(status: .granted))
+        stack.voiceEndDeadline = Self.noVoiceEndDeadline
         slept = []
         waitedForAgent = []
         agentWaitsCancelled = 0
@@ -60,6 +61,11 @@ class HQVoiceSessionCase: XCTestCase {
                 }
             }
         )
+    }
+
+    /// A sign-out deadline that never runs out on its own, so only the end decides the wait.
+    static let noVoiceEndDeadline: @Sendable (TimeInterval) async -> Void = { _ in
+        try? await Task.sleep(for: .seconds(3600))
     }
 
     var discarded: Int {
