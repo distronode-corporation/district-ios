@@ -95,7 +95,7 @@ struct SetupGoLiveStep: View {
                 SetupChoiceRow(
                     title: mode == .all ? SetupCopy.goliveModeAll : SetupCopy.goliveModeUnanswered,
                     selected: model.mode == mode,
-                    enabled: !model.checkIsPending,
+                    enabled: !model.isPolling,
                     identifier: A11yID.Setup.choice("forwarding", mode.rawValue),
                     action: { model.mode = mode }
                 )
@@ -103,12 +103,12 @@ struct SetupGoLiveStep: View {
             if model.mode == .unanswered {
                 SetupNote(text: SetupCopy.goliveUnansweredNote, font: DistrictType.caption)
             }
-            if let verifier = model.forwarding?.forwardingCheck?.verifierNumber, model.checkIsPending {
+            if let verifier = model.forwarding?.forwardingCheck?.verifierNumber, model.isPolling {
                 SetupNote(text: SetupCopy.goliveExpectCall(verifier))
             }
             SetupPrimaryButton(
                 title: SetupCopy.goliveStartCheck,
-                busy: model.isStartingCheck || model.checkIsPending,
+                busy: model.isStartingCheck || model.isPolling,
                 enabled: !model.businessLine.trimmed.isEmpty && model.forwarding?.attemptsLeft != 0,
                 identifier: A11yID.Setup.GoLive.startCheck
             ) {

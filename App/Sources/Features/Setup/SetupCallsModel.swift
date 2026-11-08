@@ -72,10 +72,10 @@ final class SetupCallsModel {
     func load() async {
         phase = .loading
         error = nil
-        async let handling = callHandling.callHandling(workspaceId: wizard.workspaceId)
-        async let config = workspaces.config(workspaceId: wizard.workspaceId)
-        async let connections = wizard.repository.connections(workspaceId: wizard.workspaceId)
-        let (handlingResult, configResult, connectionsResult) = await (handling, config, connections)
+        // ⚠️ ONE AFTER ANOTHER, NOT `async let`: see ``SetupGoLiveModel/load()``.
+        let handlingResult = await callHandling.callHandling(workspaceId: wizard.workspaceId)
+        let configResult = await workspaces.config(workspaceId: wizard.workspaceId)
+        let connectionsResult = await wizard.repository.connections(workspaceId: wizard.workspaceId)
         switch (handlingResult, configResult) {
         case let (.success(handling), .success(config)):
             storedMode = handling.callHandling

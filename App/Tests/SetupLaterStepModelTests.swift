@@ -210,8 +210,16 @@ final class SetupLaterStepModelTests: SetupStepTestCase {
         await model.startCheck()
 
         XCTAssertEqual(transport.sent(SetupFixture.forwardingRoute).count, 5)
-        XCTAssertEqual(model.checkSentence, "Checking. This takes up to a minute.")
+        XCTAssertFalse(model.isPolling, "the button is usable again")
+        XCTAssertEqual(model.checkSentence, "The check is still running. Tap the button to look again.")
         XCTAssertEqual(model.attemptsSentence, "1 check left today.")
+
+        // ⛔ THE BUTTON READS THE PENDING CHECK AGAIN; IT DOES NOT PLACE A SECOND CALL.
+        transport.add(SetupFixture.forwardingRoute, SetupFixture.forwarding("passed", attemptsLeft: 1))
+        await model.startCheck()
+
+        XCTAssertEqual(transport.sent(SetupFixture.forwardingStartRoute).count, 1)
+        XCTAssertEqual(model.checkSentence, "Forwarding works. The call arrived on your District number.")
     }
 
     func testAFailedCheckSaysWhichFailure() async {

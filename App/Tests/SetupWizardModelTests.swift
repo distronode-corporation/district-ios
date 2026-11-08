@@ -205,6 +205,21 @@ final class SetupWizardModelTests: XCTestCase {
         XCTAssertEqual(model.data?.numbersHeld, 1)
     }
 
+    /// ⛔ A STEP ALREADY DONE (reached by Back) STAYS when a page closes, with what was typed.
+    func testAPageClosedOverAStepAlreadyDoneKeepsIt() async {
+        let transport = SetupTransport([
+            SetupFixture.setupRoute: [(200, SetupFixture.setup(["done", "done", "todo", "todo", "todo", "todo"]))],
+        ])
+        let model = await loaded(transport)
+        model.back()
+        model.back()
+        XCTAssertEqual(model.active, .business)
+
+        await model.refreshAfterHandOff()
+
+        XCTAssertEqual(model.active, .business)
+    }
+
     func testAPageClosedWithNothingDoneKeepsTheStep() async {
         let transport = SetupTransport([
             SetupFixture.setupRoute: [(200, SetupFixture.setup(["done", "todo", "todo", "todo", "todo", "todo"]))],

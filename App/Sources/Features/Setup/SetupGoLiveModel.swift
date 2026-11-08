@@ -42,6 +42,10 @@ final class SetupGoLiveModel {
     private(set) var forwarding: ForwardingCheckResponse?
     private(set) var lineError = false
     private(set) var isStartingCheck = false
+    /// True while this client is polling a pending check.
+    private(set) var isPolling = false
+    /// The poll reached its limit with the check still pending on the service.
+    private(set) var pollGaveUp = false
     private(set) var checkError: String?
     private(set) var summary: Summary?
 
@@ -117,8 +121,16 @@ final class SetupGoLiveModel {
 
     // MARK: - The forwarding check
 
+    ///
+    /// ⛔ A CHECK THE SERVICE STILL HOLDS AS PENDING IS READ AGAIN, NOT STARTED AGAIN: after the
+    /// poll gave up, the button polls once more rather than placing a second call and spending
+    /// one of the day's checks.
     func startCheck() async {
-        guard !isStartingCheck, !checkIsPending else { return }
+        guard !isStartingCheck, !isPolling else { return }
+        if checkIsPending {
+            await pollForwarding()
+            return
+        }
         guard let line = SetupWire.e164(businessLine, region: wizard.region) else {
             lineError = true
             return
@@ -143,6 +155,13 @@ final class SetupGoLiveModel {
 
     /// ⚠️ A FAILED POLL IS RETRIED ON THE NEXT TICK, as the web's is; the limit is what ends it.
     func pollForwarding() async {
+        guard !isPolling else { return }
+        isPolling = true
+        pollGaveUp = false
+        defer {
+            isPolling = false
+            pollGaveUp = checkIsPending
+        }
         var ticks = 0
         while checkIsPending, ticks < pollLimit, !Task.isCancelled {
             ticks += 1
@@ -158,7 +177,7 @@ final class SetupGoLiveModel {
     var checkSentence: String? {
         guard let check = forwarding?.forwardingCheck else { return nil }
         if check.isPending {
-            return SetupCopy.goliveCheckPending
+            return pollGaveUp ? SetupCopy.goliveCheckStillPending : SetupCopy.goliveCheckPending
         }
         if check.hasPassed {
             return SetupCopy.goliveCheckPassed

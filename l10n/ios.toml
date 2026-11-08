@@ -16663,6 +16663,15 @@ screen = "setup.golive"
 state = "draft"
 id = { swift = "SetupCopy.goliveCheckPending" }
 
+[setup.golive_check_still_pending]
+en = "The check is still running. Tap the button to look again."
+fr = "La vérification est toujours en cours. Touchez le bouton pour regarder de nouveau."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCheckStillPending" }
+note = "After two minutes of polling a check the service still holds as pending. The button then reads the check again; it does not place a new call."
+
 [setup.golive_consent_heading]
 en = "By tapping the button you agree to this"
 fr = "En touchant le bouton, vous acceptez ceci"

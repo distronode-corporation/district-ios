@@ -111,13 +111,19 @@ final class SetupWizardModel {
     ///
     /// ⚠️ A FAILED RE-READ KEEPS THE STEP ON SCREEN. Nothing was written here, so the last
     /// answer is still the best one this client has; the step's own controls retry.
+    ///
+    /// ⛔ ONLY A STEP THE PAGE FINISHED MOVES ON. A step that was already done or skipped (reached
+    /// by Back) stays on screen with whatever the person typed into it; only a `todo` that came
+    /// back not `todo` advances.
     func refreshAfterHandOff() async {
         guard case .ready = phase else { return }
+        let step = active
+        let before = state(of: step)
         guard case let .success(response) = await repository.load(workspaceId: workspaceId) else { return }
         data = response
         if response.setupProgress?.completedAt != nil {
             phase = .finished
-        } else if state(of: active) != .todo {
+        } else if before == .todo, state(of: step) != .todo, active == step {
             active = SetupFlow.firstOpen(response.setupProgress)
         }
     }

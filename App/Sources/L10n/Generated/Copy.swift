@@ -6279,6 +6279,9 @@ extension SetupCopy {
     /// `setup.golive_check_pending`
     internal static var goliveCheckPending: String { AppL10n.copyLocale == .frCA ? "Vérification en cours. Cela prend jusqu'à une minute." : "Checking. This takes up to a minute." }
 
+    /// `setup.golive_check_still_pending`
+    internal static var goliveCheckStillPending: String { AppL10n.copyLocale == .frCA ? "La vérification est toujours en cours. Touchez le bouton pour regarder de nouveau." : "The check is still running. Tap the button to look again." }
+
     /// `setup.golive_consent_heading`
     internal static var goliveConsentHeading: String { AppL10n.copyLocale == .frCA ? "En touchant le bouton, vous acceptez ceci" : "By tapping the button you agree to this" }
 

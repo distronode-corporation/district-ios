@@ -83,9 +83,9 @@ final class SetupReceptionistModel {
     /// starter name over the owner's. A failed OPTIONS read only hides the voice picker.
     func load() async {
         phase = .loading
-        async let config = workspaces.config(workspaceId: wizard.workspaceId)
-        async let options = workspaces.personaOptions(workspaceId: wizard.workspaceId)
-        let (configResult, optionsResult) = await (config, options)
+        // ⚠️ ONE AFTER ANOTHER, NOT `async let`: see ``SetupGoLiveModel/load()``.
+        let configResult = await workspaces.config(workspaceId: wizard.workspaceId)
+        let optionsResult = await workspaces.personaOptions(workspaceId: wizard.workspaceId)
         switch configResult {
         case let .success(config):
             adopt(config.aiPersona, options: try? optionsResult.get())
