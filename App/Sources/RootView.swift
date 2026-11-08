@@ -79,6 +79,11 @@ struct RootView: View {
                 if phase == .active {
                     container.watchBridge.setNeedsSnapshot()
                 }
+                // ⛔ HQ BY VOICE ENDS IN THE BACKGROUND (``CallStack/endVoiceSession()``), not at
+                // `inactive` (a banner or Control Center): nothing on screen can stop it there.
+                if phase == .background {
+                    Task { await container.callStack.endVoiceSession() }
+                }
             }
     }
 

@@ -94,11 +94,30 @@ final class FakeHQVoiceEngine: HQVoiceEngine {
         continuation.yield(event)
     }
 
+    /// Whether the room is joined now: set by a connect that completed, cleared by a disconnect.
+    private(set) var isConnected = false
+    /// While true, a connect waits for ``releaseConnect()``, as a slow join would.
+    var holdsConnect = false
+    private var connecting: CheckedContinuation<Void, Never>?
+
+    var isConnectPending: Bool {
+        connecting != nil
+    }
+
+    func releaseConnect() {
+        connecting?.resume()
+        connecting = nil
+    }
+
     func connect(url: String, token: String) async throws {
         if failsToJoin {
             throw URLError(.cannotConnectToHost)
         }
+        if holdsConnect {
+            await withCheckedContinuation { connecting = $0 }
+        }
         joined = (url, token)
+        isConnected = true
     }
 
     /// While true, each microphone change waits for ``releaseMicrophone()``, as a slow
@@ -130,6 +149,7 @@ final class FakeHQVoiceEngine: HQVoiceEngine {
 
     func disconnect() async {
         disconnects += 1
+        isConnected = false
         continuation.finish()
     }
 }

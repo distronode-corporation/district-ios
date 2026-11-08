@@ -24,7 +24,7 @@ import Observation
 /// (``yieldAudio(_:)``).
 @MainActor
 @Observable
-final class HQVoiceSession: RoomAudio, PendingRoom {
+final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
     enum Phase: Equatable {
         case idle
         case minting
@@ -177,7 +177,12 @@ final class HQVoiceSession: RoomAudio, PendingRoom {
             await finish(.failed(VoiceFailure.joinFailed))
             return
         }
-        guard phase == .connecting else { return }
+        // ⛔ ENDED WHILE THE JOIN WAS IN FLIGHT (a Stop, a ring, a replacement): `finish` has
+        // disconnected already, but a connect that completes after it would leave the room joined.
+        guard phase == .connecting else {
+            await engine.disconnect()
+            return
+        }
         phase = .live
         // ⛔ THE FIRST OPEN GOES THROUGH ``setMicrophone(_:)`` like every other change, so a mute
         // tapped while it publishes is applied after it, not overwritten by it.
@@ -283,6 +288,19 @@ final class HQVoiceSession: RoomAudio, PendingRoom {
         case .notice: await cancelNotice()
         case .minting: phase = .idle
         case .idle, .connecting, .live, .ended: break
+        }
+    }
+
+    /// ⛔ IN ANY PHASE: a session replaced by another workspace's (``forScreen(container:workspaceId:role:)``)
+    /// and the app going to the background. Before the join it is abandoned, so no notice is left
+    /// up and a minted session is discarded; from the join on it is finished, so the room
+    /// disconnects, the microphone stops and the service is told (`hq/voice-end` once live,
+    /// `hq/voice-discard` before).
+    func end() async {
+        switch phase {
+        case .minting, .notice: await abandon()
+        case .connecting, .live: await finish(.byMember)
+        case .idle, .ended: break
         }
     }
 

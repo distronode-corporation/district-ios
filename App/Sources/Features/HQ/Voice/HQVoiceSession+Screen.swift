@@ -7,10 +7,17 @@ extension HQVoiceSession {
     /// ⛔ HELD BY THE CALL STACK, NOT THE SCREEN (Seer, round 4): a screen rebuilt while a token
     /// is minting or the notice is up finds the same session, so nothing minted is orphaned. A
     /// sign-out or a workspace switch abandons it (``CallStack/endPendingRoom()``).
+    ///
+    /// ⛔ A SESSION REPLACED BY ANOTHER WORKSPACE'S IS ENDED HERE (Seer, round 7), not left to the
+    /// switch: the new screen can be built before the switch's own teardown runs, and that one
+    /// then finds only the new session, so a minted token or a notice would be orphaned.
     static func forScreen(container: AppContainer, workspaceId: String, role: WorkspaceRole?) -> HQVoiceSession {
         let stack = container.callStack
-        if let held = stack.hqVoice as? HQVoiceSession, held.workspaceId == workspaceId {
-            return held
+        if let held = stack.hqVoice as? HQVoiceSession {
+            if held.workspaceId == workspaceId {
+                return held
+            }
+            Task { await held.end() }
         }
         let session = HQVoiceSession(
             workspaceId: workspaceId,

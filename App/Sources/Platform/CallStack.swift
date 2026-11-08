@@ -149,6 +149,11 @@ final class CallStack {
         await (hqVoice as? PendingRoom)?.abandon()
     }
 
+    /// End HQ by voice in whatever phase it is in: the app went to the background.
+    func endVoiceSession() async {
+        await (hqVoice as? VoiceSessionEnding)?.end()
+    }
+
     /// The last workspace the shell resolved, for ``workspaceSelected(_:)``.
     private var lastWorkspaceId: String?
 

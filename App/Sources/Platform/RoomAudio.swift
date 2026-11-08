@@ -100,3 +100,13 @@ protocol PendingRoom: AnyObject {
     /// Give up a room that was never joined. ⚠️ A no-op once it is live: ``RoomAudio`` ends that.
     func abandon() async
 }
+
+/// HQ by voice in any phase, as the call stack needs to end it.
+///
+/// ⛔ THE APP GOING TO THE BACKGROUND ENDS IT (``CallStack/endVoiceSession()``): the screen
+/// that drives it is out of reach, and a live microphone behind it is still a billed session.
+@MainActor
+protocol VoiceSessionEnding: AnyObject {
+    /// Abandon it before the join, end it after: the room disconnects and the microphone stops.
+    func end() async
+}
