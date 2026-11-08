@@ -6104,6 +6104,141 @@ extension SupportCopy {
     internal static var writeUnrepeatable: String { AppL10n.copyLocale == .frCA ? "Rien ne sera renvoyé d'ici. Le serveur n'a pas confirmé la réception; l'envoi a donc peut-être déjà abouti. Rouvrez la demande pour vérifier." : "This will not be sent again from here. The answer did not come back, so it may already have gone through. Reopen the request to check." }
 }
 
+extension TwoStepCopy {
+    /// `two_step.card_title`
+    internal static var cardTitle: String { AppL10n.copyLocale == .frCA ? "Sécurité" : "Security" }
+
+    /// `two_step.close`
+    internal static var close: String { AppL10n.copyLocale == .frCA ? "Fermer" : "Close" }
+
+    /// `two_step.code_prompt`
+    internal static var codePrompt: String { AppL10n.copyLocale == .frCA ? "Entrez ensuite le code à 6 chiffres que votre application d'authentification affiche pour District AI." : "Then enter the 6-digit code your authenticator app shows for District AI." }
+
+    /// `two_step.codes_done`
+    internal static var codesDone: String { AppL10n.copyLocale == .frCA ? "Je les ai enregistrés" : "I have saved them" }
+
+    /// `two_step.codes_left`
+    internal static func codesLeft(_ count: Int) -> String {
+        if AppL10n.copyLocale == .frCA {
+            if count == 0 || count == 1 {
+                return "\(count) code de récupération restant."
+            }
+            return "\(count) codes de récupération restants."
+        }
+        if count == 1 {
+            return "1 recovery code left."
+        }
+        return "\(count) recovery codes left."
+    }
+
+    /// `two_step.codes_none`
+    internal static var codesNone: String { AppL10n.copyLocale == .frCA ? "Il ne reste aucun code de récupération. Désactivez puis réactivez la vérification en deux étapes pour en obtenir de nouveaux." : "No recovery codes are left. Turn two-step verification off and on again to get new ones." }
+
+    /// `two_step.codes_title`
+    internal static var codesTitle: String { AppL10n.copyLocale == .frCA ? "Enregistrez vos codes de récupération" : "Save your recovery codes" }
+
+    /// `two_step.codes_warning`
+    internal static var codesWarning: String { AppL10n.copyLocale == .frCA ? "Chaque code permet une seule connexion si vous perdez votre application d'authentification. Enregistrez-les maintenant en lieu sûr. Ils ne seront plus affichés." : "Each code signs you in once if you lose your authenticator app. Save them somewhere safe now. They will not be shown again." }
+
+    /// `two_step.confirm_button`
+    internal static var confirmButton: String { AppL10n.copyLocale == .frCA ? "Activer la vérification en deux étapes" : "Turn on two-step verification" }
+
+    /// `two_step.copied`
+    internal static var copied: String { AppL10n.copyLocale == .frCA ? "Copié" : "Copied" }
+
+    /// `two_step.copy_all`
+    internal static var copyAll: String { AppL10n.copyLocale == .frCA ? "Tout copier" : "Copy all" }
+
+    /// `two_step.copy_key`
+    internal static var copyKey: String { AppL10n.copyLocale == .frCA ? "Copier la clé" : "Copy key" }
+
+    /// `two_step.error_load`
+    internal static var errorLoad: String { AppL10n.copyLocale == .frCA ? "Impossible de lire l'état de la vérification en deux étapes pour l'instant. Réessayez dans un moment." : "Two-step verification could not be read right now. Try again in a moment." }
+
+    /// `two_step.error_offline_load`
+    internal static var errorOfflineLoad: String { AppL10n.copyLocale == .frCA ? "Vous semblez être hors ligne. Vérifiez votre connexion et réessayez." : "You appear to be offline. Check your connection and try again." }
+
+    /// `two_step.error_offline_nothing_changed`
+    internal static var errorOfflineNothingChanged: String { AppL10n.copyLocale == .frCA ? "Vous semblez être hors ligne, donc rien n'a été modifié. Vérifiez votre connexion et réessayez." : "You appear to be offline, so nothing was changed. Check your connection and try again." }
+
+    /// `two_step.error_outcome_unknown_off`
+    internal static var errorOutcomeUnknownOff: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas reçu de réponse et ne savons pas si la vérification en deux étapes a été désactivée. Cet écran affiche maintenant son état." : "We did not hear back, so we cannot tell whether two-step verification was turned off. This screen now shows what is on." }
+
+    /// `two_step.error_outcome_unknown_on`
+    internal static var errorOutcomeUnknownOn: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas reçu de réponse et ne savons pas si la vérification en deux étapes a été activée. Cet écran affiche maintenant son état. Si elle est activée, désactivez-la puis réactivez-la pour obtenir des codes de récupération à enregistrer." : "We did not hear back, so we cannot tell whether two-step verification was turned on. This screen now shows what is on. If it is on, turn it off and on again to get recovery codes you can save." }
+
+    /// `two_step.error_proof_expired`
+    internal static var errorProofExpired: String { AppL10n.copyLocale == .frCA ? "Votre confirmation a expiré avant que la modification soit faite. Confirmez de nouveau qu'il s'agit bien de vous." : "Your confirmation ran out before the change was made. Confirm it is you again." }
+
+    /// `two_step.error_try_again`
+    internal static var errorTryAgain: String { AppL10n.copyLocale == .frCA ? "Un problème est survenu de notre côté. Rien n'a été modifié. Réessayez dans un moment." : "Something went wrong on our side. Nothing was changed. Try again in a moment." }
+
+    /// `two_step.key_label`
+    internal static var keyLabel: String { AppL10n.copyLocale == .frCA ? "Clé" : "Key" }
+
+    /// `two_step.no_password_note`
+    internal static var noPasswordNote: String { AppL10n.copyLocale == .frCA ? "Ce compte n'a pas de mot de passe. Pour désactiver cette option, confirmez qu'il s'agit bien de vous avec Google, Microsoft ou Apple." : "This account has no password, so confirm it is you with Google, Microsoft or Apple to turn this off." }
+
+    /// `two_step.off_explain`
+    internal static var offExplain: String { AppL10n.copyLocale == .frCA ? "Lorsqu'elle est activée, la connexion demande aussi un code à 6 chiffres d'une application d'authentification, et votre mot de passe seul ne suffit plus." : "When it is on, signing in also asks for a 6-digit code from an authenticator app, so your password alone is not enough." }
+
+    /// `two_step.on_since`
+    internal static func onSince(_ date: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Activée depuis le \(date)." : "On since \(date)."
+    }
+
+    /// `two_step.open_authenticator`
+    internal static var openAuthenticator: String { AppL10n.copyLocale == .frCA ? "Ouvrir dans une application d'authentification" : "Open in an authenticator app" }
+
+    /// `two_step.open_failed`
+    internal static var openFailed: String { AppL10n.copyLocale == .frCA ? "Aucune application de cet appareil ne l'a ouvert. Balayez le code QR depuis un autre appareil, ou entrez la clé à la main." : "No app on this device opened it. Scan the QR code from another device, or enter the key by hand." }
+
+    /// `two_step.qr_label`
+    internal static var qrLabel: String { AppL10n.copyLocale == .frCA ? "Code QR pour votre application d'authentification" : "QR code for your authenticator app" }
+
+    /// `two_step.qr_unreadable`
+    internal static var qrUnreadable: String { AppL10n.copyLocale == .frCA ? "Le code QR ne peut pas être affiché. Entrez plutôt la clé à la main." : "The QR code could not be shown. Enter the key by hand instead." }
+
+    /// `two_step.reauth_intro_off`
+    internal static var reauthIntroOff: String { AppL10n.copyLocale == .frCA ? "Connectez-vous de nouveau comme d'habitude. La vérification en deux étapes est désactivée dès que c'est fait." : "Sign in again the way you usually do. Two-step verification turns off as soon as you do." }
+
+    /// `two_step.reauth_intro_on`
+    internal static var reauthIntroOn: String { AppL10n.copyLocale == .frCA ? "Connectez-vous de nouveau comme d'habitude. Vous ajouterez ensuite District AI à votre application d'authentification." : "Sign in again the way you usually do. You then add District AI to your authenticator app." }
+
+    /// `two_step.retry`
+    internal static var retry: String { AppL10n.copyLocale == .frCA ? "Réessayer" : "Try again" }
+
+    /// `two_step.row_subtitle`
+    internal static var rowSubtitle: String { AppL10n.copyLocale == .frCA ? "Demander un code d'une application d'authentification à chaque connexion." : "Ask for a code from an authenticator app each time you sign in." }
+
+    /// `two_step.scan_intro`
+    internal static var scanIntro: String { AppL10n.copyLocale == .frCA ? "Balayez ce code QR avec votre application d'authentification, ou entrez à la main la clé ci-dessous." : "Scan this QR code with your authenticator app, or enter the key below by hand." }
+
+    /// `two_step.scan_title`
+    internal static var scanTitle: String { AppL10n.copyLocale == .frCA ? "Ajoutez District AI à votre application d'authentification" : "Add District AI to your authenticator app" }
+
+    /// `two_step.status_off`
+    internal static var statusOff: String { AppL10n.copyLocale == .frCA ? "Désactivée" : "Off" }
+
+    /// `two_step.status_on`
+    internal static var statusOn: String { AppL10n.copyLocale == .frCA ? "Activée" : "On" }
+
+    /// `two_step.title`
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Vérification en deux étapes" : "Two-step verification" }
+
+    /// `two_step.turn_off`
+    internal static var turnOff: String { AppL10n.copyLocale == .frCA ? "Désactiver" : "Turn off" }
+
+    /// `two_step.turn_on`
+    internal static var turnOn: String { AppL10n.copyLocale == .frCA ? "Activer" : "Turn on" }
+
+    /// `two_step.turned_off`
+    internal static var turnedOff: String { AppL10n.copyLocale == .frCA ? "La vérification en deux étapes est désactivée." : "Two-step verification is off." }
+
+    /// `two_step.turned_on`
+    internal static var turnedOn: String { AppL10n.copyLocale == .frCA ? "La vérification en deux étapes est activée." : "Two-step verification is on." }
+}
+
 extension VoiceStudioCopy {
     /// `voice_studio.advanced_hide`
     internal static var advancedHide: String { AppL10n.copyLocale == .frCA ? "Masquer" : "Hide" }

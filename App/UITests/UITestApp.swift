@@ -45,7 +45,7 @@ class UITestApp: XCTestCase {
     static let forbiddenSurfaces: Set<String> = [
         A11yID.Contacts.add,
         A11yID.Account.signOut,
-        A11yID.Account.delete, A11yID.DeleteAccount.submit,
+        A11yID.Account.delete, A11yID.DeleteAccount.submit, A11yID.TwoStep.turnOff, A11yID.TwoStep.confirm,
         A11yID.Marketplace.release,
         A11yID.Inbox.send,
         A11yID.Inbox.whatsAppTemplateSend,
