@@ -138,6 +138,25 @@ final class StoreCopyTests: XCTestCase {
         "marketplace.a2p_website_label": "Website (optional)",
         "contacts.website": "Website",
         "sign_in.opens_browser_sign_securely": "Opens your browser to sign in securely.",
+        // ⚠️ THE OWNER'S OWN WEBSITE, which the setup wizard reads for a draft of their facts
+        // (`setup/lookup`): an input, like a contact's website, never a place to go instead.
+        "setup.business_description": "Tell us who you are, or let us read your website.",
+        "setup.business_hours_found": "We found opening hours on your website; confirm them in step 4.",
+        "setup.business_read_nothing": "We read your website but found nothing we could use. Fill in the form "
+            + "below instead.",
+        "setup.business_read_website": "Read my website",
+        "setup.business_reading": "Reading your website",
+        "setup.business_website_heading": "Start from your website",
+        "setup.business_website_label": "Website",
+        "setup.business_website_lead": "Enter your website address and we will draft your hours, address, "
+            + "services and common questions. You review every item in step 4 before your receptionist uses it.",
+        "setup.callers_confirm_hours_first": "Use or discard the hours from your website before you continue.",
+        "setup.callers_draft_note": "Items we drafted from your website start switched off. Check each "
+            + "one, fix anything that is wrong, and switch it on.",
+        "setup.callers_fill_from_website": "Fill from my website",
+        "setup.callers_hours_draft_note": "These hours come from your website and are not saved yet. Check each "
+            + "day, then use them.",
+        "setup.callers_no_hours_found": "We did not find opening hours on that website. Enter them below.",
     ]
 
     /// French permitted, by key, with the exact French allowed. ⛔ A FRENCH SENTENCE MAY
