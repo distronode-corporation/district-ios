@@ -267,13 +267,3 @@ final class HQVoiceSessionTests: HQVoiceSessionCase {
         XCTAssertEqual(engine.disconnects, 1)
     }
 }
-
-/// A meeting room on the call stack, for the overlap rules.
-@MainActor
-private final class MeetingRoom: RoomAudio {
-    private(set) var yields: [RoomAudioYield] = []
-
-    func yieldAudio(_ reason: RoomAudioYield) async {
-        yields.append(reason)
-    }
-}

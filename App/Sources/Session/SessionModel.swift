@@ -255,9 +255,16 @@ final class SessionModel {
     /// and reports nothing back: a sign-out that hung, or refused, because a
     /// courtesy channel could not be withdrawn would leave a live refresh token
     /// behind, which is much the worse outcome.
+    ///
+    /// ⛔ HQ BY VOICE ENDS FIRST, BEFORE THE REVOKE. `hq/voice-end` and `hq/voice-discard`
+    /// authenticate with the session too; ``RootView`` reacts to `.signedOut` only after the
+    /// credential is gone, so an end sent from there would fail and leave the session's row
+    /// open for its 30 minutes. ⛔ Bounded like the unregister, for its reason
+    /// (``CallStack/voiceEndSeconds``).
     func signOut() async {
         isBusy = true
         defer { isBusy = false }
+        await container.callStack.endVoiceSession()
         await container.signOut(beforeRevoke: { await push.unregisterForSignOut() })
         push.forget()
         selection.setSelectedWorkspaceId(nil)

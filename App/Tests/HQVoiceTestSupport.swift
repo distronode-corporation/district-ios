@@ -40,10 +40,38 @@ final class HQVoiceTransport: HTTPTransport, @unchecked Sendable {
 
     /// ⚠️ A CANCELLED CALLER FAILS, as `URLSession` fails it, so a request sent from a task that
     /// cancelled itself is caught here rather than in production.
+    private var heldRoute: String?
+    private var held: CheckedContinuation<Void, Never>?
+
+    /// The next request to `route` waits for ``release()``, as a slow answer would.
+    func hold(_ route: String) {
+        lock.withLock { heldRoute = route }
+    }
+
+    var isHolding: Bool {
+        lock.withLock { held != nil }
+    }
+
+    func release() {
+        let waiter = lock.withLock {
+            defer { held = nil }
+            return held
+        }
+        waiter?.resume()
+    }
+
     func send(_ request: HTTPRequest, followRedirects _: Bool) async throws -> HTTPResponse {
         try Task.checkCancellation()
         let path = request.url.path
         let route = path.hasSuffix("/proposals/cancel") ? "proposals/cancel" : request.url.lastPathComponent
+        if lock.withLock({ heldRoute == route }) {
+            await withCheckedContinuation { waiter in
+                lock.withLock {
+                    heldRoute = nil
+                    held = waiter
+                }
+            }
+        }
         return lock.withLock {
             seen.append((path, String(bytes: request.body ?? Data(), encoding: .utf8) ?? ""))
             let reply = replies[route] ?? Reply(status: 500, body: #"{"error":"no stub for \#(route)"}"#)
@@ -94,11 +122,30 @@ final class FakeHQVoiceEngine: HQVoiceEngine {
         continuation.yield(event)
     }
 
+    /// Whether the room is joined now: set by a connect that completed, cleared by a disconnect.
+    private(set) var isConnected = false
+    /// While true, a connect waits for ``releaseConnect()``, as a slow join would.
+    var holdsConnect = false
+    private var connecting: CheckedContinuation<Void, Never>?
+
+    var isConnectPending: Bool {
+        connecting != nil
+    }
+
+    func releaseConnect() {
+        connecting?.resume()
+        connecting = nil
+    }
+
     func connect(url: String, token: String) async throws {
         if failsToJoin {
             throw URLError(.cannotConnectToHost)
         }
+        if holdsConnect {
+            await withCheckedContinuation { connecting = $0 }
+        }
         joined = (url, token)
+        isConnected = true
     }
 
     /// While true, each microphone change waits for ``releaseMicrophone()``, as a slow
@@ -128,9 +175,36 @@ final class FakeHQVoiceEngine: HQVoiceEngine {
         return refusesMicrophone ? !enabled : enabled
     }
 
+    /// While true, a disconnect waits for ``releaseDisconnect()``, as a slow room teardown would.
+    var holdsDisconnect = false
+    private var disconnecting: CheckedContinuation<Void, Never>?
+
+    var isDisconnectPending: Bool {
+        disconnecting != nil
+    }
+
+    func releaseDisconnect() {
+        disconnecting?.resume()
+        disconnecting = nil
+    }
+
     func disconnect() async {
         disconnects += 1
+        if holdsDisconnect {
+            await withCheckedContinuation { disconnecting = $0 }
+        }
+        isConnected = false
         continuation.finish()
+    }
+}
+
+/// A meeting room on the call stack, for the overlap rules.
+@MainActor
+final class MeetingRoom: RoomAudio {
+    private(set) var yields: [RoomAudioYield] = []
+
+    func yieldAudio(_ reason: RoomAudioYield) async {
+        yields.append(reason)
     }
 }
 
