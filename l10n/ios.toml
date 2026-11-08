@@ -16415,6 +16415,340 @@ state = "reviewed"
 id = { swift = "SupportCopy.writeUnrepeatable" }
 note = "⛔ SHOWN UNDER A FAILURE WHOSE WRITE MAY HAVE LANDED, AND IT IS THE OTHER HALF OF WITHDRAWING THE BUTTON. A 5xx, a dropped connection and a contract mismatch all leave a reply or a close that may already be in the customer's own thread, so re-arming the control would post a second copy. Reopening the request is the honest way back, because it re-reads."
 
+[two_step.card_title]
+en = "Security"
+fr = "Sécurité"
+ctx = "label"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.cardTitle" }
+
+[two_step.close]
+en = "Close"
+fr = "Fermer"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.close" }
+
+[two_step.code_prompt]
+en = "Then enter the 6-digit code your authenticator app shows for District AI."
+fr = "Entrez ensuite le code à 6 chiffres que votre application d'authentification affiche pour District AI."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codePrompt" }
+
+[two_step.codes_done]
+en = "I have saved them"
+fr = "Je les ai enregistrés"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codesDone" }
+
+[two_step.codes_left]
+en.one = "1 recovery code left."
+en.other = "{count} recovery codes left."
+fr.one = "{count} code de récupération restant."
+fr.other = "{count} codes de récupération restants."
+ctx = "body"
+screen = "account.two_step"
+args = { count = "int" }
+state = "draft"
+id = { swift = "TwoStepCopy.codesLeft(_:)" }
+note = "count is never 0: that case has its own sentence."
+
+[two_step.codes_none]
+en = "No recovery codes are left. Turn two-step verification off and on again to get new ones."
+fr = "Il ne reste aucun code de récupération. Désactivez puis réactivez la vérification en deux étapes pour en obtenir de nouveaux."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codesNone" }
+
+[two_step.codes_title]
+en = "Save your recovery codes"
+fr = "Enregistrez vos codes de récupération"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codesTitle" }
+
+[two_step.codes_warning]
+en = "Each code signs you in once if you lose your authenticator app. Save them somewhere safe now. They will not be shown again."
+fr = "Chaque code permet une seule connexion si vous perdez votre application d'authentification. Enregistrez-les maintenant en lieu sûr. Ils ne seront plus affichés."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codesWarning" }
+
+[two_step.confirm_button]
+en = "Turn on two-step verification"
+fr = "Activer la vérification en deux étapes"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.confirmButton" }
+
+[two_step.copied]
+en = "Copied"
+fr = "Copié"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.copied" }
+
+[two_step.copy_all]
+en = "Copy all"
+fr = "Tout copier"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.copyAll" }
+
+[two_step.copy_key]
+en = "Copy key"
+fr = "Copier la clé"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.copyKey" }
+
+[two_step.error_load]
+en = "Two-step verification could not be read right now. Try again in a moment."
+fr = "Impossible de lire l'état de la vérification en deux étapes pour l'instant. Réessayez dans un moment."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorLoad" }
+
+[two_step.error_offline_load]
+en = "You appear to be offline. Check your connection and try again."
+fr = "Vous semblez être hors ligne. Vérifiez votre connexion et réessayez."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorOfflineLoad" }
+
+[two_step.error_offline_nothing_changed]
+en = "You appear to be offline, so nothing was changed. Check your connection and try again."
+fr = "Vous semblez être hors ligne, donc rien n'a été modifié. Vérifiez votre connexion et réessayez."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorOfflineNothingChanged" }
+
+[two_step.error_outcome_unknown_off]
+en = "We did not hear back, so we cannot tell whether two-step verification was turned off. This screen now shows what is on."
+fr = "Nous n'avons pas reçu de réponse et ne savons pas si la vérification en deux étapes a été désactivée. Cet écran affiche maintenant son état."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorOutcomeUnknownOff" }
+
+[two_step.error_outcome_unknown_on]
+en = "We did not hear back, so we cannot tell whether two-step verification was turned on. This screen now shows what is on. If it is on, turn it off and on again to get recovery codes you can save."
+fr = "Nous n'avons pas reçu de réponse et ne savons pas si la vérification en deux étapes a été activée. Cet écran affiche maintenant son état. Si elle est activée, désactivez-la puis réactivez-la pour obtenir des codes de récupération à enregistrer."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorOutcomeUnknownOn" }
+note = "A confirm lost in transport may have turned it on, and its recovery codes with it: never claim either way."
+
+[two_step.error_proof_expired]
+en = "Your confirmation ran out before the change was made. Confirm it is you again."
+fr = "Votre confirmation a expiré avant que la modification soit faite. Confirmez de nouveau qu'il s'agit bien de vous."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorProofExpired" }
+note = "The service's re-auth proof lasts five minutes."
+
+[two_step.error_try_again]
+en = "Something went wrong on our side. Nothing was changed. Try again in a moment."
+fr = "Un problème est survenu de notre côté. Rien n'a été modifié. Réessayez dans un moment."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorTryAgain" }
+
+[two_step.key_label]
+en = "Key"
+fr = "Clé"
+ctx = "label"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.keyLabel" }
+note = "The authenticator secret, typed by hand."
+
+[two_step.no_password_note]
+en = "This account has no password, so confirm it is you with Google, Microsoft or Apple to turn this off."
+fr = "Ce compte n'a pas de mot de passe. Pour désactiver cette option, confirmez qu'il s'agit bien de vous avec Google, Microsoft ou Apple."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.noPasswordNote" }
+note = "An account that signs in only with a provider: the website cannot turn two-step off for it, the app can after a fresh provider sign-in."
+
+[two_step.off_explain]
+en = "When it is on, signing in also asks for a 6-digit code from an authenticator app, so your password alone is not enough."
+fr = "Lorsqu'elle est activée, la connexion demande aussi un code à 6 chiffres d'une application d'authentification, et votre mot de passe seul ne suffit plus."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.offExplain" }
+
+[two_step.on_since]
+en = "On since {date}."
+fr = "Activée depuis le {date}."
+ctx = "body"
+screen = "account.two_step"
+args = { date = "str" }
+state = "draft"
+id = { swift = "TwoStepCopy.onSince(_:)" }
+note = "{date} is when it was turned on, date and time as the app writes them elsewhere (12 sept. 2026, 15 h 04)."
+
+[two_step.open_authenticator]
+en = "Open in an authenticator app"
+fr = "Ouvrir dans une application d'authentification"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.openAuthenticator" }
+note = "Opens the otpauth link, which an authenticator app on this device (Passwords, for one) adds directly."
+
+[two_step.open_failed]
+en = "No app on this device opened it. Scan the QR code from another device, or enter the key by hand."
+fr = "Aucune application de cet appareil ne l'a ouvert. Balayez le code QR depuis un autre appareil, ou entrez la clé à la main."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.openFailed" }
+
+[two_step.qr_label]
+en = "QR code for your authenticator app"
+fr = "Code QR pour votre application d'authentification"
+ctx = "label"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.qrLabel" }
+note = "The image's VoiceOver label."
+
+[two_step.qr_unreadable]
+en = "The QR code could not be shown. Enter the key by hand instead."
+fr = "Le code QR ne peut pas être affiché. Entrez plutôt la clé à la main."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.qrUnreadable" }
+
+[two_step.reauth_intro_off]
+en = "Sign in again the way you usually do. Two-step verification turns off as soon as you do."
+fr = "Connectez-vous de nouveau comme d'habitude. La vérification en deux étapes est désactivée dès que c'est fait."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.reauthIntroOff" }
+
+[two_step.reauth_intro_on]
+en = "Sign in again the way you usually do. You then add District AI to your authenticator app."
+fr = "Connectez-vous de nouveau comme d'habitude. Vous ajouterez ensuite District AI à votre application d'authentification."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.reauthIntroOn" }
+
+[two_step.retry]
+en = "Try again"
+fr = "Réessayer"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.retry" }
+
+[two_step.row_subtitle]
+en = "Ask for a code from an authenticator app each time you sign in."
+fr = "Demander un code d'une application d'authentification à chaque connexion."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.rowSubtitle" }
+
+[two_step.scan_intro]
+en = "Scan this QR code with your authenticator app, or enter the key below by hand."
+fr = "Balayez ce code QR avec votre application d'authentification, ou entrez à la main la clé ci-dessous."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.scanIntro" }
+
+[two_step.scan_title]
+en = "Add District AI to your authenticator app"
+fr = "Ajoutez District AI à votre application d'authentification"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.scanTitle" }
+
+[two_step.status_off]
+en = "Off"
+fr = "Désactivée"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.statusOff" }
+note = "The state of two-step verification (feminine in French: la vérification)."
+
+[two_step.status_on]
+en = "On"
+fr = "Activée"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.statusOn" }
+note = "The state of two-step verification (feminine in French: la vérification)."
+
+[two_step.title]
+en = "Two-step verification"
+fr = "Vérification en deux étapes"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.title" }
+
+[two_step.turn_off]
+en = "Turn off"
+fr = "Désactiver"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.turnOff" }
+
+[two_step.turn_on]
+en = "Turn on"
+fr = "Activer"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.turnOn" }
+
+[two_step.turned_off]
+en = "Two-step verification is off."
+fr = "La vérification en deux étapes est désactivée."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.turnedOff" }
+
+[two_step.turned_on]
+en = "Two-step verification is on."
+fr = "La vérification en deux étapes est activée."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.turnedOn" }
+
 [voice_studio.advanced_hide]
 en = "Hide"
 fr = "Masquer"

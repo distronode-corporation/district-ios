@@ -11,6 +11,9 @@ enum AccountCopy {}
 /// The account deletion sheet (``DeleteAccountView``) and the sign-in screen's sentence after it.
 enum DeleteAccountCopy {}
 
+/// The two-step verification sheet (``TwoStepView``) and its row on the Account screen.
+enum TwoStepCopy {}
+
 /// The Analytics screen and its cards.
 enum AnalyticsCopy {}
 

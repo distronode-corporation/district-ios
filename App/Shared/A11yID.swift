@@ -217,6 +217,8 @@ enum A11yID {
         static let signOut = "district-account-sign-out"
         /// ⛔ A FORBIDDEN SURFACE: starts an irreversible deletion.
         static let delete = "district-account-delete"
+        /// Opens the two-step verification sheet.
+        static let twoStep = "district-account-two-step"
     }
 
     /// The workspace-settings hub. Mirrors Android's

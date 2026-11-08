@@ -19,6 +19,22 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
+- Two-step verification settings (Sean, 2026-11-07 and 2026-11-08), on DistrictCore 8.5.0's
+  `TwoStepSettingsRepository`. Account, Two-step verification opens a sheet that says whether
+  it is on, since when and how many recovery codes are left. Turning it on or off starts with
+  the same fresh re-authentication as account deletion, for the `2fa-change` action (a fresh
+  sign-in at Google, Microsoft or Apple, or the password with the authenticator code when it is
+  on; no passkeys). Turning it on then shows the new secret as a QR code and a copyable key
+  (with a button that hands the `otpauth://` link to an authenticator app on this device),
+  asks for the app's code, and shows the recovery codes once, with Copy all and a warning that
+  they are not shown again. An account with no password turns it off after a provider sign-in,
+  which the website cannot do. Every refusal has a sentence in both languages, the core's own
+  for its `MFA_*`, `mfa_code_invalid`, `rate_limited` and `browser_session_required` codes; a
+  confirm or a disable whose answer is lost says it cannot tell and reads the status again.
+  Each call is single-flight. The secret and the codes are never logged, are copied to this
+  device only and for two minutes, are covered while the app is not active (the app switcher's
+  snapshot), and are dropped when the sheet closes.
+
 - Integrations in Settings (parity Part 2 item 5), on DistrictCore 8.5.0's
   `SetupWizardRepository.connections`. A District Studio row after Knowledge, as on the web,
   opens the accounts the receptionist works through: Google Calendar and Microsoft Outlook

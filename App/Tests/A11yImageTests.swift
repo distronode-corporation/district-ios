@@ -74,7 +74,7 @@ final class A11yImageTests: XCTestCase {
             count += try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
                 .components(separatedBy: Self.constructor).count - 1
         }
-        // ⚠️ TWENTY-FOUR. The tenth is the chevron on
+        // ⚠️ TWENTY-FIVE. The tenth is the chevron on
         // ``SchedulingHubView``'s section rows and the eleventh is the radio glyph on
         // ``SchedulingCalendarPickerSheet``'s destination rows; both carry
         // `.accessibilityHidden(true)`, because each sits inside a control VoiceOver
@@ -103,13 +103,15 @@ final class A11yImageTests: XCTestCase {
         // and the warning triangle, hidden because the sentence beside it says it cannot open.
         // The twenty-fifth is the chevron on ``IntegrationsView``'s two links, hidden as on the
         // settings hub: the `NavigationLink` already says it opens something.
+        // The twenty-sixth is the lock on ``TwoStepView``'s cover over the secret while the app is
+        // not active, hidden because nobody can read the screen it is drawn for.
         // ⚠️ `SchedulingEmptyState`'s glyph is NOT among these — `EmptyStateView` takes a
         // symbol NAME and constructs the `Image` itself, so it is counted at that one
         // definition rather than per caller.
         // Comments do not count: both scans read comment-stripped source.
         XCTAssertEqual(
-            count, 25,
-            "the app has \(count) SF Symbols, not 25: update this number in the same "
+            count, 26,
+            "the app has \(count) SF Symbols, not 26: update this number in the same "
                 + "commit that adds or removes one, having decided how it is announced"
         )
     }
