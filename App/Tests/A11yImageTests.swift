@@ -74,7 +74,7 @@ final class A11yImageTests: XCTestCase {
             count += try SourceScan.stripComments(String(contentsOf: file, encoding: .utf8))
                 .components(separatedBy: Self.constructor).count - 1
         }
-        // ⚠️ TWENTY-TWO. The tenth is the chevron on
+        // ⚠️ TWENTY-FOUR. The tenth is the chevron on
         // ``SchedulingHubView``'s section rows and the eleventh is the radio glyph on
         // ``SchedulingCalendarPickerSheet``'s destination rows; both carry
         // `.accessibilityHidden(true)`, because each sits inside a control VoiceOver
@@ -98,15 +98,18 @@ final class A11yImageTests: XCTestCase {
         // The twentieth to twenty-second are on ``HQVoiceBar``: the settings slider and the
         // microphone toggle each carry a label (they are the whole button), and the waveform
         // beside the agent's state is hidden, because the state is announced as a value.
-        // The twenty-third is the chevron on ``IntegrationsView``'s two links, hidden as on the
+        // The twenty-third and twenty-fourth are on ``ReceivedAttachmentView``: the file tile's
+        // document glyph, hidden because the tile is announced as the type with an open hint,
+        // and the warning triangle, hidden because the sentence beside it says it cannot open.
+        // The twenty-fifth is the chevron on ``IntegrationsView``'s two links, hidden as on the
         // settings hub: the `NavigationLink` already says it opens something.
         // ⚠️ `SchedulingEmptyState`'s glyph is NOT among these — `EmptyStateView` takes a
         // symbol NAME and constructs the `Image` itself, so it is counted at that one
         // definition rather than per caller.
         // Comments do not count: both scans read comment-stripped source.
         XCTAssertEqual(
-            count, 23,
-            "the app has \(count) SF Symbols, not 23: update this number in the same "
+            count, 25,
+            "the app has \(count) SF Symbols, not 25: update this number in the same "
                 + "commit that adds or removes one, having decided how it is announced"
         )
     }

@@ -363,7 +363,7 @@ private struct MessageBubble: View {
         if !event.mediaUrls.isEmpty {
             HStack(spacing: DistrictSpacing.hairline) {
                 ForEach(event.mediaUrls, id: \.self) { url in
-                    ThreadMediaThumbnail(url: url)
+                    ReceivedAttachmentView(url: url)
                 }
             }
         }

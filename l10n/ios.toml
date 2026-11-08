@@ -4165,6 +4165,15 @@ screen = "inbox.thread"
 state = "reviewed"
 id = { swift = "InboxCopy.attaching" }
 
+[inbox.attachment_cannot_open]
+en = "This attachment can't be opened here"
+fr = "Cette pièce jointe ne peut pas être ouverte ici"
+ctx = "label"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.attachmentCannotOpen" }
+note = "On a received attachment the app could not fetch: the sender's carrier wants its own sign-in for it, or the network failed. Shown in a small square in the thread."
+
 [inbox.attachment_count]
 en.one = "{count} attachment"
 en.other = "{count} attachments"
@@ -4175,6 +4184,15 @@ screen = "inbox.thread"
 args = { count = "int" }
 state = "reviewed"
 id = { swift = "InboxCopy.attachmentCount(_:)" }
+
+[inbox.attachment_file]
+en = "Attachment"
+fr = "Pièce jointe"
+ctx = "label"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.attachmentFile" }
+note = "On the tile of a received file that is not an image, when iOS has no name for its type, and as the file's name in the preview and the share sheet."
 
 [inbox.attachment_held]
 en = "Held"
@@ -4203,6 +4221,15 @@ args = { channel = "str" }
 state = "reviewed"
 id = { swift = "InboxCopy.attachmentHeldOn(_:)" }
 note = "Read by VoiceOver on a held image's chip; channel is the reply's channel name as the picker shows it (WhatsApp, Messenger, Instagram). French agrees with « image »."
+
+[inbox.attachment_open_hint]
+en = "Opens a preview you can share."
+fr = "Ouvre un aperçu que vous pouvez partager."
+ctx = "a11y"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.attachmentOpenHint" }
+note = "VoiceOver hint on a received file's tile: it opens in a preview with a share button."
 
 [inbox.attachments_held_email]
 en.one = "The image stays in the draft: email replies cannot carry attachments, so it will not be sent."
@@ -4394,6 +4421,15 @@ state = "reviewed"
 id = { swift = "InboxCopy.filter" }
 note = "The Inbox toolbar menu that holds the two filters (all conversations, assigned to me)."
 
+[inbox.image_attachment]
+en = "Image attachment"
+fr = "Image jointe"
+ctx = "a11y"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.imageAttachment" }
+note = "VoiceOver label on a received image in a thread."
+
 [inbox.image_could_not_read]
 en = "That image could not be read. Try picking it again."
 fr = "Impossible de lire cette image. Sélectionnez-la de nouveau."
@@ -4437,6 +4473,15 @@ ctx = "title"
 screen = "inbox"
 state = "reviewed"
 id = { swift = "InboxCopy.keepTyping" }
+
+[inbox.loading_attachment]
+en = "Loading attachment"
+fr = "Chargement de la pièce jointe"
+ctx = "label"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.loadingAttachment" }
+note = "While a received attachment is fetched, before the app knows whether it is an image or a file."
 
 [inbox.loading_image]
 en = "Loading image"
