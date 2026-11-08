@@ -296,9 +296,10 @@ final class TwoStepModel {
         case .reread:
             dropEnrollment()
             let message = failure
-            await read()
             // ⚠️ THE READ'S OWN FAILURE, IF ANY, IS THE MORE URGENT ONE; otherwise the refusal stays.
-            if step == .overview {
+            // Keyed on the read's result, not the step: a failed re-read over a status already shown
+            // also lands on `.overview`, and must keep its own failure.
+            if await read() {
                 failure = message
             }
         }
@@ -363,17 +364,21 @@ final class TwoStepModel {
     // ── Pieces ──────────────────────────────────────────────────────────────
 
     /// The status, into ``status`` and the overview, or the reason it could not be read.
-    private func read() async {
+    /// Returns whether the status was read.
+    @discardableResult
+    private func read() async -> Bool {
         switch await settings.status() {
         case let .success(read):
             status = read
             failure = nil
             step = .overview
+            return true
         case let .failure(error):
             failure = Self.loadFailure(error)
             // ⚠️ A STATUS ALREADY SHOWN STAYS ON SCREEN under the failure; only a first read fails
             // to the Retry step.
             step = status == nil ? .loadFailed : .overview
+            return false
         }
     }
 

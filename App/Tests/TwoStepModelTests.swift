@@ -177,6 +177,21 @@ final class TwoStepModelTests: XCTestCase {
         XCTAssertEqual(model.recoveryCodes, [])
     }
 
+    /// ⛔ A RE-READ THAT FAILS KEEPS ITS OWN FAILURE (Seer on #119): the status already shown stays
+    /// on screen, so the step alone cannot tell a failed re-read from a good one.
+    func testAFailedReReadIsNotHiddenByTheRefusal() async {
+        let model = await TwoStepFixtures.scanning(then: [
+            (200, #"{"enrolled":false,"backupCodes":[]}"#),
+            (500, #"{"error":"server_error"}"#),
+        ])
+        model.totp = "123456"
+        await model.confirm()
+
+        XCTAssertEqual(model.step, .overview)
+        XCTAssertEqual(model.failure, TwoStepCopy.errorLoad)
+        XCTAssertNotEqual(model.failure, TwoStepCopy.errorOutcomeUnknownOn)
+    }
+
     func testAlreadyOnOrNotStartedReadsTheStatusAgain() async {
         for code in ["MFA_ALREADY_ENABLED", "MFA_NOT_STARTED", "MFA_NOT_PENDING"] {
             let transport = SettingsTransport(responses: [
