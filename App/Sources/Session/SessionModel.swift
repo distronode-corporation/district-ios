@@ -277,6 +277,27 @@ final class SessionModel {
         container.watchBridge.publishSignedOut()
     }
 
+    /// After the service deleted the account: everything ``signOut()`` clears on this device,
+    /// with none of its calls to the service, then the sign-in screen saying so.
+    ///
+    /// ⛔ NO PUSH UNREGISTER AND NO REVOKE. Both authenticate as an account that no longer
+    /// exists; the service removed its rows with it. See ``AppContainer/forgetDeletedAccount()``.
+    ///
+    /// ⚠️ `externalErasurePending` IS THE SERVICE'S OWN FLAG: the account is deleted either way,
+    /// and the sentence says so before it says what is still being erased.
+    func finishDeletedAccount(externalErasurePending: Bool) async {
+        await container.forgetDeletedAccount()
+        push.forget()
+        selection.setSelectedWorkspaceId(nil)
+        container.listenInRecents.clear()
+        OfflineRead.cache.clear()
+        OfflineRead.status.reset()
+        phase = .signedOut(
+            externalErasurePending ? DeleteAccountCopy.deletedErasurePending : DeleteAccountCopy.deleted
+        )
+        container.watchBridge.publishSignedOut()
+    }
+
     // ── Wording ──────────────────────────────────────────────────────────────
 
     /// ⚠️ ONE MAPPING, IN ONE PLACE, and the sentences themselves live in

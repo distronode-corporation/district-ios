@@ -12,7 +12,7 @@ import XCTest
 /// ⛔ IT DELIBERATELY DOES **NOT** INHERIT `UITestApp`, AND NEITHER WALK MAY. That
 /// base launches the app ONCE per run and refuses every identifier in
 /// `forbiddenSurfaces`; these walks sign in for real, place a real call, open the
-/// account-deletion page and block a caller, so they own their own launch. What keeps
+/// account-deletion sheet and block a caller, so they own their own launch. What keeps
 /// them safe is stated per walk: the 2.1 walk taps nothing that spends money, and the
 /// 1.2 walk touches only rows whose label carries the demo workspace's fictional
 /// `+1 555 01xx` fragment.
