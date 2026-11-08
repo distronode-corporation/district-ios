@@ -15,6 +15,7 @@ extension A11yID {
         static let skip = "district-setup-skip"
         static let stepError = "district-setup-step-error"
         static let done = "district-setup-done"
+        static let keyboardDone = "district-setup-keyboard-done"
 
         /// The step on screen, keyed by the service's step key (`business`, `golive`).
         static func step(_ key: String) -> String {

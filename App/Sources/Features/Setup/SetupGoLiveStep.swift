@@ -40,7 +40,6 @@ struct SetupGoLiveStep: View {
                     error: model.mobileError ? SetupCopy.goliveMobileError : nil,
                     placeholder: "+14165550123",
                     keyboard: .phonePad,
-                    content: .telephoneNumber,
                     identifier: A11yID.Setup.GoLive.mobile
                 )
                 VStack(alignment: .leading, spacing: DistrictSpacing.hairline) {
@@ -89,7 +88,6 @@ struct SetupGoLiveStep: View {
                 error: model.lineError ? SetupCopy.goliveBusinessLineError : nil,
                 placeholder: "+14165550123",
                 keyboard: .phonePad,
-                content: .telephoneNumber,
                 identifier: A11yID.Setup.GoLive.businessLine
             )
             DistrictEyebrow(text: SetupCopy.goliveModeLabel)

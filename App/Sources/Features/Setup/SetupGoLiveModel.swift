@@ -75,11 +75,13 @@ final class SetupGoLiveModel {
 
     // MARK: - Reading
 
+    /// ⚠️ ONE READ AFTER ANOTHER, NOT `async let`: three `async let`s here aborted the app in
+    /// `swift_task_dealloc` when the step's `.task` ran them (seen on the iOS 26.3 simulator,
+    /// Xcode 26.3), and three small reads in a row cost nothing a person waits on.
     func load() async {
-        async let forwardingRead = wizard.repository.forwardingCheck(workspaceId: wizard.workspaceId)
-        async let config = workspaces.config(workspaceId: wizard.workspaceId)
-        async let handling = callHandling.callHandling(workspaceId: wizard.workspaceId)
-        let (forwardingResult, configResult, handlingResult) = await (forwardingRead, config, handling)
+        let forwardingResult = await wizard.repository.forwardingCheck(workspaceId: wizard.workspaceId)
+        let configResult = await workspaces.config(workspaceId: wizard.workspaceId)
+        let handlingResult = await callHandling.callHandling(workspaceId: wizard.workspaceId)
         forwarding = try? forwardingResult.get()
         if case let .success(config) = configResult, case let .success(handling) = handlingResult {
             summary = Summary(

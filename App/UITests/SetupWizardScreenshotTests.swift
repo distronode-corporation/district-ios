@@ -80,8 +80,9 @@ final class SetupWizardScreenshotTests: XCTestCase {
         capture("08-calls-handoffs")
 
         tapScrolling(A11yID.Setup.Calls.saveAndContinue)
-        XCTAssertTrue(element(A11yID.Setup.GoLive.mobile).waitForExistence(timeout: 15))
+        XCTAssertTrue(element(A11yID.Setup.step("golive")).waitForExistence(timeout: 15))
         capture("09-golive")
+        XCTAssertTrue(element(A11yID.Setup.GoLive.mobile).waitForExistence(timeout: 15))
 
         type("4165550123", into: A11yID.Setup.GoLive.mobile)
         tapScrolling(A11yID.Setup.GoLive.callMe)
@@ -172,9 +173,10 @@ final class SetupWizardScreenshotTests: XCTestCase {
         XCTAssertTrue(field.waitForExistence(timeout: 10), identifier)
         field.tap()
         field.typeText(text)
-        // ⚠️ THE KEYBOARD COVERS THE BUTTONS BELOW: put it away.
-        if app.keyboards.firstMatch.exists {
-            app.navigationBars.firstMatch.tap()
+        // ⚠️ THE KEYBOARD COVERS THE BUTTONS BELOW: put it away with the wizard's own Done.
+        let done = element(A11yID.Setup.keyboardDone)
+        if app.keyboards.firstMatch.exists, done.waitForExistence(timeout: 2) {
+            done.tap()
         }
     }
 

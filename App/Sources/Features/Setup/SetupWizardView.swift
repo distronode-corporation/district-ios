@@ -63,6 +63,17 @@ struct SetupWizardView: View {
             .navigationTitle(SetupCopy.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // ⚠️ THE PHONE PAD HAS NO RETURN KEY, so without this a number field's keyboard
+                // could not be put away and covered the step's buttons.
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button(SetupCopy.done) {
+                        UIApplication.shared.sendAction(
+                            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+                        )
+                    }
+                    .accessibilityIdentifier(A11yID.Setup.keyboardDone)
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button(SetupCopy.finishLater, action: onClose)
                         .disabled(model.isCompleting)
