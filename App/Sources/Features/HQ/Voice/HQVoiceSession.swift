@@ -17,7 +17,8 @@ import Observation
 /// the service refuses falls back to `hq/voice-end` (``discard(_:)``); Stop, the 30 minutes, a
 /// ring, the agent leaving and a sign-out call `hq/voice-end`, so only the minutes used are
 /// counted. Both by `sessionId`. ⚠️ The sign-out ends it BEFORE the credential is revoked
-/// (``SessionModel/signOut()``), or the call would go out with no session.
+/// (``SessionModel/signOut()``), or the call would go out with no session; a token still
+/// minting is waited for and given back first (``abandon()``).
 ///
 /// ⛔ PUSH-TO-TALK STARTS MUTED. With ``HQMicMode/push`` the microphone opens only while the
 /// button is held (``holdToTalk(_:)``); with an open mode it opens on the join.
@@ -91,6 +92,7 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
     private var micWanted = false
     private var screenVersion = 0
     private var place = HQVoicePlace(.hq)
+    private let mints = HQVoiceMints()
 
     init(
         workspaceId: String,
@@ -142,6 +144,8 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
         }
         reset()
         phase = .minting
+        mints.begin()
+        defer { mints.finish() }
         let answer = await hq.voiceToken(workspaceId: workspaceId, locale: locale, history: history)
         // ⚠️ STOPPED, OR ENDED BY A RING, WHILE THE TOKEN WAS IN FLIGHT: nothing is shown, and a
         // session the service did open is discarded.
@@ -300,11 +304,15 @@ final class HQVoiceSession: RoomAudio, PendingRoom, VoiceSessionEnding {
     }
 
     /// ⛔ A SIGN-OUT OR A WORKSPACE SWITCH BEFORE THE JOIN: a notice is declined (discarded), and
-    /// a token still minting is discarded when it arrives (``start(history:locale:)``).
+    /// a token still minting is waited for and discarded (``start(history:locale:)``) BEFORE this
+    /// returns (#116), as the Rust core does: a discard sent after the sign-out's revoke fails and
+    /// leaves the row open for 30 minutes. The sign-out bounds the wait (``CallStack/endVoiceSession()``).
     func abandon() async {
         switch phase {
         case .notice: await cancelNotice()
-        case .minting: phase = .idle
+        case .minting:
+            phase = .idle
+            await mints.settled()
         case .idle, .connecting, .live, .ended: break
         }
     }
