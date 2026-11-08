@@ -19,6 +19,15 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
+- Integrations in Settings (parity Part 2 item 5), on DistrictCore 8.5.0's
+  `SetupWizardRepository.connections`. A District Studio row after Knowledge, as on the web,
+  opens the accounts the receptionist works through: Google Calendar and Microsoft Outlook
+  Calendar with the web's four statuses (Connected, Reconnection needed, Access revoked, Not
+  connected) and which one the receptionist books into, then links to the Desk and to the
+  business-caller lookups under Skills. Connecting, reconnecting or disconnecting a calendar
+  is the provider's consent screen, so the Integrations page opens in a sheet and the screen
+  reads again when it closes. A viewer sees the statuses only. The sending domain and the
+  media library have no mobile contract and are not here.
 - Account deletion in the app (Guideline 5.1.1(v); Sean, 2026-11-07), on DistrictCore 8.4.2's
   `NativeReauthRepository`. Account, Delete account opens a sheet that says what is deleted
   (the profile, the settings and every workspace the person owns, whose subscriptions are

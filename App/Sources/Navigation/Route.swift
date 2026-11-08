@@ -297,6 +297,12 @@ enum SettingsSection: String, Hashable, CaseIterable {
     /// hub to viewers later is a decision about the persona and capability forms,
     /// which genuinely 403, rather than about this one.
     case knowledge
+    /// ⚠️ THE ONE READ BEHIND IT, `GET connections`, ADMITS `viewer`, so the row is
+    /// offered read-only like ``knowledge`` rather than hidden. It writes nothing: the
+    /// calendar connect and disconnect legs are a provider's consent screen, which opens
+    /// the web's page in a sheet, and the two rows that lead elsewhere (Desk, Skills) are
+    /// screens with gates of their own.
+    case integrations
     /// ⚠️ Same asymmetry as ``knowledge``.
     case messaging
     /// ⛔ THE WRITES HERE ARE AGENCY-ONLY, the narrowest guard in the API, because
