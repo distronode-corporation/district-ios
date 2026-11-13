@@ -107,6 +107,11 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- District HQ by voice: signing out while Talk to HQ was still minting its session no longer
+  leaves that session open for its 30 minutes (#116). The sign-out waits for the token and
+  gives the session back (`hq/voice-discard`, falling back to `hq/voice-end`) while the
+  credential is still alive, as DistrictCore's Rust core does, inside the same 3-second bound,
+  so a stalled mint never holds the sign-out; a token that arrives later is still discarded.
 - Inbox: a received attachment that is not an image (a PDF sent by MMS) no longer draws as a
   broken image (Sean, 2026-11-08). Each received attachment is fetched once without the bearer
   token, as DistrictCore requires for media URLs, and branched on the response's `Content-Type`:

@@ -14,7 +14,13 @@ final class HQVoiceTransport: HTTPTransport, @unchecked Sendable {
 
     private let lock = NSLock()
     private var replies: [String: Reply]
-    private var seen: [(path: String, body: String)] = []
+    private struct Seen {
+        let path: String
+        let body: String
+        let authorization: String?
+    }
+
+    private var seen: [Seen] = []
 
     init(_ replies: [String: Reply] = [:]) {
         self.replies = replies
@@ -32,6 +38,11 @@ final class HQVoiceTransport: HTTPTransport, @unchecked Sendable {
     /// The bodies sent to one route, in order.
     func bodies(_ route: String) -> [String] {
         lock.withLock { seen.filter { $0.path.hasSuffix("/" + route) }.map(\.body) }
+    }
+
+    /// The `Authorization` header sent to one route, in order: the credential each call carried.
+    func authorizations(_ route: String) -> [String?] {
+        lock.withLock { seen.filter { $0.path.hasSuffix("/" + route) }.map(\.authorization) }
     }
 
     func count(_ route: String) -> Int {
@@ -73,7 +84,11 @@ final class HQVoiceTransport: HTTPTransport, @unchecked Sendable {
             }
         }
         return lock.withLock {
-            seen.append((path, String(bytes: request.body ?? Data(), encoding: .utf8) ?? ""))
+            seen.append(Seen(
+                path: path,
+                body: String(bytes: request.body ?? Data(), encoding: .utf8) ?? "",
+                authorization: request.headers["Authorization"]
+            ))
             let reply = replies[route] ?? Reply(status: 500, body: #"{"error":"no stub for \#(route)"}"#)
             return HTTPResponse(
                 statusCode: reply.status,
