@@ -159,6 +159,10 @@ enum A11yID {
         static let whatsAppTemplates = "district-inbox-whatsapp-templates"
         /// ⛔ A FORBIDDEN SURFACE like ``send``: it sends a billed WhatsApp template.
         static let whatsAppTemplateSend = "district-inbox-whatsapp-template-send"
+        /// A received attachment that is not an image: the tile that opens it in Quick Look.
+        static let attachmentFile = "district-inbox-attachment-file"
+        /// A received attachment that could not be fetched, and says so.
+        static let attachmentUnavailable = "district-inbox-attachment-unavailable"
     }
 
     enum Dialer {
@@ -213,6 +217,8 @@ enum A11yID {
         static let signOut = "district-account-sign-out"
         /// ⛔ A FORBIDDEN SURFACE: starts an irreversible deletion.
         static let delete = "district-account-delete"
+        /// Opens the two-step verification sheet.
+        static let twoStep = "district-account-two-step"
     }
 
     /// The workspace-settings hub. Mirrors Android's

@@ -42,10 +42,10 @@ class UITestApp: XCTestCase {
     ///
     /// ⚠️ `Dialer.call` IS HERE EVEN THOUGH THE EMERGENCY CASES LEAVE IT DISABLED:
     /// the point is that no future case may tap it, not that today's cannot.
-    static let forbiddenSurfaces: Set<String> = [
+    static let forbiddenSurfaces: Set<String> = Set([
         A11yID.Contacts.add,
         A11yID.Account.signOut,
-        A11yID.Account.delete,
+        A11yID.Account.delete, A11yID.DeleteAccount.submit, A11yID.TwoStep.turnOff, A11yID.TwoStep.confirm,
         A11yID.Marketplace.release,
         A11yID.Inbox.send,
         A11yID.Inbox.whatsAppTemplateSend,
@@ -54,7 +54,7 @@ class UITestApp: XCTestCase {
         A11yID.Desk.composeSubmit,
         // ⛔ A CUSTOMER'S CALL IN PROGRESS: only the loopback `LiveSuperviseScreenshotTests`.
         A11yID.Live.listen, A11yID.Live.takeOver, A11yID.Live.whisperSend,
-    ]
+    ]).union(A11yID.Setup.GoLive.forbiddenSurfaces)
 
     override func setUp() {
         super.setUp()

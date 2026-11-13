@@ -8,14 +8,13 @@ import SwiftUI
 /// dashboard or the site. So the card says
 /// what is left to do and what the button does, and the page it opens speaks for itself.
 ///
-/// ⛔ THE BUTTON OPENS AN IN-APP SAFARI SHEET, NEVER `openURL`, FOR THE REASON ``ShellView``
-/// RECORDS ON ITS OWN HAND-OFF. `applinks:www.distronode.com` claims `/dashboard/district/*`,
-/// so asking the system to open that URL routes it straight back into this app: a relaunch
-/// loop with no user input in the cycle. A ``SafariView`` renders the page in-process and
-/// consults no associated-domain routing, so it cannot loop. Android reaches the same place
-/// with `launchExternally`, which names a browser package explicitly.
+/// ⛔ THE BUTTON OPENS THE WIZARD IN THE APP (``SetupWizardView``), since 2026-11-08 ("Most in
+/// app, buying on web"). Until then it opened the web's console home in a Safari sheet; the
+/// pages the wizard still hands to the web open the same way, from inside it
+/// (``SetupHandOff``), and never through `openURL`, because `applinks:www.distronode.com`
+/// claims `/dashboard/district/*` and the system would route them straight back here.
 ///
-/// ⚠️ ENGLISH ONLY, like the rest of both native apps, by decision.
+/// ⚠️ ITS THREE SENTENCES ARE IN THE CATALOG (`finish_setup.*`), English and French.
 struct FinishSetupCard: View {
     let onOpen: () -> Void
 
@@ -44,22 +43,6 @@ struct FinishSetupCard: View {
         .districtCardSurface()
         // ⛔ `.contain`, so the button keeps its own identifier and stays operable.
         .accessibilityElement(children: .contain)
-    }
-
-    /// Where the button goes: the District console home on the host this build talks to.
-    ///
-    /// ⚠️ DERIVED FROM THE CONTAINER'S BASE URL, never a literal, so a staging build hands
-    /// off to staging (the rule ``AppContainer/baseURL`` states). The path is
-    /// ``AppLinkResolver/pathPrefix``, the prefix the app already claims, so it names the
-    /// same page the association file does and cannot drift from it.
-    static func destination(baseURL: URL) -> URL? {
-        guard var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else { return nil }
-        // ⛔ HTTPS ONLY: `SFSafariViewController` traps on any other scheme.
-        guard components.scheme == "https" else { return nil }
-        components.path = AppLinkResolver.pathPrefix
-        components.query = nil
-        components.fragment = nil
-        return components.url
     }
 }
 

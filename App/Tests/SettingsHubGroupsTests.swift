@@ -8,7 +8,7 @@ import XCTest
 /// written out rather than derived. The web's District Studio pages are, in order: Studio home,
 /// Persona, Voice, Call handling, Skills, Knowledge, Integrations, Video. Call handling is three
 /// screens in this app (how calls are answered, the dynamic persona rules, the transfer
-/// directory, in the web page's own order); Integrations and Video have no screen here.
+/// directory, in the web page's own order); Video has no screen here.
 final class SettingsHubGroupsTests: XCTestCase {
     private var groups: [SettingsHubGroup] {
         SettingsHubView.groups
@@ -18,7 +18,7 @@ final class SettingsHubGroupsTests: XCTestCase {
         XCTAssertEqual(groups.map(\.title), ["District Studio", "Workspace"])
         XCTAssertEqual(
             groups.first?.entries.map(\.section),
-            [.persona, .voiceStudio, .calls, .routing, .directory, .capabilities, .knowledge]
+            [.persona, .voiceStudio, .calls, .routing, .directory, .capabilities, .knowledge, .integrations]
         )
         XCTAssertEqual(groups.last?.entries.map(\.section), [.messaging, .members, .scheduling])
     }
@@ -38,6 +38,7 @@ final class SettingsHubGroupsTests: XCTestCase {
         XCTAssertEqual(titles[.voiceStudio], "Voice")
         XCTAssertEqual(titles[.capabilities], "Skills")
         XCTAssertEqual(titles[.knowledge], "Knowledge")
+        XCTAssertEqual(titles[.integrations], "Integrations")
     }
 
     /// ⚠️ THE VOICE SCREEN'S TITLE IS THE ROW'S AND THE WIRE HEADING'S. The service sends

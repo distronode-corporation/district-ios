@@ -158,7 +158,8 @@ struct ShellView: View {
     }
 
     var body: some View {
-        gate
+        gate.environment(\.workspaceRegion, workspaceSession.selectedEntry?.region)
+            .safeAreaInset(edge: .top, spacing: 0) { OfflineBanner(status: OfflineRead.status) }
             .task {
                 // ⚠️ Once per appearance of this view identity, not per redraw.
                 await workspaceSession.load()
@@ -271,9 +272,9 @@ struct ShellView: View {
             .onContinueUserActivity(CallBackHandoff.activityType) { continueCallBack($0) }
             // A listen-in tapped in Recents, caught by `RootView`. See ``resolvePendingListenIn()``.
             .onChange(of: container.listenInRecents.pending, initial: true) { resolvePendingListenIn() }
-            .sheet(item: $browserHandOff) { handOff in
-                SafariView(url: handOff.url)
-            }
+            .sheet(item: $browserHandOff) { SafariView(url: $0.url) }
+            // ⛔ HQ by voice hears each navigation: a page id and a record id, never a name.
+            .onChange(of: paths.hqVoicePlace) { (container.callStack.hqVoice as? HQVoiceSession)?.report($1) }
             // ⛔ A FULL-SCREEN COVER RATHER THAN A NAVIGATION DESTINATION, and it
             // covers the WHOLE shell rather than one tab. A ring can arrive for a
             // workspace that is not the selected one and while any tab is showing;

@@ -139,6 +139,59 @@ final class CallStack {
         await (supervisor as? SupervisionEnding)?.endSupervision()
     }
 
+    /// HQ by voice, held here so it outlives the screen that started it: a rebuilt HQ screen
+    /// (a rotation, a sidebar swap, a pop and a push) finds the same session again, its notice
+    /// included. ⚠️ `AnyObject` for ``room``'s reason: this tier names no feature type.
+    var hqVoice: AnyObject?
+
+    /// Abandon a room that was being set up (``PendingRoom``): on a sign-out and a workspace switch.
+    func endPendingRoom() async {
+        await (hqVoice as? PendingRoom)?.abandon()
+    }
+
+    /// End HQ by voice in whatever phase it is in, before the sign-out's revoke
+    /// (``SessionModel/signOut()``).
+    ///
+    /// ⛔ WAITED FOR AT MOST ``voiceEndSeconds`` (Seer, PR #115): a stalled `hq/voice-end` must
+    /// not hold the revoke, since a live refresh token left behind is the worse outcome. The end
+    /// is NOT cancelled at the deadline: a cancelled task's request fails before it is sent, and
+    /// one that is merely late can still close the row.
+    func endVoiceSession() async {
+        guard let session = hqVoice as? VoiceSessionEnding else { return }
+        let (done, signal) = AsyncStream<Void>.makeStream()
+        Task {
+            await session.end()
+            signal.yield()
+        }
+        let deadline = voiceEndDeadline
+        let timer = Task {
+            await deadline(Self.voiceEndSeconds)
+            signal.yield()
+        }
+        for await _ in done {
+            break
+        }
+        timer.cancel()
+    }
+
+    /// How long a sign-out waits for ``endVoiceSession()``.
+    static let voiceEndSeconds: TimeInterval = 3
+
+    /// Waits out ``voiceEndSeconds``, cancellably. A test stands in its own.
+    var voiceEndDeadline: @Sendable (TimeInterval) async -> Void = { seconds in
+        try? await Task.sleep(for: .seconds(seconds))
+    }
+
+    /// ⛔ THE BACKGROUND END HOLDS A BACKGROUND TASK until the service has heard it: an app
+    /// suspended with the `hq/voice-end` still in flight leaves the session's row open for its
+    /// 30 minutes, holding one of the fleet's voice slots. See ``BackgroundTaskLease``.
+    func endVoiceSessionInBackground(on tasks: any BackgroundTaskScheduling = UIKitBackgroundTasks()) async {
+        guard let session = hqVoice as? VoiceSessionEnding else { return }
+        let lease = BackgroundTaskLease.begin("HQ voice end", on: tasks)
+        await session.end()
+        lease.end()
+    }
+
     /// The last workspace the shell resolved, for ``workspaceSelected(_:)``.
     private var lastWorkspaceId: String?
 
@@ -154,7 +207,13 @@ final class CallStack {
         let previous = lastWorkspaceId
         lastWorkspaceId = workspaceId
         guard CallTeardown.isWorkspaceSwitch(from: previous, to: workspaceId) else { return }
-        Task { await endSupervision() }
+        Task {
+            await endSupervision()
+            await endPendingRoom()
+            // ⛔ AND A LIVE ROOM, HQ VOICE OR A MEETING (Sean, 2026-11-07: "End voice and meetings on
+            // switch"), as the deep-link switch already does: the room belongs to the old workspace.
+            await endRoom(.workspaceChanged)
+        }
     }
 
     /// End the keypad's call, if there is one. See ``CallTeardown/endsSoftphone(_:)``.
@@ -279,6 +338,13 @@ final class CallStack {
         guard let room else { return }
         self.room = nil
         await room.yieldAudio(reason)
+    }
+
+    /// A District call is ringing: end a room that yields at the ring (``RoomAudio/yieldsAtRing``).
+    /// ⚠️ A meeting stays up until the answer, through ``beginCall()``.
+    func ringArrived() async {
+        guard room?.yieldsAtRing == true else { return }
+        await endRoom(.telephoneCall)
     }
 
     /// Release the engine once the call's reducer has reached a terminal phase.

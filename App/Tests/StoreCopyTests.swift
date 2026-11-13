@@ -30,12 +30,7 @@ import XCTest
 /// true of every ⛔ that records why a string says what it says. A line whose first
 /// non-space characters are `//` is not shown to anyone, so it is not scanned.
 ///
-/// ⛔ THREE EXCEPTIONS ARE DELIBERATE AND ARE NOT LOOPHOLES:
-///   - `Features/Account/AccountView.swift` — the account-deletion row says "Opens in your
-///     browser" and opens a distronode.com page. Guideline 5.1.1(v) REQUIRES
-///     an account-deletion path, the web page is that path, and telling a person the tap
-///     leaves the app is honesty about what the control does rather than steering toward a
-///     purchase. Pinned to Android and to both store listings.
+/// ⛔ TWO EXCEPTIONS ARE DELIBERATE AND ARE NOT LOOPHOLES:
 ///   - `Features/Scheduling/**` and the catalog's `scheduling` screens: a hand-off into OUR OWN product. Nothing there
 /// names a
 ///     place today; the exemption keeps this gate out of that feature's way rather than
@@ -141,9 +136,28 @@ final class StoreCopyTests: XCTestCase {
             + "above. PNG, JPEG or WebP, up to 512 KB. It is hosted publicly so their browser can load it, "
             + "and anyone with a thread link can see it.",
         "marketplace.a2p_website_label": "Website (optional)",
-        "account.request_deletion_account_its": "Request deletion of your account and its data. Opens in your browser.",
         "contacts.website": "Website",
         "sign_in.opens_browser_sign_securely": "Opens your browser to sign in securely.",
+        // ⚠️ THE OWNER'S OWN WEBSITE, which the setup wizard reads for a draft of their facts
+        // (`setup/lookup`): an input, like a contact's website, never a place to go instead.
+        "setup.business_address_found": "We filled in your address from your website. Check it below.",
+        "setup.business_description": "Tell us who you are, or let us read your website.",
+        "setup.business_hours_found": "We found opening hours on your website; confirm them in step 4.",
+        "setup.business_read_nothing": "We read your website but found nothing we could use. Fill in the form "
+            + "below instead.",
+        "setup.business_read_website": "Read my website",
+        "setup.business_reading": "Reading your website",
+        "setup.business_website_heading": "Start from your website",
+        "setup.business_website_label": "Website",
+        "setup.business_website_lead": "Enter your website address and we will draft your hours, address, "
+            + "services and common questions. You review every item in step 4 before your receptionist uses it.",
+        "setup.callers_confirm_hours_first": "Use or discard the hours from your website before you continue.",
+        "setup.callers_draft_note": "Items we drafted from your website start switched off. Check each "
+            + "one, fix anything that is wrong, and switch it on.",
+        "setup.callers_fill_from_website": "Fill from my website",
+        "setup.callers_hours_draft_note": "These hours come from your website and are not saved yet. Check each "
+            + "day, then use them.",
+        "setup.callers_no_hours_found": "We did not find opening hours on that website. Enter them below.",
     ]
 
     /// French permitted, by key, with the exact French allowed. ⛔ A FRENCH SENTENCE MAY

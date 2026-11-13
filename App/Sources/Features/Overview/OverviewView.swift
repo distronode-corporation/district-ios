@@ -44,7 +44,8 @@ struct OverviewView: View {
     @State private var isPickerPresented = false
     /// The owner mid-setup's card. ⚠️ Its own model: see the ⛔ on ``FinishSetupModel``.
     @State private var setup: FinishSetupModel
-    @State private var setupHandOff: AppLinkHandOff?
+    /// The workspace whose setup wizard is open, while it is.
+    @State private var wizardWorkspace: SetupWizardTarget?
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -81,10 +82,8 @@ struct OverviewView: View {
             WorkspacePickerSheet(workspaceSession: workspaceSession)
                 .districtSheetBackground()
         }
-        // ⛔ A SAFARI SHEET, NOT `openURL`: the page is one this app claims. See ``FinishSetupCard``.
-        .sheet(item: $setupHandOff) { handOff in
-            SafariView(url: handOff.url)
-        }
+        // ⚠️ THE WIZARD RUNS IN THE APP (Sean, 2026-11-08); its hand-offs are sheets inside it.
+        .setupWizardSheet($wizardWorkspace, container: container, workspaceSession: workspaceSession, card: setup)
         .navigationTitle(Tab.overview.label)
         // ⛔ `.contain` FIRST. See the long note in SignInView: an identifier on a
         // container is INHERITED, so applied alone it stamps every metric tile and
@@ -176,9 +175,14 @@ struct OverviewView: View {
     @ViewBuilder
     private func finishSetup(_ response: OverviewResponse) -> some View {
         let offered = setup.isOffered && setup.workspaceId == response.workspaceId
-        if offered, let url = FinishSetupCard.destination(baseURL: container.baseURL) {
-            FinishSetupCard(onOpen: { setupHandOff = AppLinkHandOff(url: url) })
-                .padding(.horizontal, DistrictSpacing.gutter)
+        if offered {
+            FinishSetupCard(onOpen: {
+                wizardWorkspace = SetupWizardTarget(
+                    workspaceId: response.workspaceId,
+                    workspaceName: workspaceSession.selectedEntry?.name ?? ""
+                )
+            })
+            .padding(.horizontal, DistrictSpacing.gutter)
         }
     }
 

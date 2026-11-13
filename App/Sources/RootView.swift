@@ -79,6 +79,12 @@ struct RootView: View {
                 if phase == .active {
                     container.watchBridge.setNeedsSnapshot()
                 }
+                // ⛔ HQ BY VOICE ENDS IN THE BACKGROUND (``CallStack/endVoiceSession()``), not at
+                // `inactive` (a banner or Control Center): nothing on screen can stop it there.
+                // ⚠️ Under a background task, so the end reaches the service before suspension.
+                if phase == .background {
+                    Task { await container.callStack.endVoiceSessionInBackground() }
+                }
             }
     }
 
@@ -148,6 +154,8 @@ private struct SessionGate: View {
             return
         }
         Task { await container.callStack.endRoom(.sessionEnded) }
+        // ⛔ AND HQ BY VOICE BEFORE IT JOINED: its minted session is discarded.
+        Task { await container.callStack.endPendingRoom() }
         // ⛔ AND A LISTEN-IN OR A TAKEOVER (xhigh review of PR #101, item 4).
         Task { await container.callStack.endSupervision() }
         // ⛔ AND THE KEYPAD'S CALL, ON SIGN-OUT ONLY (Sean, 2026-11-06).

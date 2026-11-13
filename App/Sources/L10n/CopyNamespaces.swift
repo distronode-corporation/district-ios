@@ -8,6 +8,12 @@
 /// The Account screen.
 enum AccountCopy {}
 
+/// The account deletion sheet (``DeleteAccountView``) and the sign-in screen's sentence after it.
+enum DeleteAccountCopy {}
+
+/// The two-step verification sheet (``TwoStepView``) and its row on the Account screen.
+enum TwoStepCopy {}
+
 /// The Analytics screen and its cards.
 enum AnalyticsCopy {}
 
@@ -52,3 +58,6 @@ enum WatchBridgeCopy {}
 /// The hidden Apple Watch relay diagnostics screen (``WatchDiagnosticsView``), for TestFlight
 /// testers only.
 enum WatchDiagnosticsCopy {}
+
+/// The setup wizard (``SetupWizardView``) and its six steps.
+enum SetupCopy {}

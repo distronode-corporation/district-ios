@@ -19,6 +19,75 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
+- The setup wizard in the app (Sean, 2026-11-08: "Most in app, buying on web"), on
+  DistrictCore 8.5.0's `SetupWizardRepository`. "Finish setting up" on the overview now opens
+  the web's six steps in a sheet, in its order and with its words, and resumes on the first
+  step still to do: find your business (a draft from the business's website, saved switched
+  off, then the name, the place, the language and what the business does), your number (keep
+  the one held), your receptionist (name, greeting and a voice from the service's own list),
+  what callers should know (time zone, address, opening hours with up to four periods a day,
+  services and common questions, each with "Use on calls"), how calls are answered, and the
+  test call and forwarding check. Buying a number, a calendar's sign-in, the email sender name
+  and reply-to, and the transfer number open the web's page in a sheet, and the wizard reads
+  its state again when it closes. A person who is not the workspace's owner is told only the
+  owner can do setup. Every write is a single flight, and step 1's choices are kept on the
+  device until step 3 stores the language. English and draft French.
+- Two-step verification settings (Sean, 2026-11-07 and 2026-11-08), on DistrictCore 8.5.0's
+  `TwoStepSettingsRepository`. Account, Two-step verification opens a sheet that says whether
+  it is on, since when and how many recovery codes are left. Turning it on or off starts with
+  the same fresh re-authentication as account deletion, for the `2fa-change` action (a fresh
+  sign-in at Google, Microsoft or Apple, or the password with the authenticator code when it is
+  on; no passkeys). Turning it on then shows the new secret as a QR code and a copyable key
+  (with a button that hands the `otpauth://` link to an authenticator app on this device),
+  asks for the app's code, and shows the recovery codes once, with Copy all and a warning that
+  they are not shown again. An account with no password turns it off after a provider sign-in,
+  which the website cannot do. Every refusal has a sentence in both languages, the core's own
+  for its `MFA_*`, `mfa_code_invalid`, `rate_limited` and `browser_session_required` codes; a
+  confirm or a disable whose answer is lost says it cannot tell and reads the status again.
+  Each call is single-flight. The secret and the codes are never logged, are copied to this
+  device only and for two minutes, are covered while the app is not active (the app switcher's
+  snapshot), and are dropped when the sheet closes.
+
+- Integrations in Settings (parity Part 2 item 5), on DistrictCore 8.5.0's
+  `SetupWizardRepository.connections`. A District Studio row after Knowledge, as on the web,
+  opens the accounts the receptionist works through: Google Calendar and Microsoft Outlook
+  Calendar with the web's four statuses (Connected, Reconnection needed, Access revoked, Not
+  connected) and which one the receptionist books into, then links to the Desk and to the
+  business-caller lookups under Skills. Connecting, reconnecting or disconnecting a calendar
+  is the provider's consent screen, so the Integrations page opens in a sheet and the screen
+  reads again when it closes. A viewer sees the statuses only. The sending domain and the
+  media library have no mobile contract and are not here.
+- Account deletion in the app (Guideline 5.1.1(v); Sean, 2026-11-07), on DistrictCore 8.4.2's
+  `NativeReauthRepository`. Account, Delete account opens a sheet that says what is deleted
+  (the profile, the settings and every workspace the person owns, whose subscriptions are
+  cancelled at once) and what is kept (workspaces they belong to but do not own). A fresh
+  re-authentication comes first: a fresh sign-in at Google, Microsoft or Apple in the sign-in
+  window (`/auth/native/reauth`, PKCE and `state` as at sign-in, the installation id sent only
+  as its SHA-256), or the password, with the authenticator code when two-step verification is
+  on. The typed email address then deletes. Every refusal has a sentence saying what to do; a
+  block the service answers (a subscription it could not cancel) is shown under "Your account
+  was not deleted.". The final button is single-flight. After the deletion the app forgets the
+  session, the push token, the workspace choice, the listen-in map and the offline copy, with
+  no revoke or unregister call (the account is gone), and the sign-in screen says the account
+  was deleted, and when vendor-held support data is still being erased. The row no longer
+  opens the deletion page; its address stays as the store listings' data-deletion URL.
+
+- District HQ by voice (Sean, 2026-11-07), on DistrictCore 8.4.1's voice routes and packets.
+  Talk to HQ on the HQ screen mints a session only on the tap, shows the service's
+  `processingRegion` before the microphone opens (Start or Cancel; Cancel discards the
+  session), then joins the encrypted LiveKit room with the microphone only. `push` mode starts
+  muted and opens while held; any other mode is an open microphone with a mute switch. The
+  transcript shows final segments, HQ's proposals are cards with Confirm and Cancel, and each
+  navigation reports the page and at most one record id. A District call that rings ends the
+  session; starting one during a call or a meeting is refused with a sentence. The allowance
+  answer shows the service's own text, and the text console keeps working. A voice settings
+  screen reads and saves the voice, answer length, pace, language and microphone mode. The
+  notice is the web's disclosure (Gemini Live and Deepgram, in the United States), with a line
+  above it when the workspace's region is not where voice is processed. A session that never
+  went live (a declined notice, a failed join) is discarded (`hq/voice-discard`); one the app
+  ends (Stop, 30 minutes, a ring, a sign-out) is ended (`hq/voice-end`). Microphone changes
+  are serialized, so a quick press and release never leaves it open. The microphone prompt
+  names District HQ.
 - Dialler design A (3.3.0, Sean's pick of 2026-11-03, #95): a flag and calling-code button in
   front of the number opens a searchable country list, the number is typed the local way and
   formats as it is typed, and a line before Call reads `Rings <country> · <international
@@ -51,6 +120,19 @@ built from history before publication, so they have no tags in this repository.
 
 ### Fixed
 
+- District HQ by voice: signing out while Talk to HQ was still minting its session no longer
+  leaves that session open for its 30 minutes (#116). The sign-out waits for the token and
+  gives the session back (`hq/voice-discard`, falling back to `hq/voice-end`) while the
+  credential is still alive, as DistrictCore's Rust core does, inside the same 3-second bound,
+  so a stalled mint never holds the sign-out; a token that arrives later is still discarded.
+- Inbox: a received attachment that is not an image (a PDF sent by MMS) no longer draws as a
+  broken image (Sean, 2026-11-08). Each received attachment is fetched once without the bearer
+  token, as DistrictCore requires for media URLs, and branched on the response's `Content-Type`:
+  an image draws as before, anything else is a file tile (its type, as iOS names it, or
+  "Attachment") that opens in Quick Look from a temporary copy, with Quick Look's share button.
+  A fetch that fails (a carrier media URL that wants the carrier's own sign-in answers 401) says
+  "This attachment can't be opened here". The copy is removed when the preview closes. App-only
+  and interim: the timeline's `mediaUrls` still carries no type or name.
 - Live supervise: switching workspace from the picker now ends a live supervision. The switch
   reaches the shell as one workspace, then none while the new list loads, then the next, so the
   call stack compares with the last workspace that resolved (`CallStack.workspaceSelected`).

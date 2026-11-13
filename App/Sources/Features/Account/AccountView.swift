@@ -3,8 +3,8 @@ import DistrictNetwork
 import Foundation
 import SwiftUI
 
-/// The account surface: sign out, reach the device list, and start account
-/// deletion. Ported from Android's `SettingsScreen.kt`, whose header decisions are
+/// The account surface: sign out, reach the device list, and delete the
+/// account. Ported from Android's `SettingsScreen.kt`, whose header decisions are
 /// carried over below rather than re-derived.
 ///
 /// ⛔ THIS SCREEN EXISTS BECAUSE THE STORES REQUIRE IT, NOT BECAUSE THE PRODUCT
@@ -63,11 +63,11 @@ struct AccountView: View {
     /// The hidden Apple Watch relay diagnostics (``WatchDiagnosticsView``).
     @State private var showingWatchDiagnostics = false
 
-    /// ⛔ THE SYSTEM HAND-OFF, NOT `UIApplication.shared.open`. The latter needs
-    /// `import UIKit` in a view layer that depends on SwiftUI alone, and it is the
-    /// wrong layer: `openURL` is the environment's own answer and is what an
-    /// `.onOpenURL`-style test double can replace.
-    @Environment(\.openURL) private var openURL
+    /// The deletion sheet (``DeleteAccountView``), while it is open.
+    @State private var deleting = false
+
+    /// The two-step verification sheet (``TwoStepView``), while it is open.
+    @State private var twoStep = false
 
     init(container: AppContainer, session: SessionModel, push: PushRegistrar) {
         self.container = container
@@ -85,6 +85,7 @@ struct AccountView: View {
             VStack(alignment: .leading, spacing: DistrictSpacing.section) {
                 deviceCard
                 availabilityCard
+                securityCard
                 accountCard
                 footer
             }
@@ -273,6 +274,29 @@ struct AccountView: View {
         .accessibilityIdentifier(A11yID.Account.signOut)
     }
 
+    // ── Security ─────────────────────────────────────────────────────────────
+
+    /// ⚠️ ITS OWN CARD, NOT BESIDE DELETION: see the account card's ⚠️ below.
+    ///
+    /// ⚠️ THE ROW SAYS NOTHING ABOUT ON OR OFF. The status is read when the sheet opens, so the
+    /// Account screen makes no call for it and never shows a stale answer.
+    private var securityCard: some View {
+        card(title: TwoStepCopy.cardTitle) {
+            Button { twoStep = true } label: {
+                DistrictListRow(
+                    title: TwoStepCopy.title,
+                    subtitle: TwoStepCopy.rowSubtitle,
+                    trailing: { glyph("chevron.right") }
+                )
+            }
+            .buttonStyle(.plain)
+            .sheet(isPresented: $twoStep) {
+                TwoStepView(container: container)
+            }
+            .accessibilityIdentifier(A11yID.Account.twoStep)
+        }
+    }
+
     // ── Your account ─────────────────────────────────────────────────────────
 
     /// ⚠️ ONE ROW, ON ITS OWN CARD. See the ⚠️ about Devices in the header: the only
@@ -284,27 +308,28 @@ struct AccountView: View {
         }
     }
 
-    /// ⚠️ DELETION IS A LINK, NOT A BUTTON THAT DELETES. The flow is
-    /// identity-verified and irreversible and the web already owns it;
-    /// reimplementing it natively would duplicate that verification on the least
-    /// reviewable surface. Policy asks that the app let the user START the process,
-    /// which a hand-off to the live page does.
+    /// ⛔ DELETION STARTS AND FINISHES IN THE APP (Guideline 5.1.1(v)). The row opens
+    /// ``DeleteAccountView``, which explains what goes, asks for a fresh re-authentication and
+    /// the typed email, and only then deletes; the service checks each step.
     ///
-    /// ⚠️ AND IT IS NOT PAINTED RED. It is destructive, but it does not delete
-    /// anything on tap: it opens a page. A `destructive` tint would promise
-    /// irreversibility one tap early and make the row look like it had already
-    /// failed, which is the same reason ``DistrictButtonVariant/destructive`` is a
-    /// tinted outline rather than a solid fill. The caption carries the warning.
+    /// ⚠️ AND IT IS NOT PAINTED RED. It does not delete anything on tap: it opens a sheet. A
+    /// `destructive` tint would promise irreversibility one tap early and make the row look
+    /// like it had already failed, which is the same reason
+    /// ``DistrictButtonVariant/destructive`` is a tinted outline rather than a solid fill. The
+    /// sheet's last button is the red one.
     private var deleteAccountRow: some View {
-        Button(action: openDeletionPage) {
+        Button { deleting = true } label: {
             DistrictListRow(
                 title: AccountCopy.deleteAccount,
-                subtitle: AccountCopy.requestDeletionAccountIts,
-                trailing: { glyph("arrow.up.right") }
+                subtitle: AccountCopy.deleteAccountSubtitle,
+                trailing: { glyph("chevron.right") }
             )
         }
         .buttonStyle(.plain)
-        // ⛔ IN `UITestApp.forbiddenSurfaces`. Tapping it starts an irreversible
+        .sheet(isPresented: $deleting) {
+            DeleteAccountView(container: container, session: session)
+        }
+        // ⛔ IN `UITestApp.forbiddenSurfaces`. The sheet behind it ends in an irreversible
         // deletion of a real account against the live workspace.
         .accessibilityIdentifier(A11yID.Account.delete)
     }
@@ -398,17 +423,12 @@ struct AccountView: View {
         .accessibilityIdentifier(identifier)
     }
 
-    /// ⚠️ BOTH GLYPHS ARE DECORATION HERE, INCLUDING THE `arrow.up.right`. That one
-    /// does carry a fact a person is entitled to before pressing — that the row leaves
-    /// the app — but its single call site is ``deleteAccountRow``, whose subtitle
-    /// already ends "Opens in your browser." and which ``DistrictListRow`` now folds
-    /// into the row's own announcement. Labelling the arrow too would say it twice.
+    /// ⚠️ THE GLYPHS ARE DECORATION. A chevron says the row leads somewhere, which the button
+    /// trait already announces.
     ///
-    /// ⛔ A SECOND `arrow.up.right` ROW WITHOUT THAT SENTENCE IN ITS SUBTITLE WOULD
-    /// NEED A LABEL HERE. The glyph is silent because of what the copy already says,
-    /// not because leaving the app is unimportant. ⚠️ And the label would have to be
-    /// worded around "browser", which `StoreCopyTests` forbids outside its allow-list
-    /// — the subtitle above is on that list by exact text.
+    /// ⛔ AN `arrow.up.right` ROW (ONE THAT LEAVES THE APP) WOULD NEED A LABEL HERE, or a
+    /// subtitle saying so. ⚠️ And that label would have to be worded around "browser", which
+    /// `StoreCopyTests` forbids outside its allow-list.
     private func glyph(_ systemImage: String) -> some View {
         Image(systemName: systemImage)
             .font(DistrictType.label)
@@ -422,21 +442,16 @@ struct AccountView: View {
         Task { await session.signOut() }
     }
 
-    private func openDeletionPage() {
-        openURL(Self.accountDeletionURL)
-    }
-
     // ── Constants ────────────────────────────────────────────────────────────
 
-    /// The live, public deletion page.
+    /// The live, public deletion page: the address in each store listing's data-deletion
+    /// field.
     ///
-    /// ⚠️ THE PRODUCTION HOST, NOT THE API BASE THIS BUILD IS CONFIGURED WITH. This is
-    /// a marketing and legal page that must resolve for a reviewer with no session and
-    /// no app build config, and it is the URL declared in each store listing's
-    /// data-deletion field, so the two have to be the same address. Android holds the
-    /// identical string in `ACCOUNT_DELETION_URL`; changing one without the other is a
-    /// broken link on one platform and a store-listing mismatch on both.
-    /// `ModerationCopyTests` pins the full string.
+    /// ⚠️ THE APP NO LONGER OPENS IT (deletion happens in ``DeleteAccountView``), and it is
+    /// kept here as the one record of the listing's address. It is the PRODUCTION host, not
+    /// the API base this build is configured with: a reviewer with no session must reach it.
+    /// Android holds the identical string in `ACCOUNT_DELETION_URL`; changing one without the
+    /// other is a store-listing mismatch. `ModerationCopyTests` pins the full string.
     static let accountDeletionURL = ApiClient.productionBaseURL.appending(path: "privacy/account-deletion")
 
     /// ⚠️ READ FROM THE BUNDLE, NEVER HARDCODED. `MARKETING_VERSION` and

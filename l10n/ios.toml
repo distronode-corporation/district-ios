@@ -20,6 +20,14 @@ tier = "T0"
 state = "reviewed"
 id = { swift = "AccountCopy.deleteAccount" }
 
+[account.delete_account_subtitle]
+en = "Delete your account and its data for good. You confirm it is you first."
+fr = "Supprimez votre compte et ses données pour de bon. Vous confirmez d'abord qu'il s'agit bien de vous."
+ctx = "body"
+screen = "account"
+state = "draft"
+id = { swift = "AccountCopy.deleteAccountSubtitle" }
+
 [account.devices]
 en = "Devices"
 fr = "Appareils"
@@ -46,15 +54,6 @@ screen = "account"
 tier = "T0"
 state = "reviewed"
 id = { swift = "AccountCopy.opaqueIdInstallCleared" }
-
-[account.request_deletion_account_its]
-en = "Request deletion of your account and its data. Opens in your browser."
-fr = "Demander la suppression de votre compte et de ses données. S'ouvre hors de l'application."
-ctx = "title"
-screen = "account"
-tier = "T0"
-state = "reviewed"
-id = { swift = "AccountCopy.requestDeletionAccountIts" }
 
 [account.see_where_are_signed]
 en = "See where you are signed in, and sign out a device you no longer have."
@@ -1991,6 +1990,299 @@ screen = "contacts"
 state = "reviewed"
 id = { swift = "ContactsCopy.website" }
 
+[delete_account.back]
+en = "Back"
+fr = "Retour"
+ctx = "button"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.back" }
+
+[delete_account.cancel]
+en = "Cancel"
+fr = "Annuler"
+ctx = "button"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.cancel" }
+
+[delete_account.cannot_be_undone]
+en = "This cannot be undone."
+fr = "Cette action est irréversible."
+ctx = "title"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.cannotBeUndone" }
+note = "The web's deleteWarningTitle, word for word."
+
+[delete_account.confirm_intro]
+en = "Sign in again the way you usually do. You then have a few minutes to delete the account."
+fr = "Connectez-vous de nouveau comme d'habitude. Vous aurez ensuite quelques minutes pour supprimer le compte."
+ctx = "body"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.confirmIntro" }
+note = "The service's proof lasts five minutes from the sign-in."
+
+[delete_account.confirm_it_is_you]
+en = "Confirm it is you"
+fr = "Confirmez qu'il s'agit bien de vous"
+ctx = "title"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.confirmItIsYou" }
+
+[delete_account.continue_button]
+en = "Continue"
+fr = "Continuer"
+ctx = "button"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.continueButton" }
+
+[delete_account.continue_with]
+en = "Continue with {provider}"
+fr = "Continuer avec {provider}"
+ctx = "button"
+screen = "account.delete"
+args = { provider = "str" }
+state = "draft"
+id = { swift = "DeleteAccountCopy.continueWith(_:)" }
+note = "{provider} is Google, Microsoft or Apple, a proper noun the same in both languages."
+
+[delete_account.deleted]
+en = "Your account was deleted."
+fr = "Votre compte a été supprimé."
+ctx = "body"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.deleted" }
+note = "On the sign-in screen after a deletion."
+
+[delete_account.deleted_erasure_pending]
+en = "Your account was deleted. Support data held by a provider is still being erased."
+fr = "Votre compte a été supprimé. Des données de soutien conservées par un fournisseur sont encore en cours d'effacement."
+ctx = "body"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.deletedErasurePending" }
+note = "The service answered externalErasurePending: the account is gone, vendor-held support data is not yet."
+
+[delete_account.deleting]
+en = "Deleting…"
+fr = "Suppression…"
+ctx = "button"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.deleting" }
+
+[delete_account.email_label]
+en = "Your email address"
+fr = "Votre adresse courriel"
+ctx = "placeholder"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.emailLabel" }
+
+[delete_account.error_email_mismatch]
+en = "That is not this account's email address. Type it exactly, then try again. Nothing was deleted."
+fr = "Ce n'est pas l'adresse courriel de ce compte. Tapez-la exactement, puis réessayez. Rien n'a été supprimé."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorEmailMismatch" }
+
+[delete_account.error_no_password]
+en = "This account has no password. Confirm it is you with Google, Microsoft or Apple, whichever you sign in with."
+fr = "Ce compte n'a aucun mot de passe. Confirmez qu'il s'agit bien de vous avec Google, Microsoft ou Apple, selon votre mode de connexion."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorNoPassword" }
+
+[delete_account.error_not_confirmed]
+en = "We could not confirm it is you right now. Try again in a moment."
+fr = "Nous n'avons pas pu confirmer qu'il s'agit bien de vous pour l'instant. Réessayez dans un instant."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorNotConfirmed" }
+
+[delete_account.error_offline_not_confirmed]
+en = "You appear to be offline, so nothing was confirmed. Check your connection and try again."
+fr = "Vous semblez être hors ligne, et rien n'a été confirmé. Vérifiez votre connexion et réessayez."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorOfflineNotConfirmed" }
+
+[delete_account.error_offline_outcome_unknown]
+en = "The connection failed before we heard back, so we cannot tell whether your account was deleted. Check your connection, then close this and sign in again to check."
+fr = "La connexion a échoué avant que nous recevions une réponse, et nous ne savons pas si votre compte a été supprimé. Vérifiez votre connexion, puis fermez cette fenêtre et reconnectez-vous pour vérifier."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorOfflineOutcomeUnknown" }
+note = "A delete that failed in transport: a timeout or a dropped connection can come after the service deleted the account, so never claim either way."
+
+[delete_account.error_outcome_unknown]
+en = "We could not read the answer, so we cannot tell whether your account was deleted. Close this and sign in again to check."
+fr = "Nous n'avons pas pu lire la réponse, et nous ne savons pas si votre compte a été supprimé. Fermez cette fenêtre et reconnectez-vous pour vérifier."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorOutcomeUnknown" }
+note = "A success this build could not read: it may have been a deletion."
+
+[delete_account.error_proof_expired]
+en = "Your confirmation ran out before the account was deleted. Confirm it is you again."
+fr = "Votre confirmation a expiré avant la suppression du compte. Confirmez de nouveau qu'il s'agit bien de vous."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorProofExpired" }
+
+[delete_account.error_sheet_did_not_open]
+en = "The sign-in window could not open. Try again."
+fr = "La fenêtre de connexion n'a pas pu s'ouvrir. Réessayez."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorSheetDidNotOpen" }
+
+[delete_account.error_sign_in_not_verified]
+en = "That sign-in could not be verified, so nothing was confirmed. Try again."
+fr = "Cette connexion n'a pas pu être vérifiée, et rien n'a été confirmé. Réessayez."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorSignInNotVerified" }
+
+[delete_account.error_too_many_attempts]
+en = "Too many attempts. Wait a minute, then try again."
+fr = "Trop de tentatives. Attendez une minute, puis réessayez."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorTooManyAttempts" }
+
+[delete_account.error_try_again_shortly]
+en = "Something went wrong on our side. Try again in a moment."
+fr = "Un problème est survenu de notre côté. Réessayez dans un instant."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorTryAgainShortly" }
+
+[delete_account.error_wrong_account]
+en = "We could not confirm it is you. In the sign-in window, use the account this app is signed in to, then try again."
+fr = "Nous n'avons pas pu confirmer qu'il s'agit bien de vous. Dans la fenêtre de connexion, utilisez le compte connecté à cette application, puis réessayez."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorWrongAccount" }
+note = "reauth_failed after the sign-in window: another account's sign-in, or one too old."
+
+[delete_account.error_wrong_code]
+en = "That code is not valid, or it has already been used. Enter the newest code."
+fr = "Ce code n'est pas valide, ou il a déjà été utilisé. Entrez le code le plus récent."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorWrongCode" }
+
+[delete_account.error_wrong_password]
+en = "That password is not correct. Check it and try again."
+fr = "Ce mot de passe n'est pas le bon. Vérifiez-le et réessayez."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.errorWrongPassword" }
+
+[delete_account.last_step]
+en = "Last step"
+fr = "Dernière étape"
+ctx = "title"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.lastStep" }
+
+[delete_account.not_deleted]
+en = "Your account was not deleted."
+fr = "Votre compte n'a pas été supprimé."
+ctx = "error"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.notDeleted" }
+note = "The headline above the service's reason."
+
+[delete_account.password_label]
+en = "Your password"
+fr = "Votre mot de passe"
+ctx = "placeholder"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.passwordLabel" }
+
+[delete_account.submit]
+en = "Delete my account"
+fr = "Supprimer mon compte"
+ctx = "button"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.submit" }
+
+[delete_account.subscriptions_cancelled]
+en = "The subscriptions of the workspaces you own are cancelled at once."
+fr = "Les abonnements des espaces de travail dont vous êtes propriétaire sont annulés sur-le-champ."
+ctx = "body"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.subscriptionsCancelled" }
+note = "The service cancels every live subscription of the owned workspaces before it deletes anything."
+
+[delete_account.title]
+en = "Delete your account"
+fr = "Supprimer votre compte"
+ctx = "title"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.title" }
+
+[delete_account.type_email]
+en = "Type your account's email address to confirm. Nothing is deleted until you tap Delete my account."
+fr = "Tapez l'adresse courriel de votre compte pour confirmer. Rien n'est supprimé avant que vous touchiez Supprimer mon compte."
+ctx = "body"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.typeEmail" }
+note = "Names the submit button; keep the two in step."
+
+[delete_account.use_password]
+en = "Use my password"
+fr = "Utiliser mon mot de passe"
+ctx = "button"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.usePassword" }
+
+[delete_account.what_is_deleted]
+en = "Your user profile, your settings and all workspaces where you are the owner are deleted for good."
+fr = "Votre profil d'utilisateur, vos réglages et tous les espaces de travail dont vous êtes propriétaire sont supprimés pour de bon."
+ctx = "body"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.whatIsDeleted" }
+note = "The web's deleteWarningBody, without its download sentence."
+
+[delete_account.what_is_kept]
+en = "Workspaces you belong to but do not own are kept. You are removed from them, and their owners keep their data."
+fr = "Les espaces de travail dont vous êtes membre sans en être propriétaire sont conservés. Vous n'en faites plus partie, et leurs propriétaires gardent leurs données."
+ctx = "body"
+screen = "account.delete"
+state = "draft"
+id = { swift = "DeleteAccountCopy.whatIsKept" }
+
 [desk.all_filter]
 en = "All"
 fr = "Tout"
@@ -3232,6 +3524,440 @@ state = "reviewed"
 id = { swift = "HQCopy.viewerCannotConfirm" }
 note = "⚠️ SHOWN UNDER THE PROPOSAL FOR A ROLE THE SERVER WOULD REFUSE, in place of the Confirm button. A viewer should not normally see a proposal at all (the tool executor declines their write before the confirmation gate is reached), so this exists for the case where that ordering changes, and it says who can apply the change rather than leaving a card with only a Dismiss button on it."
 
+[hq.voice_applied]
+en = "Done."
+fr = "Fait."
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceApplied" }
+note = "A proposed change was applied."
+
+[hq.voice_busy]
+en = "Voice can't start during a call or a meeting."
+fr = "Le mode vocal ne peut pas démarrer pendant un appel ou une réunion."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceBusy" }
+note = "Refused: a call or a meeting holds the audio."
+
+[hq.voice_cancel]
+en = "Cancel"
+fr = "Annuler"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceCancel" }
+note = "Cancels a change HQ proposed by voice."
+
+[hq.voice_cancelled]
+en = "Cancelled."
+fr = "Annulé."
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceCancelled" }
+note = "A proposed change was cancelled."
+
+[hq.voice_confirm]
+en = "Confirm"
+fr = "Confirmer"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceConfirm" }
+note = "Applies a change HQ proposed by voice."
+
+[hq.voice_connecting]
+en = "Connecting…"
+fr = "Connexion…"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceConnecting" }
+note = "While the voice session joins its room."
+
+[hq.voice_ended]
+en = "Voice ended."
+fr = "Le mode vocal est terminé."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceEnded" }
+note = "A voice session ended (by the member, or the room closed)."
+
+[hq.voice_ended_call]
+en = "Voice ended for a call."
+fr = "Le mode vocal s'est arrêté pour un appel."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceEndedCall" }
+note = "A District call rang during a voice session and ended it."
+
+[hq.voice_ended_timeout]
+en = "The 30-minute voice session has ended."
+fr = "La session vocale de 30 minutes est terminée."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceEndedTimeout" }
+note = "A voice session reached its 30 minutes."
+
+[hq.voice_failed]
+en = "The change could not be made."
+fr = "La modification n'a pas pu être faite."
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceFailed" }
+note = "A proposed change failed."
+
+[hq.voice_hold_to_talk]
+en = "Hold to talk"
+fr = "Maintenir pour parler"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceHoldToTalk" }
+note = "Push-to-talk: the microphone is open only while this is held."
+
+[hq.voice_join_failed]
+en = "Voice couldn't connect. Try again."
+fr = "Le mode vocal n'a pas pu se connecter. Réessayez."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceJoinFailed" }
+note = "The voice room could not be joined."
+
+[hq.voice_language_en]
+en = "English"
+fr = "Anglais"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLanguageEn" }
+note = "Language: English."
+
+[hq.voice_language_fr]
+en = "French"
+fr = "Français"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLanguageFr" }
+note = "Language: French."
+
+[hq.voice_language_portal]
+en = "Same as the app"
+fr = "Comme l'application"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLanguagePortal" }
+note = "Language: follow the app's language."
+
+[hq.voice_length_brief]
+en = "Brief answers"
+fr = "Réponses brèves"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLengthBrief" }
+note = "Answer length: brief."
+
+[hq.voice_length_detailed]
+en = "Detailed answers"
+fr = "Réponses détaillées"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLengthDetailed" }
+note = "Answer length: detailed."
+
+[hq.voice_length_normal]
+en = "Normal answers"
+fr = "Réponses normales"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceLengthNormal" }
+note = "Answer length: normal."
+
+[hq.voice_listening]
+en = "Listening"
+fr = "À l'écoute"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceListening" }
+note = "The voice agent's state: listening."
+
+[hq.voice_mic_denied]
+en = "Allow the microphone in Settings to talk to HQ."
+fr = "Autorisez le microphone dans Réglages pour parler à HQ."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMicDenied" }
+note = "The microphone permission is off. Réglages is the iOS Settings app's French name."
+
+[hq.voice_mic_explainer]
+en = "HQ listens through your microphone while voice is on."
+fr = "HQ vous écoute par le microphone tant que le mode vocal est actif."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMicExplainer" }
+note = "Shown before the system's microphone prompt, under the Talk button."
+
+[hq.voice_mic_open]
+en = "Open mic"
+fr = "Micro ouvert"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMicOpen" }
+note = "Microphone: open while the session is live."
+
+[hq.voice_mic_push]
+en = "Hold to talk"
+fr = "Maintenir pour parler"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMicPush" }
+note = "Microphone: muted until the talk button is held."
+
+[hq.voice_mute]
+en = "Mute"
+fr = "Couper le micro"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceMute" }
+note = "Mutes an open microphone during a voice session."
+
+[hq.voice_no_agent]
+en = "District HQ voice mode is busy right now. Please try again in a few minutes; the text console still works."
+fr = "Le mode vocal de District HQ est occupé en ce moment. Réessayez dans quelques minutes; la console texte fonctionne toujours."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceNoAgent" }
+note = "No agent joined the voice room within 20 seconds (none was free). The same words as the service's own hq_voice_busy refusal."
+
+[hq.voice_notice_body]
+en = "Your voice is processed in the United States, and so is what District HQ reads for you during a voice session (calls, contacts, messages and knowledge). Voice mode runs on Gemini Live in Google Cloud's us-east4 region for every workspace, whatever your workspace's region. District HQ's scripted lines, such as reading back a change before you confirm it, are voiced by Deepgram, also in the United States. Nothing is recorded."
+fr = "Votre voix est traitée aux États-Unis, tout comme ce que District HQ lit pour vous pendant une session vocale (appels, contacts, messages et base de connaissances). Le mode vocal utilise Gemini Live dans la région us-east4 de Google Cloud pour tous les espaces de travail, quelle que soit la région du vôtre. Les phrases préétablies de District HQ, comme la relecture d'un changement avant que vous le confirmiez, sont prononcées par Deepgram, également aux États-Unis. Rien n'est enregistré."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeBody" }
+note = "The region notice, shown after a voice session is created and before the microphone opens. The web's disclosure (hqVoiceI18n.ts), word for word. The Deepgram sentence is new and draft; the rest is the web's reviewed text, so the whole string is draft."
+
+[hq.voice_notice_cancel]
+en = "Not now"
+fr = "Pas maintenant"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeCancel" }
+note = "Declines the region notice: nothing is joined and the session is discarded."
+
+[hq.voice_notice_region]
+en = "This workspace's data lives in {region}, but District HQ voice conversations are processed in the United States."
+fr = "Les données de cet espace de travail se trouvent dans la région {region}, mais les conversations vocales avec District HQ sont traitées aux États-Unis."
+ctx = "body"
+screen = "hq"
+args = { region = "str" }
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeRegion(_:)" }
+note = "Above the region notice, only when the service's processingRegion is not the workspace's region. {region} is the workspace region's display name (region.*). The web's regionDisclosure, word for word."
+
+[hq.voice_notice_start]
+en = "Start talking"
+fr = "Commencer à parler"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeStart" }
+note = "Accepts the region notice and opens the voice session."
+
+[hq.voice_notice_title]
+en = "Where your voice is processed"
+fr = "Où votre voix est traitée"
+ctx = "title"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceNoticeTitle" }
+note = "The region notice's title (the web's disclosureHeader), shown after a voice session is created and before the microphone opens."
+
+[hq.voice_pace_faster]
+en = "Faster"
+fr = "Plus rapide"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voicePaceFaster" }
+note = "Pace: faster."
+
+[hq.voice_pace_normal]
+en = "Normal pace"
+fr = "Rythme normal"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voicePaceNormal" }
+note = "Pace: normal."
+
+[hq.voice_pace_slower]
+en = "Slower"
+fr = "Plus lent"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voicePaceSlower" }
+note = "Pace: slower."
+
+[hq.voice_proposal_fallback]
+en = "HQ proposes a change."
+fr = "HQ propose une modification."
+ctx = "body"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceProposalFallback" }
+note = "A voice proposal whose summary the service left empty."
+
+[hq.voice_setting_language]
+en = "Language"
+fr = "Langue"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingLanguage" }
+note = "Voice settings: the language HQ speaks."
+
+[hq.voice_setting_length]
+en = "Answer length"
+fr = "Longueur des réponses"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingLength" }
+note = "Voice settings: how long HQ's spoken answers are."
+
+[hq.voice_setting_mic]
+en = "Microphone"
+fr = "Microphone"
+ctx = "label"
+screen = "hq"
+state = "draft"
+same_ok = true
+id = { swift = "HQCopy.voiceSettingMic" }
+note = "Voice settings: how the microphone behaves."
+
+[hq.voice_setting_pace]
+en = "Pace"
+fr = "Débit"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingPace" }
+note = "Voice settings: how fast HQ speaks."
+
+[hq.voice_setting_voice]
+en = "Voice"
+fr = "Voix"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingVoice" }
+note = "Voice settings: which voice HQ speaks with. The values are the voices' own names."
+
+[hq.voice_settings]
+en = "Voice settings"
+fr = "Réglages vocaux"
+ctx = "title"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettings" }
+note = "The District HQ voice settings screen's title and the button that opens it."
+
+[hq.voice_settings_save]
+en = "Save"
+fr = "Enregistrer"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingsSave" }
+note = "Saves the voice settings."
+
+[hq.voice_settings_saved]
+en = "Saved."
+fr = "Enregistré."
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSettingsSaved" }
+note = "The voice settings were saved."
+
+[hq.voice_speaking]
+en = "Speaking"
+fr = "HQ parle"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceSpeaking" }
+note = "The voice agent's state: speaking."
+
+[hq.voice_start]
+en = "Talk to HQ"
+fr = "Parler à HQ"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceStart" }
+note = "The button that starts a District HQ voice session. Each tap starts a session billed against the workspace's voice minutes."
+
+[hq.voice_stop]
+en = "End voice"
+fr = "Terminer le mode vocal"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceStop" }
+note = "Ends a running District HQ voice session."
+
+[hq.voice_thinking]
+en = "Thinking"
+fr = "Réflexion en cours"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceThinking" }
+note = "The voice agent's state: thinking."
+
+[hq.voice_unmute]
+en = "Unmute"
+fr = "Réactiver le micro"
+ctx = "button"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceUnmute" }
+note = "Unmutes the microphone during a voice session."
+
+[hq.voice_you]
+en = "You"
+fr = "Vous"
+ctx = "label"
+screen = "hq"
+state = "draft"
+id = { swift = "HQCopy.voiceYou" }
+note = "Labels the member's own words in the voice transcript."
+
 [in_call.call_ended]
 en = "Call ended"
 fr = "Appel terminé"
@@ -3439,6 +4165,15 @@ screen = "inbox.thread"
 state = "reviewed"
 id = { swift = "InboxCopy.attaching" }
 
+[inbox.attachment_cannot_open]
+en = "This attachment can't be opened here"
+fr = "Cette pièce jointe ne peut pas être ouverte ici"
+ctx = "label"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.attachmentCannotOpen" }
+note = "On a received attachment the app could not fetch: the sender's carrier wants its own sign-in for it, or the network failed. Shown in a small square in the thread."
+
 [inbox.attachment_count]
 en.one = "{count} attachment"
 en.other = "{count} attachments"
@@ -3449,6 +4184,15 @@ screen = "inbox.thread"
 args = { count = "int" }
 state = "reviewed"
 id = { swift = "InboxCopy.attachmentCount(_:)" }
+
+[inbox.attachment_file]
+en = "Attachment"
+fr = "Pièce jointe"
+ctx = "label"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.attachmentFile" }
+note = "On the tile of a received file that is not an image, when iOS has no name for its type, and as the file's name in the preview and the share sheet."
 
 [inbox.attachment_held]
 en = "Held"
@@ -3477,6 +4221,15 @@ args = { channel = "str" }
 state = "reviewed"
 id = { swift = "InboxCopy.attachmentHeldOn(_:)" }
 note = "Read by VoiceOver on a held image's chip; channel is the reply's channel name as the picker shows it (WhatsApp, Messenger, Instagram). French agrees with « image »."
+
+[inbox.attachment_open_hint]
+en = "Opens a preview you can share."
+fr = "Ouvre un aperçu que vous pouvez partager."
+ctx = "a11y"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.attachmentOpenHint" }
+note = "VoiceOver hint on a received file's tile: it opens in a preview with a share button."
 
 [inbox.attachments_held_email]
 en.one = "The image stays in the draft: email replies cannot carry attachments, so it will not be sent."
@@ -3668,6 +4421,15 @@ state = "reviewed"
 id = { swift = "InboxCopy.filter" }
 note = "The Inbox toolbar menu that holds the two filters (all conversations, assigned to me)."
 
+[inbox.image_attachment]
+en = "Image attachment"
+fr = "Image jointe"
+ctx = "a11y"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.imageAttachment" }
+note = "VoiceOver label on a received image in a thread."
+
 [inbox.image_could_not_read]
 en = "That image could not be read. Try picking it again."
 fr = "Impossible de lire cette image. Sélectionnez-la de nouveau."
@@ -3711,6 +4473,15 @@ ctx = "title"
 screen = "inbox"
 state = "reviewed"
 id = { swift = "InboxCopy.keepTyping" }
+
+[inbox.loading_attachment]
+en = "Loading attachment"
+fr = "Chargement de la pièce jointe"
+ctx = "label"
+screen = "inbox.thread"
+state = "draft"
+id = { swift = "InboxCopy.loadingAttachment" }
+note = "While a received attachment is fetched, before the app knows whether it is an image or a file."
 
 [inbox.loading_image]
 en = "Loading image"
@@ -12295,6 +13066,28 @@ tier = "T2"
 state = "reviewed"
 id = { swift = "SessionCopy.noLongerAvailable" }
 
+[session.offline_saved_earlier]
+en = "Offline. Showing what was saved on {stamp}"
+fr = "Hors ligne. Affichage des données enregistrées le\u00A0{stamp}"
+ctx = "body"
+screen = "session"
+tier = "T2"
+args = { stamp = "date" }
+state = "draft"
+id = { swift = "SessionCopy.offlineSavedEarlier(_:)" }
+note = "As offline_saved_today, for a copy saved on an earlier day. {stamp} is a date and time already formatted."
+
+[session.offline_saved_today]
+en = "Offline. Showing what was saved at {time}"
+fr = "Hors ligne. Affichage des données enregistrées à\u00A0{time}"
+ctx = "body"
+screen = "session"
+tier = "T2"
+args = { time = "date" }
+state = "draft"
+id = { swift = "SessionCopy.offlineSavedToday(_:)" }
+note = "Shown above every screen while the app is offline and shows the copy it saved earlier today. {time} is a time of day already formatted (« 15 h 04 », \"3:04 p.m.\"). No final period: the English time can end with one."
+
 [session.refresh_not_sent]
 en = "You appear to be offline. Your session is still active."
 fr = "Vous semblez être hors ligne. Votre session est toujours active."
@@ -13042,6 +13835,139 @@ screen = "settings"
 state = "reviewed"
 fr_variant = "Apple OS word"
 id = { swift = "SettingsCopy.hubTitle" }
+
+[settings.integrations_active_provider]
+en = "Active provider"
+fr = "Fournisseur actif"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsActiveProvider" }
+
+[settings.integrations_calendars_eyebrow]
+en = "Calendars"
+fr = "Agendas"
+ctx = "title"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsCalendarsEyebrow" }
+
+[settings.integrations_calendars_note]
+en = "Google and Microsoft approve calendar access on their own sign-in page. To connect, reconnect or disconnect a calendar, open the Integrations page."
+fr = "Google et Microsoft approuvent l'accès à l'agenda sur leur propre page de connexion. Pour connecter, reconnecter ou déconnecter un agenda, ouvrez la page Intégrations."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsCalendarsNote" }
+note = "⛔ NAMES NO DESTINATION BEYOND THE PAGE'S OWN TITLE (StoreCopyTests, Guideline 3.1.1). The connect leg is the provider's consent screen, which this app cannot draw, and the Microsoft connect route refuses a native session outright."
+
+[settings.integrations_desk_subtitle]
+en = "Your desk's switches, public name and logo."
+fr = "Les options, le nom public et le logo de votre comptoir."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsDeskSubtitle" }
+
+[settings.integrations_enrichment_subtitle]
+en = "Set under Skills."
+fr = "Se règle dans Compétences."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsEnrichmentSubtitle" }
+
+[settings.integrations_enrichment_title]
+en = "Learn about business callers"
+fr = "En savoir plus sur les appelants d'affaires"
+ctx = "title"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsEnrichmentTitle" }
+note = "The web's own heading for this group (capabilitiesI18n integrationsPage.enrichmentTitle), in both locales."
+
+[settings.integrations_not_here]
+en = "The sending domain and the media library are not available in this app."
+fr = "Le domaine d'envoi et la médiathèque ne sont pas disponibles dans cette app."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsNotHere" }
+note = "⚠️ SAYS WHY THE SCREEN STOPS WHERE IT DOES: neither has a mobile contract yet."
+
+[settings.integrations_open_page]
+en = "Open the Integrations page"
+fr = "Ouvrir la page Intégrations"
+ctx = "button"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsOpenPage" }
+
+[settings.integrations_services_eyebrow]
+en = "Connected services"
+fr = "Services connectés"
+ctx = "title"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsServicesEyebrow" }
+
+[settings.integrations_status_absent]
+en = "Not connected"
+fr = "Non connecté"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsStatusAbsent" }
+
+[settings.integrations_status_active]
+en = "Connected"
+fr = "Connecté"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsStatusActive" }
+
+[settings.integrations_status_error]
+en = "Reconnection needed"
+fr = "Reconnexion requise"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsStatusError" }
+
+[settings.integrations_status_revoked]
+en = "Access revoked"
+fr = "Accès révoqué"
+ctx = "label"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsStatusRevoked" }
+
+[settings.integrations_subtitle]
+en = "The accounts your receptionist works through."
+fr = "Les comptes avec lesquels votre réceptionniste travaille."
+ctx = "body"
+screen = "settings"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsSubtitle" }
+note = "The web's own subtitle for the page (studioI18n areas.integrations), in both locales."
+
+[settings.integrations_title]
+en = "Integrations"
+fr = "Intégrations"
+ctx = "title"
+screen = "settings"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsTitle" }
+note = "The web's own page name (studioI18n areas.integrations), in both locales."
+
+[settings.integrations_viewer_note]
+en = "You are in this workspace as a viewer, so you can see which calendars are connected and not change them."
+fr = "Avec le rôle Lecteur dans cet espace de travail, vous pouvez voir quels agendas sont connectés, mais pas les modifier."
+ctx = "body"
+screen = "settings.sections"
+state = "draft"
+id = { swift = "SettingsCopy.integrationsViewerNote" }
 
 [settings.key_id]
 en = "Key id"
@@ -14544,6 +15470,1745 @@ screen = "settings"
 state = "reviewed"
 id = { swift = "SettingsCopy.workspaceSOwn" }
 
+[setup.back]
+en = "Back"
+fr = "Retour"
+ctx = "button"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.back" }
+
+[setup.business_address_found]
+en = "We filled in your address from your website. Check it below."
+fr = "Nous avons rempli votre adresse à partir de votre site Internet. Vérifiez-la ci-dessous."
+ctx = "body"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessAddressFound" }
+note = "When the website read found an address and nothing else. The owner's own website, not a destination (StoreCopyTests allowance)."
+
+[setup.business_city_label]
+en = "City"
+fr = "Ville"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessCityLabel" }
+
+[setup.business_city_required]
+en = "Enter your city."
+fr = "Entrez votre ville."
+ctx = "error"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessCityRequired" }
+
+[setup.business_country_label]
+en = "Country"
+fr = "Pays"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessCountryLabel" }
+
+[setup.business_country_placeholder]
+en = "Choose a country"
+fr = "Choisissez un pays"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessCountryPlaceholder" }
+
+[setup.business_country_required]
+en = "Choose your country."
+fr = "Choisissez votre pays."
+ctx = "error"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessCountryRequired" }
+
+[setup.business_description]
+en = "Tell us who you are, or let us read your website."
+fr = "Dites-nous qui vous êtes, ou laissez-nous lire votre site Internet."
+ctx = "body"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.businessDescription" }
+note = "⚠️ THE OWNER'S OWN WEBSITE, read for a draft of their facts: not a destination (StoreCopyTests allowance)."
+
+[setup.business_details_heading]
+en = "About your business"
+fr = "Votre entreprise"
+ctx = "title"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessDetailsHeading" }
+
+[setup.business_email_body]
+en = "The name customers see on emails from your business, and where their replies go, are changed on the Skills page."
+fr = "Le nom que vos clients voient sur les courriels de votre entreprise et l'adresse où arrivent leurs réponses se modifient dans la page Compétences."
+ctx = "body"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessEmailBody" }
+note = "⛔ NAMES NO DESTINATION BEYOND THE PAGE'S OWN TITLE (StoreCopyTests). The email identity has no mobile contract in DistrictCore 8.5.0."
+
+[setup.business_email_heading]
+en = "Email sender name and reply-to address"
+fr = "Nom de l'expéditeur des courriels et adresse de réponse"
+ctx = "title"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessEmailHeading" }
+
+[setup.business_found_faqs_one]
+en = "{n} question"
+fr = "{n} question trouvée"
+ctx = "label"
+screen = "setup.business"
+args = { n = "int" }
+state = "draft"
+id = { swift = "SetupCopy.businessFoundFaqsOne(_:)" }
+
+[setup.business_found_faqs_other]
+en = "{n} questions"
+fr = "{n} questions trouvées"
+ctx = "label"
+screen = "setup.business"
+args = { n = "int" }
+state = "draft"
+id = { swift = "SetupCopy.businessFoundFaqsOther(_:)" }
+
+[setup.business_found_services_one]
+en = "{n} service"
+fr = "{n} service trouvé"
+ctx = "label"
+screen = "setup.business"
+args = { n = "int" }
+state = "draft"
+id = { swift = "SetupCopy.businessFoundServicesOne(_:)" }
+
+[setup.business_found_services_other]
+en = "{n} services"
+fr = "{n} services trouvés"
+ctx = "label"
+screen = "setup.business"
+args = { n = "int" }
+state = "draft"
+id = { swift = "SetupCopy.businessFoundServicesOther(_:)" }
+
+[setup.business_hours_found]
+en = "We found opening hours on your website; confirm them in step 4."
+fr = "Nous avons trouvé des heures d'ouverture sur votre site Internet; confirmez-les à l'étape 4."
+ctx = "body"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessHoursFound" }
+
+[setup.business_language_en]
+en = "English"
+fr = "Anglais"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessLanguageEn" }
+
+[setup.business_language_fr]
+en = "French"
+fr = "Français"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessLanguageFr" }
+
+[setup.business_language_label]
+en = "Language your receptionist speaks"
+fr = "Langue de votre réceptionniste"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessLanguageLabel" }
+
+[setup.business_name_label]
+en = "Business name"
+fr = "Nom de l'entreprise"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessNameLabel" }
+
+[setup.business_name_required]
+en = "Enter your business name."
+fr = "Entrez le nom de votre entreprise."
+ctx = "error"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessNameRequired" }
+
+[setup.business_read_nothing]
+en = "We read your website but found nothing we could use. Fill in the form below instead."
+fr = "Nous avons lu votre site Internet, mais n'y avons rien trouvé d'utilisable. Remplissez plutôt le formulaire ci-dessous."
+ctx = "body"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessReadNothing" }
+
+[setup.business_read_result]
+en = "Found {services} and {faqs}. They are saved as drafts for step 4."
+fr = "{services} et {faqs}. Ils sont enregistrés comme ébauches pour l'étape 4."
+ctx = "body"
+screen = "setup.business"
+args = { services = "str", faqs = "str" }
+state = "draft"
+id = { swift = "SetupCopy.businessReadResult(_:_:)" }
+note = "{services} and {faqs} are the found_* counts, chosen by number in Swift (French takes the singular for 0 and 1)."
+
+[setup.business_read_website]
+en = "Read my website"
+fr = "Lire mon site Internet"
+ctx = "button"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessReadWebsite" }
+
+[setup.business_reading]
+en = "Reading your website"
+fr = "Lecture de votre site Internet"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessReading" }
+
+[setup.business_street_hint]
+en = "Optional. Your receptionist gives it to callers who ask where you are."
+fr = "Facultatif. Votre réceptionniste la donne aux appelants qui demandent où vous êtes."
+ctx = "body"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessStreetHint" }
+
+[setup.business_street_label]
+en = "Street address"
+fr = "Adresse civique"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessStreetLabel" }
+
+[setup.business_subdivision_label_ca]
+en = "Province or territory"
+fr = "Province ou territoire"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessSubdivisionLabelCa" }
+
+[setup.business_subdivision_label_other]
+en = "Region"
+fr = "Région"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessSubdivisionLabelOther" }
+
+[setup.business_subdivision_label_us]
+en = "State"
+fr = "État"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessSubdivisionLabelUs" }
+
+[setup.business_subdivision_placeholder]
+en = "Choose one"
+fr = "Choisissez"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessSubdivisionPlaceholder" }
+
+[setup.business_subdivision_required]
+en = "Choose your province or state."
+fr = "Choisissez votre province ou votre État."
+ctx = "error"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessSubdivisionRequired" }
+
+[setup.business_timezone_label]
+en = "Time zone"
+fr = "Fuseau horaire"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessTimezoneLabel" }
+
+[setup.business_timezone_multi]
+en = "{zone}. Your area has more than one time zone, so check it in step 4."
+fr = "{zone}. Votre région compte plus d'un fuseau horaire, alors vérifiez-le à l'étape 4."
+ctx = "body"
+screen = "setup.business"
+args = { zone = "str" }
+state = "draft"
+id = { swift = "SetupCopy.businessTimezoneMulti(_:)" }
+
+[setup.business_timezone_unknown]
+en = "Choose your country and province or state to set it."
+fr = "Choisissez votre pays et votre province ou votre État pour le définir."
+ctx = "body"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessTimezoneUnknown" }
+
+[setup.business_timezone_value]
+en = "{zone}. You can change it in step 4."
+fr = "{zone}. Vous pourrez le modifier à l'étape 4."
+ctx = "body"
+screen = "setup.business"
+args = { zone = "str" }
+state = "draft"
+id = { swift = "SetupCopy.businessTimezoneValue(_:)" }
+
+[setup.business_title]
+en = "Find your business"
+fr = "Trouvez votre entreprise"
+ctx = "title"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.businessTitle" }
+
+[setup.business_website_heading]
+en = "Start from your website"
+fr = "Partir de votre site Internet"
+ctx = "title"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessWebsiteHeading" }
+
+[setup.business_website_label]
+en = "Website"
+fr = "Site"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessWebsiteLabel" }
+
+[setup.business_website_lead]
+en = "Enter your website address and we will draft your hours, address, services and common questions. You review every item in step 4 before your receptionist uses it."
+fr = "Entrez l'adresse de votre site Internet et nous préparerons une ébauche de vos heures, de votre adresse, de vos services et de vos questions fréquentes. Vous vérifiez chaque élément à l'étape 4 avant que votre réceptionniste l'utilise."
+ctx = "body"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessWebsiteLead" }
+
+[setup.business_website_placeholder]
+en = "example.com"
+fr = "example.com"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessWebsitePlaceholder" }
+
+[setup.business_what_label]
+en = "What you do, in one line"
+fr = "Ce que vous faites, en une ligne"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessWhatLabel" }
+
+[setup.business_what_placeholder]
+en = "Family dental clinic with evening appointments"
+fr = "Clinique dentaire familiale avec rendez-vous en soirée"
+ctx = "label"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.businessWhatPlaceholder" }
+
+[setup.callers_add_faq]
+en = "Add a question"
+fr = "Ajouter une question"
+ctx = "button"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersAddFaq" }
+
+[setup.callers_add_period]
+en = "Add a period"
+fr = "Ajouter une période"
+ctx = "button"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersAddPeriod" }
+
+[setup.callers_add_service]
+en = "Add a service"
+fr = "Ajouter un service"
+ctx = "button"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersAddService" }
+
+[setup.callers_address_country]
+en = "Country code"
+fr = "Code de pays"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersAddressCountry" }
+
+[setup.callers_address_country_hint]
+en = "Two letters, for example CA or US."
+fr = "Deux lettres, par exemple CA ou US."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersAddressCountryHint" }
+
+[setup.callers_address_header]
+en = "Address"
+fr = "Adresse"
+ctx = "title"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersAddressHeader" }
+
+[setup.callers_address_incomplete]
+en = "Enter at least the city and a two-letter country code, or leave the address empty."
+fr = "Entrez au moins la ville et un code de pays à deux lettres, ou laissez l'adresse vide."
+ctx = "error"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersAddressIncomplete" }
+
+[setup.callers_address_postal]
+en = "Postal or ZIP code"
+fr = "Code postal"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersAddressPostal" }
+
+[setup.callers_address_region]
+en = "Province or state"
+fr = "Province ou État"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersAddressRegion" }
+
+[setup.callers_closes]
+en = "Closes"
+fr = "Ferme"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersCloses" }
+
+[setup.callers_confirm_hours_first]
+en = "Use or discard the hours from your website before you continue."
+fr = "Utilisez ou ignorez les heures de votre site Internet avant de continuer."
+ctx = "error"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersConfirmHoursFirst" }
+
+[setup.callers_day_closed]
+en = "Closed"
+fr = "Fermé"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDayClosed" }
+
+[setup.callers_day_fri]
+en = "Friday"
+fr = "Vendredi"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDayFri" }
+
+[setup.callers_day_mon]
+en = "Monday"
+fr = "Lundi"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDayMon" }
+
+[setup.callers_day_not_set]
+en = "Not set"
+fr = "Non défini"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDayNotSet" }
+
+[setup.callers_day_open]
+en = "Open"
+fr = "Ouvert"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDayOpen" }
+
+[setup.callers_day_sat]
+en = "Saturday"
+fr = "Samedi"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDaySat" }
+
+[setup.callers_day_sun]
+en = "Sunday"
+fr = "Dimanche"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDaySun" }
+
+[setup.callers_day_thu]
+en = "Thursday"
+fr = "Jeudi"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDayThu" }
+
+[setup.callers_day_tue]
+en = "Tuesday"
+fr = "Mardi"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDayTue" }
+
+[setup.callers_day_wed]
+en = "Wednesday"
+fr = "Mercredi"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDayWed" }
+
+[setup.callers_description]
+en = "Hours, address, services and common questions."
+fr = "Heures, adresse, services et questions fréquentes."
+ctx = "body"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.callersDescription" }
+
+[setup.callers_discard_hours]
+en = "Discard"
+fr = "Ignorer"
+ctx = "button"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDiscardHours" }
+
+[setup.callers_draft_note]
+en = "Items we drafted from your website start switched off. Check each one, fix anything that is wrong, and switch it on."
+fr = "Les éléments tirés de votre site Internet sont désactivés au départ. Vérifiez chacun d'eux, corrigez ce qui est inexact, puis activez-le."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersDraftNote" }
+
+[setup.callers_faq_answer]
+en = "Answer"
+fr = "Réponse"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersFaqAnswer" }
+
+[setup.callers_faq_error]
+en = "Enter a question (up to 300 characters) and an answer (up to 1000 characters)."
+fr = "Entrez une question (300 caractères au plus) et une réponse (1000 caractères au plus)."
+ctx = "error"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersFaqError" }
+
+[setup.callers_faq_label]
+en = "Question {n}"
+fr = "Question {n}"
+ctx = "label"
+screen = "setup.callers"
+args = { n = "int" }
+state = "draft"
+same_ok = true
+id = { swift = "SetupCopy.callersFaqLabel(_:)" }
+
+[setup.callers_faq_question]
+en = "Question"
+fr = "Question"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+same_ok = true
+id = { swift = "SetupCopy.callersFaqQuestion" }
+
+[setup.callers_faqs_description]
+en = "Questions callers often ask, with the answer your receptionist should give."
+fr = "Les questions que les appelants posent souvent, avec la réponse que votre réceptionniste doit donner."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersFaqsDescription" }
+
+[setup.callers_faqs_header]
+en = "Common questions"
+fr = "Questions fréquentes"
+ctx = "title"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersFaqsHeader" }
+
+[setup.callers_fill_from_website]
+en = "Fill from my website"
+fr = "Remplir à partir de mon site Internet"
+ctx = "button"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersFillFromWebsite" }
+
+[setup.callers_fix_errors]
+en = "Fix the entries marked in red, then save."
+fr = "Corrigez les éléments marqués en rouge, puis enregistrez."
+ctx = "error"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersFixErrors" }
+
+[setup.callers_hours_description]
+en = "Add up to four opening periods a day. A day left as Not set is not mentioned to callers."
+fr = "Ajoutez jusqu'à quatre périodes d'ouverture par jour. Un jour laissé à Non défini n'est pas mentionné aux appelants."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersHoursDescription" }
+
+[setup.callers_hours_draft_note]
+en = "These hours come from your website and are not saved yet. Check each day, then use them."
+fr = "Ces heures proviennent de votre site Internet et ne sont pas encore enregistrées. Vérifiez chaque jour, puis utilisez-les."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersHoursDraftNote" }
+
+[setup.callers_hours_header]
+en = "Opening hours"
+fr = "Heures d'ouverture"
+ctx = "title"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersHoursHeader" }
+
+[setup.callers_intro]
+en = "Your receptionist answers from these facts. Only items that are switched on are used on calls."
+fr = "Votre réceptionniste répond à partir de ces renseignements. Seuls les éléments activés sont utilisés pendant les appels."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersIntro" }
+
+[setup.callers_no_faqs]
+en = "No questions yet."
+fr = "Aucune question pour l'instant."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersNoFaqs" }
+
+[setup.callers_no_hours_found]
+en = "We did not find opening hours on that website. Enter them below."
+fr = "Nous n'avons pas trouvé d'heures d'ouverture sur ce site Internet. Entrez-les ci-dessous."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersNoHoursFound" }
+
+[setup.callers_no_services]
+en = "No services yet."
+fr = "Aucun service pour l'instant."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersNoServices" }
+
+[setup.callers_off_hint]
+en = "Switched off. Your receptionist will not use this."
+fr = "Désactivé. Votre réceptionniste ne l'utilisera pas."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersOffHint" }
+
+[setup.callers_opens]
+en = "Opens"
+fr = "Ouvre"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersOpens" }
+
+[setup.callers_period_error]
+en = "Close after you open. Periods must not overlap."
+fr = "Fermez après l'ouverture. Les périodes ne doivent pas se chevaucher."
+ctx = "error"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersPeriodError" }
+
+[setup.callers_period_label]
+en = "Period {n}"
+fr = "Période {n}"
+ctx = "label"
+screen = "setup.callers"
+args = { n = "int" }
+state = "draft"
+id = { swift = "SetupCopy.callersPeriodLabel(_:)" }
+
+[setup.callers_remove]
+en = "Remove"
+fr = "Retirer"
+ctx = "button"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersRemove" }
+
+[setup.callers_remove_period]
+en = "Remove this period"
+fr = "Retirer cette période"
+ctx = "button"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersRemovePeriod" }
+
+[setup.callers_service_error]
+en = "Enter a service name (up to 120 characters) and a price of up to 40 characters."
+fr = "Entrez un nom de service (120 caractères au plus) et un prix de 40 caractères au plus."
+ctx = "error"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersServiceError" }
+
+[setup.callers_service_label]
+en = "Service {n}"
+fr = "Service {n}"
+ctx = "label"
+screen = "setup.callers"
+args = { n = "int" }
+state = "draft"
+same_ok = true
+id = { swift = "SetupCopy.callersServiceLabel(_:)" }
+
+[setup.callers_service_name]
+en = "Service"
+fr = "Service"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+same_ok = true
+id = { swift = "SetupCopy.callersServiceName" }
+
+[setup.callers_service_price]
+en = "Price (optional)"
+fr = "Prix (facultatif)"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersServicePrice" }
+
+[setup.callers_services_description]
+en = "Write prices the way you would say them, for example $45 or quoted on site."
+fr = "Écrivez les prix comme vous les diriez, par exemple 45\u00A0$ ou sur estimation."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersServicesDescription" }
+
+[setup.callers_services_header]
+en = "Services and prices"
+fr = "Services et prix"
+ctx = "title"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersServicesHeader" }
+
+[setup.callers_timezone_description]
+en = "Your opening hours are read in this time zone."
+fr = "Vos heures d'ouverture sont lues dans ce fuseau horaire."
+ctx = "body"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersTimezoneDescription" }
+
+[setup.callers_timezone_placeholder]
+en = "Choose a time zone"
+fr = "Choisissez un fuseau horaire"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersTimezonePlaceholder" }
+
+[setup.callers_title]
+en = "What callers should know"
+fr = "Ce que les appelants doivent savoir"
+ctx = "title"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.callersTitle" }
+
+[setup.callers_use_hours]
+en = "Use these hours"
+fr = "Utiliser ces heures"
+ctx = "button"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersUseHours" }
+
+[setup.callers_use_on_calls]
+en = "Use on calls"
+fr = "Utiliser pendant les appels"
+ctx = "label"
+screen = "setup.callers"
+state = "draft"
+id = { swift = "SetupCopy.callersUseOnCalls" }
+
+[setup.calls_ai_first]
+en = "Every call"
+fr = "Chaque appel"
+ctx = "label"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsAiFirst" }
+
+[setup.calls_ai_first_description]
+en = "Your receptionist answers every call straight away."
+fr = "Votre réceptionniste répond à chaque appel immédiatement."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsAiFirstDescription" }
+
+[setup.calls_ai_then_app]
+en = "Receptionist first, then the District app"
+fr = "La réceptionniste d'abord, puis l'app District"
+ctx = "label"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsAiThenApp" }
+
+[setup.calls_ai_then_app_description]
+en = "Chosen earlier in Settings. Your receptionist answers and can pass the call to the app."
+fr = "Choisi plus tôt dans Réglages. Votre réceptionniste répond et peut passer l'appel à l'app."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsAiThenAppDescription" }
+
+[setup.calls_answer_description]
+en = "Choose who picks up a call first."
+fr = "Choisissez qui décroche en premier."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsAnswerDescription" }
+
+[setup.calls_answer_header]
+en = "When your receptionist answers"
+fr = "Quand votre réceptionniste répond"
+ctx = "title"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsAnswerHeader" }
+
+[setup.calls_app_first]
+en = "Ring the District app first"
+fr = "Faire sonner l'app District en premier"
+ctx = "label"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsAppFirst" }
+
+[setup.calls_app_first_description]
+en = "Your phone rings in the District app first. If nobody picks up, your receptionist answers."
+fr = "Votre téléphone sonne d'abord dans l'app District. Si personne ne répond, votre réceptionniste prend l'appel."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsAppFirstDescription" }
+
+[setup.calls_app_needed]
+en = "This needs the District app installed and signed in on your phone, with Available for calls turned on. When nobody can be rung, your receptionist answers straight away."
+fr = "Il faut que l'app District soit installée et connectée sur votre téléphone, avec Disponible pour les appels activé. Quand personne ne peut être joint, votre réceptionniste répond immédiatement."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsAppNeeded" }
+
+[setup.calls_bookings_connected]
+en = "Your receptionist books appointments into {provider}."
+fr = "Votre réceptionniste prend les rendez-vous dans {provider}."
+ctx = "body"
+screen = "setup.calls"
+args = { provider = "str" }
+state = "draft"
+id = { swift = "SetupCopy.callsBookingsConnected(_:)" }
+note = "{provider} is a product name (Google Calendar, Microsoft Outlook Calendar), the same in both languages."
+
+[setup.calls_bookings_header]
+en = "Bookings"
+fr = "Rendez-vous"
+ctx = "title"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsBookingsHeader" }
+
+[setup.calls_bookings_none]
+en = "No calendar is connected, so your receptionist does not book appointments."
+fr = "Aucun agenda n'est connecté; votre réceptionniste ne prend donc pas de rendez-vous."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsBookingsNone" }
+
+[setup.calls_bookings_where]
+en = "Google and Microsoft approve calendar access on their own sign-in page, so a calendar is connected on the Integrations page."
+fr = "Google et Microsoft approuvent l'accès à l'agenda sur leur propre page de connexion; un agenda se connecte donc dans la page Intégrations."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsBookingsWhere" }
+
+[setup.calls_description]
+en = "When calls are answered, who to transfer to, and bookings."
+fr = "Quand elle répond, à qui elle transfère, et les rendez-vous."
+ctx = "body"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.callsDescription" }
+
+[setup.calls_keeping_line_note]
+en = "Keeping your existing business number and only want calls you miss? Set your carrier to forward unanswered calls in the last step."
+fr = "Vous gardez votre numéro d'entreprise actuel et ne voulez que les appels manqués? Réglez votre fournisseur pour qu'il transfère les appels sans réponse à la dernière étape."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsKeepingLineNote" }
+
+[setup.calls_profiles_body]
+en = "When this is on, after each call we look up the caller's public business details (such as their company and role) to add a profile to your call log. The lookups use research services based in the United States. It is off unless you switch it on, and you can switch it off at any time."
+fr = "Quand cette option est activée, après chaque appel, nous recherchons les renseignements professionnels publics de l'appelant (comme son entreprise et son poste) pour ajouter un profil à votre journal d'appels. Les recherches passent par des services situés aux États-Unis. L'option reste désactivée tant que vous ne l'activez pas, et vous pouvez la désactiver en tout temps."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsProfilesBody" }
+note = "⛔ THE WEB'S SENTENCE, NOT SOFTENED: the privacy policy promises enrichment is off unless a workspace turns it on."
+
+[setup.calls_profiles_header]
+en = "Caller profiles"
+fr = "Profils des appelants"
+ctx = "title"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsProfilesHeader" }
+
+[setup.calls_profiles_off]
+en = "Caller profiles are off."
+fr = "Les profils d'appelants sont désactivés."
+ctx = "label"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsProfilesOff" }
+
+[setup.calls_profiles_on]
+en = "Caller profiles are on."
+fr = "Les profils d'appelants sont activés."
+ctx = "label"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsProfilesOn" }
+
+[setup.calls_profiles_toggle]
+en = "Build caller profiles"
+fr = "Créer des profils d'appelants"
+ctx = "label"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsProfilesToggle" }
+
+[setup.calls_ring_label]
+en = "How long to ring the app"
+fr = "Durée de sonnerie dans l'app"
+ctx = "label"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsRingLabel" }
+
+[setup.calls_ring_seconds]
+en = "{n} seconds"
+fr = "{n} secondes"
+ctx = "label"
+screen = "setup.calls"
+args = { n = "int" }
+state = "draft"
+id = { swift = "SetupCopy.callsRingSeconds(_:)" }
+
+[setup.calls_save_answering]
+en = "Save how calls are answered"
+fr = "Enregistrer la façon de répondre"
+ctx = "button"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsSaveAnswering" }
+
+[setup.calls_title]
+en = "Calls, people and bookings"
+fr = "Appels, personnes et rendez-vous"
+ctx = "title"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.callsTitle" }
+
+[setup.calls_transfer_current]
+en = "When a caller asks for a person, your receptionist transfers the call to {number}."
+fr = "Quand un appelant demande une personne, votre réceptionniste transfère l'appel au {number}."
+ctx = "body"
+screen = "setup.calls"
+args = { number = "str" }
+state = "draft"
+id = { swift = "SetupCopy.callsTransferCurrent(_:)" }
+
+[setup.calls_transfer_header]
+en = "Passing a call to a person"
+fr = "Passer un appel à une personne"
+ctx = "title"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsTransferHeader" }
+
+[setup.calls_transfer_none]
+en = "No transfer number is set, so your receptionist takes a message instead."
+fr = "Aucun numéro de transfert n'est défini; votre réceptionniste prend donc un message."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsTransferNone" }
+
+[setup.calls_transfer_where]
+en = "The transfer number is changed on the Skills page."
+fr = "Le numéro de transfert se modifie dans la page Compétences."
+ctx = "body"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.callsTransferWhere" }
+note = "⛔ NAMES NO DESTINATION BEYOND THE PAGE'S OWN TITLE (StoreCopyTests). DistrictCore 8.5.0 has no write for the transfer number."
+
+[setup.continue]
+en = "Continue"
+fr = "Continuer"
+ctx = "button"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.continue" }
+
+[setup.done]
+en = "Done"
+fr = "Terminé"
+ctx = "button"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.done" }
+
+[setup.finish_later]
+en = "Finish later"
+fr = "Terminer plus tard"
+ctx = "button"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.finishLater" }
+
+[setup.finished_body]
+en = "Your receptionist is ready. You can change any of this in Settings."
+fr = "Votre réceptionniste est prête. Vous pouvez modifier tout cela dans Réglages."
+ctx = "body"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.finishedBody" }
+
+[setup.finished_title]
+en = "Setup is finished"
+fr = "La configuration est terminée"
+ctx = "title"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.finishedTitle" }
+
+[setup.golive_answers_ai_then_app]
+en = "Every call, with the District app as backup"
+fr = "Chaque appel, avec l'app District en relève"
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveAnswersAiThenApp" }
+
+[setup.golive_answers_app_first]
+en = "After the District app rings for {n} seconds"
+fr = "Après {n} secondes de sonnerie dans l'app District"
+ctx = "body"
+screen = "setup.golive"
+args = { n = "int" }
+state = "draft"
+id = { swift = "SetupCopy.goliveAnswersAppFirst(_:)" }
+
+[setup.golive_answers_label]
+en = "When it answers"
+fr = "Quand elle répond"
+ctx = "label"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveAnswersLabel" }
+
+[setup.golive_attempts_left]
+en = "{n} checks left today."
+fr = "{n} vérifications restantes aujourd'hui."
+ctx = "label"
+screen = "setup.golive"
+args = { n = "int" }
+state = "draft"
+id = { swift = "SetupCopy.goliveAttemptsLeft(_:)" }
+
+[setup.golive_attempts_left_one]
+en = "1 check left today."
+fr = "1 vérification restante aujourd'hui."
+ctx = "label"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveAttemptsLeftOne" }
+
+[setup.golive_business_line_error]
+en = "Enter your business line with its country code, for example +14165550123."
+fr = "Entrez votre ligne d'entreprise avec l'indicatif du pays, par exemple +14165550123."
+ctx = "error"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveBusinessLineError" }
+
+[setup.golive_business_line_label]
+en = "Your business line"
+fr = "Votre ligne d'entreprise"
+ctx = "label"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveBusinessLineLabel" }
+
+[setup.golive_call_me]
+en = "Call my mobile now"
+fr = "Appeler mon cellulaire maintenant"
+ctx = "button"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCallMe" }
+
+[setup.golive_calling]
+en = "Calling you now. Answer your phone."
+fr = "Nous vous appelons. Répondez à votre téléphone."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCalling" }
+
+[setup.golive_check_description]
+en = "We ring your business line and watch for the call to arrive on your District number."
+fr = "Nous appelons votre ligne d'entreprise et vérifions que l'appel arrive sur votre numéro District."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCheckDescription" }
+
+[setup.golive_check_dial_failed]
+en = "We could not place the check call. Try again in a few minutes."
+fr = "Nous n'avons pas pu faire l'appel de vérification. Réessayez dans quelques minutes."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCheckDialFailed" }
+
+[setup.golive_check_failed]
+en = "The call did not arrive on your District number. Check your forwarding settings and try again."
+fr = "L'appel n'est pas arrivé sur votre numéro District. Vérifiez vos réglages de transfert et réessayez."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCheckFailed" }
+
+[setup.golive_check_header]
+en = "Check my forwarding"
+fr = "Vérifier mon transfert"
+ctx = "title"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCheckHeader" }
+
+[setup.golive_check_passed]
+en = "Forwarding works. The call arrived on your District number."
+fr = "Le transfert fonctionne. L'appel est arrivé sur votre numéro District."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCheckPassed" }
+
+[setup.golive_check_pending]
+en = "Checking. This takes up to a minute."
+fr = "Vérification en cours. Cela prend jusqu'à une minute."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCheckPending" }
+
+[setup.golive_check_still_pending]
+en = "The check is still running. Tap the button to look again."
+fr = "La vérification est toujours en cours. Touchez le bouton pour regarder de nouveau."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveCheckStillPending" }
+note = "After two minutes of polling a check the service still holds as pending. The button then reads the check again; it does not place a new call."
+
+[setup.golive_consent_heading]
+en = "By tapping the button you agree to this"
+fr = "En touchant le bouton, vous acceptez ceci"
+ctx = "label"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveConsentHeading" }
+
+[setup.golive_consent_wording]
+en = "Call me now at the number I entered, from my District number, so I can hear my receptionist answer. This is a test call of up to two minutes. It is not billed, and the receptionist cannot transfer, book, email or text during it. The call is transcribed and summarized in my call log like any other call."
+fr = "Appelez-moi maintenant au numéro que j'ai indiqué, depuis mon numéro District, pour que j'entende ma réceptionniste répondre. Il s'agit d'un appel d'essai d'au plus deux minutes. Il n'est pas facturé, et la réceptionniste ne peut ni transférer, ni prendre de rendez-vous, ni envoyer de courriel ou de texto pendant l'appel. L'appel est transcrit et résumé dans mon journal d'appels comme tout autre appel."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveConsentWording" }
+note = "⛔ A CONSENT RECORD, NOT ONLY COPY. The test-call route stores its own copy of these words (testCallI18n consentWording) for the owner's language; this is the same text, character for character. Change both or neither."
+
+[setup.golive_description]
+en = "Hear your receptionist answer, then send your calls."
+fr = "Entendez-la répondre, puis envoyez-lui vos appels."
+ctx = "body"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.goliveDescription" }
+
+[setup.golive_expect_call]
+en = "Expect a call from {number}."
+fr = "Attendez-vous à un appel du {number}."
+ctx = "body"
+screen = "setup.golive"
+args = { number = "str" }
+state = "draft"
+id = { swift = "SetupCopy.goliveExpectCall(_:)" }
+
+[setup.golive_finish]
+en = "Finish"
+fr = "Terminer"
+ctx = "button"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveFinish" }
+
+[setup.golive_greeting_label]
+en = "Your receptionist says"
+fr = "Votre réceptionniste dit"
+ctx = "label"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveGreetingLabel" }
+
+[setup.golive_keeping_description]
+en = "Forward your existing line to your District number with your carrier, then check it here."
+fr = "Transférez votre ligne actuelle vers votre numéro District auprès de votre fournisseur, puis vérifiez-la ici."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveKeepingDescription" }
+
+[setup.golive_keeping_header]
+en = "Keeping your existing business number?"
+fr = "Vous gardez votre numéro d'entreprise actuel?"
+ctx = "title"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveKeepingHeader" }
+
+[setup.golive_live_header]
+en = "You're live"
+fr = "Vous êtes en service"
+ctx = "title"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveLiveHeader" }
+
+[setup.golive_mobile_error]
+en = "Enter your mobile number with its country code, for example +14165550123."
+fr = "Entrez votre numéro de cellulaire avec l'indicatif du pays, par exemple +14165550123."
+ctx = "error"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveMobileError" }
+
+[setup.golive_mobile_label]
+en = "Your mobile number"
+fr = "Votre numéro de cellulaire"
+ctx = "label"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveMobileLabel" }
+
+[setup.golive_mode_all]
+en = "All calls"
+fr = "Tous les appels"
+ctx = "label"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveModeAll" }
+
+[setup.golive_mode_label]
+en = "Which calls do you forward?"
+fr = "Quels appels transférez-vous?"
+ctx = "label"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveModeLabel" }
+
+[setup.golive_mode_unanswered]
+en = "Only calls I don't pick up"
+fr = "Seulement les appels auxquels je ne réponds pas"
+ctx = "label"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveModeUnanswered" }
+
+[setup.golive_no_greeting]
+en = "Your receptionist uses its standard greeting."
+fr = "Votre réceptionniste utilise son message d'accueil standard."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveNoGreeting" }
+
+[setup.golive_no_number_yet]
+en = "You need a District number before we can place a test call."
+fr = "Il vous faut un numéro District avant que nous puissions faire un appel d'essai."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveNoNumberYet" }
+
+[setup.golive_start_check]
+en = "Check my forwarding"
+fr = "Vérifier mon transfert"
+ctx = "button"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveStartCheck" }
+
+[setup.golive_test_description]
+en = "We call your mobile from your District number and your receptionist answers, just as a caller would hear it."
+fr = "Nous appelons votre cellulaire depuis votre numéro District et votre réceptionniste répond, comme un appelant l'entendrait."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveTestDescription" }
+
+[setup.golive_test_header]
+en = "Hear your receptionist"
+fr = "Entendez votre réceptionniste"
+ctx = "title"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveTestHeader" }
+
+[setup.golive_title]
+en = "Test and go live"
+fr = "Essai et mise en service"
+ctx = "title"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.goliveTitle" }
+
+[setup.golive_unanswered_note]
+en = "Do not answer when your business line rings. Let it ring until it forwards."
+fr = "Ne répondez pas quand votre ligne d'entreprise sonne. Laissez-la sonner jusqu'au transfert."
+ctx = "body"
+screen = "setup.golive"
+state = "draft"
+id = { swift = "SetupCopy.goliveUnansweredNote" }
+
+[setup.handoff_returned]
+en = "Checking what changed"
+fr = "Vérification des changements"
+ctx = "label"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.handoffReturned" }
+note = "Shown while the wizard reads its state again after a page opened in a sheet closes."
+
+[setup.loading]
+en = "Loading your setup"
+fr = "Chargement de votre configuration"
+ctx = "label"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.loading" }
+
+[setup.not_available_body]
+en = "This workspace was set up before these setup steps existed. Everything they cover is under Settings."
+fr = "Cet espace de travail a été créé avant ces étapes de configuration. Tout ce qu'elles couvrent se trouve dans Réglages."
+ctx = "body"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.notAvailableBody" }
+note = "⚠️ « Réglages » is Settings on Apple (the glossary's Apple OS word)."
+
+[setup.not_available_title]
+en = "Setup is not available here"
+fr = "La configuration n'est pas offerte ici"
+ctx = "title"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.notAvailableTitle" }
+
+[setup.not_owner_body]
+en = "Setup decides what your receptionist says and which number it answers, so only the person who owns this workspace can do it. Ask them to finish it."
+fr = "La configuration décide de ce que dit votre réceptionniste et du numéro auquel elle répond; seule la personne propriétaire de cet espace de travail peut donc la faire. Demandez-lui de la terminer."
+ctx = "body"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.notOwnerBody" }
+
+[setup.not_owner_title]
+en = "Only the owner can do setup"
+fr = "Seul le propriétaire peut faire la configuration"
+ctx = "title"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.notOwnerTitle" }
+
+[setup.number_answered_apac]
+en = "Calls are answered in Singapore."
+fr = "Les appels sont traités à Singapour."
+ctx = "body"
+screen = "setup.number"
+state = "draft"
+id = { swift = "SetupCopy.numberAnsweredApac" }
+
+[setup.number_answered_ca]
+en = "Calls are answered in Montréal."
+fr = "Les appels sont traités à Montréal."
+ctx = "body"
+screen = "setup.number"
+state = "draft"
+id = { swift = "SetupCopy.numberAnsweredCa" }
+
+[setup.number_answered_eu]
+en = "Calls are answered in Frankfurt."
+fr = "Les appels sont traités à Francfort."
+ctx = "body"
+screen = "setup.number"
+state = "draft"
+id = { swift = "SetupCopy.numberAnsweredEu" }
+
+[setup.number_answered_us]
+en = "Calls are answered in the United States."
+fr = "Les appels sont traités aux États-Unis."
+ctx = "body"
+screen = "setup.number"
+state = "draft"
+id = { swift = "SetupCopy.numberAnsweredUs" }
+
+[setup.number_description]
+en = "The phone number your receptionist answers."
+fr = "Le numéro de téléphone auquel votre réceptionniste répond."
+ctx = "body"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.numberDescription" }
+
+[setup.number_have_lead]
+en = "You already have a number. Your receptionist answers it."
+fr = "Vous avez déjà un numéro. Votre réceptionniste y répond."
+ctx = "body"
+screen = "setup.number"
+state = "draft"
+id = { swift = "SetupCopy.numberHaveLead" }
+
+[setup.number_held]
+en = "Numbers you hold: {held}"
+fr = "Numéros que vous détenez\u00A0: {held}"
+ctx = "label"
+screen = "setup.number"
+args = { held = "int" }
+state = "draft"
+id = { swift = "SetupCopy.numberHeld(_:)" }
+
+[setup.number_included]
+en = "Included in your plan ({held} of {included})"
+fr = "Inclus dans votre forfait ({held} sur {included})"
+ctx = "label"
+screen = "setup.number"
+args = { held = "int", included = "int" }
+state = "draft"
+id = { swift = "SetupCopy.numberIncluded(_:_:)" }
+
+[setup.number_keep]
+en = "Keep this number"
+fr = "Garder ce numéro"
+ctx = "button"
+screen = "setup.number"
+state = "draft"
+id = { swift = "SetupCopy.numberKeep" }
+
+[setup.number_none_body]
+en = "A number is chosen and bought on the setup page, which shows the numbers near you. Open it, take a number, then close it to carry on here."
+fr = "Un numéro se choisit et s'achète dans la page de configuration, qui affiche les numéros près de chez vous. Ouvrez-la, prenez un numéro, puis fermez-la pour continuer ici."
+ctx = "body"
+screen = "setup.number"
+state = "draft"
+id = { swift = "SetupCopy.numberNoneBody" }
+note = "⛔ NAMES NO DESTINATION BEYOND THE PAGE'S OWN NAME (StoreCopyTests). Buying a number charges a card and stays on the web by decision (Sean, 2026-11-08)."
+
+[setup.number_none_heading]
+en = "Get your number"
+fr = "Obtenez votre numéro"
+ctx = "title"
+screen = "setup.number"
+state = "draft"
+id = { swift = "SetupCopy.numberNoneHeading" }
+
+[setup.number_open_page]
+en = "Open the setup page"
+fr = "Ouvrir la page de configuration"
+ctx = "button"
+screen = "setup.number"
+state = "draft"
+id = { swift = "SetupCopy.numberOpenPage" }
+
+[setup.number_title]
+en = "Your number"
+fr = "Votre numéro"
+ctx = "title"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.numberTitle" }
+
+[setup.open_integrations]
+en = "Open the Integrations page"
+fr = "Ouvrir la page Intégrations"
+ctx = "button"
+screen = "setup.calls"
+state = "draft"
+id = { swift = "SetupCopy.openIntegrations" }
+
+[setup.open_skills]
+en = "Open the Skills page"
+fr = "Ouvrir la page Compétences"
+ctx = "button"
+screen = "setup.business"
+state = "draft"
+id = { swift = "SetupCopy.openSkills" }
+
+[setup.progress_label]
+en = "Setup progress"
+fr = "Progression de la configuration"
+ctx = "label"
+screen = "setup.a11y"
+state = "draft"
+id = { swift = "SetupCopy.progressLabel" }
+
+[setup.receptionist_description]
+en = "A name, a greeting and a voice."
+fr = "Son nom, son message d'accueil et sa voix."
+ctx = "body"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.receptionistDescription" }
+
+[setup.receptionist_disclosure_always]
+en = "Your receptionist tells callers it is an AI assistant at the start of every call."
+fr = "Elle indique aux appelants qu'elle est une assistante IA au début de chaque appel."
+ctx = "body"
+screen = "setup.receptionist"
+state = "draft"
+id = { swift = "SetupCopy.receptionistDisclosureAlways" }
+
+[setup.receptionist_disclosure_required]
+en = "This is required in Europe."
+fr = "C'est obligatoire en Europe."
+ctx = "body"
+screen = "setup.receptionist"
+state = "draft"
+id = { swift = "SetupCopy.receptionistDisclosureRequired" }
+
+[setup.receptionist_greeting_hint]
+en = "The first thing callers hear."
+fr = "La première chose que les appelants entendent."
+ctx = "body"
+screen = "setup.receptionist"
+state = "draft"
+id = { swift = "SetupCopy.receptionistGreetingHint" }
+
+[setup.receptionist_greeting_label]
+en = "Greeting"
+fr = "Message d'accueil"
+ctx = "label"
+screen = "setup.receptionist"
+state = "draft"
+id = { swift = "SetupCopy.receptionistGreetingLabel" }
+
+[setup.receptionist_greeting_required]
+en = "Enter a greeting."
+fr = "Entrez un message d'accueil."
+ctx = "error"
+screen = "setup.receptionist"
+state = "draft"
+id = { swift = "SetupCopy.receptionistGreetingRequired" }
+
+[setup.receptionist_name_label]
+en = "Receptionist's name"
+fr = "Son nom"
+ctx = "label"
+screen = "setup.receptionist"
+state = "draft"
+id = { swift = "SetupCopy.receptionistNameLabel" }
+
+[setup.receptionist_name_required]
+en = "Enter a name."
+fr = "Entrez un nom."
+ctx = "error"
+screen = "setup.receptionist"
+state = "draft"
+id = { swift = "SetupCopy.receptionistNameRequired" }
+
+[setup.receptionist_title]
+en = "Your receptionist"
+fr = "Votre réceptionniste"
+ctx = "title"
+screen = "setup.steps"
+state = "draft"
+id = { swift = "SetupCopy.receptionistTitle" }
+
+[setup.receptionist_voice_elsewhere]
+en = "Your receptionist uses a voice engine this step does not cover. Change the voice in Settings."
+fr = "Votre réceptionniste utilise un moteur vocal que cette étape ne couvre pas. Changez sa voix dans Réglages."
+ctx = "body"
+screen = "setup.receptionist"
+state = "draft"
+id = { swift = "SetupCopy.receptionistVoiceElsewhere" }
+
+[setup.receptionist_voice_label]
+en = "Voice"
+fr = "Voix"
+ctx = "label"
+screen = "setup.receptionist"
+state = "draft"
+id = { swift = "SetupCopy.receptionistVoiceLabel" }
+
+[setup.save]
+en = "Save"
+fr = "Enregistrer"
+ctx = "button"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.save" }
+
+[setup.save_and_continue]
+en = "Save and continue"
+fr = "Enregistrer et continuer"
+ctx = "button"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.saveAndContinue" }
+
+[setup.saved]
+en = "Saved."
+fr = "Enregistré."
+ctx = "label"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.saved" }
+
+[setup.saving]
+en = "Saving…"
+fr = "Sauvegarde…"
+ctx = "label"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.saving" }
+
+[setup.skip_step]
+en = "Skip this step for now"
+fr = "Passer cette étape pour l'instant"
+ctx = "button"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.skipStep" }
+
+[setup.step_current]
+en = "Current step"
+fr = "Étape en cours"
+ctx = "label"
+screen = "setup.a11y"
+state = "draft"
+id = { swift = "SetupCopy.stepCurrent" }
+
+[setup.step_done]
+en = "Done"
+fr = "Terminée"
+ctx = "label"
+screen = "setup.a11y"
+state = "draft"
+id = { swift = "SetupCopy.stepDone" }
+
+[setup.step_of]
+en = "Step {n} of {total}"
+fr = "Étape {n} sur {total}"
+ctx = "label"
+screen = "setup"
+args = { n = "int", total = "int" }
+state = "draft"
+id = { swift = "SetupCopy.stepOf(_:_:)" }
+
+[setup.step_skipped]
+en = "Skipped"
+fr = "Passée"
+ctx = "label"
+screen = "setup.a11y"
+state = "draft"
+id = { swift = "SetupCopy.stepSkipped" }
+
+[setup.step_todo]
+en = "To do"
+fr = "À faire"
+ctx = "label"
+screen = "setup.a11y"
+state = "draft"
+id = { swift = "SetupCopy.stepTodo" }
+
+[setup.title]
+en = "Setup"
+fr = "Configuration"
+ctx = "title"
+screen = "setup"
+state = "draft"
+id = { swift = "SetupCopy.title" }
+
 [sign_in.district_ai]
 en = "District AI"
 ctx = "label"
@@ -15488,6 +18153,340 @@ screen = "support"
 state = "reviewed"
 id = { swift = "SupportCopy.writeUnrepeatable" }
 note = "⛔ SHOWN UNDER A FAILURE WHOSE WRITE MAY HAVE LANDED, AND IT IS THE OTHER HALF OF WITHDRAWING THE BUTTON. A 5xx, a dropped connection and a contract mismatch all leave a reply or a close that may already be in the customer's own thread, so re-arming the control would post a second copy. Reopening the request is the honest way back, because it re-reads."
+
+[two_step.card_title]
+en = "Security"
+fr = "Sécurité"
+ctx = "label"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.cardTitle" }
+
+[two_step.close]
+en = "Close"
+fr = "Fermer"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.close" }
+
+[two_step.code_prompt]
+en = "Then enter the 6-digit code your authenticator app shows for District AI."
+fr = "Entrez ensuite le code à 6 chiffres que votre application d'authentification affiche pour District AI."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codePrompt" }
+
+[two_step.codes_done]
+en = "I have saved them"
+fr = "Je les ai enregistrés"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codesDone" }
+
+[two_step.codes_left]
+en.one = "1 recovery code left."
+en.other = "{count} recovery codes left."
+fr.one = "{count} code de récupération restant."
+fr.other = "{count} codes de récupération restants."
+ctx = "body"
+screen = "account.two_step"
+args = { count = "int" }
+state = "draft"
+id = { swift = "TwoStepCopy.codesLeft(_:)" }
+note = "count is never 0: that case has its own sentence."
+
+[two_step.codes_none]
+en = "No recovery codes are left. Turn two-step verification off and on again to get new ones."
+fr = "Il ne reste aucun code de récupération. Désactivez puis réactivez la vérification en deux étapes pour en obtenir de nouveaux."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codesNone" }
+
+[two_step.codes_title]
+en = "Save your recovery codes"
+fr = "Enregistrez vos codes de récupération"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codesTitle" }
+
+[two_step.codes_warning]
+en = "Each code signs you in once if you lose your authenticator app. Save them somewhere safe now. They will not be shown again."
+fr = "Chaque code permet une seule connexion si vous perdez votre application d'authentification. Enregistrez-les maintenant en lieu sûr. Ils ne seront plus affichés."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.codesWarning" }
+
+[two_step.confirm_button]
+en = "Turn on two-step verification"
+fr = "Activer la vérification en deux étapes"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.confirmButton" }
+
+[two_step.copied]
+en = "Copied"
+fr = "Copié"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.copied" }
+
+[two_step.copy_all]
+en = "Copy all"
+fr = "Tout copier"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.copyAll" }
+
+[two_step.copy_key]
+en = "Copy key"
+fr = "Copier la clé"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.copyKey" }
+
+[two_step.error_load]
+en = "Two-step verification could not be read right now. Try again in a moment."
+fr = "Impossible de lire l'état de la vérification en deux étapes pour l'instant. Réessayez dans un moment."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorLoad" }
+
+[two_step.error_offline_load]
+en = "You appear to be offline. Check your connection and try again."
+fr = "Vous semblez être hors ligne. Vérifiez votre connexion et réessayez."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorOfflineLoad" }
+
+[two_step.error_offline_nothing_changed]
+en = "You appear to be offline, so nothing was changed. Check your connection and try again."
+fr = "Vous semblez être hors ligne, donc rien n'a été modifié. Vérifiez votre connexion et réessayez."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorOfflineNothingChanged" }
+
+[two_step.error_outcome_unknown_off]
+en = "We did not hear back, so we cannot tell whether two-step verification was turned off. This screen now shows what is on."
+fr = "Nous n'avons pas reçu de réponse et ne savons pas si la vérification en deux étapes a été désactivée. Cet écran affiche maintenant son état."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorOutcomeUnknownOff" }
+
+[two_step.error_outcome_unknown_on]
+en = "We did not hear back, so we cannot tell whether two-step verification was turned on. This screen now shows what is on. If it is on, turn it off and on again to get recovery codes you can save."
+fr = "Nous n'avons pas reçu de réponse et ne savons pas si la vérification en deux étapes a été activée. Cet écran affiche maintenant son état. Si elle est activée, désactivez-la puis réactivez-la pour obtenir des codes de récupération à enregistrer."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorOutcomeUnknownOn" }
+note = "A confirm lost in transport may have turned it on, and its recovery codes with it: never claim either way."
+
+[two_step.error_proof_expired]
+en = "Your confirmation ran out before the change was made. Confirm it is you again."
+fr = "Votre confirmation a expiré avant que la modification soit faite. Confirmez de nouveau qu'il s'agit bien de vous."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorProofExpired" }
+note = "The service's re-auth proof lasts five minutes."
+
+[two_step.error_try_again]
+en = "Something went wrong on our side. Nothing was changed. Try again in a moment."
+fr = "Un problème est survenu de notre côté. Rien n'a été modifié. Réessayez dans un moment."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.errorTryAgain" }
+
+[two_step.key_label]
+en = "Key"
+fr = "Clé"
+ctx = "label"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.keyLabel" }
+note = "The authenticator secret, typed by hand."
+
+[two_step.no_password_note]
+en = "This account has no password, so confirm it is you with Google, Microsoft or Apple to turn this off."
+fr = "Ce compte n'a pas de mot de passe. Pour désactiver cette option, confirmez qu'il s'agit bien de vous avec Google, Microsoft ou Apple."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.noPasswordNote" }
+note = "An account that signs in only with a provider: the website cannot turn two-step off for it, the app can after a fresh provider sign-in."
+
+[two_step.off_explain]
+en = "When it is on, signing in also asks for a 6-digit code from an authenticator app, so your password alone is not enough."
+fr = "Lorsqu'elle est activée, la connexion demande aussi un code à 6 chiffres d'une application d'authentification, et votre mot de passe seul ne suffit plus."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.offExplain" }
+
+[two_step.on_since]
+en = "On since {date}."
+fr = "Activée depuis le {date}."
+ctx = "body"
+screen = "account.two_step"
+args = { date = "str" }
+state = "draft"
+id = { swift = "TwoStepCopy.onSince(_:)" }
+note = "{date} is when it was turned on, date and time as the app writes them elsewhere (12 sept. 2026, 15 h 04)."
+
+[two_step.open_authenticator]
+en = "Open in an authenticator app"
+fr = "Ouvrir dans une application d'authentification"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.openAuthenticator" }
+note = "Opens the otpauth link, which an authenticator app on this device (Passwords, for one) adds directly."
+
+[two_step.open_failed]
+en = "No app on this device opened it. Scan the QR code from another device, or enter the key by hand."
+fr = "Aucune application de cet appareil ne l'a ouvert. Balayez le code QR depuis un autre appareil, ou entrez la clé à la main."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.openFailed" }
+
+[two_step.qr_label]
+en = "QR code for your authenticator app"
+fr = "Code QR pour votre application d'authentification"
+ctx = "label"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.qrLabel" }
+note = "The image's VoiceOver label."
+
+[two_step.qr_unreadable]
+en = "The QR code could not be shown. Enter the key by hand instead."
+fr = "Le code QR ne peut pas être affiché. Entrez plutôt la clé à la main."
+ctx = "error"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.qrUnreadable" }
+
+[two_step.reauth_intro_off]
+en = "Sign in again the way you usually do. Two-step verification turns off as soon as you do."
+fr = "Connectez-vous de nouveau comme d'habitude. La vérification en deux étapes est désactivée dès que c'est fait."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.reauthIntroOff" }
+
+[two_step.reauth_intro_on]
+en = "Sign in again the way you usually do. You then add District AI to your authenticator app."
+fr = "Connectez-vous de nouveau comme d'habitude. Vous ajouterez ensuite District AI à votre application d'authentification."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.reauthIntroOn" }
+
+[two_step.retry]
+en = "Try again"
+fr = "Réessayer"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.retry" }
+
+[two_step.row_subtitle]
+en = "Ask for a code from an authenticator app each time you sign in."
+fr = "Demander un code d'une application d'authentification à chaque connexion."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.rowSubtitle" }
+
+[two_step.scan_intro]
+en = "Scan this QR code with your authenticator app, or enter the key below by hand."
+fr = "Balayez ce code QR avec votre application d'authentification, ou entrez à la main la clé ci-dessous."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.scanIntro" }
+
+[two_step.scan_title]
+en = "Add District AI to your authenticator app"
+fr = "Ajoutez District AI à votre application d'authentification"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.scanTitle" }
+
+[two_step.status_off]
+en = "Off"
+fr = "Désactivée"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.statusOff" }
+note = "The state of two-step verification (feminine in French: la vérification)."
+
+[two_step.status_on]
+en = "On"
+fr = "Activée"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.statusOn" }
+note = "The state of two-step verification (feminine in French: la vérification)."
+
+[two_step.title]
+en = "Two-step verification"
+fr = "Vérification en deux étapes"
+ctx = "title"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.title" }
+
+[two_step.turn_off]
+en = "Turn off"
+fr = "Désactiver"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.turnOff" }
+
+[two_step.turn_on]
+en = "Turn on"
+fr = "Activer"
+ctx = "button"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.turnOn" }
+
+[two_step.turned_off]
+en = "Two-step verification is off."
+fr = "La vérification en deux étapes est désactivée."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.turnedOff" }
+
+[two_step.turned_on]
+en = "Two-step verification is on."
+fr = "La vérification en deux étapes est activée."
+ctx = "body"
+screen = "account.two_step"
+state = "draft"
+id = { swift = "TwoStepCopy.turnedOn" }
 
 [voice_studio.advanced_hide]
 en = "Hide"

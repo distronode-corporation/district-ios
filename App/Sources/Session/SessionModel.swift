@@ -13,6 +13,8 @@ import Observation
 /// Collapsing that into a sign-out screen is the same class of mistake as rendering
 /// `workspace/list`'s 503 `REGIONS_DEGRADED` as an empty list: "we could not look"
 /// and "there is nothing" read to a paying customer as account loss.
+/// ⚠️ THE THIRD (OFFLINE) IS `signedIn`, NOT `unavailable`, since the offline read cache:
+/// the shell opens on the saved copy. See ``SessionModel/refreshPhase()``.
 enum AuthPhase: Equatable {
     case checking
     case signedIn
@@ -117,6 +119,15 @@ final class SessionModel {
             container.listenInRecents.clear()
             // ⛔ AND THE HOME SCREEN WIDGET'S WORKSPACE AND COUNTS, for the same reason.
             WidgetSnapshotPublisher.signedOut()
+            // ⛔ AND THE OFFLINE READ CACHE, for the same reason: it holds this account's data.
+            OfflineRead.cache.clear()
+            OfflineRead.status.reset()
+        case .retryLater(.refreshNotSent):
+            // ⛔ OFFLINE WITH THE SESSION INTACT IS SIGNED IN. The refresh provably never left
+            // the device, so the stored session is untouched; the shell opens, and the API
+            // client reads the offline copy (``OfflineCachingTransport``). Shown as
+            // `unavailable`, a cold launch offline never reached the copy at all.
+            phase = .signedIn
         case let .retryLater(reason):
             phase = .unavailable(Self.text(for: reason))
         }
@@ -191,6 +202,11 @@ final class SessionModel {
     private func settle(_ outcome: LoginOutcome) async {
         switch outcome {
         case .success:
+            // ⛔ A NEW SESSION STARTS WITH NO OFFLINE COPY. A session can end without either
+            // sign-out path running (a token revoked elsewhere and noticed later), so the copy
+            // is also cleared here: whatever is on disk may be another account's.
+            OfflineRead.cache.clear()
+            OfflineRead.status.reset()
             await refreshPhase()
             // ⚠️ AFTER the phase is settled, so a model woken by the change reads a
             // coordinator that already holds a token rather than racing the refresh.
@@ -241,17 +257,47 @@ final class SessionModel {
     /// and reports nothing back: a sign-out that hung, or refused, because a
     /// courtesy channel could not be withdrawn would leave a live refresh token
     /// behind, which is much the worse outcome.
+    ///
+    /// ⛔ HQ BY VOICE ENDS FIRST, BEFORE THE REVOKE. `hq/voice-end` and `hq/voice-discard`
+    /// authenticate with the session too; ``RootView`` reacts to `.signedOut` only after the
+    /// credential is gone, so an end sent from there would fail and leave the session's row
+    /// open for its 30 minutes. ⛔ Bounded like the unregister, for its reason
+    /// (``CallStack/voiceEndSeconds``).
     func signOut() async {
         isBusy = true
         defer { isBusy = false }
+        await container.callStack.endVoiceSession()
         await container.signOut(beforeRevoke: { await push.unregisterForSignOut() })
         push.forget()
         selection.setSelectedWorkspaceId(nil)
         container.listenInRecents.clear()
         WidgetSnapshotPublisher.signedOut()
+        OfflineRead.cache.clear()
+        OfflineRead.status.reset()
         phase = .signedOut(SessionCopy.signedOut)
         // ⛔ THE WATCH FORGETS THE ACCOUNT NOW, with no read: there is no session left to
         // read with. See ``WatchBridgeService/publishSignedOut()``.
+        container.watchBridge.publishSignedOut()
+    }
+
+    /// After the service deleted the account: everything ``signOut()`` clears on this device,
+    /// with none of its calls to the service, then the sign-in screen saying so.
+    ///
+    /// ⛔ NO PUSH UNREGISTER AND NO REVOKE. Both authenticate as an account that no longer
+    /// exists; the service removed its rows with it. See ``AppContainer/forgetDeletedAccount()``.
+    ///
+    /// ⚠️ `externalErasurePending` IS THE SERVICE'S OWN FLAG: the account is deleted either way,
+    /// and the sentence says so before it says what is still being erased.
+    func finishDeletedAccount(externalErasurePending: Bool) async {
+        await container.forgetDeletedAccount()
+        push.forget()
+        selection.setSelectedWorkspaceId(nil)
+        container.listenInRecents.clear()
+        OfflineRead.cache.clear()
+        OfflineRead.status.reset()
+        phase = .signedOut(
+            externalErasurePending ? DeleteAccountCopy.deletedErasurePending : DeleteAccountCopy.deleted
+        )
         container.watchBridge.publishSignedOut()
     }
 
