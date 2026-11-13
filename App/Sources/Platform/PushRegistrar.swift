@@ -398,7 +398,7 @@ final class PushRegistrar {
         case let .success(response):
             // ⚠️ ALREADY AFFIRMED: ``InboxRepository/unreadCount(workspaceId:)`` turns a
             // `{"success": false}` into a failure, so a success here is a real count.
-            UnreadBadge.set(response.count)
+            UnreadBadge.set(response.count, workspaceId: workspaceId)
             return .newData
         case .failure:
             return .failed

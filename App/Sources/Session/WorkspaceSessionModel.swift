@@ -105,14 +105,13 @@ final class WorkspaceSessionModel {
     /// Read the list and resolve a selection.
     func load() async {
         state = .loading
+        // ⛔ CAPTURED BEFORE THE AWAIT: a list that answers after a sign-out must not put the
+        // account that left back on the Home Screen (cubic, #112).
+        let widgetSession = WidgetSnapshotPublisher.session
         switch await container.workspaces.list() {
         case let .success(page):
             apply(page)
-            // ⚠️ THE HOME SCREEN WIDGET NAMES THE SELECTED WORKSPACE; a new one drops the
-            // last one's counts (``WidgetSnapshot/selecting(workspace:at:)``).
-            if let name = selectedEntry?.name {
-                WidgetSnapshotPublisher.selected(workspace: name)
-            }
+            publishToWidget(session: widgetSession)
         case let .failure(error):
             state = Self.failureState(error)
         }
@@ -172,6 +171,21 @@ final class WorkspaceSessionModel {
             return
         }
         state = .partial(page, selected: selected, degradedRegions: page.degradedRegions)
+    }
+
+    /// ⚠️ THE HOME SCREEN WIDGET NAMES THE SELECTED WORKSPACE; a different one drops the
+    /// last one's counts (``WidgetSnapshot/selecting(workspaceId:name:at:)``). ⛔ A COMPLETE
+    /// LIST WITH NOTHING TO SELECT CLEARS IT (Seer and cubic, #112), or it would go on naming
+    /// a workspace this account no longer has. A degraded answer keeps it: we could not look.
+    private func publishToWidget(session: Int) {
+        switch state {
+        case let .content(_, selected), let .partial(_, selected, _):
+            WidgetSnapshotPublisher.selected(workspaceId: selected.id, name: selected.name, session: session)
+        case .empty, .lapsed:
+            WidgetSnapshotPublisher.noWorkspace(session: session)
+        case .loading, .degraded, .failed:
+            break
+        }
     }
 
     /// A list with no selectable row. ⛔ The order of these three checks is the

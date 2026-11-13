@@ -36,10 +36,10 @@ extension WidgetCopy {
     internal static var stale: String { WidgetL10n.copyLocale == .frCA ? "Aucune mise à jour récente" : "Not updated recently" }
 
     /// `widgets.summary_calls_week`
-    internal static var summaryCallsWeek: String { WidgetL10n.copyLocale == .frCA ? "Appels cette semaine" : "Calls this week" }
+    internal static var summaryCallsWeek: String { WidgetL10n.copyLocale == .frCA ? "Appels, 7 jours" : "Calls, 7 days" }
 
     /// `widgets.summary_description`
-    internal static var summaryDescription: String { WidgetL10n.copyLocale == .frCA ? "Messages non lus et appels de la semaine de votre espace de travail." : "Unread messages and this week's calls for your workspace." }
+    internal static var summaryDescription: String { WidgetL10n.copyLocale == .frCA ? "Messages non lus et appels des 7 derniers jours de votre espace de travail." : "Unread messages and the last 7 days of calls for your workspace." }
 
     /// `widgets.summary_display_name`
     internal static var summaryDisplayName: String { WidgetL10n.copyLocale == .frCA ? "En un coup d'œil" : "At a glance" }

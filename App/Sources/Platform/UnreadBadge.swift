@@ -33,10 +33,13 @@ enum UnreadBadge {
     /// ⚠️ CLAMPED AT ZERO. The numbers reaching this are derived (a sum over a list,
     /// a server field), so a subtraction that ever went wrong fails here rather than
     /// at a caller that has no better answer than this one does.
-    static func set(_ count: Int) {
+    ///
+    /// - Parameter workspaceId: the workspace the count was read for.
+    static func set(_ count: Int, workspaceId: String) {
         UNUserNotificationCenter.current().setBadgeCount(max(0, count))
-        // ⚠️ THE HOME SCREEN WIDGET SHOWS THE SAME NUMBER AS THE ICON'S BADGE.
-        WidgetSnapshotPublisher.unread(count)
+        // ⚠️ THE HOME SCREEN WIDGET SHOWS THE SAME NUMBER AS THE ICON'S BADGE, and only under
+        // the workspace it was read for (``WidgetSnapshotPublisher``).
+        WidgetSnapshotPublisher.unread(count, workspaceId: workspaceId)
     }
 
     /// Take the badge off the icon.
@@ -44,7 +47,10 @@ enum UnreadBadge {
     /// ⛔ THE SIGN-OUT CASE, AND IT IS NOT COSMETIC. A badge left behind after a
     /// sign-out is a count of a signed-out account's messages, shown on a handset
     /// that may by then be somebody else's.
+    ///
+    /// ⚠️ THE ICON ONLY: the widget's snapshot is cleared by the same sign-out
+    /// (``WidgetSnapshotPublisher/signedOut()``), so there is no count to zero there.
     static func clear() {
-        set(0)
+        UNUserNotificationCenter.current().setBadgeCount(0)
     }
 }

@@ -11,24 +11,77 @@ import Security
 ///
 /// ⚠️ EACH COUNT IS OPTIONAL ON ITS OWN. The two come from different screens (the Inbox and
 /// Overview); one not read yet is shown as a dash, never as a zero it does not know.
+///
+/// ⛔ THE COUNTS BELONG TO `workspaceId`, NOT TO THE NAME (cubic, #112): two workspaces can
+/// share a display name, and a count read for one must never be shown under the other.
 struct WidgetSnapshot: Codable, Equatable, Sendable {
+    var workspaceId: String?
     var workspaceName: String?
     var unreadMessages: Int?
     var callsThisWeek: Int?
+    /// When ``callsThisWeek`` was read. ⚠️ It is a ROLLING seven-day count, so it goes stale
+    /// on its own; see ``callsMaxAge``.
+    var callsReadAt: Date?
     var updatedAt: Date
 
-    /// The snapshot after `name` became the selected workspace: a different workspace's
-    /// counts are dropped rather than shown under the new name.
-    func selecting(workspace name: String, at now: Date) -> WidgetSnapshot {
+    /// ⚠️ HOW LONG A SEVEN-DAY CALL COUNT IS SHOWN WITHOUT A NEW READ (cubic, #112). The window
+    /// moves while the app is closed, and the widget makes no request of its own, so after a
+    /// day the count is a dash until Overview is read again rather than a number a day out.
+    static let callsMaxAge: TimeInterval = 24 * 60 * 60
+
+    /// The snapshot after `id` became the selected workspace: a different workspace's counts
+    /// are dropped rather than shown under the new name. The same workspace keeps its counts
+    /// and takes the name it has now (a rename).
+    func selecting(workspaceId id: String, name: String, at now: Date) -> WidgetSnapshot {
+        guard id == workspaceId else {
+            return WidgetSnapshot(workspaceId: id, workspaceName: name, updatedAt: now)
+        }
         guard name != workspaceName else { return self }
-        return WidgetSnapshot(workspaceName: name, unreadMessages: nil, callsThisWeek: nil, updatedAt: now)
+        var renamed = self
+        renamed.workspaceName = name
+        renamed.updatedAt = now
+        return renamed
+    }
+
+    /// What the widget shows at `date`: the call count is a dash once it is older than
+    /// ``callsMaxAge``.
+    func shown(at date: Date) -> WidgetSnapshot {
+        guard let callsReadAt, date < callsReadAt.addingTimeInterval(Self.callsMaxAge) else {
+            var expired = self
+            expired.callsThisWeek = nil
+            return expired
+        }
+        return self
+    }
+
+    /// The widget's timeline from `now`: what it shows now and, while the call count is still
+    /// fresh, the moment it turns into a dash. ⚠️ The widget asks for nothing after that; the
+    /// app's next write redraws it.
+    func timeline(from now: Date) -> [(date: Date, snapshot: WidgetSnapshot)] {
+        let current = shown(at: now)
+        guard current.callsThisWeek != nil, let callsReadAt else { return [(now, current)] }
+        let expiry = callsReadAt.addingTimeInterval(Self.callsMaxAge)
+        return [(now, current), (expiry, shown(at: expiry))]
+    }
+}
+
+extension WidgetSnapshot {
+    init(workspaceId: String? = nil, workspaceName: String? = nil, updatedAt: Date) {
+        self.init(
+            workspaceId: workspaceId,
+            workspaceName: workspaceName,
+            unreadMessages: nil,
+            callsThisWeek: nil,
+            callsReadAt: nil,
+            updatedAt: updatedAt
+        )
     }
 }
 
 protocol WidgetSnapshotStoring: Sendable {
     func read() -> WidgetSnapshot?
     func write(_ snapshot: WidgetSnapshot) throws
-    func clear()
+    func clear() throws
 }
 
 /// The one Keychain item the widget reads, in the `.widget` group
@@ -79,9 +132,15 @@ struct WidgetSnapshotKeychain: WidgetSnapshotStoring {
         guard added == errSecSuccess else { throw WidgetSnapshotError.status(added) }
     }
 
-    func clear() {
+    /// ⚠️ THROWS ON A FAILED DELETE (cubic, #112), as ``NotifyTokenKeychain`` does: a snapshot
+    /// left behind names a signed-out account's workspace, so the caller retries it
+    /// (``WidgetSnapshotPublisher``). Nothing to delete is a success.
+    func clear() throws {
         guard let identity = query() else { return }
-        SecItemDelete(identity as CFDictionary)
+        let status = SecItemDelete(identity as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw WidgetSnapshotError.status(status)
+        }
     }
 
     func query() -> [String: Any]? {

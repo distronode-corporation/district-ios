@@ -293,6 +293,7 @@ final class SessionModel {
         push.forget()
         selection.setSelectedWorkspaceId(nil)
         container.listenInRecents.clear()
+        WidgetSnapshotPublisher.signedOut()
         OfflineRead.cache.clear()
         OfflineRead.status.reset()
         phase = .signedOut(

@@ -28,8 +28,9 @@ struct SummaryEntry: TimelineEntry {
     let snapshot: WidgetSnapshot?
 }
 
-/// ⚠️ ONE ENTRY AND `.never`: the app asks for a redraw whenever it writes a new snapshot,
-/// so the widget has nothing to schedule on its own.
+/// ⚠️ `.never`: the app asks for a redraw whenever it writes a new snapshot, so the widget
+/// schedules only one thing on its own, the moment the seven-day call count goes stale
+/// (``WidgetSnapshot/timeline(from:)``).
 struct SummaryProvider: TimelineProvider {
     var store: any WidgetSnapshotStoring = WidgetSnapshotKeychain()
 
@@ -37,20 +38,25 @@ struct SummaryProvider: TimelineProvider {
         SummaryEntry(
             date: Date(),
             snapshot: WidgetSnapshot(
+                workspaceId: nil,
                 workspaceName: "District AI",
                 unreadMessages: 0,
                 callsThisWeek: 0,
+                callsReadAt: Date(),
                 updatedAt: Date()
             )
         )
     }
 
     func getSnapshot(in _: Context, completion: @escaping (SummaryEntry) -> Void) {
-        completion(SummaryEntry(date: Date(), snapshot: store.read()))
+        let now = Date()
+        completion(SummaryEntry(date: now, snapshot: store.read()?.shown(at: now)))
     }
 
     func getTimeline(in _: Context, completion: @escaping (Timeline<SummaryEntry>) -> Void) {
-        completion(Timeline(entries: [SummaryEntry(date: Date(), snapshot: store.read())], policy: .never))
+        let now = Date()
+        let entries = store.read()?.timeline(from: now).map { SummaryEntry(date: $0.date, snapshot: $0.snapshot) }
+        completion(Timeline(entries: entries ?? [SummaryEntry(date: now, snapshot: nil)], policy: .never))
     }
 }
 
