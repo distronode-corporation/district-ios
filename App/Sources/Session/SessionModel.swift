@@ -117,6 +117,8 @@ final class SessionModel {
             // ⛔ THE LISTEN-IN MAP TOO (xhigh review of PR #101, item 7): the next sign-in may be
             // another account.
             container.listenInRecents.clear()
+            // ⛔ AND THE HOME SCREEN WIDGET'S WORKSPACE AND COUNTS, for the same reason.
+            WidgetSnapshotPublisher.signedOut()
             // ⛔ AND THE OFFLINE READ CACHE, for the same reason: it holds this account's data.
             OfflineRead.cache.clear()
             OfflineRead.status.reset()
@@ -269,6 +271,7 @@ final class SessionModel {
         push.forget()
         selection.setSelectedWorkspaceId(nil)
         container.listenInRecents.clear()
+        WidgetSnapshotPublisher.signedOut()
         OfflineRead.cache.clear()
         OfflineRead.status.reset()
         phase = .signedOut(SessionCopy.signedOut)
@@ -290,6 +293,7 @@ final class SessionModel {
         push.forget()
         selection.setSelectedWorkspaceId(nil)
         container.listenInRecents.clear()
+        WidgetSnapshotPublisher.signedOut()
         OfflineRead.cache.clear()
         OfflineRead.status.reset()
         phase = .signedOut(

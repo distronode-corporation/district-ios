@@ -9,3 +9,8 @@
 "widgets.speaker_assistant" = "Assistant";
 "widgets.speaker_caller" = "Caller";
 "widgets.stale" = "Not updated recently";
+"widgets.summary_calls_week" = "Calls, 7 days";
+"widgets.summary_description" = "Unread messages and the last 7 days of calls for your workspace.";
+"widgets.summary_display_name" = "At a glance";
+"widgets.summary_signed_out" = "Open District AI to see your workspace.";
+"widgets.summary_unread" = "Unread";

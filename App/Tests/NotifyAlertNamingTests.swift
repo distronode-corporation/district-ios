@@ -64,12 +64,17 @@ final class NotifyAlertNamingTests: XCTestCase {
         XCTAssertEqual(app["keychain-access-groups"] as? [String], [
             "$(AppIdentifierPrefix)com.distronode.district",
             "$(AppIdentifierPrefix)com.distronode.district.notify",
+            // Third, so the default group and existing items do not move (the Home Screen widget).
+            "$(AppIdentifierPrefix)com.distronode.district.widget",
         ])
         XCTAssertEqual(app["com.apple.developer.usernotifications.time-sensitive"] as? Bool, true)
         let extensionGroups = try Self.entitlements(
             "NotificationService/DistrictAINotificationService.entitlements"
         )["keychain-access-groups"] as? [String]
         XCTAssertEqual(extensionGroups, ["$(AppIdentifierPrefix)com.distronode.district.notify"])
+        let widgetGroups = try Self.entitlements("Widgets/DistrictAIWidgets.entitlements")["keychain-access-groups"]
+            as? [String]
+        XCTAssertEqual(widgetGroups, ["$(AppIdentifierPrefix)com.distronode.district.widget"])
     }
 
     /// The round-2 contract: mint when missing, expired, or within seven days of expiry.

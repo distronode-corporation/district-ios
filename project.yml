@@ -162,6 +162,9 @@ targets:
       # The call Live Activity's attributes, shared as source with `DistrictAIWidgets`, which
       # draws what the app starts (3.2).
       - path: App/LiveActivity
+      # The Home Screen widget's snapshot and its Keychain store, shared as source with
+      # `DistrictAIWidgets`: the app writes it, the widget reads it.
+      - path: App/WidgetShared
       # ⛔ RESOURCES GO UNDER `sources:`, BECAUSE XCODEGEN HAS NO `resources:` KEY
       # AT ALL. It parses every path listed here and assigns each file to the
       # build phase its type implies — `.swift` to Sources, `.xcassets` to
@@ -485,9 +488,14 @@ targets:
         # item moves. The shared `.notify` group holds ONE item, the read-only notify token
         # the notification service extension reads (`App/NotifyShared/`); the extension is
         # entitled to that group alone. Keychain sharing needs no portal capability.
+        # ⛔ THE `.widget` GROUP IS THIRD, AFTER BOTH, so the default group (the first) and
+        # every existing item stay where they are. It holds one item, the Home Screen
+        # widget's snapshot (`App/WidgetShared/`), and the widget extension is entitled to
+        # it alone. ⚠️ Proved only on a signed device install and an archive.
         keychain-access-groups:
           - $(AppIdentifierPrefix)com.distronode.district
           - $(AppIdentifierPrefix)com.distronode.district.notify
+          - $(AppIdentifierPrefix)com.distronode.district.widget
     settings:
       base:
         # ⛔ NOT THE SAME STRING AS THE ANDROID `applicationId`. Apple refuses to
@@ -754,8 +762,10 @@ targets:
   # Island and, from iOS 18 with watchOS 11, the Apple Watch Smart Stack. Sean, 2026-10-25
   # (GitLab #2): started by the app when a ring wakes it or the open app sees a live call,
   # updated by the server's Live Activity pushes, and the one place a push carries a name and
-  # a line of the conversation. It draws ActivityKit's content state and nothing else: no
-  # network, no Keychain, no App Group, no DistrictCore.
+  # a line of the conversation. It draws ActivityKit's content state for that.
+  # ⛔ AND THE HOME SCREEN WIDGET (`Widgets/Sources/SummaryWidget.swift`), which reads ONE
+  # Keychain item, the snapshot the app writes, from the `.widget` group: its only
+  # entitlement. No network, no session, no App Group, no DistrictCore.
   # ⚠️ NO SIGNING HERE, as everywhere: the App ID `com.distronode.district.widgets` must
   # exist on the team. ⛔ ITS VERSIONS ARE THE PROJECT-LEVEL PAIR, and it ships both French
   # tables: the archive refuses a nested bundle without either.
@@ -769,6 +779,10 @@ targets:
       - path: Widgets/Sources
       # The attributes type, compiled into the app too.
       - path: App/LiveActivity
+      # The Home Screen widget's snapshot and store, and the group names (by file: the rest
+      # of `App/NotifyShared` is the notification extension's).
+      - path: App/WidgetShared
+      - path: App/NotifyShared/KeychainAccessGroups.swift
       # en.lproj and fr-CA.lproj, generated from l10n/widgets*.toml by scripts/gen-l10n.py.
       - path: Widgets/Localization
         buildPhase: resources
@@ -783,8 +797,18 @@ targets:
         CFBundleDevelopmentRegion: en
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        # The team prefix, so `KeychainAccessGroups.widgetGroup` resolves (empty unsigned).
+        DistrictAppIdentifierPrefix: "$(AppIdentifierPrefix)"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    # ⚠️ GENERATED FROM `properties`, like the iOS app's; edit the entitlement here.
+    entitlements:
+      path: Widgets/DistrictAIWidgets.entitlements
+      properties:
+        # ⛔ THE `.widget` GROUP ONLY: this process must not read the session or the notify
+        # token.
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.distronode.district.widget
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.widgets

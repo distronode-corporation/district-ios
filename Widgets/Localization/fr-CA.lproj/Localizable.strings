@@ -9,3 +9,8 @@
 "widgets.speaker_assistant" = "Assistante";
 "widgets.speaker_caller" = "Appelant";
 "widgets.stale" = "Aucune mise à jour récente";
+"widgets.summary_calls_week" = "Appels, 7 jours";
+"widgets.summary_description" = "Messages non lus et appels des 7 derniers jours de votre espace de travail.";
+"widgets.summary_display_name" = "En un coup d'œil";
+"widgets.summary_signed_out" = "Ouvrez District AI pour voir votre espace de travail.";
+"widgets.summary_unread" = "Non lus";

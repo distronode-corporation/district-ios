@@ -60,6 +60,11 @@ final class OverviewModel {
         switch await container.overview.overview(workspaceId: workspaceId) {
         case let .success(response):
             state = Self.resolved(response, requested: workspaceId)
+            // ⚠️ ONLY AN ANSWER ABOUT THE WORKSPACE ASKED FOR reaches the Home Screen widget;
+            // a mismatched one resolved to a failure just above.
+            if case .content = state {
+                WidgetSnapshotPublisher.callsThisWeek(response.metrics.callsThisWeek, workspaceId: workspaceId)
+            }
         case let .failure(error):
             state = .failed(FailureText.from(error))
         }

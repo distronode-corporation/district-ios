@@ -19,6 +19,7 @@
 	<array>
 		<string>$(AppIdentifierPrefix)com.distronode.district</string>
 		<string>$(AppIdentifierPrefix)com.distronode.district.notify</string>
+		<string>$(AppIdentifierPrefix)com.distronode.district.widget</string>
 	</array>
 </dict>
 </plist>

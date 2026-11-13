@@ -183,7 +183,7 @@ final class InboxModel {
                 // ⚠️ A SUCCESSFUL READ THAT FOUND NOTHING IS A KNOWN ZERO, which is
                 // the one case where clearing the icon is a statement rather than a
                 // guess. See the ⛔ on ``UnreadBadge``.
-                UnreadBadge.set(0)
+                UnreadBadge.set(0, workspaceId: workspaceId)
                 return
             }
             state = .content(
@@ -200,7 +200,7 @@ final class InboxModel {
             // ``unreadTotal``; the background wake reads it instead
             // (``PushRegistrar/handleSilentPush()``). An occasionally low badge is
             // worth more than no ambient signal at all.
-            UnreadBadge.set(unreadTotal)
+            UnreadBadge.set(unreadTotal, workspaceId: workspaceId)
             // ⚠️ THE WATCH'S INBOX FOLLOWS A FRESH READ OF THIS ONE.
             container.watchBridge.setNeedsSnapshot()
             await loadDraftBadges(read: read)
