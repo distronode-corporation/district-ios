@@ -19,6 +19,19 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
+- The setup wizard in the app (Sean, 2026-11-08: "Most in app, buying on web"), on
+  DistrictCore 8.5.0's `SetupWizardRepository`. "Finish setting up" on the overview now opens
+  the web's six steps in a sheet, in its order and with its words, and resumes on the first
+  step still to do: find your business (a draft from the business's website, saved switched
+  off, then the name, the place, the language and what the business does), your number (keep
+  the one held), your receptionist (name, greeting and a voice from the service's own list),
+  what callers should know (time zone, address, opening hours with up to four periods a day,
+  services and common questions, each with "Use on calls"), how calls are answered, and the
+  test call and forwarding check. Buying a number, a calendar's sign-in, the email sender name
+  and reply-to, and the transfer number open the web's page in a sheet, and the wizard reads
+  its state again when it closes. A person who is not the workspace's owner is told only the
+  owner can do setup. Every write is a single flight, and step 1's choices are kept on the
+  device until step 3 stores the language. English and draft French.
 - Two-step verification settings (Sean, 2026-11-07 and 2026-11-08), on DistrictCore 8.5.0's
   `TwoStepSettingsRepository`. Account, Two-step verification opens a sheet that says whether
   it is on, since when and how many recovery codes are left. Turning it on or off starts with

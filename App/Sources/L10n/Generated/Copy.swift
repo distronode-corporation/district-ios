@@ -5810,6 +5810,685 @@ extension SettingsCopy {
     internal static var workspaceSOwn: String { AppL10n.copyLocale == .frCA ? "Propre à cet espace de travail" : "This workspace's own" }
 }
 
+extension SetupCopy {
+    /// `setup.back`
+    internal static var back: String { AppL10n.copyLocale == .frCA ? "Retour" : "Back" }
+
+    /// `setup.business_address_found`
+    internal static var businessAddressFound: String { AppL10n.copyLocale == .frCA ? "Nous avons rempli votre adresse à partir de votre site Internet. Vérifiez-la ci-dessous." : "We filled in your address from your website. Check it below." }
+
+    /// `setup.business_city_label`
+    internal static var businessCityLabel: String { AppL10n.copyLocale == .frCA ? "Ville" : "City" }
+
+    /// `setup.business_city_required`
+    internal static var businessCityRequired: String { AppL10n.copyLocale == .frCA ? "Entrez votre ville." : "Enter your city." }
+
+    /// `setup.business_country_label`
+    internal static var businessCountryLabel: String { AppL10n.copyLocale == .frCA ? "Pays" : "Country" }
+
+    /// `setup.business_country_placeholder`
+    internal static var businessCountryPlaceholder: String { AppL10n.copyLocale == .frCA ? "Choisissez un pays" : "Choose a country" }
+
+    /// `setup.business_country_required`
+    internal static var businessCountryRequired: String { AppL10n.copyLocale == .frCA ? "Choisissez votre pays." : "Choose your country." }
+
+    /// `setup.business_description`
+    internal static var businessDescription: String { AppL10n.copyLocale == .frCA ? "Dites-nous qui vous êtes, ou laissez-nous lire votre site Internet." : "Tell us who you are, or let us read your website." }
+
+    /// `setup.business_details_heading`
+    internal static var businessDetailsHeading: String { AppL10n.copyLocale == .frCA ? "Votre entreprise" : "About your business" }
+
+    /// `setup.business_email_body`
+    internal static var businessEmailBody: String { AppL10n.copyLocale == .frCA ? "Le nom que vos clients voient sur les courriels de votre entreprise et l'adresse où arrivent leurs réponses se modifient dans la page Compétences." : "The name customers see on emails from your business, and where their replies go, are changed on the Skills page." }
+
+    /// `setup.business_email_heading`
+    internal static var businessEmailHeading: String { AppL10n.copyLocale == .frCA ? "Nom de l'expéditeur des courriels et adresse de réponse" : "Email sender name and reply-to address" }
+
+    /// `setup.business_found_faqs_one`
+    internal static func businessFoundFaqsOne(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "\(n) question trouvée" : "\(n) question"
+    }
+
+    /// `setup.business_found_faqs_other`
+    internal static func businessFoundFaqsOther(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "\(n) questions trouvées" : "\(n) questions"
+    }
+
+    /// `setup.business_found_services_one`
+    internal static func businessFoundServicesOne(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "\(n) service trouvé" : "\(n) service"
+    }
+
+    /// `setup.business_found_services_other`
+    internal static func businessFoundServicesOther(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "\(n) services trouvés" : "\(n) services"
+    }
+
+    /// `setup.business_hours_found`
+    internal static var businessHoursFound: String { AppL10n.copyLocale == .frCA ? "Nous avons trouvé des heures d'ouverture sur votre site Internet; confirmez-les à l'étape 4." : "We found opening hours on your website; confirm them in step 4." }
+
+    /// `setup.business_language_en`
+    internal static var businessLanguageEn: String { AppL10n.copyLocale == .frCA ? "Anglais" : "English" }
+
+    /// `setup.business_language_fr`
+    internal static var businessLanguageFr: String { AppL10n.copyLocale == .frCA ? "Français" : "French" }
+
+    /// `setup.business_language_label`
+    internal static var businessLanguageLabel: String { AppL10n.copyLocale == .frCA ? "Langue de votre réceptionniste" : "Language your receptionist speaks" }
+
+    /// `setup.business_name_label`
+    internal static var businessNameLabel: String { AppL10n.copyLocale == .frCA ? "Nom de l'entreprise" : "Business name" }
+
+    /// `setup.business_name_required`
+    internal static var businessNameRequired: String { AppL10n.copyLocale == .frCA ? "Entrez le nom de votre entreprise." : "Enter your business name." }
+
+    /// `setup.business_read_nothing`
+    internal static var businessReadNothing: String { AppL10n.copyLocale == .frCA ? "Nous avons lu votre site Internet, mais n'y avons rien trouvé d'utilisable. Remplissez plutôt le formulaire ci-dessous." : "We read your website but found nothing we could use. Fill in the form below instead." }
+
+    /// `setup.business_read_result`
+    internal static func businessReadResult(_ services: String, _ faqs: String) -> String {
+        AppL10n.copyLocale == .frCA ? "\(services) et \(faqs). Ils sont enregistrés comme ébauches pour l'étape 4." : "Found \(services) and \(faqs). They are saved as drafts for step 4."
+    }
+
+    /// `setup.business_read_website`
+    internal static var businessReadWebsite: String { AppL10n.copyLocale == .frCA ? "Lire mon site Internet" : "Read my website" }
+
+    /// `setup.business_reading`
+    internal static var businessReading: String { AppL10n.copyLocale == .frCA ? "Lecture de votre site Internet" : "Reading your website" }
+
+    /// `setup.business_street_hint`
+    internal static var businessStreetHint: String { AppL10n.copyLocale == .frCA ? "Facultatif. Votre réceptionniste la donne aux appelants qui demandent où vous êtes." : "Optional. Your receptionist gives it to callers who ask where you are." }
+
+    /// `setup.business_street_label`
+    internal static var businessStreetLabel: String { AppL10n.copyLocale == .frCA ? "Adresse civique" : "Street address" }
+
+    /// `setup.business_subdivision_label_ca`
+    internal static var businessSubdivisionLabelCa: String { AppL10n.copyLocale == .frCA ? "Province ou territoire" : "Province or territory" }
+
+    /// `setup.business_subdivision_label_other`
+    internal static var businessSubdivisionLabelOther: String { AppL10n.copyLocale == .frCA ? "Région" : "Region" }
+
+    /// `setup.business_subdivision_label_us`
+    internal static var businessSubdivisionLabelUs: String { AppL10n.copyLocale == .frCA ? "État" : "State" }
+
+    /// `setup.business_subdivision_placeholder`
+    internal static var businessSubdivisionPlaceholder: String { AppL10n.copyLocale == .frCA ? "Choisissez" : "Choose one" }
+
+    /// `setup.business_subdivision_required`
+    internal static var businessSubdivisionRequired: String { AppL10n.copyLocale == .frCA ? "Choisissez votre province ou votre État." : "Choose your province or state." }
+
+    /// `setup.business_timezone_label`
+    internal static var businessTimezoneLabel: String { AppL10n.copyLocale == .frCA ? "Fuseau horaire" : "Time zone" }
+
+    /// `setup.business_timezone_multi`
+    internal static func businessTimezoneMulti(_ zone: String) -> String {
+        AppL10n.copyLocale == .frCA ? "\(zone). Votre région compte plus d'un fuseau horaire, alors vérifiez-le à l'étape 4." : "\(zone). Your area has more than one time zone, so check it in step 4."
+    }
+
+    /// `setup.business_timezone_unknown`
+    internal static var businessTimezoneUnknown: String { AppL10n.copyLocale == .frCA ? "Choisissez votre pays et votre province ou votre État pour le définir." : "Choose your country and province or state to set it." }
+
+    /// `setup.business_timezone_value`
+    internal static func businessTimezoneValue(_ zone: String) -> String {
+        AppL10n.copyLocale == .frCA ? "\(zone). Vous pourrez le modifier à l'étape 4." : "\(zone). You can change it in step 4."
+    }
+
+    /// `setup.business_title`
+    internal static var businessTitle: String { AppL10n.copyLocale == .frCA ? "Trouvez votre entreprise" : "Find your business" }
+
+    /// `setup.business_website_heading`
+    internal static var businessWebsiteHeading: String { AppL10n.copyLocale == .frCA ? "Partir de votre site Internet" : "Start from your website" }
+
+    /// `setup.business_website_label`
+    internal static var businessWebsiteLabel: String { AppL10n.copyLocale == .frCA ? "Site" : "Website" }
+
+    /// `setup.business_website_lead`
+    internal static var businessWebsiteLead: String { AppL10n.copyLocale == .frCA ? "Entrez l'adresse de votre site Internet et nous préparerons une ébauche de vos heures, de votre adresse, de vos services et de vos questions fréquentes. Vous vérifiez chaque élément à l'étape 4 avant que votre réceptionniste l'utilise." : "Enter your website address and we will draft your hours, address, services and common questions. You review every item in step 4 before your receptionist uses it." }
+
+    /// `setup.business_website_placeholder`
+    internal static var businessWebsitePlaceholder: String { AppL10n.copyLocale == .frCA ? "example.com" : "example.com" }
+
+    /// `setup.business_what_label`
+    internal static var businessWhatLabel: String { AppL10n.copyLocale == .frCA ? "Ce que vous faites, en une ligne" : "What you do, in one line" }
+
+    /// `setup.business_what_placeholder`
+    internal static var businessWhatPlaceholder: String { AppL10n.copyLocale == .frCA ? "Clinique dentaire familiale avec rendez-vous en soirée" : "Family dental clinic with evening appointments" }
+
+    /// `setup.callers_add_faq`
+    internal static var callersAddFaq: String { AppL10n.copyLocale == .frCA ? "Ajouter une question" : "Add a question" }
+
+    /// `setup.callers_add_period`
+    internal static var callersAddPeriod: String { AppL10n.copyLocale == .frCA ? "Ajouter une période" : "Add a period" }
+
+    /// `setup.callers_add_service`
+    internal static var callersAddService: String { AppL10n.copyLocale == .frCA ? "Ajouter un service" : "Add a service" }
+
+    /// `setup.callers_address_country`
+    internal static var callersAddressCountry: String { AppL10n.copyLocale == .frCA ? "Code de pays" : "Country code" }
+
+    /// `setup.callers_address_country_hint`
+    internal static var callersAddressCountryHint: String { AppL10n.copyLocale == .frCA ? "Deux lettres, par exemple CA ou US." : "Two letters, for example CA or US." }
+
+    /// `setup.callers_address_header`
+    internal static var callersAddressHeader: String { AppL10n.copyLocale == .frCA ? "Adresse" : "Address" }
+
+    /// `setup.callers_address_incomplete`
+    internal static var callersAddressIncomplete: String { AppL10n.copyLocale == .frCA ? "Entrez au moins la ville et un code de pays à deux lettres, ou laissez l'adresse vide." : "Enter at least the city and a two-letter country code, or leave the address empty." }
+
+    /// `setup.callers_address_postal`
+    internal static var callersAddressPostal: String { AppL10n.copyLocale == .frCA ? "Code postal" : "Postal or ZIP code" }
+
+    /// `setup.callers_address_region`
+    internal static var callersAddressRegion: String { AppL10n.copyLocale == .frCA ? "Province ou État" : "Province or state" }
+
+    /// `setup.callers_closes`
+    internal static var callersCloses: String { AppL10n.copyLocale == .frCA ? "Ferme" : "Closes" }
+
+    /// `setup.callers_confirm_hours_first`
+    internal static var callersConfirmHoursFirst: String { AppL10n.copyLocale == .frCA ? "Utilisez ou ignorez les heures de votre site Internet avant de continuer." : "Use or discard the hours from your website before you continue." }
+
+    /// `setup.callers_day_closed`
+    internal static var callersDayClosed: String { AppL10n.copyLocale == .frCA ? "Fermé" : "Closed" }
+
+    /// `setup.callers_day_fri`
+    internal static var callersDayFri: String { AppL10n.copyLocale == .frCA ? "Vendredi" : "Friday" }
+
+    /// `setup.callers_day_mon`
+    internal static var callersDayMon: String { AppL10n.copyLocale == .frCA ? "Lundi" : "Monday" }
+
+    /// `setup.callers_day_not_set`
+    internal static var callersDayNotSet: String { AppL10n.copyLocale == .frCA ? "Non défini" : "Not set" }
+
+    /// `setup.callers_day_open`
+    internal static var callersDayOpen: String { AppL10n.copyLocale == .frCA ? "Ouvert" : "Open" }
+
+    /// `setup.callers_day_sat`
+    internal static var callersDaySat: String { AppL10n.copyLocale == .frCA ? "Samedi" : "Saturday" }
+
+    /// `setup.callers_day_sun`
+    internal static var callersDaySun: String { AppL10n.copyLocale == .frCA ? "Dimanche" : "Sunday" }
+
+    /// `setup.callers_day_thu`
+    internal static var callersDayThu: String { AppL10n.copyLocale == .frCA ? "Jeudi" : "Thursday" }
+
+    /// `setup.callers_day_tue`
+    internal static var callersDayTue: String { AppL10n.copyLocale == .frCA ? "Mardi" : "Tuesday" }
+
+    /// `setup.callers_day_wed`
+    internal static var callersDayWed: String { AppL10n.copyLocale == .frCA ? "Mercredi" : "Wednesday" }
+
+    /// `setup.callers_description`
+    internal static var callersDescription: String { AppL10n.copyLocale == .frCA ? "Heures, adresse, services et questions fréquentes." : "Hours, address, services and common questions." }
+
+    /// `setup.callers_discard_hours`
+    internal static var callersDiscardHours: String { AppL10n.copyLocale == .frCA ? "Ignorer" : "Discard" }
+
+    /// `setup.callers_draft_note`
+    internal static var callersDraftNote: String { AppL10n.copyLocale == .frCA ? "Les éléments tirés de votre site Internet sont désactivés au départ. Vérifiez chacun d'eux, corrigez ce qui est inexact, puis activez-le." : "Items we drafted from your website start switched off. Check each one, fix anything that is wrong, and switch it on." }
+
+    /// `setup.callers_faq_answer`
+    internal static var callersFaqAnswer: String { AppL10n.copyLocale == .frCA ? "Réponse" : "Answer" }
+
+    /// `setup.callers_faq_error`
+    internal static var callersFaqError: String { AppL10n.copyLocale == .frCA ? "Entrez une question (300 caractères au plus) et une réponse (1000 caractères au plus)." : "Enter a question (up to 300 characters) and an answer (up to 1000 characters)." }
+
+    /// `setup.callers_faq_label`
+    internal static func callersFaqLabel(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "Question \(n)" : "Question \(n)"
+    }
+
+    /// `setup.callers_faq_question`
+    internal static var callersFaqQuestion: String { AppL10n.copyLocale == .frCA ? "Question" : "Question" }
+
+    /// `setup.callers_faqs_description`
+    internal static var callersFaqsDescription: String { AppL10n.copyLocale == .frCA ? "Les questions que les appelants posent souvent, avec la réponse que votre réceptionniste doit donner." : "Questions callers often ask, with the answer your receptionist should give." }
+
+    /// `setup.callers_faqs_header`
+    internal static var callersFaqsHeader: String { AppL10n.copyLocale == .frCA ? "Questions fréquentes" : "Common questions" }
+
+    /// `setup.callers_fill_from_website`
+    internal static var callersFillFromWebsite: String { AppL10n.copyLocale == .frCA ? "Remplir à partir de mon site Internet" : "Fill from my website" }
+
+    /// `setup.callers_fix_errors`
+    internal static var callersFixErrors: String { AppL10n.copyLocale == .frCA ? "Corrigez les éléments marqués en rouge, puis enregistrez." : "Fix the entries marked in red, then save." }
+
+    /// `setup.callers_hours_description`
+    internal static var callersHoursDescription: String { AppL10n.copyLocale == .frCA ? "Ajoutez jusqu'à quatre périodes d'ouverture par jour. Un jour laissé à Non défini n'est pas mentionné aux appelants." : "Add up to four opening periods a day. A day left as Not set is not mentioned to callers." }
+
+    /// `setup.callers_hours_draft_note`
+    internal static var callersHoursDraftNote: String { AppL10n.copyLocale == .frCA ? "Ces heures proviennent de votre site Internet et ne sont pas encore enregistrées. Vérifiez chaque jour, puis utilisez-les." : "These hours come from your website and are not saved yet. Check each day, then use them." }
+
+    /// `setup.callers_hours_header`
+    internal static var callersHoursHeader: String { AppL10n.copyLocale == .frCA ? "Heures d'ouverture" : "Opening hours" }
+
+    /// `setup.callers_intro`
+    internal static var callersIntro: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste répond à partir de ces renseignements. Seuls les éléments activés sont utilisés pendant les appels." : "Your receptionist answers from these facts. Only items that are switched on are used on calls." }
+
+    /// `setup.callers_no_faqs`
+    internal static var callersNoFaqs: String { AppL10n.copyLocale == .frCA ? "Aucune question pour l'instant." : "No questions yet." }
+
+    /// `setup.callers_no_hours_found`
+    internal static var callersNoHoursFound: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas trouvé d'heures d'ouverture sur ce site Internet. Entrez-les ci-dessous." : "We did not find opening hours on that website. Enter them below." }
+
+    /// `setup.callers_no_services`
+    internal static var callersNoServices: String { AppL10n.copyLocale == .frCA ? "Aucun service pour l'instant." : "No services yet." }
+
+    /// `setup.callers_off_hint`
+    internal static var callersOffHint: String { AppL10n.copyLocale == .frCA ? "Désactivé. Votre réceptionniste ne l'utilisera pas." : "Switched off. Your receptionist will not use this." }
+
+    /// `setup.callers_opens`
+    internal static var callersOpens: String { AppL10n.copyLocale == .frCA ? "Ouvre" : "Opens" }
+
+    /// `setup.callers_period_error`
+    internal static var callersPeriodError: String { AppL10n.copyLocale == .frCA ? "Fermez après l'ouverture. Les périodes ne doivent pas se chevaucher." : "Close after you open. Periods must not overlap." }
+
+    /// `setup.callers_period_label`
+    internal static func callersPeriodLabel(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "Période \(n)" : "Period \(n)"
+    }
+
+    /// `setup.callers_remove`
+    internal static var callersRemove: String { AppL10n.copyLocale == .frCA ? "Retirer" : "Remove" }
+
+    /// `setup.callers_remove_period`
+    internal static var callersRemovePeriod: String { AppL10n.copyLocale == .frCA ? "Retirer cette période" : "Remove this period" }
+
+    /// `setup.callers_service_error`
+    internal static var callersServiceError: String { AppL10n.copyLocale == .frCA ? "Entrez un nom de service (120 caractères au plus) et un prix de 40 caractères au plus." : "Enter a service name (up to 120 characters) and a price of up to 40 characters." }
+
+    /// `setup.callers_service_label`
+    internal static func callersServiceLabel(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "Service \(n)" : "Service \(n)"
+    }
+
+    /// `setup.callers_service_name`
+    internal static var callersServiceName: String { AppL10n.copyLocale == .frCA ? "Service" : "Service" }
+
+    /// `setup.callers_service_price`
+    internal static var callersServicePrice: String { AppL10n.copyLocale == .frCA ? "Prix (facultatif)" : "Price (optional)" }
+
+    /// `setup.callers_services_description`
+    internal static var callersServicesDescription: String { AppL10n.copyLocale == .frCA ? "Écrivez les prix comme vous les diriez, par exemple 45\u{00A0}$ ou sur estimation." : "Write prices the way you would say them, for example $45 or quoted on site." }
+
+    /// `setup.callers_services_header`
+    internal static var callersServicesHeader: String { AppL10n.copyLocale == .frCA ? "Services et prix" : "Services and prices" }
+
+    /// `setup.callers_timezone_description`
+    internal static var callersTimezoneDescription: String { AppL10n.copyLocale == .frCA ? "Vos heures d'ouverture sont lues dans ce fuseau horaire." : "Your opening hours are read in this time zone." }
+
+    /// `setup.callers_timezone_placeholder`
+    internal static var callersTimezonePlaceholder: String { AppL10n.copyLocale == .frCA ? "Choisissez un fuseau horaire" : "Choose a time zone" }
+
+    /// `setup.callers_title`
+    internal static var callersTitle: String { AppL10n.copyLocale == .frCA ? "Ce que les appelants doivent savoir" : "What callers should know" }
+
+    /// `setup.callers_use_hours`
+    internal static var callersUseHours: String { AppL10n.copyLocale == .frCA ? "Utiliser ces heures" : "Use these hours" }
+
+    /// `setup.callers_use_on_calls`
+    internal static var callersUseOnCalls: String { AppL10n.copyLocale == .frCA ? "Utiliser pendant les appels" : "Use on calls" }
+
+    /// `setup.calls_ai_first`
+    internal static var callsAiFirst: String { AppL10n.copyLocale == .frCA ? "Chaque appel" : "Every call" }
+
+    /// `setup.calls_ai_first_description`
+    internal static var callsAiFirstDescription: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste répond à chaque appel immédiatement." : "Your receptionist answers every call straight away." }
+
+    /// `setup.calls_ai_then_app`
+    internal static var callsAiThenApp: String { AppL10n.copyLocale == .frCA ? "La réceptionniste d'abord, puis l'app District" : "Receptionist first, then the District app" }
+
+    /// `setup.calls_ai_then_app_description`
+    internal static var callsAiThenAppDescription: String { AppL10n.copyLocale == .frCA ? "Choisi plus tôt dans Réglages. Votre réceptionniste répond et peut passer l'appel à l'app." : "Chosen earlier in Settings. Your receptionist answers and can pass the call to the app." }
+
+    /// `setup.calls_answer_description`
+    internal static var callsAnswerDescription: String { AppL10n.copyLocale == .frCA ? "Choisissez qui décroche en premier." : "Choose who picks up a call first." }
+
+    /// `setup.calls_answer_header`
+    internal static var callsAnswerHeader: String { AppL10n.copyLocale == .frCA ? "Quand votre réceptionniste répond" : "When your receptionist answers" }
+
+    /// `setup.calls_app_first`
+    internal static var callsAppFirst: String { AppL10n.copyLocale == .frCA ? "Faire sonner l'app District en premier" : "Ring the District app first" }
+
+    /// `setup.calls_app_first_description`
+    internal static var callsAppFirstDescription: String { AppL10n.copyLocale == .frCA ? "Votre téléphone sonne d'abord dans l'app District. Si personne ne répond, votre réceptionniste prend l'appel." : "Your phone rings in the District app first. If nobody picks up, your receptionist answers." }
+
+    /// `setup.calls_app_needed`
+    internal static var callsAppNeeded: String { AppL10n.copyLocale == .frCA ? "Il faut que l'app District soit installée et connectée sur votre téléphone, avec Disponible pour les appels activé. Quand personne ne peut être joint, votre réceptionniste répond immédiatement." : "This needs the District app installed and signed in on your phone, with Available for calls turned on. When nobody can be rung, your receptionist answers straight away." }
+
+    /// `setup.calls_bookings_connected`
+    internal static func callsBookingsConnected(_ provider: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Votre réceptionniste prend les rendez-vous dans \(provider)." : "Your receptionist books appointments into \(provider)."
+    }
+
+    /// `setup.calls_bookings_header`
+    internal static var callsBookingsHeader: String { AppL10n.copyLocale == .frCA ? "Rendez-vous" : "Bookings" }
+
+    /// `setup.calls_bookings_none`
+    internal static var callsBookingsNone: String { AppL10n.copyLocale == .frCA ? "Aucun agenda n'est connecté; votre réceptionniste ne prend donc pas de rendez-vous." : "No calendar is connected, so your receptionist does not book appointments." }
+
+    /// `setup.calls_bookings_where`
+    internal static var callsBookingsWhere: String { AppL10n.copyLocale == .frCA ? "Google et Microsoft approuvent l'accès à l'agenda sur leur propre page de connexion; un agenda se connecte donc dans la page Intégrations." : "Google and Microsoft approve calendar access on their own sign-in page, so a calendar is connected on the Integrations page." }
+
+    /// `setup.calls_description`
+    internal static var callsDescription: String { AppL10n.copyLocale == .frCA ? "Quand elle répond, à qui elle transfère, et les rendez-vous." : "When calls are answered, who to transfer to, and bookings." }
+
+    /// `setup.calls_keeping_line_note`
+    internal static var callsKeepingLineNote: String { AppL10n.copyLocale == .frCA ? "Vous gardez votre numéro d'entreprise actuel et ne voulez que les appels manqués? Réglez votre fournisseur pour qu'il transfère les appels sans réponse à la dernière étape." : "Keeping your existing business number and only want calls you miss? Set your carrier to forward unanswered calls in the last step." }
+
+    /// `setup.calls_profiles_body`
+    internal static var callsProfilesBody: String { AppL10n.copyLocale == .frCA ? "Quand cette option est activée, après chaque appel, nous recherchons les renseignements professionnels publics de l'appelant (comme son entreprise et son poste) pour ajouter un profil à votre journal d'appels. Les recherches passent par des services situés aux États-Unis. L'option reste désactivée tant que vous ne l'activez pas, et vous pouvez la désactiver en tout temps." : "When this is on, after each call we look up the caller's public business details (such as their company and role) to add a profile to your call log. The lookups use research services based in the United States. It is off unless you switch it on, and you can switch it off at any time." }
+
+    /// `setup.calls_profiles_header`
+    internal static var callsProfilesHeader: String { AppL10n.copyLocale == .frCA ? "Profils des appelants" : "Caller profiles" }
+
+    /// `setup.calls_profiles_off`
+    internal static var callsProfilesOff: String { AppL10n.copyLocale == .frCA ? "Les profils d'appelants sont désactivés." : "Caller profiles are off." }
+
+    /// `setup.calls_profiles_on`
+    internal static var callsProfilesOn: String { AppL10n.copyLocale == .frCA ? "Les profils d'appelants sont activés." : "Caller profiles are on." }
+
+    /// `setup.calls_profiles_toggle`
+    internal static var callsProfilesToggle: String { AppL10n.copyLocale == .frCA ? "Créer des profils d'appelants" : "Build caller profiles" }
+
+    /// `setup.calls_ring_label`
+    internal static var callsRingLabel: String { AppL10n.copyLocale == .frCA ? "Durée de sonnerie dans l'app" : "How long to ring the app" }
+
+    /// `setup.calls_ring_seconds`
+    internal static func callsRingSeconds(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "\(n) secondes" : "\(n) seconds"
+    }
+
+    /// `setup.calls_save_answering`
+    internal static var callsSaveAnswering: String { AppL10n.copyLocale == .frCA ? "Enregistrer la façon de répondre" : "Save how calls are answered" }
+
+    /// `setup.calls_title`
+    internal static var callsTitle: String { AppL10n.copyLocale == .frCA ? "Appels, personnes et rendez-vous" : "Calls, people and bookings" }
+
+    /// `setup.calls_transfer_current`
+    internal static func callsTransferCurrent(_ number: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Quand un appelant demande une personne, votre réceptionniste transfère l'appel au \(number)." : "When a caller asks for a person, your receptionist transfers the call to \(number)."
+    }
+
+    /// `setup.calls_transfer_header`
+    internal static var callsTransferHeader: String { AppL10n.copyLocale == .frCA ? "Passer un appel à une personne" : "Passing a call to a person" }
+
+    /// `setup.calls_transfer_none`
+    internal static var callsTransferNone: String { AppL10n.copyLocale == .frCA ? "Aucun numéro de transfert n'est défini; votre réceptionniste prend donc un message." : "No transfer number is set, so your receptionist takes a message instead." }
+
+    /// `setup.calls_transfer_where`
+    internal static var callsTransferWhere: String { AppL10n.copyLocale == .frCA ? "Le numéro de transfert se modifie dans la page Compétences." : "The transfer number is changed on the Skills page." }
+
+    /// `setup.continue`
+    internal static var `continue`: String { AppL10n.copyLocale == .frCA ? "Continuer" : "Continue" }
+
+    /// `setup.done`
+    internal static var done: String { AppL10n.copyLocale == .frCA ? "Terminé" : "Done" }
+
+    /// `setup.finish_later`
+    internal static var finishLater: String { AppL10n.copyLocale == .frCA ? "Terminer plus tard" : "Finish later" }
+
+    /// `setup.finished_body`
+    internal static var finishedBody: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste est prête. Vous pouvez modifier tout cela dans Réglages." : "Your receptionist is ready. You can change any of this in Settings." }
+
+    /// `setup.finished_title`
+    internal static var finishedTitle: String { AppL10n.copyLocale == .frCA ? "La configuration est terminée" : "Setup is finished" }
+
+    /// `setup.golive_answers_ai_then_app`
+    internal static var goliveAnswersAiThenApp: String { AppL10n.copyLocale == .frCA ? "Chaque appel, avec l'app District en relève" : "Every call, with the District app as backup" }
+
+    /// `setup.golive_answers_app_first`
+    internal static func goliveAnswersAppFirst(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "Après \(n) secondes de sonnerie dans l'app District" : "After the District app rings for \(n) seconds"
+    }
+
+    /// `setup.golive_answers_label`
+    internal static var goliveAnswersLabel: String { AppL10n.copyLocale == .frCA ? "Quand elle répond" : "When it answers" }
+
+    /// `setup.golive_attempts_left`
+    internal static func goliveAttemptsLeft(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "\(n) vérifications restantes aujourd'hui." : "\(n) checks left today."
+    }
+
+    /// `setup.golive_attempts_left_one`
+    internal static var goliveAttemptsLeftOne: String { AppL10n.copyLocale == .frCA ? "1 vérification restante aujourd'hui." : "1 check left today." }
+
+    /// `setup.golive_business_line_error`
+    internal static var goliveBusinessLineError: String { AppL10n.copyLocale == .frCA ? "Entrez votre ligne d'entreprise avec l'indicatif du pays, par exemple +14165550123." : "Enter your business line with its country code, for example +14165550123." }
+
+    /// `setup.golive_business_line_label`
+    internal static var goliveBusinessLineLabel: String { AppL10n.copyLocale == .frCA ? "Votre ligne d'entreprise" : "Your business line" }
+
+    /// `setup.golive_call_me`
+    internal static var goliveCallMe: String { AppL10n.copyLocale == .frCA ? "Appeler mon cellulaire maintenant" : "Call my mobile now" }
+
+    /// `setup.golive_calling`
+    internal static var goliveCalling: String { AppL10n.copyLocale == .frCA ? "Nous vous appelons. Répondez à votre téléphone." : "Calling you now. Answer your phone." }
+
+    /// `setup.golive_check_description`
+    internal static var goliveCheckDescription: String { AppL10n.copyLocale == .frCA ? "Nous appelons votre ligne d'entreprise et vérifions que l'appel arrive sur votre numéro District." : "We ring your business line and watch for the call to arrive on your District number." }
+
+    /// `setup.golive_check_dial_failed`
+    internal static var goliveCheckDialFailed: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu faire l'appel de vérification. Réessayez dans quelques minutes." : "We could not place the check call. Try again in a few minutes." }
+
+    /// `setup.golive_check_failed`
+    internal static var goliveCheckFailed: String { AppL10n.copyLocale == .frCA ? "L'appel n'est pas arrivé sur votre numéro District. Vérifiez vos réglages de transfert et réessayez." : "The call did not arrive on your District number. Check your forwarding settings and try again." }
+
+    /// `setup.golive_check_header`
+    internal static var goliveCheckHeader: String { AppL10n.copyLocale == .frCA ? "Vérifier mon transfert" : "Check my forwarding" }
+
+    /// `setup.golive_check_passed`
+    internal static var goliveCheckPassed: String { AppL10n.copyLocale == .frCA ? "Le transfert fonctionne. L'appel est arrivé sur votre numéro District." : "Forwarding works. The call arrived on your District number." }
+
+    /// `setup.golive_check_pending`
+    internal static var goliveCheckPending: String { AppL10n.copyLocale == .frCA ? "Vérification en cours. Cela prend jusqu'à une minute." : "Checking. This takes up to a minute." }
+
+    /// `setup.golive_check_still_pending`
+    internal static var goliveCheckStillPending: String { AppL10n.copyLocale == .frCA ? "La vérification est toujours en cours. Touchez le bouton pour regarder de nouveau." : "The check is still running. Tap the button to look again." }
+
+    /// `setup.golive_consent_heading`
+    internal static var goliveConsentHeading: String { AppL10n.copyLocale == .frCA ? "En touchant le bouton, vous acceptez ceci" : "By tapping the button you agree to this" }
+
+    /// `setup.golive_consent_wording`
+    internal static var goliveConsentWording: String { AppL10n.copyLocale == .frCA ? "Appelez-moi maintenant au numéro que j'ai indiqué, depuis mon numéro District, pour que j'entende ma réceptionniste répondre. Il s'agit d'un appel d'essai d'au plus deux minutes. Il n'est pas facturé, et la réceptionniste ne peut ni transférer, ni prendre de rendez-vous, ni envoyer de courriel ou de texto pendant l'appel. L'appel est transcrit et résumé dans mon journal d'appels comme tout autre appel." : "Call me now at the number I entered, from my District number, so I can hear my receptionist answer. This is a test call of up to two minutes. It is not billed, and the receptionist cannot transfer, book, email or text during it. The call is transcribed and summarized in my call log like any other call." }
+
+    /// `setup.golive_description`
+    internal static var goliveDescription: String { AppL10n.copyLocale == .frCA ? "Entendez-la répondre, puis envoyez-lui vos appels." : "Hear your receptionist answer, then send your calls." }
+
+    /// `setup.golive_expect_call`
+    internal static func goliveExpectCall(_ number: String) -> String {
+        AppL10n.copyLocale == .frCA ? "Attendez-vous à un appel du \(number)." : "Expect a call from \(number)."
+    }
+
+    /// `setup.golive_finish`
+    internal static var goliveFinish: String { AppL10n.copyLocale == .frCA ? "Terminer" : "Finish" }
+
+    /// `setup.golive_greeting_label`
+    internal static var goliveGreetingLabel: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste dit" : "Your receptionist says" }
+
+    /// `setup.golive_keeping_description`
+    internal static var goliveKeepingDescription: String { AppL10n.copyLocale == .frCA ? "Transférez votre ligne actuelle vers votre numéro District auprès de votre fournisseur, puis vérifiez-la ici." : "Forward your existing line to your District number with your carrier, then check it here." }
+
+    /// `setup.golive_keeping_header`
+    internal static var goliveKeepingHeader: String { AppL10n.copyLocale == .frCA ? "Vous gardez votre numéro d'entreprise actuel?" : "Keeping your existing business number?" }
+
+    /// `setup.golive_live_header`
+    internal static var goliveLiveHeader: String { AppL10n.copyLocale == .frCA ? "Vous êtes en service" : "You're live" }
+
+    /// `setup.golive_mobile_error`
+    internal static var goliveMobileError: String { AppL10n.copyLocale == .frCA ? "Entrez votre numéro de cellulaire avec l'indicatif du pays, par exemple +14165550123." : "Enter your mobile number with its country code, for example +14165550123." }
+
+    /// `setup.golive_mobile_label`
+    internal static var goliveMobileLabel: String { AppL10n.copyLocale == .frCA ? "Votre numéro de cellulaire" : "Your mobile number" }
+
+    /// `setup.golive_mode_all`
+    internal static var goliveModeAll: String { AppL10n.copyLocale == .frCA ? "Tous les appels" : "All calls" }
+
+    /// `setup.golive_mode_label`
+    internal static var goliveModeLabel: String { AppL10n.copyLocale == .frCA ? "Quels appels transférez-vous?" : "Which calls do you forward?" }
+
+    /// `setup.golive_mode_unanswered`
+    internal static var goliveModeUnanswered: String { AppL10n.copyLocale == .frCA ? "Seulement les appels auxquels je ne réponds pas" : "Only calls I don't pick up" }
+
+    /// `setup.golive_no_greeting`
+    internal static var goliveNoGreeting: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste utilise son message d'accueil standard." : "Your receptionist uses its standard greeting." }
+
+    /// `setup.golive_no_number_yet`
+    internal static var goliveNoNumberYet: String { AppL10n.copyLocale == .frCA ? "Il vous faut un numéro District avant que nous puissions faire un appel d'essai." : "You need a District number before we can place a test call." }
+
+    /// `setup.golive_start_check`
+    internal static var goliveStartCheck: String { AppL10n.copyLocale == .frCA ? "Vérifier mon transfert" : "Check my forwarding" }
+
+    /// `setup.golive_test_description`
+    internal static var goliveTestDescription: String { AppL10n.copyLocale == .frCA ? "Nous appelons votre cellulaire depuis votre numéro District et votre réceptionniste répond, comme un appelant l'entendrait." : "We call your mobile from your District number and your receptionist answers, just as a caller would hear it." }
+
+    /// `setup.golive_test_header`
+    internal static var goliveTestHeader: String { AppL10n.copyLocale == .frCA ? "Entendez votre réceptionniste" : "Hear your receptionist" }
+
+    /// `setup.golive_title`
+    internal static var goliveTitle: String { AppL10n.copyLocale == .frCA ? "Essai et mise en service" : "Test and go live" }
+
+    /// `setup.golive_unanswered_note`
+    internal static var goliveUnansweredNote: String { AppL10n.copyLocale == .frCA ? "Ne répondez pas quand votre ligne d'entreprise sonne. Laissez-la sonner jusqu'au transfert." : "Do not answer when your business line rings. Let it ring until it forwards." }
+
+    /// `setup.handoff_returned`
+    internal static var handoffReturned: String { AppL10n.copyLocale == .frCA ? "Vérification des changements" : "Checking what changed" }
+
+    /// `setup.loading`
+    internal static var loading: String { AppL10n.copyLocale == .frCA ? "Chargement de votre configuration" : "Loading your setup" }
+
+    /// `setup.not_available_body`
+    internal static var notAvailableBody: String { AppL10n.copyLocale == .frCA ? "Cet espace de travail a été créé avant ces étapes de configuration. Tout ce qu'elles couvrent se trouve dans Réglages." : "This workspace was set up before these setup steps existed. Everything they cover is under Settings." }
+
+    /// `setup.not_available_title`
+    internal static var notAvailableTitle: String { AppL10n.copyLocale == .frCA ? "La configuration n'est pas offerte ici" : "Setup is not available here" }
+
+    /// `setup.not_owner_body`
+    internal static var notOwnerBody: String { AppL10n.copyLocale == .frCA ? "La configuration décide de ce que dit votre réceptionniste et du numéro auquel elle répond; seule la personne propriétaire de cet espace de travail peut donc la faire. Demandez-lui de la terminer." : "Setup decides what your receptionist says and which number it answers, so only the person who owns this workspace can do it. Ask them to finish it." }
+
+    /// `setup.not_owner_title`
+    internal static var notOwnerTitle: String { AppL10n.copyLocale == .frCA ? "Seul le propriétaire peut faire la configuration" : "Only the owner can do setup" }
+
+    /// `setup.number_answered_apac`
+    internal static var numberAnsweredApac: String { AppL10n.copyLocale == .frCA ? "Les appels sont traités à Singapour." : "Calls are answered in Singapore." }
+
+    /// `setup.number_answered_ca`
+    internal static var numberAnsweredCa: String { AppL10n.copyLocale == .frCA ? "Les appels sont traités à Montréal." : "Calls are answered in Montréal." }
+
+    /// `setup.number_answered_eu`
+    internal static var numberAnsweredEu: String { AppL10n.copyLocale == .frCA ? "Les appels sont traités à Francfort." : "Calls are answered in Frankfurt." }
+
+    /// `setup.number_answered_us`
+    internal static var numberAnsweredUs: String { AppL10n.copyLocale == .frCA ? "Les appels sont traités aux États-Unis." : "Calls are answered in the United States." }
+
+    /// `setup.number_description`
+    internal static var numberDescription: String { AppL10n.copyLocale == .frCA ? "Le numéro de téléphone auquel votre réceptionniste répond." : "The phone number your receptionist answers." }
+
+    /// `setup.number_have_lead`
+    internal static var numberHaveLead: String { AppL10n.copyLocale == .frCA ? "Vous avez déjà un numéro. Votre réceptionniste y répond." : "You already have a number. Your receptionist answers it." }
+
+    /// `setup.number_held`
+    internal static func numberHeld(_ held: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "Numéros que vous détenez\u{00A0}: \(held)" : "Numbers you hold: \(held)"
+    }
+
+    /// `setup.number_included`
+    internal static func numberIncluded(_ held: Int, _ included: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "Inclus dans votre forfait (\(held) sur \(included))" : "Included in your plan (\(held) of \(included))"
+    }
+
+    /// `setup.number_keep`
+    internal static var numberKeep: String { AppL10n.copyLocale == .frCA ? "Garder ce numéro" : "Keep this number" }
+
+    /// `setup.number_none_body`
+    internal static var numberNoneBody: String { AppL10n.copyLocale == .frCA ? "Un numéro se choisit et s'achète dans la page de configuration, qui affiche les numéros près de chez vous. Ouvrez-la, prenez un numéro, puis fermez-la pour continuer ici." : "A number is chosen and bought on the setup page, which shows the numbers near you. Open it, take a number, then close it to carry on here." }
+
+    /// `setup.number_none_heading`
+    internal static var numberNoneHeading: String { AppL10n.copyLocale == .frCA ? "Obtenez votre numéro" : "Get your number" }
+
+    /// `setup.number_open_page`
+    internal static var numberOpenPage: String { AppL10n.copyLocale == .frCA ? "Ouvrir la page de configuration" : "Open the setup page" }
+
+    /// `setup.number_title`
+    internal static var numberTitle: String { AppL10n.copyLocale == .frCA ? "Votre numéro" : "Your number" }
+
+    /// `setup.open_integrations`
+    internal static var openIntegrations: String { AppL10n.copyLocale == .frCA ? "Ouvrir la page Intégrations" : "Open the Integrations page" }
+
+    /// `setup.open_skills`
+    internal static var openSkills: String { AppL10n.copyLocale == .frCA ? "Ouvrir la page Compétences" : "Open the Skills page" }
+
+    /// `setup.progress_label`
+    internal static var progressLabel: String { AppL10n.copyLocale == .frCA ? "Progression de la configuration" : "Setup progress" }
+
+    /// `setup.receptionist_description`
+    internal static var receptionistDescription: String { AppL10n.copyLocale == .frCA ? "Son nom, son message d'accueil et sa voix." : "A name, a greeting and a voice." }
+
+    /// `setup.receptionist_disclosure_always`
+    internal static var receptionistDisclosureAlways: String { AppL10n.copyLocale == .frCA ? "Elle indique aux appelants qu'elle est une assistante IA au début de chaque appel." : "Your receptionist tells callers it is an AI assistant at the start of every call." }
+
+    /// `setup.receptionist_disclosure_required`
+    internal static var receptionistDisclosureRequired: String { AppL10n.copyLocale == .frCA ? "C'est obligatoire en Europe." : "This is required in Europe." }
+
+    /// `setup.receptionist_greeting_hint`
+    internal static var receptionistGreetingHint: String { AppL10n.copyLocale == .frCA ? "La première chose que les appelants entendent." : "The first thing callers hear." }
+
+    /// `setup.receptionist_greeting_label`
+    internal static var receptionistGreetingLabel: String { AppL10n.copyLocale == .frCA ? "Message d'accueil" : "Greeting" }
+
+    /// `setup.receptionist_greeting_required`
+    internal static var receptionistGreetingRequired: String { AppL10n.copyLocale == .frCA ? "Entrez un message d'accueil." : "Enter a greeting." }
+
+    /// `setup.receptionist_name_label`
+    internal static var receptionistNameLabel: String { AppL10n.copyLocale == .frCA ? "Son nom" : "Receptionist's name" }
+
+    /// `setup.receptionist_name_required`
+    internal static var receptionistNameRequired: String { AppL10n.copyLocale == .frCA ? "Entrez un nom." : "Enter a name." }
+
+    /// `setup.receptionist_title`
+    internal static var receptionistTitle: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste" : "Your receptionist" }
+
+    /// `setup.receptionist_voice_elsewhere`
+    internal static var receptionistVoiceElsewhere: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste utilise un moteur vocal que cette étape ne couvre pas. Changez sa voix dans Réglages." : "Your receptionist uses a voice engine this step does not cover. Change the voice in Settings." }
+
+    /// `setup.receptionist_voice_label`
+    internal static var receptionistVoiceLabel: String { AppL10n.copyLocale == .frCA ? "Voix" : "Voice" }
+
+    /// `setup.save`
+    internal static var save: String { AppL10n.copyLocale == .frCA ? "Enregistrer" : "Save" }
+
+    /// `setup.save_and_continue`
+    internal static var saveAndContinue: String { AppL10n.copyLocale == .frCA ? "Enregistrer et continuer" : "Save and continue" }
+
+    /// `setup.saved`
+    internal static var saved: String { AppL10n.copyLocale == .frCA ? "Enregistré." : "Saved." }
+
+    /// `setup.saving`
+    internal static var saving: String { AppL10n.copyLocale == .frCA ? "Sauvegarde…" : "Saving…" }
+
+    /// `setup.skip_step`
+    internal static var skipStep: String { AppL10n.copyLocale == .frCA ? "Passer cette étape pour l'instant" : "Skip this step for now" }
+
+    /// `setup.step_current`
+    internal static var stepCurrent: String { AppL10n.copyLocale == .frCA ? "Étape en cours" : "Current step" }
+
+    /// `setup.step_done`
+    internal static var stepDone: String { AppL10n.copyLocale == .frCA ? "Terminée" : "Done" }
+
+    /// `setup.step_of`
+    internal static func stepOf(_ n: Int, _ total: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "Étape \(n) sur \(total)" : "Step \(n) of \(total)"
+    }
+
+    /// `setup.step_skipped`
+    internal static var stepSkipped: String { AppL10n.copyLocale == .frCA ? "Passée" : "Skipped" }
+
+    /// `setup.step_todo`
+    internal static var stepTodo: String { AppL10n.copyLocale == .frCA ? "À faire" : "To do" }
+
+    /// `setup.title`
+    internal static var title: String { AppL10n.copyLocale == .frCA ? "Configuration" : "Setup" }
+}
+
 extension SignInCopy {
     /// `sign_in.district_ai`
     internal static var districtAi: String { AppL10n.copyLocale == .frCA ? "District AI" : "District AI" }

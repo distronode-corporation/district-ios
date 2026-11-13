@@ -58,3 +58,6 @@ enum WatchBridgeCopy {}
 /// The hidden Apple Watch relay diagnostics screen (``WatchDiagnosticsView``), for TestFlight
 /// testers only.
 enum WatchDiagnosticsCopy {}
+
+/// The setup wizard (``SetupWizardView``) and its six steps.
+enum SetupCopy {}

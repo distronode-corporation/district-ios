@@ -3,11 +3,11 @@ import DistrictModel
 import Foundation
 import XCTest
 
-/// The overview's "Finish setting up" card: when it shows, where it goes, what it says.
+/// The overview's "Finish setting up" card: when it shows and what it says.
 ///
 /// ⚠️ WHEN THE SERVER SAYS YES OR NO IS `OverviewSetupRepositoryTests` (owner, 403, null
 /// progress, completed, offline, undecodable) and the fixture's `SetupContractTests`. This
-/// file holds what only the app decides: the workspace-switch rule and the hand-off URL.
+/// file holds what only the app decides: the workspace-switch rule and the copy.
 @MainActor
 final class FinishSetupTests: XCTestCase {
     // MARK: - The model
@@ -70,37 +70,8 @@ final class FinishSetupTests: XCTestCase {
         XCTAssertTrue(model.isOffered)
     }
 
-    // MARK: - Where the button goes
-
-    func testTheButtonOpensTheConsoleHomeOnTheBuildsOwnHost() throws {
-        let production = try XCTUnwrap(URL(string: "https://www.distronode.com"))
-        XCTAssertEqual(
-            FinishSetupCard.destination(baseURL: production)?.absoluteString,
-            "https://www.distronode.com/dashboard/district"
-        )
-
-        let staging = try XCTUnwrap(URL(string: "https://staging.example.com/api?x=1#y"))
-        XCTAssertEqual(
-            FinishSetupCard.destination(baseURL: staging)?.absoluteString,
-            "https://staging.example.com/dashboard/district",
-            "a staging build hands off to staging, and nothing of the base's path survives"
-        )
-    }
-
-    /// ⛔ `SFSafariViewController` TRAPS ON A NON-HTTP SCHEME, so no URL is better than one.
-    func testANonHTTPSBaseOffersNoButton() throws {
-        let local = try XCTUnwrap(URL(string: "http://localhost:3000"))
-        XCTAssertNil(FinishSetupCard.destination(baseURL: local))
-    }
-
-    /// ⛔ WHY THE CARD USES A SAFARI SHEET: the destination is a URL this app CLAIMS, so
-    /// handing it to the system would route it straight back here.
-    func testTheDestinationIsAClaimedURLWhichIsWhyItIsNeverHandedToTheSystem() throws {
-        let production = try XCTUnwrap(URL(string: "https://www.distronode.com"))
-        let url = try XCTUnwrap(FinishSetupCard.destination(baseURL: production))
-
-        XCTAssertNotNil(AppLinkResolver.resolve(url), "if this ever stops being claimed, revisit the sheet")
-    }
+    // ⚠️ WHERE THE BUTTON GOES MOVED: it opens the wizard in the app, and the pages the wizard
+    // still hands to the web are `SetupFlowTests`' hand-off tests.
 
     // MARK: - What it says
 

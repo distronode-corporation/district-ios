@@ -105,13 +105,17 @@ final class A11yImageTests: XCTestCase {
         // settings hub: the `NavigationLink` already says it opens something.
         // The twenty-sixth is the lock on ``TwoStepView``'s cover over the secret while the app is
         // not active, hidden because nobody can read the screen it is drawn for.
+        // The twenty-seventh to twenty-ninth are the setup wizard's: ``SetupChoiceRow``'s radio
+        // circle, hidden because the row carries `.isSelected`; ``SetupPicker``'s chevron, hidden
+        // because the menu is announced by its label and value; and the hours editor's remove
+        // button, whose glyph carries the label because it is the whole button.
         // ⚠️ `SchedulingEmptyState`'s glyph is NOT among these — `EmptyStateView` takes a
         // symbol NAME and constructs the `Image` itself, so it is counted at that one
         // definition rather than per caller.
         // Comments do not count: both scans read comment-stripped source.
         XCTAssertEqual(
-            count, 26,
-            "the app has \(count) SF Symbols, not 26: update this number in the same "
+            count, 29,
+            "the app has \(count) SF Symbols, not 29: update this number in the same "
                 + "commit that adds or removes one, having decided how it is announced"
         )
     }
