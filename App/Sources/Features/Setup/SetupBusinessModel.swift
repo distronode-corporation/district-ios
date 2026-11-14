@@ -18,9 +18,9 @@ import Observation
 /// ⚠️ THE LANGUAGE IS NOT SAVED HERE. It goes into the shell's draft and step 3 writes it into
 /// the persona, the one step that owns the persona.
 ///
-/// ⚠️ "WHAT YOU DO" IS STORED AS ONE ENABLED QUESTION in the receptionist's language
+/// ⚠️ "WHAT YOU DO" IS STORED AS ONE QUESTION in the receptionist's language
 /// (``SetupWire/whatQuestion(_:)``), because the facts have no description field and a
-/// question is how a caller asks for it.
+/// question is how a caller asks for it. It starts on; a switch turned off in step 4 is kept.
 ///
 /// ⚠️ THE EMAIL SENDER NAME AND REPLY-TO ARE NOT HERE: DistrictCore 8.5.0 has no mobile
 /// contract for the email identity, so the step opens the Skills page for them.
@@ -67,11 +67,19 @@ final class SetupBusinessModel {
         self.onRenamed = onRenamed
         let draft = wizard.draft
         let facts = wizard.data?.businessFacts
+        // ⛔ THE SAVED ADDRESS BEATS THE DRAFT. Step 4 (or the web) can change the address after
+        // this step saved it, and this step writes the address back whole, so opening on the
+        // draft's place would show stale values and a save would put them back.
+        let place = facts?["address"]?.objectValue == nil ? draft : SetupBusinessDraft.initial(
+            data: wizard.data,
+            personaLanguage: nil,
+            workspaceName: wizard.workspaceName
+        )
         businessName = draft.businessName
         what = SetupFacts.what(facts)
-        country = draft.country
-        subdivision = draft.subdivision
-        city = draft.city
+        country = place.country
+        subdivision = place.subdivision
+        city = place.city
         street = facts?["address"]?["line1"]?.stringValue ?? ""
         language = draft.language
     }
@@ -82,6 +90,24 @@ final class SetupBusinessModel {
 
     var zone: SetupPlaces.Zone? {
         country.isEmpty ? nil : SetupPlaces.zone(country: country, subdivision: subdivision)
+    }
+
+    /// The time zone a save writes: the stored one while the place (country, province or state,
+    /// and city) is still the stored place, otherwise the place's own, as on a first save.
+    ///
+    /// ⛔ STEP 4'S CHOICE SURVIVES A SAVE HERE. This step tells the owner the zone can be
+    /// changed in step 4, so saving this step again over an unchanged place must not put the
+    /// place's default back over that change.
+    var timezone: String? {
+        let stored = wizard.data?.businessFacts?["timezone"]?.stringValue ?? ""
+        let saved = SetupFacts.address(wizard.data?.businessFacts)
+        let samePlace = saved.country.trimmed.uppercased() == country
+            && saved.region.trimmed.uppercased() == subdivision.trimmed.uppercased()
+            && saved.city.trimmed.lowercased() == city.trimmed.lowercased()
+        if !stored.isEmpty, samePlace {
+            return stored
+        }
+        return zone?.timezone
     }
 
     /// A country change drops the province or state, which belonged to the old one.
@@ -243,6 +269,10 @@ final class SetupBusinessModel {
     func save() async {
         showErrors = true
         guard isValid, !isBusy else { return }
+        if let full = faqsFullError {
+            saveError = FailureText(message: full, action: .none)
+            return
+        }
         isSaving = true
         wizard.beginStepWrite()
         defer {
@@ -287,8 +317,8 @@ final class SetupBusinessModel {
     /// the web) stored.
     func factsPatch() -> WireJSON {
         var patch: [String: WireJSON] = [:]
-        if let zone {
-            patch["timezone"] = .string(zone.timezone)
+        if let timezone {
+            patch["timezone"] = .string(timezone)
         }
         var address: [String: WireJSON] = ["city": .string(city.trimmed), "country": .string(country)]
         if !street.trimmed.isEmpty {
@@ -302,19 +332,43 @@ final class SetupBusinessModel {
             address["postalCode"] = .string(postalCode)
         }
         patch["address"] = .object(address)
-        let stored = wizard.data?.businessFacts?["faqs"]?.arrayValue ?? []
-        let others = stored.filter { !SetupWire.whatQuestions.contains($0["question"]?.stringValue ?? "") }
+        let (stored, others) = storedFaqs()
         if !what.trimmed.isEmpty {
+            // ⛔ THE OWNER'S SWITCH IS KEPT: a "what you do" question switched off in step 4
+            // stays off. Only a new one starts on, because typing it is the confirmation.
+            let current = stored.first { Self.isWhat($0) }
             let mine = WireJSON.object([
                 "question": .string(SetupWire.whatQuestion(language)),
                 "answer": .string(String(what.trimmed.prefix(SetupFacts.Limit.faqAnswer))),
-                "enabled": .bool(true),
+                "enabled": .bool(current.map { $0["enabled"] == WireJSON.bool(true) } ?? true),
             ])
-            patch["faqs"] = .array(Array(([mine] + others).prefix(SetupFacts.Limit.faqs)))
+            // ⛔ NO SILENT DROP AT THE CAP: ``faqsFullError`` refuses the save before this runs.
+            patch["faqs"] = .array([mine] + others)
         } else if others.count != stored.count {
             patch["faqs"] = .array(others)
         }
         return .object(patch)
+    }
+
+    /// Set when "what you do" would be a new question on a list already at
+    /// ``SetupFacts/Limit/faqs``. An existing "what you do" question is replaced, so it always fits.
+    ///
+    /// ⛔ A REFUSAL, NEVER A TRUNCATION: cutting the list to the cap would delete the last
+    /// stored question without a word.
+    var faqsFullError: String? {
+        guard !what.trimmed.isEmpty else { return nil }
+        guard storedFaqs().others.count >= SetupFacts.Limit.faqs else { return nil }
+        return SetupCopy.businessWhatFaqsFull(SetupFacts.Limit.faqs)
+    }
+
+    /// Every stored question, and the ones that are not "what you do".
+    private func storedFaqs() -> (all: [WireJSON], others: [WireJSON]) {
+        let stored = wizard.data?.businessFacts?["faqs"]?.arrayValue ?? []
+        return (stored, stored.filter { !Self.isWhat($0) })
+    }
+
+    private static func isWhat(_ faq: WireJSON) -> Bool {
+        SetupWire.whatQuestions.contains(faq["question"]?.stringValue ?? "")
     }
 
     func dismissNotice() {

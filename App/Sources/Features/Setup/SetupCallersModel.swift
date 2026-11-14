@@ -171,9 +171,29 @@ final class SetupCallersModel {
     /// True when the facts are saved.
     @discardableResult
     func save() async -> Bool {
+        await save(continuing: false)
+    }
+
+    func saveAndContinue() async {
+        guard !isSaving else { return }
+        guard !hoursDraftPending else {
+            showErrors = true
+            saveError = SetupCopy.callersConfirmHoursFirst
+            return
+        }
+        await save(continuing: true)
+    }
+
+    /// The facts, then (when `continuing`) the step's state.
+    ///
+    /// ⛔ ONE BUSY SPAN FOR THE WHOLE TAP. `isSaving` and the wizard's step write are held from
+    /// the facts write to the end of the move, so Continue and Save stay disabled until the
+    /// next step is on screen (or the move failed), and no move lands in between.
+    @discardableResult
+    private func save(continuing: Bool) async -> Bool {
+        guard !isSaving else { return false }
         showErrors = true
         saved = false
-        guard !isSaving else { return false }
         guard isValid else {
             saveError = SetupCopy.callersFixErrors
             return false
@@ -189,23 +209,13 @@ final class SetupCallersModel {
         case let .success(response):
             wizard.adopt(response)
             saved = true
-            return true
         case let .failure(error):
             saveError = FailureText.from(error).message
             return false
         }
-    }
-
-    func saveAndContinue() async {
-        guard !hoursDraftPending else {
-            showErrors = true
-            saveError = SetupCopy.callersConfirmHoursFirst
-            return
+        if continuing {
+            await wizard.complete(.callers, as: .done)
         }
-        // ⚠️ HELD ACROSS BOTH, so no move lands between the save and its completion.
-        wizard.beginStepWrite()
-        defer { wizard.endStepWrite() }
-        guard await save() else { return }
-        await wizard.complete(.callers, as: .done)
+        return true
     }
 }

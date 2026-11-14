@@ -5948,6 +5948,11 @@ extension SetupCopy {
     /// `setup.business_website_placeholder`
     internal static var businessWebsitePlaceholder: String { AppL10n.copyLocale == .frCA ? "example.com" : "example.com" }
 
+    /// `setup.business_what_faqs_full`
+    internal static func businessWhatFaqsFull(_ n: Int) -> String {
+        AppL10n.copyLocale == .frCA ? "Vous avez déjà \(n) questions enregistrées, le maximum permis. Supprimez-en une à l'étape 4 ou laissez vide ce que vous faites." : "You already have \(n) saved questions, the most allowed. Remove one in step 4, or leave what you do empty."
+    }
+
     /// `setup.business_what_label`
     internal static var businessWhatLabel: String { AppL10n.copyLocale == .frCA ? "Ce que vous faites, en une ligne" : "What you do, in one line" }
 

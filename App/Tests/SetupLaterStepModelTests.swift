@@ -62,6 +62,27 @@ final class SetupLaterStepModelTests: SetupStepTestCase {
         XCTAssertEqual(steps, [["callers": "done"]], "no Skip was written")
     }
 
+    /// ⛔ CONTINUE STAYS BUSY THROUGH THE MOVE, not only through the facts save: the button is
+    /// still disabled while the step's state is written, and a second tap then sends nothing.
+    func testContinueStaysBusyUntilTheMoveEnds() async {
+        let transport = SetupTransport([:])
+        let wizard = await wizard(transport, states: ["done", "done", "done", "todo", "todo", "todo"])
+        transport.add(SetupFixture.patchRoute, SetupFixture.setup(["done", "done", "done", "done", "todo", "todo"]))
+        let model = SetupCallersModel(wizard: wizard)
+        transport.delay = .milliseconds(200)
+
+        async let continuing: Void = model.saveAndContinue()
+        await eventually { wizard.isCompleting }
+        XCTAssertTrue(model.isSaving, "Continue is still busy while the step's state is written")
+        await model.saveAndContinue()
+        await continuing
+
+        XCTAssertFalse(model.isSaving)
+        XCTAssertFalse(wizard.isMoving)
+        XCTAssertEqual(wizard.active, .calls)
+        XCTAssertEqual(transport.sent(SetupFixture.patchRoute).count, 2, "the facts and the step's state, once each")
+    }
+
     func testDiscardPutsBackTheStoredHours() async {
         let transport = SetupTransport([SetupFixture.lookupRoute: [(200, SetupFixture.lookup)]])
         let stored = "{\"weeklyHours\":{\"sun\":\"closed\"}}"
