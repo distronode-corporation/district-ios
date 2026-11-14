@@ -46,6 +46,9 @@ jobs:
           results_file: results.sarif
           results_format: sarif
           publish_results: true
+          # A read-only token (Administration and Metadata), so Branch-Protection can read the
+          # repository's rulesets, which the default workflow token cannot.
+          repo_token: ${{ secrets.SCORECARD_TOKEN }}
 
       - uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
