@@ -212,4 +212,13 @@ class SetupStepTestCase: XCTestCase {
         }
         XCTAssertTrue(condition(), "never happened", file: file, line: line)
     }
+
+    /// As ``until(_:file:line:)``, for a condition that waits on the transport's `delay`: it
+    /// sleeps between checks rather than yielding, for up to two seconds.
+    func eventually(_ condition: () -> Bool, file: StaticString = #filePath, line: UInt = #line) async {
+        for _ in 0 ..< 400 where !condition() {
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+        XCTAssertTrue(condition(), "never happened", file: file, line: line)
+    }
 }
