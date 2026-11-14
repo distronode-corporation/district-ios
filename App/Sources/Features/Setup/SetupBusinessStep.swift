@@ -166,10 +166,14 @@ struct SetupBusinessStep: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// The zone a save writes (``SetupBusinessModel/timezone``), so a zone chosen in step 4
+    /// shows here as it is.
     private var zoneSentence: String {
-        guard let zone = model.zone else { return SetupCopy.businessTimezoneUnknown }
-        return zone.multiZone ? SetupCopy.businessTimezoneMulti(zone.timezone)
-            : SetupCopy.businessTimezoneValue(zone.timezone)
+        guard let timezone = model.timezone else { return SetupCopy.businessTimezoneUnknown }
+        guard let zone = model.zone, zone.timezone == timezone, zone.multiZone else {
+            return SetupCopy.businessTimezoneValue(timezone)
+        }
+        return SetupCopy.businessTimezoneMulti(timezone)
     }
 
     private var email: some View {

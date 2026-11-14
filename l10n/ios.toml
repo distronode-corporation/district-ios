@@ -15809,6 +15809,15 @@ screen = "setup.business"
 state = "draft"
 id = { swift = "SetupCopy.businessWebsitePlaceholder" }
 
+[setup.business_what_faqs_full]
+en = "Your receptionist already answers {n} questions, the most it can hold. Remove one in step 4, or leave what you do empty."
+fr = "Votre réceptionniste répond déjà à {n} questions, le maximum. Supprimez-en une à l'étape 4 ou laissez vide ce que vous faites."
+ctx = "error"
+screen = "setup.business"
+args = { n = "int" }
+state = "draft"
+id = { swift = "SetupCopy.businessWhatFaqsFull(_:)" }
+
 [setup.business_what_label]
 en = "What you do, in one line"
 fr = "Ce que vous faites, en une ligne"
