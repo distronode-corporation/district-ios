@@ -42,6 +42,24 @@ final class SetupBusinessFactsTests: SetupStepTestCase {
         XCTAssertEqual(facts["timezone"] as? String, "America/Winnipeg", "the zone chosen in step 4 is kept")
     }
 
+    /// A place changed in step 1 (here only the city) takes the place's own zone again, as on a
+    /// first save, and the step says to check it in step 4.
+    func testAChangedPlaceTakesItsOwnZoneAgain() async throws {
+        let stored = """
+        {"address":{"city":"Kenora","region":"ON","country":"CA"},"timezone":"America/Winnipeg"}
+        """
+        let transport = SetupTransport([:])
+        let wizard = await wizard(transport, facts: stored)
+        transport.add(SetupFixture.patchRoute, SetupFixture.setup(facts: stored))
+        let model = SetupBusinessModel(wizard: wizard, workspaces: workspaces(transport))
+        model.city = "Ottawa"
+
+        await model.save()
+
+        let facts = try XCTUnwrap(transport.bodies(SetupFixture.patchRoute).first?["businessFacts"] as? [String: Any])
+        XCTAssertEqual(facts["timezone"] as? String, "America/Toronto")
+    }
+
     /// ⛔ THE OWNER'S SWITCH IS KEPT: a "what you do" question switched off in step 4 stays off
     /// when step 1 saves it again. A new one starts on (`SetupStepModelTests`).
     func testSavingKeepsWhatYouDoSwitchedOffWhenItWasTurnedOff() async throws {
@@ -83,7 +101,7 @@ final class SetupBusinessFactsTests: SetupStepTestCase {
         XCTAssertTrue(transport.sent(SetupFixture.patchRoute).isEmpty, "no question is cut to make room")
         XCTAssertEqual(
             model.saveError?.message,
-            "Your receptionist already answers 50 questions, the most it can hold. "
+            "You already have 50 saved questions, the most allowed. "
                 + "Remove one in step 4, or leave what you do empty."
         )
         XCTAssertEqual(wizard.active, .business)

@@ -5950,7 +5950,7 @@ extension SetupCopy {
 
     /// `setup.business_what_faqs_full`
     internal static func businessWhatFaqsFull(_ n: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "Votre réceptionniste répond déjà à \(n) questions, le maximum. Supprimez-en une à l'étape 4 ou laissez vide ce que vous faites." : "Your receptionist already answers \(n) questions, the most it can hold. Remove one in step 4, or leave what you do empty."
+        AppL10n.copyLocale == .frCA ? "Vous avez déjà \(n) questions enregistrées, le maximum permis. Supprimez-en une à l'étape 4 ou laissez vide ce que vous faites." : "You already have \(n) saved questions, the most allowed. Remove one in step 4, or leave what you do empty."
     }
 
     /// `setup.business_what_label`

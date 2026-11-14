@@ -92,8 +92,8 @@ final class SetupBusinessModel {
         country.isEmpty ? nil : SetupPlaces.zone(country: country, subdivision: subdivision)
     }
 
-    /// The time zone a save writes: the stored one while the place is still the stored place,
-    /// otherwise the place's own.
+    /// The time zone a save writes: the stored one while the place (country, province or state,
+    /// and city) is still the stored place, otherwise the place's own, as on a first save.
     ///
     /// ⛔ STEP 4'S CHOICE SURVIVES A SAVE HERE. This step tells the owner the zone can be
     /// changed in step 4, so saving this step again over an unchanged place must not put the
@@ -103,6 +103,7 @@ final class SetupBusinessModel {
         let saved = SetupFacts.address(wizard.data?.businessFacts)
         let samePlace = saved.country.trimmed.uppercased() == country
             && saved.region.trimmed.uppercased() == subdivision.trimmed.uppercased()
+            && saved.city.trimmed.lowercased() == city.trimmed.lowercased()
         if !stored.isEmpty, samePlace {
             return stored
         }
