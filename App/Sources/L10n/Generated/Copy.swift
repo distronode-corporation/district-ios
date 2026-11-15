@@ -1345,7 +1345,7 @@ extension HQCopy {
     internal static var viewerCannotConfirm: String { AppL10n.copyLocale == .frCA ? "Votre rôle dans cet espace de travail est Lecteur\u{00A0}: demandez à un membre ayant le rôle Administrateur ou Membre de l'appliquer." : "You are in this workspace as a viewer, so ask an agency or client member to apply this." }
 
     /// `hq.voice_applied`
-    internal static var voiceApplied: String { AppL10n.copyLocale == .frCA ? "Fait." : "Done." }
+    internal static var voiceApplied: String { AppL10n.copyLocale == .frCA ? "C'est fait." : "Done." }
 
     /// `hq.voice_busy`
     internal static var voiceBusy: String { AppL10n.copyLocale == .frCA ? "Le mode vocal ne peut pas démarrer pendant un appel ou une réunion." : "Voice can't start during a call or a meeting." }
@@ -1485,7 +1485,7 @@ extension HQCopy {
     internal static var voiceThinking: String { AppL10n.copyLocale == .frCA ? "Réflexion en cours" : "Thinking" }
 
     /// `hq.voice_unmute`
-    internal static var voiceUnmute: String { AppL10n.copyLocale == .frCA ? "Réactiver le micro" : "Unmute" }
+    internal static var voiceUnmute: String { AppL10n.copyLocale == .frCA ? "Rétablir le micro" : "Unmute" }
 
     /// `hq.voice_you`
     internal static var voiceYou: String { AppL10n.copyLocale == .frCA ? "Vous" : "You" }
@@ -5950,7 +5950,7 @@ extension SetupCopy {
 
     /// `setup.business_what_faqs_full`
     internal static func businessWhatFaqsFull(_ n: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "Vous avez déjà \(n) questions enregistrées, le maximum permis. Supprimez-en une à l'étape 4 ou laissez vide ce que vous faites." : "You already have \(n) saved questions, the most allowed. Remove one in step 4, or leave what you do empty."
+        AppL10n.copyLocale == .frCA ? "Vous avez déjà \(n) questions enregistrées, le maximum permis. Supprimez-en une à l'étape 4 ou laissez vide le champ «\u{00A0}Ce que vous faites\u{00A0}»." : "You already have \(n) saved questions, the most allowed. Remove one in step 4, or leave what you do empty."
     }
 
     /// `setup.business_what_label`
@@ -5987,7 +5987,7 @@ extension SetupCopy {
     internal static var callersAddressRegion: String { AppL10n.copyLocale == .frCA ? "Province ou État" : "Province or state" }
 
     /// `setup.callers_closes`
-    internal static var callersCloses: String { AppL10n.copyLocale == .frCA ? "Ferme" : "Closes" }
+    internal static var callersCloses: String { AppL10n.copyLocale == .frCA ? "Fermeture" : "Closes" }
 
     /// `setup.callers_confirm_hours_first`
     internal static var callersConfirmHoursFirst: String { AppL10n.copyLocale == .frCA ? "Utilisez ou ignorez les heures de votre site Internet avant de continuer." : "Use or discard the hours from your website before you continue." }
@@ -6082,10 +6082,10 @@ extension SetupCopy {
     internal static var callersOffHint: String { AppL10n.copyLocale == .frCA ? "Désactivé. Votre réceptionniste ne l'utilisera pas." : "Switched off. Your receptionist will not use this." }
 
     /// `setup.callers_opens`
-    internal static var callersOpens: String { AppL10n.copyLocale == .frCA ? "Ouvre" : "Opens" }
+    internal static var callersOpens: String { AppL10n.copyLocale == .frCA ? "Ouverture" : "Opens" }
 
     /// `setup.callers_period_error`
-    internal static var callersPeriodError: String { AppL10n.copyLocale == .frCA ? "Fermez après l'ouverture. Les périodes ne doivent pas se chevaucher." : "Close after you open. Periods must not overlap." }
+    internal static var callersPeriodError: String { AppL10n.copyLocale == .frCA ? "La fermeture doit suivre l'ouverture. Les périodes ne doivent pas se chevaucher." : "Close after you open. Periods must not overlap." }
 
     /// `setup.callers_period_label`
     internal static func callersPeriodLabel(_ n: Int) -> String {
@@ -6175,10 +6175,10 @@ extension SetupCopy {
     internal static var callsBookingsWhere: String { AppL10n.copyLocale == .frCA ? "Google et Microsoft approuvent l'accès à l'agenda sur leur propre page de connexion; un agenda se connecte donc dans la page Intégrations." : "Google and Microsoft approve calendar access on their own sign-in page, so a calendar is connected on the Integrations page." }
 
     /// `setup.calls_description`
-    internal static var callsDescription: String { AppL10n.copyLocale == .frCA ? "Quand elle répond, à qui elle transfère, et les rendez-vous." : "When calls are answered, who to transfer to, and bookings." }
+    internal static var callsDescription: String { AppL10n.copyLocale == .frCA ? "Quand répondre aux appels, à qui les transférer et les rendez-vous." : "When calls are answered, who to transfer to, and bookings." }
 
     /// `setup.calls_keeping_line_note`
-    internal static var callsKeepingLineNote: String { AppL10n.copyLocale == .frCA ? "Vous gardez votre numéro d'entreprise actuel et ne voulez que les appels manqués? Réglez votre fournisseur pour qu'il transfère les appels sans réponse à la dernière étape." : "Keeping your existing business number and only want calls you miss? Set your carrier to forward unanswered calls in the last step." }
+    internal static var callsKeepingLineNote: String { AppL10n.copyLocale == .frCA ? "Vous gardez votre numéro d'entreprise actuel et ne voulez que les appels manqués? À la dernière étape, demandez à votre transporteur de renvoyer les appels sans réponse." : "Keeping your existing business number and only want calls you miss? Set your carrier to forward unanswered calls in the last step." }
 
     /// `setup.calls_profiles_body`
     internal static var callsProfilesBody: String { AppL10n.copyLocale == .frCA ? "Quand cette option est activée, après chaque appel, nous recherchons les renseignements professionnels publics de l'appelant (comme son entreprise et son poste) pour ajouter un profil à votre journal d'appels. Les recherches passent par des services situés aux États-Unis. L'option reste désactivée tant que vous ne l'activez pas, et vous pouvez la désactiver en tout temps." : "When this is on, after each call we look up the caller's public business details (such as their company and role) to add a profile to your call log. The lookups use research services based in the United States. It is off unless you switch it on, and you can switch it off at any time." }
@@ -6227,7 +6227,7 @@ extension SetupCopy {
     internal static var `continue`: String { AppL10n.copyLocale == .frCA ? "Continuer" : "Continue" }
 
     /// `setup.done`
-    internal static var done: String { AppL10n.copyLocale == .frCA ? "Terminé" : "Done" }
+    internal static var done: String { AppL10n.copyLocale == .frCA ? "OK" : "Done" }
 
     /// `setup.finish_later`
     internal static var finishLater: String { AppL10n.copyLocale == .frCA ? "Terminer plus tard" : "Finish later" }
@@ -6258,10 +6258,10 @@ extension SetupCopy {
     internal static var goliveAttemptsLeftOne: String { AppL10n.copyLocale == .frCA ? "1 vérification restante aujourd'hui." : "1 check left today." }
 
     /// `setup.golive_business_line_error`
-    internal static var goliveBusinessLineError: String { AppL10n.copyLocale == .frCA ? "Entrez votre ligne d'entreprise avec l'indicatif du pays, par exemple +14165550123." : "Enter your business line with its country code, for example +14165550123." }
+    internal static var goliveBusinessLineError: String { AppL10n.copyLocale == .frCA ? "Entrez votre ligne d'affaires avec l'indicatif du pays, par exemple +14165550123." : "Enter your business line with its country code, for example +14165550123." }
 
     /// `setup.golive_business_line_label`
-    internal static var goliveBusinessLineLabel: String { AppL10n.copyLocale == .frCA ? "Votre ligne d'entreprise" : "Your business line" }
+    internal static var goliveBusinessLineLabel: String { AppL10n.copyLocale == .frCA ? "Votre ligne d'affaires" : "Your business line" }
 
     /// `setup.golive_call_me`
     internal static var goliveCallMe: String { AppL10n.copyLocale == .frCA ? "Appeler mon cellulaire maintenant" : "Call my mobile now" }
@@ -6270,19 +6270,19 @@ extension SetupCopy {
     internal static var goliveCalling: String { AppL10n.copyLocale == .frCA ? "Nous vous appelons. Répondez à votre téléphone." : "Calling you now. Answer your phone." }
 
     /// `setup.golive_check_description`
-    internal static var goliveCheckDescription: String { AppL10n.copyLocale == .frCA ? "Nous appelons votre ligne d'entreprise et vérifions que l'appel arrive sur votre numéro District." : "We ring your business line and watch for the call to arrive on your District number." }
+    internal static var goliveCheckDescription: String { AppL10n.copyLocale == .frCA ? "Nous appelons votre ligne d'affaires et vérifions que l'appel arrive sur votre numéro District." : "We ring your business line and watch for the call to arrive on your District number." }
 
     /// `setup.golive_check_dial_failed`
     internal static var goliveCheckDialFailed: String { AppL10n.copyLocale == .frCA ? "Nous n'avons pas pu faire l'appel de vérification. Réessayez dans quelques minutes." : "We could not place the check call. Try again in a few minutes." }
 
     /// `setup.golive_check_failed`
-    internal static var goliveCheckFailed: String { AppL10n.copyLocale == .frCA ? "L'appel n'est pas arrivé sur votre numéro District. Vérifiez vos réglages de transfert et réessayez." : "The call did not arrive on your District number. Check your forwarding settings and try again." }
+    internal static var goliveCheckFailed: String { AppL10n.copyLocale == .frCA ? "L'appel n'est pas arrivé sur votre numéro District. Vérifiez vos réglages de renvoi et réessayez." : "The call did not arrive on your District number. Check your forwarding settings and try again." }
 
     /// `setup.golive_check_header`
-    internal static var goliveCheckHeader: String { AppL10n.copyLocale == .frCA ? "Vérifier mon transfert" : "Check my forwarding" }
+    internal static var goliveCheckHeader: String { AppL10n.copyLocale == .frCA ? "Vérifier mon renvoi" : "Check my forwarding" }
 
     /// `setup.golive_check_passed`
-    internal static var goliveCheckPassed: String { AppL10n.copyLocale == .frCA ? "Le transfert fonctionne. L'appel est arrivé sur votre numéro District." : "Forwarding works. The call arrived on your District number." }
+    internal static var goliveCheckPassed: String { AppL10n.copyLocale == .frCA ? "Le renvoi fonctionne. L'appel est arrivé sur votre numéro District." : "Forwarding works. The call arrived on your District number." }
 
     /// `setup.golive_check_pending`
     internal static var goliveCheckPending: String { AppL10n.copyLocale == .frCA ? "Vérification en cours. Cela prend jusqu'à une minute." : "Checking. This takes up to a minute." }
@@ -6297,7 +6297,7 @@ extension SetupCopy {
     internal static var goliveConsentWording: String { AppL10n.copyLocale == .frCA ? "Appelez-moi maintenant au numéro que j'ai indiqué, depuis mon numéro District, pour que j'entende ma réceptionniste répondre. Il s'agit d'un appel d'essai d'au plus deux minutes. Il n'est pas facturé, et la réceptionniste ne peut ni transférer, ni prendre de rendez-vous, ni envoyer de courriel ou de texto pendant l'appel. L'appel est transcrit et résumé dans mon journal d'appels comme tout autre appel." : "Call me now at the number I entered, from my District number, so I can hear my receptionist answer. This is a test call of up to two minutes. It is not billed, and the receptionist cannot transfer, book, email or text during it. The call is transcribed and summarized in my call log like any other call." }
 
     /// `setup.golive_description`
-    internal static var goliveDescription: String { AppL10n.copyLocale == .frCA ? "Entendez-la répondre, puis envoyez-lui vos appels." : "Hear your receptionist answer, then send your calls." }
+    internal static var goliveDescription: String { AppL10n.copyLocale == .frCA ? "Entendez votre réceptionniste répondre, puis envoyez-lui vos appels." : "Hear your receptionist answer, then send your calls." }
 
     /// `setup.golive_expect_call`
     internal static func goliveExpectCall(_ number: String) -> String {
@@ -6311,7 +6311,7 @@ extension SetupCopy {
     internal static var goliveGreetingLabel: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste dit" : "Your receptionist says" }
 
     /// `setup.golive_keeping_description`
-    internal static var goliveKeepingDescription: String { AppL10n.copyLocale == .frCA ? "Transférez votre ligne actuelle vers votre numéro District auprès de votre fournisseur, puis vérifiez-la ici." : "Forward your existing line to your District number with your carrier, then check it here." }
+    internal static var goliveKeepingDescription: String { AppL10n.copyLocale == .frCA ? "Renvoyez votre ligne actuelle vers votre numéro District auprès de votre transporteur, puis vérifiez le renvoi ici." : "Forward your existing line to your District number with your carrier, then check it here." }
 
     /// `setup.golive_keeping_header`
     internal static var goliveKeepingHeader: String { AppL10n.copyLocale == .frCA ? "Vous gardez votre numéro d'entreprise actuel?" : "Keeping your existing business number?" }
@@ -6329,7 +6329,7 @@ extension SetupCopy {
     internal static var goliveModeAll: String { AppL10n.copyLocale == .frCA ? "Tous les appels" : "All calls" }
 
     /// `setup.golive_mode_label`
-    internal static var goliveModeLabel: String { AppL10n.copyLocale == .frCA ? "Quels appels transférez-vous?" : "Which calls do you forward?" }
+    internal static var goliveModeLabel: String { AppL10n.copyLocale == .frCA ? "Quels appels renvoyez-vous?" : "Which calls do you forward?" }
 
     /// `setup.golive_mode_unanswered`
     internal static var goliveModeUnanswered: String { AppL10n.copyLocale == .frCA ? "Seulement les appels auxquels je ne réponds pas" : "Only calls I don't pick up" }
@@ -6341,7 +6341,7 @@ extension SetupCopy {
     internal static var goliveNoNumberYet: String { AppL10n.copyLocale == .frCA ? "Il vous faut un numéro District avant que nous puissions faire un appel d'essai." : "You need a District number before we can place a test call." }
 
     /// `setup.golive_start_check`
-    internal static var goliveStartCheck: String { AppL10n.copyLocale == .frCA ? "Vérifier mon transfert" : "Check my forwarding" }
+    internal static var goliveStartCheck: String { AppL10n.copyLocale == .frCA ? "Vérifier mon renvoi" : "Check my forwarding" }
 
     /// `setup.golive_test_description`
     internal static var goliveTestDescription: String { AppL10n.copyLocale == .frCA ? "Nous appelons votre cellulaire depuis votre numéro District et votre réceptionniste répond, comme un appelant l'entendrait." : "We call your mobile from your District number and your receptionist answers, just as a caller would hear it." }
@@ -6353,7 +6353,7 @@ extension SetupCopy {
     internal static var goliveTitle: String { AppL10n.copyLocale == .frCA ? "Essai et mise en service" : "Test and go live" }
 
     /// `setup.golive_unanswered_note`
-    internal static var goliveUnansweredNote: String { AppL10n.copyLocale == .frCA ? "Ne répondez pas quand votre ligne d'entreprise sonne. Laissez-la sonner jusqu'au transfert." : "Do not answer when your business line rings. Let it ring until it forwards." }
+    internal static var goliveUnansweredNote: String { AppL10n.copyLocale == .frCA ? "Ne répondez pas quand votre ligne d'affaires sonne. Laissez-la sonner jusqu'au renvoi." : "Do not answer when your business line rings. Let it ring until it forwards." }
 
     /// `setup.handoff_returned`
     internal static var handoffReturned: String { AppL10n.copyLocale == .frCA ? "Vérification des changements" : "Checking what changed" }
@@ -6429,7 +6429,7 @@ extension SetupCopy {
     internal static var receptionistDescription: String { AppL10n.copyLocale == .frCA ? "Son nom, son message d'accueil et sa voix." : "A name, a greeting and a voice." }
 
     /// `setup.receptionist_disclosure_always`
-    internal static var receptionistDisclosureAlways: String { AppL10n.copyLocale == .frCA ? "Elle indique aux appelants qu'elle est une assistante IA au début de chaque appel." : "Your receptionist tells callers it is an AI assistant at the start of every call." }
+    internal static var receptionistDisclosureAlways: String { AppL10n.copyLocale == .frCA ? "Votre réceptionniste indique aux appelants qu'elle est une assistante IA au début de chaque appel." : "Your receptionist tells callers it is an AI assistant at the start of every call." }
 
     /// `setup.receptionist_disclosure_required`
     internal static var receptionistDisclosureRequired: String { AppL10n.copyLocale == .frCA ? "C'est obligatoire en Europe." : "This is required in Europe." }
@@ -6444,7 +6444,7 @@ extension SetupCopy {
     internal static var receptionistGreetingRequired: String { AppL10n.copyLocale == .frCA ? "Entrez un message d'accueil." : "Enter a greeting." }
 
     /// `setup.receptionist_name_label`
-    internal static var receptionistNameLabel: String { AppL10n.copyLocale == .frCA ? "Son nom" : "Receptionist's name" }
+    internal static var receptionistNameLabel: String { AppL10n.copyLocale == .frCA ? "Nom de la réceptionniste" : "Receptionist's name" }
 
     /// `setup.receptionist_name_required`
     internal static var receptionistNameRequired: String { AppL10n.copyLocale == .frCA ? "Entrez un nom." : "Enter a name." }
@@ -6929,7 +6929,7 @@ extension TwoStepCopy {
     internal static var qrLabel: String { AppL10n.copyLocale == .frCA ? "Code QR pour votre application d'authentification" : "QR code for your authenticator app" }
 
     /// `two_step.qr_unreadable`
-    internal static var qrUnreadable: String { AppL10n.copyLocale == .frCA ? "Le code QR ne peut pas être affiché. Entrez plutôt la clé à la main." : "The QR code could not be shown. Enter the key by hand instead." }
+    internal static var qrUnreadable: String { AppL10n.copyLocale == .frCA ? "Le code QR n'a pas pu être affiché. Entrez plutôt la clé à la main." : "The QR code could not be shown. Enter the key by hand instead." }
 
     /// `two_step.reauth_intro_off`
     internal static var reauthIntroOff: String { AppL10n.copyLocale == .frCA ? "Connectez-vous de nouveau comme d'habitude. La vérification en deux étapes est désactivée dès que c'est fait." : "Sign in again the way you usually do. Two-step verification turns off as soon as you do." }
