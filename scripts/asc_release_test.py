@@ -11,6 +11,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -798,6 +799,71 @@ class ReviewDetailTests(unittest.TestCase):
 
     def test_an_ordinary_path_passes(self) -> None:
         asc_release.refuse_review_detail("/appStoreVersions/v13/appStoreVersionLocalizations")
+
+
+class CommittedChangelogTests(unittest.TestCase):
+    """The real CHANGELOG.md and release-notes/, through the lane's own functions.
+
+    The other tests use a fixture CHANGELOG, so they cannot see a released section that grew
+    past what App Store Connect accepts. This reads every released `## [x.y(.z)]` section the
+    way `whats-new` does and fails here, in CI, instead of at submission time.
+    """
+
+    CHANGELOG_PATH = ROOT / "CHANGELOG.md"
+
+    # Versions released before this repository wrote What's New in any language but English.
+    # They have no release-notes/<locale>/<version>.txt, and none will be added after the
+    # fact, so only their English is checked. The test below fails if one of them gains a
+    # language file, so the list can only shrink.
+    ENGLISH_ONLY = frozenset({"1.0", "1.1", "1.2", "1.3", "2.0"})
+
+    def released_versions(self) -> list[str]:
+        text = self.CHANGELOG_PATH.read_text(encoding="utf-8")
+        return re.findall(r"^## \[(\d+\.\d+(?:\.\d+)?)\]", text, flags=re.MULTILINE)
+
+    def lane(self, build):
+        """Run one of the lane's builders; a refusal fails the test with the lane's message."""
+        err = io.StringIO()
+        try:
+            with contextlib.redirect_stderr(err):
+                return build()
+        except SystemExit:
+            self.fail(err.getvalue().strip())
+
+    def test_the_changelog_has_released_versions(self) -> None:
+        self.assertIn("1.0", self.released_versions())
+
+    def test_every_released_section_is_valid_store_text(self) -> None:
+        for version in self.released_versions():
+            with self.subTest(version=version):
+                english = self.lane(lambda: asc_release.whats_new(self.CHANGELOG_PATH, version))
+                self.assertTrue(english.strip())
+                self.assertLessEqual(len(english), asc_release.WHATS_NEW_LIMIT)
+
+    def test_every_released_version_has_notes_in_every_language(self) -> None:
+        for version in self.released_versions():
+            if version in self.ENGLISH_ONLY:
+                continue
+            with self.subTest(version=version):
+                notes = self.lane(lambda: asc_release.ReleaseNotes(self.CHANGELOG_PATH, version))
+                self.assertTrue(notes.translations, f"{version} has no notes in any other language")
+                for locale, text in notes.translations.items():
+                    self.assertTrue(text, f"{locale}/{version}.txt")
+                    self.assertLessEqual(len(text), asc_release.WHATS_NEW_LIMIT, f"{locale}/{version}.txt")
+
+    def test_the_english_only_list_is_exact(self) -> None:
+        released = set(self.released_versions())
+        self.assertLessEqual(self.ENGLISH_ONLY, released, "the list names a version the CHANGELOG lacks")
+        root = asc_release.NOTES_ROOT
+        for version in sorted(self.ENGLISH_ONLY):
+            with self.subTest(version=version):
+                self.assertEqual(sorted(root.glob(f"*/{version}.txt")), [], f"{version} has notes now; drop it from the list")
+
+    def test_every_language_file_belongs_to_a_released_version(self) -> None:
+        released = set(self.released_versions())
+        for path in sorted(asc_release.NOTES_ROOT.glob("*/*.txt")):
+            with self.subTest(path=path.name):
+                self.assertIn(path.stem, released, f"{path.parent.name}/{path.name} has no CHANGELOG section")
 
 
 if __name__ == "__main__":
