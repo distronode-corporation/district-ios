@@ -8,11 +8,18 @@ are the App Store version (`MARKETING_VERSION` in `project.yml`).
 The public history starts at 1.2. Versions 1.0 (2026-09-23) and 1.1 (2026-09-25) were
 built from history before publication, so they have no tags in this repository.
 
+A version's `## [x.y]` section is its App Store What's New, word for word:
+`scripts/asc_release.py whats-new` sends that section and nothing else, and refuses one over
+4000 characters. Write it for App Store readers. Detail for this repository goes under
+`[Unreleased]` until the version is released, then under `## <version> in detail` below the
+version's section, which the lane never reads.
+
 ## [Unreleased]
 
 What 3.4.0 ships, in detail, until it is on sale. The `[3.4.0]` section below is its App
-Store What's New, which the release lane sends verbatim, so these entries move under it after
-the release, as the 3.0.0 to 3.3.0 entries did.
+Store What's New, which the release lane sends verbatim, so these entries move to a
+`## 3.4.0 in detail` section under it after the release, as the 2.2 and 3.0.0 to 3.3.0
+entries have.
 
 ### Known limits
 
@@ -174,6 +181,11 @@ Watch your live calls as they happen, and step in when you need to.
 - The keypad has a country button in front of the number. Type the number the local way, and the line under it shows the country it rings and the full international number before you call. A number with the wrong number of digits for its country is explained once you stop typing.
 - A number that belongs to no one country, such as a +1 800 toll-free number, now says so instead of naming a country.
 
+## 3.3.0 in detail
+
+What 3.3.0 shipped, for this repository. Not release notes: the lane reads only the
+`[3.3.0]` section above.
+
 ### Added
 
 - Dialler design A (3.3.0, picked 2026-11-03, #95): a flag and calling-code button in
@@ -297,6 +309,11 @@ Small fixes for calls and the Apple Watch app.
 - In French, a time such as 16 h 13 no longer breaks across two lines at larger text sizes.
 - The Apple Watch app now shows live calls and unread messages in colour, so they stand out at a glance.
 
+## 3.2.1 in detail
+
+What 3.2.1 shipped, for this repository. Not release notes: the lane reads only the
+`[3.2.1]` section above.
+
 ### Changed
 
 - MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
@@ -366,6 +383,11 @@ More of District AI on your Apple Watch.
 - Decline a call on your iPhone or your Apple Watch, and once everyone it rang has declined, the assistant takes a message right away instead of letting it ring on.
 - Message notifications now show who the message is from, when the contact has a name.
 - Notifications about an urgent call, or from a contact you marked VIP, can arrive as Time Sensitive, so they reach you during a Focus.
+
+## 3.2.0 in detail
+
+What 3.2.0 shipped, for this repository. Not release notes: the lane reads only the
+`[3.2.0]` section above.
 
 ### Added
 
@@ -487,6 +509,11 @@ District AI comes to Apple Watch.
 - Phone numbers no longer repeats its help text.
 - In French, working hours show and accept times such as 9 h and 13 h 30.
 
+## 3.1.0 in detail
+
+What 3.1.0 shipped, for this repository. Not release notes: the lane reads only the
+`[3.1.0]` section above.
+
 ### Added
 
 - Apple Watch app: recent calls, inbox reply and mark read, and your availability for
@@ -590,6 +617,11 @@ A small update.
 - Rooms and Preview persona say in plain words when a session ends or cannot connect, instead of showing a technical message.
 - Crash reporting is updated to the latest stable version.
 
+## 3.0.3 in detail
+
+What 3.0.3 shipped, for this repository. Not release notes: the lane reads only the
+`[3.0.3]` section above.
+
 ### Changed
 
 - DistrictCore `exactVersion` 7.0.3 (district-core-swift's 7.0.3 tag). Its catalogs
@@ -634,6 +666,11 @@ Fixes for answered calls, and clearer screens.
 - Bookings switches between its views with one segmented control instead of separate buttons.
 - Working hours: the two edit buttons say what they do and no longer look like tabs.
 - In French, a call length never breaks across two lines, the Inbox is titled Réception as on its tab, a number in use reads Actif, and a contact's research headings are in French.
+
+## 3.0.2 in detail
+
+What 3.0.2 shipped, for this repository. Not release notes: the lane reads only the
+`[3.0.2]` section above.
 
 ### Changed
 
@@ -706,6 +743,11 @@ Fixes for calls, notifications and labels.
 - New colours from the District palette, and selected rows on iPad stay readable.
 - At the largest text sizes, labels and numbers no longer break mid-word, and every screen fits its width. On iPad in portrait, a list now opens beside the item you select.
 - The Analytics conversion funnel shows its bars in every language.
+
+## 3.0.1 in detail
+
+What 3.0.1 shipped, for this repository. Not release notes: the lane reads only the
+`[3.0.1]` section above.
 
 ### Fixed
 
@@ -829,6 +871,11 @@ District AI is now in Canadian French.
 - Knowledge: Read a text file fills a new document's title and text from a plain text file (.txt or .md, up to 1 MB). Nothing is added until you tap Add document.
 - If the receptionist is interrupted mid-call, the live transcript says Reconnecting… instead of Call ended, and goes live again when the call resumes.
 
+## 3.0.0 in detail
+
+What 3.0.0 shipped, for this repository. Not release notes: the lane reads only the
+`[3.0.0]` section above.
+
 ### Added
 
 - New ticket on District Desk. A New ticket button in the Desk toolbar opens the form that
@@ -930,6 +977,11 @@ together under District Studio, as on the web.
 - If your account has an authenticator app turned on, Sign in with Apple now asks for its
   code, as the website does. Enter the 6-digit code, or one of your recovery codes. A wrong
   code can be typed again, and if the step times out, start again with Sign in with Apple.
+
+## 2.2 in detail
+
+What 2.2 shipped, for this repository. Not release notes: the lane reads only the
+`[2.2]` section above.
 
 ### Added
 
