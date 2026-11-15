@@ -1,7 +1,7 @@
 {
-  "signed_off_by": "Sean Dean, 2026-11-06",
-  "release": "v3.3.0",
-  "commit": "371e659979f7486f111d03790fdf61aaaddc52e0",
+  "signed_off_by": "Sean Dean, by approving the pull request that adds this file: the French added or changed since v3.3.0 (367 strings in l10n/ios.toml, l10n/widgets.toml and l10n/infoplist.toml) was reviewed by an AI agent, whose 23 corrections that pull request lists, 2026-11-15",
+  "release": "v3.4.0",
+  "commit": "3b7e9a4bbc541eed06b8d8058eb549b22d8ab41e",
   "catalogs": [
     {
       "path": "l10n/appintents.toml",
@@ -13,11 +13,11 @@
     },
     {
       "path": "l10n/infoplist.toml",
-      "sha256": "dc209063b8c0068ad00bf8385b04364f7e3c7ea0cc36dd8525c872cb32ac7bf8"
+      "sha256": "dfd9255e8fc0a00a8eedff2970b9ae5b608ea4145c244a3af55f1b5f08a89d37"
     },
     {
       "path": "l10n/ios.toml",
-      "sha256": "328454c479989d5a5433b85d02e2d56649657aaf964da2b361e62f65c6b58c71"
+      "sha256": "283754f423301ba9ecf92a03ab78785c2cbf36e2a4b887bac4a2faf3f9096dce"
     },
     {
       "path": "l10n/notificationservice-infoplist.toml",
@@ -45,7 +45,7 @@
     },
     {
       "path": "l10n/widgets.toml",
-      "sha256": "cca1e398f586169c79cf259f765e2e1fcbb6a799a954c8d74606eb764cd2efa7"
+      "sha256": "bf7d418b6a5240eb90c5a4c7d4c57451ea361fb6b937c7f2a21e141d1ee7838b"
     }
   ]
 }
