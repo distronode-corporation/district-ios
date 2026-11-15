@@ -1,7 +1,7 @@
 {
-  "signed_off_by": "Sean Dean, by approving the pull request that adds this file: the French added or changed since v3.3.0 (367 strings in l10n/ios.toml, l10n/widgets.toml and l10n/infoplist.toml) was reviewed by an AI agent, whose 23 corrections that pull request lists, 2026-11-15",
+  "signed_off_by": "Sean Dean, by approving this file's pull request, 2026-11-15. The 367 French strings changed since v3.3.0 were reviewed by an AI agent and 24 were corrected.",
   "release": "v3.4.0",
-  "commit": "3b7e9a4bbc541eed06b8d8058eb549b22d8ab41e",
+  "commit": "b61ad1f34317174d41b159afdb2ae0ee05d11a6a",
   "catalogs": [
     {
       "path": "l10n/appintents.toml",
@@ -45,7 +45,7 @@
     },
     {
       "path": "l10n/widgets.toml",
-      "sha256": "bf7d418b6a5240eb90c5a4c7d4c57451ea361fb6b937c7f2a21e141d1ee7838b"
+      "sha256": "09fc158bf0a52dc7b4822358d2ce2876f2af55186817a885e542c190c7a74f84"
     }
   ]
 }
