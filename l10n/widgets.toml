@@ -113,7 +113,7 @@ note = "The Home Screen widget's description in the widget gallery."
 
 [widgets.summary_display_name]
 en = "At a glance"
-fr = "En un coup d'œil"
+fr = "D'un coup d'œil"
 ctx = "title"
 screen = "home_widget"
 state = "reviewed"
