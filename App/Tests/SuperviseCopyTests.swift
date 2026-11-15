@@ -8,7 +8,7 @@ import XCTest
 /// gets.
 ///
 /// ⛔ THE FRENCH IS ASSERTED LITERALLY, NBSP AND ALL, because the website's wording is the
-/// contract: `liveI18n.ts` for the website's sentences, Sean's list for the approved ones.
+/// contract: `liveI18n.ts` for the website's sentences, the approved list for the others.
 final class SuperviseCopyTests: XCTestCase {
     private let nbsp = "\u{00A0}"
 
@@ -46,7 +46,7 @@ final class SuperviseCopyTests: XCTestCase {
         XCTAssertEqual(french, "Un membre de l'équipe a pris l'appel.")
     }
 
-    /// ⛔ "APPROVED LINE + REASON ONLY" (Sean, 2026-11-05): exactly the two known prefixes go,
+    /// ⛔ "APPROVED LINE + REASON ONLY" (decided 2026-11-05): exactly the two known prefixes go,
     /// what remains starts with a capital, and a sentence without a prefix is left as it was.
     func testOnlyTheKnownNotUsedPrefixesAreStripped() {
         XCTAssertEqual(
@@ -92,7 +92,7 @@ final class SuperviseCopyTests: XCTestCase {
     }
 
     /// Each problem's sentence: a join that failed or dropped is the connect sentence, a coach
-    /// leg that failed is Sean's microphone sentence.
+    /// leg that failed is the approved microphone sentence.
     func testEachProblemHasItsSentence() {
         XCTAssertNil(SuperviseCopy.problem(nil))
         let connect = "Could not connect you to the call. Try again."
@@ -114,7 +114,7 @@ final class SuperviseCopyTests: XCTestCase {
         XCTAssertEqual(SuperviseCopy.problem(.takeoverDropped(reason: nil)), SuperviseCopy.takeOverJoinFailed)
     }
 
-    /// Sean's approved French, word for word (2026-11-05).
+    /// The approved French, word for word (2026-11-05).
     func testTheApprovedFrenchIsWordForWord() {
         L10nRuntime.withLocale(.frCA) {
             XCTAssertEqual(SuperviseCopy.joining, "Connexion à l'appel en cours.")

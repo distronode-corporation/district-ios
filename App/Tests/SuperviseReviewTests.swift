@@ -3,7 +3,7 @@ import DistrictCall
 import DistrictModel
 import XCTest
 
-/// The xhigh review of PR #101 (Sean: "All 1-11 + tests"), on the supervision's own seams:
+/// The review of PR #101 (all eleven items, with tests), on the supervision's own seams:
 /// an ended row, a reconnect, sign-out mid-call, a system mute while listening, a receipt
 /// before the 200, and a stop while the join is still in flight.
 @MainActor
@@ -229,7 +229,7 @@ final class SuperviseReviewTests: XCTestCase {
 
     // MARK: - The dialler and a workspace switch
 
-    /// ⛔ THE KEYPAD'S CALL ENDS ON SIGN-OUT ONLY (Sean, 2026-11-06), never on `unavailable`.
+    /// ⛔ THE KEYPAD'S CALL ENDS ON SIGN-OUT ONLY (2026-11-06), never on `unavailable`.
     func testTheKeypadCallEndsOnSignOutOnly() async {
         XCTAssertTrue(CallTeardown.endsSoftphone(.signedOut("Signed out.")))
         XCTAssertFalse(CallTeardown.endsSoftphone(.unavailable("Try again.")))

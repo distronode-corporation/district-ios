@@ -39,7 +39,7 @@ final class DeleteAccountModelTests: XCTestCase {
         XCTAssertNil(model.failure)
     }
 
-    /// ⛔ TWO-STEP ACCOUNTS ARE ALLOWED, WITH THE CODE (Sean, 2026-11-07). `MFA_REQUIRED` opens
+    /// ⛔ TWO-STEP ACCOUNTS ARE ALLOWED, WITH THE CODE (decided 2026-11-07). `MFA_REQUIRED` opens
     /// the code field and is not shown as a failure; the next try carries both.
     func testTwoStepVerificationAsksForTheCodeThenSendsItWithThePassword() async {
         let transport = SettingsTransport(responses: [

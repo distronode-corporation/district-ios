@@ -218,7 +218,7 @@ final class TwoStepModelTests: XCTestCase {
 
     // MARK: - Turning off
 
-    /// ⛔ TWO-STEP ACCOUNTS RE-AUTHENTICATE WITH THEIR CODE (Sean, 2026-11-07).
+    /// ⛔ TWO-STEP ACCOUNTS RE-AUTHENTICATE WITH THEIR CODE (decided 2026-11-07).
     func testTurningOffAsksForTheCodeThenDisables() async {
         let transport = SettingsTransport(responses: [
             (200, TwoStepFixtures.statusOn),

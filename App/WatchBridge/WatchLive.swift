@@ -26,7 +26,7 @@ struct WatchLiveCall: Codable, Hashable, Sendable, Identifiable {
     /// When it started, for "3 min ago" against the watch's clock.
     var startedAt: Date?
     /// ⛔ FALSE FOR A VIEWER, AND FOR A COLLEAGUE'S OWN SOFTPHONE CALL (no receptionist is
-    /// there to read a note; Sean, 2026-11-05, Q2). The watch draws no steering buttons at all
+    /// there to read a note; decided 2026-11-05). The watch draws no steering buttons at all
     /// then, rather than buttons the server refuses.
     var canWhisper: Bool
 }
@@ -43,7 +43,7 @@ enum WatchLivePhase: String, Codable, Sendable {
     case unavailable
 }
 
-/// The receptionist's answer to the latest note, display-ready (Sean, 2026-11-05, Q4).
+/// The receptionist's answer to the latest note, display-ready (decided 2026-11-05).
 ///
 /// ⛔ ANSWERS THE LATEST NOTE, NOT A PARTICULAR ONE: the event names no note, so the phone
 /// drops the receipt it holds when the next note is sent, and the watch shows what it is sent.

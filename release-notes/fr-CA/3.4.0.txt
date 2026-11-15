@@ -1,0 +1,12 @@
+Configurez votre espace de travail, parlez à District HQ et protégez votre compte, directement dans l'application.
+
+- Terminer la configuration ouvre maintenant les étapes de configuration dans l'application : trouvez votre entreprise, choisissez le nom, le message d'accueil et la voix de votre réceptionniste, ajoutez ce que les appelants doivent savoir et choisissez la façon de répondre aux appels. L'achat d'un numéro et la connexion d'un agenda se font toujours sur le Web.
+- Parler à HQ : parlez à District HQ de vive voix depuis son écran. Avant que le micro s'ouvre, l'application vous indique comment et où votre voix est traitée. Réglez la voix, la longueur des réponses, le débit, la langue et le mode du micro dans Réglages vocaux.
+- Activez ou désactivez la vérification en deux étapes depuis Compte, avec une application d'authentification et des codes de récupération.
+- Supprimez votre compte depuis Compte. L'application indique d'abord ce qui est supprimé et ce qui est conservé, puis vous vous reconnectez et entrez votre adresse courriel pour confirmer.
+- Un nouveau widget pour l'écran d'accueil affiche votre espace de travail, ses messages non lus et ses appels des 7 derniers jours. Il nécessite iOS 18 ou une version ultérieure.
+- Hors ligne, l'aperçu, la réception, les appels, les contacts et la liste de vos espaces de travail affichent ce qu'ils ont chargé en dernier, avec une bannière qui indique quand ces données ont été enregistrées. Les modifications exigent une connexion.
+- Intégrations, dans District Studio, montre les agendas qu'utilise votre réceptionniste et indique si chacun est connecté.
+- Un PDF ou un autre fichier reçu par texto s'ouvre maintenant dans un aperçu au lieu de s'afficher comme une image brisée.
+- En français, les onglets de Numéros de téléphone ne sont plus coupés sur les petits iPhone, et le solde du transporteur s'affiche comme un montant en français.
+- Petites corrections : plus de ligne au-dessus de la première rangée d'une liste, les cartes ne répètent plus le libellé de leur rangée, et un long nom d'hôte SIP reste sur une seule ligne.

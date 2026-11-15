@@ -10,6 +10,10 @@ built from history before publication, so they have no tags in this repository.
 
 ## [Unreleased]
 
+What 3.4.0 ships, in detail, until it is on sale. The `[3.4.0]` section below is its App
+Store What's New, which the release lane sends verbatim, so these entries move under it after
+the release, as the 3.0.0 to 3.3.0 entries did.
+
 ### Known limits
 
 - Dialler: a whole number typed without its trunk prefix may lose a leading digit when that
@@ -19,7 +23,7 @@ built from history before publication, so they have no tags in this repository.
 
 ### Added
 
-- The setup wizard in the app (Sean, 2026-11-08: "Most in app, buying on web"), on
+- The setup wizard in the app (decided 2026-11-08: "Most in app, buying on web"), on
   DistrictCore 8.5.0's `SetupWizardRepository`. "Finish setting up" on the overview now opens
   the web's six steps in a sheet, in its order and with its words, and resumes on the first
   step still to do: find your business (a draft from the business's website, saved switched
@@ -32,7 +36,7 @@ built from history before publication, so they have no tags in this repository.
   its state again when it closes. A person who is not the workspace's owner is told only the
   owner can do setup. Every write is a single flight, and step 1's choices are kept on the
   device until step 3 stores the language. English and draft French.
-- Two-step verification settings (Sean, 2026-11-07 and 2026-11-08), on DistrictCore 8.5.0's
+- Two-step verification settings (decided 2026-11-07 and 2026-11-08), on DistrictCore 8.5.0's
   `TwoStepSettingsRepository`. Account, Two-step verification opens a sheet that says whether
   it is on, since when and how many recovery codes are left. Turning it on or off starts with
   the same fresh re-authentication as account deletion, for the `2fa-change` action (a fresh
@@ -47,7 +51,6 @@ built from history before publication, so they have no tags in this repository.
   Each call is single-flight. The secret and the codes are never logged, are copied to this
   device only and for two minutes, are covered while the app is not active (the app switcher's
   snapshot), and are dropped when the sheet closes.
-
 - Integrations in Settings (parity Part 2 item 5), on DistrictCore 8.5.0's
   `SetupWizardRepository.connections`. A District Studio row after Knowledge, as on the web,
   opens the accounts the receptionist works through: Google Calendar and Microsoft Outlook
@@ -57,7 +60,7 @@ built from history before publication, so they have no tags in this repository.
   is the provider's consent screen, so the Integrations page opens in a sheet and the screen
   reads again when it closes. A viewer sees the statuses only. The sending domain and the
   media library have no mobile contract and are not here.
-- Account deletion in the app (Guideline 5.1.1(v); Sean, 2026-11-07), on DistrictCore 8.4.2's
+- Account deletion in the app (Guideline 5.1.1(v); decided 2026-11-07), on DistrictCore 8.4.2's
   `NativeReauthRepository`. Account, Delete account opens a sheet that says what is deleted
   (the profile, the settings and every workspace the person owns, whose subscriptions are
   cancelled at once) and what is kept (workspaces they belong to but do not own). A fresh
@@ -71,8 +74,7 @@ built from history before publication, so they have no tags in this repository.
   no revoke or unregister call (the account is gone), and the sign-in screen says the account
   was deleted, and when vendor-held support data is still being erased. The row no longer
   opens the deletion page; its address stays as the store listings' data-deletion URL.
-
-- District HQ by voice (Sean, 2026-11-07), on DistrictCore 8.4.1's voice routes and packets.
+- District HQ by voice (decided 2026-11-07), on DistrictCore 8.4.1's voice routes and packets.
   Talk to HQ on the HQ screen mints a session only on the tap, shows the service's
   `processingRegion` before the microphone opens (Start or Cancel; Cancel discards the
   session), then joins the encrypted LiveKit room with the microphone only. `push` mode starts
@@ -88,13 +90,99 @@ built from history before publication, so they have no tags in this repository.
   ends (Stop, 30 minutes, a ring, a sign-out) is ended (`hq/voice-end`). Microphone changes
   are serialized, so a quick press and release never leaves it open. The microphone prompt
   names District HQ.
-- Dialler design A (3.3.0, Sean's pick of 2026-11-03, #95): a flag and calling-code button in
+- A Home Screen widget (#112), small and medium, iOS 18 and later: the selected workspace's
+  name, its unread messages (the icon badge's number) and its calls in the last 7 days. The app
+  writes one snapshot, with no credential, contact, number or message text, to a Keychain item
+  in a new access group (`com.distronode.district.widget`, third in the app's list and the
+  widget's only group) from reads it already does; the widget makes no request and holds no
+  session. Counts belong to a workspace id, so a switch drops the other workspace's counts; a
+  count not read yet shows as a hyphen, and the call count turns into one 24 hours after it was
+  read. Every sign-out path clears it. `WidgetSnapshotTests` (11). Not yet seen on a signed
+  device: an unsigned build has no Keychain access.
+- Offline, read-only (#111): the last successful answer of the workspace list, Overview, Inbox,
+  Calls and Contacts is kept, and shown only when the service cannot be reached, never over an
+  answer the service gave. A banner says when the copy was saved. An expired access token
+  offline no longer reads as a sign-out: `api` takes a placeholder bearer that the caching
+  transport never sends. The copies sit in Caches (never backed up), with file protection and
+  hashed names, at most 7 days old and 2 MB each, keyed by language, and both sign-out paths
+  clear them. `OfflineReadCacheTests` (16).
+
+### Changed
+
+- MARKETING_VERSION 3.4.0. DistrictCore `exactVersion` 8.5.0 (from 8.3.0, through 8.4.1 for
+  HQ by voice and 8.4.2 for account deletion).
+- Phone numbers: the four tabs are a segmented control only when their names fit at its font
+  (#110), otherwise the menu already used at accessibility text sizes, so « Mes numéros » is
+  never cut on an iPhone 16e in French. `ParityFixes3Tests`.
+
+### Fixed
+
+- District HQ by voice (#115): a session replaced by another workspace's HQ screen is ended,
+  the app going to the background ends it (a meeting is not affected), `end()` works in any
+  phase, and a Stop during a slow join leaves no room joined. `HQVoiceLifecycleTests` (6).
+- Setup wizard (#127, fixes #121): step 4's Save and continue stays busy until the move ends,
+  so a second tap cannot write the facts twice; step 1 never drops the 50th question (a full
+  list refuses a new "what you do" with a sentence and sends nothing); back on step 1 after
+  step 4, the saved address and time zone are kept; an existing "what you do" question keeps
+  its switch.
+- Lists and cards (#108): Contacts, Inbox and Calls no longer draw a line above the first row,
+  and the Carrier, Persona and scheduling image cards no longer repeat their row's label as a
+  title. `VisualWalk302Tests`.
+- Phone numbers (#109): the carrier balance is French money in French (« 12,50 $ US »), a
+  trunk's SIP host stays on one line (scaled, then truncated in the middle; VoiceOver reads it
+  whole), and the contact block confirmation's identifier is Android's,
+  `district-contact-block-confirm`. `ParityFixes2Tests`.
+- District HQ by voice: signing out while Talk to HQ was still minting its session no longer
+  leaves that session open for its 30 minutes (#116). The sign-out waits for the token and
+  gives the session back (`hq/voice-discard`, falling back to `hq/voice-end`) while the
+  credential is still alive, as DistrictCore's Rust core does, inside the same 3-second bound,
+  so a stalled mint never holds the sign-out; a token that arrives later is still discarded.
+- Inbox: a received attachment that is not an image (a PDF sent by MMS) no longer draws as a
+  broken image (decided 2026-11-08). Each received attachment is fetched once without the bearer
+  token, as DistrictCore requires for media URLs, and branched on the response's `Content-Type`:
+  an image draws as before, anything else is a file tile (its type, as iOS names it, or
+  "Attachment") that opens in Quick Look from a temporary copy, with Quick Look's share button.
+  A fetch that fails (a carrier media URL that wants the carrier's own sign-in answers 401) says
+  "This attachment can't be opened here". The copy is removed when the preview closes. App-only
+  and interim: the timeline's `mediaUrls` still carries no type or name.
+
+## [3.4.0] - 2026-11-15
+
+Set up your workspace, talk to District HQ and protect your account, all in the app.
+
+- Finish setting up now opens the setup steps in the app: find your business, choose your receptionist's name, greeting and voice, add what callers should know, and choose how calls are answered. Buying a number and connecting a calendar still happen on the web.
+- Talk to HQ: speak to District HQ out loud from its screen. Before the microphone opens, the app tells you how and where your voice is processed. Set the voice, answer length, pace, language and microphone mode in Voice settings.
+- Turn two-step verification on or off from Account, with an authenticator app and recovery codes.
+- Delete your account from Account. The app first says what is deleted and what is kept, then you sign in again and type your email address to confirm.
+- A new Home Screen widget shows your workspace, its unread messages and its calls in the last 7 days. It needs iOS 18 or later.
+- When you are offline, Overview, Inbox, Calls, Contacts and your list of workspaces show what they last loaded, with a banner that says when it was saved. Changes need a connection.
+- Integrations, under District Studio, shows the calendars your receptionist uses and whether each one is connected.
+- A PDF or other file sent to you by text message now opens in a preview instead of showing as a broken image.
+- In French, the Phone numbers tabs are no longer cut off on smaller iPhones, and the carrier balance is written as a French amount.
+- Smaller fixes: no line above the first row of a list, cards no longer repeat their row's label, and a long SIP host name stays on one line.
+
+## [3.3.0] - 2026-11-06
+
+Watch your live calls as they happen, and step in when you need to.
+
+- A new Live calls screen lists the calls your receptionist is taking right now. Listen in without the caller hearing you, send your receptionist a private note and see whether it was used, or take over the call yourself and hand it back when you are done.
+- On your Apple Watch, a note you send during a live call now shows whether your receptionist used it.
+- Reply to WhatsApp, Messenger and Instagram conversations on the channel the customer wrote on, so a WhatsApp customer is no longer answered by text message.
+- Messenger and Instagram conversations now appear in your inbox. When the reply window has closed, the app says so and keeps your text until the customer writes again. A human agent reply shows its 7-day window.
+- When a WhatsApp conversation's window has closed, send one of your approved templates instead.
+- Assign a conversation to a teammate, see who each conversation is assigned to, and show only the ones assigned to you.
+- The keypad has a country button in front of the number. Type the number the local way, and the line under it shows the country it rings and the full international number before you call. A number with the wrong number of digits for its country is explained once you stop typing.
+- A number that belongs to no one country, such as a +1 800 toll-free number, now says so instead of naming a country.
+
+### Added
+
+- Dialler design A (3.3.0, picked 2026-11-03, #95): a flag and calling-code button in
   front of the number opens a searchable country list, the number is typed the local way and
   formats as it is typed, and a line before Call reads `Rings <country> · <international
   number>`. That E.164 number is what `calls/dial` is sent (it was the typed text). The home
   country is the one most of the workspace's numbers belong to, cached per workspace; a
   workspace with no numbers picks one or types `+`. `DialPlan`, `DialerCountryPicker`.
-- Messenger and Instagram reply window (3.3.0, Sean's decisions of 2026-11-06: web parity), on
+- Messenger and Instagram reply window (3.3.0, decided 2026-11-06: web parity), on
   DistrictCore 8.3.0's `InboxRepository.metaWindow`. A Messenger or Instagram reply reads Meta's
   window when its channel is selected and again after a send, with the WhatsApp window's
   guards (latest read only, a cancelled read dropped, an answer for another address dropped).
@@ -102,7 +190,7 @@ built from history before publication, so they have no tags in this repository.
   `messenger_window_closed` closes it at once. The 7-day human agent window shows the
   website's badge and offers no AI draft. Open and an unknown state block nothing, and no
   countdown is drawn. Two strings, the website's English and French.
-- Live supervise (3.3.0, Sean's decisions of 2026-11-05), on DistrictCore 8.2.0's
+- Live supervise (3.3.0, decided 2026-11-05), on DistrictCore 8.2.0's
   `SuperviseSession`, `CallsRepository.monitor`/`takeOver` and `WhisperReceipt`. A Live calls
   hub (Overview row, iPad sidebar) lists the call log's calls in progress and follows the
   workspace's `broadcast: true` telemetry (a call ending comes off at once); `calls/active` is
@@ -116,30 +204,7 @@ built from history before publication, so they have no tags in this repository.
   (`call_ended`) is said in the core's words. Apple Watch: a note sent from the wrist shows its
   receipt (used, or not used and why), relayed by the phone on the next keepalive; no steering
   on a colleague's own call. The microphone permission text names taking over a call. New
-  strings: the website's sentences and Sean's seven approved ones, plus four app-only drafts.
-
-### Fixed
-
-- District HQ by voice: signing out while Talk to HQ was still minting its session no longer
-  leaves that session open for its 30 minutes (#116). The sign-out waits for the token and
-  gives the session back (`hq/voice-discard`, falling back to `hq/voice-end`) while the
-  credential is still alive, as DistrictCore's Rust core does, inside the same 3-second bound,
-  so a stalled mint never holds the sign-out; a token that arrives later is still discarded.
-- Inbox: a received attachment that is not an image (a PDF sent by MMS) no longer draws as a
-  broken image (Sean, 2026-11-08). Each received attachment is fetched once without the bearer
-  token, as DistrictCore requires for media URLs, and branched on the response's `Content-Type`:
-  an image draws as before, anything else is a file tile (its type, as iOS names it, or
-  "Attachment") that opens in Quick Look from a temporary copy, with Quick Look's share button.
-  A fetch that fails (a carrier media URL that wants the carrier's own sign-in answers 401) says
-  "This attachment can't be opened here". The copy is removed when the preview closes. App-only
-  and interim: the timeline's `mediaUrls` still carries no type or name.
-- Live supervise: switching workspace from the picker now ends a live supervision. The switch
-  reaches the shell as one workspace, then none while the new list loads, then the next, so the
-  call stack compares with the last workspace that resolved (`CallStack.workspaceSelected`).
-- Live calls: a re-read cancelled part way (the next event reschedules it) is a failure, so the
-  list on screen is kept rather than replaced by the pages read so far, which could drop a live
-  call on a later page. A read queued behind the cancelled one runs in a fresh task, so it
-  lands instead of failing at once and leaving the list stale until the next event.
+  strings: the website's sentences and seven approved for the apps, plus four app-only drafts.
 
 ### Changed
 
@@ -153,13 +218,13 @@ built from history before publication, so they have no tags in this repository.
   viewers; Unassigned) with the `assignee_is_viewer` and `assignee_not_member` refusals. A
   closed WhatsApp window replaces the reply box with the approved templates (variables,
   preview, `sendWhatsAppTemplate`), and an open one names its sender. The alert push register
-  declares `metaChannels`. 24 new strings in English and French, the French reviewed (Sean's
-  sign-off, 2026-11-05). The held-images sentences then replace the three "removed" ones with
+  declares `metaChannels`. 24 new strings in English and French, the French reviewed
+  (signed off 2026-11-05). The held-images sentences then replace the three "removed" ones with
   four new strings (`inbox.attachments_held_*`, `inbox.attachments_switch_to_sms`), the French
-  reviewed too (Sean's sign-off, 2026-11-05, "Approve all").
+  reviewed too (signed off 2026-11-05).
   iPhone and iPad: Assign is a row's leading swipe action and a context-menu item. Apple Watch: unchanged code; it
   reads the phone's snapshot, whose `canReply` and wrist replies now follow `replyOptions`.
-  The max review's findings (Sean, "All except 9"): an image that finishes uploading after a
+  The review's findings (all but item 9): an image that finishes uploading after a
   switch to a text-only channel, or is handed over after one, is held rather than lost, and Send
   and the channel picker wait for an upload; held images show in the reply box as dimmed chips
   marked Held, each with Remove (which updates the saved draft), and VoiceOver names the channel
@@ -167,72 +232,144 @@ built from history before publication, so they have no tags in this repository.
   and re-reads the current owner when it opens; overlapping WhatsApp window reads apply only the
   latest, and the read at the window's close re-arms while the answer is already past. Three new
   strings (`inbox.attachment_held`, `inbox.attachment_held_by_email`, `inbox.attachment_held_on`),
-  the French reviewed (Sean's sign-off, 2026-11-06, "Approve all 3").
+  the French reviewed (signed off 2026-11-06).
   A blank reply box deletes the saved draft only once the draft has been read, so removing an
   image or clearing the box after a failed read cannot delete a reply nobody has seen; a save
   that lands counts as read, since the server then holds only this composer's text. A draft
   restored after an image was attached merges its images with it (by URL) instead of replacing it,
   and an upload that lands once that merge filled the five is dropped with the five-image sentence.
-- 3.3.0: MARKETING_VERSION 3.3.0, Live supervise and Inbox parity (WhatsApp, Messenger and
+- MARKETING_VERSION 3.3.0, Live supervise and Inbox parity (WhatsApp, Messenger and
   Instagram replies, assignment, the Messenger and Instagram reply window). The version pair is
   project-level, so every target carries the same value. DistrictCore is at `exactVersion`
   8.3.0. The build number is still set by `scripts/archive-imac.sh`.
-- 3.2.1: MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
+
+### Fixed
+
+- Live supervise: switching workspace from the picker now ends a live supervision. The switch
+  reaches the shell as one workspace, then none while the new list loads, then the next, so the
+  call stack compares with the last workspace that resolved (`CallStack.workspaceSelected`).
+- Live calls: a re-read cancelled part way (the next event reschedules it) is a failure, so the
+  list on screen is kept rather than replaced by the pages read so far, which could drop a live
+  call on a later page. A read queued behind the cancelled one runs in a fresh task, so it
+  lands instead of failing at once and leaving the list stale until the next event.
+- Dialler: a pasted `+1 1 416 555 0199` no longer turns into a callable Canadian number. The
+  field showed `(141) 655-50199`, and reading that again took its leading `1` as the trunk
+  prefix, `416 555 0199` with Call on. What the field shows now always reads back to the same
+  number; one that would not is shown as `+114165550199` (Seer on district-core-rust #63).
+- Dialler: every country whose national prefix is `0` in libphonenumber drops its trunk `0`, 103
+  countries where 45 were listed: `0412 123 4567` typed in Venezuela sent `+58 0412…` (also
+  Ecuador, Uruguay and 55 more; Seer on district-core-rust #63). The list is the same in the
+  iOS, Mac and Android apps and district-core-rust.
+- Dialler: the web's other no-country +1 codes, 500, 600, 700, 710 and 900, get the same "does
+  not belong to one country" line as the toll-free ones, as the web's area-code table has it;
+  600 said "Rings Canada" and the others "Rings United States".
+- Dialler: every trunk prefix follows libphonenumber-js 1.13.14. Belarus is `8` (it was `80`,
+  which is still read, as is `0`), Turkmenistan `8` and the Marshall Islands `1` are added, and
+  the prefixes libphonenumber also strips are read: Lithuania's old `8` (`8 612 34567` sent
+  `+370 8612 34567`) and the UK's `180020`.
+- Dialler: a +1 toll-free number (800, 833, 844, 855, 866, 877, 888) no longer says "Rings
+  Canada" or "Rings United States" under the field. It says what the web dialler says, "Rings +1
+  800 555 0100. This number does not belong to one country. Check it before you call." (and the
+  web's French), new key `dialer_m.rings_no_country` (decided 2026-11-04). As on the
+  web it is said from 8 digits with the `1` (Call still off, the number ungrouped until whole).
+  The button keeps its +1 country. The dialler's 13 French strings are marked reviewed.
+- Dialler: three cases Seer found in district-core-rust #63's port of `DialPlan`, which
+  this copy had too (and district-macos, fixed the same way). `+7` then `812` typed one key at a
+  time kept its 8: a `+` and a calling code with no digit after it now stay in the field, so
+  the 8 is read after the code instead of as Russia's trunk prefix; a country picked over
+  such a field clears it (`DialPlan.entryForPick`). A Russian number typed with its `7` and
+  no `+` (`79161234567`) is too long rather than offered as an eleven-digit Kazakh number:
+  every +7 number now needs exactly ten digits after the code. And `+911` is still refused
+  but keeps its plus, so the next digit reaches India (`+91 1…`) instead of reading `91…` as
+  a local number.
+- Dialler: a number of the wrong length for its country is explained only once the operator
+  stops (the field loses focus, Return, the new Done key above the number pad, or a refused
+  Call), and the next keystroke clears it, as on the web (MR !102) and the Mac (district-macos#91). "That is
+  too many digits for a phone number." no longer appears mid-typing, and `+4165550123` (eight
+  digits after Switzerland's `+41`) now says why Call is off instead of saying nothing. It
+  still cannot be called.
+
+## [3.2.1] - 2026-10-27
+
+Small fixes for calls and the Apple Watch app.
+
+- A finished call's end time now shows in full in the Dynamic Island instead of being cut off.
+- In French, a time such as 16 h 13 no longer breaks across two lines at larger text sizes.
+- The Apple Watch app now shows live calls and unread messages in colour, so they stand out at a glance.
+
+### Changed
+
+- MARKETING_VERSION 3.2.1, the visual polish the 3.2.0 visual QA found. The version
   pair is project-level, so every target carries the same value. DistrictCore stays at
   `exactVersion` 8.1.0.
-- 3.2.0: MARKETING_VERSION 3.2.0, Apple Watch round 2. The version pair is project-level,
-  so the iOS app, the watch app, its complications and the notification service extension
-  carry the same value.
-- 3.2.0: DistrictCore `exactVersion` 8.0.0 (district-core-swift's 8.0.0 tag, #39), for the
-  decline, whisper, notify-token and message-sender endpoints and
-  `RingCancelReason.declined`.
-- 3.2.0: a person's decline is sent (`POST calls/{callId}/decline`), reversing "a decline
-  sends nothing" (Sean, 2026-10-24, GitLab #2 note 4083623386): the ringing screen's
-  Decline and the system's end action while it rings (lock screen, Apple Watch, headset,
-  car) feed `.declinePressed`, whose `.requestDecline` command `IncomingCallDeclineSender`
-  sends once, never retried, inside a background task. A ring ended because nobody is
-  signed in feeds the core's `.withdrawnLocally` and sends nothing, like a timeout.
-  `IncomingCallEnding` holds both choices; `IncomingCallDeclineTests` runs them through the
-  real reducer.
-- 3.2.0: a ring the server ends with reason `declined` (every member rang declined) is
-  recorded in CallKit's Recents as `.declinedElsewhere`, not as a missed call.
-  `RingCancelTests`.
-- 3.2.0: the call's Live Activity (Sean, 2026-10-25, GitLab #2): a new widget extension,
-  `DistrictAIWidgets` (`com.distronode.district.widgets`), draws `DistrictCallActivityAttributes`
-  on the Lock Screen, in the Dynamic Island and, with watchOS 11, in the Apple
-  Watch Smart Stack (`.supplementalActivityFamilies([.small])`). The app starts it locally
-  only, when a ring wakes it (after CallKit has the call) or when the open app sees a call in
-  progress (the call screen, the watch relay's live list), never two for one call; updates it
-  from the live transcript while awake (the latest final line, at most 120 characters); ends
-  it when the call ends (gone four minutes later) and at sign-out at once. Each push token goes
-  to the server once through DistrictCore's `CallsRepository.registerLiveActivity`
-  (`pushType: .token`), so the server's `liveactivity` pushes update it while the app sleeps.
-  iOS 18 and later only: the extension targets iOS 18 for the watch family, and iOS 17
-  starts none (Sean, "iOS 18+ only"). Push-to-start (Sean, "Add push-to-start"): the device's
-  push-to-start token goes to `POST live-activity/start-token` for the current workspace
-  (`LiveActivityStartTokens`: after sign-in and at launch, on a new token, on a workspace
-  switch, again after 7 days; never retried; cleared at sign-out), so a ring starts the
-  activity with no app running; the app adopts what the server starts, registers its update
-  token, and never keeps two for one call (the local ring start stays as the fallback). The
-  start push's alert keys `live_activity.start.title` and `.body` are in `l10n/push.toml`. `NSSupportsLiveActivities` in the app; strings in `l10n/widgets.toml`.
-  `CallLiveActivitiesTests`, `CallLiveActivityPushStartTests`, `LiveActivityStartTokensTests`.
-- 3.2.0: DistrictCore `exactVersion` 8.1.0 (district-core-swift's 8.1.0 tag, #42), for
-  `CallsRepository.registerLiveActivity` and `registerLiveActivityStartToken`.
-- 3.2.0: steering from the watch sends through the core's `CallsRepository.whisper`;
-  `PendingCoreWhisper`, its failure sentence (`watch_bridge.whisper_unavailable`) and its
-  code are gone, and `ContainerWatchLiveSources` takes the sender with no default.
-- 3.1.0: MARKETING_VERSION 3.1.0, the Apple Watch companion release. The version pair is
-  project-level, so the iOS app, the watch app and its complication carry the same value.
-- 3.1.0: DistrictCore `exactVersion` 7.1.0 (district-core-swift's 7.1.0 tag), for
-  `SchedulingWallClock` (#72). Package.swift is unchanged between 7.0.3 and 7.1.0, so no
-  other pin moves.
-- The product is Desk in English and « Comptoir » in French on every surface (#69, #73):
-  "District Desk" is gone from the title, eyebrow, Overview tile, viewer note and off card,
-  and English sentences take the article ("The Desk is off"). `DeskNamingTests`.
+
+### Fixed
+
+- The Dynamic Island's compact view shows a finished call's end time in full
+  (#89). Only the running timer keeps the 44 pt cap; the end time drops its day period in
+  compact ("12:53", « 13 h 19 ») and may shrink to 0.8. `CallActivityClock`.
+- French times from the server no longer wrap between the hour and « h » (#89):
+  `WireDate.unbroken` joins « 16 h 13 » with U+00A0. `WireDateTests`, `FrenchWireTextTests`.
+- The watch has an AccentColor (#89), the dark `district` teal #67cded, so a live
+  call, the unread count and dots, and the assistant's transcript lines are no longer grey.
+- In French the Sign in with Apple button showed Apple's logo alone: its intrinsic
+  width fits "Sign in with Apple" but not « Se connecter avec Apple », and the control drops
+  its title when it does not fit. `SignInView` gives it a 240 pt minimum width (3.2.1
+  visual QA).
+- The hidden Apple Watch diagnostics sheet (Debug and TestFlight) has a Done button
+  (`watch_diagnostics.done`, « OK ») and its empty line is no longer dimmed twice (#89).
+
+### Release lane
+
+- The signed-in smoke no longer writes the demo account's password into its logs. XCUITest's
+  `typeText` records `Type '<text>' into "Password"` in the run log, the console log and the
+  result bundle, secure field or not. `scripts/smoke-simulator.sh` now keeps the password out
+  of every child process and puts it on the simulator's pasteboard (`simctl pbcopy`, from
+  stdin); the suite pastes it from the field's edit menu and is told only that it is there
+  (`DISTRICT_SMOKE_PASSWORD_ON_PASTEBOARD`). Both pasteboards are cleared on exit, and a guard
+  searches the log, the result bundle and its exports for the password without printing it
+  (a copy fails the run with exit 3, an unreadable bundle a green run with exit 4). The
+  journey also turns down the "Save Password?" sheet that a fresh simulator raises after
+  Enter platform, which had covered the page until "the consent screen never appeared".
+  `scripts/smoke-simulator.test.sh` (40 cases) holds the channel and the guard. Its first
+  simulator runs (iPhone 17 Pro and iPad Pro 13, erased) showed the paste never lands: the
+  sign-in page runs in SafariViewService, whose paste does not read what `simctl pbcopy`
+  writes. So, fixed here:
+  - The password is typed by the script, not pasted. The
+    suite focuses the field and logs the step `SMOKE-TYPE-PASSWORD-NOW`; the script sees it
+    in xcodebuild's live output, raises the device's Simulator window and types the password
+    and Return as System Events keystrokes, the password going to `osascript` by stdin.
+    XCTest never sees the keystrokes. The Mac needs Accessibility and Automation granted
+    once to whatever runs the script.
+  - The secure field's value is no longer read (it hung for 30 s on the iPad). A password
+    that never landed shows as the login page refusing the sign-in, or as the run still on
+    the login page after 45 s, each with its own message.
+  - The script waits for `simctl bootstatus -b`, clears the previous run's attachments, and
+    no longer prints the all-clear after a failed attachment export (exit 4 on a green run).
+  - Consent is found in either language (the page speaks the account's stored language), a
+    page already past consent counts as success (a stray "Not Now" tap can press it), and the
+    call log screen carries `district-call-log-root` in both layouts, since the iPad's split
+    view has no tab and its tab identifier.
+  - The release gate is an iPhone run (now the script's default device, iPhone 17 Pro); an
+    iPad run is informational, since under XCUITest's load the iPad sign-in sheet paints blank
+    while a manual iPad sign-in works (decided 2026-10-27).
+  Proven on iPhone 17 Pro (erased, QA account): 1 test, 0 failures, the password in no log or
+  bundle. The harness has 52 cases.
+
+## [3.2.0] - 2026-10-25
+
+More of District AI on your Apple Watch.
+
+- Follow a call's live transcript on your Apple Watch while the assistant takes it, and guide the assistant: tell it you will call them back today, have it ask what the call is about, or dictate your own instruction.
+- When a call ends, your watch shows a summary with the outcome and the action items. Call back on iPhone opens your iPhone's keypad with the number filled in.
+- Add an optional complication that shows how many messages are unread. It is on no watch face until you add it, and it never shows who wrote.
+- Decline a call on your iPhone or your Apple Watch, and once everyone it rang has declined, the assistant takes a message right away instead of letting it ring on.
+- Message notifications now show who the message is from, when the contact has a name.
+- Notifications about an urgent call, or from a contact you marked VIP, can arrive as Time Sensitive, so they reach you during a Focus.
 
 ### Added
 
-- 3.2.0: message alerts name their sender, through a notification service extension
+- Message alerts name their sender, through a notification service extension
   (`DistrictAINotificationService`, `com.distronode.district.notificationservice`) that
   holds no session. The app mints a scoped, read-only notify token
   (`NotifyTokenRepository.mint()`) after sign-in and at launch when it is missing, expired
@@ -246,7 +383,7 @@ built from history before publication, so they have no tags in this repository.
   Keychain group listed first; `scripts/archive-imac.sh` refuses a signature whose first
   group is not it. `NotifyAlertNamingTests`, `NotifyTokenRenewalTests`; CI checks the
   extension is embedded with its manifest and both tables.
-- 3.2.0: on the Apple Watch, a Live row per call in progress, its transcript (final lines,
+- On the Apple Watch, a Live row per call in progress, its transcript (final lines,
   the newest interim line lighter, memory only) and steering for anyone but a viewer: two
   third-person instructions and a dictated line, sent as a whisper. The phone relays over
   WatchConnectivity (`WatchLiveRelay`), by default a fresh snapshot per 5-second keepalive,
@@ -254,43 +391,105 @@ built from history before publication, so they have no tags in this repository.
   older phone answers "update both apps" and the watch hides Live.
   `WatchLiveRelayTests`, `WatchLiveRequestTests`, `WatchLiveComposerTests`,
   `WatchLiveStoreTests`.
-- 3.2.0: a call card on the watch after a watched call ends, from Recent calls and from a
+- A call card on the watch after a watched call ends, from Recent calls and from a
   tapped call notification: caller, outcome, summary and action items, asked again at 10,
   30 and 60 s while the summary is on its way. "Call back on iPhone" is a Handoff carrying
   the call id, never the number; the iPhone fills the dialler and never dials.
-- 3.2.0: an opt-in unread complication (`com.distronode.district.complication.unread`:
+- An opt-in unread complication (`com.distronode.district.complication.unread`:
   circular, inline, corner), a count only and `.privacySensitive()`, on no face until
   added. While it is on a face the watch asks the phone for a fresh snapshot about every
   15 minutes (`WKApplicationRefreshBackgroundTask`, `WatchAppDelegate`).
   `UnreadComplicationTests`, `WatchBackgroundRefreshTests`.
-- 3.2.0: the Time Sensitive Notifications entitlement, for the server's "needs you" alerts
+- The Time Sensitive Notifications entitlement, for the server's "needs you" alerts
   (an urgent call or a VIP contact). The App ID needs the capability, and App Review notes
   must justify it.
-- 3.2.0: a hidden relay diagnostics screen (seven taps on Account's version line, Debug and
+- A hidden relay diagnostics screen (seven taps on Account's version line, Debug and
   TestFlight builds only) logging the watch relay's timings, with no content, for the
   device spike that confirms the relay mode.
-- 3.2.0: steer after a decline. A person's decline (and only that: not a timeout, a
+- Steer after a decline. A person's decline (and only that: not a timeout, a
   withdrawal or a ring with nobody signed in) posts "You declined the call. Tell the
   assistant what to say?" (category `district.declined_steer`: the two canned lines and a
   text box), carrying the ring's own ids, so a tap opens the call. Each action goes through
   `NotificationActionHandler` (`DeclineSteerHandler`) to `CallsRepository.whisper` once,
   inside a background task, never retried; a failure posts "Not sent to the assistant" with
   the instruction carried back. `DeclineSteerTests`.
-- 3.2.0: App Intents on the iPhone and the watch, "Set my availability" (on or off) and "Read
+- App Intents on the iPhone and the watch, "Set my availability" (on or off) and "Read
   my latest message" (shown only, marks nothing read), with App Shortcuts phrases. The watch
   sets availability through its switch's own write and asks the phone for the latest message
   (`WatchAction.latestMessage`; no protocol bump, an older phone answers "update both apps").
   Strings in `l10n/appintents.toml` and `l10n/appshortcuts.toml`, written as the
   `AppIntents` and `AppShortcuts` tables into both apps. `IntentRunnerTests`,
   `WatchIntentRunnerTests`.
-- 3.2.0: on the watch, Double Tap (watchOS 11 and later) presses the Live screen's first
+- On the watch, Double Tap (watchOS 11 and later) presses the Live screen's first
   canned line and the call card's Call back; the complications tell the Smart Stack when they
   matter (`TimelineEntryRelevance`: unread messages raise the unread one, an availability
   change raises the availability one for 30 minutes); and long looks for a message (the
   sender and the alert's text) and an incoming call (the call's card), with the phone's
   category actions. `ComplicationRelevanceTests`, `NotificationLongLookTests`.
 
-- Added: Apple Watch app: recent calls, inbox reply and mark read, and your availability for
+### Changed
+
+- MARKETING_VERSION 3.2.0, Apple Watch round 2. The version pair is project-level,
+  so the iOS app, the watch app, its complications and the notification service extension
+  carry the same value.
+- DistrictCore `exactVersion` 8.0.0 (district-core-swift's 8.0.0 tag, #39), for the
+  decline, whisper, notify-token and message-sender endpoints and
+  `RingCancelReason.declined`.
+- A person's decline is sent (`POST calls/{callId}/decline`), reversing "a decline
+  sends nothing" (decided 2026-10-24): the ringing screen's
+  Decline and the system's end action while it rings (lock screen, Apple Watch, headset,
+  car) feed `.declinePressed`, whose `.requestDecline` command `IncomingCallDeclineSender`
+  sends once, never retried, inside a background task. A ring ended because nobody is
+  signed in feeds the core's `.withdrawnLocally` and sends nothing, like a timeout.
+  `IncomingCallEnding` holds both choices; `IncomingCallDeclineTests` runs them through the
+  real reducer.
+- A ring the server ends with reason `declined` (every member rang declined) is
+  recorded in CallKit's Recents as `.declinedElsewhere`, not as a missed call.
+  `RingCancelTests`.
+- The call's Live Activity (decided 2026-10-25): a new widget extension,
+  `DistrictAIWidgets` (`com.distronode.district.widgets`), draws `DistrictCallActivityAttributes`
+  on the Lock Screen, in the Dynamic Island and, with watchOS 11, in the Apple
+  Watch Smart Stack (`.supplementalActivityFamilies([.small])`). The app starts it locally
+  only, when a ring wakes it (after CallKit has the call) or when the open app sees a call in
+  progress (the call screen, the watch relay's live list), never two for one call; updates it
+  from the live transcript while awake (the latest final line, at most 120 characters); ends
+  it when the call ends (gone four minutes later) and at sign-out at once. Each push token goes
+  to the server once through DistrictCore's `CallsRepository.registerLiveActivity`
+  (`pushType: .token`), so the server's `liveactivity` pushes update it while the app sleeps.
+  iOS 18 and later only: the extension targets iOS 18 for the watch family, and iOS 17
+  starts none (decided: "iOS 18+ only"). Push-to-start (decided: "Add push-to-start"): the device's
+  push-to-start token goes to `POST live-activity/start-token` for the current workspace
+  (`LiveActivityStartTokens`: after sign-in and at launch, on a new token, on a workspace
+  switch, again after 7 days; never retried; cleared at sign-out), so a ring starts the
+  activity with no app running; the app adopts what the server starts, registers its update
+  token, and never keeps two for one call (the local ring start stays as the fallback). The
+  start push's alert keys `live_activity.start.title` and `.body` are in `l10n/push.toml`. `NSSupportsLiveActivities` in the app; strings in `l10n/widgets.toml`.
+  `CallLiveActivitiesTests`, `CallLiveActivityPushStartTests`, `LiveActivityStartTokensTests`.
+- DistrictCore `exactVersion` 8.1.0 (district-core-swift's 8.1.0 tag, #42), for
+  `CallsRepository.registerLiveActivity` and `registerLiveActivityStartToken`.
+- Steering from the watch sends through the core's `CallsRepository.whisper`;
+  `PendingCoreWhisper`, its failure sentence (`watch_bridge.whisper_unavailable`) and its
+  code are gone, and `ContainerWatchLiveSources` takes the sender with no default.
+
+## [3.1.0] - 2026-10-24
+
+District AI comes to Apple Watch.
+
+- A new Apple Watch app shows your recent calls and your inbox. Reply to a conversation with a quick reply or your own words, and mark it read.
+- Turn your availability for calls on or off from your wrist, and add a complication to a watch face to see at a glance whether calls ring to you.
+- Tapping a message notification on your watch opens that conversation.
+- The Apple Watch app works with District AI on your iPhone, so keep your iPhone nearby. It needs watchOS 10 or later.
+- Reply and Mark read on a message notification now work when the app is closed, from a locked iPhone or from your Apple Watch.
+- District Desk is now simply the Desk.
+- Text fields have a clearer edge, so an empty field is easy to see.
+- District HQ's question box shows its own hint instead of repeating its label.
+- A contact or conversation known only by its number shows a person icon instead of a stray symbol.
+- Phone numbers no longer repeats its help text.
+- In French, working hours show and accept times such as 9 h and 13 h 30.
+
+### Added
+
+- Apple Watch app: recent calls, inbox reply and mark read, and your availability for
   calls, with a watch-face complication. A companion app (watchOS 10 or later), embedded in
   the iPhone app: the watch holds no credential and makes no request of its own. The iPhone
   sends it a snapshot over WatchConnectivity (`updateApplicationContext`: workspace,
@@ -315,57 +514,19 @@ built from history before publication, so they have no tags in this repository.
   message's thread key (`WatchAction.resolveMessage`). An older phone answers "update both
   apps" and the watch stays on the inbox.
 
+### Changed
+
+- MARKETING_VERSION 3.1.0, the Apple Watch companion release. The version pair is
+  project-level, so the iOS app, the watch app and its complication carry the same value.
+- DistrictCore `exactVersion` 7.1.0 (district-core-swift's 7.1.0 tag), for
+  `SchedulingWallClock` (#72). Package.swift is unchanged between 7.0.3 and 7.1.0, so no
+  other pin moves.
+- The product is Desk in English and « Comptoir » in French on every surface (#69, #73):
+  "District Desk" is gone from the title, eyebrow, Overview tile, viewer note and off card,
+  and English sentences take the article ("The Desk is off"). `DeskNamingTests`.
+
 ### Fixed
 
-- Dialler: a pasted `+1 1 416 555 0199` no longer turns into a callable Canadian number. The
-  field showed `(141) 655-50199`, and reading that again took its leading `1` as the trunk
-  prefix, `416 555 0199` with Call on. What the field shows now always reads back to the same
-  number; one that would not is shown as `+114165550199` (Seer on district-core-rust #63).
-- Dialler: every country whose national prefix is `0` in libphonenumber drops its trunk `0`, 103
-  countries where 45 were listed: `0412 123 4567` typed in Venezuela sent `+58 0412…` (also
-  Ecuador, Uruguay and 55 more; Seer on district-core-rust #63). The list is the same in the
-  iOS, Mac and Android apps and district-core-rust.
-- Dialler: the web's other no-country +1 codes, 500, 600, 700, 710 and 900, get the same "does
-  not belong to one country" line as the toll-free ones, as the web's area-code table has it;
-  600 said "Rings Canada" and the others "Rings United States".
-- Dialler: every trunk prefix follows libphonenumber-js 1.13.14. Belarus is `8` (it was `80`,
-  which is still read, as is `0`), Turkmenistan `8` and the Marshall Islands `1` are added, and
-  the prefixes libphonenumber also strips are read: Lithuania's old `8` (`8 612 34567` sent
-  `+370 8612 34567`) and the UK's `180020`.
-- Dialler: a +1 toll-free number (800, 833, 844, 855, 866, 877, 888) no longer says "Rings
-  Canada" or "Rings United States" under the field. It says what the web dialler says, "Rings +1
-  800 555 0100. This number does not belong to one country. Check it before you call." (and the
-  web's French), new key `dialer_m.rings_no_country` (Sean, 2026-11-04, GitLab #2). As on the
-  web it is said from 8 digits with the `1` (Call still off, the number ungrouped until whole).
-  The button keeps its +1 country. The dialler's 13 French strings are marked reviewed.
-- Dialler: three cases Seer found in district-core-rust #63's port of `DialPlan`, which
-  this copy had too (and district-macos, fixed the same way). `+7` then `812` typed one key at a
-  time kept its 8: a `+` and a calling code with no digit after it now stay in the field, so
-  the 8 is read after the code instead of as Russia's trunk prefix; a country picked over
-  such a field clears it (`DialPlan.entryForPick`). A Russian number typed with its `7` and
-  no `+` (`79161234567`) is too long rather than offered as an eleven-digit Kazakh number:
-  every +7 number now needs exactly ten digits after the code. And `+911` is still refused
-  but keeps its plus, so the next digit reaches India (`+91 1…`) instead of reading `91…` as
-  a local number.
-- Dialler: a number of the wrong length for its country is explained only once the operator
-  stops (the field loses focus, Return, the new Done key above the number pad, or a refused
-  Call), and the next keystroke clears it, as on the web (MR !102) and the Mac (district-macos#91). "That is
-  too many digits for a phone number." no longer appears mid-typing, and `+4165550123` (eight
-  digits after Switzerland's `+41`) now says why Call is off instead of saying nothing. It
-  still cannot be called.
-- 3.2.1: the Dynamic Island's compact view shows a finished call's end time in full
-  (#89). Only the running timer keeps the 44 pt cap; the end time drops its day period in
-  compact ("12:53", « 13 h 19 ») and may shrink to 0.8. `CallActivityClock`.
-- 3.2.1: French times from the server no longer wrap between the hour and « h » (#89):
-  `WireDate.unbroken` joins « 16 h 13 » with U+00A0. `WireDateTests`, `FrenchWireTextTests`.
-- 3.2.1: the watch has an AccentColor (#89), the dark `district` teal #67cded, so a live
-  call, the unread count and dots, and the assistant's transcript lines are no longer grey.
-- 3.2.1: in French the Sign in with Apple button showed Apple's logo alone: its intrinsic
-  width fits "Sign in with Apple" but not « Se connecter avec Apple », and the control drops
-  its title when it does not fit. `SignInView` gives it a 240 pt minimum width (3.2.1
-  visual QA).
-- 3.2.1: the hidden Apple Watch diagnostics sheet (Debug and TestFlight) has a Done button
-  (`watch_diagnostics.done`, « OK ») and its empty line is no longer dimmed twice (#89).
 - Text fields have a 3:1 edge (WCAG 1.4.11), as on the Mac (#71): `fieldEdge`, 6.07:1 dark
   and 7.41:1 light on the card, where `input` was 1.40:1 and 1.62:1. `DistrictContrastTests`.
 - Working hours: a French time field reads « 9 h », « 9 h 30 », « 17 h » (#72), and stores
@@ -377,7 +538,7 @@ built from history before publication, so they have no tags in this repository.
   (« Ouvrir sur l'iPhone », `watch.open_iphone_short`): the full sentence cannot fit its one
   line. The inline family and VoiceOver keep `watch.open_iphone`. `ComplicationView.headline(for:)`,
   `testTheRectangularHeadlineIsShortWhenThereIsNothingToShow`.
-- Watch French, Sean's choices as relayed by the manager (2026-10-24): « Session fermée » (`watch.signed_out`),
+- Watch French, as chosen at review (2026-10-24): « Session fermée » (`watch.signed_out`),
   « … charger cette liste. » (`watch.could_not_load`), « Aucun canal de réponse pour cette
   conversation. » (`watch.cannot_reply`), « Date » (`watch.when`); `watch.inbox` keeps
   « Réception », the iPhone tab's word, now with its `fr_variant`. The French time error
@@ -385,7 +546,7 @@ built from history before publication, so they have no tags in this repository.
 - The watch's call detail keeps the system's side margin (`.scenePadding(.horizontal)`):
   its fields started about 5 px from the edge of a 46 mm screen, under the rounded corner,
   where the title and every list inset about 30 px (3.1.0 visual QA).
-- Fixed: replying to or marking a message read from a notification while the app was
+- Replying to or marking a message read from a notification while the app was
   closed was silently dropped. Reply and Mark read are background actions, and from a
   locked phone or an Apple Watch they launch the app with no screen: the action waited
   for a view and a loaded workspace that never came, and the system's completion handler
@@ -420,45 +581,19 @@ built from history before publication, so they have no tags in this repository.
   now also opens Calls and Inbox. `scripts/smoke-simulator.test.sh` (13 cases, in CI's
   release script tests) holds the signing, the uninstall and where the password goes.
   Proven on 3.0.3 (f65026f), iPhone 17 Pro, QA account, plan "Voice Pro": 1 test, 0 failures.
-- The signed-in smoke no longer writes the demo account's password into its logs. XCUITest's
-  `typeText` records `Type '<text>' into "Password"` in the run log, the console log and the
-  result bundle, secure field or not. `scripts/smoke-simulator.sh` now keeps the password out
-  of every child process and puts it on the simulator's pasteboard (`simctl pbcopy`, from
-  stdin); the suite pastes it from the field's edit menu and is told only that it is there
-  (`DISTRICT_SMOKE_PASSWORD_ON_PASTEBOARD`). Both pasteboards are cleared on exit, and a guard
-  searches the log, the result bundle and its exports for the password without printing it
-  (a copy fails the run with exit 3, an unreadable bundle a green run with exit 4). The
-  journey also turns down the "Save Password?" sheet that a fresh simulator raises after
-  Enter platform, which had covered the page until "the consent screen never appeared".
-  `scripts/smoke-simulator.test.sh` (40 cases) holds the channel and the guard. Its first
-  simulator runs (iPhone 17 Pro and iPad Pro 13, erased) showed the paste never lands: the
-  sign-in page runs in SafariViewService, whose paste does not read what `simctl pbcopy`
-  writes. So, fixed here:
-  - The password is typed by the script, not pasted (Sean, GitLab #2 note 4096242351). The
-    suite focuses the field and logs the step `SMOKE-TYPE-PASSWORD-NOW`; the script sees it
-    in xcodebuild's live output, raises the device's Simulator window and types the password
-    and Return as System Events keystrokes, the password going to `osascript` by stdin.
-    XCTest never sees the keystrokes. The Mac needs Accessibility and Automation granted
-    once to whatever runs the script.
-  - The secure field's value is no longer read (it hung for 30 s on the iPad). A password
-    that never landed shows as the login page refusing the sign-in, or as the run still on
-    the login page after 45 s, each with its own message.
-  - The script waits for `simctl bootstatus -b`, clears the previous run's attachments, and
-    no longer prints the all-clear after a failed attachment export (exit 4 on a green run).
-  - Consent is found in either language (the page speaks the account's stored language), a
-    page already past consent counts as success (a stray "Not Now" tap can press it), and the
-    call log screen carries `district-call-log-root` in both layouts, since the iPad's split
-    view has no tab and its tab identifier.
-  - The release gate is an iPhone run (now the script's default device, iPhone 17 Pro); an
-    iPad run is informational, since under XCUITest's load the iPad sign-in sheet paints blank
-    while a manual iPad sign-in works (Sean, 2026-10-27).
-  Proven on iPhone 17 Pro (erased, QA account): 1 test, 0 failures, the password in no log or
-  bundle. The harness has 52 cases.
+
+## [3.0.3] - 2026-10-22
+
+A small update.
+
+- In French, a workflow's Recent runs now say why a step could not notify your team, for example that no team member has the app on a device that can receive notifications.
+- Rooms and Preview persona say in plain words when a session ends or cannot connect, instead of showing a technical message.
+- Crash reporting is updated to the latest stable version.
 
 ### Changed
 
-- 3.0.3: DistrictCore `exactVersion` 7.0.3 (district-core-swift's 7.0.3 tag). Its catalogs
-  carry the service's error codes and vocabulary from monorepo ac4071d14. What this app
+- DistrictCore `exactVersion` 7.0.3 (district-core-swift's 7.0.3 tag). Its catalogs
+  carry the service's current error codes and vocabulary. What this app
   shows from them: five workflow action reason codes (`no-devices`, `no-message`,
   `push-lookup-failed`, `push-not-delivered`, `signing-unavailable`) now have a French
   label, so `WorkflowActionReason.label` on a French screen shows the reviewed sentence
@@ -468,10 +603,11 @@ built from history before publication, so they have no tags in this repository.
   editing), so no screen here changes for them. No app source change;
   `FrenchWireTextTests.testTheTeamPushReasonsHaveTheirOwnFrenchSentence` holds the labels.
 - MARKETING_VERSION 3.0.3.
+- Crash reporting runs on Sentry 9.30.1 (was 9.29.2).
 
 ### Fixed
 
-- 3.0.3: a room or a persona preview that ends on its own no longer shows LiveKit's own
+- A room or a persona preview that ends on its own no longer shows LiveKit's own
   text (port of District AI for Mac #74). A meeting whose room was deleted read "You were
   disconnected from this room. (Room deleted)", and the preview "The preview ended without
   being stopped here. Room deleted": the SDK's English error description passed through as
@@ -484,9 +620,35 @@ built from history before publication, so they have no tags in this repository.
   string is added or reworded. Tested in `RoomEndWordingTests` and
   `PersonaPreviewStateTests`.
 
+## [3.0.2] - 2026-10-16
+
+Fixes for answered calls, and clearer screens.
+
+- Answering a call no longer waits for the speaker to start, which could stop the call from connecting.
+- Coloured badges are easier to read, with more contrast between each label and its background.
+- Section and field labels are in sentence case, without capitals or letter spacing.
+- Sheets use the app's own background instead of grey, and text fields have a clear edge and no longer repeat their label inside the box.
+- Empty Calls, Contacts and Inbox lists fill the screen.
+- On iPad, a long workspace name shows on up to two lines in the sidebar.
+- The Desk's status filters wrap onto a second line instead of being cut off at the edge of the screen.
+- Bookings switches between its views with one segmented control instead of separate buttons.
+- Working hours: the two edit buttons say what they do and no longer look like tabs.
+- In French, a call length never breaks across two lines, the Inbox is titled Réception as on its tab, a number in use reads Actif, and a contact's research headings are in French.
+
+### Changed
+
+- DistrictCore 7.0.2 (district-core-swift 5d03f80, tag 7.0.2), pinned by its tag: the i18n
+  contracts from the service (in French, the number status `in-use` reads « Actif »,
+  the research keys `estimatedValue`, `person` and `callerIntel` take the portal's headings
+  « Évaluation DGI », « Profil du contact » and « Renseignements sur l'appelant », the skip
+  reasons `email-misconfigured` and `ses-missing` have labels, and the error
+  `sending_domain_provider_changed` its sentence), and a French call length that never
+  breaks (« 1 min 5 s », every space U+00A0). swift-asn1 stays 1.7.3. district-macos
+  names the same release.
+
 ### Fixed
 
-- 3.0.2: an answered call joins before its speaker starts (port of district-macos #64). The
+- An answered call joins before its speaker starts (port of district-macos #64). The
   softphone joined with LiveKit's auto-subscribe, so the server's first subscriber offer
   already carried the caller's and the agent's audio, and applying it starts the speaker
   (WebRTC's `AVAudioEngine` playout start, up to ten attempts 100 ms apart) on the worker
@@ -501,26 +663,7 @@ built from history before publication, so they have no tags in this repository.
   diagnostics: the launch argument `-diagnostics.webrtcLog YES` forwards the SDK's debug
   lines and WebRTC's native ones to the unified log (`io.livekit.sdk`); off by default.
   Tested by `LiveKitCallEngineJoinTests` (the join's options and the subscriber's selector).
-- An answered call joins before its microphone starts. The softphone joined with LiveKit's
-  concurrent microphone mode (`ConnectOptions(enableMicrophone: true)`), which starts Core
-  Audio on the SDK's one serial WebRTC queue while the join builds its peer connections on
-  that same queue. A slow start (VoiceProcessingIO building its aggregate device, about 5 s
-  on the first answer after a launch) held the join past its 10 s transport wait: the server
-  saw the session start and never become active, and the call ended "the call could not be
-  connected" (District AI for Mac 3.0.1, 2026-10-16, 05:46:05Z; this engine joins the same way). `LiveKitCallEngine.connect` now
-  joins with nothing published (`LiveKitCallRoom`) and then calls `setMicrophone(enabled: true)`
-  once; `CallJoinGate` still holds the reducers' unmute until that publish is done, so a call
-  still has exactly one microphone track. A microphone that cannot start after the join no
-  longer ends anything: the call stays connected and shows muted, and Unmute tries again.
-  3.0.0 joined the same way. Tested at the engine seam (`CallRoom`,
-  `LiveKitCallEngineJoinTests`).
-- The end screen no longer shows LiveKit's own text. A caller hanging up read "Call ended ·
-  Room deleted" (the SDK's English error description, passed through as the end reason), and
-  a failed join could show the SDK's message the same way. `InCallCopy.word(for:)` now always
-  says the catalog's sentence for both (`wordRemoteEnded`, `wordFailed`, English and French);
-  the SDK's text goes to the log (`Logger`, category `Call`). No new strings.
-
-- 3.0.2, the Apple batch after 3.0.1 (the 3.0.1 visual QA's MEDIUM and LOW findings, the
+- The Apple batch after 3.0.1 (the 3.0.1 visual QA's MEDIUM and LOW findings, the
   queued contrast and type items, and the French notes from the 3.0.1 round):
   - Every tinted badge clears WCAG AA. A badge's label (and an avatar's initials, and a
     desk chip's) is drawn in a chip ink, its tone moved a fifth of the way towards
@@ -550,6 +693,40 @@ built from history before publication, so they have no tags in this repository.
     to U+2026 attached to its word (« Sonnerie… » already was).
 - MARKETING_VERSION 3.0.2.
 
+## [3.0.1] - 2026-10-15
+
+Fixes for calls, notifications and labels.
+
+- An incoming call now stops ringing as soon as it is answered on another device, the caller hangs up, or the ring times out, instead of ringing for up to 30 seconds. A call answered on another device is no longer listed as missed.
+- Fixes a problem that could cut the sound of a call, or end it, just after it was answered.
+- If you sign out and sign in to another account without closing the app, notifications now reach the new account.
+- Statuses of calls, messages and numbers show their names, such as Completed, instead of their codes.
+- Support requests show their status in your language.
+- The reply box gives your reply the full width, with the photo, file and AI draft controls in one row. On a hardware keyboard, Command-Return sends and Return starts a new line.
+- New colours from the District palette, and selected rows on iPad stay readable.
+- At the largest text sizes, labels and numbers no longer break mid-word, and every screen fits its width. On iPad in portrait, a list now opens beside the item you select.
+- The Analytics conversion funnel shows its bars in every language.
+
+### Fixed
+
+- An answered call joins before its microphone starts. The softphone joined with LiveKit's
+  concurrent microphone mode (`ConnectOptions(enableMicrophone: true)`), which starts Core
+  Audio on the SDK's one serial WebRTC queue while the join builds its peer connections on
+  that same queue. A slow start (VoiceProcessingIO building its aggregate device, about 5 s
+  on the first answer after a launch) held the join past its 10 s transport wait: the server
+  saw the session start and never become active, and the call ended "the call could not be
+  connected" (District AI for Mac 3.0.1, 2026-10-16, 05:46:05Z; this engine joins the same way). `LiveKitCallEngine.connect` now
+  joins with nothing published (`LiveKitCallRoom`) and then calls `setMicrophone(enabled: true)`
+  once; `CallJoinGate` still holds the reducers' unmute until that publish is done, so a call
+  still has exactly one microphone track. A microphone that cannot start after the join no
+  longer ends anything: the call stays connected and shows muted, and Unmute tries again.
+  3.0.0 joined the same way. Tested at the engine seam (`CallRoom`,
+  `LiveKitCallEngineJoinTests`).
+- The end screen no longer shows LiveKit's own text. A caller hanging up read "Call ended ·
+  Room deleted" (the SDK's English error description, passed through as the end reason), and
+  a failed join could show the SDK's message the same way. `InCallCopy.word(for:)` now always
+  says the catalog's sentence for both (`wordRemoteEnded`, `wordFailed`, English and French);
+  the SDK's text goes to the log (`Logger`, category `Call`). No new strings.
 - A ring stops on this device when it ends elsewhere. The server now sends a
   `call_ring_cancelled` APNs background push (on the alert token, never VoIP) whenever a ring
   ends: answered on any device, timed out, the caller hung up, or withdrawn. `AppDelegate`
@@ -644,35 +821,13 @@ built from history before publication, so they have no tags in this repository.
   matches one by name. `asc_dev_cert_test.py` runs in CI's release scripts job and the
   release job.
 
-### Changed
+## [3.0.0] - 2026-10-15
 
-- Crash reporting runs on Sentry 9.30.1 (was 9.29.2).
-- French: the call log's title is « Appels » (`calls.call_log`); « Journal des appels » was
-  cut to « Journal des ap… » in the iPad split view's list column.
-- `scripts/asc_localization.py` adds a language's App Store listing through the App Store
-  Connect API (the version localization and the app info's name and subtitle), from
-  `store-listing/<locale>.json` (fr-CA: the reviewed store copy, verbatim) and the
-  version's What's New file. `--dry-run` prints every write and sends none; its tests run in
-  CI's release scripts job.
-- 3.0.0: Canadian French ships in every build. project.yml takes App/Localization
-  (fr-CA.lproj) into the app and project.fr.yml is gone; the release workflow sets
-  `DISTRICT_FRENCH=YES`, so the archive guard requires fr-CA.lproj's two tables and refuses
-  any other French .lproj, and CI's bundle check does the same. The app follows the
-  device's language (any French is Canadian French).
-- The account's stored language follows the app's: `LocaleSync` writes
-  `{profile:{locale:"fr"|"en"}}` (POST /api/settings) on sign-in and when the resolved
-  language changes. Every request already sends `Accept-Language` (`fr-CA` or `en`).
-- The detail placeholder's symbol is hidden from VoiceOver.
-- DistrictCore 7.0.2 (district-core-swift 5d03f80, tag 7.0.2), pinned by its tag: the i18n
-  contracts from monorepo ecf098046 (in French, the number status `in-use` reads « Actif »,
-  the research keys `estimatedValue`, `person` and `callerIntel` take the portal's headings
-  « Évaluation DGI », « Profil du contact » and « Renseignements sur l'appelant », the skip
-  reasons `email-misconfigured` and `ses-missing` have labels, and the error
-  `sending_domain_provider_changed` its sentence), and a French call length that never
-  breaks (« 1 min 5 s », every space U+00A0). swift-asn1 stays 1.7.3. district-macos
-  names the same release.
-- DistrictCore 7.0.0, the release: 7.0.0-beta.3 plus the reviewed v3.0 French in its catalogs
-  (« Annulés », the member roles « Administrateur » and « Membre »). swift-asn1 stays 1.7.3.
+District AI is now in Canadian French.
+
+- Raise a ticket on a customer's behalf from District Desk: the New ticket button in the Desk toolbar opens the form.
+- Knowledge: Read a text file fills a new document's title and text from a plain text file (.txt or .md, up to 1 MB). Nothing is added until you tap Add document.
+- If the receptionist is interrupted mid-call, the live transcript says Reconnecting… instead of Call ended, and goes live again when the call resumes.
 
 ### Added
 
@@ -686,23 +841,27 @@ built from history before publication, so they have no tags in this repository.
   (.txt or .md) of up to 1 MB, as the Windows app does. Nothing is added until Add document.
   The same files are refused for the same reasons as on Windows: too large, empty, no
   text, or not plain text by its bytes (UTF-8, or UTF-16 with its mark, is read).
-- A live transcript on a call in progress. A call's screen shows the conversation as it
-  happens, line by line, while the call is in progress and the screen is in front, then the
-  full transcript in the same place once the call ends. It is fed by the telemetry socket
-  (`App/Sources/Platform/Live/`, the `URLSessionWebSocketTask` adapter ported from
-  district-macos with a send added), which the phone opens only for that screen, asks for
-  that call's transcript alone (`socket.mode` with `broadcast: false`), and closes when the
-  screen goes or the app goes to the background. Lines missed while the server was
-  restarting are named ("Earlier lines will appear in the full transcript after the call").
-  A call the server has no live transcript for keeps the Show transcript button.
-  ⚠️ When the assistant fails mid-call (`agent_error`) the pane says "Reconnecting…" rather
-  than "Call ended", also when a snapshot says so (`endedReason`), and goes live again if a
-  fresh assistant takes the call. A call the server answered `not_live` is subscribed again
-  only when a load of the call row shows it in progress, at most once per 30 s, never on a
-  timer; a load showing the call over ends the transcript and fetches the full one.
 
 ### Changed
 
+- French: the call log's title is « Appels » (`calls.call_log`); « Journal des appels » was
+  cut to « Journal des ap… » in the iPad split view's list column.
+- `scripts/asc_localization.py` adds a language's App Store listing through the App Store
+  Connect API (the version localization and the app info's name and subtitle), from
+  `store-listing/<locale>.json` (fr-CA: the reviewed store copy, verbatim) and the
+  version's What's New file. `--dry-run` prints every write and sends none; its tests run in
+  CI's release scripts job.
+- Canadian French ships in every build. project.yml takes App/Localization
+  (fr-CA.lproj) into the app and project.fr.yml is gone; the release workflow sets
+  `DISTRICT_FRENCH=YES`, so the archive guard requires fr-CA.lproj's two tables and refuses
+  any other French .lproj, and CI's bundle check does the same. The app follows the
+  device's language (any French is Canadian French).
+- The account's stored language follows the app's: `LocaleSync` writes
+  `{profile:{locale:"fr"|"en"}}` (POST /api/settings) on sign-in and when the resolved
+  language changes. Every request already sends `Accept-Language` (`fr-CA` or `en`).
+- The detail placeholder's symbol is hidden from VoiceOver.
+- DistrictCore 7.0.0, the release: 7.0.0-beta.3 plus the reviewed v3.0 French in its catalogs
+  (« Annulés », the member roles « Administrateur » and « Membre »). swift-asn1 stays 1.7.3.
 - Two CalDAV sentences lose their em dash, the one deliberate change to English in 3.0's
   catalog work: "The server address must start with https://, because an app password sent
   over http:// travels in the clear." and "Finish in the browser, then come back: this page
@@ -732,7 +891,7 @@ built from history before publication, so they have no tags in this repository.
   while French is off, or any `fr.lproj`. The unit tests run pinned to English, the UI
   tests find the Overview and settings rows, the report's Done and the block
   confirmations by identifier, and `StoreCopyTests` scans the catalog's French too.
-- DistrictCore 7.0.0-beta.3: the contracts from monorepo 43eed5fd6 (French API errors,
+- DistrictCore 7.0.0-beta.3: the service's current contracts (French API errors,
   masculine desk statuses), the billing currency, and the portal's four booking webhook
   events. Billing amounts come from its `BillingMoneyFormat`: English exactly as before
   ("$249.00"), French naming the currency (« 249,00 $ CA », « 249,00 $ US »); the five
@@ -743,113 +902,11 @@ built from history before publication, so they have no tags in this repository.
   inside one year drops its first year; English is unchanged. 7.0.0-beta.1: the core's sentences come from its catalogs, every request
   sends `Accept-Language` (`en`), and errors are shown through `ApiError.localizedMessage`
   (the same sentence in English).
-- DistrictCore 6.0.0: 4.0.0 resolves District Studio links, 5.0.0 adds the live
-  transcript's models, ops and reducer, and 6.0.0 adds `CodeExchangeResult.mfaRequired` and
-  `POST /api/auth/native/mfa`, the authenticator code step after Sign in with Apple.
-- Release notes per language: What's New for every App Store localization other than English
-  comes from `release-notes/<locale>/<version>.txt`, as on district-android, and a
-  localization with no notes in its language stops the submission rather than showing
-  English.
-- `release.yml` has a `build_only` dispatch input: it archives and signs on the runner and
-  uploads nothing.
 - The catalogs carry their reviewed Canadian French (fr-CA): 1,728 entries in
   `l10n/ios.toml`, `l10n/push.toml` and `l10n/infoplist.toml`, regenerated into `Copy.swift`
   and the `fr-CA.lproj` strings, so `FR_COMPLETE` is true. French stays switched off: the
   French tables still enter the app only through `project.fr.yml` (`DISTRICT_FRENCH`), and
   the release guard is unchanged.
-
-## [3.3.0] - 2026-11-06
-
-Watch your live calls as they happen, and step in when you need to.
-
-- A new Live calls screen lists the calls your receptionist is taking right now. Listen in without the caller hearing you, send your receptionist a private note and see whether it was used, or take over the call yourself and hand it back when you are done.
-- On your Apple Watch, a note you send during a live call now shows whether your receptionist used it.
-- Reply to WhatsApp, Messenger and Instagram conversations on the channel the customer wrote on, so a WhatsApp customer is no longer answered by text message.
-- Messenger and Instagram conversations now appear in your inbox. When the reply window has closed, the app says so and keeps your text until the customer writes again. A human agent reply shows its 7-day window.
-- When a WhatsApp conversation's window has closed, send one of your approved templates instead.
-- Assign a conversation to a teammate, see who each conversation is assigned to, and show only the ones assigned to you.
-- The keypad has a country button in front of the number. Type the number the local way, and the line under it shows the country it rings and the full international number before you call. A number with the wrong number of digits for its country is explained once you stop typing.
-- A number that belongs to no one country, such as a +1 800 toll-free number, now says so instead of naming a country.
-
-## [3.2.1] - 2026-10-27
-
-Small fixes for calls and the Apple Watch app.
-
-- A finished call's end time now shows in full in the Dynamic Island instead of being cut off.
-- In French, a time such as 16 h 13 no longer breaks across two lines at larger text sizes.
-- The Apple Watch app now shows live calls and unread messages in colour, so they stand out at a glance.
-
-## [3.2.0] - 2026-10-25
-
-More of District AI on your Apple Watch.
-
-- Follow a call's live transcript on your Apple Watch while the assistant takes it, and guide the assistant: tell it you will call them back today, have it ask what the call is about, or dictate your own instruction.
-- When a call ends, your watch shows a summary with the outcome and the action items. Call back on iPhone opens your iPhone's keypad with the number filled in.
-- Add an optional complication that shows how many messages are unread. It is on no watch face until you add it, and it never shows who wrote.
-- Decline a call on your iPhone or your Apple Watch, and once everyone it rang has declined, the assistant takes a message right away instead of letting it ring on.
-- Message notifications now show who the message is from, when the contact has a name.
-- Notifications about an urgent call, or from a contact you marked VIP, can arrive as Time Sensitive, so they reach you during a Focus.
-
-## [3.1.0] - 2026-10-24
-
-District AI comes to Apple Watch.
-
-- A new Apple Watch app shows your recent calls and your inbox. Reply to a conversation with a quick reply or your own words, and mark it read.
-- Turn your availability for calls on or off from your wrist, and add a complication to a watch face to see at a glance whether calls ring to you.
-- Tapping a message notification on your watch opens that conversation.
-- The Apple Watch app works with District AI on your iPhone, so keep your iPhone nearby. It needs watchOS 10 or later.
-- Reply and Mark read on a message notification now work when the app is closed, from a locked iPhone or from your Apple Watch.
-- District Desk is now simply the Desk.
-- Text fields have a clearer edge, so an empty field is easy to see.
-- District HQ's question box shows its own hint instead of repeating its label.
-- A contact or conversation known only by its number shows a person icon instead of a stray symbol.
-- Phone numbers no longer repeats its help text.
-- In French, working hours show and accept times such as 9 h and 13 h 30.
-
-## [3.0.3] - 2026-10-22
-
-A small update.
-
-- In French, a workflow's Recent runs now say why a step could not notify your team, for example that no team member has the app on a device that can receive notifications.
-- Rooms and Preview persona say in plain words when a session ends or cannot connect, instead of showing a technical message.
-- Crash reporting is updated to the latest stable version.
-
-## [3.0.2] - 2026-10-16
-
-Fixes for answered calls, and clearer screens.
-
-- Answering a call no longer waits for the speaker to start, which could stop the call from connecting.
-- Coloured badges are easier to read, with more contrast between each label and its background.
-- Section and field labels are in sentence case, without capitals or letter spacing.
-- Sheets use the app's own background instead of grey, and text fields have a clear edge and no longer repeat their label inside the box.
-- Empty Calls, Contacts and Inbox lists fill the screen.
-- On iPad, a long workspace name shows on up to two lines in the sidebar.
-- The Desk's status filters wrap onto a second line instead of being cut off at the edge of the screen.
-- Bookings switches between its views with one segmented control instead of separate buttons.
-- Working hours: the two edit buttons say what they do and no longer look like tabs.
-- In French, a call length never breaks across two lines, the Inbox is titled Réception as on its tab, a number in use reads Actif, and a contact's research headings are in French.
-
-## [3.0.1] - 2026-10-15
-
-Fixes for calls, notifications and labels.
-
-- An incoming call now stops ringing as soon as it is answered on another device, the caller hangs up, or the ring times out, instead of ringing for up to 30 seconds. A call answered on another device is no longer listed as missed.
-- Fixes a problem that could cut the sound of a call, or end it, just after it was answered.
-- If you sign out and sign in to another account without closing the app, notifications now reach the new account.
-- Statuses of calls, messages and numbers show their names, such as Completed, instead of their codes.
-- Support requests show their status in your language.
-- The reply box gives your reply the full width, with the photo, file and AI draft controls in one row. On a hardware keyboard, Command-Return sends and Return starts a new line.
-- New colours from the District palette, and selected rows on iPad stay readable.
-- At the largest text sizes, labels and numbers no longer break mid-word, and every screen fits its width. On iPad in portrait, a list now opens beside the item you select.
-- The Analytics conversion funnel shows its bars in every language.
-
-## [3.0.0] - 2026-10-15
-
-District AI is now in Canadian French.
-
-- Raise a ticket on a customer's behalf from District Desk: the New ticket button in the Desk toolbar opens the form.
-- Knowledge: Read a text file fills a new document's title and text from a plain text file (.txt or .md, up to 1 MB). Nothing is added until you tap Add document.
-- If the receptionist is interrupted mid-call, the live transcript says Reconnecting… instead of Call ended, and goes live again when the call resumes.
 
 ## [2.2.1] - 2026-10-13
 
@@ -873,6 +930,35 @@ together under District Studio, as on the web.
 - If your account has an authenticator app turned on, Sign in with Apple now asks for its
   code, as the website does. Enter the 6-digit code, or one of your recovery codes. A wrong
   code can be typed again, and if the step times out, start again with Sign in with Apple.
+
+### Added
+
+- A live transcript on a call in progress. A call's screen shows the conversation as it
+  happens, line by line, while the call is in progress and the screen is in front, then the
+  full transcript in the same place once the call ends. It is fed by the telemetry socket
+  (`App/Sources/Platform/Live/`, the `URLSessionWebSocketTask` adapter ported from
+  district-macos with a send added), which the phone opens only for that screen, asks for
+  that call's transcript alone (`socket.mode` with `broadcast: false`), and closes when the
+  screen goes or the app goes to the background. Lines missed while the server was
+  restarting are named ("Earlier lines will appear in the full transcript after the call").
+  A call the server has no live transcript for keeps the Show transcript button.
+  ⚠️ When the assistant fails mid-call (`agent_error`) the pane says "Reconnecting…" rather
+  than "Call ended", also when a snapshot says so (`endedReason`), and goes live again if a
+  fresh assistant takes the call. A call the server answered `not_live` is subscribed again
+  only when a load of the call row shows it in progress, at most once per 30 s, never on a
+  timer; a load showing the call over ends the transcript and fetches the full one.
+
+### Changed
+
+- DistrictCore 6.0.0: 4.0.0 resolves District Studio links, 5.0.0 adds the live
+  transcript's models, ops and reducer, and 6.0.0 adds `CodeExchangeResult.mfaRequired` and
+  `POST /api/auth/native/mfa`, the authenticator code step after Sign in with Apple.
+- Release notes per language: What's New for every App Store localization other than English
+  comes from `release-notes/<locale>/<version>.txt`, as on district-android, and a
+  localization with no notes in its language stops the submission rather than showing
+  English.
+- `release.yml` has a `build_only` dispatch input: it archives and signs on the runner and
+  uploads nothing.
 
 ## [2.1] - 2026-10-05
 
@@ -978,7 +1064,8 @@ Voice Studio is the headline of 2.0.
 
 The first release on the App Store.
 
-[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/distronode-corporation/district-ios/compare/v3.4.0...HEAD
+[3.4.0]: https://github.com/distronode-corporation/district-ios/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/distronode-corporation/district-ios/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/distronode-corporation/district-ios/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/distronode-corporation/district-ios/compare/v3.1.0...v3.2.0

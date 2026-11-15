@@ -7,14 +7,14 @@ name: CodeQL Swift
 # under App/ stays out of the database and the job still passes. This workflow generates
 # the project and builds the app itself. The workflow files are analysed by codeql.yml.
 #
-# ⛔ NIGHTLY AND ON DEMAND, NOT PER PUSH OR PULL REQUEST (Sean, 2026-10-06). The traced
+# ⛔ NIGHTLY AND ON DEMAND, NOT PER PUSH OR PULL REQUEST (2026-10-06). The traced
 # build holds one of the five macOS jobs the free plan runs at once for the whole
 # organisation, and a scan per push to main (55 to 91 minutes each) was what ci.yml's
 # `app` jobs and release.yml queued behind. One scan a night covers every commit of that
 # day; a new alert arrives up to a day after the push that caused it. Dispatch this
 # workflow to scan a commit sooner.
 #
-# ⛔ THE APP'S OWN CODE ONLY (Sean, 2026-10-06). CodeQL's Swift extractor runs beside
+# ⛔ THE APP'S OWN CODE ONLY (2026-10-06). CodeQL's Swift extractor runs beside
 # every compiler invocation made after `Initialize CodeQL`, and nothing compiled before it
 # is extracted. So the packages are resolved and the whole app is built once BEFORE it,
 # then the app's own sources are touched, and the traced build recompiles them and only

@@ -2,8 +2,8 @@
 import DistrictL10n
 import XCTest
 
-/// The product is "Desk" in English and « Comptoir » in French, on every surface (Sean,
-/// 2026-10-23). "District Desk" is gone, and its settings are "Desk settings" /
+/// The product is "Desk" in English and « Comptoir » in French, on every surface
+/// (decided 2026-10-23). "District Desk" is gone, and its settings are "Desk settings" /
 /// « Réglages du comptoir » (Apple's own word for settings).
 final class DeskNamingTests: XCTestCase {
     private func french<T>(_ body: () -> T) -> T {

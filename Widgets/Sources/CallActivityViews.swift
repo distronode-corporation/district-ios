@@ -4,8 +4,8 @@ import WidgetKit
 
 /// What every view of the activity reads, decided once from the context.
 ///
-/// ⛔ NOTHING HERE IS LOGGED: a caller's name and a line of the conversation (Sean's decision,
-/// 2026-10-25, GitLab #2).
+/// ⛔ NOTHING HERE IS LOGGED: a caller's name and a line of the conversation (decided
+/// 2026-10-25).
 struct CallActivityContent {
     let phase: DistrictCallActivityPhase
     let caller: String

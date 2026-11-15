@@ -4,7 +4,7 @@ import Foundation
 ///
 /// ⛔ ONLY CHROME. Every Studio label (headings, recipe names, leg names, channels, residency
 /// and latency sentences, the save and saved lines) arrives from the server in the reader's
-/// PORTAL language and is rendered verbatim (Sean, 2026-10-03: "Follow the portal language").
+/// PORTAL language and is rendered verbatim (decided 2026-10-03: "Follow the portal language").
 /// What is here is the title before the read lands, the tuning chrome and the two refusals'
 /// fallbacks. ⛔ The "Based on" line and an unsaved edit's meter are NOT here: they are filled
 /// from the read's own templates (`VoiceStudioText`), so they follow the portal language too.

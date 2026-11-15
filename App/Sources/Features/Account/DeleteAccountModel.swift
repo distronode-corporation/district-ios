@@ -10,7 +10,7 @@ import Observation
 /// its code) earns a proof bound to this installation and this one action; the typed email then
 /// spends it (`NativeReauthRepository`). Nothing here decides who may delete: a workspace owner,
 /// a refused subscription cancellation or any other block is the service's answer, shown as it
-/// comes (Sean, 2026-11-07: two-step accounts "Allow, with re-auth"; 2026-11-08: re-auth "Yes,
+/// comes (decided 2026-11-07: two-step accounts "Allow, with re-auth"; 2026-11-08: re-auth "Yes,
 /// SSO or password").
 ///
 /// ⛔ SINGLE-FLIGHT ACROSS ALL THREE CALLS. ``busy`` is checked and set before the first

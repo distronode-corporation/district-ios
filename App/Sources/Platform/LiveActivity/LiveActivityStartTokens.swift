@@ -24,7 +24,7 @@ protocol LiveActivityStartTokenMemory {
 }
 
 /// The device's Live Activity push-to-start token, sent to the server so a ring can start the
-/// call's activity with no app running (Sean, 2026-10-25: "Add push-to-start").
+/// call's activity with no app running (decided 2026-10-25: "Add push-to-start").
 ///
 /// ⛔ SENT ONLY WHILE SIGNED IN, FOR THE CURRENT WORKSPACE: after sign-in and on each launch
 /// (``begin()``), when ActivityKit hands over a new token, and when the person switches

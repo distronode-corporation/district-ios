@@ -10,7 +10,7 @@
   ⛔ IT COLLECTS NOTHING AND SENDS NOTHING. It makes no network request and reads no
   Keychain item, App Group or UserDefaults suite: it draws the content state the app or an
   APNs Live Activity push hands ActivityKit (a caller's name and the latest transcript
-  line, Sean's decision 2026-10-25), on this device only. The app's own manifest covers the
+  line, decided 2026-10-25), on this device only. The app's own manifest covers the
   push token the app sends. No required-reason API.
 -->
 <plist version="1.0">

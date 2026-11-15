@@ -161,7 +161,7 @@ extension ShellView {
     }
 
     /// A listen-in tapped in Recents: that call's Live screen while it is live, its call log
-    /// entry once it has ended (Sean, 2026-11-05). ⚠️ A handle this device never listened under
+    /// entry once it has ended (decided 2026-11-05). ⚠️ A handle this device never listened under
     /// (a keypad call, another app's row) does nothing, as before.
     ///
     /// ⚠️ WAITS FOR THE WORKSPACE LIST, like ``resolvePendingCallBack()``.

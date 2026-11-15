@@ -65,7 +65,7 @@ enum CallActivityRingOutcome: Equatable {
 /// The call Live Activities: started, updated and ended locally, and their push tokens handed
 /// to the server so it can update them while the app sleeps.
 ///
-/// ⛔ STARTED THREE WAYS (Sean, 2026-10-25: "When you're rung, or the app is open", then "Add
+/// ⛔ STARTED THREE WAYS (decided 2026-10-25: "When you're rung, or the app is open", then "Add
 /// push-to-start"): the server's push-to-start on a ring (iOS 18, the token sent by
 /// ``LiveActivityStartTokens``; this object adopts what it starts), and locally, as the
 /// fallback, by a ring that wakes the app (``rang(workspaceId:callId:)``, after CallKit
@@ -80,8 +80,8 @@ enum CallActivityRingOutcome: Equatable {
 /// a failure only costs server updates, and the app still updates and ends the activity while
 /// it is awake.
 ///
-/// ⚠️ THE CONTENT IS A NAME AND A LINE OF CONVERSATION ON THE LOCK SCREEN, which is Sean's
-/// decision (GitLab #2, 2026-10-25). Nothing here logs a state, a name or a line.
+/// ⚠️ THE CONTENT IS A NAME AND A LINE OF CONVERSATION ON THE LOCK SCREEN, by
+/// decision (2026-10-25). Nothing here logs a state, a name or a line.
 @MainActor
 final class CallLiveActivities {
     /// How long an ended call stays on the Lock Screen.

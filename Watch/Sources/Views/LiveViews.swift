@@ -135,8 +135,8 @@ struct LiveCallView: View {
     }
 }
 
-/// The receptionist's answer to the latest note: used, or not used and why (Sean, 2026-11-05,
-/// Q4). ⚠️ The words are the phone's, already in its language (``WatchWhisperReceipt``).
+/// The receptionist's answer to the latest note: used, or not used and why (decided
+/// 2026-11-05). ⚠️ The words are the phone's, already in its language (``WatchWhisperReceipt``).
 struct ReceiptRow: View {
     let receipt: WatchWhisperReceipt
 

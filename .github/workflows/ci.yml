@@ -229,8 +229,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # ⛔ THE iPAD LEG RUNS ON PUSHES TO MAIN AND DISPATCHES, NOT ON PULL REQUESTS (Sean,
-        # 2026-10-06). It builds and runs the same bundles as the iPhone leg, and on a pull
+        # ⛔ THE iPAD LEG RUNS ON PUSHES TO MAIN AND DISPATCHES, NOT ON PULL REQUESTS
+        # (2026-10-06). It builds and runs the same bundles as the iPhone leg, and on a pull
         # request it held one of the five macOS jobs the free plan runs at once for the
         # whole organisation for about 15 minutes. An iPad-only regression is caught on
         # main after the merge. `app (iPad)` is a required check, so `app-ipad-pr-stand-in`

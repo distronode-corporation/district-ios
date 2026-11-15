@@ -9,7 +9,7 @@ import Foundation
 /// order through this, and `SuperviseModelTests` records what reached it. The one
 /// conformance the app ships is ``CallStackSuperviseMedia``.
 ///
-/// ⛔ ONE SYSTEM CALL FOR THE WHOLE SUPERVISION (Sean, 2026-11-05, Q3). Listen starts a
+/// ⛔ ONE SYSTEM CALL FOR THE WHOLE SUPERVISION (decided 2026-11-05). Listen starts a
 /// CallKit call, so the system holds the audio session, the lock screen shows the call and
 /// Recents lists it; a takeover is a second ROOM inside that same call, never a second call,
 /// which is what lets it work with the phone locked.

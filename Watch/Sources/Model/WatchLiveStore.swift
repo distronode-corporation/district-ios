@@ -15,7 +15,7 @@ struct WatchLiveTranscript: Equatable {
     /// ⛔ WHY THE LAST ASK FAILED, IN WORDS, until the next one succeeds: an unreachable phone
     /// is said, never shown as a transcript that simply stopped.
     var failure: String?
-    /// The receptionist's answer to the latest note, as the phone last sent it (Sean, Q4).
+    /// The receptionist's answer to the latest note, as the phone last sent it.
     var receipt: WatchWhisperReceipt?
 }
 

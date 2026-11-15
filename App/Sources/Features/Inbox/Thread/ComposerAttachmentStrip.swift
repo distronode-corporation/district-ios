@@ -6,8 +6,8 @@ import SwiftUI
 /// URLs. Uploading at PICK time rather than at SEND time means an upload failure costs a retry
 /// of one image instead of failing a billable send that has already spent its rate-limit slot.
 ///
-/// ⛔ HELD IMAGES ARE DRAWN, DIMMED AND MARKED HELD, EACH WITH ITS OWN REMOVE (max review, #99;
-/// Sean, "Dimmed chips with Remove"). They sit in the draft on a channel that cannot carry them
+/// ⛔ HELD IMAGES ARE DRAWN, DIMMED AND MARKED HELD, EACH WITH ITS OWN REMOVE (review of #99:
+/// "Dimmed chips with Remove"). They sit in the draft on a channel that cannot carry them
 /// (``ThreadContent/heldAttachments``), and nothing showed them, so the operator could neither
 /// see nor drop what the draft was keeping. VoiceOver hears the channel they are not sent on.
 /// They draw on any channel, a thread with no SMS reply included, and a switch to SMS makes

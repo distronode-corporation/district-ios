@@ -34,12 +34,12 @@ extension CallsRepository: SuperviseServing {}
 /// person listening (the lock screen still shows the call and ends it), and a screen rebuilt
 /// around the call finds this model again through ``CallStack/supervisor``.
 ///
-/// ⛔ LISTEN IS A CALLKIT CALL, AND THE START COMES FIRST (Sean, 2026-11-05, Q3). The OS is
+/// ⛔ LISTEN IS A CALLKIT CALL, AND THE START COMES FIRST (decided 2026-11-05). The OS is
 /// asked for the call before the server is asked for the seat, exactly as the dialler asks it
 /// before the carrier, so the session is configured by CallKit, a ring arriving meets a call
 /// in progress, and a takeover from the lock screen has a call to continue.
 ///
-/// ⛔ A COLLEAGUE'S OWN SOFTPHONE CALL OFFERS LISTEN ONLY (Sean, Q2): the session is built
+/// ⛔ A COLLEAGUE'S OWN SOFTPHONE CALL OFFERS LISTEN ONLY (decided 2026-11-05): the session is built
 /// from the row's `receptionistOnCall`, so `mayWhisper` and `mayTakeOver` are false there.
 /// The routes' 409 `call_has_no_receptionist` stays the fallback.
 @MainActor

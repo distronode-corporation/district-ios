@@ -74,7 +74,7 @@ extension DialerModel {
     /// the button already names the country while the digits are being typed.
     ///
     /// ⛔ A +1 TOLL-FREE NUMBER RINGS NO ONE COUNTRY, AND THE LINE SAYS SO, as the web
-    /// dialler does (`ringsNoCountry`; Sean, 2026-11-04, GitLab #2). ``DialPlan`` keeps the
+    /// dialler does (`ringsNoCountry`; decided 2026-11-04). ``DialPlan`` keeps the
     /// +1 country on the button for 800, 833 … 888, because the flag is where the next digits
     /// are read, but "Rings Canada" under a 1-800 number would claim a country it does not have.
     /// So do the web's other no-country codes, 500, 600, 700, 710 and 900 (``DialPlan/nanpNoCountry``).

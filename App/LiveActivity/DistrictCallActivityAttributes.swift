@@ -14,8 +14,8 @@ import Foundation
 /// `latestLine`, `latestSpeaker`, `callerName`), and ActivityKit decodes it with this type's
 /// `Codable`. A renamed property is an update that silently never arrives.
 ///
-/// ⛔ THE ONE PLACE A NAME AND CONVERSATION TEXT TRAVEL IN A PUSH (Sean's decision 2026-10-25,
-/// GitLab #2). Nothing here, in the app or in the extension, logs a state.
+/// ⛔ THE ONE PLACE A NAME AND CONVERSATION TEXT TRAVEL IN A PUSH (decided 2026-10-25).
+/// Nothing here, in the app or in the extension, logs a state.
 struct DistrictCallActivityAttributes: ActivityAttributes {
     /// What changes during the call.
     ///

@@ -82,7 +82,7 @@ struct OverviewView: View {
             WorkspacePickerSheet(workspaceSession: workspaceSession)
                 .districtSheetBackground()
         }
-        // ⚠️ THE WIZARD RUNS IN THE APP (Sean, 2026-11-08); its hand-offs are sheets inside it.
+        // ⚠️ THE WIZARD RUNS IN THE APP (decided 2026-11-08); its hand-offs are sheets inside it.
         .setupWizardSheet($wizardWorkspace, container: container, workspaceSession: workspaceSession, card: setup)
         .navigationTitle(Tab.overview.label)
         // ⛔ `.contain` FIRST. See the long note in SignInView: an identifier on a

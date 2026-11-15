@@ -346,7 +346,7 @@ extension LiveCallsModelTests {
         XCTAssertEqual(model.calls.map(\.id), ["cmh1first", "cmh1second"])
     }
 
-    /// ⛔ A READ QUEUED BEHIND THE CANCELLED ONE STILL LANDS (Sean, 2026-11-06): it runs in a
+    /// ⛔ A READ QUEUED BEHIND THE CANCELLED ONE STILL LANDS (2026-11-06): it runs in a
     /// fresh task, where its request is not refused, and the list takes the call it brings.
     func testAReadQueuedBehindACancelledReadLands() async throws {
         let live = try row("cmh1first", status: "in-progress", minutesAgo: 2)
