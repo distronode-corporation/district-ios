@@ -42,7 +42,7 @@ extension WidgetCopy {
     internal static var summaryDescription: String { WidgetL10n.copyLocale == .frCA ? "Messages non lus et appels des 7 derniers jours de votre espace de travail." : "Unread messages and the last 7 days of calls for your workspace." }
 
     /// `widgets.summary_display_name`
-    internal static var summaryDisplayName: String { WidgetL10n.copyLocale == .frCA ? "En un coup d'œil" : "At a glance" }
+    internal static var summaryDisplayName: String { WidgetL10n.copyLocale == .frCA ? "D'un coup d'œil" : "At a glance" }
 
     /// `widgets.summary_signed_out`
     internal static var summarySignedOut: String { WidgetL10n.copyLocale == .frCA ? "Ouvrez District AI pour voir votre espace de travail." : "Open District AI to see your workspace." }

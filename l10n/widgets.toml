@@ -98,7 +98,7 @@ en = "Calls, 7 days"
 fr = "Appels, 7 jours"
 ctx = "label"
 screen = "home_widget"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.summaryCallsWeek" }
 note = "Label under the number of calls in the last seven days (a rolling window, not the calendar week), as Overview's weekly call volume."
 
@@ -107,16 +107,16 @@ en = "Unread messages and the last 7 days of calls for your workspace."
 fr = "Messages non lus et appels des 7 derniers jours de votre espace de travail."
 ctx = "body"
 screen = "home_widget"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.summaryDescription" }
 note = "The Home Screen widget's description in the widget gallery."
 
 [widgets.summary_display_name]
 en = "At a glance"
-fr = "En un coup d'œil"
+fr = "D'un coup d'œil"
 ctx = "title"
 screen = "home_widget"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.summaryDisplayName" }
 note = "The Home Screen widget's name in the widget gallery."
 
@@ -125,7 +125,7 @@ en = "Open District AI to see your workspace."
 fr = "Ouvrez District AI pour voir votre espace de travail."
 ctx = "body"
 screen = "home_widget"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.summarySignedOut" }
 note = "Shown when the app has not written anything yet, or after sign-out."
 
@@ -134,6 +134,6 @@ en = "Unread"
 fr = "Non lus"
 ctx = "label"
 screen = "home_widget"
-state = "draft"
+state = "reviewed"
 id = { swift = "WidgetCopy.summaryUnread" }
 note = "Label above the number of unread messages. Plural masculine in French: « messages non lus »."
