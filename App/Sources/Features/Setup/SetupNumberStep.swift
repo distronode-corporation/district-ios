@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Step 2, "Your number".
 ///
-/// ⛔ BUYING A NUMBER CHARGES A CARD AND STAYS ON THE WEB (Sean, 2026-11-08). An owner who
+/// ⛔ BUYING A NUMBER CHARGES A CARD AND STAYS ON THE WEB (decided 2026-11-08). An owner who
 /// already holds one keeps it here; one who holds none opens the setup page in a sheet, where
 /// the web's own wizard opens on this step, and the wizard reads its state again when the
 /// sheet closes. A number bought there marks the step done, so this one moves on by itself.

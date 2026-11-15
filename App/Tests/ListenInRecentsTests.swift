@@ -30,7 +30,7 @@ final class MemoryRecentsKeys: ListenInRecentsKeyStore, @unchecked Sendable {
     }
 }
 
-/// A listen-in tapped in the system's Recents reopens its call (Sean, 2026-11-05): the Live
+/// A listen-in tapped in the system's Recents reopens its call (decided 2026-11-05): the Live
 /// screen while the call is live, its call log entry once it has ended; nothing for a handle this
 /// device never listened under; and no number stored on the device.
 @MainActor

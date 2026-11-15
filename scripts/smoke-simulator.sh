@@ -6,7 +6,7 @@
 #   scripts/smoke-simulator.sh [--device "iPhone 17 Pro"] [--keep-derived]
 #
 # ⛔ THE RELEASE GATE IS AN iPHONE RUN (the default device). An iPad run is INFORMATIONAL:
-# report it, never block a release on it (Sean, 2026-10-27, GitLab #2). Under XCUITest's load the
+# report it, never block a release on it (decided 2026-10-27). Under XCUITest's load the
 # iPad's sign-in sheet (SafariViewService) paints a blank page and the consent button never
 # appears, while a manual iPad sign-in renders it and reaches Overview in 3 s (PR #91 smoke,
 # iPad Pro 13): the failure is the harness, not the app.
@@ -31,7 +31,7 @@
 # in xcodebuild's live output and types the password, then Return, into the simulator as
 # System Events keystrokes, the password going to `osascript` FROM STDIN (printf is a
 # builtin, so it is in no argv and on no disk). XCTest never sees keystrokes it did not send.
-# (Sean, GitLab #2 note 4096242351. A paste was tried first: the sign-in page runs in
+# (A paste was tried first: the sign-in page runs in
 # SafariViewService, whose paste never reads what `simctl pbcopy` writes.)
 #
 # ⛔ THE MAC NEEDS TWO ONE-TIME GRANTS for whatever runs this script (Terminal, or the agent's

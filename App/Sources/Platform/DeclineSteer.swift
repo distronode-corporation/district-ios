@@ -4,7 +4,7 @@ import Foundation
 import UserNotifications
 
 /// "You declined the call. Tell the assistant what to say?": the notification a PERSON's
-/// decline leaves behind (3.2, Sean 2026-10-25, GitLab #2).
+/// decline leaves behind (3.2, decided 2026-10-25).
 ///
 /// ⛔ ONLY AFTER A PERSON'S DECLINE. It is posted by ``IncomingCallDeclineSender``, which runs
 /// only for ``IncomingCallCommand/requestDecline(workspace:call:)``, and the reducer emits that

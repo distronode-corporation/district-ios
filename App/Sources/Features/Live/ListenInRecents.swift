@@ -54,8 +54,8 @@ struct KeychainListenInRecentsKeyStore: ListenInRecentsKeyStore {
     }
 }
 
-/// The listen-ins the system's Recents list shows, so a tap there reopens the call (Sean,
-/// 2026-11-05: "Reopen the Live screen").
+/// The listen-ins the system's Recents list shows, so a tap there reopens the call
+/// (decided 2026-11-05: "Reopen the Live screen").
 ///
 /// ⛔ iOS HANDS BACK ONLY THE HANDLE. A Recents tap arrives as an `INStartCallIntent` naming the
 /// person the call was reported with (``SuperviseModel/handle(for:)``), never the CallKit UUID,

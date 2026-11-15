@@ -2,8 +2,8 @@ import Foundation
 
 /// What the watch-face complications show: availability for calls, and the unread count.
 ///
-/// ⛔ TWO COMPLICATIONS, AND THE UNREAD COUNT IS OPT-IN (Sean, 2026-10-24, GitLab #2 note
-/// 4083623386, reversing 3.1.0's "no unread count"). A number on a watch face is read by
+/// ⛔ TWO COMPLICATIONS, AND THE UNREAD COUNT IS OPT-IN (decided 2026-10-24,
+/// reversing 3.1.0's "no unread count"). A number on a watch face is read by
 /// whoever is beside you, so it is never part of the availability complication: it is a
 /// second one, ``unreadWidgetKind``, that a person adds to a face on purpose. It shows a
 /// count only, never a name or a preview, and the count is `.privacySensitive()`, so a

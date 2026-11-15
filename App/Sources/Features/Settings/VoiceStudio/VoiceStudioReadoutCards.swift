@@ -5,7 +5,7 @@ import SwiftUI
 /// A leg's number, a meter's headline: the words for each, never an estimate.
 ///
 /// ⛔ FROM THE SERVICE'S TEMPLATES, IN THE PORTAL LANGUAGE (``VoiceStudioText``): the app types
-/// none of these words (Sean, 2026-10-03: "Follow the portal language").
+/// none of these words (decided 2026-10-03: "Follow the portal language").
 extension VoiceStudioLatencyText {
     /// The server's sentence, a measured median the server sent as a bare number, or the
     /// server's "not measured yet".

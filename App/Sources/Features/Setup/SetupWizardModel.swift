@@ -6,7 +6,7 @@ import Observation
 /// The setup wizard's shell: the state the service holds, the step on screen, and the one
 /// write every step ends in, its own state.
 ///
-/// ⛔ MOST OF IT RUNS HERE, BUYING RUNS ON THE WEB (Sean, 2026-11-08: "Most in app, buying on
+/// ⛔ MOST OF IT RUNS HERE, BUYING RUNS ON THE WEB (decided 2026-11-08: "Most in app, buying on
 /// web"). The business, the receptionist, what callers should know, how calls are answered,
 /// the test call and the forwarding check are this client's; buying a number, the plan, a
 /// calendar sign-in, the email identity and the transfer number open the web's page in a

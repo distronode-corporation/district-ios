@@ -110,7 +110,7 @@ private struct SuperviseScreen: View {
             VStack(alignment: .leading, spacing: DistrictSpacing.row) {
                 header
                 SuperviseCallCard(model: model, confirmingTakeover: $confirmingTakeover)
-                // ⛔ HIDDEN, NOT DISABLED, ON A COLLEAGUE'S OWN SOFTPHONE CALL (Sean, Q2): no
+                // ⛔ HIDDEN, NOT DISABLED, ON A COLLEAGUE'S OWN SOFTPHONE CALL (2026-11-05): no
                 // receptionist is there to read a note.
                 if state.receptionistOnCall {
                     SuperviseWhisperCard(model: model)

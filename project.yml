@@ -71,7 +71,7 @@ options:
 # every target, the embedded ones included. Nothing reads this value on the simulator path.
 settings:
   base:
-    MARKETING_VERSION: "3.3.0"
+    MARKETING_VERSION: "3.4.0"
     CURRENT_PROJECT_VERSION: "1"
 
 packages:
@@ -649,8 +649,8 @@ targets:
         GENERATE_INFOPLIST_FILE: "NO"
 
   # The watch-face complications: a WidgetKit extension embedded in the watch app, holding
-  # two widgets. Availability for calls, and since 3.2 an OPT-IN unread count (Sean,
-  # 2026-10-24, GitLab #2 note 4083623386, reversing 3.1.0's "no unread count"): a second
+  # two widgets. Availability for calls, and since 3.2 an OPT-IN unread count (decided
+  # 2026-10-24, reversing 3.1.0's "no unread count"): a second
   # complication a person adds to a face on purpose, a count only, never a name, redacted
   # on a lowered wrist (`.privacySensitive()`). It reads what the watch app wrote into the
   # App Group; it has no session of its own.
@@ -692,7 +692,7 @@ targets:
         GENERATE_INFOPLIST_FILE: "NO"
 
   # ⛔ THE NOTIFICATION SERVICE EXTENSION (3.2): A MESSAGE ALERT GETS ITS SENDER'S NAME.
-  # Sean, 2026-10-24 (GitLab #2 note 4083623386), reversing 3.1.0's "no NSE, a credential in
+  # Decided 2026-10-24, reversing 3.1.0's "no NSE, a credential in
   # a second place". The second place holds a SCOPED, READ-ONLY token, not the session: the
   # server's notify-read token authenticates `GET messages/{id}/sender` and nothing else,
   # and only while this device's session family is alive. It sits in the shared Keychain
@@ -759,8 +759,8 @@ targets:
         GENERATE_INFOPLIST_FILE: "NO"
 
   # ⛔ THE WIDGET EXTENSION (3.2): THE CALL'S LIVE ACTIVITY on the Lock Screen, the Dynamic
-  # Island and, from iOS 18 with watchOS 11, the Apple Watch Smart Stack. Sean, 2026-10-25
-  # (GitLab #2): started by the app when a ring wakes it or the open app sees a live call,
+  # Island and, from iOS 18 with watchOS 11, the Apple Watch Smart Stack. Decided
+  # 2026-10-25: started by the app when a ring wakes it or the open app sees a live call,
   # updated by the server's Live Activity pushes, and the one place a push carries a name and
   # a line of the conversation. It draws ActivityKit's content state for that.
   # ⛔ AND THE HOME SCREEN WIDGET (`Widgets/Sources/SummaryWidget.swift`), which reads ONE

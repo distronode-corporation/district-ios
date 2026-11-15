@@ -4,7 +4,7 @@ import DistrictModel
 
 /// The Live calls screen's words, and the few decisions about which one to say.
 ///
-/// ⛔ THE WEBSITE'S SENTENCES, WORD FOR WORD, AND SEAN'S SEVEN FOR THE APPS. Every member the
+/// ⛔ THE WEBSITE'S SENTENCES, WORD FOR WORD, AND SEVEN APPROVED FOR THE APPS. Every member the
 /// generated file adds comes from the Live page's `liveI18n.ts` in both languages, or from
 /// the approved list (2026-11-05); the catalog note on each one says which. The four drafts
 /// are this app's own (a busy device, a system call that never started, the quoted first
@@ -72,7 +72,7 @@ enum SuperviseCopy {
     }
 
     /// The website's "not used" sentences open with "Not used: " / « Consigne non utilisée : »,
-    /// which repeats the approved line above them (Sean, 2026-11-05: "Approved line + reason
+    /// which repeats the approved line above them (decided 2026-11-05: "Approved line + reason
     /// only").
     ///
     /// ⛔ THE REASON COMES FROM THE AGENT'S CODE (`transfer`, `taken_over`), NEVER FROM FREE TEXT;

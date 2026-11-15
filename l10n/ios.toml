@@ -3337,7 +3337,7 @@ screen = "dialer"
 args = { number = "str" }
 state = "reviewed"
 id = { swift = "DialerModel.ringsNoCountry(_:)" }
-note = "Shown under the number before Call, in place of dialer_m.rings, for a +1 toll-free number (800, 833, 844, 855, 866, 877, 888), which belongs to the whole plan rather than one country. {number} is the full international number, e.g. +1 800 555 0100. The web's ringsNoCountry, word for word in both languages (Sean, 2026-11-04, GitLab #2)."
+note = "Shown under the number before Call, in place of dialer_m.rings, for a +1 toll-free number (800, 833, 844, 855, 866, 877, 888), which belongs to the whole plan rather than one country. {number} is the full international number, e.g. +1 800 555 0100. The web's ringsNoCountry, word for word in both languages (2026-11-04)."
 
 [finish_setup.action]
 en = "Open setup"
@@ -4955,7 +4955,7 @@ fr = "Aucun modèle approuvé pour ce numéro pour l'instant."
 ctx = "body"
 screen = "inbox.thread"
 state = "reviewed"
-fr_variant = "The website's first sentence only (Sean, 2026-11-05): its second, « Actualisez les modèles dans les paramètres de messagerie », points to a refresh this app cannot do, since its Messaging settings cannot refresh templates."
+fr_variant = "The website's first sentence only (2026-11-05): its second, « Actualisez les modèles dans les paramètres de messagerie », points to a refresh this app cannot do, since its Messaging settings cannot refresh templates."
 id = { swift = "InboxCopy.whatsappTemplatesNone" }
 note = "The template sheet when the sender has no approved template. The website's sentence (inboxI18n whatsAppTemplatesNone), without its second sentence: the app's Messaging settings cannot refresh templates, and an Apple catalog names no web destination (STORE-APPLE)."
 
@@ -15443,7 +15443,7 @@ ctx = "title"
 screen = "settings"
 state = "reviewed"
 id = { swift = "SettingsCopy.voiceStudioTitle" }
-note = "⚠️ THE ROW, NAMED AS THE WEB'S DISTRICT STUDIO PAGE IS (\"Voice\", Sean's decision of 2026-10-04). It is also the screen's title before the read lands (``VoiceStudioCopy/title``), matching the heading the service sends."
+note = "⚠️ THE ROW, NAMED AS THE WEB'S DISTRICT STUDIO PAGE IS (\"Voice\", the decision of 2026-10-04). It is also the screen's title before the read lands (``VoiceStudioCopy/title``), matching the heading the service sends."
 
 [settings.we_could_not_ask]
 en = "We could not ask the carrier, so this says nothing about the credentials."
@@ -16991,7 +16991,7 @@ ctx = "body"
 screen = "setup.number"
 state = "draft"
 id = { swift = "SetupCopy.numberNoneBody" }
-note = "⛔ NAMES NO DESTINATION BEYOND THE PAGE'S OWN NAME (StoreCopyTests). Buying a number charges a card and stays on the web by decision (Sean, 2026-11-08)."
+note = "⛔ NAMES NO DESTINATION BEYOND THE PAGE'S OWN NAME (StoreCopyTests). Buying a number charges a card and stays on the web by decision (2026-11-08)."
 
 [setup.number_none_heading]
 en = "Get your number"
@@ -17322,7 +17322,7 @@ ctx = "error"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.busyInRoom" }
-note = "App-only. Listen was pressed while a meeting room holds the device's audio. French approved by Sean, 2026-11-05."
+note = "App-only. Listen was pressed while a meeting room holds the device's audio. French approved 2026-11-05."
 
 [supervise.busy_with_call]
 en = "There is already a call on this device. End it before listening in."
@@ -17331,7 +17331,7 @@ ctx = "error"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.busyWithCall" }
-note = "App-only. Listen was pressed while a phone call (placed, answered or supervised) holds the device. French approved by Sean, 2026-11-05."
+note = "App-only. Listen was pressed while a phone call (placed, answered or supervised) holds the device. French approved 2026-11-05."
 
 [supervise.call_ended]
 en = "The call has ended."
@@ -17340,7 +17340,7 @@ ctx = "body"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.callEnded" }
-note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. A status line; the server refusal api_error.call_ended keeps its own sentence."
+note = "Approved for the apps, 2026-11-05 (core-rust #70), word for word. A status line; the server refusal api_error.call_ended keeps its own sentence."
 
 [supervise.disconnect]
 en = "Stop listening"
@@ -17394,7 +17394,7 @@ ctx = "body"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.joining" }
-note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word."
+note = "Approved for the apps, 2026-11-05 (core-rust #70), word for word."
 
 [supervise.listen_in_body]
 en = "Hear the call as it happens. The caller does not hear you."
@@ -17457,7 +17457,7 @@ ctx = "body"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.noReceipt" }
-note = "App-only (xhigh review of PR #101, item 9). The Apple Watch's receipt line when the receptionist did not answer a note from the wrist within the time the phone may wait in the background. Approved by Sean, 2026-11-06."
+note = "App-only (review of PR #101, item 9). The Apple Watch's receipt line when the receptionist did not answer a note from the wrist within the time the phone may wait in the background. Approved 2026-11-06."
 
 [supervise.not_started]
 en = "iOS did not start the listen-in. Another call may already be in progress."
@@ -17466,7 +17466,7 @@ ctx = "error"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.notStarted" }
-note = "App-only. CallKit refused, or never answered, the system call a listen-in is. French approved by Sean, 2026-11-05."
+note = "App-only. CallKit refused, or never answered, the system call a listen-in is. French approved 2026-11-05."
 
 [supervise.page_subtitle]
 en = "Calls happening right now. Listen in, send your receptionist a private note, or take the call yourself."
@@ -17493,7 +17493,7 @@ ctx = "label"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.receptionistNotOnCall" }
-note = "Sean-approved for the apps, 2026-11-05, word for word. Shown on a team member's own softphone call (receptionistOnCall false), where Whisper and Take over are hidden and Listen stays."
+note = "Approved for the apps, 2026-11-05, word for word. Shown on a team member's own softphone call (receptionistOnCall false), where Whisper and Take over are hidden and Listen stays."
 
 [supervise.take_over]
 en = "Take over the call"
@@ -17548,7 +17548,7 @@ ctx = "error"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.takeOverJoinFailed" }
-note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. Also said when iOS refuses the microphone before the takeover is asked for."
+note = "Approved for the apps, 2026-11-05 (core-rust #70), word for word. Also said when iOS refuses the microphone before the takeover is asked for."
 
 [supervise.taken_over_body]
 en = "Your receptionist has stepped back and is waiting on the line. Hand the call back and it carries on."
@@ -17584,7 +17584,7 @@ ctx = "body"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.takingOver" }
-note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word."
+note = "Approved for the apps, 2026-11-05 (core-rust #70), word for word."
 
 [supervise.whisper_applied]
 en = "Your receptionist used your note."
@@ -17593,7 +17593,7 @@ ctx = "body"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.whisperApplied" }
-note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. The receipt's first line when the note was acted on."
+note = "Approved for the apps, 2026-11-05 (core-rust #70), word for word. The receipt's first line when the note was acted on."
 
 [supervise.whisper_disabled_placeholder]
 en = "Viewers cannot send notes"
@@ -17621,7 +17621,7 @@ screen = "live"
 args = { words = "str" }
 state = "reviewed"
 id = { swift = "SuperviseCopy.whisperFirstWords(_:)" }
-note = "App-only. The receipt's second line: the first words the receptionist said after acting on the note, quoted. {words} is customer speech, never translated. French approved by Sean, 2026-11-05."
+note = "App-only. The receipt's second line: the first words the receptionist said after acting on the note, quoted. {words} is customer speech, never translated. French approved 2026-11-05."
 
 [supervise.whisper_heading]
 en = "Note to your receptionist"
@@ -17639,7 +17639,7 @@ ctx = "body"
 screen = "live"
 state = "reviewed"
 id = { swift = "SuperviseCopy.whisperNotApplied" }
-note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. The receipt's first line when the note was held back; the reason follows."
+note = "Approved for the apps, 2026-11-05 (core-rust #70), word for word. The receipt's first line when the note was held back; the reason follows."
 
 [supervise.whisper_not_used_taken_over]
 en = "Not used: a team member is holding the call."
@@ -17694,7 +17694,7 @@ screen = "live"
 args = { max = "int" }
 state = "reviewed"
 id = { swift = "SuperviseCopy.whisperTooLong(_:)" }
-note = "Sean-approved for the apps, 2026-11-05 (core-rust #70), word for word. {max} is the route's limit, 2000."
+note = "Approved for the apps, 2026-11-05 (core-rust #70), word for word. {max} is the route's limit, 2000."
 
 [support.close]
 en = "Mark resolved"

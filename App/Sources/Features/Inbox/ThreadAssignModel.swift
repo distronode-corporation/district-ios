@@ -6,8 +6,8 @@ import Observation
 /// The assign sheet: who a conversation can be given to, and the write
 /// (`POST conversations/assign`, DistrictCore 8.2.0).
 ///
-/// ⛔ NO VIEWER IS OFFERED. The route answers 400 `assignee_is_viewer` for one (Sean,
-/// 2026-11-04, the web's rule), so a viewer in the list is a choice that can only fail.
+/// ⛔ NO VIEWER IS OFFERED. The route answers 400 `assignee_is_viewer` for one
+/// (2026-11-04, the web's rule), so a viewer in the list is a choice that can only fail.
 /// The refusal is still handled, because a member's role can change between the read
 /// and the tap.
 ///

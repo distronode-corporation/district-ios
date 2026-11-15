@@ -7,8 +7,8 @@ import Foundation
 ///
 /// ⛔ ONLY A PERSON MAY FEED ``IncomingCallEvent/declinePressed``. While the call rings it
 /// emits ``IncomingCallCommand/requestDecline(workspace:call:)``, which tells the server, and
-/// through the agent the caller, that somebody refused the call (Sean, 2026-10-24, GitLab #2
-/// note 4083623386). An ending with nobody behind it feeds ``IncomingCallEvent/withdrawnLocally``,
+/// through the agent the caller, that somebody refused the call (decided 2026-10-24).
+/// An ending with nobody behind it feeds ``IncomingCallEvent/withdrawnLocally``,
 /// which ends the ring the same way and sends nothing.
 ///
 /// ⚠️ ITS OWN TYPE, OUT OF ``IncomingCallModel``, so `DistrictAITests` can run these choices

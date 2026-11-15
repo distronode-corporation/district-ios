@@ -31,7 +31,7 @@ extension SmokeUITests {
     ///
     /// So this logs one step named `passwordMarker` and returns. The script sees that step in
     /// xcodebuild's live output and types the password, then Return, into the simulator as
-    /// keystrokes from System Events (Sean, GitLab #2 note 4096242351), which XCTest does not
+    /// keystrokes from System Events, which XCTest does not
     /// see. Return sends the form; `awaitConsent(_:in:loginButton:)` reads the outcome from
     /// the page.
     func awaitScriptedPassword() {

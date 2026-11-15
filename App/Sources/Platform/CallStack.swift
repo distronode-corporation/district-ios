@@ -56,7 +56,7 @@ protocol SoftphoneEnding: AnyObject {
 
 /// When the session's end takes the device's calls down with it.
 enum CallTeardown {
-    /// ⛔ THE KEYPAD'S CALL ENDS ON SIGN-OUT ONLY (Sean, 2026-11-06: "End it on sign-out only"):
+    /// ⛔ THE KEYPAD'S CALL ENDS ON SIGN-OUT ONLY (decided 2026-11-06: "End it on sign-out only"):
     /// signing out, a session that ended, a session that must sign in again (all `signedOut`).
     /// NOT on `unavailable` (the session is intact) and NOT on a workspace switch.
     static func endsSoftphone(_ phase: AuthPhase) -> Bool {
@@ -210,7 +210,7 @@ final class CallStack {
         Task {
             await endSupervision()
             await endPendingRoom()
-            // ⛔ AND A LIVE ROOM, HQ VOICE OR A MEETING (Sean, 2026-11-07: "End voice and meetings on
+            // ⛔ AND A LIVE ROOM, HQ VOICE OR A MEETING (decided 2026-11-07: "End voice and meetings on
             // switch"), as the deep-link switch already does: the room belongs to the old workspace.
             await endRoom(.workspaceChanged)
         }

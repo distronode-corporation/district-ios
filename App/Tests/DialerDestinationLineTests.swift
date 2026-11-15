@@ -56,7 +56,7 @@ final class DialerDestinationLineTests: XCTestCase {
         }
     }
 
-    /// ⛔ A +1 TOLL-FREE NUMBER NAMES NO COUNTRY (Sean, 2026-11-04, GitLab #2): the web's
+    /// ⛔ A +1 TOLL-FREE NUMBER NAMES NO COUNTRY (decided 2026-11-04): the web's
     /// `ringsNoCountry`, word for word, for every one of the seven codes, typed locally or
     /// with `+1`, whatever +1 country is on the button.
     func testATollFreeNumberSaysItBelongsToNoOneCountry() {

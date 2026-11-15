@@ -11,7 +11,7 @@ import Observation
 /// A fresh sign-in at the person's provider, or their password and (when two-step verification
 /// is already on) its code, earns a proof bound to this installation and this action
 /// (``NativeReauthRepository``); `enroll` checks it, `confirm` and `disable` spend it. No
-/// passkeys (Sean, 2026-11-08: "Yes, SSO or password"); two-step accounts re-authenticate with
+/// passkeys (decided 2026-11-08: "Yes, SSO or password"); two-step accounts re-authenticate with
 /// their code (2026-11-07). The re-authentication is the one ``DeleteAccountModel`` runs, with
 /// its wording.
 ///
