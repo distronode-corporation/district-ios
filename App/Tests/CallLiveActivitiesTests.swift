@@ -221,11 +221,55 @@ final class CallLiveActivitiesTests: XCTestCase {
         XCTAssertTrue(line.hasSuffix("…"))
         XCTAssertEqual(activity.state.latestSpeaker, .caller)
 
+        // ⚠️ THE WHOLE TRANSCRIPT ON EVERY PUBLISH, as the model sends it.
+        let s3 = LiveFixtures.segment("s3", index: 2, text: long)
+        let s4 = LiveFixtures.segment("s4", index: 3, final: false)
+        let s5 = LiveFixtures.segment("s5", index: 4, text: "   ")
         let updates = activity.updates.count
-        activities.transcript(callId: "call_1", lines: [LiveFixtures.segment("s3", index: 2, text: long)])
-        activities.transcript(callId: "call_1", lines: [LiveFixtures.segment("s4", index: 3, final: false)])
-        activities.transcript(callId: "call_1", lines: [LiveFixtures.segment("s5", index: 4, text: "   ")])
+        activities.transcript(callId: "call_1", lines: [s3])
+        activities.transcript(callId: "call_1", lines: [s3, s4])
+        activities.transcript(callId: "call_1", lines: [s3, s4, s5])
         XCTAssertEqual(activity.updates.count, updates, "the same line, an interim one or a blank one change nothing")
+    }
+
+    /// ⛔ A RETRACTED LINE LEAVES THE LOCK SCREEN. The transcript is published whole, so a
+    /// transcript with no final line left is one whose lines were retracted.
+    func testARetractionThatLeavesNoLineClearsTheExcerpt() throws {
+        let activities = make()
+        activities.rang(workspaceId: "ws_1", callId: "call_1")
+        let activity = try XCTUnwrap(host.started.first)
+        let s1 = LiveFixtures.segment("s1", index: 0, speaker: .agent, text: "Your card ends in 4242.")
+        let s2 = LiveFixtures.segment("s2", index: 1, text: "Thanks.")
+
+        activities.transcript(callId: "call_1", lines: [s1, s2])
+        XCTAssertEqual(activity.state.latestLine, "Thanks.")
+
+        activities.transcript(callId: "call_1", lines: [s1])
+        XCTAssertEqual(activity.state.latestLine, "Your card ends in 4242.", "the line before it is the latest now")
+        XCTAssertEqual(activity.state.latestSpeaker, .assistant)
+
+        activities.transcript(callId: "call_1", lines: [LiveFixtures.segment("s3", index: 2, final: false)])
+        XCTAssertNil(activity.state.latestLine)
+        XCTAssertNil(activity.state.latestSpeaker)
+        XCTAssertEqual(activity.updates.last?.latestLine, nil, "the clearing reached ActivityKit")
+
+        let updates = activity.updates.count
+        activities.transcript(callId: "call_1", lines: [])
+        XCTAssertEqual(activity.updates.count, updates, "already clear: nothing to send")
+    }
+
+    /// ⚠️ A TRANSCRIPT NOT YET READ IS EMPTY BECAUSE IT IS UNREAD, NOT RETRACTED: a line the
+    /// server pushed stays until this transcript has supplied one of its own.
+    func testAnUnreadTranscriptLeavesAPushedLineAlone() {
+        host.alreadyRunning = [FakeActivity(
+            workspaceId: "ws_1",
+            callId: "call_1",
+            state: .init(phase: .aiAnswering, startedAt: "x", latestLine: "Pushed.", latestSpeaker: .caller)
+        )]
+        let activities = make()
+        activities.transcript(callId: "call_1", lines: [])
+        XCTAssertEqual(host.alreadyRunning.first?.state.latestLine, "Pushed.")
+        XCTAssertEqual(host.alreadyRunning.first?.updates, [])
     }
 
     func testTheLineRules() {
@@ -282,6 +326,37 @@ final class CallLiveActivitiesTests: XCTestCase {
         XCTAssertEqual(host.started.first?.ending, .immediate)
         XCTAssertEqual(survivor.ending, .immediate)
         XCTAssertEqual(activities.callIds, [])
+    }
+
+    /// ⛔ AND AN ENDED CALL STILL ON SCREEN GOES TOO. Its caller and its last line belong to
+    /// the account that is leaving, so it does not wait out ``CallLiveActivities/dismissalDelay``.
+    func testSignOutTakesDownAnEndedCallStillOnScreen() throws {
+        let activities = make()
+        activities.seenLive(workspaceId: "ws_1", callId: "call_1", callerName: "Marie", startedAt: started)
+        let line = LiveFixtures.segment("s1", index: 0, text: "My account number is 1234.")
+        activities.transcript(callId: "call_1", lines: [line])
+        activities.ended(callId: "call_1")
+        let activity = try XCTUnwrap(host.started.first)
+        XCTAssertEqual(activity.ending, .after(clock.addingTimeInterval(CallLiveActivities.dismissalDelay)))
+
+        clock = started.addingTimeInterval(60)
+        activities.endAll()
+
+        XCTAssertEqual(activity.ending, .immediate)
+        XCTAssertEqual(activity.endCount, 2)
+    }
+
+    /// ⚠️ ONE ALREADY GONE IS LEFT ALONE: past its dismissal the system has removed it.
+    func testSignOutLeavesAnEndedCallPastItsDismissal() throws {
+        let activities = make()
+        activities.seenLive(workspaceId: "ws_1", callId: "call_1", callerName: "Marie", startedAt: started)
+        activities.ended(callId: "call_1")
+        let activity = try XCTUnwrap(host.started.first)
+
+        clock = started.addingTimeInterval(CallLiveActivities.dismissalDelay + 1)
+        activities.endAll()
+
+        XCTAssertEqual(activity.endCount, 1)
     }
 
     // MARK: - What the open app sees
