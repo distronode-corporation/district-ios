@@ -137,10 +137,13 @@ struct MessagingAccountSheet: View {
     private func credentials(_ draft: MessagingDraft) -> some View {
         VStack(alignment: .leading, spacing: DistrictSpacing.row) {
             ForEach(MessagingCatalog.credentialFields(for: draft.provider)) { credential in
+                // ⛔ THE CATALOG'S CLASSIFICATION PICKS THE BOX: a secret is masked and
+                // gets the system keyboard; a plaintext identifier stays readable.
                 SettingsField(
                     label: credential.label,
                     text: secretBinding(draft, credential.key),
-                    enabled: !saving
+                    enabled: !saving,
+                    secure: credential.isSecret
                 )
             }
             Text(credentialNote(draft))

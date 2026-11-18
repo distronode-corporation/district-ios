@@ -1,4 +1,3 @@
-import AVFoundation
 import DistrictData
 import DistrictModel
 import DistrictNetwork
@@ -127,7 +126,6 @@ final class ActiveRoomModel: RoomAudio {
         RoomName.displayName(roomName.value)
     }
 
-    private let repository: RoomsRepository
     private let callStack: CallStack
     private let webOrigin: URL
 
@@ -146,6 +144,10 @@ final class ActiveRoomModel: RoomAudio {
     /// did not choose that ending and is offered the room back.
     private var released = false
 
+    /// ⛔ Bumped by every join, leave and yield; a join that sees it move touches nothing.
+    private var joinGeneration = 0
+    private let seams: RoomJoinSeams
+
     /// - Parameter webOrigin: ⚠️ DEFAULTED TO THE PRODUCTION ORIGIN RATHER THAN READ
     ///   OFF THE CONTAINER. It is the origin a `guestPath` is joined onto and nothing
     ///   else; the credential itself comes from the container's client.
@@ -153,13 +155,14 @@ final class ActiveRoomModel: RoomAudio {
         container: AppContainer,
         roomName: RoomName,
         role: WorkspaceRole?,
-        webOrigin: URL = ApiClient.productionBaseURL
+        webOrigin: URL = ApiClient.productionBaseURL,
+        seams: RoomJoinSeams? = nil
     ) {
         canPublish = WorkspaceRole.allowsMutation(role)
         self.roomName = roomName
-        repository = container.rooms
         callStack = container.callStack
         self.webOrigin = webOrigin
+        self.seams = seams ?? .live(container.rooms)
     }
 
     // MARK: - Joining
@@ -201,18 +204,33 @@ final class ActiveRoomModel: RoomAudio {
             return
         }
 
-        await dropEngine()
+        joinGeneration &+= 1
+        let generation = joinGeneration
+        // ⛔ `joining` BEFORE THE TEARDOWN AWAITS: a second press must not start a second join.
         phase = .joining
         joinFailure = nil
+        await dropEngine()
+        guard generation == joinGeneration else { return }
+        // ⛔ AND THE AUDIO IS CHECKED AGAIN, because the teardown awaited: another room or a
+        // call may have taken it meanwhile. ``CallStack/claimRoom(_:)`` replaces whatever it
+        // holds, so claiming now would strand that room's engine.
+        guard !callStack.hasLiveCall, !callStack.hasLiveRoom else {
+            phase = .idle
+            joinFailure = callStack.hasLiveCall ? RoomsCopy.busyWithCall : RoomsCopy.busyWithRoom
+            return
+        }
         // ⛔ CLAIMED BEFORE THE PERMISSIONS AND THE TOKEN READ, NOT AFTER THE CONNECT.
         // Both of those await, and a dial tapped across either would otherwise find no
         // room and be allowed. ``release()`` gives it back on every exit.
         callStack.claimRoom(self)
-        await requestPermissions()
-
-        switch await repository.token(roomName: roomName) {
+        let granted = await seams.askPermissions()
+        guard generation == joinGeneration else { return }
+        permissions = granted
+        let outcome = await seams.fetchToken(roomName)
+        guard generation == joinGeneration else { return }
+        switch outcome {
         case let .success(credential):
-            await connect(with: credential)
+            await connect(with: credential, generation: generation)
         case let .failure(error):
             // ⛔ BACK TO `idle`, NOT `failed`. The engine never connected, so there is
             // nothing to report a connection state about, and the reason the user
@@ -224,20 +242,7 @@ final class ActiveRoomModel: RoomAudio {
         }
     }
 
-    /// ⚠️ ASKED FOR SEPARATELY AND IN ORDER, because the two answers are not one
-    /// outcome. `AVCaptureDevice.requestAccess` returns the current grant immediately
-    /// when it has already been answered, so this is one path rather than two.
-    private func requestPermissions() async {
-        let microphone = await AVCaptureDevice.requestAccess(for: .audio)
-        let camera = await AVCaptureDevice.requestAccess(for: .video)
-        permissions = RoomPermissions(
-            requested: true,
-            microphoneGranted: microphone,
-            cameraGranted: camera
-        )
-    }
-
-    private func connect(with credential: RoomTokenResponse) async {
+    private func connect(with credential: RoomTokenResponse, generation: Int) async {
         // ⚠️ NULL FOR A VIEWER, BY SERVER DECISION. Never synthesised.
         guestLink = credential.guestPath.flatMap { URL(string: $0, relativeTo: webOrigin)?.absoluteURL }
 
@@ -278,6 +283,7 @@ final class ActiveRoomModel: RoomAudio {
         do {
             try await engine.connect(url: credential.url, token: credential.token)
         } catch {
+            guard generation == joinGeneration, self.engine === engine else { return }
             // ⚠️ The engine has already yielded `.failed` and rethrown; this only
             // records that the throw was seen. Letting it escape would crash the
             // process over a network condition.
@@ -288,6 +294,7 @@ final class ActiveRoomModel: RoomAudio {
             return
         }
 
+        guard generation == joinGeneration, self.engine === engine else { return }
         refreshRoster()
         // ⛔ MICROPHONE ON, CAMERA OFF, AND THE ASYMMETRY IS DELIBERATE. Joining muted
         // is a well-known way to hold a meeting in which nobody realises they are
@@ -363,6 +370,7 @@ final class ActiveRoomModel: RoomAudio {
     func leave() async {
         guard !released else { return }
         released = true
+        joinGeneration &+= 1
         await dropEngine()
         phase = .left
     }
@@ -383,6 +391,7 @@ final class ActiveRoomModel: RoomAudio {
     /// nobody routed through `endRoom` would hold the claim forever.
     func yieldAudio(_ reason: RoomAudioYield) async {
         guard !released else { return }
+        joinGeneration &+= 1
         await dropEngine()
         phase = .yielded(reason)
     }
@@ -481,19 +490,4 @@ final class ActiveRoomModel: RoomAudio {
         companionPresent = everyone.contains(where: ActiveRoomModel.isCompanion)
         localVideo = engine.localCameraTrack()
     }
-
-    /// Is this participant the note-taking Companion rather than a person?
-    ///
-    /// ⛔ THE SAME TWO TESTS THE WEB APPLIES, IN THE SAME ORDER, AND THE DUPLICATION
-    /// IS THE POINT. Getting this wrong on one platform and not the other produces a
-    /// blank muted tile that only phone users see. The KIND is the real test (the
-    /// voice agent joins through the Agents framework with the agent kind); the
-    /// prefix is a retired browser-side signalling participant that nothing mints any
-    /// more, kept because a room built before the metadata cutover could still
-    /// contain one.
-    private static func isCompanion(_ participant: RoomParticipantSnapshot) -> Bool {
-        participant.isAgent || participant.identity.hasPrefix(retiredCompanionPrefix)
-    }
-
-    private static let retiredCompanionPrefix = "ai-companion-"
 }
