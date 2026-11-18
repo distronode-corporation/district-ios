@@ -6,25 +6,46 @@
 
 # District AI for iOS
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/distronode-corporation/district-ios/badge)](https://scorecard.dev/viewer/?uri=github.com/distronode-corporation/district-ios)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15870/badge)](https://www.bestpractices.dev/projects/15870)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/distronode-corporation/district-ios/badge)](https://scorecard.dev/viewer/?uri=github.com/distronode-corporation/district-ios)
 [![Latest release](https://img.shields.io/github/v/release/distronode-corporation/district-ios?label=release)](https://github.com/distronode-corporation/district-ios/releases/latest)
+[![License: Apache-2.0](https://img.shields.io/github/license/distronode-corporation/district-ios)](LICENSE)
+[![CI](https://github.com/distronode-corporation/district-ios/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/distronode-corporation/district-ios/actions/workflows/ci.yml)
 
-<a href="https://apps.apple.com/app/id6809297970"><img alt="Download on the App Store" src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" height="44"></a>
-
-District AI for iOS is [on the App Store](https://apps.apple.com/app/id6809297970).
-
-Links: [project page](https://www.distronode.com/open-source/district-ios) ·
-[GitLab mirror](https://gitlab.com/distronode-corporation/district-ios) (read-only mirror;
-issues and pull requests live on GitHub) · [CHANGELOG](CHANGELOG.md)
-
-The native iPhone and iPad client for [District AI](https://www.distronode.com/district-ai),
-the AI receptionist service by Distronode. It places and answers calls, and covers the
-inbox, contacts, meeting rooms and workspace settings of a District AI workspace.
+The native iPhone and iPad app for District AI, the AI voice receptionist from
+[Distronode](https://distronode.com) that answers a business's phone calls.
 
 <img alt="The Overview on iPad, in a fictional review workspace" src="docs/images/ipad-overview.png" width="620">
 
 *The Overview on iPad, in a fictional review workspace.*
+
+**Quick start:** install it from the App Store and sign in with your District AI account.
+
+<a href="https://apps.apple.com/app/id6809297970"><img alt="Download on the App Store" src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" height="44"></a>
+
+Or build it for the simulator on a Mac with Xcode 26.3 and XcodeGen (see
+[Build and test](#build-and-test)):
+
+```sh
+xcodegen generate --spec project.yml
+xcodebuild build -project DistrictAI.xcodeproj -scheme DistrictAI \
+  -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO
+```
+
+**Links:** [Distronode](https://distronode.com) ·
+[project page](https://www.distronode.com/open-source/district-ios) ·
+[Distronode on GitHub](https://github.com/distronode-corporation) ·
+[CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md) ·
+[SECURITY-MODEL](SECURITY-MODEL.md) ·
+[GitLab mirror](https://gitlab.com/distronode-corporation/district-ios) (read-only mirror;
+issues and pull requests live on GitHub)
+
+## What it is
+
+The native iPhone and iPad client for [District AI](https://www.distronode.com/district-ai),
+the AI receptionist service by Distronode, [on the App Store](https://apps.apple.com/app/id6809297970).
+It places and answers calls, and covers the inbox, contacts, meeting rooms and workspace
+settings of a District AI workspace.
 
 This repository and [district-core-swift](https://github.com/distronode-corporation/district-core-swift), the Swift package that holds most of
 the app's logic, are the client's complete source, under the Apache License 2.0. The
@@ -249,11 +270,31 @@ Builds from a fork report no crashes: crash reporting (Sentry) starts only when 
 supplied at build time, and `project.yml` ships it empty. Only the release workflow
 supplies one.
 
+## Uninstall
+
+Sign out first (Account, Sign out), with the device online, if you want the session ended on
+the service as well: signing out revokes the app's refresh token. A revoke the service could
+not be reached for is kept and sent on the app's next launch, so if you delete the app before
+that, the session stays open on the service until it expires (or until a new install's first
+launch revokes it, below). Then delete the app as any other: touch and
+hold its icon on the Home Screen and choose Remove App, then Delete App. Its Apple Watch app
+is removed with it.
+
+iOS can keep an app's Keychain items after the app is deleted, so a session left there is
+not used again: the first launch of a new install wipes any session it finds from an earlier
+one and queues its revoke. Your District AI account and workspace are on the service and are
+not touched; deleting the account is Account, Delete account, in the app.
+
 ## Contributing, security and conduct
 
 - [CONTRIBUTING.md](CONTRIBUTING.md): the local gate, the rules CI enforces, and how
   pull requests are reviewed.
 - [SECURITY.md](SECURITY.md): report vulnerabilities privately, not in an issue.
+- [SECURITY-MODEL.md](SECURITY-MODEL.md): what the app protects, from whom, and the tests
+  that hold each control.
+- [ROADMAP.md](ROADMAP.md): the near-term plan.
+- [GOVERNANCE.md](https://github.com/distronode-corporation/.github/blob/main/GOVERNANCE.md):
+  how the project is run, its roles, and how it continues, for every Distronode repository.
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 - [SUPPORT](.github/SUPPORT.md): where questions, bugs and account problems go.
 - [CHANGELOG.md](CHANGELOG.md).
