@@ -144,8 +144,7 @@ final class ActiveRoomModel: RoomAudio {
     /// did not choose that ending and is offered the room back.
     private var released = false
 
-    /// ⛔ BUMPED BY EVERY JOIN, LEAVE AND YIELD, AND CHECKED AFTER EVERY AWAIT IN A JOIN, so
-    /// a join a leave or a yield landed inside never connects or publishes the microphone.
+    /// ⛔ Bumped by every join, leave and yield; a join that sees it move touches nothing.
     private var joinGeneration = 0
     private let seams: RoomJoinSeams
 
@@ -207,18 +206,18 @@ final class ActiveRoomModel: RoomAudio {
 
         joinGeneration &+= 1
         let generation = joinGeneration
-        await dropEngine()
-        // ⛔ A STALE JOIN TOUCHES NOTHING: the phase and the claim are the leave's or yield's.
-        guard generation == joinGeneration else { return }
+        // ⛔ `joining` BEFORE THE TEARDOWN AWAITS: a second press must not start a second join.
         phase = .joining
         joinFailure = nil
+        await dropEngine()
+        guard generation == joinGeneration else { return }
         // ⛔ CLAIMED BEFORE THE PERMISSIONS AND THE TOKEN READ, NOT AFTER THE CONNECT.
         // Both of those await, and a dial tapped across either would otherwise find no
         // room and be allowed. ``release()`` gives it back on every exit.
         callStack.claimRoom(self)
-        permissions = await seams.askPermissions()
+        let granted = await seams.askPermissions()
         guard generation == joinGeneration else { return }
-
+        permissions = granted
         let outcome = await seams.fetchToken(roomName)
         guard generation == joinGeneration else { return }
         switch outcome {
@@ -276,7 +275,6 @@ final class ActiveRoomModel: RoomAudio {
         do {
             try await engine.connect(url: credential.url, token: credential.token)
         } catch {
-            // ⛔ A LEAVE OR YIELD DURING THE CONNECT ALREADY SET THE PHASE AND THE CLAIM.
             guard generation == joinGeneration, self.engine === engine else { return }
             // ⚠️ The engine has already yielded `.failed` and rethrown; this only
             // records that the throw was seen. Letting it escape would crash the
