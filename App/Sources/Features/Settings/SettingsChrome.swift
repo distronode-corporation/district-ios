@@ -189,6 +189,9 @@ struct SettingsField: View {
     /// name or a number. `axis:` rather than a separate editor so the two share one
     /// component and one disabled state.
     var multiline = false
+    /// ⛔ A CREDENTIAL IS A `SecureField`: masked on screen, and typed on the system
+    /// keyboard, never a third-party one. A single-line box only; `multiline` is ignored.
+    var secure = false
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -207,7 +210,11 @@ struct SettingsField: View {
 
     @ViewBuilder
     private var box: some View {
-        if multiline {
+        if secure {
+            SecureField(label, text: text, prompt: .noPlaceholder)
+                .disabled(!enabled)
+                .districtField()
+        } else if multiline {
             TextField(label, text: text, prompt: .noPlaceholder, axis: .vertical)
                 .lineLimit(3 ... 8)
                 .disabled(!enabled)
