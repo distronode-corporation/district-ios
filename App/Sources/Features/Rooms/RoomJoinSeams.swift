@@ -1,6 +1,7 @@
 import AVFoundation
 import DistrictData
 import DistrictModel
+import DistrictNetwork
 import Foundation
 
 /// The two things ``ActiveRoomModel/join()`` waits on that a test has to hold: the token
