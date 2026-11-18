@@ -211,6 +211,14 @@ final class ActiveRoomModel: RoomAudio {
         joinFailure = nil
         await dropEngine()
         guard generation == joinGeneration else { return }
+        // ⛔ AND THE AUDIO IS CHECKED AGAIN, because the teardown awaited: another room or a
+        // call may have taken it meanwhile. ``CallStack/claimRoom(_:)`` replaces whatever it
+        // holds, so claiming now would strand that room's engine.
+        guard !callStack.hasLiveCall, !callStack.hasLiveRoom else {
+            phase = .idle
+            joinFailure = callStack.hasLiveCall ? RoomsCopy.busyWithCall : RoomsCopy.busyWithRoom
+            return
+        }
         // ⛔ CLAIMED BEFORE THE PERMISSIONS AND THE TOKEN READ, NOT AFTER THE CONNECT.
         // Both of those await, and a dial tapped across either would otherwise find no
         // room and be allowed. ``release()`` gives it back on every exit.
@@ -482,19 +490,4 @@ final class ActiveRoomModel: RoomAudio {
         companionPresent = everyone.contains(where: ActiveRoomModel.isCompanion)
         localVideo = engine.localCameraTrack()
     }
-
-    /// Is this participant the note-taking Companion rather than a person?
-    ///
-    /// ⛔ THE SAME TWO TESTS THE WEB APPLIES, IN THE SAME ORDER, AND THE DUPLICATION
-    /// IS THE POINT. Getting this wrong on one platform and not the other produces a
-    /// blank muted tile that only phone users see. The KIND is the real test (the
-    /// voice agent joins through the Agents framework with the agent kind); the
-    /// prefix is a retired browser-side signalling participant that nothing mints any
-    /// more, kept because a room built before the metadata cutover could still
-    /// contain one.
-    private static func isCompanion(_ participant: RoomParticipantSnapshot) -> Bool {
-        participant.isAgent || participant.identity.hasPrefix(retiredCompanionPrefix)
-    }
-
-    private static let retiredCompanionPrefix = "ai-companion-"
 }
