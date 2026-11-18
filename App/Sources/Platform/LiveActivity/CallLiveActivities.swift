@@ -95,6 +95,17 @@ final class CallLiveActivities {
     private var activities: [String: any CallActivityHandle] = [:]
     private var tokenTasks: [String: Task<Void, Never>] = [:]
     private var adopted = false
+    /// The calls whose excerpt came from a live transcript, so an emptied transcript (a
+    /// retraction) clears it, while one not yet read (no snapshot so far) leaves alone a line
+    /// the server pushed.
+    private var transcribed: Set<String> = []
+    /// Ended activities still on screen until their dismissal, by activity id.
+    ///
+    /// ⛔ KEPT SO A SIGN-OUT CAN TAKE THEM DOWN AT ONCE. An ended call stays for
+    /// ``dismissalDelay`` with its caller and its last line, and once it leaves
+    /// ``activities`` nothing else holds it: ``endAll()`` would miss it, and the account that
+    /// signed out would stay on the Lock Screen for minutes.
+    private var lingering: [String: (activity: any CallActivityHandle, until: Date)] = [:]
     private var newActivities: Task<Void, Never>?
 
     init(host: any CallActivityHosting, registrar: any LiveActivityRegistering, now: @escaping () -> Date = Date.init) {
@@ -244,16 +255,25 @@ final class CallLiveActivities {
     ///
     /// ⚠️ INTERIM LINES ARE NEVER SHOWN: they are rewritten as the caller speaks, and the
     /// server's own updates carry final segments only, so the two agree.
+    ///
+    /// ⛔ A TRANSCRIPT LEFT WITH NO LINE TO SHOW CLEARS THE EXCERPT. The transcript is the
+    /// whole of it on every publish, so a line that is gone from it was retracted, and a
+    /// retracted line must not stay on the Lock Screen. ⚠️ Only once this transcript has
+    /// supplied a line: before its first snapshot it is empty because it is unread.
     func transcript(callId: String, lines: [TranscriptSegment]) {
-        guard let activity = tracked(callId),
-              let segment = lines.last(where: \.final),
-              let line = DistrictCallActivityLine.clip(segment.text)
-        else { return }
+        guard let activity = tracked(callId) else { return }
         var state = activity.state
-        state.latestLine = line
-        state.latestSpeaker = Self.speaker(segment.speaker)
-        if state.phase == .ringing {
-            state.phase = .aiAnswering
+        if let (segment, line) = Self.latestLine(lines) {
+            state.latestLine = line
+            state.latestSpeaker = Self.speaker(segment.speaker)
+            if state.phase == .ringing {
+                state.phase = .aiAnswering
+            }
+            transcribed.insert(callId)
+        } else {
+            guard transcribed.contains(callId) else { return }
+            state.latestLine = nil
+            state.latestSpeaker = nil
         }
         guard state != activity.state else { return }
         push(state, to: activity)
@@ -279,6 +299,12 @@ final class CallLiveActivities {
         for (callId, activity) in activities {
             finish(callId, activity.state, dismissal: .immediate)
         }
+        // ⛔ AND THE ENDED ONES STILL ON SCREEN. See ``lingering``.
+        let moment = now()
+        for (_, entry) in lingering where entry.until > moment {
+            entry.activity.end(entry.activity.state, dismissal: .immediate)
+        }
+        lingering.removeAll()
     }
 
     private func finish(
@@ -288,7 +314,13 @@ final class CallLiveActivities {
     ) {
         guard let activity = activities.removeValue(forKey: callId) else { return }
         tokenTasks.removeValue(forKey: callId)?.cancel()
+        transcribed.remove(callId)
         activity.end(state, dismissal: dismissal)
+        let moment = now()
+        lingering = lingering.filter { $0.value.until > moment }
+        if case let .after(until) = dismissal {
+            lingering[activity.activityId] = (activity, until)
+        }
     }
 
     private func push(_ state: DistrictCallActivityAttributes.ContentState, to activity: any CallActivityHandle) {
@@ -302,6 +334,16 @@ final class CallLiveActivities {
     // MARK: - Pure rules
 
     /// The token as APNs wants it: lowercase hex.
+    /// The latest final segment with something to show, and its clipped line.
+    static func latestLine(_ lines: [TranscriptSegment]) -> (TranscriptSegment, String)? {
+        for segment in lines.reversed() where segment.final {
+            if let line = DistrictCallActivityLine.clip(segment.text) {
+                return (segment, line)
+            }
+        }
+        return nil
+    }
+
     nonisolated static func hex(_ data: Data) -> String {
         data.map { String(format: "%02x", $0) }.joined()
     }
