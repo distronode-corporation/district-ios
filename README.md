@@ -273,8 +273,10 @@ supplies one.
 ## Uninstall
 
 Sign out first (Account, Sign out), with the device online, if you want the session ended on
-the service as well: signing out revokes the app's refresh token, and a revoke the service
-could not be reached for is kept to send later. Then delete the app as any other: touch and
+the service as well: signing out revokes the app's refresh token. A revoke the service could
+not be reached for is kept and sent on the app's next launch, so if you delete the app before
+that, the session stays open on the service until it expires (or until a new install's first
+launch revokes it, below). Then delete the app as any other: touch and
 hold its icon on the Home Screen and choose Remove App, then Delete App. Its Apple Watch app
 is removed with it.
 
