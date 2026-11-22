@@ -185,9 +185,11 @@ final class SetupGoLiveModel {
         return check.failure == "dial_failed" ? SetupCopy.goliveCheckDialFailed : SetupCopy.goliveCheckFailed
     }
 
+    /// ⚠️ THE CATALOG CHOOSES THE FORM, NOT THIS CLIENT: French takes the singular for 0 and 1
+    /// (« 0 vérification restante »), English only for 1 ("0 checks left").
     var attemptsSentence: String? {
         guard let left = forwarding?.attemptsLeft else { return nil }
-        return left == 1 ? SetupCopy.goliveAttemptsLeftOne : SetupCopy.goliveAttemptsLeft(left)
+        return SetupCopy.goliveAttemptsLeft(left)
     }
 
     // MARK: - Finish

@@ -1,5 +1,6 @@
 @testable import DistrictAI
 import DistrictData
+import DistrictL10n
 import DistrictModel
 import DistrictNetwork
 import Foundation
@@ -309,5 +310,27 @@ final class SetupLaterStepModelTests: SetupStepTestCase {
         await model.startCheck()
 
         XCTAssertEqual(model.checkSentence, "We could not place the check call. Try again in a few minutes.")
+    }
+
+    /// ⚠️ FRENCH TAKES THE SINGULAR AT 0 AND 1, ENGLISH ONLY AT 1 (#130): « 0 vérification
+    /// restante », but "0 checks left".
+    func testChecksLeftTakeEachLanguagesSingular() async {
+        var english: [String?] = []
+        var french: [String?] = []
+        for left in [0, 1, 2] {
+            let transport = SetupTransport([
+                SetupFixture.forwardingRoute: [(200, SetupFixture.forwarding("passed", attemptsLeft: left))],
+            ])
+            let model = await goLive(transport)
+            await model.load()
+            english.append(L10nRuntime.withLocale(.en) { model.attemptsSentence })
+            french.append(L10nRuntime.withLocale(.frCA) { model.attemptsSentence })
+        }
+
+        let zeroFrench = "0 vérification restante aujourd'hui."
+        let oneFrench = "1 vérification restante aujourd'hui."
+        let twoFrench = "2 vérifications restantes aujourd'hui."
+        XCTAssertEqual(english, ["0 checks left today.", "1 check left today.", "2 checks left today."])
+        XCTAssertEqual(french, [zeroFrench, oneFrench, twoFrench])
     }
 }

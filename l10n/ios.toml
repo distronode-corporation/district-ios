@@ -16585,21 +16585,15 @@ state = "reviewed"
 id = { swift = "SetupCopy.goliveAnswersLabel" }
 
 [setup.golive_attempts_left]
-en = "{n} checks left today."
-fr = "{n} vérifications restantes aujourd'hui."
+en.one = "{n} check left today."
+en.other = "{n} checks left today."
+fr.one = "{n} vérification restante aujourd'hui."
+fr.other = "{n} vérifications restantes aujourd'hui."
 ctx = "label"
 screen = "setup.golive"
 args = { n = "int" }
 state = "reviewed"
 id = { swift = "SetupCopy.goliveAttemptsLeft(_:)" }
-
-[setup.golive_attempts_left_one]
-en = "1 check left today."
-fr = "1 vérification restante aujourd'hui."
-ctx = "label"
-screen = "setup.golive"
-state = "reviewed"
-id = { swift = "SetupCopy.goliveAttemptsLeftOne" }
 
 [setup.golive_business_line_error]
 en = "Enter your business line with its country code, for example +14165550123."
