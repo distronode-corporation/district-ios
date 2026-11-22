@@ -19,7 +19,9 @@ The native iPhone and iPad app for District AI, the AI voice receptionist from
 
 *The Overview on iPad, in a fictional review workspace.*
 
-**Quick start:** install it from the App Store and sign in with your District AI account.
+## Quick start
+
+Install it from the App Store and sign in with your District AI account.
 
 <a href="https://apps.apple.com/app/id6809297970"><img alt="Download on the App Store" src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" height="44"></a>
 
