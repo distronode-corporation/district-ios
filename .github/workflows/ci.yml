@@ -5,7 +5,8 @@ name: CI
 # tested there; project.yml pins the release this app builds against. Here, `verify`
 # formats and lints App/ in the pinned swift:6.2.4 image, and `app` builds the SwiftUI
 # app with Xcode, which resolves that pinned release, and runs its XCTest bundles on an
-# iPhone simulator, and on an iPad simulator too on pushes to main and dispatches. `gitleaks` scans the history for secrets and `zizmor`
+# iPhone simulator, and on an iPad simulator too on pushes to main and dispatches, and
+# prints the app target's line coverage. `gitleaks` scans the history for secrets and `zizmor`
 # runs static analysis on these workflows. `dependency graph` submits the packages Xcode
 # resolved to GitHub's dependency graph, which cannot see them in an XcodeGen project.
 #
@@ -320,6 +321,8 @@ jobs:
       # BOOTING ONE, and `CODE_SIGNING_ALLOWED=NO` is what lets every job here run with no
       # Apple account: a simulator build needs no certificate, profile or team.
       # The raw log is kept for the guards below; xcbeautify only formats the console.
+      # `-enableCodeCoverage YES` here and on the DistrictAITests step: the build is
+      # what instruments the code, and test-without-building only collects.
       - name: Build for testing
         run: |
           set -o pipefail
@@ -329,6 +332,7 @@ jobs:
             -destination "generic/platform=iOS Simulator" \
             -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath SourcePackages \
+            -enableCodeCoverage YES \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild.log | xcbeautify --renderer github-actions
           grep -q '\*\* TEST BUILD SUCCEEDED \*\*' xcodebuild.log
 
@@ -459,6 +463,7 @@ jobs:
             -clonedSourcePackagesDirPath SourcePackages \
             -resultBundlePath DistrictAITests.xcresult \
             -only-testing:DistrictAITests \
+            -enableCodeCoverage YES \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-test.log | xcbeautify --renderer github-actions
 
       # ⛔ A BUNDLE THAT DISCOVERS NOTHING REPORTS SUCCESS; a scheme edit that drops the
@@ -480,6 +485,25 @@ jobs:
             echo "a silent loss of the signal, not a pass."
             exit 1
           fi
+
+      # The app target's line coverage from DistrictAITests, printed with every target's
+      # for context. ⚠️ NO FLOOR YET: the number has to be measured on the runner first.
+      # A missing report or target is a warning, not a failure, until then.
+      - name: DistrictAITests line coverage (xccov)
+        run: |
+          xcrun xccov view --report --only-targets --json DistrictAITests.xcresult > coverage.json
+          python3 - <<'PY'
+          import json
+          report = json.load(open("coverage.json"))
+          targets = report["targets"] if isinstance(report, dict) else report
+          for t in sorted(targets, key=lambda t: t["name"]):
+              print(f'{t["name"]}: {100 * t["lineCoverage"]:.2f}% ({t["coveredLines"]}/{t["executableLines"]} lines)')
+          app = [t for t in targets if t["name"] == "DistrictAI.app"]
+          if app:
+              print(f'app target line coverage - {100 * app[0]["lineCoverage"]:.2f}%')
+          else:
+              print("::warning::DistrictAI.app is not in the coverage report")
+          PY
 
       # ⛔ THE WATCH APP'S OWN UNIT TESTS (`DistrictAIWatchTests`, its `DistrictAIWatch`
       # scheme), on an Apple Watch simulator. The iPhone leg only: they do not depend on the
@@ -572,6 +596,7 @@ jobs:
           name: app-${{ matrix.device }}
           path: |
             xcodebuild*.log
+            coverage.json
             simulator-udid.txt
             watch-simulator-udid.txt
             *.xcresult
