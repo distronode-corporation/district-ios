@@ -492,10 +492,17 @@ jobs:
       # A missing report or target is a warning, not a failure, until then.
       - name: DistrictAITests line coverage (xccov)
         run: |
-          xcrun xccov view --report --only-targets --json DistrictAITests.xcresult > coverage.json
+          if ! xcrun xccov view --report --only-targets --json DistrictAITests.xcresult > coverage.json; then
+            echo "::warning::xccov could not read DistrictAITests.xcresult; no coverage report this run"
+            exit 0
+          fi
           python3 - <<'PY'
-          import json
-          report = json.load(open("coverage.json"))
+          import json, sys
+          try:
+              report = json.load(open("coverage.json"))
+          except (OSError, ValueError) as e:
+              print(f"::warning::the coverage report could not be parsed ({e})")
+              sys.exit(0)
           targets = report["targets"] if isinstance(report, dict) else report
           for t in sorted(targets, key=lambda t: t["name"]):
               print(f'{t["name"]}: {100 * t["lineCoverage"]:.2f}% ({t["coveredLines"]}/{t["executableLines"]} lines)')

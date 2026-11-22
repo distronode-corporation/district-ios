@@ -42,7 +42,12 @@ for n in 1 2; do
   mkdir -p "$OUT/$n"
   # ditto keeps symlinks inside bundles as symlinks.
   ditto "DerivedData/Build/Products/$product" "$OUT/$n/$(basename "$product")"
+  # Regular files by content, plus every symbolic link by its literal target (not
+  # followed), so an added, removed or retargeted link (e.g. Versions/Current) differs too.
   (cd "$OUT/$n" && find . -type f -print0 | sort -z | xargs -0 shasum -a 256) > "$OUT/$n.sha256"
+  (cd "$OUT/$n" && find . -type l -print0 | sort -z | while IFS= read -r -d '' l; do
+    printf 'link  %s -> %s\n' "$l" "$(readlink "$l")"
+  done) >> "$OUT/$n.sha256"
   echo "$(wc -l < "$OUT/$n.sha256" | tr -d ' ') files in build $n"
 done
 
@@ -52,5 +57,5 @@ if diff -u "$OUT/1.sha256" "$OUT/2.sha256" > "$OUT/sha256.diff"; then
 fi
 
 echo "FAIL: the two builds differ in these files:"
-grep -E '^[-+][0-9a-f]{64} ' "$OUT/sha256.diff" | sed 's/^[-+][0-9a-f]*  //' | sort -u | tee "$OUT/differing.txt"
+grep -E '^[-+]([0-9a-f]{64}|link) ' "$OUT/sha256.diff" | sed -E 's/^[-+]([0-9a-f]{64}|link)  //; s/ -> .*$//' | sort -u | tee "$OUT/differing.txt"
 exit 1
