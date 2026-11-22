@@ -6251,11 +6251,17 @@ extension SetupCopy {
 
     /// `setup.golive_attempts_left`
     internal static func goliveAttemptsLeft(_ n: Int) -> String {
-        AppL10n.copyLocale == .frCA ? "\(n) vérifications restantes aujourd'hui." : "\(n) checks left today."
+        if AppL10n.copyLocale == .frCA {
+            if n == 0 || n == 1 {
+                return "\(n) vérification restante aujourd'hui."
+            }
+            return "\(n) vérifications restantes aujourd'hui."
+        }
+        if n == 1 {
+            return "\(n) check left today."
+        }
+        return "\(n) checks left today."
     }
-
-    /// `setup.golive_attempts_left_one`
-    internal static var goliveAttemptsLeftOne: String { AppL10n.copyLocale == .frCA ? "1 vérification restante aujourd'hui." : "1 check left today." }
 
     /// `setup.golive_business_line_error`
     internal static var goliveBusinessLineError: String { AppL10n.copyLocale == .frCA ? "Entrez votre ligne d'affaires avec l'indicatif du pays, par exemple +14165550123." : "Enter your business line with its country code, for example +14165550123." }

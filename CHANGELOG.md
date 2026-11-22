@@ -132,6 +132,10 @@ entries have.
   list refuses a new "what you do" with a sentence and sends nothing); back on step 1 after
   step 4, the saved address and time zone are kept; an existing "what you do" question keeps
   its switch.
+- Setup wizard (#130): at 0 checks left, step 6 says « 0 vérification restante
+  aujourd'hui. » in French, which takes the singular for 0 and 1; English still says
+  "0 checks left today." The sentence is one plural catalog entry now, so each language
+  picks its own form.
 - Lists and cards (#108): Contacts, Inbox and Calls no longer draw a line above the first row,
   and the Carrier, Persona and scheduling image cards no longer repeat their row's label as a
   title. `VisualWalk302Tests`.
