@@ -6,7 +6,8 @@ name: CI
 # formats and lints App/ in the pinned swift:6.2.4 image, and `app` builds the SwiftUI
 # app with Xcode, which resolves that pinned release, and runs its XCTest bundles on an
 # iPhone simulator, and on an iPad simulator too on pushes to main and dispatches, and
-# prints the app target's line coverage. `gitleaks` scans the history for secrets and `zizmor`
+# prints the app target's line coverage. `repeatable` (main and dispatches) builds the app
+# unsigned twice and compares the two products. `gitleaks` scans the history for secrets and `zizmor`
 # runs static analysis on these workflows. `dependency graph` submits the packages Xcode
 # resolved to GitHub's dependency graph, which cannot see them in an XcodeGen project.
 #
@@ -600,6 +601,50 @@ jobs:
             simulator-udid.txt
             watch-simulator-udid.txt
             *.xcresult
+          if-no-files-found: warn
+          retention-days: 7
+
+  # Repeatable build: the app built UNSIGNED for device, in Release, twice from clean on
+  # one runner, and every file in the two .app bundles compared (ci/repeatable-build.sh,
+  # which lists the expected differences; none yet).
+  # ⚠️ PUSHES TO MAIN AND DISPATCHES ONLY, for the iPad leg's reason: two Release builds
+  # would hold one of the organisation's five macOS slots on every pull request.
+  # ⚠️ NON-BLOCKING until a first run on the runner has shown what, if anything, differs.
+  repeatable:
+    name: repeatable
+    if: ${{ github.event_name != 'pull_request' && (!github.event.repository.private || (github.event_name == 'workflow_dispatch' && inputs.run_app)) }}
+    runs-on: macos-26
+    timeout-minutes: 60
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Xcode and XcodeGen
+        id: toolchain
+        uses: ./.github/actions/macos-toolchain # zizmor: ignore[self-repository]
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: SourcePackages
+          key: sourcepackages-xcode-${{ steps.toolchain.outputs.xcode-version }}-${{ hashFiles('project.yml') }}
+
+      - name: Resolve packages
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project DistrictAI.xcodeproj \
+            -scheme DistrictAI \
+            -clonedSourcePackagesDirPath SourcePackages
+
+      - name: Build twice and compare
+        run: ci/repeatable-build.sh DistrictAI 'generic/platform=iOS' Release-iphoneos/DistrictAI.app
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: repeatable
+          path: ${{ runner.temp }}/repeatable/
           if-no-files-found: warn
           retention-days: 7
 
