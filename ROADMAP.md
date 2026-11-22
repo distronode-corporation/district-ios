@@ -1,20 +1,27 @@
 # Roadmap
 
-The near-term plan for District AI for iOS. It is taken from this repository's one open issue,
-its open pull request and the known limits in its own CHANGELOG, each named with where it comes
-from. It has no dates: an item is done when the change that does it is merged and released, and
-it then leaves this list for [CHANGELOG.md](CHANGELOG.md). Anything here can change; open an
-issue to discuss an item or to propose a new one.
+The near-term plan for District AI for iOS. This repository has no open issues or pull
+requests, so the list is taken from what is merged but not yet released, the unfinished items
+in its own CI and the known limits in its CHANGELOG, each named with where it comes from. This
+roadmap covers the next twelve months, to November 2027. Items have no dates of their own: an
+item is done when the change that does it is merged and released, and it then leaves this list
+for [CHANGELOG.md](CHANGELOG.md). Anything here can change; open an issue to discuss an item or
+to propose a new one.
 
 ## Near term
 
-- **The French plural at 0 checks left.** The setup screen reads « 0 vérifications restantes »
-  where French uses the singular for 0; the fix and a test for 0, 1 and 2 in both languages are
-  planned for 3.4.1
-  ([#130](https://github.com/distronode-corporation/district-ios/issues/130)).
-- **Hardening from the deep security scan.** One open pull request: room joins, credential
-  fields and the call Live Activity
-  ([#134](https://github.com/distronode-corporation/district-ios/pull/134)).
+- **Release what is merged.** Since 3.4.0, `main` has the French singular at 0 checks left on
+  the setup screen ([#130](https://github.com/distronode-corporation/district-ios/issues/130),
+  fixed by [#136](https://github.com/distronode-corporation/district-ios/pull/136)) and the
+  hardening from the deep security scan: room joins, credential fields and the call Live
+  Activity ([#134](https://github.com/distronode-corporation/district-ios/pull/134)). The plan
+  is to ship them in the next App Store release.
+- **A repeatable build.** CI's `repeatable` job (`ci/repeatable-build.sh`, on pushes to `main`)
+  builds the app unsigned twice from clean and compares the two products byte for byte. It does
+  not pass yet: two files differ between the builds, the Sentry framework's binary and the
+  watch app's `Metadata.appintents/version.json`, so the job is marked `continue-on-error` and
+  does not block a merge. The plan is to make both builds identical, then make the job
+  blocking.
 
 ## Known limits, not planned
 
