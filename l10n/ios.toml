@@ -13151,6 +13151,16 @@ tier = "T2"
 state = "reviewed"
 id = { swift = "SessionCopy.sessionHasEndedPlease" }
 
+[session.session_replaced]
+en = "Your sign-in changed while that request was running. Please try again."
+fr = "Votre connexion a changé pendant l'exécution de cette demande. Veuillez réessayer."
+ctx = "error"
+screen = "session"
+tier = "T2"
+state = "draft"
+id = { swift = "SessionCopy.sessionReplaced" }
+note = "DistrictCore answers retryLater(.sessionReplaced) when a newer login replaced the session mid-request; the next attempt serves the replacement. French is draft until reviewed."
+
 [session.sign_in_expired]
 en = "That sign-in expired. Please try again."
 fr = "Cette tentative de connexion a expiré. Veuillez réessayer."

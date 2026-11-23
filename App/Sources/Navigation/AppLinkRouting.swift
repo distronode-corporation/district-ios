@@ -189,6 +189,7 @@ enum AppLinkRouting {
         case .callHandling: .calls
         case .skills: .capabilities
         case .knowledge: .knowledge
+        case .integrations: .hub
         }
         let route = Route.workspaceSettings(workspaceId: workspaceId, role: role, section: section)
         if case .hidden = RouteGate.gate(for: route, role: role) {

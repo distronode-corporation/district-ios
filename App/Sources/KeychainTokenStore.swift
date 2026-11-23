@@ -32,7 +32,7 @@ import Security
 /// ⚠️ A STRUCT, SO IT IS `Sendable` BY CONSTRUCTION. Every Keychain call below is
 /// synchronous and thread-safe; there is no state here to protect, so an actor
 /// would only add suspension points to a call that never blocks.
-struct KeychainTokenStore: TokenStore {
+actor KeychainTokenStore: TokenStore {
     /// `kSecAttrService` for every item this store owns.
     ///
     /// ⚠️ Changing it ORPHANS the existing item rather than migrating it: the old
@@ -67,18 +67,22 @@ struct KeychainTokenStore: TokenStore {
     /// is named, exactly as before.
     let accessGroup: String?
 
+    private let items: any KeychainItemBackend
+
     init(
         service: String = KeychainTokenStore.defaultService,
-        accessGroup: String? = KeychainAccessGroups.privateGroup
+        accessGroup: String? = KeychainAccessGroups.privateGroup,
+        items: (any KeychainItemBackend)? = nil
     ) {
         self.service = service
         self.accessGroup = accessGroup
+        self.items = items ?? SecItemKeychainBackend(service: service, accessGroup: accessGroup)
     }
 
     // ── TokenStore ───────────────────────────────────────────────────────────
 
     func read() async throws -> PersistedSession? {
-        guard let data = try load(account: Self.sessionAccount) else { return nil }
+        guard let data = try items.load(account: Self.sessionAccount) else { return nil }
         let stored = try decode(data)
         return PersistedSession(
             refreshToken: stored.refreshToken,
@@ -94,7 +98,7 @@ struct KeychainTokenStore: TokenStore {
             deviceId: session.deviceId
         )
         let data = try JSONEncoder().encode(stored)
-        try save(data, account: Self.sessionAccount)
+        try items.save(data, account: Self.sessionAccount)
     }
 
     /// ⛔ `revokeAccount` IS DELIBERATELY ABSENT FROM THIS METHOD, AND IT IS THE
@@ -108,12 +112,27 @@ struct KeychainTokenStore: TokenStore {
     /// outlives it. Same rule as `KeystoreTokenStore.wipe` on Android; see the
     /// ⛔ on ``TokenStore/clear()``.
     func clear() async throws {
-        try delete(account: Self.sessionAccount)
-        try delete(account: Self.pendingAccount)
+        try items.delete(account: Self.sessionAccount)
+        try items.delete(account: Self.pendingAccount)
+    }
+
+    /// ``clear()``, but only while the stored session is the one holding `refreshToken`.
+    ///
+    /// ⛔ AN UNDO OF ONE ADOPTION, NOT A WIPE OF WHATEVER IS STORED: a login can write its
+    /// own session while the undo is in progress, and an unconditional clear would sign
+    /// that login out at the next cold start. The compare and the delete run inside this
+    /// actor with no suspension between them (every member's body is synchronous), which
+    /// is the one-step atomicity ``TokenStore/clear(ifHolding:)`` demands.
+    func clear(ifHolding refreshToken: String) async throws {
+        guard let data = try items.load(account: Self.sessionAccount) else { return }
+        let stored = try decode(data)
+        guard stored.refreshToken == refreshToken else { return }
+        try items.delete(account: Self.sessionAccount)
+        try items.delete(account: Self.pendingAccount)
     }
 
     func pendingRefreshToken() async throws -> String? {
-        guard let data = try load(account: Self.pendingAccount) else { return nil }
+        guard let data = try items.load(account: Self.pendingAccount) else { return nil }
         guard let token = String(data: data, encoding: .utf8) else {
             throw KeychainTokenStoreError.unreadableItem
         }
@@ -121,11 +140,11 @@ struct KeychainTokenStore: TokenStore {
     }
 
     func markRefreshPending(_ refreshToken: String) async throws {
-        try save(Data(refreshToken.utf8), account: Self.pendingAccount)
+        try items.save(Data(refreshToken.utf8), account: Self.pendingAccount)
     }
 
     func clearRefreshPending() async throws {
-        try delete(account: Self.pendingAccount)
+        try items.delete(account: Self.pendingAccount)
     }
 
     /// ⚠️ THE SAME ACCESSIBILITY AND SYNCHRONIZABLE ATTRIBUTES AS THE SESSION,
@@ -136,7 +155,7 @@ struct KeychainTokenStore: TokenStore {
     /// revokes the whole family — and both attributes come from ``query(account:)``
     /// and ``save(_:account:)``, which every account shares.
     func pendingRevokeToken() async throws -> String? {
-        guard let data = try load(account: Self.revokeAccount) else { return nil }
+        guard let data = try items.load(account: Self.revokeAccount) else { return nil }
         guard let token = String(data: data, encoding: .utf8) else {
             throw KeychainTokenStoreError.unreadableItem
         }
@@ -144,19 +163,43 @@ struct KeychainTokenStore: TokenStore {
     }
 
     func markRevokePending(_ refreshToken: String) async throws {
-        try save(Data(refreshToken.utf8), account: Self.revokeAccount)
+        try items.save(Data(refreshToken.utf8), account: Self.revokeAccount)
     }
 
     func clearRevokePending() async throws {
-        try delete(account: Self.revokeAccount)
+        try items.delete(account: Self.revokeAccount)
+    }
+
+    /// Clear the outbox only while it still holds `refreshToken`.
+    ///
+    /// ⛔ THE ACKNOWLEDGEMENT OF ONE REVOKE, NOT A WIPE OF THE SLOT: two revokes can
+    /// overlap (a launch drain and a sign-out), and the older one's acceptance can
+    /// arrive after a newer token took the slot, so clearing unconditionally would drop
+    /// a credential the server is still honouring. Same actor-isolation atomicity as
+    /// ``clear(ifHolding:)``: no suspension inside, so compare and delete are one step.
+    func clearRevokePending(ifHolding refreshToken: String) async throws {
+        guard let data = try items.load(account: Self.revokeAccount) else { return }
+        guard let token = String(data: data, encoding: .utf8) else {
+            throw KeychainTokenStoreError.unreadableItem
+        }
+        guard token == refreshToken else { return }
+        try items.delete(account: Self.revokeAccount)
     }
 
     // ── Keychain ─────────────────────────────────────────────────────────────
 
     /// The identity of one item. ⚠️ Used for reads, writes and deletes alike, so
     /// a value that differs between them would address a different item. Internal, not
-    /// private, so a test can hold the access group to it.
-    func query(account: String) -> [String: Any] {
+    /// private, so a test can hold the access group to it. Nonisolated because it reads
+    /// only the immutable `service` and ``accessGroup``, and the store is an actor.
+    nonisolated func query(account: String) -> [String: Any] {
+        KeychainTokenStore.itemIdentity(service: service, accessGroup: accessGroup, account: account)
+    }
+
+    /// The one builder of an item's identity, shared with ``SecItemKeychainBackend``
+    /// so the store's public ``query(account:)`` and the backend's every SecItem call
+    /// can never disagree about which item they address.
+    static func itemIdentity(service: String, accessGroup: String?, account: String) -> [String: Any] {
         var identity: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -173,62 +216,6 @@ struct KeychainTokenStore: TokenStore {
             identity[kSecAttrAccessGroup as String] = accessGroup
         }
         return identity
-    }
-
-    private func load(account: String) throws -> Data? {
-        var request = query(account: account)
-        request[kSecReturnData as String] = true
-        request[kSecMatchLimit as String] = kSecMatchLimitOne
-
-        var result: CFTypeRef?
-        let status = SecItemCopyMatching(request as CFDictionary, &result)
-        switch status {
-        case errSecSuccess:
-            guard let data = result as? Data else { throw KeychainTokenStoreError.unreadableItem }
-            return data
-        case errSecItemNotFound:
-            // ⛔ THE ONE STATUS THAT IS NOT AN ERROR. Every other failure THROWS,
-            // because "the device is locked" and "there is no session" are
-            // different answers and the coordinator acts on the difference: a
-            // throw keeps the session, a nil signs the user out.
-            return nil
-        default:
-            throw KeychainTokenStoreError.status(status)
-        }
-    }
-
-    /// Write `data`, creating the item if it is not there yet.
-    ///
-    /// ⚠️ UPDATE FIRST, ADD ON `errSecItemNotFound` — deliberately NOT
-    /// delete-then-add, which is the more common shape. A crash between the
-    /// delete and the add would lose a refresh token that was perfectly good,
-    /// costing a re-login for no reason.
-    private func save(_ data: Data, account: String) throws {
-        let attributes: [String: Any] = [
-            kSecValueData as String: data,
-            // Restated on every write so an item created by an earlier build
-            // with a laxer class is corrected rather than inherited.
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
-        ]
-
-        let updated = SecItemUpdate(query(account: account) as CFDictionary, attributes as CFDictionary)
-        if updated == errSecSuccess {
-            return
-        }
-        guard updated == errSecItemNotFound else { throw KeychainTokenStoreError.status(updated) }
-
-        var request = query(account: account)
-        request.merge(attributes) { _, new in new }
-        let added = SecItemAdd(request as CFDictionary, nil)
-        guard added == errSecSuccess else { throw KeychainTokenStoreError.status(added) }
-    }
-
-    private func delete(account: String) throws {
-        let status = SecItemDelete(query(account: account) as CFDictionary)
-        // Nothing to delete is a successful clear, not a failure.
-        guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw KeychainTokenStoreError.status(status)
-        }
     }
 
     private func decode(_ data: Data) throws -> StoredSession {
@@ -266,4 +253,88 @@ enum KeychainTokenStoreError: Error {
     case status(OSStatus)
     /// The item was present but its bytes were not what this build stores.
     case unreadableItem
+}
+
+/// The three keychain calls ``KeychainTokenStore`` makes, as a seam so the store's
+/// compare-and-clear semantics can be tested where no keychain answers: an unsigned
+/// build (local or CI) gets `errSecMissingEntitlement` for every `SecItem` call, which
+/// is the documented behaviour the coordinator maps to "try again". The production
+/// conformer below is the plumbing the store held inline before the seam.
+protocol KeychainItemBackend: Sendable {
+    func load(account: String) throws -> Data?
+    func save(_ data: Data, account: String) throws
+    func delete(account: String) throws
+}
+
+/// The production ``KeychainItemBackend``: same service, same accounts, same access
+/// group and accessibility attributes as the inline plumbing it replaces, so items
+/// written by earlier versions of the app are found and kept exactly as before.
+struct SecItemKeychainBackend: KeychainItemBackend {
+    private let service: String
+    private let accessGroup: String?
+
+    init(service: String, accessGroup: String?) {
+        self.service = service
+        self.accessGroup = accessGroup
+    }
+
+    private func query(account: String) -> [String: Any] {
+        KeychainTokenStore.itemIdentity(service: service, accessGroup: accessGroup, account: account)
+    }
+
+    func load(account: String) throws -> Data? {
+        var request = query(account: account)
+        request[kSecReturnData as String] = true
+        request[kSecMatchLimit as String] = kSecMatchLimitOne
+
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(request as CFDictionary, &result)
+        switch status {
+        case errSecSuccess:
+            guard let data = result as? Data else { throw KeychainTokenStoreError.unreadableItem }
+            return data
+        case errSecItemNotFound:
+            // ⛔ THE ONE STATUS THAT IS NOT AN ERROR. Every other failure THROWS,
+            // because "the device is locked" and "there is no session" are
+            // different answers and the coordinator acts on the difference: a
+            // throw keeps the session, a nil signs the user out.
+            return nil
+        default:
+            throw KeychainTokenStoreError.status(status)
+        }
+    }
+
+    /// Write `data`, creating the item if it is not there yet.
+    ///
+    /// ⚠️ UPDATE FIRST, ADD ON `errSecItemNotFound` — deliberately NOT
+    /// delete-then-add, which is the more common shape. A crash between the
+    /// delete and the add would lose a refresh token that was perfectly good,
+    /// costing a re-login for no reason.
+    func save(_ data: Data, account: String) throws {
+        let attributes: [String: Any] = [
+            kSecValueData as String: data,
+            // Restated on every write so an item created by an earlier build
+            // with a laxer class is corrected rather than inherited.
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+        ]
+
+        let updated = SecItemUpdate(query(account: account) as CFDictionary, attributes as CFDictionary)
+        if updated == errSecSuccess {
+            return
+        }
+        guard updated == errSecItemNotFound else { throw KeychainTokenStoreError.status(updated) }
+
+        var request = query(account: account)
+        request.merge(attributes) { _, new in new }
+        let added = SecItemAdd(request as CFDictionary, nil)
+        guard added == errSecSuccess else { throw KeychainTokenStoreError.status(added) }
+    }
+
+    func delete(account: String) throws {
+        let status = SecItemDelete(query(account: account) as CFDictionary)
+        // Nothing to delete is a successful clear, not a failure.
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw KeychainTokenStoreError.status(status)
+        }
+    }
 }
