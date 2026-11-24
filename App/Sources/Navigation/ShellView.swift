@@ -227,11 +227,11 @@ struct ShellView: View {
                     Task { await container.schedulingHandoffFlow.receive(url) }
                     return
                 }
-                guard let outcome = AppLinkResolver.resolve(url) else { return }
+                guard let outcome = AppLinkRouting.outcome(for: url) else { return }
                 switch outcome {
                 case .openInBrowser:
-                    // ⚠️ THE URL AS DELIVERED, NEVER A REBUILT ONE. Query and fragment
-                    // included: the page the tap named is the page that has to open.
+                    // ⛔ URL AS DELIVERED, LAST LINK WINS: a held destination is cleared with the sheet.
+                    pendingLink = nil
                     browserHandOff = AppLinkHandOff(url: url)
                 case let .destination(destination):
                     // ⚠️ LAST ONE WINS, no queue. A second link is the one the user is
