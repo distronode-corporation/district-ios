@@ -29,9 +29,16 @@ import Security
 /// is the narrowest class that still works after a reboot-plus-one-unlock, which
 /// is the property background work needs.
 ///
-/// ⚠️ A STRUCT, SO IT IS `Sendable` BY CONSTRUCTION. Every Keychain call below is
-/// synchronous and thread-safe; there is no state here to protect, so an actor
-/// would only add suspension points to a call that never blocks.
+/// ⛔ AN ACTOR, BECAUSE DISTRICTCORE 9.0.0 MAKES THE ONE-STEP CLEARS THE RULE.
+/// The Keychain calls themselves are synchronous and thread-safe, and a struct was
+/// `Sendable` by construction for exactly that reason; what the struct could not
+/// give is what ``clear(ifHolding:)`` and ``clearRevokePending(ifHolding:)``
+/// require: the compare and the delete with NOTHING between them, not even a
+/// call from another task. Every member's body is synchronous, so each turn runs
+/// to completion with no suspension points, and the actor's isolation is what
+/// makes the one step atomic. The protocol is fully `async` and both call sites
+/// hold the store as an existential, so the actor adds no suspension a caller
+/// was not already awaiting.
 actor KeychainTokenStore: TokenStore {
     /// `kSecAttrService` for every item this store owns.
     ///
