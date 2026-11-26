@@ -77,14 +77,16 @@ final class WatchSnapshotSourceTests: ScreenSnapshotTestCase {
         XCTAssertNil(watch.conversations)
     }
 
-    /// A workspace list that cannot be read publishes nothing rather than "no workspace".
-    func testAnUnreadableWorkspaceListPublishesNoWorkspaceSentence() async throws {
+    /// A workspace list that cannot be read is told to the Watch as "no workspace", signed
+    /// in, with no rows: never the rows of a workspace the phone could not confirm.
+    func testAnUnreadableWorkspaceListIsNoWorkspace() async throws {
         let built = try await snapshot([
             "/api/district/workspace/list": .json(#"{"error":"Internal error"}"#, status: 500),
         ])
-        // The model reads a failed list as no selection; the Watch is told there is no
-        // workspace only through the composer's own sentence, never with stale rows.
-        XCTAssertNil(built?.calls)
-        XCTAssertNil(built?.conversations)
+        let watch = try XCTUnwrap(built)
+        XCTAssertTrue(watch.signedIn)
+        XCTAssertNil(watch.workspace)
+        XCTAssertNil(watch.calls)
+        XCTAssertNil(watch.conversations)
     }
 }
