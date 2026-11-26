@@ -101,6 +101,7 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
         "/api/district/scheduling/status": "district-scheduling-status-ready",
         "/api/district/workspace/persona/voice-studio": "district-voice-studio",
         "/api/district/messages/drafts": "district-drafts-list",
+        "/api/district/setup/forwarding-check": "district-forwarding-check",
         // ⚠️ ONE PATH, TWO RESPONSES: the usage history is the same route with `history=true`.
         "/api/district/workspace/usage?history=true": "district-usage-history",
     ]

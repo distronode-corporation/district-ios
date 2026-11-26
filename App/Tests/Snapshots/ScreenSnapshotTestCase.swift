@@ -105,6 +105,11 @@ class ScreenSnapshotTestCase: XCTestCase {
         line: UInt = #line,
         _ make: @escaping (AppContainer) -> some View
     ) async throws {
+        // ⛔ JUDGED ON THE iPHONE SIMULATOR ONLY. The iPad leg's simulator lays out at 2x, and
+        // pinning the layout's scale in the window changed how text rasterised depending on
+        // what ran before (CI runs 45839096836 and 45839155803), so the references, the iPad
+        // layouts included, are drawn and compared on the iPhone leg, which runs everywhere.
+        try XCTSkipIf(UIDevice.current.userInterfaceIdiom == .pad, "snapshots are compared on the iPhone simulator")
         for locale in locales {
             for device in devices {
                 L10nRuntime.locale = locale
@@ -184,9 +189,6 @@ class ScreenSnapshotTestCase: XCTestCase {
         window.traitOverrides.preferredContentSizeCategory = .large
         window.traitOverrides.horizontalSizeClass = device == .iPad ? .regular : .compact
         window.traitOverrides.verticalSizeClass = .regular
-        // ⚠️ THE LAYOUT'S SCALE IS PINNED TOO, at the iPhone simulator's 3x: the iPad leg's
-        // simulator is 2x, and layout rounds to the screen's pixels before the 1x drawing.
-        window.traitOverrides.displayScale = 3
         window.rootViewController = controller
         window.isHidden = false
         window.layoutIfNeeded()
