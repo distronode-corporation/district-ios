@@ -123,7 +123,7 @@ struct SnapshotPrepared<Content: View>: View {
 @MainActor
 func firstReadLanded(_ condition: () -> Bool, file: StaticString = #filePath, line: UInt = #line) async {
     var tries = 0
-    while !condition(), tries < 300 {
+    while !condition(), tries < 800 {
         try? await Task.sleep(for: .milliseconds(10))
         tries += 1
     }

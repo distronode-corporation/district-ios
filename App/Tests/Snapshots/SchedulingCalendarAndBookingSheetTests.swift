@@ -41,7 +41,10 @@ final class SchedulingCalendarAndBookingSheetTests: SchedulingWriteSnapshotCase 
     func testCalendarPickerSaved() async throws {
         let connection = try await recordedConnection()
         try await assertScreen(
-            ["op:calendar.connections.calendars.put": .fixture("district-scheduling-ok")],
+            [
+                "op:calendar.connections.calendars.put": .fixture("district-scheduling-ok"),
+                "op:calendar.connections.destination": .fixture("district-scheduling-ok"),
+            ],
             devices: [.iPhone]
         ) { container in
             let model = self.picker(container, connection)

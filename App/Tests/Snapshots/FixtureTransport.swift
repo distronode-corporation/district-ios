@@ -56,6 +56,7 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
     func send(_ request: HTTPRequest, followRedirects: Bool) async throws -> HTTPResponse {
         _ = followRedirects
         let path = request.url.path
+        let named = Self.op(in: request.body).map { "\(path) \($0)" } ?? path
         let reply: Reply? = lock.withLock {
             inFlightCount += 1
             requested.append("\(request.method.rawValue) \(path)")
@@ -73,7 +74,7 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
         await Task.yield()
         defer { lock.withLock { inFlightCount -= 1 } }
         guard let reply else {
-            lock.withLock { unanswered.append("\(request.method.rawValue) \(path)") }
+            lock.withLock { unanswered.append("\(request.method.rawValue) \(named)") }
             return HTTPResponse(
                 statusCode: 404,
                 headers: ["Content-Type": "application/json"],
