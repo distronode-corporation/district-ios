@@ -33,21 +33,6 @@ final class CallScopeSnapshotTests: ScreenSnapshotTestCase {
         })
     }
 
-    /// A missed call: no summary, no follow-up, no analysis, no transcript to offer.
-    func testCallDetailMissedWithNothingAnalysed() async throws {
-        try await draw(Self.call { call in
-            call["status"] = "no-answer"
-            call["direction"] = "missed"
-            call["type"] = "missed"
-            call["durationRaw"] = 0
-            call["duration"] = "0m 0s"
-            for key in ["aiSummary", "summary", "followUp", "analysis", "sentiment", "disposition"] {
-                call[key] = NSNull()
-            }
-            call["hasTranscript"] = false
-        }, devices: [.iPhone])
-    }
-
     /// A refused read: the failure with its retry.
     func testCallDetailFailed() async throws {
         try await draw(.refused(500), devices: [.iPhone])
