@@ -613,16 +613,15 @@ jobs:
 
   # Repeatable build: the app built UNSIGNED for device, in Release, twice from clean on
   # one runner, and every file in the two .app bundles compared (ci/repeatable-build.sh,
-  # which lists the expected differences; none yet).
+  # which says why nothing is skipped and why SWIFT_DETERMINISTIC_HASHING is set).
   # ⚠️ PUSHES TO MAIN AND DISPATCHES ONLY, for the iPad leg's reason: two Release builds
   # would hold one of the organisation's five macOS slots on every pull request.
-  # ⚠️ NON-BLOCKING until a first run on the runner has shown what, if anything, differs.
+  # ⛔ BLOCKING: a file that differs between the two builds fails the run.
   repeatable:
     name: repeatable
     if: ${{ github.event_name != 'pull_request' && (!github.event.repository.private || (github.event_name == 'workflow_dispatch' && inputs.run_app)) }}
     runs-on: macos-26
     timeout-minutes: 60
-    continue-on-error: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

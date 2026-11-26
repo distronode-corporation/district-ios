@@ -195,6 +195,10 @@ every pull request, and uses no secrets:
   `DistrictAITests` and the signed-out UI tests on an iPhone simulator, and on an iPad
   simulator too on pushes to `main` (a pull request's `app (iPad)` check is a stand-in
   that runs nothing).
+- **repeatable** (macOS, pushes to `main` and dispatches): builds the app unsigned, in
+  Release, twice from clean, and fails unless every file in the two bundles is byte for byte
+  the same ([`ci/repeatable-build.sh`](ci/repeatable-build.sh), which is also the recipe for
+  repeating a build yourself).
 - **gitleaks** (Linux): scans the full git history for secrets, with the rules and
   allowlists in [`.gitleaks.toml`](.gitleaks.toml).
 - **release scripts** (Linux): tests the release workflow's scripts against stubs.
