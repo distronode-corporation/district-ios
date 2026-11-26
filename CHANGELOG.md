@@ -116,6 +116,11 @@ entries have.
 
 ### Changed
 
+- Release builds are built with `Reproducible.xcconfig`, which turns off Objective-C selector
+  stubs (`-fno-objc-msgsend-selector-stubs`) for every target, LiveKit's included. The
+  release archive and CI's `repeatable` job pass the same file, so the shipped binary is built
+  exactly as the repeatable check builds it; with stubs, the linker ordered LiveKit's seven
+  selector references differently from one link to the next.
 - Sentry is linked as its dynamic XCFramework (`Sentry-Dynamic`, still 9.30.1 and still
   prebuilt) instead of the static one, so two clean builds of the same commit are byte for
   byte identical; the static product's embedded framework held a stub linked in a random

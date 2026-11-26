@@ -1,0 +1,12 @@
+// Build settings for every build that ships or is checked for repeatability: the release
+// archive (scripts/archive-imac.sh) and CI's repeatable job (ci/repeatable-build.sh) both pass
+// this file with `-xcconfig`, so the shipped binary is built exactly as the repeatable check
+// builds it. ⚠️ A file passed with -xcconfig reaches the Swift package targets; a setting in
+// project.yml does not (measured: a project-level OTHER_CFLAGS left LiveKit's stubs in place).
+//
+// ⛔ NO OBJECTIVE-C SELECTOR STUBS. LiveKit's one Objective-C file (LKObjCHelpers.m) is
+// otherwise compiled to call `objc_msgSend$<selector>` stubs, and the linker writes the
+// selector references those stubs load in an order that varies between links: main's first
+// run of the repeatable job (45815462034) differed in DistrictAI.app/DistrictAI that way.
+// Without stubs, clang emits ordinary objc_msgSend calls and the linker has nothing to order.
+OTHER_CFLAGS = $(inherited) -fno-objc-msgsend-selector-stubs
