@@ -63,7 +63,9 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
                 requested[requested.count - 1] += " \(op)"
                 return overrides["op:\(op)"] ?? Self.schedulingOps[op].map(Reply.fixture)
             }
-            return overrides["\(request.method.rawValue) \(path)"] ?? overrides[path]
+            let flag = Self.historyFlag(request.url)
+            return overrides["\(request.method.rawValue) \(path)"] ?? overrides[path + flag]
+                ?? overrides[path] ?? Self.paths[path + flag].map(Reply.fixture)
                 ?? Self.paths[path].map(Reply.fixture) ?? Self.unrecorded[path].map { Reply.json($0) }
                 ?? Self.byName(path)
         }
@@ -87,6 +89,8 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
         "/api/district/scheduling/status": "district-scheduling-status-ready",
         "/api/district/workspace/persona/voice-studio": "district-voice-studio",
         "/api/district/messages/drafts": "district-drafts-list",
+        // ⚠️ ONE PATH, TWO RESPONSES: the usage history is the same route with `history=true`.
+        "/api/district/workspace/usage?history=true": "district-usage-history",
     ]
 
     /// The routes the service records no fixture for, answered with the model's own shape
@@ -125,6 +129,13 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
         "webhooks.list": "district-scheduling-webhooks",
         "webhooks.deliveries": "district-scheduling-webhook-deliveries",
     ]
+
+    /// `?history=true` when the request asks for a history, else empty: the one query that
+    /// selects a different recorded response on the same path.
+    private static func historyFlag(_ url: URL) -> String {
+        let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        return items.contains { $0.name == "history" && $0.value == "true" } ? "?history=true" : ""
+    }
 
     private static func op(in body: Data?) -> String? {
         guard let body, let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any] else {

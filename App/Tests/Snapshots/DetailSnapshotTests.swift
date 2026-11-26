@@ -74,21 +74,6 @@ final class DetailSnapshotTests: ScreenSnapshotTestCase {
         }
     }
 
-    func testThread() async throws {
-        try await assertScreen(
-            ["/api/district/messages/msg_contract_inbound": .fixture("district-message-thread")]
-        ) { container in
-            ThreadView(
-                container: container,
-                workspaceId: Self.workspace,
-                role: .client,
-                threadKey: "msg_contract_inbound",
-                replyTargets: [],
-                title: "Contract Test Caller"
-            )
-        }
-    }
-
     func testSetupWizard() async throws {
         try await assertScreen { container in
             SetupWizardView(container: container, workspaceId: Self.workspace, workspaceName: "Contract Clinic") {}

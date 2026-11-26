@@ -48,6 +48,14 @@ class ScreenSnapshotTestCase: XCTestCase {
         baseURL: nil
     )
 
+    /// ⚠️ LIGHT, AT 1x. The light appearance whatever the simulator is set to, so a reference
+    /// never depends on the machine; and one point per pixel, which keeps every word legible in
+    /// review while each committed image stays a tenth of its 3x size.
+    static let traits = UITraitCollection(traitsFrom: [
+        UITraitCollection(userInterfaceStyle: .light),
+        UITraitCollection(displayScale: 1),
+    ])
+
     override func setUp() async throws {
         try await super.setUp()
         NSTimeZone.default = try XCTUnwrap(TimeZone(identifier: "America/Toronto"))
@@ -115,7 +123,12 @@ class ScreenSnapshotTestCase: XCTestCase {
                 }
                 assertSnapshot(
                     of: controller,
-                    as: .image(on: device.config, precision: 0.995, perceptualPrecision: 0.98),
+                    as: .image(
+                        on: device.config,
+                        precision: 0.995,
+                        perceptualPrecision: 0.98,
+                        traits: Self.traits
+                    ),
                     named: "\(device.rawValue)-\(locale == .frCA ? "fr-CA" : "en")",
                     file: file,
                     testName: testName,
@@ -131,6 +144,7 @@ class ScreenSnapshotTestCase: XCTestCase {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let window = UIWindow(windowScene: scene)
         window.frame = CGRect(origin: .zero, size: size)
+        window.overrideUserInterfaceStyle = .light
         window.rootViewController = controller
         window.isHidden = false
         window.layoutIfNeeded()
