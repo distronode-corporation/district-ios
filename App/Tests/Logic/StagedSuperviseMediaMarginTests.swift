@@ -56,10 +56,10 @@ final class StagedSuperviseMediaMarginTests: XCTestCase {
         media.requestMuted(uuid: uuid, muted: false)
         try await Task.sleep(for: .milliseconds(200))
 
-        XCTAssertEqual(requests.all, [
-            .muteRequested(uuid: uuid, muted: true),
-            .muteRequested(uuid: uuid, muted: false),
-        ])
+        // ⚠️ EACH ECHO IS ITS OWN TASK, so the two can land in either order; both must land.
+        XCTAssertEqual(requests.all.count, 2)
+        XCTAssertTrue(requests.all.contains(.muteRequested(uuid: uuid, muted: true)))
+        XCTAssertTrue(requests.all.contains(.muteRequested(uuid: uuid, muted: false)))
     }
 
     func testAReleasedClaimHearsNothingThatWasStillPending() async throws {
