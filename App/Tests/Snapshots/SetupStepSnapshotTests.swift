@@ -52,6 +52,18 @@ final class SetupStepSnapshotTests: ScreenSnapshotTestCase {
         }
     }
 
+    /// The wizard checked by what it reads aloud, for the steps CI draws blank
+    /// (see ``assertScreenContent(_:locales:expected:file:line:screen:)``).
+    private func assertWizardContent(
+        _ replies: [String: FixtureTransport.Reply],
+        line: UInt = #line,
+        expected: @escaping () -> [String]
+    ) async throws {
+        try await assertScreenContent(replies, expected: { _ in expected() }, line: line, screen: { container in
+            SetupWizardView(container: container, workspaceId: Self.workspace, workspaceName: "Contract Clinic") {}
+        })
+    }
+
     // MARK: - The steps
 
     /// Step 1 with the facts the service holds: name, website, language and the services read so far.
@@ -71,36 +83,46 @@ final class SetupStepSnapshotTests: ScreenSnapshotTestCase {
 
     /// Step 4 with the recorded address and hours filled in.
     func testCallersStep() async throws {
-        try await assertWizard([Self.setupPath: Self.setup(open: "callers")])
+        try await assertWizardContent([Self.setupPath: Self.setup(open: "callers")]) {
+            [SetupCopy.callersTitle, SetupCopy.callersHoursHeader, SetupCopy.businessTimezoneLabel]
+        }
     }
 
     /// Step 4 with no business facts: every field empty, no hours.
     func testCallersStepEmpty() async throws {
-        try await assertWizard([Self.setupPath: Self.setup(open: "callers", fixture: "district-setup")])
+        try await assertWizardContent([Self.setupPath: Self.setup(open: "callers", fixture: "district-setup")]) {
+            [SetupCopy.callersTitle, SetupCopy.callersHoursHeader, SetupCopy.callersAddFaq]
+        }
     }
 
     /// Step 6: the test call and the recorded forwarding check, passed.
     func testGoLiveStep() async throws {
-        try await assertWizard([
+        try await assertWizardContent([
             Self.setupPath: Self.setup(open: "golive"),
             "/api/district/setup/forwarding-check": .fixture("district-forwarding-check"),
-        ])
+        ]) {
+            [SetupCopy.goliveTitle]
+        }
     }
 
     /// Step 6 for a workspace that has never run the forwarding check.
     func testGoLiveStepNoCheck() async throws {
-        try await assertWizard([
+        try await assertWizardContent([
             Self.setupPath: Self.setup(open: "golive"),
             "/api/district/setup/forwarding-check": .json(
                 #"{"available":true,"forwardingCheck":null,"attemptsLeft":4}"#
             ),
-        ])
+        ]) {
+            [SetupCopy.goliveTitle]
+        }
     }
 
     /// Step 5: how calls are answered (the recorded call handling), the transfer number from
     /// the config and the calendar from the connections.
     func testCallsStep() async throws {
-        try await assertWizard([Self.setupPath: Self.setup(open: "calls")])
+        try await assertWizardContent([Self.setupPath: Self.setup(open: "calls")]) {
+            [SetupCopy.callsTitle]
+        }
     }
 
     /// Step 5 when the call-handling read is refused: a retry, never a form of defaults.

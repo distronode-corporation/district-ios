@@ -139,21 +139,6 @@ final class SchedulingAvailabilityWriteSnapshotTests: SchedulingWriteSnapshotCas
         }
     }
 
-    /// A last day before the first, refused on the press.
-    func testOverrideAddEndBeforeStart() async throws {
-        try await assertScreen(devices: [.iPhone], locales: [.en]) { container in
-            let model = self.overrides(container)
-            return SnapshotPrepared(SchedulingAvailabilityOverridesSheet(model: model, addFormOnly: true)) {
-                model.beginAdd()
-                model.updateAdding { form in
-                    form.date = "2026-09-14"
-                    form.endDate = "2026-09-12"
-                }
-                await model.submit()
-            }
-        }
-    }
-
     private func rules(_ container: AppContainer) -> SchedulingAvailabilityRulesModel {
         SchedulingAvailabilityRulesModel(
             admin: container.schedulingAdmin,

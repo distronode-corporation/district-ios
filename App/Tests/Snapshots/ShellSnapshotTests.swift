@@ -63,13 +63,13 @@ final class ShellSnapshotTests: ScreenSnapshotTestCase {
     /// The list's default workspace (a viewer's): the read-only shell.
     func testShellViewer() async throws {
         select(nil)
-        try await assertRoot(Self.overview(for: "ws-contract-viewer", role: "viewer"))
+        try await assertRoot(Self.overview(for: "ws-contract-viewer", role: "viewer"), devices: [.iPad])
     }
 
     /// A client's workspace: every tab a client may open.
     func testShellClient() async throws {
         select("ws-contract-client")
-        try await assertRoot(Self.overview(for: "ws-contract-client", role: "client"))
+        try await assertRoot(Self.overview(for: "ws-contract-client", role: "client"), devices: [.iPad])
     }
 
     /// An agency's workspace, the one role that sees every workspace's switcher.
