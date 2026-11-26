@@ -23,7 +23,7 @@ import XCTest
 /// every runner, and animations are off so nothing is drawn halfway.
 @MainActor
 class ScreenSnapshotTestCase: XCTestCase {
-    /// The sizes every screen is drawn at: a phone and an iPad, portrait.
+    /// The sizes every screen is drawn at: an iPhone 13 in portrait and an iPad Pro 11 in landscape.
     enum Device: String, CaseIterable {
         case iPhone
         case iPad
