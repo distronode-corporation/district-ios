@@ -6,17 +6,6 @@ import XCTest
 /// The event type's two lists, its hosts and its booking questions, each read by the sheet
 /// itself from the recorded answers: loaded, empty, refused, and the one-question editor.
 final class SchedulingEventTypeListsSnapshotTests: SchedulingWriteSnapshotCase {
-    /// A live scheduler user who hosts nothing yet, so the add picker has a row to offer.
-    private static let usersWithCandidate = Reply.json("""
-    {"ok":true,"data":[
-     {"id":"sched-user-contract","email":"contract@distronode.test","name":"Contract Member",
-      "is_admin":true,"is_owner":true,"role":"owner","archived":false},
-     {"id":"sched-user-new","email":"new@contract.test","name":"New Host",
-      "is_admin":false,"is_owner":false,"role":"member","archived":false}]}
-    """)
-
-    private typealias Reply = FixtureTransport.Reply
-
     // MARK: - Hosts
 
     /// The recorded hosts; every recorded user already hosts or is archived, so there is
@@ -82,7 +71,7 @@ final class SchedulingEventTypeListsSnapshotTests: SchedulingWriteSnapshotCase {
                 onSaved: { _ in }
             )
             return SnapshotPrepared(SchedulingEventTypeHostsSheet(model: model)) {
-                await model.load()
+                await firstReadLanded { !model.rows.isEmpty }
                 for row in model.rows {
                     model.remove(row.userId)
                 }
@@ -102,7 +91,7 @@ final class SchedulingEventTypeListsSnapshotTests: SchedulingWriteSnapshotCase {
                 onSaved: { _ in }
             )
             return SnapshotPrepared(SchedulingEventTypeHostsSheet(model: model)) {
-                await model.load()
+                await firstReadLanded { !model.rows.isEmpty }
                 model.setPriority("2.5", for: "sched-user-rotation")
                 await model.save()
             }
@@ -138,7 +127,7 @@ final class SchedulingEventTypeListsSnapshotTests: SchedulingWriteSnapshotCase {
         ) { container in
             let model = self.questions(container)
             return SnapshotPrepared(SchedulingEventTypeQuestionsSheet(model: model)) {
-                await model.load()
+                await firstReadLanded { !model.questions.isEmpty }
                 guard let first = model.questions.first else {
                     XCTFail("the recorded questions did not load")
                     return

@@ -36,7 +36,7 @@ final class SchedulingAvailabilityWriteSnapshotTests: SchedulingWriteSnapshotCas
         try await assertScreen(devices: [.iPhone]) { container in
             let model = self.rules(container)
             return SnapshotPrepared(SchedulingAvailabilityRulesSheet(model: model)) {
-                await model.load()
+                await firstReadLanded { model.week.contains { !$0.isEmpty } }
                 guard let row = model.week.firstIndex(where: { !$0.isEmpty }),
                       let range = model.week[row].first
                 else {
@@ -53,7 +53,7 @@ final class SchedulingAvailabilityWriteSnapshotTests: SchedulingWriteSnapshotCas
         try await assertScreen(devices: [.iPhone], locales: [.en]) { container in
             let model = self.rules(container)
             return SnapshotPrepared(SchedulingAvailabilityRulesSheet(model: model)) {
-                await model.load()
+                await firstReadLanded { model.week.contains { !$0.isEmpty } }
                 await model.save()
             }
         }
@@ -64,7 +64,7 @@ final class SchedulingAvailabilityWriteSnapshotTests: SchedulingWriteSnapshotCas
         try await assertScreen(devices: [.iPhone], locales: [.en]) { container in
             let model = self.rules(container)
             return SnapshotPrepared(SchedulingAvailabilityRulesSheet(model: model)) {
-                await model.load()
+                await firstReadLanded { model.week.contains { !$0.isEmpty } }
                 guard let row = model.week.firstIndex(where: { !$0.isEmpty }) else {
                     XCTFail("the recorded hours did not load")
                     return
@@ -104,7 +104,7 @@ final class SchedulingAvailabilityWriteSnapshotTests: SchedulingWriteSnapshotCas
         ) { container in
             let model = self.overrides(container)
             return SnapshotPrepared(SchedulingAvailabilityOverridesSheet(model: model)) {
-                await model.load()
+                await firstReadLanded { !model.rows.isEmpty }
                 guard let row = model.rows.first else {
                     XCTFail("the recorded overrides did not load")
                     return

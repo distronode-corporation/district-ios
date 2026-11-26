@@ -19,6 +19,16 @@ class SchedulingWriteSnapshotCase: ScreenSnapshotTestCase {
     /// The recorded booking.
     static let bookingId = "bk-contract-1"
 
+    /// A live scheduler user who hosts nothing and is in no team, so an add picker has a
+    /// row to offer.
+    static let usersWithCandidate = FixtureTransport.Reply.json("""
+    {"ok":true,"data":[
+     {"id":"sched-user-contract","email":"contract@distronode.test","name":"Contract Member",
+      "is_admin":true,"is_owner":true,"role":"owner","archived":false},
+     {"id":"sched-user-new","email":"new@contract.test","name":"New Host",
+      "is_admin":false,"is_owner":false,"role":"member","archived":false}]}
+    """)
+
     /// The containers ``admin(_:)`` built, kept for the test's length: a repository's
     /// bearer comes from its container's session.
     private var readers: [AppContainer] = []
@@ -100,5 +110,22 @@ struct SnapshotPrepared<Content: View>: View {
     var body: some View {
         content
             .task { await prepare() }
+    }
+}
+
+/// Waits until `condition` holds: the sheet's own first read has landed, so a step taken
+/// next cannot be overwritten by that read arriving late.
+///
+/// ⚠️ A STEP THAT READ AGAIN INSTEAD WOULD RACE THE SHEET'S OWN READ, and whichever
+/// answered last would decide what is drawn. Fails the test rather than hang if it never does.
+@MainActor
+func firstReadLanded(_ condition: () -> Bool, file: StaticString = #filePath, line: UInt = #line) async {
+    var tries = 0
+    while !condition(), tries < 300 {
+        try? await Task.sleep(for: .milliseconds(10))
+        tries += 1
+    }
+    if !condition() {
+        XCTFail("the sheet's first read never landed", file: file, line: line)
     }
 }
