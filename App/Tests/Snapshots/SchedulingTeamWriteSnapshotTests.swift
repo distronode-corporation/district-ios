@@ -8,6 +8,26 @@ import XCTest
 /// archived, over the recorded "Sales" team and the recorded scheduler users.
 final class SchedulingTeamWriteSnapshotTests: SchedulingWriteSnapshotCase {
     private static let memberId = "sched-user-contract"
+
+    /// The recorded "Sales" team from the teams list, without ``memberId``, as `teams.get`
+    /// answers after the removal (CodeRabbit #144: the default reply was a different team).
+    private static func salesWithoutMember() -> FixtureTransport.Reply {
+        let data = FixtureTransport.fixtureData("district-scheduling-teams")
+        guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let items = (root["data"] as? [String: Any])?["items"] as? [[String: Any]],
+              var sales = items.first(where: { $0["name"] as? String == "Sales" }),
+              let members = sales["members"] as? [[String: Any]]
+        else {
+            XCTFail("the recorded teams list has no Sales team with members")
+            return .json("{}")
+        }
+        let left = members.filter { $0["id"] as? String != memberId }
+        sales["members"] = left
+        sales["member_count"] = left.count
+        let body = (try? JSONSerialization.data(withJSONObject: ["ok": true, "data": sales])) ?? Data()
+        return FixtureTransport.Reply(status: 200, body: body)
+    }
+
     private static let memberName = "Contract Member"
 
     // MARK: - Create and rename
@@ -109,11 +129,15 @@ final class SchedulingTeamWriteSnapshotTests: SchedulingWriteSnapshotCase {
         }
     }
 
-    /// Removed: the re-read team ("Support", recorded with nobody in it) is what is drawn.
+    /// Removed: the re-read of the same team ("Sales" as recorded, without the member just
+    /// removed) is what is drawn.
     func testMembersRemoved() async throws {
         let team = try await recordedTeam()
         try await assertScreen(
-            ["op:teams.members.remove": .fixture("district-scheduling-ok")],
+            [
+                "op:teams.members.remove": .fixture("district-scheduling-ok"),
+                "op:teams.get": Self.salesWithoutMember(),
+            ],
             devices: [.iPhone],
             locales: [.en]
         ) { container in

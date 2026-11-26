@@ -184,6 +184,9 @@ class ScreenSnapshotTestCase: XCTestCase {
         window.traitOverrides.preferredContentSizeCategory = .large
         window.traitOverrides.horizontalSizeClass = device == .iPad ? .regular : .compact
         window.traitOverrides.verticalSizeClass = .regular
+        // ⚠️ THE LAYOUT'S SCALE IS PINNED TOO, at the iPhone simulator's 3x: the iPad leg's
+        // simulator is 2x, and layout rounds to the screen's pixels before the 1x drawing.
+        window.traitOverrides.displayScale = 3
         window.rootViewController = controller
         window.isHidden = false
         window.layoutIfNeeded()
