@@ -23,6 +23,11 @@ final class ShellSnapshotTests: ScreenSnapshotTestCase {
         )
     }
 
+    /// The recorded degraded answer, at the status the service sends it with.
+    static var degraded: FixtureTransport.Reply {
+        FixtureTransport.Reply(status: 503, body: FixtureTransport.fixtureData("district-workspace-list-degraded"))
+    }
+
     private func select(_ workspaceId: String?) {
         WorkspaceSelectionStore().setSelectedWorkspaceId(workspaceId)
     }
@@ -78,11 +83,12 @@ final class ShellSnapshotTests: ScreenSnapshotTestCase {
         ], devices: [.iPhone])
     }
 
-    /// The recorded degraded list: a region unreachable and nothing else to open.
+    /// The recorded 503 `REGIONS_DEGRADED`: two regions unreachable, said as such rather than as no
+    /// workspaces.
     func testShellDegraded() async throws {
         select(nil)
         try await assertRoot(
-            ["/api/district/workspace/list": .fixture("district-workspace-list-degraded")],
+            ["/api/district/workspace/list": Self.degraded],
             devices: [.iPhone]
         )
     }
