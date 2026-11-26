@@ -123,8 +123,8 @@ class ScreenSnapshotTestCase: XCTestCase {
                 if expectAllAnswered {
                     XCTAssertEqual(transport.unanswered, [], "unstubbed requests", file: file, line: line)
                 }
-                assertSnapshot(
-                    of: Self.render(window),
+                await assertSnapshot(
+                    of: Self.steadyRender(window),
                     as: .image(precision: 0.995, perceptualPrecision: 0.98),
                     named: "\(device.rawValue)-\(locale == .frCA ? "fr-CA" : "en")",
                     file: file,
@@ -150,6 +150,24 @@ class ScreenSnapshotTestCase: XCTestCase {
         return UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { context in
             window.layer.render(in: context.cgContext)
         }
+    }
+
+    /// The window drawn once two drawings 100 ms apart are the same, at most two seconds on.
+    ///
+    /// ⛔ A QUIET TRANSPORT IS NOT A DRAWN SCREEN. Locally, a list whose read had been answered
+    /// was still drawn as its skeleton about once in thirty runs, the rows landing a moment
+    /// later; waiting for the picture itself to stop changing closes that gap.
+    private static func steadyRender(_ window: UIWindow) async -> UIImage {
+        var image = render(window)
+        for _ in 0 ..< 20 {
+            try? await Task.sleep(for: .milliseconds(100))
+            let next = render(window)
+            if next.pngData() == image.pngData() {
+                return next
+            }
+            image = next
+        }
+        return image
     }
 
     /// A window of the device's size, with its traits set on the window rather than taken from
