@@ -148,14 +148,18 @@ class ScreenSnapshotTestCase: XCTestCase {
     /// view-controller strategy moves the controller into a window of its own, which makes the
     /// screen disappear and appear again: its `.task` restarts, and a screen that shows its
     /// skeleton while it reads was sometimes drawn mid-read (measured: 3 to 4 of 112 drawings
-    /// per local run). Drawing this window's layer at one point per pixel has no such race.
+    /// per local run). Drawing this window at one point per pixel has no such race.
+    ///
+    /// ⛔ `drawHierarchy`, NOT `layer.render`: the layer renderer cannot draw iOS 26's glass and
+    /// material layers, so screens built on them (toolbars, the tab bar, the setup wizard) came
+    /// out blank.
     private static func render(_ window: UIWindow) -> UIImage {
         window.layoutIfNeeded()
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
         format.opaque = true
-        return UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { context in
-            window.layer.render(in: context.cgContext)
+        return UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
+            window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
         }
     }
 
