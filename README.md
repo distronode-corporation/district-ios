@@ -301,8 +301,9 @@ tools the build runs (its comments say why).
 What this does not give you is a way to compare your build with the copy on your iPhone.
 The App Store signs and encrypts each copy it delivers, so the installed app differs from
 any build made from source, by Apple's design. The link between a release and its source
-is the tag: each App Store version is built by `release.yml` from its protected `v*` tag,
-and its GitHub Release is that tag's source.
+is the tag: each App Store version since `release.yml` existed is built by it from its
+protected `v*` tag (versions up to 1.2 were built on a maintainer's machine, as above), and
+its GitHub Release is that tag's source.
 
 ## Uninstall
 
