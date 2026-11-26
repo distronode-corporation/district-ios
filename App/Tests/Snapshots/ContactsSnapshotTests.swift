@@ -4,7 +4,7 @@ import XCTest
 
 /// The contacts list, drawn from the service's recorded contacts and blocked list.
 final class ContactsSnapshotTests: ScreenSnapshotTestCase {
-    private static let empty = #"{"success":true,"contacts":[],"total":0}"#
+    private static let empty = #"{"success":true,"contacts":[],"total":0,"limit":50,"offset":0}"#
 
     /// Two recorded contacts, one of them blocked, as a client who may edit sees them (the
     /// add button is in the bar).
