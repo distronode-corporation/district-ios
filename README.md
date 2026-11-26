@@ -276,6 +276,35 @@ Builds from a fork report no crashes: crash reporting (Sentry) starts only when 
 supplied at build time, and `project.yml` ships it empty. Only the release workflow
 supplies one.
 
+### Repeating a build
+
+Two builds of the same commit, with the same tools, are byte for byte the same. CI's
+`repeatable` job proves it on every push to `main`, and you can repeat it on a Mac with
+Xcode 26.3 and XcodeGen 2.46.0:
+
+```sh
+git checkout main
+xcodegen generate --spec project.yml
+xcodebuild -resolvePackageDependencies -project DistrictAI.xcodeproj \
+  -scheme DistrictAI -clonedSourcePackagesDirPath SourcePackages
+ci/repeatable-build.sh DistrictAI 'generic/platform=iOS' Release-iphoneos/DistrictAI.app
+```
+
+It builds the app unsigned, in Release, twice from clean, compares every file in the two
+bundles and prints `PASS` or the files that differ. Nothing is left out of the comparison.
+Releases up to 3.4.0 predate it and differ in two files between builds (the Sentry framework
+and the watch app's App Intents metadata); `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md)
+says why.
+The script sets `SWIFT_DETERMINISTIC_HASHING=1`, which fixes the hash seed of the Swift
+tools the build runs (its comments say why).
+
+What this does not give you is a way to compare your build with the copy on your iPhone.
+The App Store signs and encrypts each copy it delivers, so the installed app differs from
+any build made from source, by Apple's design. The link between a release and its source
+is the tag: each App Store version since `release.yml` existed is built by it from its
+protected `v*` tag (versions up to 1.2 were built on a maintainer's machine, as above), and
+its GitHub Release is that tag's source.
+
 ## Uninstall
 
 Sign out first (Account, Sign out), with the device online, if you want the session ended on
