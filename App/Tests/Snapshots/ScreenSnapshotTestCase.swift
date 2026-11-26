@@ -138,8 +138,13 @@ class ScreenSnapshotTestCase: XCTestCase {
                     testName: testName,
                     line: line
                 )
+                // ⛔ DETACHED FROM THE SCENE, NOT ONLY HIDDEN. A hidden window stays in the scene, and
+                // after a few hundred drawings on CI the later ones lost their glass, their large
+                // titles and sometimes everything (run 45884906886 against run 45885167945), so a
+                // drawing depended on how many came before it in the process.
                 window.isHidden = true
                 window.rootViewController = nil
+                window.windowScene = nil
             }
         }
     }
