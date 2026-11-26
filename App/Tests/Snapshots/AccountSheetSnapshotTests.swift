@@ -80,11 +80,18 @@ final class AccountSheetSnapshotTests: ScreenSnapshotTestCase {
     }
 
     /// The sign-in sheet would not open: said above the same choices.
+    ///
+    /// ⚠️ THE FAILURE IS PRODUCED INSIDE EACH DRAWING, after the harness has set its language:
+    /// the model stores the sentence when it fails, so a failure made beforehand drew English
+    /// in the French reference (CodeRabbit #146).
     func testDeleteExplainSheetDidNotOpen() async throws {
-        let model = Self.deleteModel(SettingsTransport([]), sso: .couldNotOpen)
-        await model.reauthenticate(with: .google)
-        XCTAssertNotNil(model.failure)
-        try await assertScreen(devices: [.iPhone]) { _ in DeleteAccountView(model: model) }
+        try await assertScreen(devices: [.iPhone]) { _ in
+            let model = Self.deleteModel(SettingsTransport([]), sso: .couldNotOpen)
+            return SnapshotPrepared(DeleteAccountView(model: model)) {
+                await model.reauthenticate(with: .google)
+                XCTAssertNotNil(model.failure)
+            }
+        }
     }
 
     /// The password field.
