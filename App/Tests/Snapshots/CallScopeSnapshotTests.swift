@@ -33,6 +33,25 @@ final class CallScopeSnapshotTests: ScreenSnapshotTestCase {
         })
     }
 
+    /// A missed call: no summary, no follow-up, no analysis, no transcript to offer. The two
+    /// summaries are required strings in the model, so "nothing" is empty there, and null in the
+    /// optional fields (#157: a null summary did not decode and drew the decode failure).
+    func testCallDetailMissedWithNothingAnalysed() async throws {
+        try await draw(Self.call { call in
+            call["status"] = "no-answer"
+            call["direction"] = "missed"
+            call["type"] = "missed"
+            call["durationRaw"] = 0
+            call["duration"] = "0m 0s"
+            call["aiSummary"] = ""
+            call["summary"] = ""
+            for key in ["followUp", "analysis", "sentiment", "disposition"] {
+                call[key] = NSNull()
+            }
+            call["hasTranscript"] = false
+        }, devices: [.iPhone])
+    }
+
     /// A refused read: the failure with its retry.
     func testCallDetailFailed() async throws {
         try await draw(.refused(500), devices: [.iPhone])
