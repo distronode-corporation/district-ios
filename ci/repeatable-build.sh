@@ -22,6 +22,16 @@
 # variable changes no compiler output; it only fixes the seed of the Swift tools the
 # build runs.
 #
+# ⛔ -fno-objc-msgsend-selector-stubs IS PART OF THE RECIPE TOO. LiveKit's one Objective-C
+# file (LKObjCHelpers.m, seven selectors) is compiled to call `objc_msgSend$<selector>`
+# stubs, and the linker writes the selector references those stubs load in an order that
+# varies between links: on main's first run of this job (45815462034) the two builds
+# differed in DistrictAI.app/DistrictAI, in its UUID and in three of the seven stubs, whose
+# selector references had swapped. Without stubs, clang emits ordinary objc_msgSend calls
+# with selector references of its own, and the linker has nothing to order. It is passed
+# on the command line, not in project.yml, because only a command-line setting reaches the
+# package targets.
+#
 # On a difference it prints each differing file and keeps both products under
 # $RUNNER_TEMP/repeatable (or /tmp/repeatable) for the job to upload.
 set -euo pipefail
@@ -44,7 +54,8 @@ for n in 1 2; do
     -destination "$destination" \
     -derivedDataPath DerivedData \
     -clonedSourcePackagesDirPath SourcePackages \
-    CODE_SIGNING_ALLOWED=NO > "$OUT/build-$n.log" 2>&1 || {
+    CODE_SIGNING_ALLOWED=NO \
+    'OTHER_CFLAGS=$(inherited) -fno-objc-msgsend-selector-stubs' > "$OUT/build-$n.log" 2>&1 || {
       tail -n 100 "$OUT/build-$n.log"
       exit 1
     }
