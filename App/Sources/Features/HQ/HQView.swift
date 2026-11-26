@@ -40,12 +40,14 @@ struct HQView: View {
     private let hq: HQRepository
     private let workspaceId: String
 
-    init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
+    /// - Parameter model: the console's model; nil builds the screen's own, which is what the
+    ///   app does. A test passes one it has already driven, to draw a transcript.
+    init(container: AppContainer, workspaceId: String, role: WorkspaceRole?, model: HQModel? = nil) {
         // ⚠️ `State(initialValue:)` in `init`, as every other model-owning screen does:
         // building it in `body` would be a new model, and a new transcript, on every
         // redraw.
         _model = State(
-            initialValue: HQModel(container: container, workspaceId: workspaceId, role: role)
+            initialValue: model ?? HQModel(container: container, workspaceId: workspaceId, role: role)
         )
         _voice = State(initialValue: HQVoiceSession.forScreen(
             container: container,

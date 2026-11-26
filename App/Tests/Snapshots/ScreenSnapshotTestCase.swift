@@ -99,6 +99,7 @@ class ScreenSnapshotTestCase: XCTestCase {
     ///     which would have drawn a failure state nobody chose.
     func assertScreen(
         _ replies: [String: FixtureTransport.Reply] = [:],
+        sequences: [String: [FixtureTransport.Reply]] = [:],
         devices: [Device] = Device.allCases,
         locales: [L10nLocale] = [.en, .frCA],
         expectAllAnswered: Bool = true,
@@ -110,7 +111,7 @@ class ScreenSnapshotTestCase: XCTestCase {
         for locale in locales {
             for device in devices {
                 L10nRuntime.locale = locale
-                let transport = FixtureTransport(replies)
+                let transport = FixtureTransport(replies, sequences: sequences)
                 let container = try await container(transport)
                 let controller = UIHostingController(
                     rootView: NavigationStack { make(container) }
