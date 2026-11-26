@@ -124,8 +124,9 @@ class ScreenSnapshotTestCase: XCTestCase {
                 if expectAllAnswered {
                     XCTAssertEqual(transport.unanswered, [], "unstubbed requests", file: file, line: line)
                 }
-                await assertSnapshot(
-                    of: Self.steadyRender(window),
+                let drawing = await Self.steadyRender(window)
+                assertSnapshot(
+                    of: drawing,
                     as: .image(precision: 0.995, perceptualPrecision: 0.98),
                     named: "\(device.rawValue)-\(locale == .frCA ? "fr-CA" : "en")",
                     file: file,
