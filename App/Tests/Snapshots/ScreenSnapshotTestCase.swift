@@ -116,7 +116,10 @@ class ScreenSnapshotTestCase: XCTestCase {
                 let transport = FixtureTransport(replies, sequences: sequences)
                 let container = try await container(transport)
                 let controller = UIHostingController(
-                    rootView: NavigationStack { make(container) }
+                    // ⚠️ INLINE TITLES: the space under a large title came out 5 points taller in
+                    // a long run than in a short one (runs 45891588712 and 45891796773), so a
+                    // drawing depended on what ran before it. An inline title has no such gap.
+                    rootView: NavigationStack { make(container).toolbarTitleDisplayMode(.inline) }
                         .environment(\.dynamicTypeSize, .large)
                         .transaction { $0.animation = nil }
                 )
