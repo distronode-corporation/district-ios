@@ -16,12 +16,6 @@ to propose a new one.
   hardening from the deep security scan: room joins, credential fields and the call Live
   Activity ([#134](https://github.com/distronode-corporation/district-ios/pull/134)). The plan
   is to ship them in the next App Store release.
-- **A repeatable build.** CI's `repeatable` job (`ci/repeatable-build.sh`, on pushes to `main`)
-  builds the app unsigned twice from clean and compares the two products byte for byte. It does
-  not pass yet: two files differ between the builds, the Sentry framework's binary and the
-  watch app's `Metadata.appintents/version.json`, so the job is marked `continue-on-error` and
-  does not block a merge. The plan is to make both builds identical, then make the job
-  blocking.
 
 ## Known limits, not planned
 

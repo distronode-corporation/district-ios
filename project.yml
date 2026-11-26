@@ -113,10 +113,17 @@ packages:
   # not a key it knows, and an unknown key under a package is a spec error
   # rather than a silently ignored line.
   # ⚠️ 9.30.1 IS THE PRECOMPILED BINARY PATH. sentry-cocoa's own Package.swift
-  # declares the `Sentry` product as a `.binaryTarget` XCFramework downloaded
-  # from the GitHub release, so nothing here compiles the SDK from source. The
-  # source-built product is called `SentrySPM`; `Sentry-Dynamic` and
-  # `SentrySwiftUI` are different distributions again and none of them is wanted.
+  # declares each product as a `.binaryTarget` XCFramework downloaded from the
+  # GitHub release, so nothing here compiles the SDK from source (the source-built
+  # product is called `SentrySPM`).
+  # ⛔ THE PRODUCT IS `Sentry-Dynamic`, NOT `Sentry`, FOR THE REPEATABLE BUILD. The
+  # `Sentry` product is a STATIC XCFramework: its code links into the app binary and
+  # Xcode embeds the framework only to carry its Info.plist and privacy manifest,
+  # "injecting a stub binary into codeless framework". That stub is linked in a fresh
+  # random `swbuild.tmp.*` directory whose path lands in its LC_ID_DYLIB and code
+  # signature, so `Frameworks/Sentry.framework/Sentry` differed between two clean
+  # builds of the same commit (ci/repeatable-build.sh). `Sentry-Dynamic` is copied
+  # into the bundle as shipped (bitcode strip only), with its own privacy manifest.
   Sentry:
     url: https://github.com/getsentry/sentry-cocoa
     exactVersion: 9.30.1
@@ -212,10 +219,10 @@ targets:
       # ⚠️ `product:` (SINGULAR) IS STATED RATHER THAN LEFT TO THE DEFAULT. The
       # default links the product whose name matches the PACKAGE name, which
       # here happens to be right — and would stop being right the day somebody
-      # renames the package key. The package publishes several products and only
-      # this one is the default static XCFramework; see the ⛔ on the package.
+      # renames the package key. The package publishes several products; this is
+      # the dynamic XCFramework, see the ⛔ on the package for why not `Sentry`.
       - package: Sentry
-        product: Sentry
+        product: Sentry-Dynamic
       # ⛔ THE ONLY PLACE THE SDK ENTERS THE BUILD, AND IT IS THE APP TARGET ONLY.
       # district-core-swift's CI greps its sources for an `import LiveKit` and
       # fails, so the SDK and its WebRTC natives stay on this side of the
