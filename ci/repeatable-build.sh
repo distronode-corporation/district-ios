@@ -22,6 +22,10 @@
 # variable changes no compiler output; it only fixes the seed of the Swift tools the
 # build runs.
 #
+# ⛔ Reproducible.xcconfig IS PART OF THE RECIPE, passed with -xcconfig, as the release
+# archive passes it: the one place the build settings for repeatability live (it says why
+# there are no Objective-C selector stubs).
+#
 # On a difference it prints each differing file and keeps both products under
 # $RUNNER_TEMP/repeatable (or /tmp/repeatable) for the job to upload.
 set -euo pipefail
@@ -44,6 +48,7 @@ for n in 1 2; do
     -destination "$destination" \
     -derivedDataPath DerivedData \
     -clonedSourcePackagesDirPath SourcePackages \
+    -xcconfig Reproducible.xcconfig \
     CODE_SIGNING_ALLOWED=NO > "$OUT/build-$n.log" 2>&1 || {
       tail -n 100 "$OUT/build-$n.log"
       exit 1
