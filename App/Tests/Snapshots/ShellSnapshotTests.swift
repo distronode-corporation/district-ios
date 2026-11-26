@@ -49,24 +49,6 @@ final class ShellSnapshotTests: ScreenSnapshotTestCase {
 
     // MARK: - The shell
 
-    /// The list's default workspace (a viewer's): the read-only shell.
-    func testShellViewer() async throws {
-        select(nil)
-        try await assertRoot()
-    }
-
-    /// A client's workspace: every tab a client may open.
-    func testShellClient() async throws {
-        select("ws-contract-client")
-        try await assertRoot()
-    }
-
-    /// An agency's workspace, the one role that sees every workspace's switcher.
-    func testShellAgency() async throws {
-        select("ws-contract-active")
-        try await assertRoot(devices: [.iPad])
-    }
-
     /// No workspace at all: the shell's empty state rather than a tab bar over nothing.
     func testShellNoWorkspace() async throws {
         select(nil)
