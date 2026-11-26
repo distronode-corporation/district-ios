@@ -517,7 +517,7 @@ jobs:
       # Measured locally (iMac, HDD) at about 4 minutes; on the runner the watch simulator's
       # first boot is most of it.
       - name: Watch app tests
-        if: matrix.device == 'iPhone'
+        if: ${{ !cancelled() && matrix.device == 'iPhone' }}
         timeout-minutes: 20
         run: |
           set -o pipefail
@@ -534,7 +534,7 @@ jobs:
 
       # ⛔ COUNTED, LIKE THE OTHER BUNDLES: a scheme that lost its test target reports success.
       - name: Watch tests were discovered
-        if: matrix.device == 'iPhone'
+        if: ${{ !cancelled() && matrix.device == 'iPhone' }}
         run: |
           minimum=65
           executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-watch.log | sort -n | tail -1)
@@ -544,6 +544,8 @@ jobs:
             exit 1
           fi
 
+      # ⚠️ THE WATCH TESTS AND THIS FLOOR RUN EVEN AFTER A FAILED STEP ABOVE (`!cancelled()`),
+      # so a run that fails one snapshot still reports the figure; the job fails either way.
       # ⛔ THE PROJECT'S LINE COVERAGE, HELD TO A FLOOR (ci/coverage_floor.py, which says what
       # counts: this repository's shipped code, the app, its extensions, the watch app and its
       # complication, from both test runs; no dependency package and no test bundle). The
@@ -551,7 +553,7 @@ jobs:
       # with the change that adds coverage, never lower it to make a change pass. The target
       # is 80 (OpenSSF silver's statement coverage criterion).
       - name: Line coverage floor (xccov)
-        if: matrix.device == 'iPhone'
+        if: ${{ !cancelled() && matrix.device == 'iPhone' }}
         run: |
           xcrun xccov view --report --json DistrictAITests.xcresult > coverage-app.json
           xcrun xccov view --report --json DistrictAIWatchTests.xcresult > coverage-watch.json
