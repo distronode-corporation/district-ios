@@ -228,7 +228,9 @@ jobs:
     # by hand (workflow_dispatch with run_app).
     if: ${{ !github.event.repository.private || (github.event_name == 'workflow_dispatch' && inputs.run_app) }}
     runs-on: macos-26
-    timeout-minutes: 60
+    # ⚠️ 90, NOT 60, SINCE THE SCREEN SNAPSHOT TESTS: each drawing waits for its reads and for
+    # three identical frames, which adds about half a second per drawing (a few thousand).
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
