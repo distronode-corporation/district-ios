@@ -36,22 +36,22 @@ final class SchedulingDeveloperModel {
     /// repository over a stub transport, which exercises the envelope walk rather than
     /// skipping it. ⚠️ Production still constructs through the container, so both
     /// collaborators remain the one shared ``ApiClient``.
-    /// `tab` is the one open on entry: the first in the app, another in a test.
     init(
         repository: SchedulingAdminRepository,
         scheduling: SchedulingRepository,
-        workspaceId: String,
-        tab: String? = nil
+        workspaceId: String
     ) {
         self.repository = repository
         self.scheduling = scheduling
         self.workspaceId = workspaceId
-        self.tab = tab ?? SchedulingDeveloperFormat.tabIds[0]
     }
 
-    convenience init(container: AppContainer, workspaceId: String, tab: String? = nil) {
-        let admin = container.schedulingAdmin
-        self.init(repository: admin, scheduling: container.scheduling, workspaceId: workspaceId, tab: tab)
+    convenience init(container: AppContainer, workspaceId: String) {
+        self.init(
+            repository: container.schedulingAdmin,
+            scheduling: container.scheduling,
+            workspaceId: workspaceId
+        )
     }
 
     /// ⚠️ THE CONTEXT LOADS ONCE FOR THE SCREEN and the tabs load on demand. The timezone
@@ -177,12 +177,12 @@ struct SchedulingDeveloperView: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
-    init(container: AppContainer, workspaceId: String, role: WorkspaceRole?, tab: String? = nil) {
+    init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
         self.workspaceId = workspaceId
         self.role = role
         let admin = container.schedulingAdmin
         self.admin = admin
-        let model = SchedulingDeveloperModel(container: container, workspaceId: workspaceId, tab: tab)
+        let model = SchedulingDeveloperModel(container: container, workspaceId: workspaceId)
         _model = State(initialValue: model)
         let refresh: () -> Void = { Task { await model.reload() } }
         _keyRevoke = State(initialValue: SchedulingAPIKeyRevokeModel(
