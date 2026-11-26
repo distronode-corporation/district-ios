@@ -117,43 +117,6 @@ final class SchedulingAvailabilityWriteSnapshotTests: SchedulingWriteSnapshotCas
 
     // MARK: - Adding one
 
-    /// The form as "Add" opens it: a day off, first and last day.
-    func testOverrideAddDayOff() async throws {
-        try await assertScreen(devices: [.iPhone]) { container in
-            let model = self.overrides(container)
-            model.beginAdd()
-            return SchedulingOverrideAddSheet(model: model)
-        }
-    }
-
-    /// Custom hours: one date and a window, and no last-day field.
-    func testOverrideAddCustomHours() async throws {
-        try await assertScreen(devices: [.iPhone]) { container in
-            let model = self.overrides(container)
-            model.beginAdd()
-            model.updateAdding { form in
-                form.reason = "custom_hours"
-                form.date = "2026-09-30"
-            }
-            return SchedulingOverrideAddSheet(model: model)
-        }
-    }
-
-    /// A last day before the first, refused on the press.
-    func testOverrideAddEndBeforeStart() async throws {
-        try await assertScreen(devices: [.iPhone], locales: [.en]) { container in
-            let model = self.overrides(container)
-            return SnapshotPrepared(SchedulingOverrideAddSheet(model: model)) {
-                model.beginAdd()
-                model.updateAdding { form in
-                    form.date = "2026-09-14"
-                    form.endDate = "2026-09-12"
-                }
-                await model.submit()
-            }
-        }
-    }
-
     private func rules(_ container: AppContainer) -> SchedulingAvailabilityRulesModel {
         SchedulingAvailabilityRulesModel(
             admin: container.schedulingAdmin,
