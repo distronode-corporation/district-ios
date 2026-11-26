@@ -19,6 +19,11 @@ import XCTest
 /// override: SwiftUI evaluates a body outside the test's task, where a task-local is not set.
 /// XCTest runs these one at a time, and ``tearDown()`` puts English back for the tests after.
 ///
+/// ⚠️ EVERY DRAWING IS LIGHT, AT THE `.large` TEXT SIZE, AT ONE PIXEL PER POINT, WITH NO SAFE
+/// AREA, whatever the simulator or another test in the bundle has set (one did change the text
+/// size, and one screen was drawn larger on CI), so a reference depends on neither the machine
+/// nor the order the tests run in. 1x keeps every word legible and each image small in git.
+///
 /// ⚠️ THE TIME ZONE IS FIXED (Toronto, the service's own) so an absolute time draws the same on
 /// every runner, and animations are off so nothing is drawn halfway.
 @MainActor
@@ -47,17 +52,6 @@ class ScreenSnapshotTestCase: XCTestCase {
         deviceId: "device_snapshot",
         baseURL: nil
     )
-
-    /// ⚠️ LIGHT, AT 1x, AT THE DEFAULT TEXT SIZE. The light appearance and the `.large` text size
-    /// whatever the simulator is set to (a test elsewhere in the bundle that changes the text size
-    /// drew one screen larger on CI), so a reference never depends on the machine or the order;
-    /// and one point per pixel, which keeps every word legible in
-    /// review while each committed image stays a tenth of its 3x size.
-    static let traits = UITraitCollection(traitsFrom: [
-        UITraitCollection(userInterfaceStyle: .light),
-        UITraitCollection(displayScale: 1),
-        UITraitCollection(preferredContentSizeCategory: .large),
-    ])
 
     override func setUp() async throws {
         try await super.setUp()
@@ -121,19 +115,18 @@ class ScreenSnapshotTestCase: XCTestCase {
                         .environment(\.dynamicTypeSize, .large)
                         .transaction { $0.animation = nil }
                 )
-                let window = try present(controller, size: device.config.size ?? .zero)
-                await settle(transport)
+                // ⛔ NO SAFE AREA FROM THE DEVICE: the drawing is the same on any simulator the
+                // job picks, the iPad leg's included.
+                controller.safeAreaRegions = []
+                let before = transport.requestCount
+                let window = try present(controller, device: device)
+                await settle(transport, after: before)
                 if expectAllAnswered {
                     XCTAssertEqual(transport.unanswered, [], "unstubbed requests", file: file, line: line)
                 }
                 assertSnapshot(
-                    of: controller,
-                    as: .image(
-                        on: device.config,
-                        precision: 0.995,
-                        perceptualPrecision: 0.98,
-                        traits: Self.traits
-                    ),
+                    of: Self.render(window),
+                    as: .image(precision: 0.995, perceptualPrecision: 0.98),
                     named: "\(device.rawValue)-\(locale == .frCA ? "fr-CA" : "en")",
                     file: file,
                     testName: testName,
@@ -145,21 +138,47 @@ class ScreenSnapshotTestCase: XCTestCase {
         }
     }
 
-    private func present(_ controller: UIViewController, size: CGSize) throws -> UIWindow {
+    /// ⛔ THE SETTLED WINDOW ITSELF IS DRAWN, NEVER RE-HOSTED. swift-snapshot-testing's
+    /// view-controller strategy moves the controller into a window of its own, which makes the
+    /// screen disappear and appear again: its `.task` restarts, and a screen that shows its
+    /// skeleton while it reads was sometimes drawn mid-read (measured: 3 to 4 of 112 drawings
+    /// per local run). Drawing this window's layer at one point per pixel has no such race.
+    private static func render(_ window: UIWindow) -> UIImage {
+        window.layoutIfNeeded()
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        return UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { context in
+            window.layer.render(in: context.cgContext)
+        }
+    }
+
+    /// A window of the device's size, with its traits set on the window rather than taken from
+    /// the simulator: light, the `.large` text size, and the device's size classes.
+    private func present(_ controller: UIViewController, device: Device) throws -> UIWindow {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let window = UIWindow(windowScene: scene)
-        window.frame = CGRect(origin: .zero, size: size)
+        window.frame = CGRect(origin: .zero, size: device.config.size ?? .zero)
         window.overrideUserInterfaceStyle = .light
         window.traitOverrides.preferredContentSizeCategory = .large
+        window.traitOverrides.horizontalSizeClass = device == .iPad ? .regular : .compact
+        window.traitOverrides.verticalSizeClass = .regular
         window.rootViewController = controller
         window.isHidden = false
         window.layoutIfNeeded()
         return window
     }
 
-    /// Waits until no request is in flight and none has started for a run of short yields,
-    /// so the drawing is of the screen's settled state, not of its spinner.
-    private func settle(_ transport: FixtureTransport) async {
+    /// Waits for the screen's first request, then until no request is in flight and none has
+    /// started for a run of short yields, so the drawing is of the settled state.
+    ///
+    /// ⛔ QUIET BEFORE THE FIRST REQUEST IS NOT SETTLED. A screen's `.task` can start well after
+    /// the window appears on a loaded runner, and a wait that counted quiet from the start drew
+    /// skeletons as references. A screen that reads nothing is drawn after two seconds.
+    private func settle(_ transport: FixtureTransport, after before: Int) async {
+        for _ in 0 ..< 100 where transport.requestCount == before {
+            try? await Task.sleep(for: .milliseconds(20))
+        }
         var quiet = 0
         var lastCount = -1
         for _ in 0 ..< 400 {
