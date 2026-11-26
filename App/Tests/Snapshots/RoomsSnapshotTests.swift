@@ -34,6 +34,32 @@ final class RoomsSnapshotTests: ScreenSnapshotTestCase {
         }
     }
 
+    // MARK: - The lobby
+
+    /// No meeting has happened yet in this workspace.
+    func testLobbyEmpty() async throws {
+        try await assertScreen(["/api/district/meetings": .json("[]")]) { container in
+            RoomsLobbyView(container: container, workspaceId: "ws-contract-test", role: .client)
+        }
+    }
+
+    /// The meetings could not be read: the failure and its retry.
+    func testLobbyFailed() async throws {
+        try await assertScreen(
+            ["/api/district/meetings": .json(#"{"error":"Something went wrong."}"#, status: 500)],
+            devices: [.iPhone]
+        ) { container in
+            RoomsLobbyView(container: container, workspaceId: "ws-contract-test", role: .client)
+        }
+    }
+
+    /// A viewer: the recorded meetings, and no way to start one.
+    func testLobbyViewer() async throws {
+        try await assertScreen(devices: [.iPhone]) { container in
+            RoomsLobbyView(container: container, workspaceId: "ws-contract-test", role: .viewer)
+        }
+    }
+
     // MARK: - The banner
 
     /// Every phase with a banner, one under another: connecting, reconnecting, left, dropped,

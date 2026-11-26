@@ -110,6 +110,15 @@ final class InCallSnapshotTests: ScreenSnapshotTestCase {
         try await assertCall(state)
     }
 
+    // MARK: - The dialer
+
+    /// A viewer opens the dialer: the viewer notice in place of the microphone one, no call to place.
+    func testDialerViewer() async throws {
+        try await assertScreen(devices: [.iPhone]) { container in
+            DialerView(container: container, workspaceId: "ws-contract-test", role: .viewer)
+        }
+    }
+
     // MARK: - The country picker
 
     /// Every country, the home one first and the chosen one marked.
