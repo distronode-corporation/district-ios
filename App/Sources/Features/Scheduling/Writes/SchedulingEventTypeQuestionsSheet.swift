@@ -41,7 +41,7 @@ struct SchedulingEventTypeQuestionsSheet: View {
             await model.load()
         }
         .sheet(isPresented: editorPresented) {
-            SchedulingQuestionEditor(model: model)
+            editor
                 .districtSheetBackground()
         }
     }
@@ -127,18 +127,8 @@ struct SchedulingEventTypeQuestionsSheet: View {
             SchedulingWriteOutcome(state: model.state, onDismiss: model.dismissNotice)
         }
     }
-}
 
-/// The one-question editor the list above presents.
-///
-/// ⚠️ ITS OWN VIEW RATHER THAN A PROPERTY OF THE LIST, so a test can draw the form
-/// itself: a presented sheet is not part of the presenting view's image.
-struct SchedulingQuestionEditor: View {
-    let model: SchedulingEventTypeQuestionsModel
-
-    var body: some View {
-        editor
-    }
+    // MARK: - The one-question editor
 
     @ViewBuilder
     private var editor: some View {
