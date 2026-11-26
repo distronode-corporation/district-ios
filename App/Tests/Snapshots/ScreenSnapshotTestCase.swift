@@ -48,12 +48,15 @@ class ScreenSnapshotTestCase: XCTestCase {
         baseURL: nil
     )
 
-    /// ⚠️ LIGHT, AT 1x. The light appearance whatever the simulator is set to, so a reference
-    /// never depends on the machine; and one point per pixel, which keeps every word legible in
+    /// ⚠️ LIGHT, AT 1x, AT THE DEFAULT TEXT SIZE. The light appearance and the `.large` text size
+    /// whatever the simulator is set to (a test elsewhere in the bundle that changes the text size
+    /// drew one screen larger on CI), so a reference never depends on the machine or the order;
+    /// and one point per pixel, which keeps every word legible in
     /// review while each committed image stays a tenth of its 3x size.
     static let traits = UITraitCollection(traitsFrom: [
         UITraitCollection(userInterfaceStyle: .light),
         UITraitCollection(displayScale: 1),
+        UITraitCollection(preferredContentSizeCategory: .large),
     ])
 
     override func setUp() async throws {
@@ -114,6 +117,7 @@ class ScreenSnapshotTestCase: XCTestCase {
                 let container = try await container(transport)
                 let controller = UIHostingController(
                     rootView: NavigationStack { make(container) }
+                        .environment(\.dynamicTypeSize, .large)
                         .transaction { $0.animation = nil }
                 )
                 let window = try present(controller, size: device.config.size ?? .zero)
@@ -145,6 +149,7 @@ class ScreenSnapshotTestCase: XCTestCase {
         let window = UIWindow(windowScene: scene)
         window.frame = CGRect(origin: .zero, size: size)
         window.overrideUserInterfaceStyle = .light
+        window.traitOverrides.preferredContentSizeCategory = .large
         window.rootViewController = controller
         window.isHidden = false
         window.layoutIfNeeded()
