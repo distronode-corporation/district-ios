@@ -1,5 +1,6 @@
 @testable import DistrictAI
 import DistrictData
+import DistrictModel
 import SwiftUI
 import XCTest
 

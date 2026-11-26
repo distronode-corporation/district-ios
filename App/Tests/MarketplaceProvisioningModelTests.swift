@@ -98,7 +98,7 @@ final class MarketplaceProvisioningModelTests: ScreenSnapshotTestCase {
         model.lookupNumber = " +14165550142 "
         await model.lookup()
         XCTAssertEqual(Self.sent(transport), ["GET \(Self.lookup)"])
-        XCTAssertEqual(model.lookupResult?.lines, ["+14165550142", "CA", "mobile", "ExampleMobile"])
+        XCTAssertEqual(model.lookupResult?.lines, ["+14165550142", "CA", "mobile", "Example Mobile"])
         XCTAssertTrue(model.lookupWrite.isArmed)
     }
 
