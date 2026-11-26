@@ -154,20 +154,22 @@ class ScreenSnapshotTestCase: XCTestCase {
         }
     }
 
-    /// The window drawn once two drawings 100 ms apart are the same, at most two seconds on.
+    /// The window drawn once three drawings 100 ms apart are the same, at most three seconds on.
     ///
     /// ⛔ A QUIET TRANSPORT IS NOT A DRAWN SCREEN. Locally, a list whose read had been answered
     /// was still drawn as its skeleton about once in thirty runs, the rows landing a moment
     /// later; waiting for the picture itself to stop changing closes that gap.
     private static func steadyRender(_ window: UIWindow) async -> UIImage {
         var image = render(window)
-        for _ in 0 ..< 20 {
+        var same = 0
+        for _ in 0 ..< 30 {
             try? await Task.sleep(for: .milliseconds(100))
             let next = render(window)
-            if next.pngData() == image.pngData() {
-                return next
-            }
+            same = next.pngData() == image.pngData() ? same + 1 : 0
             image = next
+            if same >= 2 {
+                break
+            }
         }
         return image
     }
