@@ -36,7 +36,7 @@ struct SchedulingAvailabilityOverridesSheet: View {
             await model.load()
         }
         .sheet(isPresented: addPresented) {
-            addSheet
+            SchedulingOverrideAddSheet(model: model)
                 .districtSheetBackground()
         }
     }
@@ -134,8 +134,24 @@ struct SchedulingAvailabilityOverridesSheet: View {
             SchedulingWriteOutcome(state: model.state, onDismiss: model.dismissNotice)
         }
     }
+}
 
-    // MARK: - Adding one
+/// The "add an override" form the list above presents.
+///
+/// ⚠️ ITS OWN VIEW RATHER THAN A PROPERTY OF THE LIST, so a test can draw the form
+/// itself: a presented sheet is not part of the presenting view's image.
+struct SchedulingOverrideAddSheet: View {
+    let model: SchedulingAvailabilityOverridesModel
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var colors: DistrictColors {
+        .resolve(colorScheme)
+    }
+
+    var body: some View {
+        addSheet
+    }
 
     @ViewBuilder
     private var addSheet: some View {
