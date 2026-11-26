@@ -73,7 +73,8 @@ final class SchedulingDeveloperWriteSnapshotTests: SchedulingWriteSnapshotCase {
 
     /// Editing the recorded active webhook: the address fixed, its events and fields ticked.
     func testWebhookEdit() async throws {
-        let hook = try await XCTUnwrap(recordedWebhooks().first)
+        let hooks = try await recordedWebhooks()
+        let hook = try XCTUnwrap(hooks.first)
         try await assertScreen(devices: [.iPhone]) { container in
             SchedulingWebhookEditorSheet(model: self.webhookModel(container, mode: .edit(hook)))
         }
@@ -87,7 +88,8 @@ final class SchedulingDeveloperWriteSnapshotTests: SchedulingWriteSnapshotCase {
          "events":["booking.created","booking.no_show"],"fields":null,"is_active":true,
          "created_at":"2026-09-07T11:00:00Z"}]}}
         """)
-        let hook = try await XCTUnwrap(admin(["op:webhooks.list": list]).webhooks(workspaceId: Self.workspace).first)
+        let listed = try await admin(["op:webhooks.list": list]).webhooks(workspaceId: Self.workspace)
+        let hook = try XCTUnwrap(listed.first)
         try await assertScreen(devices: [.iPhone]) { container in
             SchedulingWebhookEditorSheet(model: self.webhookModel(container, mode: .edit(hook)))
         }
@@ -96,14 +98,16 @@ final class SchedulingDeveloperWriteSnapshotTests: SchedulingWriteSnapshotCase {
     /// The recorded second webhook subscribes only to `recording.completed`, which the
     /// editor no longer offers: nothing is ticked, so there is nothing to save.
     func testWebhookEditRetiredEventOnly() async throws {
-        let hook = try await XCTUnwrap(recordedWebhooks().last)
+        let hooks = try await recordedWebhooks()
+        let hook = try XCTUnwrap(hooks.last)
         try await assertScreen(devices: [.iPhone], locales: [.en]) { container in
             SchedulingWebhookEditorSheet(model: self.webhookModel(container, mode: .edit(hook)))
         }
     }
 
     func testWebhookEditSaved() async throws {
-        let hook = try await XCTUnwrap(recordedWebhooks().first)
+        let hooks = try await recordedWebhooks()
+        let hook = try XCTUnwrap(hooks.first)
         try await assertScreen(
             ["op:webhooks.patch": .fixture("district-scheduling-ok")],
             devices: [.iPhone],

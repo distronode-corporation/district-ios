@@ -56,7 +56,8 @@ class SchedulingWriteSnapshotCase: ScreenSnapshotTestCase {
 
     /// The recorded "Sales" team, the one with members.
     func recordedTeam() async throws -> SchedulingTeam {
-        try await XCTUnwrap(admin().teams(workspaceId: Self.workspace).first)
+        let teams = try await admin().teams(workspaceId: Self.workspace)
+        return try XCTUnwrap(teams.first)
     }
 
     /// The recorded webhooks: an active one, and one whose only event this build no
@@ -67,7 +68,8 @@ class SchedulingWriteSnapshotCase: ScreenSnapshotTestCase {
 
     /// The recorded Google connection, the destination.
     func recordedConnection() async throws -> SchedulingCalendarConnection {
-        try await XCTUnwrap(admin().calendarStatus(workspaceId: Self.workspace).connections.first)
+        let status = try await admin().calendarStatus(workspaceId: Self.workspace)
+        return try XCTUnwrap(status.connections.first)
     }
 }
 
