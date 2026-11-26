@@ -102,10 +102,10 @@ final class InCallSnapshotTests: ScreenSnapshotTestCase {
         try await assertCall(state)
     }
 
-    /// The service refused the dial: never answered, so no duration.
-    func testDialRefused() async throws {
-        let state = Self.session([.dialRefused])
-        XCTAssertTrue(state.phase.isEnded)
+    /// The room could not be joined: never answered, so no duration.
+    func testCouldNotConnect() async throws {
+        let state = Self.session([Self.accepted, .engine(.failed(message: "Timed out"))])
+        XCTAssertEqual(state.phase, .ended(.failed(message: "Timed out")))
         XCTAssertFalse(state.answered)
         try await assertCall(state)
     }
