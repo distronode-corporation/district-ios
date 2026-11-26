@@ -33,7 +33,7 @@ enum AppContainerSeam {
     /// Keychain store, this installation's real device id, and the caller's base URL.
     static func resolve(baseURL: URL) -> Resolved {
         #if DEBUG
-            if let injected = UITestSession.current() {
+            if let injected = UITestSession.inProcess ?? UITestSession.current() {
                 return Resolved(
                     // ⚠️ IN MEMORY, NEVER THE KEYCHAIN, so a UI-test run leaves no
                     // credential on a handset that is somebody's own phone.
