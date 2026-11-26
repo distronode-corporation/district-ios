@@ -49,9 +49,6 @@ final class ShellSnapshotTests: ScreenSnapshotTestCase {
 
     // MARK: - The shell
 
-    /// ⚠️ THE SHELL IS DRAWN ON THE iPAD ONLY: the phone's tab bar controller draws nothing of its
-    /// selected tab into the window's layer (measured: a blank screen under a faint tab bar).
-    ///
     /// The recorded overview, about the workspace the shell selected and in its role: the
     /// overview fixture was recorded for another workspace, and the model rightly refuses an
     /// overview about a workspace other than the one it asked for.
@@ -66,13 +63,13 @@ final class ShellSnapshotTests: ScreenSnapshotTestCase {
     /// The list's default workspace (a viewer's): the read-only shell.
     func testShellViewer() async throws {
         select(nil)
-        try await assertRoot(Self.overview(for: "ws-contract-viewer", role: "viewer"), devices: [.iPad])
+        try await assertRoot(Self.overview(for: "ws-contract-viewer", role: "viewer"))
     }
 
     /// A client's workspace: every tab a client may open.
     func testShellClient() async throws {
         select("ws-contract-client")
-        try await assertRoot(Self.overview(for: "ws-contract-client", role: "client"), devices: [.iPad])
+        try await assertRoot(Self.overview(for: "ws-contract-client", role: "client"))
     }
 
     /// An agency's workspace, the one role that sees every workspace's switcher.
