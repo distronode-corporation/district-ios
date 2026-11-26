@@ -194,6 +194,8 @@ xcodegen generate --spec project.yml
 # ⛔ `generic/platform=iOS` ARCHIVES FOR DEVICE WITHOUT NAMING ONE. A concrete
 # destination ties the archive to whatever this host happens to have paired, and
 # a release host needs no paired iPhone.
+# ⛔ Reproducible.xcconfig: the same build settings CI's repeatable job builds with, so the
+# shipped binary is built exactly as that check proves repeatable (the file says why).
 xcodebuild archive \
   -project DistrictAI.xcodeproj \
   -scheme DistrictAI \
@@ -204,6 +206,7 @@ xcodebuild archive \
   -authenticationKeyPath "$KEY_PATH" \
   -authenticationKeyID "$ASC_KEY_ID" \
   -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+  -xcconfig Reproducible.xcconfig \
   DEVELOPMENT_TEAM="$TEAM_ID" \
   CODE_SIGN_STYLE=Automatic \
   CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
