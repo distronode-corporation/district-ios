@@ -49,6 +49,38 @@ final class ShellSnapshotTests: ScreenSnapshotTestCase {
 
     // MARK: - The shell
 
+    /// ⚠️ THE SHELL IS DRAWN ON THE iPAD ONLY: the phone's tab bar controller draws nothing of its
+    /// selected tab into the window's layer (measured: a blank screen under a faint tab bar).
+    ///
+    /// The recorded overview, about the workspace the shell selected and in its role: the
+    /// overview fixture was recorded for another workspace, and the model rightly refuses an
+    /// overview about a workspace other than the one it asked for.
+    private static func overview(for workspaceId: String, role: String) -> [String: FixtureTransport.Reply] {
+        let reply = FixtureTransport.Reply.recorded("district-overview") { json in
+            json["workspaceId"] = workspaceId
+            json["role"] = role
+        }
+        return ["/api/district/overview": reply]
+    }
+
+    /// The list's default workspace (a viewer's): the read-only shell.
+    func testShellViewer() async throws {
+        select(nil)
+        try await assertRoot(Self.overview(for: "ws-contract-viewer", role: "viewer"), devices: [.iPad])
+    }
+
+    /// A client's workspace: every tab a client may open.
+    func testShellClient() async throws {
+        select("ws-contract-client")
+        try await assertRoot(Self.overview(for: "ws-contract-client", role: "client"), devices: [.iPad])
+    }
+
+    /// An agency's workspace, the one role that sees every workspace's switcher.
+    func testShellAgency() async throws {
+        select("ws-contract-active")
+        try await assertRoot(Self.overview(for: "ws-contract-active", role: "agency"), devices: [.iPad])
+    }
+
     /// No workspace at all: the shell's empty state rather than a tab bar over nothing.
     func testShellNoWorkspace() async throws {
         select(nil)

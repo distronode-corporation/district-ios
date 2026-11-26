@@ -138,6 +138,48 @@ final class SchedulingEventTypeListsSnapshotTests: SchedulingWriteSnapshotCase {
         }
     }
 
+    /// "Add question": a blank text question placed after the recorded two.
+    func testQuestionEditorAdd() async throws {
+        try await assertScreen(devices: [.iPhone]) { container in
+            let model = self.questions(container)
+            return SnapshotPrepared(SchedulingEventTypeQuestionsSheet(model: model, editorOnly: true)) {
+                await model.load()
+                model.beginAdd()
+            }
+        }
+    }
+
+    /// The recorded `select` question opened for editing, with its three options listed.
+    func testQuestionEditorEditSelect() async throws {
+        try await assertScreen(devices: [.iPhone]) { container in
+            let model = self.questions(container)
+            return SnapshotPrepared(SchedulingEventTypeQuestionsSheet(model: model, editorOnly: true)) {
+                await model.load()
+                guard let first = model.questions.first else {
+                    XCTFail("the recorded questions did not load")
+                    return
+                }
+                model.beginEdit(first)
+            }
+        }
+    }
+
+    /// A `select` with no options, refused on the press before anything is sent.
+    func testQuestionEditorSelectWithoutOptions() async throws {
+        try await assertScreen(devices: [.iPhone], locales: [.en]) { container in
+            let model = self.questions(container)
+            return SnapshotPrepared(SchedulingEventTypeQuestionsSheet(model: model, editorOnly: true)) {
+                await model.load()
+                model.beginAdd()
+                model.updateEditing { form in
+                    form.label = "Which office?"
+                    form.type = "select"
+                }
+                await model.submit()
+            }
+        }
+    }
+
     private func questions(_ container: AppContainer) -> SchedulingEventTypeQuestionsModel {
         SchedulingEventTypeQuestionsModel(
             admin: container.schedulingAdmin,
