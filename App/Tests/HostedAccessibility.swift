@@ -37,6 +37,8 @@ final class HostedAccessibility {
     func close() {
         window.isHidden = true
         window.rootViewController = nil
+        // Detached from the scene too, so windows do not pile up over a long run.
+        window.windowScene = nil
         try? Self.automation(false)
     }
 
