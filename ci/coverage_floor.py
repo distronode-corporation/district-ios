@@ -16,8 +16,8 @@ iOS run's embedded watch app too). Per file the report with the most covered lin
 taken. That is never more than the true union of the runs, so the figure can only be an
 underestimate.
 
-Exits 1 below the floor, and also when the reports hold no counted file at all: an empty
-or misread report is a lost signal, not a pass.
+Exits 1 below the floor, and also when any one report counts no executable line of the
+project: an empty or misread report is a lost signal, not a pass, even beside a good one.
 """
 
 from __future__ import annotations
@@ -49,7 +49,8 @@ def counted_files(reports: list[object], root: str) -> dict[str, tuple[str, int,
     """path relative to root -> (target, covered, executable), best report per file."""
     prefix = root.rstrip("/") + "/"
     best: dict[str, tuple[str, int, int]] = {}
-    for report in reports:
+    for index, report in enumerate(reports, start=1):
+        executable_here = 0
         for target in targets_of(report):
             name = target.get("name", "")
             if name.endswith(".xctest"):
@@ -64,9 +65,14 @@ def counted_files(reports: list[object], root: str) -> dict[str, tuple[str, int,
                 covered, executable = int(f["coveredLines"]), int(f["executableLines"])
                 if covered < 0 or executable < 0 or covered > executable:
                     die(f"{rel}: {covered} covered of {executable} executable lines")
+                executable_here += executable
                 seen = best.get(rel)
                 if seen is None or covered > seen[1]:
                     best[rel] = (name, covered, executable)
+        # Every report is a required run: one that counts nothing (a run that lost its
+        # coverage, or a bundle that tested nothing) must fail here, not vanish in the merge.
+        if executable_here == 0:
+            die(f"report {index} counts no executable line under {root}")
     return best
 
 
@@ -87,8 +93,6 @@ def main(argv: list[str]) -> int:
             die(f"{path} could not be read as JSON ({e})")
 
     files = counted_files(reports, args.root)
-    if not files:
-        die(f"no source file under {args.root} in {len(reports)} report(s)")
 
     per_target: dict[str, list[int]] = {}
     for name, covered, executable in files.values():
@@ -102,8 +106,6 @@ def main(argv: list[str]) -> int:
 
     covered = sum(c for _, c, _ in files.values())
     executable = sum(e for _, _, e in files.values())
-    if executable == 0:
-        die("the counted files have no executable line")
     pct = 100 * covered / executable
     print(f"project line coverage - {pct:.2f}% ({covered}/{executable} lines in {len(files)} files, floor {args.floor:.2f}%)")
     if pct < args.floor:

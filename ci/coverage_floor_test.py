@@ -89,12 +89,20 @@ class FloorTests(unittest.TestCase):
         for report in ({"targets": []}, [target("DistrictData", file("SourcePackages/a.swift", 1, 1))], [target("x", )]):
             code, out = self.run_floor(0, report)
             self.assertEqual(code, 1, report)
-            self.assertIn("FATAL - no source file under", out)
+            self.assertIn("FATAL - report 1 counts no executable line", out)
 
     def test_only_non_executable_files_is_a_failure(self) -> None:
         code, out = self.run_floor(0, [target("DistrictAI.app", file("App/Empty.swift", 0, 0))])
         self.assertEqual(code, 1)
         self.assertIn("no executable line", out)
+
+    def test_an_empty_report_beside_a_good_one_still_fails(self) -> None:
+        # CodeRabbit on #143: the watch run losing its coverage must not pass on the app's.
+        good = {"targets": [target("DistrictAI.app", file("App/A.swift", 80, 100))]}
+        for empty in ({"targets": []}, [target("DistrictAIWatchTests.xctest", file("Watch/Tests/T.swift", 5, 5))]):
+            code, out = self.run_floor(80, good, empty)
+            self.assertEqual(code, 1, empty)
+            self.assertIn("FATAL - report 2 counts no executable line", out)
 
     def test_hostile_reports(self) -> None:
         code, out = self.run_floor(0, raw=["not json"])
