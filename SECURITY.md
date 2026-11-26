@@ -17,6 +17,17 @@ it appeared, not what it was. Test only against accounts and workspaces that are
 Expect an acknowledgement within a few working days. There is no paid bug bounty; what
 you get is credit in the changelog entry for the fix, if you want it.
 
+## After you report
+
+The steps are the organization's
+[vulnerability response](https://github.com/distronode-corporation/.github/blob/main/GOVERNANCE.md#vulnerability-response):
+acknowledgement within a few working days; an assessment against this file and
+[SECURITY-MODEL.md](SECURITY-MODEL.md) (whether it is in scope, how bad it is, which
+versions it affects), with you kept informed in the private advisory or by email; a fix,
+developed privately while the report is undisclosed, with a test that fails without it, in a
+new App Store release; then a GitHub security advisory and a CHANGELOG entry that credit you,
+unless you ask to stay anonymous.
+
 ## Supported versions
 
 Only the current App Store release is supported. Fixes ship in a new release rather than
