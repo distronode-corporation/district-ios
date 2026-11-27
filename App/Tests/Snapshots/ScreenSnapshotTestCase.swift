@@ -53,13 +53,20 @@ class ScreenSnapshotTestCase: XCTestCase {
         baseURL: nil
     )
 
+    /// The process's default time zone before this test pinned it, put back in ``tearDown()``.
+    private var savedTimeZone: TimeZone?
+
     override func setUp() async throws {
         try await super.setUp()
+        savedTimeZone = NSTimeZone.default
         NSTimeZone.default = try XCTUnwrap(TimeZone(identifier: "America/Toronto"))
         UIView.setAnimationsEnabled(false)
     }
 
     override func tearDown() async throws {
+        if let savedTimeZone {
+            NSTimeZone.default = savedTimeZone
+        }
         L10nRuntime.locale = .en
         UITestSession.inProcess = nil
         UIView.setAnimationsEnabled(true)
@@ -131,7 +138,13 @@ class ScreenSnapshotTestCase: XCTestCase {
                 if expectAllAnswered {
                     XCTAssertEqual(transport.unanswered, [], "unstubbed requests", file: file, line: line)
                 }
-                let drawing = await Self.steadyRender(window)
+                guard let drawing = await Self.steadyRender(window) else {
+                    XCTFail("\(device.rawValue)-\(locale): the window could not be drawn", file: file, line: line)
+                    window.isHidden = true
+                    window.rootViewController = nil
+                    window.windowScene = nil
+                    continue
+                }
                 assertSnapshot(
                     of: drawing,
                     as: .image(precision: 0.995, perceptualPrecision: 0.98),
@@ -160,14 +173,19 @@ class ScreenSnapshotTestCase: XCTestCase {
     /// ⛔ `drawHierarchy`, NOT `layer.render`: the layer renderer cannot draw iOS 26's glass and
     /// material layers, so screens built on them (toolbars, the tab bar, the setup wizard) came
     /// out blank.
-    private static func render(_ window: UIWindow) -> UIImage {
+    ///
+    /// ⛔ NIL WHEN `drawHierarchy` SAYS IT COULD NOT DRAW: an incomplete image must never be
+    /// recorded or compared.
+    private static func render(_ window: UIWindow) -> UIImage? {
         window.layoutIfNeeded()
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
         format.opaque = true
-        return UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
-            window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+        var drawn = false
+        let image = UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
+            drawn = window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
         }
+        return drawn ? image : nil
     }
 
     /// The window drawn once three drawings 100 ms apart are the same, at most three seconds on.
@@ -175,13 +193,13 @@ class ScreenSnapshotTestCase: XCTestCase {
     /// ⛔ A QUIET TRANSPORT IS NOT A DRAWN SCREEN. Locally, a list whose read had been answered
     /// was still drawn as its skeleton about once in thirty runs, the rows landing a moment
     /// later; waiting for the picture itself to stop changing closes that gap.
-    private static func steadyRender(_ window: UIWindow) async -> UIImage {
+    private static func steadyRender(_ window: UIWindow) async -> UIImage? {
         var image = render(window)
         var same = 0
         for _ in 0 ..< 30 {
             try? await Task.sleep(for: .milliseconds(100))
             let next = render(window)
-            same = next.pngData() == image.pngData() ? same + 1 : 0
+            same = next != nil && next?.pngData() == image?.pngData() ? same + 1 : 0
             image = next
             if same >= 2 {
                 break
