@@ -187,7 +187,11 @@ has passed that gate, so a bump here brings models already checked against the s
 ## Continuous integration
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to `main` and
-every pull request, and uses no secrets:
+every pull request, and uses no secrets. It is ready for a merge queue (`merge_group`): a
+queued pull request's commit runs every job, both `app` legs and `repeatable` included,
+and the push to `main` that follows skips the macOS jobs, which already ran on that commit.
+
+The jobs:
 
 - **verify** (Linux, `swift:6.2.4`): SwiftFormat and SwiftLint over `App/`.
 - **app** (macOS, Xcode 26.3): generates the project, resolves its packages and checks
@@ -219,10 +223,13 @@ repository.
 
 [`codeql.yml`](.github/workflows/codeql.yml) runs CodeQL over the workflows on every
 pull request, and [`codeql-swift.yml`](.github/workflows/codeql-swift.yml) over the app's
-own Swift build nightly and on demand (LiveKit, Sentry and DistrictCore are built before
+own Swift build weekly and on demand (LiveKit, Sentry and DistrictCore are built before
 the trace starts, so they are not analysed here; DistrictCore is analysed in its own
 repository). [`scorecard.yml`](.github/workflows/scorecard.yml) publishes the
 OpenSSF Scorecard result behind the badge above.
+[`package-pins.yml`](.github/workflows/package-pins.yml) compares the Swift package pins in
+`project.yml` with their upstream releases every Monday and keeps one issue listing the
+updates, since Dependabot cannot read an XcodeGen project.
 
 ## Releases
 

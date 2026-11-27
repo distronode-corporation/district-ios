@@ -7,12 +7,14 @@ name: CodeQL Swift
 # under App/ stays out of the database and the job still passes. This workflow generates
 # the project and builds the app itself. The workflow files are analysed by codeql.yml.
 #
-# ⛔ NIGHTLY AND ON DEMAND, NOT PER PUSH OR PULL REQUEST (2026-10-06). The traced
-# build holds one of the five macOS jobs the free plan runs at once for the whole
-# organisation, and a scan per push to main (55 to 91 minutes each) was what ci.yml's
-# `app` jobs and release.yml queued behind. One scan a night covers every commit of that
-# day; a new alert arrives up to a day after the push that caused it. Dispatch this
-# workflow to scan a commit sooner.
+# ⛔ WEEKLY AND ON DEMAND, NOT PER PUSH, PULL REQUEST OR NIGHT. The traced build holds one
+# of the five macOS jobs the free plan runs at once for the whole organisation for 54 to 96
+# minutes. A scan per push to main was what ci.yml's `app` jobs and release.yml queued
+# behind (2026-10-06), and the nightly scan that replaced it still overlapped pull request
+# work, which queued 10 to 87 minutes for a runner (2026-11-27). Each scan analyses main as
+# it stands that Sunday, not every commit since the last one: a change merged and reverted
+# within the week is never scanned, and an alert for a change that stays arrives up to a
+# week after its push. Dispatch this workflow to scan a commit sooner.
 #
 # ⛔ THE APP'S OWN CODE ONLY (2026-10-06). CodeQL's Swift extractor runs beside
 # every compiler invocation made after `Initialize CodeQL`, and nothing compiled before it
@@ -23,9 +25,10 @@ name: CodeQL Swift
 # the app was traced" proves it from the traced build's log.
 on:
   schedule:
-    # 22:07 UTC, the quietest hour for this organisation's runners; district-macos scans
-    # an hour later so the two never hold two slots at once.
-    - cron: "7 22 * * *"
+    # Sundays 06:07 UTC (01:07 or 02:07 in Toronto), in the quietest hours for this
+    # organisation's runners; district-macos scans three hours later, Sundays 09:07, so the
+    # two never hold two slots at once.
+    - cron: "7 6 * * 0"
   workflow_dispatch:
 
 # Nothing at the top level; the job below asks for exactly what it uses.
@@ -36,7 +39,7 @@ jobs:
     name: Analyze (swift)
     # ⛔ SKIPPED WHILE THE REPOSITORY IS PRIVATE. Code scanning is not available to a
     # private repository on the free plan, so the upload would fail. `schedule` carries
-    # `repository` in its payload too (since 2022), so the nightly run is guarded the same way.
+    # `repository` in its payload too (since 2022), so the weekly run is guarded the same way.
     if: ${{ !github.event.repository.private }}
     runs-on: macos-26
     # ⛔ 300, NOT 120: the traced build is serial (`-jobs 1`, see that step). Before the
