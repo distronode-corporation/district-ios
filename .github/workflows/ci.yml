@@ -237,8 +237,10 @@ jobs:
   # had one AND both `app` legs and `repeatable` succeeded there. Then `app` and
   # `repeatable` are skipped here (they passed on this commit), and `dependency graph`
   # reads that run's resolved packages. A queue run that failed, was cancelled or has not
-  # finished them counts as none. Not run on other events. If this job fails, its output
-  # is empty and everything runs, which is the safe side.
+  # finished them counts as none, and so does one whose `package-resolved` artifact has
+  # expired (a rerun more than seven days on), since `app` must then make a fresh one. Not
+  # run on other events. If this job fails, its output is empty and everything runs, which
+  # is the safe side.
   queue-lookup:
     name: queue lookup
     if: ${{ github.event_name == 'push' }}
@@ -267,6 +269,13 @@ jobs:
             --jq '[.jobs[] | select((.name == "app (iPhone)" or .name == "app (iPad)" or .name == "repeatable") and .conclusion == "success")] | length')"
           if [ "$passed" != "3" ]; then
             echo "The merge queue's run $run_id of $SHA has not passed both app legs and repeatable: every job runs."
+            echo "run_id=" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+          artifacts="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/artifacts?name=package-resolved" \
+            --jq '[.artifacts[] | select(.expired == false)] | length')"
+          if [ "$artifacts" = "0" ]; then
+            echo "The merge queue's run $run_id of $SHA has no unexpired package-resolved artifact: every job runs."
             echo "run_id=" >>"$GITHUB_OUTPUT"
             exit 0
           fi
