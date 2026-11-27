@@ -94,7 +94,8 @@ code (the app, its extensions, the watch app and its complication, from `Distric
 `DistrictAIWatchTests`; no dependency package and no test bundle) with
 `ci/coverage_floor.py`, and fails below the floor set in `.github/workflows/ci.yml`. It is a
 ratchet: a change that adds coverage raises it, and it is never lowered to let a change pass.
-The target is 80 percent. No source file is excluded to reach it.
+The floor is 80 percent, and every change must keep the project at or above it. No source
+file is excluded to reach it.
 
 **Screens have snapshot tests** (`App/Tests/Snapshots`). Each one builds a real
 `AppContainer` over `FixtureTransport`, which answers from the service's recorded contract
