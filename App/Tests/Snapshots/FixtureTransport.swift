@@ -39,8 +39,13 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
 
     /// - Parameter overrides: keyed by path (`/api/district/contacts`), or by `METHOD path`
     ///   (`POST /api/district/contacts`) when one path answers two methods differently.
-    init(_ overrides: [String: Reply] = [:]) {
+    /// Replies given in turn for one path, the last one repeating: for a route that answers
+    /// a question and then a confirmation on the same path.
+    private var sequences: [String: [Reply]]
+
+    init(_ overrides: [String: Reply] = [:], sequences: [String: [Reply]] = [:]) {
         self.overrides = overrides
+        self.sequences = sequences
     }
 
     /// Requests sent and not yet answered.
@@ -63,6 +68,12 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
             if path == "/api/district/scheduling/admin", let op = Self.op(in: request.body) {
                 requested[requested.count - 1] += " \(op)"
                 return overrides["op:\(op)"] ?? Self.schedulingOps[op].map(Reply.fixture)
+            }
+            if let queue = sequences[path], let first = queue.first {
+                if queue.count > 1 {
+                    sequences[path] = Array(queue.dropFirst())
+                }
+                return first
             }
             let flag = Self.historyFlag(request.url)
             return overrides["\(request.method.rawValue) \(path)"] ?? overrides[path + flag]

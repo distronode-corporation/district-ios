@@ -558,7 +558,7 @@ jobs:
           xcrun xccov view --report --json DistrictAITests.xcresult > coverage-app.json
           xcrun xccov view --report --json DistrictAIWatchTests.xcresult > coverage-watch.json
           xcrun xccov view --report --only-targets --json DistrictAITests.xcresult > coverage.json
-          python3 ci/coverage_floor.py --root "$PWD" --floor 24.0 coverage-app.json coverage-watch.json
+          python3 ci/coverage_floor.py --root "$PWD" --floor 80.0 coverage-app.json coverage-watch.json
 
       # ⛔ THE SIGNED-OUT SUBSET ONLY; no session ever reaches CI. These assert the state a
       # stranger meets. An unsigned build has no keychain entitlement, so the app lands on

@@ -31,13 +31,25 @@ final class SchedulingSettingsModel {
     /// repository over a stub transport, which exercises the envelope walk rather than
     /// skipping it. ⚠️ Production still constructs through the container, so both
     /// collaborators remain the one shared ``ApiClient``.
-    init(repository: SchedulingAdminRepository, workspaceId: String) {
+    ///
+    /// - Parameter tab: the tab open on entry. ⚠️ Always the first one in the app; a test
+    ///   names another so each tab's states can be drawn.
+    init(
+        repository: SchedulingAdminRepository,
+        workspaceId: String,
+        tab: String = SchedulingSettingsFormat.settingsTabIds[0]
+    ) {
         self.repository = repository
         self.workspaceId = workspaceId
+        self.tab = tab
     }
 
-    convenience init(container: AppContainer, workspaceId: String) {
-        self.init(repository: container.schedulingAdmin, workspaceId: workspaceId)
+    convenience init(
+        container: AppContainer,
+        workspaceId: String,
+        tab: String = SchedulingSettingsFormat.settingsTabIds[0]
+    ) {
+        self.init(repository: container.schedulingAdmin, workspaceId: workspaceId, tab: tab)
     }
 
     func selectTab(_ next: String) async {
@@ -135,14 +147,20 @@ struct SchedulingSettingsView: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
-    init(container: AppContainer, workspaceId: String, role: WorkspaceRole?) {
+    init(
+        container: AppContainer,
+        workspaceId: String,
+        role: WorkspaceRole?,
+        tab: String = SchedulingSettingsFormat.settingsTabIds[0]
+    ) {
         self.workspaceId = workspaceId
         self.role = role
         admin = container.schedulingAdmin
         media = container.schedulingAdminMedia
         _model = State(initialValue: SchedulingSettingsModel(
             container: container,
-            workspaceId: workspaceId
+            workspaceId: workspaceId,
+            tab: tab
         ))
     }
 
