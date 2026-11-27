@@ -138,7 +138,7 @@ class ScreenSnapshotTestCase: XCTestCase {
                 if expectAllAnswered {
                     XCTAssertEqual(transport.unanswered, [], "unstubbed requests", file: file, line: line)
                 }
-                guard let drawing = await Self.steadyRender(window) else {
+                guard let drawing = await Self.steadyRender(window).flatMap(Self.asStored) else {
                     XCTFail("\(device.rawValue)-\(locale): the window could not be drawn", file: file, line: line)
                     window.isHidden = true
                     window.rootViewController = nil
@@ -208,6 +208,19 @@ class ScreenSnapshotTestCase: XCTestCase {
         return image
     }
 
+    /// The drawing as its reference is kept: written as a PNG and read back.
+    ///
+    /// ⛔ COMPARED LIKE FOR LIKE, OR THE TOLERANCE IS ZERO. The renderer's image is wide colour,
+    /// and in memory it is not laid out like a PNG read from disk. swift-snapshot-testing checks
+    /// the pair byte for byte in a common format, where they agree, but hands the RAW pair to its
+    /// perceptual check, which scored a 14-pixel antialiasing difference at a switch as 3.7% of
+    /// the screen differing, at a delta E of 26 (run 45909792980). Read back from PNG, the same
+    /// pair has no pixel over the threshold (largest delta E 0.04), so the stated precision is
+    /// the precision applied. The PNG written for a new reference is unchanged.
+    static func asStored(_ image: UIImage) -> UIImage? {
+        image.pngData().flatMap { UIImage(data: $0) }
+    }
+
     /// A window of the device's size, with its traits set on the window rather than taken from
     /// the simulator: light, the `.large` text size, and the device's size classes.
     private func present(_ controller: UIViewController, device: Device) throws -> UIWindow {
@@ -249,5 +262,52 @@ class ScreenSnapshotTestCase: XCTestCase {
             }
             lastCount = count
         }
+    }
+}
+
+/// The comparison ``ScreenSnapshotTestCase/asStored(_:)`` sets up: a few different pixels
+/// pass at the harness's precision, a real difference still fails, and the stored image is
+/// the drawing pixel for pixel.
+@MainActor
+final class ScreenSnapshotStoredComparisonTests: XCTestCase {
+    private let harness = Diffing<UIImage>.image(precision: 0.995, perceptualPrecision: 0.98)
+
+    /// A wide-colour drawing like the harness's own: one point per pixel, opaque, a Display P3
+    /// green outside sRGB, with an optional block painted over it.
+    private func drawing(block: CGRect? = nil, color: UIColor = .white) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        return UIGraphicsImageRenderer(size: CGSize(width: 200, height: 200), format: format).image { context in
+            UIColor(displayP3Red: 0.2, green: 0.85, blue: 0.3, alpha: 1).setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 200, height: 200))
+            if let block {
+                color.setFill()
+                context.fill(block)
+            }
+        }
+    }
+
+    func testStoredIsTheSameImage() throws {
+        let raw = drawing()
+        let stored = try XCTUnwrap(ScreenSnapshotTestCase.asStored(raw))
+        XCTAssertEqual(stored.size, raw.size)
+        XCTAssertNil(Diffing<UIImage>.image().diff(stored, raw), "the round trip changed a pixel")
+    }
+
+    func testAFewDifferentPixelsPass() throws {
+        let reference = try XCTUnwrap(ScreenSnapshotTestCase.asStored(drawing()))
+        let shifted = try XCTUnwrap(
+            ScreenSnapshotTestCase.asStored(drawing(block: CGRect(x: 120, y: 60, width: 3, height: 3)))
+        )
+        XCTAssertNil(harness.diff(reference, shifted))
+    }
+
+    func testARealDifferenceFails() throws {
+        let reference = try XCTUnwrap(ScreenSnapshotTestCase.asStored(drawing()))
+        let changed = try XCTUnwrap(
+            ScreenSnapshotTestCase.asStored(drawing(block: CGRect(x: 0, y: 0, width: 200, height: 50)))
+        )
+        XCTAssertNotNil(harness.diff(reference, changed))
     }
 }
