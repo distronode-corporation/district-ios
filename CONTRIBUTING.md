@@ -89,6 +89,25 @@ lowers it in the same commit and says why. A
 new signed-out UI test class has to be added to the `-only-testing` list there, and its
 cases to the expected count.
 
+**Line coverage has a floor.** CI measures the line coverage of this repository's shipped
+code (the app, its extensions, the watch app and its complication, from `DistrictAITests` and
+`DistrictAIWatchTests`; no dependency package and no test bundle) with
+`ci/coverage_floor.py`, and fails below the floor set in `.github/workflows/ci.yml`. It is a
+ratchet: a change that adds coverage raises it, and it is never lowered to let a change pass.
+The target is 80 percent. No source file is excluded to reach it.
+
+**Screens have snapshot tests** (`App/Tests/Snapshots`). Each one builds a real
+`AppContainer` over `FixtureTransport`, which answers from the service's recorded contract
+fixtures (read from the resolved district-core-swift checkout, so run with
+`-clonedSourcePackagesDirPath SourcePackages` as CI does), and draws the screen in English and
+French on a phone and an iPad. A test states the replies for any state the fixtures do not
+record (empty, refused) and fails if the screen asks for a path nobody answered. The
+reference images under `__Snapshots__` are recorded on CI, never on your Mac (rendering
+differs between machines): a new or changed screen fails its first run, the `app` job
+uploads the images it recorded as the `snapshots-iPhone` artifact, and you commit them from
+there after looking at each one. A changed reference is reviewed as an image in the pull
+request.
+
 **UI tests find elements by accessibility identifier**, from `App/Shared`, never by
 label: labels change with copy, and an unsigned CI build shows a different screen from a
 signed-in one.

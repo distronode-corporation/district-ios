@@ -6,7 +6,7 @@ name: CI
 # formats and lints App/ in the pinned swift:6.2.4 image, and `app` builds the SwiftUI
 # app with Xcode, which resolves that pinned release, and runs its XCTest bundles on an
 # iPhone simulator, and on an iPad simulator too on pushes to main and dispatches, and
-# prints the app target's line coverage. `repeatable` (main and dispatches) builds the app
+# holds the project's line coverage to a floor. `repeatable` (main and dispatches) builds the app
 # unsigned twice and compares the two products. `gitleaks` scans the history for secrets and `zizmor`
 # runs static analysis on these workflows. `dependency graph` submits the packages Xcode
 # resolved to GitHub's dependency graph, which cannot see them in an XcodeGen project.
@@ -139,6 +139,7 @@ jobs:
           python3 scripts/asc_release_test.py
           python3 scripts/asc_localization_test.py
           python3 scripts/asc_dev_cert_test.py
+          python3 ci/coverage_floor_test.py
 
   # ⛔ THE APP'S STRINGS ARE GENERATED, AND THIS IS WHAT KEEPS THE GENERATED FILE HONEST.
   # Every sentence the `*Copy` enums say lives in l10n/ios.toml; App/Sources/L10n/Generated
@@ -227,7 +228,9 @@ jobs:
     # by hand (workflow_dispatch with run_app).
     if: ${{ !github.event.repository.private || (github.event_name == 'workflow_dispatch' && inputs.run_app) }}
     runs-on: macos-26
-    timeout-minutes: 60
+    # ⚠️ 90, NOT 60, SINCE THE SCREEN SNAPSHOT TESTS: each drawing waits for its reads and for
+    # three identical frames, which adds about half a second per drawing (a few thousand).
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -453,7 +456,12 @@ jobs:
           test "$live" = "true" || { echo "::error::NSSupportsLiveActivities is '$live' in the app"; exit 1; }
           echo "DistrictAIWidgets.appex is embedded, with its manifest and both tables, and the app supports Live Activities"
 
+      # ⚠️ TEST_RUNNER_ IS HOW A VARIABLE REACHES THE TEST PROCESS: xcodebuild strips the prefix.
+      # SNAPSHOT_ARTIFACTS is where swift-snapshot-testing writes the failed and reference
+      # images of a snapshot that did not match, for the upload below.
       - name: DistrictAITests
+        env:
+          TEST_RUNNER_SNAPSHOT_ARTIFACTS: ${{ runner.temp }}/snapshot-failures
         run: |
           set -o pipefail
           xcodebuild test-without-building \
@@ -487,31 +495,19 @@ jobs:
             exit 1
           fi
 
-      # The app target's line coverage from DistrictAITests, printed with every target's
-      # for context. ⚠️ NO FLOOR YET: the number has to be measured on the runner first.
-      # A missing report or target is a warning, not a failure, until then.
-      - name: DistrictAITests line coverage (xccov)
-        run: |
-          if ! xcrun xccov view --report --only-targets --json DistrictAITests.xcresult > coverage.json; then
-            echo "::warning::xccov could not read DistrictAITests.xcresult; no coverage report this run"
-            exit 0
-          fi
-          python3 - <<'PY'
-          import json, sys
-          try:
-              report = json.load(open("coverage.json"))
-          except (OSError, ValueError) as e:
-              print(f"::warning::the coverage report could not be parsed ({e})")
-              sys.exit(0)
-          targets = report["targets"] if isinstance(report, dict) else report
-          for t in sorted(targets, key=lambda t: t["name"]):
-              print(f'{t["name"]}: {100 * t["lineCoverage"]:.2f}% ({t["coveredLines"]}/{t["executableLines"]} lines)')
-          app = [t for t in targets if t["name"] == "DistrictAI.app"]
-          if app:
-              print(f'app target line coverage - {100 * app[0]["lineCoverage"]:.2f}%')
-          else:
-              print("::warning::DistrictAI.app is not in the coverage report")
-          PY
+      # ⛔ A SCREEN SNAPSHOT WITH NO REFERENCE IS RECORDED AND FAILS THE RUN (see
+      # App/Tests/Snapshots/ScreenSnapshotTestCase.swift). The images it wrote, and those of
+      # any snapshot that did not match, are uploaded here: a new reference is committed from
+      # this artifact, and a mismatch is read as the two images side by side.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: snapshots-${{ matrix.device }}
+          path: |
+            App/Tests/Snapshots/__Snapshots__/
+            ${{ runner.temp }}/snapshot-failures/
+          if-no-files-found: ignore
+          retention-days: 7
 
       # ⛔ THE WATCH APP'S OWN UNIT TESTS (`DistrictAIWatchTests`, its `DistrictAIWatch`
       # scheme), on an Apple Watch simulator. The iPhone leg only: they do not depend on the
@@ -521,7 +517,7 @@ jobs:
       # Measured locally (iMac, HDD) at about 4 minutes; on the runner the watch simulator's
       # first boot is most of it.
       - name: Watch app tests
-        if: matrix.device == 'iPhone'
+        if: ${{ !cancelled() && matrix.device == 'iPhone' }}
         timeout-minutes: 20
         run: |
           set -o pipefail
@@ -533,11 +529,12 @@ jobs:
             -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath SourcePackages \
             -resultBundlePath DistrictAIWatchTests.xcresult \
+            -enableCodeCoverage YES \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-watch.log | xcbeautify --renderer github-actions
 
       # ⛔ COUNTED, LIKE THE OTHER BUNDLES: a scheme that lost its test target reports success.
       - name: Watch tests were discovered
-        if: matrix.device == 'iPhone'
+        if: ${{ !cancelled() && matrix.device == 'iPhone' }}
         run: |
           minimum=65
           executed=$(sed -n 's/.*Executed \([0-9]*\) tests\{0,1\}, with.*/\1/p' xcodebuild-watch.log | sort -n | tail -1)
@@ -546,6 +543,22 @@ jobs:
             echo "FATAL - expected at least $minimum DistrictAIWatchTests, saw ${executed:-0}."
             exit 1
           fi
+
+      # ⚠️ THE WATCH TESTS AND THIS FLOOR RUN EVEN AFTER A FAILED STEP ABOVE (`!cancelled()`),
+      # so a run that fails one snapshot still reports the figure; the job fails either way.
+      # ⛔ THE PROJECT'S LINE COVERAGE, HELD TO A FLOOR (ci/coverage_floor.py, which says what
+      # counts: this repository's shipped code, the app, its extensions, the watch app and its
+      # complication, from both test runs; no dependency package and no test bundle). The
+      # iPhone leg only, the one that runs the watch tests. The floor is a ratchet: raise it
+      # with the change that adds coverage, never lower it to make a change pass. The target
+      # is 80 (OpenSSF silver's statement coverage criterion).
+      - name: Line coverage floor (xccov)
+        if: ${{ !cancelled() && matrix.device == 'iPhone' }}
+        run: |
+          xcrun xccov view --report --json DistrictAITests.xcresult > coverage-app.json
+          xcrun xccov view --report --json DistrictAIWatchTests.xcresult > coverage-watch.json
+          xcrun xccov view --report --only-targets --json DistrictAITests.xcresult > coverage.json
+          python3 ci/coverage_floor.py --root "$PWD" --floor 24.0 coverage-app.json coverage-watch.json
 
       # ⛔ THE SIGNED-OUT SUBSET ONLY; no session ever reaches CI. These assert the state a
       # stranger meets. An unsigned build has no keychain entitlement, so the app lands on
@@ -604,7 +617,7 @@ jobs:
           name: app-${{ matrix.device }}
           path: |
             xcodebuild*.log
-            coverage.json
+            coverage*.json
             simulator-udid.txt
             watch-simulator-udid.txt
             *.xcresult

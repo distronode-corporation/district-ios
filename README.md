@@ -194,7 +194,8 @@ every pull request, and uses no secrets:
   every `exactVersion` pin resolved as declared, builds once for testing, then runs
   `DistrictAITests` and the signed-out UI tests on an iPhone simulator, and on an iPad
   simulator too on pushes to `main` (a pull request's `app (iPad)` check is a stand-in
-  that runs nothing).
+  that runs nothing), and holds the project's line coverage to a floor
+  (`ci/coverage_floor.py`; see CONTRIBUTING.md).
 - **repeatable** (macOS, pushes to `main` and dispatches): builds the app unsigned, in
   Release, twice from clean, and fails unless every file in the two bundles is byte for byte
   the same ([`ci/repeatable-build.sh`](ci/repeatable-build.sh), which is also the recipe for

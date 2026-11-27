@@ -146,6 +146,24 @@ packages:
   LiveKit:
     url: https://github.com/livekit/client-sdk-swift
     exactVersion: 2.17.0
+  # ⛔ TEST-ONLY: linked by DistrictAITests and by nothing that ships. The screen snapshot
+  # tests (App/Tests/Snapshots) compare each screen, drawn in its real states, with a
+  # committed reference image. MIT licence. Pinned exactly, like every package here.
+  SnapshotTesting:
+    url: https://github.com/pointfreeco/swift-snapshot-testing
+    exactVersion: 1.19.7
+  # ⛔ ITS THREE DEPENDENCIES, PINNED FOR swift-asn1's REASON: listed so they cannot float under
+  # it. Nothing here links them by name. swift-syntax is resolved but not built (only its
+  # InlineSnapshotTesting library uses it, and nothing links that).
+  swift-custom-dump:
+    url: https://github.com/pointfreeco/swift-custom-dump
+    exactVersion: 1.7.3
+  xctest-dynamic-overlay:
+    url: https://github.com/pointfreeco/xctest-dynamic-overlay
+    exactVersion: 1.13.1
+  swift-syntax:
+    url: https://github.com/swiftlang/swift-syntax
+    exactVersion: 604.0.0
 
 targets:
   DistrictAI:
@@ -846,8 +864,14 @@ targets:
     platform: iOS
     sources:
       - path: App/Tests
+        # The reference images are read at run time from beside the test files, never
+        # copied into the bundle.
+        excludes:
+          - "**/__Snapshots__/**"
     dependencies:
       - target: DistrictAI
+      - package: SnapshotTesting
+        product: SnapshotTesting
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.distronode.district.tests
