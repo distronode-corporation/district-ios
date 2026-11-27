@@ -14,6 +14,11 @@ name: Review threads
 # GitHub has no workflow event for a thread being resolved, so the scheduled run
 # re-evaluates every open pull request and turns a resolved one green.
 #
+# In the merge queue there is no pull request to read: its threads were checked on the pull
+# request before it could be queued (the ruleset requires them resolved). The `merge-queue`
+# job writes the same `review-threads` status, success, on the queued commit, so the
+# required check reports there too (as in district-assurance).
+#
 # Nothing from this repository is checked out or run.
 on:
   pull_request:
@@ -25,20 +30,44 @@ on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
+  merge_group:
+    types: [checks_requested]
 
 permissions: {}
 
 # One run per pull request at a time (and one sweep), so the newest queued run reads the
 # newest state. Each run reads every thread, so a superseded queued run loses nothing.
 concurrency:
-  group: review-threads-${{ github.event.pull_request.number || 'all' }}
+  group: review-threads-${{ github.event.pull_request.number || github.event.merge_group.head_ref || 'all' }}
   cancel-in-progress: false
 
 jobs:
   review-threads:
     name: review threads
+    if: github.event_name != 'merge_group'
     permissions:
       contents: read # the script's checkout
       pull-requests: read # open pull requests and their review threads
       statuses: write # the `review-threads` commit status
     uses: distronode-corporation/.github/.github/workflows/review-threads.yml@1b08fecf82b5b63650b4bcc4b2ef07198caf2f73 # merged commit of distronode-corporation/.github#22
+
+  merge-queue:
+    name: review threads (merge queue)
+    if: github.event_name == 'merge_group'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      statuses: write # the `review-threads` commit status on the queued commit
+    steps:
+      - name: Threads were checked on the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          echo "Review threads were checked on the pull request before it was queued."
+          gh api --method POST "repos/$REPO/statuses/$SHA" \
+            -f state=success \
+            -f context=review-threads \
+            -f description="Threads were checked on the pull request"
