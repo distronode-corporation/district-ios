@@ -22,7 +22,19 @@ struct SchedulingEventTypeQuestionsSheet: View {
         .resolve(colorScheme)
     }
 
+    /// ⚠️ TEST SEAM, FALSE IN THE APP: true draws the one-question editor the list presents, on its own (a presented
+    /// sheet is not part of an image).
+    var editorOnly = false
+
     var body: some View {
+        if editorOnly {
+            editor
+        } else {
+            listScreen
+        }
+    }
+
+    private var listScreen: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DistrictSpacing.row) {
                 header

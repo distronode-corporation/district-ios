@@ -17,7 +17,19 @@ struct SchedulingAvailabilityOverridesSheet: View {
         .resolve(colorScheme)
     }
 
+    /// ⚠️ TEST SEAM, FALSE IN THE APP: true draws the add-an-override form the list presents, on its own (a presented
+    /// sheet is not part of an image).
+    var addFormOnly = false
+
     var body: some View {
+        if addFormOnly {
+            addSheet
+        } else {
+            listScreen
+        }
+    }
+
+    private var listScreen: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DistrictSpacing.row) {
                 header
