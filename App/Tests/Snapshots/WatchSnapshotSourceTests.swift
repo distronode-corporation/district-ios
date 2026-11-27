@@ -77,16 +77,13 @@ final class WatchSnapshotSourceTests: ScreenSnapshotTestCase {
         XCTAssertNil(watch.conversations)
     }
 
-    /// A workspace list that cannot be read is told to the Watch as "no workspace", signed
-    /// in, with no rows: never the rows of a workspace the phone could not confirm.
-    func testAnUnreadableWorkspaceListIsNoWorkspace() async throws {
+    /// A workspace list that cannot be read publishes nothing (#152): the Watch keeps its last
+    /// snapshot, which carries its own time, rather than being told the account has no
+    /// workspace, and never gets the rows of a workspace the phone could not confirm.
+    func testAnUnreadableWorkspaceListPublishesNothing() async throws {
         let built = try await snapshot([
             "/api/district/workspace/list": .json(#"{"error":"Internal error"}"#, status: 500),
         ])
-        let watch = try XCTUnwrap(built)
-        XCTAssertTrue(watch.signedIn)
-        XCTAssertNil(watch.workspace)
-        XCTAssertNil(watch.calls)
-        XCTAssertNil(watch.conversations)
+        XCTAssertNil(built)
     }
 }
