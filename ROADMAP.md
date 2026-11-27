@@ -20,13 +20,6 @@ to propose a new one.
   hardening from the deep security scan: room joins, credential fields and the call Live
   Activity ([#134](https://github.com/distronode-corporation/district-ios/pull/134)). The plan
   is to ship them in the next App Store release.
-- **Test coverage of 80 percent.** CI measures the line coverage of this repository's own
-  code (the app, its extensions, the watch app and its complication) at about 24 percent
-  on 2026-11-26: most of the logic is tested in district-core-swift, and most of what is
-  left here is SwiftUI screens. The plan is screen snapshot tests, each screen drawn in its
-  real states in English and French on a phone and an iPad and compared with a reviewed
-  reference image, plus unit tests for the logic still in the app, with a CI floor that
-  rises with each step until it reaches 80.
 
 ## Known limits, not planned
 
