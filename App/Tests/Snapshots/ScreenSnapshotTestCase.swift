@@ -53,13 +53,20 @@ class ScreenSnapshotTestCase: XCTestCase {
         baseURL: nil
     )
 
+    /// The process's default time zone before this test pinned it, put back in ``tearDown()``.
+    private var savedTimeZone: TimeZone?
+
     override func setUp() async throws {
         try await super.setUp()
+        savedTimeZone = NSTimeZone.default
         NSTimeZone.default = try XCTUnwrap(TimeZone(identifier: "America/Toronto"))
         UIView.setAnimationsEnabled(false)
     }
 
     override func tearDown() async throws {
+        if let savedTimeZone {
+            NSTimeZone.default = savedTimeZone
+        }
         L10nRuntime.locale = .en
         UITestSession.inProcess = nil
         UIView.setAnimationsEnabled(true)
@@ -132,7 +139,13 @@ class ScreenSnapshotTestCase: XCTestCase {
                 if expectAllAnswered {
                     XCTAssertEqual(transport.unanswered, [], "unstubbed requests", file: file, line: line)
                 }
-                let drawing = await Self.steadyRender(window)
+                guard let drawing = await Self.steadyRender(window).flatMap(Self.asStored) else {
+                    XCTFail("\(device.rawValue)-\(locale): the window could not be drawn", file: file, line: line)
+                    window.isHidden = true
+                    window.rootViewController = nil
+                    window.windowScene = nil
+                    continue
+                }
                 assertSnapshot(
                     of: drawing,
                     as: .image(precision: 0.995, perceptualPrecision: 0.98),
@@ -161,14 +174,19 @@ class ScreenSnapshotTestCase: XCTestCase {
     /// ⛔ `drawHierarchy`, NOT `layer.render`: the layer renderer cannot draw iOS 26's glass and
     /// material layers, so screens built on them (toolbars, the tab bar, the setup wizard) came
     /// out blank.
-    private static func render(_ window: UIWindow) -> UIImage {
+    ///
+    /// ⛔ NIL WHEN `drawHierarchy` SAYS IT COULD NOT DRAW: an incomplete image must never be
+    /// recorded or compared.
+    private static func render(_ window: UIWindow) -> UIImage? {
         window.layoutIfNeeded()
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
         format.opaque = true
-        return UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
-            window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+        var drawn = false
+        let image = UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
+            drawn = window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
         }
+        return drawn ? image : nil
     }
 
     /// The window drawn once three drawings 100 ms apart are the same, at most three seconds on.
@@ -176,19 +194,32 @@ class ScreenSnapshotTestCase: XCTestCase {
     /// ⛔ A QUIET TRANSPORT IS NOT A DRAWN SCREEN. Locally, a list whose read had been answered
     /// was still drawn as its skeleton about once in thirty runs, the rows landing a moment
     /// later; waiting for the picture itself to stop changing closes that gap.
-    private static func steadyRender(_ window: UIWindow) async -> UIImage {
+    private static func steadyRender(_ window: UIWindow) async -> UIImage? {
         var image = render(window)
         var same = 0
         for _ in 0 ..< 30 {
             try? await Task.sleep(for: .milliseconds(100))
             let next = render(window)
-            same = next.pngData() == image.pngData() ? same + 1 : 0
+            same = next != nil && next?.pngData() == image?.pngData() ? same + 1 : 0
             image = next
             if same >= 2 {
                 break
             }
         }
         return image
+    }
+
+    /// The drawing as its reference is kept: written as a PNG and read back.
+    ///
+    /// ⛔ COMPARED LIKE FOR LIKE, OR THE TOLERANCE IS ZERO. The renderer's image is wide colour,
+    /// and in memory it is not laid out like a PNG read from disk. swift-snapshot-testing checks
+    /// the pair byte for byte in a common format, where they agree, but hands the RAW pair to its
+    /// perceptual check, which scored a 14-pixel antialiasing difference at a switch as 3.7% of
+    /// the screen differing, at a delta E of 26 (run 45909792980). Read back from PNG, the same
+    /// pair has no pixel over the threshold (largest delta E 0.04), so the stated precision is
+    /// the precision applied. The PNG written for a new reference is unchanged.
+    static func asStored(_ image: UIImage) -> UIImage? {
+        image.pngData().flatMap { UIImage(data: $0) }
     }
 
     /// A window of the device's size, with its traits set on the window rather than taken from
@@ -232,5 +263,52 @@ class ScreenSnapshotTestCase: XCTestCase {
             }
             lastCount = count
         }
+    }
+}
+
+/// The comparison ``ScreenSnapshotTestCase/asStored(_:)`` sets up: a few different pixels
+/// pass at the harness's precision, a real difference still fails, and the stored image is
+/// the drawing pixel for pixel.
+@MainActor
+final class ScreenSnapshotStoredComparisonTests: XCTestCase {
+    private let harness = Diffing<UIImage>.image(precision: 0.995, perceptualPrecision: 0.98)
+
+    /// A wide-colour drawing like the harness's own: one point per pixel, opaque, a Display P3
+    /// green outside sRGB, with an optional block painted over it.
+    private func drawing(block: CGRect? = nil, color: UIColor = .white) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        return UIGraphicsImageRenderer(size: CGSize(width: 200, height: 200), format: format).image { context in
+            UIColor(displayP3Red: 0.2, green: 0.85, blue: 0.3, alpha: 1).setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 200, height: 200))
+            if let block {
+                color.setFill()
+                context.fill(block)
+            }
+        }
+    }
+
+    func testStoredIsTheSameImage() throws {
+        let raw = drawing()
+        let stored = try XCTUnwrap(ScreenSnapshotTestCase.asStored(raw))
+        XCTAssertEqual(stored.size, raw.size)
+        XCTAssertNil(Diffing<UIImage>.image().diff(stored, raw), "the round trip changed a pixel")
+    }
+
+    func testAFewDifferentPixelsPass() throws {
+        let reference = try XCTUnwrap(ScreenSnapshotTestCase.asStored(drawing()))
+        let shifted = try XCTUnwrap(
+            ScreenSnapshotTestCase.asStored(drawing(block: CGRect(x: 120, y: 60, width: 3, height: 3)))
+        )
+        XCTAssertNil(harness.diff(reference, shifted))
+    }
+
+    func testARealDifferenceFails() throws {
+        let reference = try XCTUnwrap(ScreenSnapshotTestCase.asStored(drawing()))
+        let changed = try XCTUnwrap(
+            ScreenSnapshotTestCase.asStored(drawing(block: CGRect(x: 0, y: 0, width: 200, height: 50)))
+        )
+        XCTAssertNotNil(harness.diff(reference, changed))
     }
 }

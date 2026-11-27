@@ -257,13 +257,15 @@ private struct CallDetailContentView: View {
     private var onDemandTranscript: some View {
         switch model.transcript {
         case .idle:
-            Button(CallsCopy.showTranscript) {
-                Task { await model.loadTranscript() }
+            if display.offersTranscript {
+                Button(CallsCopy.showTranscript) {
+                    Task { await model.loadTranscript() }
+                }
+                .buttonStyle(.districtSecondary)
+                // ⚠️ THE IDENTIFIER `ReviewRecordingTests` ADDRESSES BY LITERAL.
+                // Without it the recording's transcript step finds nothing and skips.
+                .accessibilityIdentifier(A11yID.Calls.showTranscript)
             }
-            .buttonStyle(.districtSecondary)
-            // ⚠️ THE IDENTIFIER `ReviewRecordingTests` ADDRESSES BY LITERAL.
-            // Without it the recording's transcript step finds nothing and skips.
-            .accessibilityIdentifier(A11yID.Calls.showTranscript)
         case .loading:
             ProgressView()
         case let .loaded(text):

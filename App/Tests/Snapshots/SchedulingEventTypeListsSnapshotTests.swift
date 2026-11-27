@@ -71,7 +71,11 @@ final class SchedulingEventTypeListsSnapshotTests: SchedulingWriteSnapshotCase {
                 onSaved: { _ in }
             )
             return SnapshotPrepared(SchedulingEventTypeHostsSheet(model: model)) {
-                await firstReadLanded { !model.rows.isEmpty }
+                // ⛔ THE SHEET READS TWICE, HOSTS AND THEN THE DIRECTORY, and the directory's add
+                // candidates are worked out against the rows as they are when it answers. Removing
+                // the rows between the two offered every removed host back under an Add button
+                // (run 45909792980, fr-CA), so the step waits for the second read too.
+                await firstReadLanded { !model.rows.isEmpty && model.canAddHosts }
                 for row in model.rows {
                     model.remove(row.userId)
                 }
@@ -91,7 +95,8 @@ final class SchedulingEventTypeListsSnapshotTests: SchedulingWriteSnapshotCase {
                 onSaved: { _ in }
             )
             return SnapshotPrepared(SchedulingEventTypeHostsSheet(model: model)) {
-                await firstReadLanded { !model.rows.isEmpty }
+                // Both reads, as in ``testHostsSaveWithNone()``.
+                await firstReadLanded { !model.rows.isEmpty && model.canAddHosts }
                 model.setPriority("2.5", for: "sched-user-rotation")
                 await model.save()
             }
