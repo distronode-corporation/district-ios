@@ -22,6 +22,14 @@ final class SettingsRolesSnapshotTests: ScreenSnapshotTestCase {
     /// A viewer sees only the rows a viewer may open, and the read-only footnote.
     func testHubForAViewer() async throws {
         try await assertScreen(devices: [.iPhone]) { container in
+            SettingsDestinations.view(for: .hub, container: container, workspaceId: Self.workspace, role: .viewer)
+        }
+    }
+
+    /// The scheduling settings as a viewer sees them. (This drawing was filed as the viewer's
+    /// hub until #165; its references are the same images, renamed.)
+    func testSchedulingForAViewer() async throws {
+        try await assertScreen(devices: [.iPhone]) { container in
             SettingsDestinations.view(
                 for: .scheduling, container: container, workspaceId: Self.workspace, role: .viewer
             )

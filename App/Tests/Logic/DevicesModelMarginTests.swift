@@ -136,15 +136,16 @@ final class DevicesModelMarginTests: ScreenSnapshotTestCase {
     func testASecondWriteWhileBusyIsDropped() async throws {
         let (model, transport) = try await model([Self.revokePath: .fixture("district-device-revoke")])
         await model.load()
+        // The first revoke is held in flight until both overlapping calls have returned.
+        transport.hold("POST \(Self.revokePath)")
         let first = Task { await model.revoke(deviceId: "device-contract-android-1") }
-        for _ in 0 ..< 200 where !model.busy {
-            await Task.yield()
-        }
+        await transport.waitUntilHeld("POST \(Self.revokePath)")
         XCTAssertTrue(model.busy)
         let droppedAll = await model.revokeAll()
         let droppedOne = await model.revoke(deviceId: "device-contract-ios-2")
         XCTAssertFalse(droppedAll)
         XCTAssertFalse(droppedOne)
+        transport.release("POST \(Self.revokePath)")
         _ = await first.value
         XCTAssertFalse(model.busy)
         XCTAssertFalse(transport.requested.contains("POST \(Self.revokeAllPath)"))

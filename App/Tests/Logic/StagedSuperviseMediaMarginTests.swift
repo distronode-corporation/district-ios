@@ -4,8 +4,10 @@ import Foundation
 import XCTest
 
 /// The staged supervision device of the screenshot lane: it answers as CallKit and a LiveKit
-/// room would, on a timer, and nothing else. ⚠️ The waits below are the device's own delays
-/// (800 ms for the start, 3 s for the join) plus a margin.
+/// room would, on a timer, and nothing else. ⚠️ A test that expects a callback waits for it
+/// (bounded, failing if it never comes), never for a fixed time: the device's delays (800 ms
+/// for the start, 3 s for the join) are minimums, and a loaded runner can run them late. Only
+/// the tests that prove nothing arrives wait a fixed time past the device's delay.
 @MainActor
 final class StagedSuperviseMediaMarginTests: XCTestCase {
     private let uuid = UUID(uuidString: "00000000-0000-0000-0000-0000000000A1")!
@@ -34,27 +36,27 @@ final class StagedSuperviseMediaMarginTests: XCTestCase {
 
     // MARK: - The system call
 
-    func testAStartIsPerformedAfterADelayAsTheOSWouldPerformIt() async throws {
+    func testAStartIsPerformedAfterADelayAsTheOSWouldPerformIt() async {
         let media = StagedSuperviseMedia()
         let requests = StagedRequests()
         media.claim(self) { requests.all.append($0) }
 
         media.startCall(uuid: uuid, handle: "Maya Chen") {}
         XCTAssertEqual(requests.all, [], "never synchronously")
-        try await Task.sleep(for: .milliseconds(1200))
+        await stagedWait { !requests.all.isEmpty }
 
         XCTAssertEqual(requests.all, [.dialRequested(uuid: uuid)])
     }
 
     /// ⚠️ A mute is echoed back as CallKit echoes it, so the model applies it only then.
-    func testAMuteIsEchoedThroughTheHandler() async throws {
+    func testAMuteIsEchoedThroughTheHandler() async {
         let media = StagedSuperviseMedia()
         let requests = StagedRequests()
         media.claim(self) { requests.all.append($0) }
 
         media.requestMuted(uuid: uuid, muted: true)
         media.requestMuted(uuid: uuid, muted: false)
-        try await Task.sleep(for: .milliseconds(200))
+        await stagedWait { requests.all.count >= 2 }
 
         // ⚠️ EACH ECHO IS ITS OWN TASK, so the two can land in either order; both must land.
         XCTAssertEqual(requests.all.count, 2)
@@ -93,15 +95,19 @@ final class StagedSuperviseMediaMarginTests: XCTestCase {
     // MARK: - The legs
 
     /// A listener's join announces the two people present, then the connection, and no microphone.
-    func testAListenJoinAnnouncesThePeoplePresentAndNoMicrophone() async throws {
+    func testAListenJoinAnnouncesThePeoplePresentAndNoMicrophone() async {
         let media = StagedSuperviseMedia()
         let stream = await media.beginLeg(.listen)
-        let collector = Task { await stagedDrain(stream) }
+        let seen = StagedEvents<CallEngineEvent>()
+        let collector = Task { await seen.drain(stream) }
 
         await media.perform(.connect(url: "wss://staged.invalid", token: "t"))
-        try await Task.sleep(for: .milliseconds(3600))
+        // ⛔ THE LEG ENDS ONLY AFTER THE JOIN HAS ARRIVED: ending it first finishes the stream
+        // the delayed join yields into, and those events are dropped.
+        await stagedWait { seen.all.count >= 3 }
         media.endLeg()
-        let events = await collector.value
+        await collector.value
+        let events = seen.all
 
         XCTAssertEqual(events, [
             .participantJoined(CallParticipant(identity: "caller", name: nil, isAgent: false)),
@@ -111,18 +117,20 @@ final class StagedSuperviseMediaMarginTests: XCTestCase {
     }
 
     /// ⚠️ The coach leg's microphone starts after the connection, as the engine reports it.
-    func testATakeoverJoinAlsoReportsTheMicrophoneStarted() async throws {
+    func testATakeoverJoinAlsoReportsTheMicrophoneStarted() async {
         let media = StagedSuperviseMedia()
         let stream = await media.beginLeg(.takeover)
-        let collector = Task { await stagedDrain(stream) }
+        let seen = StagedEvents<CallEngineEvent>()
+        let collector = Task { await seen.drain(stream) }
 
         await media.perform(.connect(url: "wss://staged.invalid", token: "t"))
-        try await Task.sleep(for: .milliseconds(3600))
+        await stagedWait { seen.all.count >= 4 }
         media.endLeg()
-        let events = await collector.value
+        await collector.value
+        let events = seen.all
 
         XCTAssertEqual(events.last, .microphoneChanged(enabled: true))
-        XCTAssertEqual(events.count, 4)
+        guard events.count == 4 else { return XCTFail("expected four events, got \(events)") }
         XCTAssertEqual(events[2], .connected, "the microphone follows the connection")
     }
 
@@ -188,4 +196,32 @@ func stagedDrain<Element: Sendable>(_ stream: AsyncStream<Element>) async -> [El
         out.append(element)
     }
     return out
+}
+
+/// The elements of a stream as they arrive, so a test can wait for a count before ending it.
+@MainActor
+final class StagedEvents<Element: Sendable> {
+    private(set) var all: [Element] = []
+
+    func drain(_ stream: AsyncStream<Element>) async {
+        for await element in stream {
+            all.append(element)
+        }
+    }
+}
+
+/// Waits until `condition` holds, for at most `seconds`, and fails the test if it never does.
+@MainActor
+func stagedWait(
+    seconds: Int = 10,
+    file: StaticString = #filePath,
+    line: UInt = #line,
+    _ condition: () -> Bool
+) async {
+    for _ in 0 ..< seconds * 100 where !condition() {
+        try? await Task.sleep(for: .milliseconds(10))
+    }
+    if !condition() {
+        XCTFail("the expected callbacks never arrived", file: file, line: line)
+    }
 }
