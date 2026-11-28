@@ -203,7 +203,7 @@ jobs:
       # repository. The CLI itself is free (MIT), so install a pinned version and run it,
       # the same way district-scheduler does. `go install` of a tagged module is checked
       # against the Go checksum database. `.gitleaks.toml` is picked up from the root.
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: "1.25"
           cache: false
@@ -904,7 +904,7 @@ jobs:
       # The retry is a backstop for a snapshot GitHub has not finished storing, not the way
       # the two jobs are ordered (see above). A run whose log ends in "Retry timeout
       # exceeded" has NOT reviewed the Swift packages: re-run that job.
-      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+      - uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
         with:
           fail-on-severity: moderate
           retry-on-snapshot-warnings: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
