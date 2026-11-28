@@ -740,8 +740,11 @@ jobs:
   # iPad leg's verdict on a change is the queued commit once the merge queue is on, and
   # until then the push to main that follows its merge. Removing
   # `app (iPad)` from the ruleset's required checks would let this job go.
+  # The name is the required check's only on a pull request. On a merge_group run the job is
+  # skipped, and a skipped job reports success, so under the real name it would sit beside the
+  # real `app (iPad)` and could satisfy the requirement before the real build finished (#172).
   app-ipad-pr-stand-in:
-    name: app (iPad)
+    name: ${{ github.event_name == 'pull_request' && 'app (iPad)' || 'app (iPad) (pull request stand-in, not run)' }}
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -755,8 +758,9 @@ jobs:
   # require `repeatable`, so the queued commit is held until its two builds match; a required
   # check must report on the pull request too, and without one a pull request could never be
   # queued. This job tests nothing and says so, like `app (iPad)` above.
+  # Named for the check on a pull request only, for the reason given at `app-ipad-pr-stand-in`.
   repeatable-pr-stand-in:
-    name: repeatable
+    name: ${{ github.event_name == 'pull_request' && 'repeatable' || 'repeatable (pull request stand-in, not run)' }}
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
