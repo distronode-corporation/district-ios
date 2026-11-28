@@ -1,5 +1,6 @@
 @testable import DistrictAI
 import DistrictData
+import DistrictL10n
 import DistrictNetwork
 import Foundation
 import SwiftUI
@@ -122,18 +123,25 @@ final class AccountSheetSnapshotTests: ScreenSnapshotTestCase {
     }
 
     /// The typed email did not match the account's.
+    ///
+    /// ⛔ ONE MODEL PER LANGUAGE, DRIVEN AFTER THE LANGUAGE IS SET: the model keeps the refusal as
+    /// the sentence it was when Delete was pressed, so one model drawn in both languages showed
+    /// the English sentence in the French reference (#165).
     func testDeleteConfirmMismatch() async throws {
-        let model = Self.deleteModel(
-            SettingsTransport(responses: [
-                (400, #"{"error":"That is not the email on this account.","code":"confirmation_mismatch"}"#),
-            ]),
-            sso: .proved(expiresInSeconds: 300)
-        )
-        await model.reauthenticate(with: .google)
-        model.confirmation = "someone@example.test"
-        await model.delete()
-        XCTAssertNotNil(model.failure)
-        try await assertScreen(devices: [.iPhone]) { _ in DeleteAccountView(model: model) }
+        for locale in [L10nLocale.en, .frCA] {
+            L10nRuntime.locale = locale
+            let model = Self.deleteModel(
+                SettingsTransport(responses: [
+                    (400, #"{"error":"That is not the email on this account.","code":"confirmation_mismatch"}"#),
+                ]),
+                sso: .proved(expiresInSeconds: 300)
+            )
+            await model.reauthenticate(with: .google)
+            model.confirmation = "someone@example.test"
+            await model.delete()
+            XCTAssertNotNil(model.failure)
+            try await assertScreen(devices: [.iPhone], locales: [locale]) { _ in DeleteAccountView(model: model) }
+        }
     }
 
     private static func deleteModel(

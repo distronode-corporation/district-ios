@@ -37,12 +37,16 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
     private(set) var requested: [String] = []
     private(set) var unanswered: [String] = []
 
-    /// - Parameter overrides: keyed by path (`/api/district/contacts`), or by `METHOD path`
-    ///   (`POST /api/district/contacts`) when one path answers two methods differently.
     /// Replies given in turn for one path, the last one repeating: for a route that answers
     /// a question and then a confirmation on the same path.
     private var sequences: [String: [Reply]]
+    /// Replies held back until the test releases them, keyed by `METHOD path` (``hold(_:)``).
+    private var held: [String: HeldReply] = [:]
 
+    /// - Parameters:
+    ///   - overrides: keyed by path (`/api/district/contacts`), or by `METHOD path`
+    ///     (`POST /api/district/contacts`) when one path answers two methods differently.
+    ///   - sequences: replies given in turn for one path (see ``sequences``).
     init(_ overrides: [String: Reply] = [:], sequences: [String: [Reply]] = [:]) {
         self.overrides = overrides
         self.sequences = sequences
@@ -83,6 +87,9 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
         }
         // A suspension point, as a real network is, so a screen's loading state is drawn first.
         await Task.yield()
+        if let gate = lock.withLock({ held["\(request.method.rawValue) \(path)"] }) {
+            await gate.wait()
+        }
         defer { lock.withLock { inFlightCount -= 1 } }
         guard let reply else {
             lock.withLock { unanswered.append("\(request.method.rawValue) \(named)") }
@@ -93,6 +100,70 @@ final class FixtureTransport: HTTPTransport, @unchecked Sendable {
             )
         }
         return HTTPResponse(statusCode: reply.status, headers: ["Content-Type": "application/json"], body: reply.body)
+    }
+
+    // MARK: - Held replies
+
+    /// Holds every reply to `key` (`METHOD path`) until ``release(_:)``, so a test can act
+    /// while that request is provably in flight rather than hoping a `Task.yield()` loses a race.
+    func hold(_ key: String) {
+        lock.withLock { held[key] = HeldReply() }
+    }
+
+    /// Waits until a request to `key` is being held. Fails the test, rather than hang, if none
+    /// arrives within two seconds.
+    func waitUntilHeld(_ key: String, file: StaticString = #filePath, line: UInt = #line) async {
+        guard let gate = lock.withLock({ held[key] }) else {
+            return XCTFail("\(key) is not held", file: file, line: line)
+        }
+        for _ in 0 ..< 400 where !gate.hasArrived {
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+        if !gate.hasArrived {
+            XCTFail("no request to \(key) arrived", file: file, line: line)
+        }
+    }
+
+    /// Lets the held replies to `key` go, and every later one straight through.
+    func release(_ key: String) {
+        lock.withLock { held[key] }?.release()
+    }
+
+    /// One held route: the requests waiting on it, and whether it has been let go.
+    private final class HeldReply: @unchecked Sendable {
+        private let lock = NSLock()
+        private var released = false
+        private var arrived = false
+        private var waiting: [CheckedContinuation<Void, Never>] = []
+
+        var hasArrived: Bool {
+            lock.withLock { arrived }
+        }
+
+        func wait() async {
+            await withCheckedContinuation { continuation in
+                let go: Bool = lock.withLock {
+                    arrived = true
+                    if released {
+                        return true
+                    }
+                    waiting.append(continuation)
+                    return false
+                }
+                if go {
+                    continuation.resume()
+                }
+            }
+        }
+
+        func release() {
+            let resumed: [CheckedContinuation<Void, Never>] = lock.withLock {
+                released = true
+                defer { waiting = [] }
+                return waiting
+            }
+            resumed.forEach { $0.resume() }
+        }
     }
 
     /// The recorded reply for each path whose fixture is not named after it (the service

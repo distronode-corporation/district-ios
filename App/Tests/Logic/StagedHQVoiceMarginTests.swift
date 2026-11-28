@@ -5,7 +5,9 @@ import Foundation
 import XCTest
 
 /// The staged HQ voice room of the screenshot lane: one scripted exchange in the person's
-/// language, cut short by a disconnect. ⚠️ The script runs 3.4 s; the waits carry a margin.
+/// language, cut short by a disconnect. ⚠️ The script's last event is due at 3.4 s, but each
+/// of its sleeps starts after the one before resumes, so a loaded runner adds up lateness: a
+/// test waits for the eight events (bounded) before disconnecting, never a fixed time.
 @MainActor
 final class StagedHQVoiceMarginTests: XCTestCase {
     override func tearDown() async throws {
@@ -15,18 +17,20 @@ final class StagedHQVoiceMarginTests: XCTestCase {
 
     private func runScript() async throws -> [HQVoiceEngineEvent] {
         let engine = StagedHQVoiceEngine()
-        let collector = Task { await stagedDrain(engine.events) }
+        let seen = StagedEvents<HQVoiceEngineEvent>()
+        let collector = Task { await seen.drain(engine.events) }
         try await engine.connect(url: "wss://staged.invalid", token: "t")
-        try await Task.sleep(for: .milliseconds(4000))
+        await stagedWait { seen.all.count >= 8 }
         await engine.disconnect()
-        return await collector.value
+        await collector.value
+        return seen.all
     }
 
     func testTheWholeScriptPlaysInOrderInEnglish() async throws {
         L10nRuntime.locale = .en
         let events = try await runScript()
 
-        XCTAssertEqual(events.count, 8)
+        guard events.count == 8 else { return XCTFail("expected eight events, got \(events)") }
         XCTAssertEqual(events.first, .connected, "the join is reported at once")
         XCTAssertEqual(events[1], .agentState(.listening))
         XCTAssertEqual(events[2], .transcript(HQVoiceSegment(
@@ -61,7 +65,7 @@ final class StagedHQVoiceMarginTests: XCTestCase {
         L10nRuntime.locale = .frCA
         let events = try await runScript()
 
-        XCTAssertEqual(events.count, 8)
+        guard events.count == 8 else { return XCTFail("expected eight events, got \(events)") }
         guard case let .transcript(member) = events[2], case let .packet(.proposal(proposal)) = events[6] else {
             return XCTFail("the scripted shape, got \(events)")
         }

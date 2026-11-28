@@ -1,5 +1,6 @@
 @testable import DistrictAI
 import DistrictCall
+import DistrictL10n
 import DistrictModel
 import SwiftUI
 import XCTest
@@ -57,10 +58,11 @@ final class SuperviseSnapshotTests: ScreenSnapshotTestCase {
         _ model: SuperviseModel,
         role: WorkspaceRole? = .agency,
         devices: [Device] = [.iPhone],
+        locales: [L10nLocale] = [.en, .frCA],
         testName: String = #function,
         line: UInt = #line
     ) async throws {
-        try await assertScreen(devices: devices, testName: testName, line: line) { container in
+        try await assertScreen(devices: devices, locales: locales, testName: testName, line: line) { container in
             container.callStack.supervisor = model
             return SuperviseView(
                 container: container,
@@ -89,12 +91,24 @@ final class SuperviseSnapshotTests: ScreenSnapshotTestCase {
     }
 
     /// Listen while this device is on another call: the refusal, said in words.
+    ///
+    /// ⛔ ONE MODEL PER LANGUAGE, DRIVEN AFTER THE LANGUAGE IS SET: the model keeps the refusal as
+    /// the sentence it was when Listen was pressed, so one model drawn in both languages showed
+    /// the English sentence in the French reference (#165).
     func testRefusedBusyWithCall() async throws {
         media.hasLiveCall = true
-        let model = try makeModel()
-        model.listen()
-        XCTAssertEqual(model.startRefusal, SuperviseCopy.busyWithCall)
-        try await assertSupervise(model)
+        for locale in [L10nLocale.en, .frCA] {
+            if let previous = model {
+                await previous.endSupervision()
+            }
+            // ⚠️ The second model's header shows the call's time in Toronto time, the first one's
+            // in UTC (#169); the references record what this order draws.
+            L10nRuntime.locale = locale
+            let model = try makeModel()
+            model.listen()
+            XCTAssertEqual(model.startRefusal, SuperviseCopy.busyWithCall)
+            try await assertSupervise(model, locales: [locale])
+        }
     }
 
     // MARK: - Under way

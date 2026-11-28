@@ -36,10 +36,11 @@ final class ThreadComposerSnapshotTests: ScreenSnapshotTestCase {
         extra["POST /api/district/messages/draft"] = .fixture("district-ai-draft")
         let replies = Fixtures.replies(extra)
         try await assertScreen(replies, devices: [.iPhone]) { container in
-            ScopeComposerHost(model: Self.threadModel(container, [Fixtures.sms])) { model in
-                await model.open()
-                await model.generateDraft()
-            }
+            ScopeComposerHost(
+                model: Self.threadModel(container, [Fixtures.sms]),
+                drive: { model in await model.open() },
+                afterBar: { model in await model.generateDraft() }
+            )
         }
     }
 
@@ -203,17 +204,40 @@ final class ThreadComposerSnapshotTests: ScreenSnapshotTestCase {
 }
 
 /// The composer alone, under the space the thread would fill, for a model a test drives.
+///
+/// ⛔ `afterBar` RUNS ONCE THE BAR HAS BEEN DRAWN EMPTY, for a step that fills the box. A
+/// two-line reply in a box first laid out with that text already in it has two stable heights,
+/// one device pixel apart (about 1 drawing in 10 locally, and CI runs 45910050299 and
+/// 45937295086, #163). The same box laid out empty and then filled grew to one height in 80
+/// of 80 local drawings. On a slow runner the draft could land before the bar's first layout,
+/// so the step waits for the empty bar's measured layout (a height reported after layout, not
+/// `onAppear`, which runs before the first frame) and fails if it never comes.
 struct ScopeComposerHost: View {
     let model: ThreadModel
     let drive: @MainActor @Sendable (ThreadModel) async -> Void
+    var afterBar: (@MainActor @Sendable (ThreadModel) async -> Void)?
+
+    @State private var laidOutEmpty = false
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer(minLength: 0)
             if let content = model.current {
                 ComposerBar(model: model, content: content)
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.size.height
+                    } action: { height in
+                        if height > 0 {
+                            laidOutEmpty = true
+                        }
+                    }
             }
         }
-        .task { await drive(model) }
+        .task {
+            await drive(model)
+            guard let afterBar else { return }
+            await firstReadLanded { laidOutEmpty }
+            await afterBar(model)
+        }
     }
 }

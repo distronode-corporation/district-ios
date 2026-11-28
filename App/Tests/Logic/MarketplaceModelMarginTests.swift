@@ -72,12 +72,12 @@ final class MarketplaceModelMarginTests: ScreenSnapshotTestCase {
 
     /// The search is loading while it is in flight.
     func testTheSearchIsLoadingWhileInFlight() async throws {
-        let (model, _) = try await model()
+        let (model, transport) = try await model()
+        transport.hold("GET \(Self.searchPath)")
         let search = Task { await model.runSearch() }
-        for _ in 0 ..< 200 where !model.isSearching {
-            await Task.yield()
-        }
+        await transport.waitUntilHeld("GET \(Self.searchPath)")
         XCTAssertTrue(model.isSearching)
+        transport.release("GET \(Self.searchPath)")
         await search.value
         XCTAssertFalse(model.isSearching)
     }

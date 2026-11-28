@@ -145,12 +145,13 @@ final class AvailabilityModelMarginTests: ScreenSnapshotTestCase {
     func testASecondToggleWhileSavingIsDropped() async throws {
         let (model, transport) = try await model([Self.path: .json(Self.available)])
         await model.load()
+        // The first write is held in flight until the second toggle has been tried.
+        transport.hold("PATCH \(Self.path)")
         let first = Task { await model.setAvailable(false) }
-        for _ in 0 ..< 200 where !model.saving {
-            await Task.yield()
-        }
+        await transport.waitUntilHeld("PATCH \(Self.path)")
         XCTAssertTrue(model.saving)
         await model.setAvailable(true)
+        transport.release("PATCH \(Self.path)")
         await first.value
         XCTAssertEqual(transport.requested.filter { $0 == "PATCH \(Self.path)" }.count, 1)
     }
