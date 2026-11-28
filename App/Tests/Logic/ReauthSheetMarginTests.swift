@@ -98,15 +98,21 @@ final class ReauthSheetMarginTests: XCTestCase {
         let sheets = ReauthSheets()
         let controller = Self.controller(transport) { url in
             sheets.urls.append(url)
-            if sheets.urls.count == 1 {
-                try? await Task.sleep(for: .milliseconds(300))
+            let attempt = sheets.urls.count
+            if attempt == 1 {
+                // The first sheet stays open until the second attempt has finished.
+                await withCheckedContinuation { sheets.heldFirst = $0 }
             }
-            return .success(Self.callback(echoing: url, code: "code-\(sheets.urls.count)"))
+            return .success(Self.callback(echoing: url, code: "code-\(attempt)"))
         }
 
         let first = Task { await controller.reauthenticate(provider: .google, action: .deleteAccount) }
-        try await Task.sleep(for: .milliseconds(50))
+        for _ in 0 ..< 400 where sheets.heldFirst == nil {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+        let held = try XCTUnwrap(sheets.heldFirst, "the first sheet was never presented")
         let second = await controller.reauthenticate(provider: .google, action: .deleteAccount)
+        held.resume()
         let firstOutcome = await first.value
 
         XCTAssertEqual(second, .proved(expiresInSeconds: 120))
@@ -160,4 +166,6 @@ final class ReauthSheetMarginTests: XCTestCase {
 @MainActor
 final class ReauthSheets {
     var urls: [URL] = []
+    /// The first sheet, held open until the test lets it answer.
+    var heldFirst: CheckedContinuation<Void, Never>?
 }
