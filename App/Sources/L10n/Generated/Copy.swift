@@ -4959,6 +4959,9 @@ extension SessionCopy {
     /// `session.session_has_ended_please`
     internal static var sessionHasEndedPlease: String { AppL10n.copyLocale == .frCA ? "Votre session a pris fin. Veuillez vous reconnecter." : "Your session has ended. Please sign in again." }
 
+    /// `session.session_replaced`
+    internal static var sessionReplaced: String { AppL10n.copyLocale == .frCA ? "Votre connexion a changé pendant l'exécution de cette demande. Veuillez réessayer." : "Your sign-in changed while that request was running. Please try again." }
+
     /// `session.sign_in_expired`
     internal static var signInExpired: String { AppL10n.copyLocale == .frCA ? "Cette tentative de connexion a expiré. Veuillez réessayer." : "That sign-in expired. Please try again." }
 
