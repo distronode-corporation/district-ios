@@ -116,6 +116,15 @@ entries have.
 
 ### Changed
 
+- Release builds are built with `Reproducible.xcconfig`, which turns off Objective-C selector
+  stubs (`-fno-objc-msgsend-selector-stubs`) for every target, LiveKit's included. The
+  release archive and CI's `repeatable` job pass the same file, so the shipped binary is built
+  exactly as the repeatable check builds it; with stubs, the linker ordered LiveKit's seven
+  selector references differently from one link to the next.
+- Sentry is linked as its dynamic XCFramework (`Sentry-Dynamic`, still 9.30.1 and still
+  prebuilt) instead of the static one, so two clean builds of the same commit are byte for
+  byte identical; the static product's embedded framework held a stub linked in a random
+  temporary directory. CI's `repeatable` job now blocks.
 - MARKETING_VERSION 3.4.0. DistrictCore `exactVersion` 8.5.0 (from 8.3.0, through 8.4.1 for
   HQ by voice and 8.4.2 for account deletion).
 - Phone numbers: the four tabs are a segmented control only when their names fit at its font

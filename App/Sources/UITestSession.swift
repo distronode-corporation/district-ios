@@ -37,6 +37,11 @@
         /// The launch argument that arms the seam. ⚠️ Both halves are required: the
         /// argument alone does nothing, so an app launched with it by accident (or
         /// by a curious person) still signs in normally.
+        /// A session set by a unit test in its own process, for the screen snapshot tests: they
+        /// build a real ``AppContainer`` over a fixture transport and need it signed in. ⛔ Like
+        /// everything in this file it does not exist in a Release build.
+        nonisolated(unsafe) static var inProcess: UITestSession?
+
         static let launchArgument = "-UITestSession"
         static let sessionVariable = "DISTRICT_UITEST_SESSION"
         static let baseURLVariable = "DISTRICT_UITEST_BASE_URL"

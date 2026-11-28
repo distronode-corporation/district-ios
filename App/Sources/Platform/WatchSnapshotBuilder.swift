@@ -46,8 +46,16 @@ final class ContainerWatchSnapshotSource: WatchSnapshotSourcing {
         let workspaces = WorkspaceSessionModel(container: container)
         await workspaces.load()
         guard !mark.isMarked else { return nil }
-        guard let entry = workspaces.selectedEntry else {
+        let entry: WorkspaceEntry
+        switch WatchSnapshotComposer.workspace(in: workspaces.state) {
+        case let .selected(selected):
+            entry = selected
+        case .none:
             return WatchSnapshotComposer.noWorkspace(at: now, language: language)
+        case .unknown:
+            // ⛔ A LIST THAT COULD NOT BE READ IS NOT "NO WORKSPACE" (#152): nothing is published,
+            // and the Watch keeps its last snapshot, which carries its own time.
+            return nil
         }
         let id = entry.id
         let callHandling = container.callHandling
@@ -83,6 +91,29 @@ final class ContainerWatchSnapshotSource: WatchSnapshotSourcing {
 /// about the same call, and in the same language.
 @MainActor
 enum WatchSnapshotComposer {
+    /// What the workspace list says the Watch should be told about.
+    enum WorkspaceAnswer {
+        /// The workspace to build the snapshot for.
+        case selected(WorkspaceEntry)
+        /// A real answer: the account has no workspace it can use (none, or all lapsed).
+        case none
+        /// The list could not be read (a failure, or every region down): say nothing.
+        case unknown
+    }
+
+    /// ⛔ ONLY A REAL ANSWER BECOMES "NO WORKSPACE". A failed or degraded read is unknown, and
+    /// the Watch keeps the snapshot it has rather than being told the account is empty (#152).
+    static func workspace(in state: WorkspaceSessionState) -> WorkspaceAnswer {
+        switch state {
+        case let .content(_, selected), let .partial(_, selected, _):
+            .selected(selected)
+        case .empty, .lapsed:
+            .none
+        case .loading, .degraded, .failed:
+            .unknown
+        }
+    }
+
     struct Reads {
         let workspaceId: String
         let workspaceName: String

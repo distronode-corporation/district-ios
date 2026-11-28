@@ -373,11 +373,12 @@ final class AppContainer {
     /// order of the sign-out steps and the revoke outbox that survives a 503.
     let signOutCoordinator: SignOutCoordinator
 
-    /// - Parameter microphone: the permission ``callStack`` asks through. ⚠️ A PARAMETER RATHER THAN A
-    ///   SEAM RESOLVED INSIDE, because this initialiser is against `function_body_length`'s 60 and a
-    ///   parameter costs its body nothing. Only a test passes one.
-    init(baseURL: URL = ApiClient.productionBaseURL, microphone: any MicrophoneAccess = LiveMicrophoneAccess()) {
-        let transport = URLSessionHTTPTransport()
+    /// ⚠️ `microphone` and `transport` are PARAMETERS, NOT SEAMS (the body is at its 60 lines); only tests pass them.
+    init(
+        baseURL: URL = ApiClient.productionBaseURL,
+        microphone: any MicrophoneAccess = LiveMicrophoneAccess(),
+        transport: any HTTPTransport = URLSessionHTTPTransport()
+    ) {
         // ⛔ THE TOKEN STORE IS RESOLVED, NOT CONSTRUCTED HERE. See ``AppContainerSeam``.
         let seam = AppContainerSeam.resolve(baseURL: baseURL)
         let store = seam.store

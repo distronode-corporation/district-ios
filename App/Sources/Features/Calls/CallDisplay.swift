@@ -33,6 +33,11 @@ import Foundation
 struct CallDisplay {
     let id: String
 
+    /// Whether the call detail offers "Show transcript". ⛔ ONLY A STATED `false` HIDES IT
+    /// (#159): the service says the call has no transcript (a missed call, for example), so
+    /// the button would fetch nothing. A missing field, from an older service, keeps it.
+    var offersTranscript = true
+
     /// nil when there was no usable caller ID, so a render site shows a placeholder.
     ///
     /// ⛔ THE ABSENCE TEST IS ``CallerIdentity``, NOT A LOCAL LITERAL. Guarding
@@ -109,6 +114,7 @@ extension CallDisplay {
             durationLabel: seconds > 0 ? AppWire.duration(sent: call.duration, seconds: seconds) : nil,
             aiSummary: CallNarrative.summary(call.aiSummary)
         )
+        offersTranscript = call.hasTranscript != false
     }
 }
 

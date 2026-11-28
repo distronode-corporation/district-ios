@@ -11,8 +11,20 @@
 # paths embedded in the binaries are the same too. CODE_SIGNING_ALLOWED=NO: no
 # signature to strip before comparing, and no Apple account needed.
 #
-# Expected differences: none yet listed. This has not run on a runner yet; if a file
-# must be accepted as differing, list it here with the reason and skip it below.
+# Expected differences: none. Every file is compared; nothing is skipped.
+#
+# ⛔ SWIFT_DETERMINISTIC_HASHING=1 IS PART OF THE RECIPE. Xcode's App Intents metadata
+# extractor (appintentsmetadataprocessor, a Swift tool) writes
+# Metadata.appintents/version.json from a Swift Dictionary, and a Dictionary's order
+# follows a hash seed that is random per process unless this variable is set. Without
+# it the file's two keys came out in either order, so two clean builds differed in
+# DistrictAIWatch.app/Metadata.appintents/version.json about half the time. The
+# variable changes no compiler output; it only fixes the seed of the Swift tools the
+# build runs.
+#
+# ⛔ Reproducible.xcconfig IS PART OF THE RECIPE, passed with -xcconfig, as the release
+# archive passes it: the one place the build settings for repeatability live (it says why
+# there are no Objective-C selector stubs).
 #
 # On a difference it prints each differing file and keeps both products under
 # $RUNNER_TEMP/repeatable (or /tmp/repeatable) for the job to upload.
@@ -22,6 +34,7 @@ scheme=$1
 destination=$2
 product=$3
 OUT=${RUNNER_TEMP:-/tmp}/repeatable
+export SWIFT_DETERMINISTIC_HASHING=1
 rm -rf "$OUT"
 mkdir -p "$OUT"
 
@@ -35,6 +48,7 @@ for n in 1 2; do
     -destination "$destination" \
     -derivedDataPath DerivedData \
     -clonedSourcePackagesDirPath SourcePackages \
+    -xcconfig Reproducible.xcconfig \
     CODE_SIGNING_ALLOWED=NO > "$OUT/build-$n.log" 2>&1 || {
       tail -n 100 "$OUT/build-$n.log"
       exit 1
