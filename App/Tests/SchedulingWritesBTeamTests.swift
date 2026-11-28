@@ -205,6 +205,8 @@ final class SchedulingWritesBTeamTests: XCTestCase {
         XCTAssertEqual(Fixtures.op(transport), "teams.members.remove")
         XCTAssertEqual(Fixtures.params(transport)["userId"] as? String, "u-9")
         XCTAssertEqual(Fixtures.op(transport, 1), "teams.get")
+        // The re-read is of THIS team: a re-read of another would draw its roster here (#164).
+        XCTAssertEqual(Fixtures.params(transport, 1)["id"] as? String, "t-1")
         XCTAssertTrue(model.members.isEmpty)
         XCTAssertEqual(Fixtures.done(model.state), SchedulingTeamWriteCopy.removeDone)
     }
